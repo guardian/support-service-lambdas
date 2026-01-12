@@ -4,6 +4,7 @@ import { Router } from '@modules/routing/router';
 import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
 import { withBodyParser } from '@modules/routing/withParsers';
 import type { Stage } from '@modules/stage';
+import { stageFromEnvironment } from '@modules/stage';
 import type {
 	ZuoraAccount,
 	ZuoraSubscription,
@@ -11,7 +12,6 @@ import type {
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyResult, Handler } from 'aws-lambda';
 import dayjs from 'dayjs';
-import type { ZodType } from 'zod';
 import {
 	applyDiscountEndpoint,
 	previewDiscountEndpoint,
@@ -26,9 +26,9 @@ import {
 	applyDiscountResponseSchema,
 	previewDiscountResponseSchema,
 } from './responseSchema';
+import { stringify } from './stringify';
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo fix in next refactor
-const stage = process.env.STAGE as Stage;
+const stage = stageFromEnvironment();
 
 // main entry point from AWS
 export const handler: Handler = Router([
@@ -108,7 +108,3 @@ export function previewDiscountHandler(stage: Stage) {
 		};
 	};
 }
-
-// this is a type safe version of stringify
-export const stringify = <T>(t: T, type: ZodType<T>): string =>
-	JSON.stringify(type.parse(t));

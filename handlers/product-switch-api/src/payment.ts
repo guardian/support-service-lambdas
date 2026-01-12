@@ -22,7 +22,7 @@ export const adjustNonCollectedInvoice = async (
 			(invoiceItem) =>
 				invoiceItem.productRatePlanChargeId === supporterPlusChargeId,
 		),
-		`No supporter plus invoice item found in the invoice ${invoiceId}`,
+		`No supporter plus invoice item (id: ${supporterPlusChargeId} ) found in the invoice ${invoiceId}`,
 	);
 	return await creditInvoice(
 		dayjs(),

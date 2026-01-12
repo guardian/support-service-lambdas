@@ -58,7 +58,7 @@ describe('promoSync handler', () => {
 				'2c92c0f965f2122101660fb33ed24a45',
 				'2c92c0f965d280590165f16b1b9946c2',
 			],
-			countryGroups: ['GB'],
+			countries: ['GB'],
 		},
 		startTimestamp: '2025-11-17T00:00:00.000Z',
 		endTimestamp: '2026-11-17T00:00:00.000Z',
@@ -214,5 +214,33 @@ describe('promoSync handler', () => {
 		await handler(createEvent([record]));
 
 		expect(mockedWriteToDynamoDb).not.toHaveBeenCalled();
+	});
+
+	it('should not include landingPage when title is undefined', async () => {
+		const imageWithoutLandingPageTitle: Record<string, AttributeValue> = {
+			...validNewImage,
+			landingPage: {
+				M: {
+					type: { S: 'supporterPlus' },
+				},
+			},
+		};
+
+		const record: DynamoDBRecord = {
+			eventName: 'INSERT',
+			dynamodb: {
+				NewImage: imageWithoutLandingPageTitle,
+				SequenceNumber: '123',
+			},
+		} as DynamoDBRecord;
+
+		await handler(createEvent([record]));
+
+		expect(mockedWriteToDynamoDb).toHaveBeenCalledTimes(2);
+
+		const calls = mockedWriteToDynamoDb.mock.calls as Array<[object, string]>;
+		calls.forEach(([item]) => {
+			expect(item).not.toHaveProperty('landingPage');
+		});
 	});
 });

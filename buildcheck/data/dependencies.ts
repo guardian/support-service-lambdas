@@ -14,6 +14,7 @@ export const dep = separateDepRecords({
 	'fast-xml-parser': '^4.5.0',
 	// signature validation
 	'@peculiar/x509': '^1.12.3',
+	'@okta/jwt-verifier': '^4.0.1',
 	// clients
 	'google-auth-library': '^9.15.0',
 	'@google-cloud/bigquery': '^7.9.3',
@@ -29,14 +30,19 @@ export const dep = separateDepRecords({
 		'client-secrets-manager',
 		'client-sfn',
 		'client-sns',
+		'client-lambda',
+		'credential-provider-node',
+		'lib-storage',
 	]),
 });
 
 // intended for use in devDependencies
 export const devDeps = separateDepRecords({
+	typescript: 'catalog:',
 	// types
 	'@types/stripe': '^8.0.417',
 	'@types/aws-lambda': '^8.10.147',
+	'@types/jest': '^29.5.14',
 	// dev - for running locally
 	tsx: '^4.21.0',
 	'tsconfig-paths': 'catalog:',
@@ -44,6 +50,10 @@ export const devDeps = separateDepRecords({
 	'@faker-js/faker': '^9.8.0',
 	'aws-sdk-client-mock': '4.1.0',
 	'fetch-mock': '^11.1.1',
+	jest: '^29.7.0',
+	'ts-jest': '^29.3.2',
+	// linting
+	'eslint-plugin-sort-keys-fix': '^1.1.2',
 });
 
 // do not use, migrate away

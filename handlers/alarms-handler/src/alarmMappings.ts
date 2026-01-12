@@ -1,6 +1,13 @@
 import { objectEntries } from '@modules/objectFunctions';
 
-type Team = 'VALUE' | 'GROWTH' | 'PORTFOLIO' | 'PLATFORM' | 'SRE' | 'ENGINE';
+type Team =
+	| 'VALUE'
+	| 'GROWTH'
+	| 'PORTFOLIO'
+	| 'PLATFORM'
+	| 'SRE'
+	| 'ENGINE'
+	| 'PUZZLES';
 
 const mobilePurchasesApps = [
 	'mobile-purchases-apple-pubsub',
@@ -135,6 +142,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'observer-data-export',
 	],
 	ENGINE: ['price-migration-engine-state-machine'],
+	PUZZLES: ['puzzles-app'],
 };
 
 const buildAppToTeamMappings = (
