@@ -27,9 +27,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Require team approval
+        env:
+          TEAM_MEMBERS_JSON: ${{ steps.team_members.outputs.data }}
+          PR_REVIEWS_JSON: ${{ steps.pr_reviews.outputs.data }}
         run: |
-          TEAM_MEMBERS=$(echo '${{ steps.team_members.outputs.data }}' | jq -r '.[].login')
-          APPROVED_USERS=$(echo '${{ steps.pr_reviews.outputs.data }}' | jq -r '[.[] | select(.state == "APPROVED")] | .[].user.login' | sort | uniq)
+          TEAM_MEMBERS=$(echo "$TEAM_MEMBERS_JSON" | jq -r '.[].login')
+          APPROVED_USERS=$(echo "$PR_REVIEWS_JSON" | jq -r '[.[] | select(.state == "APPROVED")] | .[].user.login' | sort | uniq)
           
           FOUND_APPROVER=0
           for member in $TEAM_MEMBERS; do
