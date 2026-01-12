@@ -66,7 +66,6 @@ class PaperEmailDataTest extends AnyFlatSpec with Matchers {
       paymentPlans = Map(GBP -> PaymentPlan(GBP, AmountMinorUnits(1225), Monthly, "GBP 12.25 every month")),
     ),
     firstPaymentDate = LocalDate.of(2018, 12, 1),
-    firstPaperDate = LocalDate.of(2018, 11, 1),
     subscriptionName = SubscriptionName("A-S000SubId"),
     contacts = contacts,
     paymentMethod = DirectDebit(
@@ -89,7 +88,6 @@ class PaperEmailDataTest extends AnyFlatSpec with Matchers {
       paymentPlans = Map(GBP -> PaymentPlan(GBP, AmountMinorUnits(1225), Monthly, "GBP 12.25 every month")),
     ),
     firstPaymentDate = LocalDate.of(2018, 12, 1),
-    firstPaperDate = LocalDate.of(2018, 11, 1),
     subscriptionName = SubscriptionName("A-S000SubId"),
     contacts = contacts,
     paymentMethod = DirectDebit(
