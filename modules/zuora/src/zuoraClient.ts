@@ -51,7 +51,10 @@ export class ZuoraClient extends RestClient {
 					// we're not going to be able to extract anything useful from non-json
 					throw e;
 				}
-				throw generateZuoraError(parsedBody, e);
+				const customError = generateZuoraError(parsedBody, e);
+				if (customError !== undefined) {
+					throw customError;
+				}
 			}
 			throw new Error('unexpected error thrown during REST call', { cause: e });
 		}
