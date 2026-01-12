@@ -1,7 +1,4 @@
-import {
-	PromoCampaign, promoCampaignSchema,
-	promoProductSchema,
-} from '@modules/promotions/v2/schema';
+import type { PromoCampaign } from '@modules/promotions/v2/schema';
 import type { Stage } from '@modules/stage';
 import { z } from 'zod';
 import { createSyncHandler } from '../lib/syncHandler';
