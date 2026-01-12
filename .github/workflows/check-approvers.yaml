@@ -1,0 +1,51 @@
+name: Require Reader Revenue Team Approval
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, review_requested, review_request_removed]
+  pull_request_review:
+    types: [submitted, edited, dismissed]
+
+jobs:
+  check-approval:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get team members
+        id: team_members
+        uses: octokit/request-action@v2.x
+        with:
+          route: GET /orgs/guardian/teams/reader-revenue/members
+        env:
+          GITHUB_TOKEN: ${{ secrets.ORG_READ_TOKEN }}
+
+      - name: Get PR reviews
+        id: pr_reviews
+        uses: octokit/request-action@v2.x
+        with:
+          route: GET /repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Require team approval
+        run: |
+          TEAM_MEMBERS=$(echo '${{ steps.team_members.outputs.data }}' | jq -r '.[].login')
+          APPROVED_USERS=$(echo '${{ steps.pr_reviews.outputs.data }}' | jq -r '[.[] | select(.state == "APPROVED")] | .[].user.login' | sort | uniq)
+          
+          FOUND_APPROVER=0
+          for member in $TEAM_MEMBERS; do
+            for approver in $APPROVED_USERS; do
+              if [[ "$member" == "$approver" ]]; then
+                FOUND_APPROVER=1
+                echo "Found required team approver: $member"
+                break 2
+              fi
+            done
+          done
+
+          if [[ $FOUND_APPROVER -eq 1 ]]; then
+            echo "✅ At least one Reader Revenue team member has approved."
+          else
+            echo "❌ None of the Reader Revenue team members have approved this PR."
+            exit 1
+          fi
+        shell: bash
