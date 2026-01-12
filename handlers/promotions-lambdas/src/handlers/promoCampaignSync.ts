@@ -1,5 +1,5 @@
-import type {
-	PromoCampaign,
+import {
+	PromoCampaign, promoCampaignSchema,
 	promoProductSchema,
 } from '@modules/promotions/v2/schema';
 import type { Stage } from '@modules/stage';
@@ -22,7 +22,7 @@ type OldPromoCampaignModel = z.infer<typeof oldPromoCampaignSchema>;
 
 const productGroupMapping: Record<
 	OldPromoCampaignModel['group'],
-	z.infer<typeof promoProductSchema>
+	PromoCampaign['product']
 > = {
 	supporterPlus: 'SupporterPlus',
 	tierThree: 'TierThree',
