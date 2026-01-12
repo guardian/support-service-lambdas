@@ -28,12 +28,9 @@ object PaperEmailFields {
 
   private def basicFields(data: PaperEmailData) = {
     Map(
-      "ZuoraSubscriberId" -> data.subscriptionName.value,
-      "SubscriberKey" -> data.contacts.billTo.email.map(_.value).getOrElse(""),
       "subscriber_id" -> data.subscriptionName.value,
       "IncludesDigipack" -> digipackPlans.contains(data.plan.id).toString,
-      "date_of_first_paper" -> data.firstPaperDate.format(dateformat),
-      "date_of_first_payment" -> data.firstPaymentDate.format(dateformat),
+      "first_payment_date" -> data.firstPaymentDate.format(dateformat),
       "package" -> data.plan.description.value.replace("+", "Plus"),
       "subscription_rate" -> data.discountMessage
         .map(_.value)
@@ -66,7 +63,6 @@ object PaperEmailFields {
       "title" -> soldTo.title.map(_.value).getOrElse(""),
       "first_name" -> soldTo.firstName.value,
       "last_name" -> soldTo.lastName.value,
-      "EmailAddress" -> billTo.email.map(_.value).getOrElse(""),
       "billing_address_line_1" -> billToAddress.address1.map(_.value).getOrElse(""),
       "billing_address_line_2" -> billToAddress.address2.map(_.value).getOrElse(""),
       "billing_address_town" -> billToAddress.city.map(_.value).getOrElse(""),
