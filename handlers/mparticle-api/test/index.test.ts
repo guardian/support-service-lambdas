@@ -55,8 +55,12 @@ describe('handlerDeletion', () => {
 					messageId: 'test-message-1',
 					receiptHandle: 'test-receipt-1',
 					body: JSON.stringify({
-						userId: 'user-123',
-						email: 'user@example.com',
+						Type: 'Notification',
+						Message: JSON.stringify({
+							userId: 'user-123',
+							email: 'user@example.com',
+							eventType: 'DELETE',
+						}),
 					}),
 					attributes: {
 						ApproximateReceiveCount: '1',
@@ -94,8 +98,12 @@ describe('handlerDeletion', () => {
 					messageId: 'test-message-1',
 					receiptHandle: 'test-receipt-1',
 					body: JSON.stringify({
+					Type: 'Notification',
+					Message: JSON.stringify({
 						userId: 'user-123',
 						email: 'user1@example.com',
+						eventType: 'DELETE',
+					}),
 					}),
 					attributes: {
 						ApproximateReceiveCount: '1',
@@ -113,8 +121,12 @@ describe('handlerDeletion', () => {
 					messageId: 'test-message-2',
 					receiptHandle: 'test-receipt-2',
 					body: JSON.stringify({
+					Type: 'Notification',
+					Message: JSON.stringify({
 						userId: 'user-456',
 						email: 'user2@example.com',
+						eventType: 'DELETE',
+					}),
 					}),
 					attributes: {
 						ApproximateReceiveCount: '1',
@@ -145,8 +157,12 @@ describe('handlerDeletion', () => {
 					messageId: 'test-message-1',
 					receiptHandle: 'test-receipt-1',
 					body: JSON.stringify({
+					Type: 'Notification',
+					Message: JSON.stringify({
 						userId: 'user-fail',
 						email: 'fail@example.com',
+						eventType: 'DELETE',
+					}),
 					}),
 					attributes: {
 						ApproximateReceiveCount: '1',
@@ -188,7 +204,14 @@ describe('handlerDeletion', () => {
 				{
 					messageId: 'test-message-1',
 					receiptHandle: 'test-receipt-1',
-					body: '{"userId":"json-user","email":"json@example.com"}',
+				body: JSON.stringify({
+					Type: 'Notification',
+					Message: JSON.stringify({
+						userId: 'json-user',
+						email: 'json@example.com',
+						eventType: 'DELETE',
+					}),
+				}),
 					attributes: {
 						ApproximateReceiveCount: '1',
 						SentTimestamp: '1234567890',

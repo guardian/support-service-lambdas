@@ -20,7 +20,10 @@ import type {
 	BulkDeletionAPI,
 	MParticleClient as MParticleClientType,
 } from './services/mparticleClient';
-import { DeletionRequestBodySchema } from './types/deletionMessage';
+import {
+	DeletionRequestBodySchema,
+	SnsNotificationSchema,
+} from './types/deletionMessage';
 
 export const handlerHttp: Handler<
 	APIGatewayProxyEvent,
@@ -121,8 +124,13 @@ async function processSQSRecord(
 ): Promise<void> {
 	logger.log(`Processing message ${record.messageId}`);
 
-	// Parse the message body
-	const body = DeletionRequestBodySchema.parse(JSON.parse(record.body));
+	// Parse the SNS notification envelope
+	const snsNotification = SnsNotificationSchema.parse(JSON.parse(record.body));
+
+	// Parse the actual deletion request from the Message field
+	const body = DeletionRequestBodySchema.parse(
+		JSON.parse(snsNotification.Message),
+	);
 
 	// Process the deletion - throws on retryable failure
 	await processUserDeletion(
