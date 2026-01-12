@@ -99,7 +99,6 @@ class AddPaperSub(
     paperEmailData = PaperEmailData(
       plan = plan,
       firstPaymentDate = request.startDate,
-      firstPaperDate = request.startDate,
       subscriptionName = subscriptionName,
       contacts = customerData.contacts,
       paymentMethod = customerData.paymentMethod,
