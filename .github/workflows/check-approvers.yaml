@@ -1,14 +1,14 @@
 name: Require Reader Revenue Team Approval
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review, review_requested, review_request_removed]
   pull_request_review:
     types: [submitted, edited, dismissed]
 
 jobs:
   check-approval:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
     steps:
       - name: Get team members
         id: team_members
