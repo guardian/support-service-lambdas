@@ -6,7 +6,7 @@ import sbtassembly.PathList
 
 object Dependencies {
 
-  val awsSdkVersion = "2.40.2"
+  val awsSdkVersion = "2.40.17"
 
   val circeVersion = "0.14.13"
   val sttpVersion = "3.11.0"
@@ -15,7 +15,7 @@ object Dependencies {
   val catsEffectVersion = "2.5.5"
 
   val logging: Seq[ModuleID] = Seq(
-    "ch.qos.logback" % "logback-classic" % "1.5.22",
+    "ch.qos.logback" % "logback-classic" % "1.5.24",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
   )
 
@@ -41,8 +41,8 @@ object Dependencies {
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.3.0"
 
   // GCP
-  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.57.0"
-  val grpcNettyOverride = "io.grpc" % "grpc-netty-shaded" % "1.76.0"
+  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.57.1"
+  val grpcNettyOverride = "io.grpc" % "grpc-netty-shaded" % "1.78.0"
 
   // Cats
   val catsCore = "org.typelevel" %% "cats-core" % catsVersion
@@ -86,7 +86,7 @@ object Dependencies {
   val zio2 = "dev.zio" %% "zio" % zio2Version
   val tapirVersion =
     "1.11.33" // stick with 1.11.33 for now as later versions indirectly pull in netty-codec-base which duplicates netty-codec content
-  val enumeratum = "com.beachape" %% "enumeratum" % "1.7.6"
+  val enumeratum = "com.beachape" %% "enumeratum" % "1.9.2"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.4.0"
   val stripe = "com.stripe" % "stripe-java" % "29.1.0"
   val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.2.0"

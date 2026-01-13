@@ -109,27 +109,17 @@ class DigipackEmailDataTest extends AnyFlatSpec with Matchers {
     val expected =
       """
         |{
-        |  "ZuoraSubscriberId": "A-S000SubId",
-        |  "Date of first payment": "1 December 2018",
-        |  "Address 2": "billToAddress2",
-        |  "Trial period": "18",
-        |  "First Name": "FirstBill",
-        |  "Last Name": "lastBill",
-        |  "Country": "United Kingdom",
-        |  "Account number": "*****mask",
-        |  "SubscriberKey": "bill@contact.com",
-        |  "Account Name": "someAccountName",
-        |  "Default payment method": "Direct Debit",
-        |  "Currency" : "£",
-        |  "Post Code": "billToPostcode",
-        |  "Subscription term" : "month",
-        |  "City": "billToCity",
-        |  "Subscription details": "GBP 12.25 every month",
-        |  "MandateID": "MandateId",
-        |  "EmailAddress": "bill@contact.com",
-        |  "Payment amount" : "12.25",
-        |  "Address 1": "billToAddress1",
-        |  "Sort Code": "12-34-56"
+        |  "subscriber_id": "A-S000SubId",
+        |  "first_payment_date": "1 December 2018",
+        |  "first_name": "FirstBill",
+        |  "last_name": "lastBill",
+        |  "bank_account_no": "*****mask",
+        |  "account_holder": "someAccountName",
+        |  "payment_method": "Direct Debit",
+        |  "currency" : "£",
+        |  "subscription_rate": "GBP 12.25 every month",
+        |  "mandate_id": "MandateId",
+        |  "bank_sort_code": "12-34-56"
         |}
       """.stripMargin
 
@@ -152,27 +142,17 @@ class DigipackEmailDataTest extends AnyFlatSpec with Matchers {
     val expected =
       """
         |{
-        |  "ZuoraSubscriberId": "A-S000SubId",
-        |  "Date of first payment": "1 December 2018",
-        |  "Address 2": "billToAddress2",
-        |  "Trial period": "18",
-        |  "First Name": "FirstBill",
-        |  "Last Name": "lastBill",
-        |  "Country": "United Kingdom",
-        |  "Account number": "*****mask",
-        |  "SubscriberKey": "bill@contact.com",
-        |  "Account Name": "someAccountName",
-        |  "Default payment method": "Direct Debit",
-        |  "Currency" : "£",
-        |  "Post Code": "billToPostcode",
-        |  "Subscription term" : "month",
-        |  "City": "billToCity",
-        |  "Subscription details": "GBP 10 for first two months, then GBP 12.25 every month",
-        |  "MandateID": "MandateId",
-        |  "EmailAddress": "bill@contact.com",
-        |  "Payment amount" : "12.25",
-        |  "Address 1": "billToAddress1",
-        |  "Sort Code": "12-34-56"
+        |  "subscriber_id": "A-S000SubId",
+        |  "first_payment_date": "1 December 2018",
+        |  "first_name": "FirstBill",
+        |  "last_name": "lastBill",
+        |  "bank_account_no": "*****mask",
+        |  "account_holder": "someAccountName",
+        |  "payment_method": "Direct Debit",
+        |  "currency" : "£",
+        |  "subscription_rate": "GBP 10 for first two months, then GBP 12.25 every month",
+        |  "mandate_id": "MandateId",
+        |  "bank_sort_code": "12-34-56"
         |}
       """.stripMargin
 

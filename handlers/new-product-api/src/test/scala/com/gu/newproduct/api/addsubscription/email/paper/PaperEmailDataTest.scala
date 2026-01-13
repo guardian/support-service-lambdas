@@ -66,7 +66,6 @@ class PaperEmailDataTest extends AnyFlatSpec with Matchers {
       paymentPlans = Map(GBP -> PaymentPlan(GBP, AmountMinorUnits(1225), Monthly, "GBP 12.25 every month")),
     ),
     firstPaymentDate = LocalDate.of(2018, 12, 1),
-    firstPaperDate = LocalDate.of(2018, 11, 1),
     subscriptionName = SubscriptionName("A-S000SubId"),
     contacts = contacts,
     paymentMethod = DirectDebit(
@@ -89,7 +88,6 @@ class PaperEmailDataTest extends AnyFlatSpec with Matchers {
       paymentPlans = Map(GBP -> PaymentPlan(GBP, AmountMinorUnits(1225), Monthly, "GBP 12.25 every month")),
     ),
     firstPaymentDate = LocalDate.of(2018, 12, 1),
-    firstPaperDate = LocalDate.of(2018, 11, 1),
     subscriptionName = SubscriptionName("A-S000SubId"),
     contacts = contacts,
     paymentMethod = DirectDebit(
@@ -110,12 +108,9 @@ class PaperEmailDataTest extends AnyFlatSpec with Matchers {
     val expected =
       """
         |{
-        |  "ZuoraSubscriberId" : "A-S000SubId",
-        |  "SubscriberKey" : "bill@contact.com",
         |  "subscriber_id" : "A-S000SubId",
         |  "IncludesDigipack" : "true",
-        |  "date_of_first_paper" : "1 November 2018",
-        |  "date_of_first_payment" : "1 December 2018",
+        |  "first_payment_date" : "1 December 2018",
         |  "package" : "EverydayPlus",
         |  "subscription_rate" : "GBP 12.25 every month",
         |  "bank_account_no" : "*****mask",
@@ -126,8 +121,7 @@ class PaperEmailDataTest extends AnyFlatSpec with Matchers {
         |  "title" : "SoldToTitle",
         |  "first_name" : "FirstSold",
         |  "last_name" : "lastSold",
-        |  "EmailAddress" : "bill@contact.com",
-        |  
+        |
         |  "billing_address_line_1" : "billToAddress1",
         |  "billing_address_line_2" : "billToAddress2",
         |  "billing_address_town" : "billToCity",
@@ -154,12 +148,9 @@ class PaperEmailDataTest extends AnyFlatSpec with Matchers {
     val expected =
       """
         |{
-        |  "ZuoraSubscriberId" : "A-S000SubId",
-        |  "SubscriberKey" : "bill@contact.com",
         |  "subscriber_id" : "A-S000SubId",
         |  "IncludesDigipack" : "true",
-        |  "date_of_first_paper" : "1 November 2018",
-        |  "date_of_first_payment" : "1 December 2018",
+        |  "first_payment_date" : "1 December 2018",
         |  "package" : "EverydayPlus",
         |  "subscription_rate" : "GBP 10.00 for first 2 months , then GBP 12.25 every 12 months",
         |  "bank_account_no" : "*****mask",
@@ -170,7 +161,6 @@ class PaperEmailDataTest extends AnyFlatSpec with Matchers {
         |  "title" : "SoldToTitle",
         |  "first_name" : "FirstSold",
         |  "last_name" : "lastSold",
-        |  "EmailAddress" : "bill@contact.com",
         |
         |  "billing_address_line_1" : "billToAddress1",
         |  "billing_address_line_2" : "billToAddress2",

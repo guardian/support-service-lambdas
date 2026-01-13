@@ -17,7 +17,9 @@ export type CatalogInformation = {
 	};
 };
 
-const getCatalogBillingPeriod = (billingPeriod: BillingPeriod) => {
+export const getCatalogRatePlanName = (
+	billingPeriod: BillingPeriod,
+): 'Monthly' | 'Annual' => {
 	if (billingPeriod == 'Annual') {
 		return 'Annual';
 	} else if (billingPeriod == 'Month') {
@@ -32,12 +34,11 @@ export const getCatalogInformation = (
 	billingPeriod: BillingPeriod,
 	currency: IsoCurrency,
 ): CatalogInformation => {
-	const catalogBillingPeriod = getCatalogBillingPeriod(billingPeriod);
+	const catalogBillingPeriod = getCatalogRatePlanName(billingPeriod);
 	const sourceProductRatePlan =
 		productCatalog[s.sourceProduct].ratePlans[catalogBillingPeriod];
 	const targetProductRatePlan =
 		productCatalog[s.targetProduct].ratePlans[catalogBillingPeriod];
-
 	const price = getIfDefined(
 		targetProductRatePlan.pricing[currency],
 		'No Supporter Plus price defined for currency',
