@@ -4,17 +4,15 @@ import {
 } from '@modules/internationalisation/schemas';
 import { z } from 'zod';
 
-export const promoProductSchema = z.enum([
-	'SupporterPlus',
-	'TierThree',
-	'DigitalSubscription',
-	'Newspaper',
-	'Weekly',
-]);
-
 export const promoCampaignSchema = z.object({
 	campaignCode: z.string(),
-	product: promoProductSchema,
+	product: z.enum([
+		'SupporterPlus',
+		'TierThree',
+		'DigitalSubscription',
+		'Newspaper',
+		'Weekly',
+	]),
 	name: z.string(),
 	created: z.string(),
 });
