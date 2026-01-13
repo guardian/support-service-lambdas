@@ -54,7 +54,15 @@ export const previewCreateSubscription = async (
 	);
 
 	const numberOfMonthsToPreview = 13; // 13 allows for annual subs to have a second invoice
-	const initialTermLengthInMonths = 14; // This is to work round an issue where Zuora cuts off the preview at the term end date
+	/*
+	specificPreviewThruDate makes it find all invoices up to that date
+	However the initial term end date must be later than the specificPreviewThruDate, to avoid undesirable behaviour:
+	if (initial term end date <= specificPreviewThruDate), it assumes the charges end on initial term end date, thus pro-rating accordingly
+	if (initial term end date > specificPreviewThruDate), it returns the whole payment amount, even if the term end date would otherwise truncate it.
+	see https://docs.google.com/document/d/1R7saA1kcuyHEeV9v_zElrfPJwHjJQj489InNEc2L_G8/edit?tab=t.0
+	This means we must set initialTermLengthInMonths > numberOfMonthsToPreview
+	*/
+	const initialTermLengthInMonths = 14;
 
 	const createSubscriptionOrderAction = buildCreateSubscriptionOrderAction({
 		productRatePlanId: productRatePlan.id,
