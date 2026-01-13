@@ -16,12 +16,13 @@ export const validatePromotion = (
 	appliedPromotion: AppliedPromotion,
 	productRatePlanId: string,
 ): ValidatedPromotion => {
+	logger.log(`Validating promotion ${appliedPromotion.promoCode}`);
+
 	if (!promotion) {
 		throw new ValidationError(
 			`No Promotion found for promo code ${appliedPromotion.promoCode}`,
 		);
 	}
-	logger.log(`Validating promotion ${promotion.promoCode}: `, promotion.name);
 
 	checkPromotionIsActive(promotion);
 	console.log(`${promotion.promoCode} is active`);
