@@ -13,6 +13,7 @@ import {
 import { DiscountApi } from '../lib/discount-api';
 import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
+import { IdentitySync } from '../lib/identity-sync';
 import { MetricPushApi } from '../lib/metric-push-api';
 import { MobilePurchasesToSupporterProductData } from '../lib/mobile-purchases-to-supporter-product-data';
 import { MParticleApi } from '../lib/mparticle-api';
@@ -148,6 +149,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	TicketTailorWebhook,
 	MobilePurchasesToSupporterProductData,
 	StripeDisputes,
+	IdentitySync,
 ];
 
 // generate all stacks for all stages
