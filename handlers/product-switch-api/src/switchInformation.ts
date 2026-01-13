@@ -34,6 +34,7 @@ export type SubscriptionInformation = {
 	accountNumber: string;
 	subscriptionNumber: string;
 	previousProductName: string;
+	previousRatePlanId: string;
 	previousRatePlanName: string;
 	previousAmount: number;
 	currency: IsoCurrency;
@@ -192,6 +193,7 @@ export const getSwitchInformation = async (
 		accountNumber: subscription.accountNumber,
 		subscriptionNumber: subscription.subscriptionNumber,
 		previousProductName: contributionRatePlan.productName,
+		previousRatePlanId: contributionRatePlan.id,
 		previousRatePlanName: contributionRatePlan.ratePlanName,
 		previousAmount,
 		currency,

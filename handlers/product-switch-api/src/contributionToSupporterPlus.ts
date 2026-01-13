@@ -274,12 +274,13 @@ const buildChangePlanOrderAction = (
 	orderDate: Dayjs,
 	catalog: CatalogInformation,
 	contributionAmount: number,
+	currentRatePlanId: string,
 ): ChangePlanOrderAction => {
 	return {
 		type: 'ChangePlan',
 		triggerDates: singleTriggerDate(orderDate),
 		changePlan: {
-			productRatePlanId: catalog.contribution.productRatePlanId,
+			ratePlanId: currentRatePlanId,
 			subType: 'Upgrade',
 			newProductRatePlan: {
 				productRatePlanId: catalog.supporterPlus.productRatePlanId,
@@ -359,7 +360,7 @@ function buildSwitchRequestWithoutOptions(
 ): OrderRequest {
 	const { startNewTerm, contributionAmount, catalog } =
 		productSwitchInformation;
-	const { accountNumber, subscriptionNumber } =
+	const { accountNumber, subscriptionNumber, previousRatePlanId } =
 		productSwitchInformation.subscription;
 
 	// don't preview term update, because future dated amendments might prevent it
@@ -378,7 +379,12 @@ function buildSwitchRequestWithoutOptions(
 				subscriptionNumber,
 				customFields: { LastPlanAddedDate__c: zuoraDateFormat(orderDate) },
 				orderActions: [
-					buildChangePlanOrderAction(orderDate, catalog, contributionAmount),
+					buildChangePlanOrderAction(
+						orderDate,
+						catalog,
+						contributionAmount,
+						previousRatePlanId,
+					),
 					...discountOrderAction,
 					...maybeNewTermOrderActions,
 				],
