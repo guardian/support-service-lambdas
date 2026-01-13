@@ -286,7 +286,6 @@ function prepareFrequencySwitchInfo(
 		type: 'ChangePlan',
 		triggerDates,
 		changePlan: {
-			productRatePlanId: currentRatePlan.productRatePlanId,
 			ratePlanId: currentRatePlan.id,
 			subType: 'Upgrade',
 			newProductRatePlan: {
