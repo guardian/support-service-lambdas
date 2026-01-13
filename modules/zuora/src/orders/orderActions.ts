@@ -35,7 +35,8 @@ type BaseOrderAction = {
 export type ChangePlanOrderAction = BaseOrderAction & {
 	type: 'ChangePlan';
 	changePlan: {
-		ratePlanId: string;
+		productRatePlanId: string;
+		ratePlanId?: string;
 		subType: 'Upgrade';
 		newProductRatePlan: {
 			productRatePlanId: string;
