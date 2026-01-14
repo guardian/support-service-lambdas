@@ -27,6 +27,16 @@ export type OrderActionType =
 	| 'AddProduct'
 	| 'RemoveProduct';
 
+type ChangePlanTarget =
+	| {
+			productRatePlanId: string;
+			ratePlanId?: never;
+		}
+	| {
+			productRatePlanId?: never;
+			ratePlanId: string;
+		};
+
 type BaseOrderAction = {
 	type: OrderActionType;
 	triggerDates: TriggerDates;
@@ -34,9 +44,7 @@ type BaseOrderAction = {
 
 export type ChangePlanOrderAction = BaseOrderAction & {
 	type: 'ChangePlan';
-	changePlan: {
-		productRatePlanId?: string;
-		ratePlanId?: string;
+	changePlan: ChangePlanTarget & {
 		subType: 'Upgrade';
 		newProductRatePlan: {
 			productRatePlanId: string;
