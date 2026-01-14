@@ -4,7 +4,7 @@
 
 import * as util from 'node:util';
 import { getIfDefined } from '@modules/nullAndUndefined';
-import { getPromotions } from '@modules/promotions/v1/getPromotions';
+import { getPromotions } from '../src/v1/getPromotions';
 
 describe('getPromotions functions', () => {
 	test('we can return all promotions for a given stage', async () => {
