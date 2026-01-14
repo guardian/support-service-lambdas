@@ -1,7 +1,10 @@
 import { SupportRegionId } from '@modules/internationalisation/countryGroup';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
-import type { AppliedPromotion, Promo } from '@modules/promotions/v2/schema';
+import type {
+	AppliedPromotion,
+	Promotion,
+} from '@modules/promotions/v1/schema';
 import type { Stage } from '@modules/stage';
 import dayjs from 'dayjs';
 import type { CreateSubscriptionOrderAction } from '@modules/zuora/orders/orderActions';
@@ -25,30 +28,32 @@ jest.mock('../src/createSubscription/subscriptionDates', () => ({
 }));
 
 const productCatalog = generateProductCatalog(code);
-const promo1: Promo = {
-	name: 'Test Promo',
-	campaignCode: 'campaign',
-	discount: { amount: 10, durationMonths: 3 },
-	appliesTo: {
-		countries: ['GB'],
-		productRatePlanIds: ['8ad08cbd8586721c01858804e3275376'],
+const promotions: Promotion[] = [
+	{
+		name: 'Test Promo',
+		campaignCode: 'campaign',
+		promotionType: { name: 'percent_discount', amount: 10, durationMonths: 3 },
+		appliesTo: {
+			countries: new Set(['GB']),
+			productRatePlanIds: new Set(['8ad08cbd8586721c01858804e3275376']),
+		},
+		codes: { 'Channel 0': ['PROMO10'] },
+		starts: new Date('2024-01-01'),
+		expires: new Date('2099-01-01'),
 	},
-	promoCode: 'PROMO10',
-	startTimestamp: '2024-01-01',
-	endTimestamp: '2099-01-01',
-};
-const promo2: Promo = {
-	name: 'Patron Promo',
-	campaignCode: 'campaign',
-	discount: { amount: 10, durationMonths: 3 },
-	appliesTo: {
-		countries: ['GB'],
-		productRatePlanIds: ['8ad08cbd8586721c01858804e3275376'],
+	{
+		name: 'Patron Promo',
+		campaignCode: 'campaign',
+		promotionType: { name: 'percent_discount', amount: 10, durationMonths: 3 },
+		appliesTo: {
+			countries: new Set(['GB']),
+			productRatePlanIds: new Set(['8ad08cbd8586721c01858804e3275376']),
+		},
+		codes: { 'Channel 0': ['TEST_PATRON'] },
+		starts: new Date('2024-01-01'),
+		expires: new Date('2099-01-01'),
 	},
-	promoCode: 'TEST_PATRON',
-	startTimestamp: '2024-01-01',
-	endTimestamp: '2099-01-01',
-};
+];
 
 const paymentMethod = {
 	type: 'CreditCardReferenceTransaction' as const,
@@ -111,8 +116,8 @@ describe('the buildCreateSubscriptionRequest function', () => {
 	it('builds request without promotion or gift', () => {
 		const request = buildCreateSubscriptionRequest(
 			productCatalog,
+			promotions,
 			supporterPlusInput,
-			undefined,
 		);
 		if (!('newAccount' in request)) {
 			throw new Error('Expected newAccount in request');
@@ -139,8 +144,8 @@ describe('the buildCreateSubscriptionRequest function', () => {
 		};
 		const request = buildCreateSubscriptionRequest(
 			productCatalog,
+			promotions,
 			input,
-			promo1,
 		);
 		const orderAction = request.subscriptions[0]
 			?.orderActions[0] as CreateSubscriptionOrderAction;
@@ -166,8 +171,8 @@ describe('the buildCreateSubscriptionRequest function', () => {
 		};
 		const request = buildCreateSubscriptionRequest(
 			productCatalog,
+			promotions,
 			input,
-			undefined,
 		);
 		expect(request.subscriptions[0]?.customFields?.ReaderType__c).toBe(
 			ReaderType.Gift,
@@ -185,8 +190,8 @@ describe('the buildCreateSubscriptionRequest function', () => {
 		};
 		const request = buildCreateSubscriptionRequest(
 			productCatalog,
+			promotions,
 			input,
-			promo2,
 		);
 		expect(request.subscriptions[0]?.customFields?.ReaderType__c).toBe(
 			ReaderType.Patron,
@@ -201,8 +206,8 @@ describe('the buildCreateSubscriptionRequest function', () => {
 		};
 		const request = buildCreateSubscriptionRequest(
 			productCatalog,
+			promotions,
 			input,
-			undefined,
 		);
 		expect(request.processingOptions.runBilling).toBe(false);
 		expect(request.processingOptions.collectPayment).toBe(false);
