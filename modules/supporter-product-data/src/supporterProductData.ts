@@ -1,3 +1,4 @@
+import * as console from 'node:console';
 import { DynamoDBClient, QueryCommand } from '@aws-sdk/client-dynamodb';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
 import { awsConfig } from '@modules/aws/config';
@@ -53,10 +54,13 @@ export const getSupporterProductData = async (
 	});
 };
 
-// Custom replacer to format Dayjs objects as 'YYYY-MM-DD' strings in JSON
-const dayJsReplacer = (_key: string, value: unknown) => {
-	if (dayjs.isDayjs(value)) {
-		return zuoraDateFormat(value);
+// Custom replacer to format dates as 'YYYY-MM-DD' strings in JSON
+const supporterRatePlanDateReplacer = (key: string, value: unknown) => {
+	if (
+		typeof value === 'string' &&
+		['termEndDate', 'contractEffectiveDate'].includes(key)
+	) {
+		return zuoraDateFormat(dayjs(value));
 	}
 	return value;
 };
@@ -69,7 +73,11 @@ export const sendToSupporterProductData = async (
 	supporterRatePlanItem: SupporterRatePlanItem,
 ) => {
 	const queueName = `supporter-product-data-${stage}`;
-	const messageBody = JSON.stringify(supporterRatePlanItem, dayJsReplacer, 2);
+	const messageBody = JSON.stringify(
+		supporterRatePlanItem,
+		supporterRatePlanDateReplacer,
+		2,
+	);
 	logger.log(
 		`Sending supporter product data message ${messageBody} to queue ${queueName}`,
 	);

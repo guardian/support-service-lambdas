@@ -11,6 +11,7 @@ import {
 test('Dynamo Integration', async () => {
 	const supporterData = await getSupporterProductData('CODE', '110001137');
 	expect(supporterData?.length).toEqual(4);
+	expect(supporterData?.[0]?.contractEffectiveDate.year()).toEqual(2024);
 });
 
 test('sendToSupporterProductData Integration', async () => {
@@ -19,7 +20,7 @@ test('sendToSupporterProductData Integration', async () => {
 		identityId: '104528145',
 		productRatePlanId: '8a128ed885fc6ded018602296ace3eb8',
 		productRatePlanName: 'Supporter Plus V2 - Monthly',
-		termEndDate: dayjs('2025-10-10'),
+		termEndDate: dayjs().add(1, 'week'),
 		contractEffectiveDate: dayjs('2024-10-10'),
 	};
 	const response = await sendToSupporterProductData('CODE', supporterItem);
