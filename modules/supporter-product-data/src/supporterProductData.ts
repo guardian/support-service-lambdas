@@ -5,6 +5,7 @@ import { sendMessageToQueue } from '@modules/aws/sqs';
 import { prettyPrint } from '@modules/prettyPrint';
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
+import { zuoraDateFormat } from '@modules/zuora/utils';
 import dayjs from 'dayjs';
 import { z } from 'zod';
 
@@ -43,11 +44,7 @@ export const getSupporterProductData = async (
 		const parseResult = supporterRatePlanItemSchema.safeParse(unmarshalled);
 		if (!parseResult.success) {
 			console.error(
-				`Failed to parse supporter product data: ${JSON.stringify(
-					unmarshalled,
-					null,
-					2,
-				)} because of error:`,
+				`Failed to parse supporter product data: ${prettyPrint(unmarshalled)} because of error:`,
 				parseResult.error,
 			);
 			throw new Error('Failed to parse supporter product data');
@@ -59,7 +56,7 @@ export const getSupporterProductData = async (
 // Custom replacer to format Dayjs objects as 'YYYY-MM-DD' strings in JSON
 const dayJsReplacer = (_key: string, value: unknown) => {
 	if (dayjs.isDayjs(value)) {
-		return value.format('YYYY-MM-DD');
+		return zuoraDateFormat(value);
 	}
 	return value;
 };
