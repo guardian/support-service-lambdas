@@ -2,6 +2,7 @@
  * @group integration
  */
 
+import dayjs from 'dayjs';
 import {
 	getSupporterProductData,
 	sendToSupporterProductData,
@@ -18,8 +19,8 @@ test('sendToSupporterProductData Integration', async () => {
 		identityId: '104528145',
 		productRatePlanId: '8a128ed885fc6ded018602296ace3eb8',
 		productRatePlanName: 'Supporter Plus V2 - Monthly',
-		termEndDate: '2025-10-10',
-		contractEffectiveDate: '2024-10-10',
+		termEndDate: dayjs('2025-10-10'),
+		contractEffectiveDate: dayjs('2024-10-10'),
 	};
 	const response = await sendToSupporterProductData('CODE', supporterItem);
 	expect(response.$metadata.httpStatusCode).toEqual(200);

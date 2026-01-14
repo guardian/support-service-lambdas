@@ -1,11 +1,11 @@
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
-import { zuoraDateFormat } from '@modules/zuora/utils';
-import dayjs from 'dayjs';
+import type { Dayjs } from 'dayjs';
 import type { SwitchInformation } from './switchInformation';
 
 export type ContributionAmount = { amount: number; currency: string };
 
 export const supporterRatePlanItemFromSwitchInformation = (
+	now: Dayjs,
 	switchInformation: SwitchInformation,
 ): SupporterRatePlanItem => {
 	const productRatePlanName =
@@ -19,7 +19,7 @@ export const supporterRatePlanItemFromSwitchInformation = (
 		productRatePlanId:
 			switchInformation.catalog.supporterPlus.productRatePlanId,
 		productRatePlanName,
-		termEndDate: zuoraDateFormat(dayjs().add(1, 'year')),
-		contractEffectiveDate: zuoraDateFormat(dayjs()),
+		termEndDate: now.add(1, 'year'),
+		contractEffectiveDate: now,
 	};
 };

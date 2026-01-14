@@ -80,7 +80,10 @@ export const switchToSupporterPlus = async (
 		sendSalesforceTracking(paidAmount, productSwitchInformation),
 		sendToSupporterProductData(
 			productSwitchInformation.stage,
-			supporterRatePlanItemFromSwitchInformation(productSwitchInformation),
+			supporterRatePlanItemFromSwitchInformation(
+				dayjs(),
+				productSwitchInformation,
+			),
 		),
 	]);
 	return {
