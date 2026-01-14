@@ -176,6 +176,7 @@ const pressReaderEntitlements: HandlerDefinition = {
 		...dep['@aws-sdk/client-dynamodb'],
 		...dep['@aws-sdk/client-ssm'],
 		...dep['@aws-sdk/util-dynamodb'],
+		...dep.dayjs,
 		...dep['fast-xml-parser'],
 		...dep.zod,
 	},
@@ -478,6 +479,8 @@ const moduleSupporterProductData: ModuleDefinition = {
 	devDependencies: {
 		...dep['@aws-sdk/client-dynamodb'],
 		...dep['@aws-sdk/util-dynamodb'],
+		...dep['dayjs'],
+		...dep['zod'],
 	},
 	extraScripts: {
 		test: 'NODE_OPTIONS="$NODE_OPTIONS --experimental-vm-modules" jest --group=-integration',

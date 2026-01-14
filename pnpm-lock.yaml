@@ -288,6 +288,9 @@ importers:
       '@aws-sdk/util-dynamodb':
         specifier: ^3.940.0
         version: 3.940.0(@aws-sdk/client-dynamodb@3.940.0)
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.19
       fast-xml-parser:
         specifier: ^4.5.0
         version: 4.5.3
@@ -612,6 +615,12 @@ importers:
       '@aws-sdk/util-dynamodb':
         specifier: ^3.940.0
         version: 3.940.0(@aws-sdk/client-dynamodb@3.940.0)
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.19
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
 
   modules/sync-supporter-product-data:
     dependencies:

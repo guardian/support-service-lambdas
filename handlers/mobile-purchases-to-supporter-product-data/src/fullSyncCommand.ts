@@ -6,7 +6,6 @@ import { prettyPrint } from '@modules/prettyPrint';
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
-import { zuoraDateFormat } from '@modules/zuora/utils';
 import { parse } from 'csv-parse/sync';
 import dayjs from 'dayjs';
 
@@ -61,8 +60,8 @@ const createSupporterRatePlanItem = (
 			productId,
 			'productRatePlanName missing from CSV row',
 		),
-		termEndDate: zuoraDateFormat(dayjs(termEndDate)),
-		contractEffectiveDate: zuoraDateFormat(dayjs(contractEffectiveDate)),
+		termEndDate: dayjs(termEndDate),
+		contractEffectiveDate: dayjs(contractEffectiveDate),
 	};
 };
 
