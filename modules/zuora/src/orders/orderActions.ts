@@ -31,11 +31,11 @@ type ChangePlanTarget =
 	| {
 			productRatePlanId: string;
 			ratePlanId?: never;
-		}
+	  }
 	| {
 			productRatePlanId?: never;
 			ratePlanId: string;
-		};
+	  };
 
 type BaseOrderAction = {
 	type: OrderActionType;
