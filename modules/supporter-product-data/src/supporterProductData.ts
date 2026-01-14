@@ -56,6 +56,14 @@ export const getSupporterProductData = async (
 	});
 };
 
+// Custom replacer to format Dayjs objects as 'YYYY-MM-DD' strings in JSON
+const dayJsReplacer = (_key: string, value: unknown) => {
+	if (dayjs.isDayjs(value)) {
+		return value.format('YYYY-MM-DD');
+	}
+	return value;
+};
+
 // We insert into the SupporterProductData table via an SQS queue to keep all the logic around formatting and TTLs in one place
 // This is the lambda that ultimately does the writing:
 // https://github.com/guardian/support-frontend/blob/main/supporter-product-data/src/main/scala/com/gu/lambdas/ProcessSupporterRatePlanItemLambda.scala#L24
@@ -64,7 +72,7 @@ export const sendToSupporterProductData = async (
 	supporterRatePlanItem: SupporterRatePlanItem,
 ) => {
 	const queueName = `supporter-product-data-${stage}`;
-	const messageBody = prettyPrint(supporterRatePlanItem);
+	const messageBody = JSON.stringify(supporterRatePlanItem, dayJsReplacer, 2);
 	logger.log(
 		`Sending supporter product data message ${messageBody} to queue ${queueName}`,
 	);
