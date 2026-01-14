@@ -63,12 +63,20 @@ const transformPromo = (oldPromo: OldPromo): Promo[] => {
 			promo.description = oldPromo.description;
 		}
 
-		if (oldPromo.landingPage?.title) {
-			promo.landingPage = {
-				title: oldPromo.landingPage.title,
-				description: oldPromo.landingPage.description,
-				roundelHtml: oldPromo.landingPage.roundelHtml,
-			};
+		if (oldPromo.landingPage) {
+			const landingPage: Promo['landingPage'] = {};
+
+			if (oldPromo.landingPage.title) {
+				landingPage.title = oldPromo.landingPage.title;
+			}
+			if (oldPromo.landingPage.description) {
+				landingPage.description = oldPromo.landingPage.description;
+			}
+			if (oldPromo.landingPage.roundelHtml) {
+				landingPage.roundelHtml = oldPromo.landingPage.roundelHtml;
+			}
+
+			promo.landingPage = landingPage;
 		}
 
 		return promo;
