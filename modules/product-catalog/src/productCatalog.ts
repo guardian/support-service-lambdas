@@ -8,6 +8,7 @@ import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSc
 type ProductBillingSystem = 'stripe' | 'zuora';
 
 export type ProductCatalog = z.infer<typeof productCatalogSchema>;
+export type GenericProductCatalog = ProductCatalog & CatalogShape;
 
 // -------- Product --------
 export type ProductKey = keyof ProductCatalog;
@@ -116,6 +117,61 @@ export type ProductRatePlan<
 export type ZuoraProductRatePlanKey<P extends ZuoraProductKey> =
 	keyof ProductCatalog[P]['ratePlans'];
 
+type ValueOf<T> = T[keyof T];
+type AnyRatePlan = ValueOf<{
+	[K in keyof ProductCatalog]: ValueOf<ProductCatalog[K]['ratePlans']>;
+}>;
+
+type AnyRatePlanCharge = AnyRatePlan extends { charges: infer C }
+	? C extends readonly (infer E)[]
+		? E
+		: C extends Record<PropertyKey, infer V>
+			? V extends readonly (infer E2)[]
+				? E2
+				: V
+			: never
+	: never;
+
+// Infer the union of rate plan keys per product
+type RatePlanKey<P extends ProductKey> = keyof ProductCatalog[P]['ratePlans'];
+
+// All keys across union
+type AllKeys<U> = U extends any ? keyof U : never;
+
+// Keys in every member
+type RequiredKeys<U> = {
+	[K in AllKeys<U>]: [U] extends [Record<K, unknown>] ? K : never;
+}[AllKeys<U>];
+
+// Keys in some but not all members
+type OptionalKeys<U> = Exclude<AllKeys<U>, RequiredKeys<U>>;
+
+// Required props
+type RequiredProps<U> = {
+	[K in RequiredKeys<U>]: U extends Record<K, infer V> ? V : never;
+};
+
+// Optional props (fixed)
+type OptionalProps<U> = {
+	[K in OptionalKeys<U>]?: Extract<U, Record<K, any>>[K];
+};
+
+// Combine
+type CommonPropsWithOptional<U> = [U] extends [never]
+	? {}
+	: RequiredProps<U> & OptionalProps<U>;
+
+export type CommonRatePlan = CommonPropsWithOptional<AnyRatePlan>;
+
+export type CommonRatePlanCharge = CommonPropsWithOptional<AnyRatePlanCharge>;
+
+// Target shape: Record<ProductKey, { ratePlans: Record<RatePlanKey<ProductKey>, { billingPeriod: BillingPeriod }> }>
+export type CatalogShape = Record<
+	ProductKey,
+	{
+		ratePlans: Record<RatePlanKey<ProductKey>, CommonRatePlan>;
+	}
+>;
 export type TermType = z.infer<typeof termTypeSchema>;
 
 export class ProductCatalogHelper {

@@ -14,12 +14,14 @@ import type {
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import dayjs from 'dayjs';
-import { preview, switchToSupporterPlus } from './contributionToSupporterPlus';
 import type {
 	ProductSwitchGenericRequestBody,
 	ProductSwitchRequestBody,
-} from './schemas';
-import { getSwitchInformation } from './switchInformation';
+} from '../schemas';
+import getSwitchInformation from './switchInformation';
+import { preview } from './preview';
+import { switchToSupporterPlus } from './switch';
+import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 
 export function contributionToSupporterPlusEndpoint(
 	stage: Stage,
@@ -48,6 +50,7 @@ export function productSwitchEndpoint(stage: Stage, today: dayjs.Dayjs) {
 	): Promise<APIGatewayProxyResult> => {
 		logger.log('Loading the product catalog');
 		const productCatalog = await getProductCatalogFromApi(stage);
+		const zuoraCatalog = await getZuoraCatalogFromS3(stage);
 
 		// don't get the billing preview until we know the subscription is not cancelled
 		const lazyBillingPreview = new Lazy(
@@ -68,6 +71,7 @@ export function productSwitchEndpoint(stage: Stage, today: dayjs.Dayjs) {
 			subscription,
 			account,
 			productCatalog,
+			zuoraCatalog,
 			lazyBillingPreview,
 			today,
 		);

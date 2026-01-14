@@ -55,9 +55,8 @@ export const sendThankYouEmail = async (
 
 	const billingPeriodMonths: number = {
 		Month: 1,
-		Quarter: 3,
 		Annual: 12,
-	}[switchInformation.subscription.billingPeriod];
+	}[billingPeriod];
 
 	const emailMessage: EmailMessageWithUserId = buildEmailMessage(
 		{

@@ -21,10 +21,11 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import type { ContributionTestAdditionalOptions } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import { createContribution } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
-import { doSwitch, preview } from '../src/contributionToSupporterPlus';
 import { adjustNonCollectedInvoice } from '../src/payment';
-import type { SwitchInformation } from '../src/switchInformation';
-import { getSwitchInformation } from '../src/switchInformation';
+import type { SwitchInformation } from '../src/changePlan/switchInformation';
+import getSwitchInformation from '../src/changePlan/switchInformation';
+import { preview } from '../src/changePlan/preview';
+import { doSwitch } from '../src/changePlan/switch';
 
 interface ContributionCreationDetails {
 	zuoraClient: ZuoraClient;

@@ -10,7 +10,7 @@ import { frequencySwitchRequestSchema } from './frequencySwitchSchemas';
 import {
 	contributionToSupporterPlusEndpoint,
 	productSwitchEndpoint,
-} from './productSwitchEndpoint';
+} from './changePlan/productSwitchEndpoint';
 import {
 	productSwitchGenericRequestSchema,
 	productSwitchRequestSchema,

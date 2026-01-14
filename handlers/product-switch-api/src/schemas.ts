@@ -54,7 +54,6 @@ export type ZuoraPreviewResponseInvoice = z.infer<
 >;
 
 export const zuoraPreviewResponseSchema = z.object({
-	success: z.boolean(),
 	previewResult: z.optional(
 		z.object({
 			invoices: z.array(zuoraPreviewResponseInvoiceSchema),
@@ -66,7 +65,6 @@ export const zuoraPreviewResponseSchema = z.object({
 export type ZuoraPreviewResponse = z.infer<typeof zuoraPreviewResponseSchema>;
 
 export const zuoraSwitchResponseSchema = z.object({
-	success: z.boolean(),
 	invoiceIds: z.optional(z.array(z.string())),
 	reasons: z.optional(z.array(z.object({ message: z.string() }))),
 });
@@ -74,7 +72,6 @@ export const zuoraSwitchResponseSchema = z.object({
 export type ZuoraSwitchResponse = z.infer<typeof zuoraSwitchResponseSchema>;
 
 export const zuoraGetAmendmentResponseSchema = z.object({
-	success: z.boolean(),
 	id: z.optional(z.string()),
 	status: z.optional(z.string()),
 	type: z.optional(z.string()),

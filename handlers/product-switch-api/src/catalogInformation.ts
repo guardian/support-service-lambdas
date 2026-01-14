@@ -2,7 +2,7 @@ import type { BillingPeriod } from '@modules/billingPeriod';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
-import { validSwitches, ValidTargetProduct } from './validSwitches';
+import { SwitchableProduct, ValidTargetProduct } from './validSwitches';
 
 export type CatalogInformation = {
 	targetProduct: {
@@ -30,15 +30,16 @@ export const getCatalogRatePlanName = (
 
 export const getCatalogInformation = (
 	productCatalog: ProductCatalog,
-	s: (typeof validSwitches)[ValidTargetProduct],
+	targetProduct: ValidTargetProduct,
+	sourceProduct: SwitchableProduct,
 	billingPeriod: BillingPeriod,
 	currency: IsoCurrency,
 ): CatalogInformation => {
 	const catalogBillingPeriod = getCatalogRatePlanName(billingPeriod);
 	const sourceProductRatePlan =
-		productCatalog[s.sourceProduct].ratePlans[catalogBillingPeriod];
+		productCatalog[sourceProduct].ratePlans[catalogBillingPeriod];
 	const targetProductRatePlan =
-		productCatalog[s.targetProduct].ratePlans[catalogBillingPeriod];
+		productCatalog[targetProduct].ratePlans[catalogBillingPeriod];
 	const price = getIfDefined(
 		targetProductRatePlan.pricing[currency],
 		'No Supporter Plus price defined for currency',

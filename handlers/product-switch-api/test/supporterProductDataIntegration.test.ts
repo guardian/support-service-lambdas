@@ -4,7 +4,7 @@
 
 import { sendToSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
 import { supporterRatePlanItemFromSwitchInformation } from '../src/supporterProductData';
-import type { SwitchInformation } from '../src/switchInformation';
+import type { SwitchInformation } from '../src/changePlan/switchInformation';
 
 test('supporter product data', async () => {
 	const switchInformation: SwitchInformation = {

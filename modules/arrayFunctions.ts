@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { objectEntries, objectFromEntries } from '@modules/objectFunctions';
 
 export function isInList<T extends string>(values: readonly [T, ...T[]]) {
 	return (productKey: string): productKey is T => {
@@ -13,7 +14,7 @@ export const sumNumbers = (array: number[]): number => {
 	return sum(array, (item) => item);
 };
 export const groupBy = <T>(
-	array: T[],
+	array: readonly T[],
 	fn: (item: T) => string,
 ): Record<string, T[]> => {
 	return array.reduce<Record<string, T[]>>((acc, item) => {
@@ -26,12 +27,12 @@ export const groupBy = <T>(
 };
 
 export const groupMap = <T, R>(
-	array: T[],
+	array: readonly T[],
 	group: (item: T) => string,
 	map: (item: T) => R,
 ): Record<string, R[]> => {
-	return Object.fromEntries(
-		Object.entries(groupBy(array, group)).map(([key, values]) => [
+	return objectFromEntries(
+		objectEntries(groupBy(array, group)).map(([key, values]) => [
 			key,
 			values.map(map),
 		]),
@@ -63,6 +64,12 @@ export const mapValues = <T extends object, RES>(
 	return res;
 };
 
+/**
+ * this goes through the object, applying the function to each value.  If the result is true, the value goes into the first list
+ * otherwise it goes into the second list.  The keys are discarded.
+ * @param obj
+ * @param fn
+ */
 export const partitionByValueType = <T extends object, U extends T[keyof T]>(
 	obj: T,
 	fn: (v: T[keyof T], k: keyof T) => v is U,

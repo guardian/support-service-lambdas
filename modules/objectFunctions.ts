@@ -38,6 +38,14 @@ export function objectEntries<T extends Record<string, unknown>>(
 	>;
 }
 
+export function objectLeftJoin<K extends string, VA, VB>(
+	l: Record<K, VA>,
+	r: Record<K, VB>,
+): [VA, VB][] {
+	const lKeys = objectKeys(l);
+	return lKeys.map((key) => [l[key], r[key]] as const);
+}
+
 export function objectJoin<K extends string, VA, VB>(
 	l: Record<K, VA>,
 	r: Record<K, VB>,

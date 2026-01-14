@@ -1,7 +1,7 @@
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import dayjs from 'dayjs';
-import type { SwitchInformation } from './switchInformation';
+import type { SwitchInformation } from './changePlan/switchInformation';
 
 export type ContributionAmount = { amount: number; currency: string };
 

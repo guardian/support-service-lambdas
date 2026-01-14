@@ -73,16 +73,15 @@ const getProductRatePlanCharges = (
  * We use this to hoist billing period from the `productRatePlanCharges` up into the `ratePlans`
  * if-and-only-if all the charges have the same `billingPeriod`.
  */
-const getBillingPeriod = (productRatePlan: ZuoraProductRatePlan) => {
-	const billingPeriods = new Set(
-		productRatePlan.productRatePlanCharges.map(
-			(productRatePlanCharge) => productRatePlanCharge.billingPeriod,
-		),
-	);
+export const getBillingPeriod = (
+	name: string,
+	billingPeriodList: (string | null)[],
+) => {
+	const billingPeriods = new Set(billingPeriodList);
 	if (billingPeriods.size > 1) {
 		const errorList = [...billingPeriods].join(',');
 		throw new Error(
-			`Product rate plan ${productRatePlan.name} has multiple billingPeriods ${errorList}`,
+			`Product rate plan ${name} has multiple billingPeriods ${errorList}`,
 		);
 	}
 
@@ -117,7 +116,12 @@ const getZuoraProduct = (
 		isDeliveryProduct: isDeliveryProduct(productName),
 		ratePlans: arrayToObject(
 			allRatePlans.map((productRatePlan) => {
-				const billingPeriod = getBillingPeriod(productRatePlan);
+				const billingPeriod = getBillingPeriod(
+					productRatePlan.name,
+					productRatePlan.productRatePlanCharges.map(
+						(productRatePlanCharge) => productRatePlanCharge.billingPeriod,
+					),
+				);
 				const productRatePlanKey = getProductRatePlanKey(productRatePlan.name);
 				return {
 					[productRatePlanKey]: {

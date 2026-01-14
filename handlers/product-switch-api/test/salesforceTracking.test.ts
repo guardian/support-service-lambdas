@@ -1,5 +1,5 @@
 import { createSQSMessageBody } from '../src/salesforceTracking';
-import type { SwitchInformation } from '../src/switchInformation';
+import type { SwitchInformation } from '../src/changePlan/switchInformation';
 
 test('salesforce tracking data is serialised to the queue correctly', () => {
 	const testData: SwitchInformation = {
