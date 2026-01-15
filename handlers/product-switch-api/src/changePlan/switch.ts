@@ -27,7 +27,7 @@ export const switchToSupporterPlus = async (
 	const paidAmount = await takePaymentOrAdjustInvoice(
 		zuoraClient,
 		switchResponse,
-		productSwitchInformation.catalog.targetProduct.subscriptionChargeId,
+		productSwitchInformation.catalog.targetProduct.baseChargeIds,
 		productSwitchInformation.account.id,
 		productSwitchInformation.account.defaultPaymentMethodId,
 	);

@@ -8,7 +8,6 @@ import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSc
 type ProductBillingSystem = 'stripe' | 'zuora';
 
 export type ProductCatalog = z.infer<typeof productCatalogSchema>;
-export type GenericProductCatalog = ProductCatalog & CatalogShape;
 
 // -------- Product --------
 export type ProductKey = keyof ProductCatalog;
@@ -133,7 +132,7 @@ type AnyRatePlanCharge = AnyRatePlan extends { charges: infer C }
 	: never;
 
 // Infer the union of rate plan keys per product
-type RatePlanKey<P extends ProductKey> = keyof ProductCatalog[P]['ratePlans'];
+// type RatePlanKey<P extends ProductKey> = keyof ProductCatalog[P]['ratePlans'];
 
 // All keys across union
 type AllKeys<U> = U extends any ? keyof U : never;
@@ -157,21 +156,14 @@ type OptionalProps<U> = {
 };
 
 // Combine
-type CommonPropsWithOptional<U> = [U] extends [never]
-	? {}
-	: RequiredProps<U> & OptionalProps<U>;
+type CommonPropsWithOptional<U> = RequiredProps<U> & OptionalProps<U>;
 
+// FIXME causes the type checker to give up with `never` - need productCatalogSchema to base all rate plans on a specific CommonRatePlan and remove this one
 export type CommonRatePlan = CommonPropsWithOptional<AnyRatePlan>;
 
+// FIXME as above, need productCatalogSchema to base all rate plan charges on a specific CommonRatePlanCharge and remove this one
 export type CommonRatePlanCharge = CommonPropsWithOptional<AnyRatePlanCharge>;
 
-// Target shape: Record<ProductKey, { ratePlans: Record<RatePlanKey<ProductKey>, { billingPeriod: BillingPeriod }> }>
-export type CatalogShape = Record<
-	ProductKey,
-	{
-		ratePlans: Record<RatePlanKey<ProductKey>, CommonRatePlan>;
-	}
->;
 export type TermType = z.infer<typeof termTypeSchema>;
 
 export class ProductCatalogHelper {

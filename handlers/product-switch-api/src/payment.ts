@@ -13,16 +13,15 @@ export const adjustNonCollectedInvoice = async (
 	zuoraClient: ZuoraClient,
 	invoiceId: string, // this must be an id, NOT the invoice number
 	paymentAmount: number,
-	supporterPlusChargeId: string,
+	baseChargeIds: string[],
 ) => {
 	console.log(`Writing off amount ${paymentAmount} from invoice ${invoiceId}`);
 	const invoiceItems = await getInvoiceItems(zuoraClient, invoiceId);
 	const supporterPlusInvoiceItem = getIfDefined(
-		invoiceItems.invoiceItems.find(
-			(invoiceItem) =>
-				invoiceItem.productRatePlanChargeId === supporterPlusChargeId,
+		invoiceItems.invoiceItems.find((invoiceItem) =>
+			baseChargeIds.includes(invoiceItem.productRatePlanChargeId),
 		),
-		`No supporter plus invoice item (id: ${supporterPlusChargeId} ) found in the invoice ${invoiceId}`,
+		`No supporter plus invoice item (id: ${baseChargeIds} ) found in the invoice ${invoiceId}`,
 	);
 	return await creditInvoice(
 		dayjs(),
@@ -39,7 +38,7 @@ export const adjustNonCollectedInvoice = async (
 export const takePaymentOrAdjustInvoice = async (
 	zuoraClient: ZuoraClient,
 	switchResponse: ZuoraSwitchResponse,
-	supporterPlusChargeId: string,
+	baseChargeIds: string[],
 	accountId: string,
 	paymentMethodId: string,
 ): Promise<number> => {
@@ -59,7 +58,7 @@ export const takePaymentOrAdjustInvoice = async (
 			zuoraClient,
 			invoiceId,
 			amountPayableToday,
-			supporterPlusChargeId,
+			baseChargeIds,
 		);
 		return 0;
 	} else {

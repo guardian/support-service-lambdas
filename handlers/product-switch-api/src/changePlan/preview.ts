@@ -118,13 +118,13 @@ export const previewResponseFromZuoraResponse = (
 	);
 
 	const supporterPlusSubscriptionInvoiceItem = getIfDefined(
-		invoice.invoiceItems.find(
-			(invoiceItem: ZuoraPreviewResponseInvoiceItem) =>
-				invoiceItem.productRatePlanChargeId ===
-				catalogInformation.targetProduct.subscriptionChargeId,
+		invoice.invoiceItems.find((invoiceItem: ZuoraPreviewResponseInvoiceItem) =>
+			catalogInformation.targetProduct.baseChargeIds.includes(
+				invoiceItem.productRatePlanChargeId,
+			),
 		),
 		'No supporter plus invoice item found in the preview response: id: ' +
-			catalogInformation.targetProduct.subscriptionChargeId,
+			catalogInformation.targetProduct.baseChargeIds,
 	);
 
 	const supporterPlusContributionItem = getIfDefined(

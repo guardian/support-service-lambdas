@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { validTargetProducts } from './validSwitches';
+import { validTargetGuardianProductNames } from './validSwitches';
 
 export const productSwitchRequestSchema = z.object({
 	preview: z.boolean(),
@@ -12,7 +12,7 @@ export const productSwitchRequestSchema = z.object({
 
 export const productSwitchGenericRequestSchema = z
 	.object({
-		targetProduct: z.enum(validTargetProducts),
+		targetProduct: z.enum(validTargetGuardianProductNames),
 	})
 	.extend(productSwitchRequestSchema.shape);
 

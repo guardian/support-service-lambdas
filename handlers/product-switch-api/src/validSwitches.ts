@@ -2,65 +2,45 @@ import { ProductKey } from '@modules/product-catalog/productCatalog';
 import { BillingPeriod } from '@modules/billingPeriod';
 import { isInList } from '@modules/arrayFunctions';
 
-export const validTargetProducts = [
+export const validTargetGuardianProductNames = [
 	'SupporterPlus',
 	// 'DigitalSubscription',
 ] satisfies readonly [ProductKey, ...ProductKey[]];
 
-export type ValidTargetProduct = (typeof validTargetProducts)[number];
+export type ValidTargetGuardianProductName =
+	(typeof validTargetGuardianProductNames)[number];
 
-export const validTargetBillingPeriod = ['Annual', 'Month'] as const;
-export type ValidTargetBillingPeriod =
-	(typeof validTargetBillingPeriod)[number];
+export const validTargetZuoraBillingPeriods = ['Annual', 'Month'] as const;
+export type ValidTargetZuoraBillingPeriod =
+	(typeof validTargetZuoraBillingPeriods)[number];
 
 export const isValidTargetBillingPeriod = (
 	bp: BillingPeriod,
-): bp is ValidTargetBillingPeriod => isInList(validTargetBillingPeriod)(bp);
+): bp is ValidTargetZuoraBillingPeriod =>
+	isInList(validTargetZuoraBillingPeriods)(bp);
 
-//
-// // use productBillingPeriods.ts instead?
-// type ValidBillingPeriodForSwitch<F extends ProductKey, T extends ProductKey> = {
-// 	[FPRP in ProductRatePlanKey<F>]: FPRP extends ProductRatePlanKey<T>
-// 		? FPRP
-// 		: never;
-// }[ProductRatePlanKey<F>];
-//
-// type SwitchConfiguration<F extends ProductKey, T extends ProductKey> = {
-// 	sourceProduct: F;
-// 	targetProduct: T;
-// 	validBillingPeriods: ReadonlyArray<ValidBillingPeriodForSwitch<F, T>>;
-// };
-//
-// type SwitchObject<F extends ProductKey, T extends ValidTargetProduct> = {
-// 	[X in T]: SwitchConfiguration<F, T>;
-// };
-//
-// const toSupporterPlus: SwitchObject<'Contribution', 'SupporterPlus'> = {
-// 	SupporterPlus: {
-// 		sourceProduct: 'Contribution',
-// 		targetProduct: 'SupporterPlus',
-// 		validBillingPeriods: ['Annual', 'Monthly'],
-// 	},
-// };
-//
-// export const validSwitches = {
-// 	...toSupporterPlus,
-// 	// ...{DigitalSubscription: 'test2'},
-// };
 export const switchesForProduct = {
 	Contribution: {
-		SupporterPlus: {
-			validBillingPeriods: ['Annual', 'Month'], // todo types
-		},
+		SupporterPlus: ['Annual', 'Month'] as const,
 	},
 } satisfies Partial<
 	Record<
 		ProductKey,
-		Record<
-			ValidTargetProduct,
-			{ validBillingPeriods: ValidTargetBillingPeriod[] }
-		>
+		Record<ValidTargetGuardianProductName, ValidTargetZuoraBillingPeriod[]>
 	>
 >;
 
 export type SwitchableProduct = keyof typeof switchesForProduct;
+
+export const isProductSupported = (
+	productKeyToCheck: ProductKey,
+): productKeyToCheck is keyof typeof switchesForProduct =>
+	productKeyToCheck in switchesForProduct;
+
+export const isTargetSupported = (
+	cur: Record<
+		ValidTargetGuardianProductName,
+		{ validBillingPeriods: ValidTargetZuoraBillingPeriod[] }
+	>,
+	targetProductToCheck: ValidTargetGuardianProductName,
+): targetProductToCheck is keyof typeof cur => targetProductToCheck in cur;

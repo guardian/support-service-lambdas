@@ -196,3 +196,13 @@ export const difference = <T>(a: T[], b: T[]) => {
 	const onlyInB = [...setB].filter((x) => !setA.has(x));
 	return [onlyInA, onlyInB] as const;
 };
+
+export function getIfNonEmpty<T>(
+	array: T[],
+	errorMessage: string,
+): [T, ...T[]] {
+	if (array[0] === undefined) {
+		throw new Error(errorMessage);
+	}
+	return [array[0], ...array.slice(1)];
+}

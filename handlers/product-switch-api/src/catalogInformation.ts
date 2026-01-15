@@ -1,14 +1,27 @@
 import type { BillingPeriod } from '@modules/billingPeriod';
-import type { IsoCurrency } from '@modules/internationalisation/currency';
-import { getIfDefined } from '@modules/nullAndUndefined';
-import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
-import { SwitchableProduct, ValidTargetProduct } from './validSwitches';
+import {
+	CommonRatePlan,
+	CommonRatePlanCharge,
+} from '@modules/product-catalog/productCatalog';
+import { objectEntries, objectValues } from '@modules/objectFunctions';
+import {
+	getIfNonEmpty,
+	getSingleOrThrow,
+	partition,
+} from '@modules/arrayFunctions';
+// import type { IsoCurrency } from '@modules/internationalisation/currency';
+// import { getIfDefined } from '@modules/nullAndUndefined';
+// import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
+// import {
+// 	SwitchableProduct,
+// 	ValidTargetBillingPeriod,
+// 	ValidTargetProduct,
+// } from './validSwitches';
 
 export type CatalogInformation = {
 	targetProduct: {
-		catalogBasePrice: number;
 		productRatePlanId: string;
-		subscriptionChargeId: string; // used to find the price and service end date (next payment date) from the preview invoice, also to find and adjust out any charge less than 0.50
+		baseChargeIds: string[]; // used to find the price and service end date (next payment date) from the preview invoice, also to find and adjust out any charge less than 0.50
 		contributionChargeId?: string; // used to find the price from the preview invoice as above, also to do the chargeOverrides in the order to set the additional amount to take
 	};
 	sourceProduct: {
@@ -28,32 +41,64 @@ export const getCatalogRatePlanName = (
 	throw new Error(`Unsupported billing period ${billingPeriod}`);
 };
 
-export const getCatalogInformation = (
-	productCatalog: ProductCatalog,
-	targetProduct: ValidTargetProduct,
-	sourceProduct: SwitchableProduct,
-	billingPeriod: BillingPeriod,
-	currency: IsoCurrency,
-): CatalogInformation => {
-	const catalogBillingPeriod = getCatalogRatePlanName(billingPeriod);
-	const sourceProductRatePlan =
-		productCatalog[sourceProduct].ratePlans[catalogBillingPeriod];
-	const targetProductRatePlan =
-		productCatalog[targetProduct].ratePlans[catalogBillingPeriod];
-	const price = getIfDefined(
-		targetProductRatePlan.pricing[currency],
-		'No Supporter Plus price defined for currency',
+export function buildTargetProduct(targetProductRatePlan: CommonRatePlan) {
+	const charges: CommonRatePlan['charges'] = targetProductRatePlan.charges;
+	const chargesNameId: Array<
+		[keyof CommonRatePlan['charges'], CommonRatePlanCharge]
+	> = objectEntries(charges);
+	const [contributionChargeId, nonContributionCharges] = partition(
+		chargesNameId,
+		([productKey]) => productKey === 'Contribution',
 	);
-	return {
-		targetProduct: {
-			catalogBasePrice: price,
-			productRatePlanId: targetProductRatePlan.id,
-			subscriptionChargeId: targetProductRatePlan.charges.Subscription.id,
-			contributionChargeId: targetProductRatePlan.charges.Contribution.id,
-		},
-		sourceProduct: {
-			productRatePlanId: sourceProductRatePlan.id,
-			chargeIds: [sourceProductRatePlan.charges.Contribution.id],
-		},
+	const targetProduct1 = {
+		productRatePlanId: targetProductRatePlan.id,
+		baseChargeIds: nonContributionCharges.map((c) => c[1].id),
+		contributionChargeId: getSingleOrThrow(
+			contributionChargeId,
+			(msg) => new Error(`multiple contribution charges! ${msg}`),
+		)[1].id,
 	};
-};
+	return targetProduct1;
+}
+
+export function buildSourceProduct(guardianProductRatePlan: CommonRatePlan) {
+	return {
+		productRatePlanId: guardianProductRatePlan.id,
+		chargeIds: getIfNonEmpty(
+			objectValues(guardianProductRatePlan.charges).map(
+				(charge: CommonRatePlanCharge) => charge.id,
+			),
+			'charges are missing from the catalog TODO can we move this check upstream?',
+		),
+	};
+}
+
+// export const getCatalogInformation = (
+// 	productCatalog: ProductCatalog,
+// 	targetProduct: ValidTargetProduct,
+// 	sourceProduct: SwitchableProduct,
+// 	billingPeriod: ValidTargetBillingPeriod,
+// 	currency: IsoCurrency,
+// ): CatalogInformation => {
+// 	const catalogBillingPeriod = getCatalogRatePlanName(billingPeriod);
+// 	const sourceProductRatePlan =
+// 		productCatalog[sourceProduct].ratePlans[catalogBillingPeriod];
+// 	const targetProductRatePlan =
+// 		productCatalog[targetProduct].ratePlans[catalogBillingPeriod];
+// 	const price = getIfDefined(
+// 		targetProductRatePlan.pricing[currency],
+// 		'No Supporter Plus price defined for currency',
+// 	);
+// 	return {
+// 		targetProduct: {
+// 			catalogBasePrice: price,
+// 			productRatePlanId: targetProductRatePlan.id,
+// 			subscriptionChargeId: targetProductRatePlan.charges.Subscription.id,
+// 			contributionChargeId: targetProductRatePlan.charges.Contribution.id,
+// 		},
+// 		sourceProduct: {
+// 			productRatePlanId: sourceProductRatePlan.id,
+// 			chargeIds: [sourceProductRatePlan.charges.Contribution.id],
+// 		},
+// 	};
+// };
