@@ -48,8 +48,8 @@ export const getDiscountRatePlanFromCatalog = (
 	productCatalog: ProductCatalog,
 	productKey: ProductKey,
 ) => {
-	if (supportsPromotions(productKey)) {
-		return productCatalog[productKey].ratePlans.Discount;
+	if (!supportsPromotions(productKey)) {
+		return undefined;
 	}
-	return;
+	return productCatalog[productKey].ratePlans.Discount;
 };
