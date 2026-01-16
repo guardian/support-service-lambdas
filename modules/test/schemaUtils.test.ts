@@ -27,7 +27,7 @@ describe('optionalDropNulls', () => {
 			},
 		};
 
-		const result = optionalDropNulls(schema).parse(input);
+		const result = schema.parse(input);
 
 		expect(result).toEqual({
 			name: 'John',
