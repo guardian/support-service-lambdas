@@ -1,8 +1,8 @@
-import { optionalDropNulls } from '@modules/schemaUtils';
 import {
 	isoCountrySchema,
 	supportRegionSchema,
 } from '@modules/internationalisation/schemas';
+import { optionalDropNulls } from '@modules/schemaUtils';
 import { z } from 'zod';
 
 export const promoProductSchema = z.enum([

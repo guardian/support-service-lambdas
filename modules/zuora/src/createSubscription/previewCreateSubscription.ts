@@ -1,8 +1,8 @@
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
-import { dateFromStringSchema } from '@modules/schemaUtils';
 import type { AppliedPromotion, Promo } from '@modules/promotions/v2/schema';
+import { dateFromStringSchema } from '@modules/schemaUtils';
 import type { Stage } from '@modules/stage';
 import dayjs from 'dayjs';
 import { z } from 'zod';
