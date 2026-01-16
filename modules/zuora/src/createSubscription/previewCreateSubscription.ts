@@ -5,6 +5,7 @@ import type {
 	AppliedPromotion,
 	Promotion,
 } from '@modules/promotions/v1/schema';
+import { dateFromStringSchema } from '@modules/schemaUtils';
 import type { Stage } from '@modules/stage';
 import dayjs from 'dayjs';
 import { z } from 'zod';
@@ -16,7 +17,6 @@ import { buildCreateSubscriptionOrderAction } from '@modules/zuora/orders/orderA
 import type { PreviewOrderRequest } from '@modules/zuora/orders/orderRequests';
 import { previewOrderRequest } from '@modules/zuora/orders/orderRequests';
 import { zuoraDateFormat } from '@modules/zuora/utils';
-import { dateFromStringSchema } from '@modules/zuora/utils/dateFromStringSchema';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 export type PreviewCreateSubscriptionInputFields = {
