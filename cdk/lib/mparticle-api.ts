@@ -10,7 +10,7 @@ import {
 	ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
-// import { SrAppConfigKey } from './cdk/SrAppConfigKey'; // Commented out for initial deployment - will be needed when SNS subscription is enabled
+import { SrAppConfigKey } from './cdk/SrAppConfigKey';
 import { SrLambda } from './cdk/SrLambda';
 import { SrLambdaAlarm } from './cdk/SrLambdaAlarm';
 import { SrRestDomain } from './cdk/SrRestDomain';
@@ -39,10 +39,10 @@ export class MParticleApi extends SrStack {
 			`/${this.stage}/${this.stack}/${app}/sarResultsBucket`,
 		).stringValue;
 
-		// const identityMmaSnsDeletionRequestTopicArn = new SrAppConfigKey(
-		// 	this,
-		// 	'IdentityMmaSnsDeletionRequestTopicArn',
-		// ).valueAsString;
+		const identityMmaSnsDeletionRequestTopicArn = new SrAppConfigKey(
+			this,
+			'IdentityMmaSnsDeletionRequestTopicArn',
+		).valueAsString;
 
 		const sarS3BaseKey = 'mparticle-results/'; // this must be the same as used in the code
 
@@ -104,12 +104,27 @@ export class MParticleApi extends SrStack {
 				resources: [mmaUserDeletionLambda.inputQueue.queueArn],
 				conditions: {
 					ArnEquals: {
-						//'aws:SourceArn': identityMmaSnsDeletionRequestTopicArn, --- This will be uncommented when testing is complete ---
-						'aws:SourceArn': 'AAAAAAAAAAAA',
+						'aws:SourceArn': identityMmaSnsDeletionRequestTopicArn,
 					},
 				},
 			}),
 		);
+
+		// NOTE: The SNS subscription must be created manually by the Identity team
+		// because cross-account subscription creation requires permissions in the Identity account.
+		// The queue policy above allows Identity's SNS topic to send messages to our SQS queue.
+		// Identity team should subscribe this queue ARN to their SNS topic:
+		// Queue ARN: mmaUserDeletionLambda.inputQueue.queueArn
+		//
+		// Alternatively, this could be automated if Identity adds a topic policy allowing our account to subscribe:
+		// const identityMmaSnsTopic = Topic.fromTopicArn(
+		// 	this,
+		// 	'IdentityMmaSnsDeletionRequestTopic',
+		// 	identityMmaSnsDeletionRequestTopicArn,
+		// );
+		// identityMmaSnsTopic.addSubscription(
+		// 	new SqsSubscription(mmaUserDeletionLambda.inputQueue),
+		// );
 
 		const apiGateway = new GuApiGatewayWithLambdaByPath(this, {
 			app: app,

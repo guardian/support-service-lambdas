@@ -13,6 +13,15 @@ export const ConfigSchema = z.object({
 	}),
 	pod: z.string(),
 	sarResultsBucket: z.string(),
+	braze: z.object({
+		apiUrl: z.string(),
+		apiKey: z.string(),
+	}),
+	identityApi: z.object({
+		baseUrl: z.string(),
+		accessToken: z.string(),
+	}),
+	IdentityMmaSnsDeletionRequestTopicArn: z.string().optional(), // TODO:delete comment - Used by CDK, not needed at runtime
 });
 export type AppConfig = z.infer<typeof ConfigSchema>;
 
