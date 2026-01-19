@@ -6,6 +6,7 @@ import type {
 	ProductKey,
 } from '@modules/product-catalog/productCatalog';
 import { supportsPromotions } from '@modules/product-catalog/productCatalog';
+import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import type { Promo } from '@modules/promotions/v2/schema';
 import { promoSchema } from '@modules/promotions/v2/schema';
@@ -17,7 +18,7 @@ export const getPromotion = async (
 	stage: Stage,
 ): Promise<Promo> => {
 	const tableName = `support-admin-console-promos-${stage}`;
-	console.log(`Querying ${tableName}`);
+	logger.log(`Querying ${tableName}`);
 	const result = await dynamoClient.send(
 		new GetItemCommand({
 			TableName: tableName,
