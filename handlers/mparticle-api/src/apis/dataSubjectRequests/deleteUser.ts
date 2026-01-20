@@ -1,7 +1,6 @@
 import { logger } from '@modules/routing/logger';
 import type { BrazeClient } from '../../services/brazeClient';
 import { deleteBrazeUser } from '../../services/brazeClient';
-import type { IdentityApiClient } from '../../services/identityApiClient';
 import type {
 	BulkDeletionAPI,
 	MParticleClient,
@@ -20,43 +19,33 @@ import type { DeletionResult } from '../../types/deletionMessage';
  * 5. SQS automatically retries up to maxReceiveCount, then moves to DLQ
  *
  * @param identityId - The identity ID (customerId) to delete
+ * @param brazeUuid - Optional Braze UUID for the user
  * @param mParticleClient - Client for mParticle API
  * @param brazeClient - Client for Braze API
  * @param mParticleEnvironment - The mParticle environment (production or development)
  */
 export async function processUserDeletion(
 	identityId: string,
+	brazeUuid: string | undefined,
 	mParticleClient: MParticleClient<BulkDeletionAPI>,
 	brazeClient: BrazeClient,
-	identityApiClient: IdentityApiClient,
 	mParticleEnvironment: 'production' | 'development' = 'production',
 ): Promise<void> {
 	logger.log(`Processing deletion for user ${identityId}`);
 
-	const identityUser = await identityApiClient.getUser(identityId);
-	if (!identityUser) {
-		const error = new Error(
-			`Unable to fetch Identity API data for user ${identityId}`,
-		);
-		logger.error(error.message, error);
-		throw error;
-	}
-
-	const { identityId: resolvedIdentityId, brazeUuid } = identityUser;
-
 	// Delete from mParticle using the identity ID (customer_id)
 	const mParticleResult = await deleteMParticleUser(
 		mParticleClient,
-		resolvedIdentityId,
+		identityId,
 		mParticleEnvironment,
 	);
 
 	let brazeResult: DeletionResult | null = null;
-	if (brazeUuid) {
+	if (brazeUuid && brazeUuid.trim() !== '') {
 		brazeResult = await deleteBrazeUser(brazeClient, brazeUuid);
 	} else {
 		logger.log(
-			`Identity API did not return a brazeUuid for user ${resolvedIdentityId} - skipping Braze deletion`,
+			`No brazeUuid provided for user ${identityId} - skipping Braze deletion`,
 		);
 	}
 
@@ -64,13 +53,13 @@ export async function processUserDeletion(
 	if (!mParticleResult.success) {
 		if (mParticleResult.retryable) {
 			logger.error(
-				`mParticle deletion failed for user ${resolvedIdentityId} - will retry`,
+				`mParticle deletion failed for user ${identityId} - will retry`,
 				mParticleResult.error,
 			);
 			throw mParticleResult.error;
 		} else {
 			logger.error(
-				`Non-retryable mParticle error for user ${resolvedIdentityId} - giving up`,
+				`Non-retryable mParticle error for user ${identityId} - giving up`,
 				mParticleResult.error,
 			);
 			// Don't throw - message will be removed from queue
@@ -81,13 +70,13 @@ export async function processUserDeletion(
 	if (brazeResult && !brazeResult.success) {
 		if (brazeResult.retryable) {
 			logger.error(
-				`Braze deletion failed for user ${resolvedIdentityId} - will retry`,
+				`Braze deletion failed for user ${identityId} - will retry`,
 				brazeResult.error,
 			);
 			throw brazeResult.error;
 		} else {
 			logger.error(
-				`Non-retryable Braze error for user ${resolvedIdentityId} - giving up`,
+				`Non-retryable Braze error for user ${identityId} - giving up`,
 				brazeResult.error,
 			);
 			// Don't throw - message will be removed from queue
@@ -95,7 +84,7 @@ export async function processUserDeletion(
 	}
 
 	logger.log(
-		`Successfully processed deletion for user ${resolvedIdentityId} (Braze ${
+		`Successfully processed deletion for user ${identityId} (Braze ${
 			brazeUuid ? 'processed' : 'skipped - no brazeUuid'
 		})`,
 	);

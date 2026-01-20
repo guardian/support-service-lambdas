@@ -15,6 +15,7 @@ export const DeletionRequestBodySchema = z.object({
 	userId: z.string(),
 	eventType: z.string().optional(),
 	email: z.string().optional(),
+	brazeUuid: z.string().optional(),
 });
 
 export type DeletionRequestBody = z.infer<typeof DeletionRequestBodySchema>;

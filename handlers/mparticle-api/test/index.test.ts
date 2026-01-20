@@ -19,10 +19,6 @@ jest.mock('../src/services/config', () => ({
 			apiUrl: 'https://api.braze.com',
 			apiKey: 'test-braze-key',
 		},
-		identityApi: {
-			baseUrl: 'https://idapi.example.com',
-			accessToken: 'test-token',
-		},
 	}),
 	getEnv: jest.fn().mockReturnValue('test'),
 }));
@@ -60,6 +56,7 @@ describe('handlerDeletion', () => {
 							userId: 'user-123',
 							email: 'user@example.com',
 							eventType: 'DELETE',
+							brazeUuid: 'braze-uuid-123',
 						}),
 					}),
 					attributes: {
@@ -84,7 +81,7 @@ describe('handlerDeletion', () => {
 		expect(mockProcessUserDeletion).toHaveBeenCalledTimes(1);
 		expect(mockProcessUserDeletion).toHaveBeenCalledWith(
 			'user-123',
-			expect.anything(),
+			'braze-uuid-123',
 			expect.anything(),
 			expect.anything(),
 			'development',
@@ -103,6 +100,7 @@ describe('handlerDeletion', () => {
 							userId: 'user-123',
 							email: 'user1@example.com',
 							eventType: 'DELETE',
+							brazeUuid: 'braze-uuid-123',
 						}),
 					}),
 					attributes: {
@@ -126,6 +124,7 @@ describe('handlerDeletion', () => {
 							userId: 'user-456',
 							email: 'user2@example.com',
 							eventType: 'DELETE',
+							brazeUuid: 'braze-uuid-456',
 						}),
 					}),
 					attributes: {
@@ -162,6 +161,7 @@ describe('handlerDeletion', () => {
 							userId: 'user-fail',
 							email: 'fail@example.com',
 							eventType: 'DELETE',
+							brazeUuid: 'braze-uuid-fail',
 						}),
 					}),
 					attributes: {
@@ -210,6 +210,7 @@ describe('handlerDeletion', () => {
 							userId: 'json-user',
 							email: 'json@example.com',
 							eventType: 'DELETE',
+							brazeUuid: 'json-braze-uuid',
 						}),
 					}),
 					attributes: {
@@ -233,7 +234,49 @@ describe('handlerDeletion', () => {
 
 		expect(mockProcessUserDeletion).toHaveBeenCalledWith(
 			'json-user',
+			'json-braze-uuid',
 			expect.anything(),
+			expect.anything(),
+			'development',
+		);
+	});
+
+	it('should handle message without brazeUuid', async () => {
+		const event: SQSEvent = {
+			Records: [
+				{
+					messageId: 'test-message-1',
+					receiptHandle: 'test-receipt-1',
+					body: JSON.stringify({
+						Type: 'Notification',
+						Message: JSON.stringify({
+							userId: 'no-braze-user',
+							email: 'nobraze@example.com',
+							eventType: 'DELETE',
+						}),
+					}),
+					attributes: {
+						ApproximateReceiveCount: '1',
+						SentTimestamp: '1234567890',
+						SenderId: 'test-sender',
+						ApproximateFirstReceiveTimestamp: '1234567890',
+					},
+					messageAttributes: {},
+					md5OfBody: 'test-md5',
+					eventSource: 'aws:sqs',
+					eventSourceARN: 'arn:aws:sqs:eu-west-1:123456789:test-queue',
+					awsRegion: 'eu-west-1',
+				},
+			],
+		};
+
+		mockProcessUserDeletion.mockResolvedValue(undefined);
+
+		await handlerDeletion(event, mockContext, mockCallback);
+
+		expect(mockProcessUserDeletion).toHaveBeenCalledWith(
+			'no-braze-user',
+			undefined,
 			expect.anything(),
 			expect.anything(),
 			'development',

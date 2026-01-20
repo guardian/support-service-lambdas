@@ -1,7 +1,6 @@
 import { processUserDeletion } from '../../../src/apis/dataSubjectRequests/deleteUser';
 import type { BrazeClient } from '../../../src/services/brazeClient';
 import { deleteBrazeUser } from '../../../src/services/brazeClient';
-import type { IdentityApiClient } from '../../../src/services/identityApiClient';
 import type {
 	BulkDeletionAPI,
 	MParticleClient,
@@ -18,22 +17,13 @@ describe('processUserDeletion', () => {
 
 	const mockMParticleClient = {} as MParticleClient<BulkDeletionAPI>;
 	const mockBrazeClient = {} as BrazeClient;
-	const mockIdentityApi = {
-		getUser: jest.fn(),
-	};
-	const mockIdentityApiClient = mockIdentityApi as unknown as IdentityApiClient;
-	const mockGetUser = mockIdentityApi.getUser;
 	const userId = 'test-user-123';
+	const brazeUuid = 'braze-uuid-123';
 
 	beforeEach(() => {
 		jest.clearAllMocks();
 		console.log = jest.fn();
 		console.error = jest.fn();
-		mockGetUser.mockReset();
-		mockGetUser.mockResolvedValue({
-			identityId: userId,
-			brazeUuid: 'braze-uuid-123',
-		});
 	});
 
 	describe('Both deletions succeed', () => {
@@ -43,9 +33,9 @@ describe('processUserDeletion', () => {
 
 			await processUserDeletion(
 				userId,
+				brazeUuid,
 				mockMParticleClient,
 				mockBrazeClient,
-				mockIdentityApiClient,
 				'production',
 			);
 
@@ -56,7 +46,7 @@ describe('processUserDeletion', () => {
 			);
 			expect(mockDeleteBrazeUser).toHaveBeenCalledWith(
 				mockBrazeClient,
-				'braze-uuid-123',
+				brazeUuid,
 			);
 		});
 	});
@@ -74,9 +64,9 @@ describe('processUserDeletion', () => {
 			await expect(
 				processUserDeletion(
 					userId,
+					brazeUuid,
 					mockMParticleClient,
 					mockBrazeClient,
-					mockIdentityApiClient,
 					'production',
 				),
 			).rejects.toThrow('Network timeout');
@@ -99,9 +89,9 @@ describe('processUserDeletion', () => {
 			await expect(
 				processUserDeletion(
 					userId,
+					brazeUuid,
 					mockMParticleClient,
 					mockBrazeClient,
-					mockIdentityApiClient,
 					'production',
 				),
 			).rejects.toThrow('Server error');
@@ -127,9 +117,9 @@ describe('processUserDeletion', () => {
 			await expect(
 				processUserDeletion(
 					userId,
+					brazeUuid,
 					mockMParticleClient,
 					mockBrazeClient,
-					mockIdentityApiClient,
 					'production',
 				),
 			).rejects.toThrow('mParticle error');
@@ -148,9 +138,9 @@ describe('processUserDeletion', () => {
 			// Should not throw - message will be removed from queue
 			await processUserDeletion(
 				userId,
+				brazeUuid,
 				mockMParticleClient,
 				mockBrazeClient,
-				mockIdentityApiClient,
 				'production',
 			);
 
@@ -169,9 +159,9 @@ describe('processUserDeletion', () => {
 			// Should not throw - message will be removed from queue
 			await processUserDeletion(
 				userId,
+				brazeUuid,
 				mockMParticleClient,
 				mockBrazeClient,
-				mockIdentityApiClient,
 				'production',
 			);
 		});
@@ -185,9 +175,9 @@ describe('processUserDeletion', () => {
 
 			await processUserDeletion(
 				userId,
+				brazeUuid,
 				mockMParticleClient,
 				mockBrazeClient,
-				mockIdentityApiClient,
 				'production',
 			);
 
@@ -196,17 +186,16 @@ describe('processUserDeletion', () => {
 		});
 	});
 
-	describe('Identity API integration', () => {
-		it('should skip Braze deletion when brazeUuid is missing', async () => {
-			mockGetUser.mockResolvedValue({ identityId: userId });
+	describe('BrazeUuid handling', () => {
+		it('should skip Braze deletion when brazeUuid is undefined', async () => {
 			mockDeleteMParticleUser.mockResolvedValue({ success: true });
 			mockDeleteBrazeUser.mockResolvedValue({ success: true });
 
 			await processUserDeletion(
 				userId,
+				undefined,
 				mockMParticleClient,
 				mockBrazeClient,
-				mockIdentityApiClient,
 				'production',
 			);
 
@@ -214,20 +203,35 @@ describe('processUserDeletion', () => {
 			expect(mockDeleteBrazeUser).not.toHaveBeenCalled();
 		});
 
-		it('should throw when Identity API returns no user', async () => {
-			mockGetUser.mockResolvedValue(null);
+		it('should skip Braze deletion when brazeUuid is empty string', async () => {
+			mockDeleteMParticleUser.mockResolvedValue({ success: true });
+			mockDeleteBrazeUser.mockResolvedValue({ success: true });
 
-			await expect(
-				processUserDeletion(
-					userId,
-					mockMParticleClient,
-					mockBrazeClient,
-					mockIdentityApiClient,
-					'production',
-				),
-			).rejects.toThrow('Unable to fetch Identity API data');
+			await processUserDeletion(
+				userId,
+				'',
+				mockMParticleClient,
+				mockBrazeClient,
+				'production',
+			);
 
-			expect(mockDeleteMParticleUser).not.toHaveBeenCalled();
+			expect(mockDeleteMParticleUser).toHaveBeenCalled();
+			expect(mockDeleteBrazeUser).not.toHaveBeenCalled();
+		});
+
+		it('should skip Braze deletion when brazeUuid is whitespace', async () => {
+			mockDeleteMParticleUser.mockResolvedValue({ success: true });
+			mockDeleteBrazeUser.mockResolvedValue({ success: true });
+
+			await processUserDeletion(
+				userId,
+				'   ',
+				mockMParticleClient,
+				mockBrazeClient,
+				'production',
+			);
+
+			expect(mockDeleteMParticleUser).toHaveBeenCalled();
 			expect(mockDeleteBrazeUser).not.toHaveBeenCalled();
 		});
 	});
