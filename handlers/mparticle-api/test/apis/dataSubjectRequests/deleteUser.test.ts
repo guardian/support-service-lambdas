@@ -18,7 +18,7 @@ describe('processUserDeletion', () => {
 	const mockMParticleClient = {} as MParticleClient<BulkDeletionAPI>;
 	const mockBrazeClient = {} as BrazeClient;
 	const userId = 'test-user-123';
-	const brazeUuid = 'braze-uuid-123';
+	const brazeId = 'braze-id-123';
 
 	beforeEach(() => {
 		jest.clearAllMocks();
@@ -33,7 +33,7 @@ describe('processUserDeletion', () => {
 
 			await processUserDeletion(
 				userId,
-				brazeUuid,
+				brazeId,
 				mockMParticleClient,
 				mockBrazeClient,
 				'production',
@@ -46,7 +46,7 @@ describe('processUserDeletion', () => {
 			);
 			expect(mockDeleteBrazeUser).toHaveBeenCalledWith(
 				mockBrazeClient,
-				brazeUuid,
+				brazeId,
 			);
 		});
 	});
@@ -64,7 +64,7 @@ describe('processUserDeletion', () => {
 			await expect(
 				processUserDeletion(
 					userId,
-					brazeUuid,
+					brazeId,
 					mockMParticleClient,
 					mockBrazeClient,
 					'production',
@@ -89,7 +89,7 @@ describe('processUserDeletion', () => {
 			await expect(
 				processUserDeletion(
 					userId,
-					brazeUuid,
+					brazeId,
 					mockMParticleClient,
 					mockBrazeClient,
 					'production',
@@ -117,7 +117,7 @@ describe('processUserDeletion', () => {
 			await expect(
 				processUserDeletion(
 					userId,
-					brazeUuid,
+					brazeId,
 					mockMParticleClient,
 					mockBrazeClient,
 					'production',
@@ -138,7 +138,7 @@ describe('processUserDeletion', () => {
 			// Should not throw - message will be removed from queue
 			await processUserDeletion(
 				userId,
-				brazeUuid,
+				brazeId,
 				mockMParticleClient,
 				mockBrazeClient,
 				'production',
@@ -159,7 +159,7 @@ describe('processUserDeletion', () => {
 			// Should not throw - message will be removed from queue
 			await processUserDeletion(
 				userId,
-				brazeUuid,
+				brazeId,
 				mockMParticleClient,
 				mockBrazeClient,
 				'production',
@@ -175,7 +175,7 @@ describe('processUserDeletion', () => {
 
 			await processUserDeletion(
 				userId,
-				brazeUuid,
+				brazeId,
 				mockMParticleClient,
 				mockBrazeClient,
 				'production',

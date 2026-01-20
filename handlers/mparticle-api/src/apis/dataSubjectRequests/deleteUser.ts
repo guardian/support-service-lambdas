@@ -19,14 +19,14 @@ import type { DeletionResult } from '../../types/deletionMessage';
  * 5. SQS automatically retries up to maxReceiveCount, then moves to DLQ
  *
  * @param identityId - The identity ID (customerId) to delete
- * @param brazeUuid - Optional Braze UUID for the user
+ * @param brazeId - Optional Braze ID for the user
  * @param mParticleClient - Client for mParticle API
  * @param brazeClient - Client for Braze API
  * @param mParticleEnvironment - The mParticle environment (production or development)
  */
 export async function processUserDeletion(
 	identityId: string,
-	brazeUuid: string | undefined,
+	brazeId: string | undefined,
 	mParticleClient: MParticleClient<BulkDeletionAPI>,
 	brazeClient: BrazeClient,
 	mParticleEnvironment: 'production' | 'development' = 'production',
@@ -41,11 +41,11 @@ export async function processUserDeletion(
 	);
 
 	let brazeResult: DeletionResult | null = null;
-	if (brazeUuid && brazeUuid.trim() !== '') {
-		brazeResult = await deleteBrazeUser(brazeClient, brazeUuid);
+	if (brazeId && brazeId.trim() !== '') {
+		brazeResult = await deleteBrazeUser(brazeClient, brazeId);
 	} else {
 		logger.log(
-			`No brazeUuid provided for user ${identityId} - skipping Braze deletion`,
+			`No brazeId provided for user ${identityId} - skipping Braze deletion`,
 		);
 	}
 
@@ -85,7 +85,7 @@ export async function processUserDeletion(
 
 	logger.log(
 		`Successfully processed deletion for user ${identityId} (Braze ${
-			brazeUuid ? 'processed' : 'skipped - no brazeUuid'
+			brazeId ? 'processed' : 'skipped - no brazeId'
 		})`,
 	);
 }

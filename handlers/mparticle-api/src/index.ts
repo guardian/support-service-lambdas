@@ -128,7 +128,7 @@ async function processSQSRecord(
 	// Process the deletion - throws on retryable failure
 	await processUserDeletion(
 		body.userId,
-		body.brazeUuid,
+		body.brazeId,
 		mParticleClient,
 		brazeClient,
 		mParticleEnvironment,

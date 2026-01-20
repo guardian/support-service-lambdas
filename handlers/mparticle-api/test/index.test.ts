@@ -56,7 +56,7 @@ describe('handlerDeletion', () => {
 							userId: 'user-123',
 							email: 'user@example.com',
 							eventType: 'DELETE',
-							brazeUuid: 'braze-uuid-123',
+							brazeId: 'braze-uuid-123',
 						}),
 					}),
 					attributes: {
@@ -100,7 +100,7 @@ describe('handlerDeletion', () => {
 							userId: 'user-123',
 							email: 'user1@example.com',
 							eventType: 'DELETE',
-							brazeUuid: 'braze-uuid-123',
+							brazeId: 'braze-uuid-123',
 						}),
 					}),
 					attributes: {
@@ -124,7 +124,7 @@ describe('handlerDeletion', () => {
 							userId: 'user-456',
 							email: 'user2@example.com',
 							eventType: 'DELETE',
-							brazeUuid: 'braze-uuid-456',
+							brazeId: 'braze-uuid-456',
 						}),
 					}),
 					attributes: {
@@ -161,7 +161,7 @@ describe('handlerDeletion', () => {
 							userId: 'user-fail',
 							email: 'fail@example.com',
 							eventType: 'DELETE',
-							brazeUuid: 'braze-uuid-fail',
+							brazeId: 'braze-uuid-fail',
 						}),
 					}),
 					attributes: {
@@ -210,7 +210,7 @@ describe('handlerDeletion', () => {
 							userId: 'json-user',
 							email: 'json@example.com',
 							eventType: 'DELETE',
-							brazeUuid: 'json-braze-uuid',
+							brazeId: 'json-braze-uuid',
 						}),
 					}),
 					attributes: {
@@ -241,7 +241,7 @@ describe('handlerDeletion', () => {
 		);
 	});
 
-	it('should handle message without brazeUuid', async () => {
+	it('should handle message without brazeId', async () => {
 		const event: SQSEvent = {
 			Records: [
 				{
