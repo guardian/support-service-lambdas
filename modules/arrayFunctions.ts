@@ -13,10 +13,10 @@ export const sum = <T>(array: T[], fn: (item: T) => number): number => {
 export const sumNumbers = (array: number[]): number => {
 	return sum(array, (item) => item);
 };
-export const groupBy = <T>(
+export const groupBy = <T, I extends string>(
 	array: readonly T[],
-	fn: (item: T) => string,
-): Record<string, T[]> => {
+	fn: (item: T) => I,
+): Record<I, T[]> => {
 	return array.reduce<Record<string, T[]>>((acc, item) => {
 		const key = fn(item);
 		const group = acc[key] ?? [];
@@ -36,6 +36,25 @@ export const groupMap = <T, R>(
 			key,
 			values.map(map),
 		]),
+	);
+};
+
+export const groupMap2 = <T, R, K extends string>(
+	array: readonly T[],
+	groupFn: (item: T) => [K, R] | undefined,
+): Record<K, R[]> => {
+	return array.reduce<Record<K, R[]>>(
+		(acc, item) => {
+			const keyValue = groupFn(item);
+			if (keyValue !== undefined) {
+				const [key, value] = keyValue;
+				const group = acc[key] ?? [];
+				group.push(value);
+				acc[key] = group;
+			}
+			return acc;
+		},
+		{} as Record<K, R[]>,
 	);
 };
 
@@ -145,6 +164,22 @@ export const getSingleOrThrow = <T>(
 	return array[0];
 };
 
+export const headOption = <T>(
+	array: T[],
+	error: (msg: string) => Error,
+): T | undefined => {
+	if (array.length > 1) {
+		throw error('Array had more than one matching element');
+	}
+	if (array.length === 0) {
+		return undefined;
+	}
+	if (!array[0]) {
+		throw error('Matching element was null or undefined');
+	}
+	return array[0];
+};
+
 export const findDuplicates = <T>(array: T[]) =>
 	array.filter((item, index) => array.indexOf(item) !== index);
 export const distinct = <T>(array: T[]) => Array.from(new Set(array));
@@ -205,4 +240,38 @@ export function getIfNonEmpty<T>(
 		throw new Error(errorMessage);
 	}
 	return [array[0], ...array.slice(1)];
+}
+
+/**
+ * safer than objectFromEntries, this does a groupBy and then extracts a single item
+ *
+ * @param ratePlanCharges
+ * @param by
+ * @param msg
+ */
+export function groupSingleOrThrow<T, K extends string>(
+	ratePlanCharges: T[],
+	by: (t: T) => K,
+	msg: string,
+): Record<K, T> {
+	return groupMapSingleOrThrow(ratePlanCharges, (a) => [by(a), a], msg);
+}
+
+/**
+ * safer than objectFromEntries and mapValues, this does a groupMap and then extracts a single item
+ *
+ * @param ratePlanCharges
+ * @param by
+ * @param map
+ * @param msg
+ */
+export function groupMapSingleOrThrow<T, R, K extends string>(
+	ratePlanCharges: T[],
+	by: (t: T) => [K, R] | undefined,
+	// map: (item: T) => R,
+	msg: string,
+): Record<K, R> {
+	return mapValues(groupMap2(ratePlanCharges, by), (arr) =>
+		getSingleOrThrow(arr, (msg2) => new Error('oops: ' + msg + ' ' + msg2)),
+	);
 }

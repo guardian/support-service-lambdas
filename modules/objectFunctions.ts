@@ -17,9 +17,13 @@ export function objectKeysNonEmpty<
 
 export function objectValues<V, T extends Record<string, V>>(
 	libs: T,
-): Array<T[keyof T]> {
+): {
+	[K in keyof T]: T[K];
+} extends infer V
+	? V[keyof V][]
+	: never {
 	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- allowed in utility function - get back type lost by Object.values
-	return Object.values(libs) as Array<T[keyof T]>;
+	return Object.values(libs) as any;
 }
 
 export function objectFromEntries<K extends string, V>(
@@ -38,12 +42,14 @@ export function objectEntries<T extends Record<string, unknown>>(
 	>;
 }
 
-export function objectLeftJoin<K extends string, VA, VB>(
+export function objectLeftJoin<K extends string, VA, VB, KR extends K>(
 	l: Record<K, VA>,
-	r: Record<K, VB>,
-): [VA, VB][] {
+	r: Record<KR, VB>,
+): [VA, VB | undefined][] {
 	const lKeys = objectKeys(l);
-	return lKeys.map((key) => [l[key], r[key]] as const);
+	return lKeys.map(
+		(key) => [l[key], key in r ? r[key as KR] : undefined] as const,
+	);
 }
 
 export function objectJoin<K extends string, VA, VB>(
@@ -60,4 +66,23 @@ export function objectJoin<K extends string, VA, VB>(
 	}
 
 	return lKeys.map((key) => [l[key], r[key]] as const);
+}
+
+/**
+ * This does a mapValue on a specific named property, useful if we want to replace
+ * just e.g. the ratePlans and keep everything else the same.
+ *
+ * @param obj
+ * @param property
+ * @param mapFn
+ */
+export function mapProperty<T, K extends keyof T, V>(
+	obj: T,
+	property: K,
+	mapFn: (value: T[K]) => V,
+): Omit<T, K> & { [P in K]: V } {
+	return {
+		...obj,
+		[property]: mapFn(obj[property]),
+	};
 }

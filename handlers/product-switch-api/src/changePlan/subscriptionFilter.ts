@@ -1,4 +1,9 @@
-import { GuardianRatePlan, GuardianSubscription } from './highLevelSubParser';
+import {
+	GuardianRatePlan,
+	GuardianRatePlans,
+	GuardianSubscription,
+	GuardianSubscriptionProducts,
+} from './guardianSubscriptionBuilder';
 import { RatePlanCharge } from '@modules/zuora/types';
 import dayjs from 'dayjs';
 import {
@@ -6,7 +11,7 @@ import {
 	partitionByType,
 	partitionByValueType,
 } from '@modules/arrayFunctions';
-import { objectKeys } from '@modules/objectFunctions';
+import { mapProperty, objectKeys } from '@modules/objectFunctions';
 import { ProductKey } from '@modules/product-catalog/productCatalog';
 import { logger } from '@modules/routing/logger';
 
@@ -65,7 +70,7 @@ export class SubscriptionFilter {
 				if (maybeDiscardWholePlan !== undefined) return maybeDiscardWholePlan;
 
 				const { errors, filteredCharges } = this.filterCharges(
-					rp.guardianRatePlanCharges,
+					rp.ratePlanCharges,
 				);
 
 				const maybeAllChargesDiscarded =
@@ -81,28 +86,46 @@ export class SubscriptionFilter {
 		return { discarded, ratePlans };
 	}
 
-	private filterRatePlans(
-		joinedByProduct: Record<ProductKey, Record<string, GuardianRatePlan[]>>,
-	): Record<ProductKey, Record<string, GuardianRatePlan[]>> {
-		return mapValues(
-			joinedByProduct,
-			(jbp: Record<string, GuardianRatePlan[]>) =>
-				mapValues(jbp, (guardianSubRatePlans: GuardianRatePlan[]) => {
-					const { discarded, ratePlans } =
-						this.filterRatePlanList(guardianSubRatePlans);
-					if (discarded.length > 0)
-						logger.log(`discarded rateplans:`, discarded); // could be spammy?
-					return ratePlans;
-				}),
-		);
+	private filterProducts(
+		products: GuardianSubscriptionProducts,
+	): GuardianSubscriptionProducts {
+		const filtered = mapValuesCorrelated(products, this.filterRatePlanses());
+		return filtered; // FIXME mapValues breaks the correlation, need to recover it
+	}
+
+	private filterRatePlanses<K extends ProductKey>(): (
+		jbp: GuardianRatePlans<K>,
+	) => GuardianRatePlans<K> {
+		return (jbp: GuardianRatePlans<K>) =>
+			mapValues(jbp, (guardianSubRatePlans: GuardianRatePlan[]) => {
+				const { discarded, ratePlans } =
+					this.filterRatePlanList(guardianSubRatePlans);
+				if (discarded.length > 0) logger.log(`discarded rateplans:`, discarded); // could be spammy?
+				return ratePlans;
+			}) satisfies GuardianRatePlans<K>;
 	}
 
 	filterSubscription(highLevelSub: GuardianSubscription): GuardianSubscription {
-		const { guardianProducts, ...restSubscription } = highLevelSub;
-		const ratePlans = this.filterRatePlans(guardianProducts);
-		return {
-			...restSubscription,
-			guardianProducts: ratePlans,
-		};
+		return mapProperty(highLevelSub, 'products', (products) =>
+			this.filterProducts(products),
+		);
 	}
+}
+
+/**
+ * non generic version of mapValues needed to maintain the relationship between key and value
+ * (in a similar way to groupMapSingleOrThrowCorrelated)
+ *
+ * @param obj
+ * @param fn
+ */
+export function mapValuesCorrelated<K extends ProductKey>(
+	obj: { [T in K]: GuardianRatePlans<T> },
+	fn: <Q extends K>(v: GuardianRatePlans<Q>, k: K) => GuardianRatePlans<Q>,
+): { [T in K]: GuardianRatePlans<T> } {
+	const res = {} as { [T in K]: GuardianRatePlans<T> };
+	for (const key of objectKeys(obj)) {
+		res[key as K] = fn(obj[key], key);
+	}
+	return res;
 }

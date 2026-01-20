@@ -10,7 +10,7 @@ type ProductBillingSystem = 'stripe' | 'zuora';
 export type ProductCatalog = z.infer<typeof productCatalogSchema>;
 
 // -------- Product --------
-export type ProductKey = keyof ProductCatalog;
+export type ProductKey = keyof ProductCatalog & string;
 export const isProductKey = isInList(
 	objectKeysNonEmpty(productCatalogSchema._def.shape()),
 );
@@ -107,67 +107,164 @@ export type Product<P extends ProductKey> = ProductCatalog[P];
 
 // -------- Product Rate Plan --------
 export type ProductRatePlanKey<P extends ProductKey> =
-	keyof ProductCatalog[P]['ratePlans'];
+	keyof ProductCatalog[P]['ratePlans'] & string;
 export type ProductRatePlan<
 	P extends ProductKey,
 	PRP extends ProductRatePlanKey<P>,
 > = ProductCatalog[P]['ratePlans'][PRP];
 
-export type ZuoraProductRatePlanKey<P extends ZuoraProductKey> =
-	keyof ProductCatalog[P]['ratePlans'];
-
-type ValueOf<T> = T[keyof T];
-type AnyRatePlan = ValueOf<{
-	[K in keyof ProductCatalog]: ValueOf<ProductCatalog[K]['ratePlans']>;
-}>;
-
-type AnyRatePlanCharge = AnyRatePlan extends { charges: infer C }
-	? C extends readonly (infer E)[]
-		? E
-		: C extends Record<PropertyKey, infer V>
-			? V extends readonly (infer E2)[]
-				? E2
-				: V
-			: never
-	: never;
-
-// Infer the union of rate plan keys per product
-// type RatePlanKey<P extends ProductKey> = keyof ProductCatalog[P]['ratePlans'];
-
-// All keys across union
+// --- UTIL ---
 type AllKeys<U> = U extends any ? keyof U : never;
-
-// Keys in every member
 type RequiredKeys<U> = {
 	[K in AllKeys<U>]: [U] extends [Record<K, unknown>] ? K : never;
 }[AllKeys<U>];
-
-// Keys in some but not all members
 type OptionalKeys<U> = Exclude<AllKeys<U>, RequiredKeys<U>>;
-
-// Required props
 type RequiredProps<U> = {
-	[K in RequiredKeys<U>]: U extends Record<K, infer V> ? V : never;
+	[K in RequiredKeys<U>]: Extract<U, Record<K, any>>[K];
 };
-
-// Optional props (fixed)
 type OptionalProps<U> = {
 	[K in OptionalKeys<U>]?: Extract<U, Record<K, any>>[K];
 };
-
-// Combine
 type CommonPropsWithOptional<U> = RequiredProps<U> & OptionalProps<U>;
 
-// FIXME causes the type checker to give up with `never` - need productCatalogSchema to base all rate plans on a specific CommonRatePlan and remove this one
-export type CommonRatePlan = CommonPropsWithOptional<AnyRatePlan>;
+// --- charge ---
+// type ChargesOfRatePlan<X> = X extends {
+// 	charges: infer C extends Record<string, object>;
+// }
+// 	? C[keyof C]
+// 	: never;
+//
+// type CommonRatePlanChargeFor<X> = CommonPropsWithOptional<
+// 	ChargesOfRatePlan<X>
+// >;
 
-// FIXME as above, need productCatalogSchema to base all rate plan charges on a specific CommonRatePlanCharge and remove this one
-export type CommonRatePlanCharge = CommonPropsWithOptional<AnyRatePlanCharge>;
+// must be called with a specific product, not a union
+type RatePlansOfProduct<P extends ProductKey> =
+	ProductCatalog[P]['ratePlans'][keyof ProductCatalog[P]['ratePlans']];
+
+// type CommonRatePlanChargeForEachRatePlanOfProduct<P extends ProductKey> =
+// 	CommonRatePlanChargeFor<RatePlansOfProduct<P>>;
+//
+// type CommonRatePlanChargeForProduct<P extends ProductKey> =
+// 	CommonPropsWithOptional<CommonRatePlanChargeForEachRatePlanOfProduct<P>>;
+//
+// type AnyCommonProductCharge = {
+// 	[P in ProductKey]: CommonRatePlanChargeForProduct<P>;
+// }[ProductKey];
+//
+// export type CommonRatePlanCharge =
+// 	CommonPropsWithOptional<AnyCommonProductCharge>;
+
+// --- rate plan ---
+type CommonRatePlanForProductBeforeCharges<P extends ProductKey> =
+	CommonPropsWithOptional<RatePlansOfProduct<P>>;
+
+type ChargesOfCommonRatePlan<P extends ProductKey> =
+	CommonRatePlanForProductBeforeCharges<P> extends { charges: infer C }
+		? C
+		: never;
+
+export type CommonRatePlanForProduct<P extends ProductKey> = Omit<
+	CommonRatePlanForProductBeforeCharges<P>,
+	'charges'
+> & {
+	charges: CommonPropsWithOptional<ChargesOfCommonRatePlan<P>>;
+};
+
+type AnyCommonProductRatePlan = {
+	[P in ProductKey]: CommonRatePlanForProduct<P>;
+}[ProductKey];
+
+type CommonRatePlanBeforeCharges =
+	CommonPropsWithOptional<AnyCommonProductRatePlan>;
+
+export type CommonRatePlan = Omit<CommonRatePlanBeforeCharges, 'charges'> & {
+	charges: CommonPropsWithOptional<
+		{
+			[P in ProductKey]: ChargesOfCommonRatePlan<P>;
+		}[ProductKey]
+	>;
+};
+// --- product ---
+// type CommonProductForEachProduct<P extends ProductKey> = ProductCatalog[P];
+//
+// type CommonProductBeforeRatePlans = CommonPropsWithOptional<
+// 	CommonProductForEachProduct<ProductKey>
+// >;
+//
+// type RatePlansOfProductCatalog<P extends ProductKey> =
+// 	ProductCatalog[P] extends { ratePlans: infer R } ? R : never;
+//
+// type DeUnionedChargesProp<CommonRP> = {
+// 	charges: CommonPropsWithOptional<
+// 		CommonRP extends { charges: infer C } ? C : never
+// 	>;
+// };
+//
+// // if it has a charges property, replace with a common props-ified version
+// type ProcessChargesForRatePlan<CommonRP> = CommonRP extends { charges: any }
+// 	? Omit<CommonRP, 'charges'> & DeUnionedChargesProp<CommonRP>
+// 	: CommonRP;
+//
+// type CommonProductRatePlanKeys = CommonPropsWithOptional<
+// 	{
+// 		[P in ProductKey]: RatePlansOfProductCatalog<P>;
+// 	}[ProductKey]
+// >;
+//
+// // this de-unions all the products, and also replaces both ratePlans and charges with the relevant de-unioned versions
+// export type CommonProduct = Omit<CommonProductBeforeRatePlans, 'ratePlans'> & {
+// 	ratePlans: {
+// 		[K in keyof CommonProductRatePlanKeys]: CommonPropsWithOptional<
+// 			{
+// 				[P in ProductKey]: RatePlansOfProductCatalog<P> extends Record<
+// 					K,
+// 					infer RP
+// 				>
+// 					? RP
+// 					: never;
+// 			}[ProductKey]
+// 		> extends infer CommonRP
+// 			? ProcessChargesForRatePlan<CommonRP>
+// 			: never;
+// 	};
+// };
+// // export type CommonRatePlan = CommonProduct extends {
+// // 	ratePlans: infer RP;
+// // }
+// // 	? RP extends Record<string, infer RatePlan>
+// // 		? RatePlan
+// // 		: never
+// // 	: never;
+//
+// // --- end ---
+// function shouldCompile(
+// 	a: CommonRatePlanChargeFor<ProductRatePlan<'DigitalSubscription', 'Annual'>>,
+// 	b: CommonRatePlanChargeForProduct<'DigitalSubscription'>,
+// 	c: CommonRatePlanCharge,
+// 	d: CommonRatePlanForProduct<'HomeDelivery'>,
+// 	e: CommonRatePlan,
+// 	f: CommonProduct,
+// ) {
+// 	return [
+// 		a.id,
+// 		b.id,
+// 		c.id,
+// 		d.termType,
+// 		d.charges.Monday?.id ?? '',
+// 		e.termType,
+// 		e.charges.Monday?.id ?? '',
+// 		f.billingSystem,
+// 		f.ratePlans.Monthly?.charges.Subscription?.id,
+// 	];
+// }
 
 export type TermType = z.infer<typeof termTypeSchema>;
 
 export class ProductCatalogHelper {
-	constructor(private catalogData: ProductCatalog) {}
+	constructor(private catalogData: ProductCatalog) {
+		// console.log(shouldCompile.toString()); // TODO delete, just to stop ts unused warnings
+	}
 
 	getProductRatePlan = <
 		P extends ProductKey,

@@ -4,7 +4,7 @@ import { isInList } from '@modules/arrayFunctions';
 
 export const validTargetGuardianProductNames = [
 	'SupporterPlus',
-	// 'DigitalSubscription',
+	'DigitalSubscription',
 ] satisfies readonly [ProductKey, ...ProductKey[]];
 
 export type ValidTargetGuardianProductName =
@@ -23,12 +23,22 @@ export const switchesForProduct = {
 	Contribution: {
 		SupporterPlus: ['Annual', 'Month'] as const,
 	},
+	SupporterPlus: { DigitalSubscription: ['Annual', 'Month'] as const },
 } satisfies Partial<
 	Record<
 		ProductKey,
-		Record<ValidTargetGuardianProductName, ValidTargetZuoraBillingPeriod[]>
+		Partial<
+			Record<
+				ValidTargetGuardianProductName,
+				readonly ValidTargetZuoraBillingPeriod[]
+			>
+		>
 	>
 >;
+
+export type ValidTargetProductNameFor<
+	T extends keyof typeof switchesForProduct,
+> = keyof (typeof switchesForProduct)[T];
 
 export type SwitchableProduct = keyof typeof switchesForProduct;
 
@@ -37,10 +47,18 @@ export const isProductSupported = (
 ): productKeyToCheck is keyof typeof switchesForProduct =>
 	productKeyToCheck in switchesForProduct;
 
-export const isTargetSupported = (
-	cur: Record<
+type TargetSwitchMap = Partial<
+	Record<
 		ValidTargetGuardianProductName,
-		{ validBillingPeriods: ValidTargetZuoraBillingPeriod[] }
-	>,
-	targetProductToCheck: ValidTargetGuardianProductName,
-): targetProductToCheck is keyof typeof cur => targetProductToCheck in cur;
+		readonly ValidTargetZuoraBillingPeriod[]
+	>
+>;
+
+export const isTargetSupported = <
+	S extends TargetSwitchMap,
+	K extends ValidTargetGuardianProductName,
+>(
+	switches: S,
+	target: K,
+): switches is S & Record<K, readonly ValidTargetZuoraBillingPeriod[]> =>
+	target in switches;
