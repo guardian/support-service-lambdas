@@ -3,7 +3,7 @@ import {
 	GuardianRatePlans,
 	GuardianSubscription,
 	GuardianSubscriptionProducts,
-} from './guardianSubscriptionBuilder';
+} from './guardianSubscriptionParser';
 import { RatePlanCharge } from '@modules/zuora/types';
 import dayjs from 'dayjs';
 import {

@@ -5,7 +5,6 @@ import {
 } from '@modules/internationalisation/currency';
 import type { Lazy } from '@modules/lazy';
 import {
-	CommonRatePlan,
 	ProductCatalog,
 	ProductKey,
 	ProductRatePlan,
@@ -28,30 +27,21 @@ import type {
 	ProductSwitchRequestBody,
 } from '../schemas';
 import { objectValues } from '@modules/objectFunctions';
-import { sumNumbers } from '@modules/arrayFunctions';
-import {
-	isProductSupported,
-	isTargetSupported,
-	isValidTargetBillingPeriod,
-	switchesForProduct,
-	ValidTargetGuardianProductName,
-	ValidTargetZuoraBillingPeriod,
-} from '../validSwitches';
+import { getIfNonEmpty, isInList, sumNumbers } from '@modules/arrayFunctions';
+import { ValidTargetZuoraBillingPeriod } from '../validSwitches';
 import { ZuoraCatalog } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import {
 	GuardianRatePlan,
-	GuardianSubscription,
-	GuardianSubscriptionBuilder,
-} from './guardianSubscriptionBuilder';
+	GuardianSubscriptionParser,
+} from './guardianSubscriptionParser';
 import { SubscriptionFilter } from './subscriptionFilter';
 import {
 	AnyGuardianCatalogKeys,
-	asSinglePlanGuardianSub,
+	getSinglePlanSubscriptionOrThrow,
 	SinglePlanGuardianSubscription,
-} from './singlePlanGuardianSub';
+} from './getSinglePlanSubscriptionOrThrow';
 import { getIfDefined } from '@modules/nullAndUndefined';
-import { prettyPrint } from '@modules/prettyPrint';
-import { foldCharges, RatePlanMatcher } from './matchFluent';
+import { ProductMatcher } from './matchFluent';
 import { logger } from '@modules/routing/logger';
 
 export type AccountInformation = {
@@ -108,128 +98,69 @@ export type ConcreteSinglePlanGuardianProduct<P extends ProductKey> = Omit<
 	ratePlan: ProductRatePlan<P, ProductRatePlanKey<P>>;
 };
 
-/**
- * Takes a low level subscription and returns a simplified sub with a single current plan, and its associated
- * guardian product catalog product
- */
-class ZuoraToGuardianSubscriptionParser {
-	constructor(
-		zuoraCatalog: ZuoraCatalog,
-		// productCatalog: ProductCatalog,
-		today: dayjs.Dayjs,
-	) {
-		this.highLevelSubParser = new GuardianSubscriptionBuilder(zuoraCatalog);
-		this.subscriptionFilter =
-			SubscriptionFilter.activeCurrentSubscriptionFilter(today);
-		// this.sss = new SSS(productCatalog);
-	}
+// /**
+//  * gathers up all the relevant information and checks that we can switch
+//  */
+// function getValidSwitchOrThrow(
+// 	input: ProductSwitchGenericRequestBody,
+// 	singlePlanGuardianSubscription: SinglePlanGuardianSubscription,
+// ): {
+// 	zuoraBillingPeriod: ValidTargetZuoraBillingPeriod;
+// 	targetGuardianProductName: ValidTargetGuardianProductName;
+// } {
+// 	const productKey: ProductKey =
+// 		singlePlanGuardianSubscription.productCatalogKeys.productKey;
+// 	if (!isSwitchFromSupported(productKey)) {
+// 		throw new ValidationError(
+// 			`unsupported source product for switching: ${productKey}`,
+// 		);
+// 	}
+// 	const availableSwitchesForSub = switchesForProduct[productKey];
+//
+// 	const targetProduct: ValidTargetGuardianProductName = input.targetProduct;
+//
+// 	if (!isSwitchToSupported(availableSwitchesForSub, targetProduct)) {
+// 		throw new ValidationError(
+// 			`switch is not supported: from ${productKey} to ${targetProduct}`,
+// 		);
+// 	}
+//
+// 	const validBillingPeriodsForThisSwitch =
+// 		availableSwitchesForSub[targetProduct];
+//
+// 	const billingPeriod = getIfDefined(
+// 		objectValues(
+// 			singlePlanGuardianSubscription.subscription.ratePlan.ratePlanCharges,
+// 		)[0]?.billingPeriod,
+// 		`No rate plan charge found on the rate plan ${prettyPrint(
+// 			singlePlanGuardianSubscription.subscription.ratePlan,
+// 		)}`,
+// 	);
+//
+// 	if (
+// 		billingPeriod === undefined ||
+// 		!isValidSwitchableBillingPeriod(billingPeriod) ||
+// 		!validBillingPeriodsForThisSwitch.includes(billingPeriod)
+// 	) {
+// 		throw new ValidationError(
+// 			`switch is not supported: from ${productKey} to ${targetProduct} with billing period ${billingPeriod}`,
+// 		);
+// 	}
+//
+// 	return {
+// 		targetGuardianProductName: targetProduct,
+// 		zuoraBillingPeriod: billingPeriod,
+// 	};
+// }
 
-	private highLevelSubParser: GuardianSubscriptionBuilder;
-
-	private subscriptionFilter: SubscriptionFilter;
-
-	getSinglePlanGuardianSubscriptionOrThrow(
-		zuoraSubscription: ZuoraSubscription,
-	): SinglePlanGuardianSubscription {
-		const highLevelSub: GuardianSubscription =
-			this.highLevelSubParser.buildGuardianSubscription<ProductKey>(
-				zuoraSubscription,
-			);
-
-		// const testing: GuardianRatePlan[] =
-		// 	highLevelSub.products.NationalDelivery.EverydayPlus; //.map(c => c.ratePlanCharges.);
-		// console.log(`todo ${testing}`);
-
-		const subWithCurrentPlans: GuardianSubscription =
-			this.subscriptionFilter.filterSubscription(highLevelSub);
-
-		// got SupporterPlus Annual (keys for the product catalog) and then the whole object
-		const singlePlanSubGeneric: SinglePlanGuardianSubscription<ProductKey> =
-			asSinglePlanGuardianSub(subWithCurrentPlans);
-
-		return singlePlanSubGeneric;
-	}
-}
-
-function getSwitchOrThrow(
-	zuoraCatalog: ZuoraCatalog,
-	today: dayjs.Dayjs,
-	zuoraSubscription: ZuoraSubscription,
-	input: ProductSwitchGenericRequestBody,
-): {
-	singlePlanGuardianSubscription: SinglePlanGuardianSubscription;
-	zuoraBillingPeriod: ValidTargetZuoraBillingPeriod;
-	targetGuardianProductName: ValidTargetGuardianProductName;
-} {
-	const singlePlanGuardianSubscription: SinglePlanGuardianSubscription =
-		new ZuoraToGuardianSubscriptionParser(
-			zuoraCatalog,
-			// productCatalog,
-			today,
-		).getSinglePlanGuardianSubscriptionOrThrow(zuoraSubscription);
-
-	// const ttt: ConcreteSinglePlanGuardianProduct<
-	// 	'Contribution' | 'SupporterPlus'
-	// > = subAndProduct.singlePlanGuardianProduct;
-	// const qqq: AnySinglePlanGuardianProduct = ttt;
-	// console.log(qqq);
-	// const fff: string = ttt.ratePlan.charges.Contribution.id;
-	// const charges = qqq.ratePlan.charges;
-	// const ggg: string | undefined = charges.Contribution?.id;
-	// console.log(fff, ggg);
-
-	const productKey =
-		singlePlanGuardianSubscription.productCatalogKeys.productKey;
-	// should be already checked by the type checker?
-	if (!isProductSupported(productKey)) {
-		throw new ValidationError(
-			`unsupported source product for switching: ${productKey}`,
-		);
-	}
-	const availableSwitchesForSub = switchesForProduct[productKey];
-
-	const targetProduct: ValidTargetGuardianProductName = input.targetProduct;
-
-	if (!isTargetSupported(availableSwitchesForSub, targetProduct)) {
-		throw new ValidationError(
-			`switch is not supported: from ${productKey} to ${targetProduct}`,
-		);
-	}
-
-	const validBillingPeriodsForSwitch = availableSwitchesForSub[targetProduct];
-
-	const billingPeriod = getIfDefined(
-		objectValues(singlePlanGuardianSubscription.ratePlan.ratePlanCharges)[0]
-			?.billingPeriod,
-		`No rate plan charge found on the rate plan ${prettyPrint(
-			singlePlanGuardianSubscription.ratePlan,
-		)}`,
-	);
-
-	if (
-		billingPeriod === undefined ||
-		!isValidTargetBillingPeriod(billingPeriod) ||
-		!validBillingPeriodsForSwitch.includes(billingPeriod)
-	) {
-		throw new ValidationError(
-			`switch is not supported: from ${productKey} to ${targetProduct} with billing period ${billingPeriod}`,
-		);
-	}
-	return {
-		singlePlanGuardianSubscription,
-		zuoraBillingPeriod: billingPeriod,
-		targetGuardianProductName: targetProduct,
-	};
-}
-
-function maybeGuardianCatalogKeys<P extends ProductKey>(
+function validGuardianCatalogKeysOrThrow<P extends ProductKey>(
 	productCatalog: ProductCatalog,
 	targetGuardianProductName: P,
 	productRatePlanKey: string,
 ): AnyGuardianCatalogKeys {
 	const hasRatePlan = <
 		TKeys extends string | number | symbol,
-		TMap extends Record<TKeys, CommonRatePlan>,
+		TMap extends Record<TKeys, unknown>,
 	>(
 		key: string | number | symbol,
 		map: TMap,
@@ -269,110 +200,141 @@ const getCurrency = (contributionRatePlan: GuardianRatePlan): IsoCurrency => {
 const getSwitchInformation = async <P extends ProductKey>(
 	stage: Stage,
 	input: ProductSwitchGenericRequestBody,
-	subscription: ZuoraSubscription,
+	zuoraSubscription: ZuoraSubscription,
 	account: ZuoraAccount,
 	productCatalog: ProductCatalog,
 	zuoraCatalog: ZuoraCatalog, // maybe ProductCatalog alone has enough information?
 	lazyBillingPreview: Lazy<SimpleInvoiceItem[]>,
 	today: Dayjs,
 ): Promise<SwitchInformation> => {
-	const {
-		singlePlanGuardianSubscription,
-		zuoraBillingPeriod,
-		targetGuardianProductName,
-	} = getSwitchOrThrow(zuoraCatalog, today, subscription, input);
+	const guardianSubscriptionParser = new GuardianSubscriptionParser(
+		zuoraCatalog,
+	);
+	const subscriptionFilter =
+		SubscriptionFilter.activeCurrentSubscriptionFilter(today);
 
-	const userInformation = getAccountInformation(account);
+	const singlePlanGuardianSubscription: SinglePlanGuardianSubscription =
+		getSinglePlanSubscriptionOrThrow(
+			subscriptionFilter.filterSubscription(
+				guardianSubscriptionParser.parse(zuoraSubscription),
+			),
+		);
 
-	const productRatePlanKey =
-		singlePlanGuardianSubscription.productCatalogKeys.productRatePlanKey;
+	// const { targetGuardianProductName, zuoraBillingPeriod } =
+	// 	getValidSwitchOrThrow(input, singlePlanGuardianSubscription);
+
+	const currency = getCurrency(
+		singlePlanGuardianSubscription.subscription.ratePlan,
+	);
+
+	// TODO:delete comment - use ProductMatcher to derive source product info and valid target products
+	const sourceSource = new ProductMatcher(
+		productCatalog,
+		'current product cannot be switched from',
+	)
+		.matchProduct('Contribution')
+		.matchRatePlans(['Annual', 'Monthly'])
+		.matchCharges({
+			Contribution: (charge) => charge.id,
+		})
+		.buildRatePlanResult((ratePlan, chargesResult) => ({
+			billingPeriod: ratePlan.billingPeriod,
+			productRatePlanId: ratePlan.id,
+			chargeIds: chargesResult,
+		}))
+		.buildProductResult((product, ratePlanResult) => ({
+			...ratePlanResult,
+			validTargetProducts: ['SupporterPlus'] as const,
+		}))
+		.run(singlePlanGuardianSubscription.productCatalogKeys);
+
+	const sourceProduct1: CatalogInformation['sourceProduct'] = {
+		productRatePlanId: sourceSource.productRatePlanId,
+		chargeIds: getIfNonEmpty(sourceSource.chargeIds, 'no charges'),
+	};
+
+	const requestedTargetProduct: ProductKey = input.targetProduct;
+	if (!isInList(sourceSource.validTargetProducts)(requestedTargetProduct))
+		throw new ValidationError(
+			`not a valid target product: ${input.targetProduct}`,
+		);
+
 	const validTargetProductCatalogKeys: AnyGuardianCatalogKeys =
-		maybeGuardianCatalogKeys(
+		validGuardianCatalogKeysOrThrow(
 			productCatalog,
-			targetGuardianProductName,
-			productRatePlanKey,
+			requestedTargetProduct,
+			singlePlanGuardianSubscription.productCatalogKeys.productRatePlanKey,
 		);
 
 	logger.log(`switching from/to`, {
 		from: singlePlanGuardianSubscription.productCatalogKeys,
-		to: targetGuardianProductName,
+		to: validTargetProductCatalogKeys,
 	});
 
-	const currency = getCurrency(singlePlanGuardianSubscription.ratePlan);
+	const targetTarget = new ProductMatcher(
+		productCatalog,
+		'target product not supported',
+	)
+		.matchProduct('SupporterPlus')
+		.matchRatePlans(['Monthly', 'Annual'])
+		.matchCharges({
+			Contribution: () => undefined,
+			Subscription: (c) => c.id,
+		})
+		.buildRatePlanResult((ratePlan, charges) => ({
+			billingPeriod: ratePlan.billingPeriod,
+			productRatePlanId: ratePlan.id,
+			contributionChargeId: ratePlan.charges.Contribution.id,
+			chargeIds: charges.filter((c) => c !== undefined),
+			catalogBasePrice: ratePlan.pricing[currency],
+		}))
+		.buildProductResult((product, ratePlanResultInner) => ({
+			...ratePlanResultInner,
+		}))
+		.matchProduct('DigitalSubscription')
+		.matchRatePlans(['Monthly', 'Annual'])
+		.matchCharges({
+			Subscription: (c) => c.id,
+		})
+		.buildRatePlanResult((ratePlan, charges) => ({
+			billingPeriod: ratePlan.billingPeriod,
+			productRatePlanId: ratePlan.id,
+			contributionChargeId: undefined,
+			chargeIds: charges.filter((c) => c !== undefined),
+			catalogBasePrice: ratePlan.pricing[currency],
+		}))
+		.buildProductResult((product, ratePlanResultInner) => ({
+			...ratePlanResultInner,
+		}))
+		.run(validTargetProductCatalogKeys);
 
-	const targetProduct = new RatePlanMatcher<
-		CatalogInformation['targetProduct'] & { catalogBasePrice: number }
-	>(productCatalog, 'arpp')
-		.on('SupporterPlus', (c) =>
-			c.onMany(['Monthly', 'Annual'], (ratePlan) => {
-				const { Contribution, ...nonContributionCharges } = ratePlan.charges;
-
-				return {
-					productRatePlanId: ratePlan.id,
-					baseChargeIds: objectValues(nonContributionCharges).map(
-						(charge) => charge.id,
-					),
-					contributionChargeId: ratePlan.charges.Contribution.id,
-					catalogBasePrice: ratePlan.pricing[currency],
-				};
-			}),
-		)
-		.on('DigitalSubscription', (c) =>
-			c.onMany(['Monthly', 'Annual'], (ratePlan) => {
-				return {
-					productRatePlanId: ratePlan.id,
-					baseChargeIds: objectValues(ratePlan.charges).map(
-						(charge) => charge.id,
-					),
-					contributionChargeId: undefined,
-					catalogBasePrice: ratePlan.pricing[currency],
-				};
-			}),
-		)
-		.run(validTargetProductCatalogKeys).ratePlanResult;
-
-	const sourceProduct: CatalogInformation['sourceProduct'] =
-		new RatePlanMatcher<CatalogInformation['sourceProduct']>(
-			productCatalog,
-			'arrgh',
-		)
-			.on('SupporterPlus', (c) =>
-				c.onMany(['Annual', 'Monthly'], (ratePlan) => {
-					return {
-						productRatePlanId: ratePlan.id,
-						chargeIds: foldCharges(ratePlan.charges)((charge) => charge.id),
-					};
-				}),
-			)
-			.on('Contribution', (c) =>
-				c.onMany(['Annual', 'Monthly'], (ratePlan) => {
-					return {
-						productRatePlanId: ratePlan.id,
-						chargeIds: foldCharges(ratePlan.charges)((charge) => charge.id),
-					};
-				}),
-			)
-			.run(singlePlanGuardianSubscription.productCatalogKeys).ratePlanResult;
+	const targetProduct: CatalogInformation['targetProduct'] = {
+		productRatePlanId: targetTarget.productRatePlanId,
+		contributionChargeId: targetTarget.contributionChargeId,
+		baseChargeIds: targetTarget.chargeIds,
+	};
 
 	const catalogInformation: CatalogInformation = {
 		targetProduct,
-		sourceProduct,
+		sourceProduct: sourceProduct1,
 	};
 
-	const catalogBasePrice: number = targetProduct.catalogBasePrice;
+	const catalogBasePrice: number = targetTarget.catalogBasePrice;
 
 	const previousAmount = sumNumbers(
 		objectValues(
-			singlePlanGuardianSubscription.ratePlan.ratePlanCharges,
+			singlePlanGuardianSubscription.subscription.ratePlan.ratePlanCharges,
 		).flatMap((c: RatePlanCharge) => (c.price !== null ? [c.price] : [])),
 	);
+
+	const zuoraBillingPeriod = sourceSource.billingPeriod;
 
 	const maybeDiscount = await getDiscount(
 		!!input.applyDiscountIfAvailable,
 		previousAmount,
 		catalogBasePrice,
 		zuoraBillingPeriod,
-		subscription.status,
+		singlePlanGuardianSubscription.subscription.status,
 		account.metrics.totalInvoiceBalance,
 		stage,
 		lazyBillingPreview,
@@ -407,16 +369,21 @@ const getSwitchInformation = async <P extends ProductKey>(
 		};
 
 	const subscriptionInformation: SubscriptionInformation = {
-		accountNumber: subscription.accountNumber,
-		subscriptionNumber: subscription.subscriptionNumber,
-		previousProductName: singlePlanGuardianSubscription.ratePlan.productName,
-		previousRatePlanName: singlePlanGuardianSubscription.ratePlan.ratePlanName,
+		accountNumber: singlePlanGuardianSubscription.subscription.accountNumber,
+		subscriptionNumber:
+			singlePlanGuardianSubscription.subscription.subscriptionNumber,
+		previousProductName:
+			singlePlanGuardianSubscription.subscription.ratePlan.productName,
+		previousRatePlanName:
+			singlePlanGuardianSubscription.subscription.ratePlan.ratePlanName,
 		previousAmount,
 		currency,
 		billingPeriod: zuoraBillingPeriod,
 	};
 
-	const termStartDate = dayjs(subscription.termStartDate).startOf('day');
+	const termStartDate = dayjs(
+		singlePlanGuardianSubscription.subscription.termStartDate,
+	).startOf('day');
 	const startOfToday = today.startOf('day');
 	const startNewTerm = termStartDate.isBefore(startOfToday);
 
@@ -426,7 +393,7 @@ const getSwitchInformation = async <P extends ProductKey>(
 		startNewTerm,
 		targetContribution,
 		actualTotalPrice: contributionAmount + actualBasePrice,
-		account: userInformation,
+		account: getAccountInformation(account),
 		subscription: subscriptionInformation,
 		catalog: catalogInformation,
 		discount: maybeDiscount,

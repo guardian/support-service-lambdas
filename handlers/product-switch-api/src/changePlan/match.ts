@@ -6,7 +6,7 @@ import {
 	ProductRatePlan,
 	ProductRatePlanKey,
 } from '@modules/product-catalog/productCatalog';
-import { GuardianCatalogKeys } from './singlePlanGuardianSub';
+import { GuardianCatalogKeys } from './getSinglePlanSubscriptionOrThrow';
 
 // export type GuardianCatalogKeys<
 // 	P extends ProductKey,

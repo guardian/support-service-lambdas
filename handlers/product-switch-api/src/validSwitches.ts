@@ -14,7 +14,7 @@ export const validTargetZuoraBillingPeriods = ['Annual', 'Month'] as const;
 export type ValidTargetZuoraBillingPeriod =
 	(typeof validTargetZuoraBillingPeriods)[number];
 
-export const isValidTargetBillingPeriod = (
+export const isValidSwitchableBillingPeriod = (
 	bp: BillingPeriod,
 ): bp is ValidTargetZuoraBillingPeriod =>
 	isInList(validTargetZuoraBillingPeriods)(bp);
@@ -42,7 +42,7 @@ export type ValidTargetProductNameFor<
 
 export type SwitchableProduct = keyof typeof switchesForProduct;
 
-export const isProductSupported = (
+export const isSwitchFromSupported = (
 	productKeyToCheck: ProductKey,
 ): productKeyToCheck is keyof typeof switchesForProduct =>
 	productKeyToCheck in switchesForProduct;
@@ -54,7 +54,7 @@ type TargetSwitchMap = Partial<
 	>
 >;
 
-export const isTargetSupported = <
+export const isSwitchToSupported = <
 	S extends TargetSwitchMap,
 	K extends ValidTargetGuardianProductName,
 >(

@@ -105,24 +105,22 @@ function groupMapSingleOrThrowCorrelated<K extends ProductKey, A, B>(
  *    └─ ...(other products in catalog)...
  * It maintains all current and historical plans and charges.
  */
-export class GuardianSubscriptionBuilder {
+export class GuardianSubscriptionParser {
 	private zuoraProductIdGuardianLookup: ZuoraProductIdToKey;
 	constructor(catalog: ZuoraCatalog) {
 		this.zuoraProductIdGuardianLookup = buildZuoraProductIdToKey(catalog);
 	}
 
-	buildGuardianSubscription<P extends ProductKey>(
-		zuoraSubscription: ZuoraSubscription,
-	): GuardianSubscription {
+	parse(zuoraSubscription: ZuoraSubscription): GuardianSubscription {
 		return mapProperty(
 			groupSubscriptionByZuoraCatalogIds(zuoraSubscription),
 			'products',
 			(zuoraSubscriptionProducts) =>
-				this.buildGuardianSubscriptionProducts<P>(zuoraSubscriptionProducts),
+				this.buildGuardianSubscriptionProducts(zuoraSubscriptionProducts),
 		);
 	}
 
-	private buildGuardianSubscriptionProducts<P extends ProductKey>(
+	private buildGuardianSubscriptionProducts(
 		zuoraSubscriptionProducts: ZuoraPIdToPRPIdToSubscriptionRatePlans,
 	): GuardianSubscriptionProducts {
 		return groupMapSingleOrThrowCorrelated(

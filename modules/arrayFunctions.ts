@@ -164,6 +164,12 @@ export const getSingleOrThrow = <T>(
 	return array[0];
 };
 
+/**
+ * returns the first value or undefined, but throws if there are multiple
+ *
+ * @param array
+ * @param error
+ */
 export const headOption = <T>(
 	array: T[],
 	error: (msg: string) => Error,

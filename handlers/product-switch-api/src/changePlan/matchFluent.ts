@@ -1,4 +1,4 @@
-// TypeScript
+// TODO this matcher can definitely be further tidied up once the API is settled
 import {
 	Product,
 	ProductCatalog,
@@ -6,262 +6,372 @@ import {
 	ProductRatePlan,
 	ProductRatePlanKey,
 } from '@modules/product-catalog/productCatalog';
-import { GuardianCatalogKeys } from './singlePlanGuardianSub';
-import { objectEntries } from '@modules/objectFunctions';
-import { getIfNonEmpty } from '@modules/arrayFunctions';
-// TODO:delete comment - Replace this with your actual logger import.
-const logger = { log: (...args: unknown[]) => console.log(...args) };
+import { logger } from '@modules/routing/logger';
+import { GuardianCatalogKeys } from './getSinglePlanSubscriptionOrThrow';
 
-// TODO:delete comment - Handler for a specific product+ratePlan pair.
-type CaseHandler<
-	P extends ProductKey,
-	K extends ProductRatePlanKey<P>,
-	RRatePlan,
-> = (ratePlan: ProductRatePlan<P, K>) => RRatePlan;
+type NotInferred = { __brand: 'NotInferred' };
 
-// TODO:delete comment - Function that maps a product to some value.
-type ProductMapper<P extends ProductKey, RProduct> = (
-	product: ProductCatalog[P],
-) => RProduct;
+type CombineTypes<TCurrent, TNew> = [TCurrent] extends [NotInferred]
+	? TNew
+	: {
+			[K in keyof (TCurrent | TNew)]: K extends keyof TCurrent
+				? K extends keyof TNew
+					? TCurrent[K] | TNew[K]
+					: TCurrent[K]
+				: K extends keyof TNew
+					? TNew[K]
+					: never;
+		};
 
-class ProductMatchBuilder<P extends ProductKey, RRatePlan> {
-	// TODO:delete comment - Shared map from "Product:RatePlan" -> handler.
-	private readonly handlers: Map<string, (rp: unknown) => RRatePlan>;
-	private readonly productKey: P;
+type ChargeHandler<C, TChargeResult> = (charge: C) => TChargeResult;
 
-	constructor(
-		handlers: Map<string, (rp: unknown) => RRatePlan>,
-		productKey: P,
-	) {
-		this.handlers = handlers;
-		this.productKey = productKey;
-	}
-
-	on<K extends ProductRatePlanKey<P>>(
-		ratePlanKey: K,
-		handler: CaseHandler<P, K, RRatePlan>,
-	): this {
-		const key = `${this.productKey}:${ratePlanKey as string}`;
-		this.handlers.set(key, handler as (rp: unknown) => RRatePlan);
-		return this;
-	}
-
-	// TODO:delete comment - Register the same handler for multiple rate plans of this product.
-	onMany<K extends ProductRatePlanKey<P>>(
-		ratePlanKeys: readonly K[],
-		handler: CaseHandler<P, K, RRatePlan>,
-	): this {
-		for (const ratePlanKey of ratePlanKeys) {
-			const key = `${this.productKey}:${ratePlanKey as string}`;
-			this.handlers.set(key, handler as (rp: unknown) => RRatePlan);
-		}
-		return this;
-	}
-
-	// TODO:delete comment - Expose handlers for use by RatePlanMatcher when combining with product.
-	getRegisteredHandlers(): Map<string, (rp: unknown) => RRatePlan> {
-		return this.handlers;
-	}
-}
-
-export type MatchResult<RRatePlan, RProduct> = {
-	productResult: RProduct | undefined;
-	ratePlanResult: RRatePlan;
-};
-
-export class RatePlanMatcher<RRatePlan, RProduct = void> {
-	// TODO:delete comment - Underlying product catalog.
+export class ProductMatcher<TResult = NotInferred> {
 	private readonly productCatalog: ProductCatalog;
-	// TODO:delete comment - Error message used when no handler is found.
 	private readonly error: string;
-	// TODO:delete comment - Map "Product:RatePlan" -> handler function.
 	private readonly handlers = new Map<
-		string,
-		(
-			rp: ProductRatePlan<ProductKey, ProductRatePlanKey<ProductKey>>,
-		) => MatchResult<RRatePlan, RProduct>
+		string, // this is productKey:productRatePlanKey combo
+		(rp: ProductRatePlan<ProductKey, ProductRatePlanKey<ProductKey>>) => TResult
 	>();
 	private defaultHandler?: (
 		rp: ProductRatePlan<ProductKey, ProductRatePlanKey<ProductKey>>,
-	) => MatchResult<RRatePlan, RProduct>;
+	) => TResult;
 
 	constructor(productCatalog: ProductCatalog, error: string) {
 		this.productCatalog = productCatalog;
 		this.error = error;
 	}
 
-	// TODO:delete comment - Flat form: .on('Contribution', 'Annual', handler)
-	on<P extends ProductKey, K extends ProductRatePlanKey<P>>(
-		productKey: P,
-		ratePlanKey: K,
-		handler: CaseHandler<P, K, RRatePlan>,
-	): this;
-
-	// TODO:delete comment - Nested form without product mapper.
-	on<P extends ProductKey>(
-		productKey: P,
-		nested: (productBuilder: ProductMatchBuilder<P, RRatePlan>) => unknown,
-	): this;
-
-	// TODO:delete comment - Nested form with product mapper returning separate product value.
-	on<P extends ProductKey, RProd extends RProduct>(
-		productKey: P,
-		nested: (productBuilder: ProductMatchBuilder<P, RRatePlan>) => unknown,
-		productMapper: ProductMapper<P, RProd>,
-	): this;
-
-	on<P extends ProductKey, RProd extends RProduct>(
-		productKey: P,
-		ratePlanOrNested:
-			| ProductRatePlanKey<P>
-			| ((productBuilder: ProductMatchBuilder<P, RRatePlan>) => unknown),
-		maybeHandler?: ((ratePlan: unknown) => RRatePlan) | ProductMapper<P, RProd>,
-	): this {
-		// TODO:delete comment - Flat form.
-		if (typeof ratePlanOrNested === 'string') {
-			const ratePlanKey = ratePlanOrNested as ProductRatePlanKey<P>;
-			const handler = maybeHandler as (rp: unknown) => RRatePlan;
-			const key = `${productKey}:${ratePlanKey as string}`;
-			const wrappedHandler = (rp: unknown): MatchResult<RRatePlan, RProduct> =>
-				({
-					productResult: undefined,
-					ratePlanResult: handler(rp),
-				}) as MatchResult<RRatePlan, RProduct>;
-			this.handlers.set(key, wrappedHandler);
-			return this;
-		}
-
-		const nested = ratePlanOrNested;
-		const productMapper = maybeHandler as ProductMapper<P, RProd> | undefined;
-
-		const tempHandlers = new Map<string, (rp: unknown) => RRatePlan>();
-		const productBuilder = new ProductMatchBuilder<P, RRatePlan>(
-			tempHandlers,
+	matchProduct<P extends ProductKey>(productKey: P) {
+		const product = this.productCatalog[productKey] as ProductCatalog[P];
+		return new ProductRatePlanMatcher<P, TResult, NotInferred>(
+			this,
 			productKey,
+			product,
+			new Map(),
 		);
-		nested(productBuilder);
-
-		for (const [key, innerHandler] of productBuilder
-			.getRegisteredHandlers()
-			.entries()) {
-			if (!productMapper) {
-				// TODO:delete comment - No product mapper: just forward the rate-plan result.
-				const wrappedHandler = (
-					rp: unknown,
-				): MatchResult<RRatePlan, RProduct> =>
-					({
-						productResult: undefined,
-						ratePlanResult: innerHandler(rp),
-					}) as MatchResult<RRatePlan, RProduct>;
-				this.handlers.set(key, wrappedHandler);
-			} else {
-				// TODO:delete comment - With product mapper: return { productResult, ratePlanResult }.
-				const wrappedHandler = (
-					rp: unknown,
-				): MatchResult<RRatePlan, RProduct> => {
-					const product = this.productCatalog[productKey] as ProductCatalog[P];
-					const productResult = productMapper(product);
-					const ratePlanResult = innerHandler(rp);
-					return {
-						productResult: productResult as unknown as RProduct,
-						ratePlanResult,
-					};
-				};
-				this.handlers.set(key, wrappedHandler);
-			}
-		}
-
-		return this;
-	}
-
-	// TODO:delete comment - Register a single handler for multiple rate plans of one product.
-	onMany<P extends ProductKey, K extends ProductRatePlanKey<P>>(
-		productKey: P,
-		ratePlanKeys: readonly K[],
-		handler: CaseHandler<P, K, RRatePlan>,
-	): this {
-		for (const ratePlanKey of ratePlanKeys) {
-			const key = `${productKey}:${ratePlanKey as string}`;
-			const wrappedHandler = (
-				rp: ProductRatePlan<P, K>,
-			): MatchResult<RRatePlan, RProduct> =>
-				({
-					productResult: undefined,
-					ratePlanResult: handler(rp),
-				}) as MatchResult<RRatePlan, RProduct>;
-			this.handlers.set(key, wrappedHandler);
-		}
-		return this;
 	}
 
 	otherwise(
-		handler: (ratePlan: unknown) => MatchResult<RRatePlan, RProduct>,
+		handler: (
+			ratePlan: ProductRatePlan<ProductKey, ProductRatePlanKey<ProductKey>>,
+		) => TResult,
 	): this {
 		this.defaultHandler = handler;
 		return this;
 	}
 
-	run<P extends ProductKey>(
-		keys: GuardianCatalogKeys<P>,
-	): MatchResult<RRatePlan, RProduct> {
-		// TODO:delete comment - Extract keys for this particular match invocation.
+	run<P extends ProductKey>(keys: GuardianCatalogKeys<P>): TResult {
 		const productKey = keys.productKey;
 		const ratePlanKey: ProductRatePlanKey<P> = keys.productRatePlanKey;
-
 		const product = this.productCatalog[productKey];
 		const ratePlans: Product<P>['ratePlans'] = product.ratePlans;
 		const ratePlan = ratePlans[ratePlanKey];
-
 		const key = `${productKey}:${ratePlanKey}`;
-		const handler:
-			| ((
-					rp: ProductRatePlan<ProductKey, ProductRatePlanKey<ProductKey>>,
-			  ) => MatchResult<RRatePlan, RProduct>)
-			| undefined = this.handlers.get(key) ?? this.defaultHandler;
+		const handler = this.handlers.get(key) ?? this.defaultHandler;
 
 		if (!handler) {
 			throw new Error(`match error: ${JSON.stringify(keys)}: ${this.error}`);
 		}
 
-		return (
-			handler as (
-				rp: ProductRatePlan<P, ProductRatePlanKey<P>>,
-			) => MatchResult<RRatePlan, RProduct>
-		)(ratePlan);
+		return handler(
+			ratePlan as ProductRatePlan<ProductKey, ProductRatePlanKey<ProductKey>>,
+		);
+	}
+
+	// internal helper for builders to register handlers
+	putHandler(
+		key: string,
+		handler: (
+			rp: ProductRatePlan<ProductKey, ProductRatePlanKey<ProductKey>>,
+		) => TResult,
+	): void {
+		this.handlers.set(key, handler);
 	}
 }
 
-// TODO:delete comment - Demo showing how to configure a reusable matcher and run it.
-function demo<P extends ProductKey, RP extends ProductRatePlanKey<P>>(
+class ProductRatePlanMatcher<
+	P extends ProductKey,
+	TResult,
+	RRatePlan = NotInferred,
+> {
+	constructor(
+		private readonly matcher: ProductMatcher<TResult>,
+		private readonly productKey: P,
+		private readonly product: ProductCatalog[P],
+		// TODO:delete comment - store handlers as any internally; RRatePlan is tracked via the generic
+		private readonly ratePlanHandlers: Map<
+			string,
+			(rp: ProductRatePlan<P, ProductRatePlanKey<P>>) => any
+		> = new Map(),
+	) {}
+
+	matchRatePlan<K extends ProductRatePlanKey<P>>(ratePlanKey: K) {
+		return this.matchRatePlans([ratePlanKey]);
+	}
+
+	matchRatePlans<K extends ProductRatePlanKey<P>>(
+		ratePlanKeys: readonly K[],
+	): ProductRatePlanChargeMatcher<P, TResult, RRatePlan, K> {
+		// TODO:delete comment - delegate to a dedicated rate-plan-level builder
+		return new ProductRatePlanChargeMatcher<P, TResult, RRatePlan, K>(
+			this,
+			ratePlanKeys,
+		);
+	}
+
+	// TODO:delete comment - allow rate-plan builders to register handlers
+	addRatePlanHandler<K extends ProductRatePlanKey<P>>(
+		ratePlanKey: K,
+		handler: (rp: ProductRatePlan<P, K>) => any,
+	): void {
+		const key = `${this.productKey}:${ratePlanKey as string}`;
+		this.ratePlanHandlers.set(
+			key,
+			handler as unknown as (
+				rp: ProductRatePlan<P, ProductRatePlanKey<P>>,
+			) => any,
+		);
+	}
+
+	buildProductResult<ProductResult>(
+		productMapper: (
+			product: ProductCatalog[P],
+			ratePlanResult: RRatePlan,
+		) => ProductResult,
+	): ProductMatcher<CombineTypes<TResult, ProductResult>> {
+		// TODO:delete comment - always call mapper as (product, ratePlanResultOrUndefined)
+		const mapperWithRatePlan = productMapper as (
+			product: ProductCatalog[P],
+			ratePlanResult: RRatePlan,
+		) => ProductResult;
+
+		if (this.ratePlanHandlers.size > 0) {
+			// TODO:delete comment - we have explicit rate-plan handlers, so compute their results
+			for (const [key, ratePlanHandler] of this.ratePlanHandlers.entries()) {
+				const wrapped = (
+					rp: ProductRatePlan<ProductKey, ProductRatePlanKey<ProductKey>>,
+				): ProductResult => {
+					const ratePlanResult = ratePlanHandler(
+						rp as ProductRatePlan<P, ProductRatePlanKey<P>>,
+					) as RRatePlan;
+					return mapperWithRatePlan(this.product, ratePlanResult);
+				};
+				this.matcher.putHandler(key, wrapped as any);
+			}
+		} else {
+			// TODO:delete comment - no rate-plan handlers; we still call mapper with undefined ratePlanResult
+			const product = this.product;
+			for (const ratePlanKey of Object.keys(product.ratePlans)) {
+				const key = `${this.productKey}:${ratePlanKey}`;
+				const wrapped = (
+					_rp: ProductRatePlan<ProductKey, ProductRatePlanKey<ProductKey>>,
+				): ProductResult => {
+					return mapperWithRatePlan(product, undefined as unknown as RRatePlan);
+				};
+				this.matcher.putHandler(key, wrapped as any);
+			}
+		}
+
+		type TNext = CombineTypes<TResult, ProductResult>;
+		return this.matcher as unknown as ProductMatcher<TNext>;
+	}
+}
+
+// TODO:delete comment - builder for configuring handlers for specific ratePlan keys
+class ProductRatePlanChargeMatcher<
+	P extends ProductKey,
+	TResult,
+	RRatePlan,
+	K extends ProductRatePlanKey<P>,
+> {
+	// TODO:delete comment - keep a reference to the parent product-level builder
+	constructor(
+		private readonly parent: ProductRatePlanMatcher<P, TResult, RRatePlan>,
+		private readonly ratePlanKeys: readonly K[],
+	) {}
+
+	mapCharges<TChargeResult>(
+		chargeMapper: (
+			charge: CommonChargesOf<P, K>[keyof CommonChargesOf<P, K>],
+		) => TChargeResult,
+	) {
+		// TODO:delete comment - return an object exposing buildRatePlanResult
+		return {
+			buildRatePlanResult: <RRatePlanNew>(
+				ratePlanHandler: (
+					ratePlan: ProductRatePlan<P, K>,
+					chargesResult: TChargeResult[],
+				) => RRatePlanNew,
+			): ProductRatePlanMatcher<
+				P,
+				TResult,
+				CombineTypes<RRatePlan, RRatePlanNew>
+			> => {
+				for (const ratePlanKey of this.ratePlanKeys) {
+					const wrapped = (rp: ProductRatePlan<P, K>): RRatePlanNew => {
+						type CMap = CommonChargesOf<P, K>;
+						const charges = (rp as unknown as { charges: CMap }).charges;
+
+						const chargesResult: TChargeResult[] = [];
+
+						const isFn = typeof chargeMapper === 'function';
+						const defaultHandler = isFn ? chargeMapper : undefined;
+						const mapHandlers = isFn ? undefined : chargeMapper;
+
+						for (const [key, value] of Object.entries(
+							charges as Record<string, unknown>,
+						) as [string, unknown][]) {
+							const specific = mapHandlers?.[key as keyof CMap];
+							if (specific) {
+								chargesResult.push(
+									(specific as ChargeHandler<unknown, TChargeResult>)(value),
+								);
+								continue;
+							}
+
+							if (defaultHandler) {
+								chargesResult.push(
+									(defaultHandler as ChargeHandler<unknown, TChargeResult>)(
+										value,
+									),
+								);
+								continue;
+							}
+
+							throw new Error(
+								`match error: no handler for charge key ${key} in runChargeHandlers`,
+							);
+						}
+
+						return ratePlanHandler(rp, chargesResult);
+					};
+					// TODO:delete comment - delegate handler registration to parent
+					this.parent.addRatePlanHandler(ratePlanKey, wrapped);
+				}
+
+				type RNext = CombineTypes<RRatePlan, RRatePlanNew>;
+				// TODO:delete comment - reuse same instance, narrow exposed type
+				return this.parent as unknown as ProductRatePlanMatcher<
+					P,
+					TResult,
+					RNext
+				>;
+			},
+		};
+	}
+
+	matchCharges<TChargeResult>(chargeHandlers: {
+		[CK in keyof CommonChargesOf<P, K>]: ChargeHandler<
+			CommonChargesOf<P, K>[CK],
+			TChargeResult
+		>;
+	}) {
+		// TODO:delete comment - return an object exposing buildRatePlanResult
+		return {
+			buildRatePlanResult: <RRatePlanNew>(
+				ratePlanHandler: (
+					ratePlan: ProductRatePlan<P, K>,
+					chargesResult: TChargeResult[],
+				) => RRatePlanNew,
+			): ProductRatePlanMatcher<
+				P,
+				TResult,
+				CombineTypes<RRatePlan, RRatePlanNew>
+			> => {
+				for (const ratePlanKey of this.ratePlanKeys) {
+					const wrapped = (rp: ProductRatePlan<P, K>): RRatePlanNew => {
+						type CMap = CommonChargesOf<P, K>;
+						const results: TChargeResult[] = [];
+						const charges = (rp as unknown as { charges: CMap }).charges;
+						for (const [chargeKey, charge] of Object.entries(charges)) {
+							const handler = chargeHandlers[chargeKey as keyof CMap];
+							if (!handler) {
+								throw new Error(
+									`match error: no handler for charge key ${chargeKey} in matchCharges`,
+								);
+							}
+							results.push(
+								(handler as ChargeHandler<unknown, TChargeResult>)(charge),
+							);
+						}
+						return ratePlanHandler(rp, results);
+					};
+					// TODO:delete comment - delegate handler registration to parent
+					this.parent.addRatePlanHandler(ratePlanKey, wrapped);
+				}
+
+				type RNext = CombineTypes<RRatePlan, RRatePlanNew>;
+				// TODO:delete comment - reuse same instance, narrow exposed type
+				return this.parent as unknown as ProductRatePlanMatcher<
+					P,
+					TResult,
+					RNext
+				>;
+			},
+		};
+	}
+
+	buildRatePlanResult<RRatePlanNew>(
+		ratePlanHandler: (ratePlan: ProductRatePlan<P, K>) => RRatePlanNew,
+	): ProductRatePlanMatcher<P, TResult, CombineTypes<RRatePlan, RRatePlanNew>> {
+		for (const ratePlanKey of this.ratePlanKeys) {
+			const wrapped = (rp: ProductRatePlan<P, K>): RRatePlanNew => {
+				return ratePlanHandler(rp);
+			};
+			// TODO:delete comment - delegate handler registration to parent
+			this.parent.addRatePlanHandler(ratePlanKey, wrapped);
+		}
+
+		type RNext = CombineTypes<RRatePlan, RRatePlanNew>;
+		// TODO:delete comment - reuse same instance, narrow exposed type
+		return this.parent as unknown as ProductRatePlanMatcher<P, TResult, RNext>;
+	}
+}
+
+// TODO:delete comment - example usage kept the same
+function demo<P extends ProductKey>(
 	productCatalog: ProductCatalog,
 	productCatalogKeys: GuardianCatalogKeys<P>,
 ) {
-	const matcher = new RatePlanMatcher<
-		{ billingPeriod: string },
-		{ pid: string }
-	>(productCatalog, 'ooohh')
-		.on(
-			'Contribution',
-			(c) =>
-				c.onMany(['Annual', 'Monthly'], (rp) => ({
-					billingPeriod: rp.billingPeriod,
-				})),
-			(product) => ({ pid: product.customerFacingName }),
-		)
-		.on('HomeDelivery', 'WeekendPlus', (rp) => ({
-			billingPeriod: rp.billingPeriod,
-		}));
+	const result = new ProductMatcher(productCatalog, 'error text goes here')
+		.matchProduct('Contribution')
+		.matchRatePlans(['Annual', 'Monthly'])
+		.matchCharges({
+			Contribution: (charge) => charge.id,
+		})
+		.buildRatePlanResult((ratePlan, chargesResult) => ({
+			billingPeriod: ratePlan.billingPeriod,
+			productRatePlanId: ratePlan.id,
+			chargeIds: chargesResult,
+		}))
+		.buildProductResult((product, ratePlanResult) => ({
+			...ratePlanResult,
+			productId: product.customerFacingName,
+		}))
+		.matchProduct('SupporterPlus')
+		.matchRatePlans(['Annual', 'Monthly'])
+		.matchCharges({
+			Contribution: (charge) => charge.id,
+			Subscription: (charge) => charge.id,
+		})
+		.buildRatePlanResult((ratePlan, chargesResult) => ({
+			billingPeriod: ratePlan.billingPeriod,
+			productRatePlanId: ratePlan.id,
+			chargeIds: chargesResult,
+		}))
+		.buildProductResult((product, ratePlanResult) => ({
+			...ratePlanResult,
+			productId: product.customerFacingName,
+		}))
+		.run(productCatalogKeys);
 
-	const result = matcher.run(productCatalogKeys);
 	logger.log('demo result', { result });
 	return result;
 }
 
-// TODO:delete comment - Keep a reference to avoid tree-shaking in this example file.
 console.debug(demo.toString() ? '' : '');
 
-// -- fold --
-
+// TODO:delete comment - helper types for charges
 type ChargesOf<P extends ProductKey, RP extends ProductRatePlanKey<P>> =
 	ProductRatePlan<P, RP> extends {
 		charges: infer C extends Record<string, any>;
@@ -269,22 +379,13 @@ type ChargesOf<P extends ProductKey, RP extends ProductRatePlanKey<P>> =
 		? C
 		: never;
 
-type ChargeValueOf<C extends Record<string, any>> = C[keyof C];
+type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
+	k: infer I,
+) => void
+	? I
+	: never;
 
-export function foldCharges<
+type CommonChargesOf<
 	P extends ProductKey,
 	RP extends ProductRatePlanKey<P>,
-	C extends ChargesOf<P, RP>,
->(charges: C) {
-	return <T>(
-		mapper: (charge: ChargeValueOf<C>, key: keyof C) => T,
-	): [T, ...T[]] => {
-		const mapped = objectEntries(charges).map(([k, v]) =>
-			mapper(v as ChargeValueOf<C>, k),
-		);
-		return getIfNonEmpty(
-			mapped,
-			'product catalog has a product with no charges - fix',
-		);
-	};
-}
+> = Required<UnionToIntersection<ChargesOf<P, RP>>>;
