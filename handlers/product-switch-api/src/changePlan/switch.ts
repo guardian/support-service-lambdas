@@ -1,7 +1,11 @@
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { SwitchInformation } from './switchInformation';
 import dayjs, { type Dayjs } from 'dayjs';
-import { ZuoraSwitchResponse, zuoraSwitchResponseSchema } from '../schemas';
+import {
+	ProductSwitchRequestBody,
+	ZuoraSwitchResponse,
+	zuoraSwitchResponseSchema,
+} from '../schemas';
 import { removePendingUpdateAmendments } from '../amendments';
 import { takePaymentOrAdjustInvoice } from '../payment';
 import { sendThankYouEmail } from './productSwitchEmail';
@@ -10,11 +14,14 @@ import { sendToSupporterProductData } from '@modules/supporter-product-data/supp
 import { supporterRatePlanItemFromSwitchInformation } from '../supporterProductData';
 import type { CreateOrderRequest } from '@modules/zuora/orders/orderRequests';
 import { buildSwitchRequestWithoutOptions } from './buildSwitchOrderRequest';
+import { Stage } from '@modules/stage';
 
 export type SwitchResponse = { message: string };
 
 export const switchToSupporterPlus = async (
 	zuoraClient: ZuoraClient,
+	stage: Stage,
+	input: ProductSwitchRequestBody,
 	productSwitchInformation: SwitchInformation,
 	today: dayjs.Dayjs,
 ): Promise<SwitchResponse> => {
@@ -33,10 +40,10 @@ export const switchToSupporterPlus = async (
 	);
 
 	await Promise.allSettled([
-		sendThankYouEmail(paidAmount, productSwitchInformation),
-		sendSalesforceTracking(paidAmount, productSwitchInformation),
+		sendThankYouEmail(stage, paidAmount, productSwitchInformation),
+		sendSalesforceTracking(stage, input, paidAmount, productSwitchInformation),
 		sendToSupporterProductData(
-			productSwitchInformation.stage,
+			stage,
 			supporterRatePlanItemFromSwitchInformation(productSwitchInformation),
 		),
 	]);

@@ -21,11 +21,13 @@ export type GuardianCatalogKeys<P extends ProductKey> = {
 	};
 }[P];
 
-export type SinglePlanGuardianSubscription<P extends ProductKey = ProductKey> =
-	{
-		subscription: { ratePlan: GuardianRatePlan } & RestSubscription;
-		productCatalogKeys: GuardianCatalogKeys<P>;
-	};
+export type SinglePlanGuardianSubscription = {
+	ratePlan: GuardianRatePlan;
+} & RestSubscription;
+export type GuardianSubscriptionWithKeys = {
+	subscription: SinglePlanGuardianSubscription;
+	productCatalogKeys: GuardianCatalogKeys<ProductKey>;
+};
 
 type PlanWithKeys<P extends ProductKey> = {
 	ratePlan: GuardianRatePlan;
@@ -41,7 +43,7 @@ type PlanWithKeys<P extends ProductKey> = {
  */
 export function getSinglePlanSubscriptionOrThrow(
 	subWithCurrentPlans: GuardianSubscription,
-): SinglePlanGuardianSubscription {
+): GuardianSubscriptionWithKeys {
 	const { products, ...restSubWithCurrentPlans } = subWithCurrentPlans;
 
 	const allPlansWithKeys: PlanWithKeys<ProductKey>[] = objectEntries(

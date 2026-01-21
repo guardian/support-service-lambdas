@@ -2,6 +2,8 @@ import { sendMessageToQueue } from '@modules/aws/sqs';
 import { prettyPrint } from '@modules/prettyPrint';
 import { logger } from '@modules/routing/logger';
 import type { SwitchInformation } from './changePlan/switchInformation';
+import { ProductSwitchRequestBody } from './schemas';
+import { Stage } from '@modules/stage';
 
 export type SalesforceTrackingInput = {
 	subscriptionName: string;
@@ -19,6 +21,7 @@ export type SalesforceTrackingInput = {
 
 export function createSQSMessageBody(
 	switchInformation: SwitchInformation,
+	input: ProductSwitchRequestBody,
 	paidAmount: number,
 	now: Date,
 ) {
@@ -39,23 +42,26 @@ export function createSQSMessageBody(
 		requestedDate: now.toISOString().substring(0, 10),
 		effectiveDate: now.toISOString().substring(0, 10),
 		paidAmount,
-		csrUserId: switchInformation.input.csrUserId,
-		caseId: switchInformation.input.caseId,
+		csrUserId: input.csrUserId,
+		caseId: input.caseId,
 	};
 	return JSON.stringify(salesforceTrackingInput);
 }
 
 export const sendSalesforceTracking = async (
+	stage: Stage,
+	input: ProductSwitchRequestBody,
 	paidAmount: number,
 	switchInformation: SwitchInformation,
 ) => {
 	const messageBody = createSQSMessageBody(
 		switchInformation,
+		input,
 		paidAmount,
 		new Date(),
 	);
 
-	const queueName = `product-switch-salesforce-tracking-${switchInformation.stage}`;
+	const queueName = `product-switch-salesforce-tracking-${stage}`;
 	logger.log(
 		`Sending Salesforce tracking message ${prettyPrint(
 			JSON.parse(messageBody),

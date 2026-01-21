@@ -22,6 +22,12 @@ import getSwitchInformation from './switchInformation';
 import { preview } from './preview';
 import { switchToSupporterPlus } from './switch';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
+import { SubscriptionFilter } from './subscriptionFilter';
+import { GuardianSubscriptionParser } from './guardianSubscriptionParser';
+import {
+	getSinglePlanSubscriptionOrThrow,
+	GuardianSubscriptionWithKeys,
+} from './getSinglePlanSubscriptionOrThrow';
 
 export function contributionToSupporterPlusEndpoint(
 	stage: Stage,
@@ -65,20 +71,38 @@ export function productSwitchEndpoint(stage: Stage, today: dayjs.Dayjs) {
 			.then(itemsForSubscription(subscription.subscriptionNumber))
 			.then(toSimpleInvoiceItems);
 
+		const guardianSubscriptionParser = new GuardianSubscriptionParser(
+			zuoraCatalog,
+		);
+		const subscriptionFilter =
+			SubscriptionFilter.activeCurrentSubscriptionFilter(today);
+
+		const guardianSubscriptionWithKeys: GuardianSubscriptionWithKeys =
+			getSinglePlanSubscriptionOrThrow(
+				subscriptionFilter.filterSubscription(
+					guardianSubscriptionParser.parse(subscription),
+				),
+			);
+
 		const switchInformation = await getSwitchInformation(
 			stage,
 			body,
-			subscription,
+			guardianSubscriptionWithKeys,
 			account,
 			productCatalog,
-			zuoraCatalog,
 			lazyBillingPreview,
 			today,
 		);
 
 		const response = body.preview
 			? await preview(zuoraClient, switchInformation, subscription)
-			: await switchToSupporterPlus(zuoraClient, switchInformation, dayjs());
+			: await switchToSupporterPlus(
+					zuoraClient,
+					stage,
+					body,
+					switchInformation,
+					dayjs(),
+				);
 
 		return {
 			body: JSON.stringify(response),

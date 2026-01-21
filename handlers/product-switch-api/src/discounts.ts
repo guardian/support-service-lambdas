@@ -1,8 +1,4 @@
-import type { BillingPeriod } from '@modules/billingPeriod';
-import type { Lazy } from '@modules/lazy';
-import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
-import type { SimpleInvoiceItem } from '@modules/zuora/billingPreview';
 
 export type Discount = {
 	// Zuora discount API reference:
@@ -18,7 +14,7 @@ export type Discount = {
 
 type PartialDiscount = Omit<Discount, 'discountedPrice'>;
 
-const annualContribHalfPriceSupporterPlusForOneYear = (
+export const annualContribHalfPriceSupporterPlusForOneYear = (
 	stage: Stage,
 ): PartialDiscount => ({
 	productRatePlanId:
@@ -34,44 +30,3 @@ const annualContribHalfPriceSupporterPlusForOneYear = (
 	upToPeriodsType: 'Years',
 	discountPercentage: 50,
 });
-
-export const getDiscount = async (
-	clientWantsADiscount: boolean,
-	oldContributionAmount: number,
-	supporterPlusPrice: number,
-	billingPeriod: BillingPeriod,
-	subscriptionStatus: string,
-	invoiceBalance: number,
-	stage: Stage,
-	lazyBillingPreview: Lazy<SimpleInvoiceItem[]>,
-): Promise<Discount | undefined> => {
-	const discountDetails = annualContribHalfPriceSupporterPlusForOneYear(stage);
-	const discountedPrice =
-		(supporterPlusPrice * (100 - discountDetails.discountPercentage)) / 100;
-
-	const subIsActive = subscriptionStatus === 'Active';
-
-	if (subIsActive) {
-		const nextInvoiceItems = await lazyBillingPreview.get();
-
-		const hasUpcomingDiscount = nextInvoiceItems.some(
-			(invoiceItem) => invoiceItem.amount < 0,
-		);
-
-		const isEligibleForDiscount =
-			clientWantsADiscount &&
-			oldContributionAmount <= discountedPrice &&
-			billingPeriod === 'Annual' &&
-			invoiceBalance === 0 &&
-			!hasUpcomingDiscount;
-
-		if (isEligibleForDiscount) {
-			logger.log('Subscription is eligible for discount');
-			return { ...discountDetails, discountedPrice };
-		}
-		logger.log('Subscription is not eligible for discount - sub is Active');
-		return;
-	}
-	logger.log('Subscription is not eligible for discount - sub is NOT active');
-	return;
-};

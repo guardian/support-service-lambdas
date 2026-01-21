@@ -1,5 +1,8 @@
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { SwitchInformation } from './switchInformation';
+import type {
+	CatalogInformation,
+	SwitchInformation,
+} from './switchInformation';
 import {
 	previewOrderRequest,
 	PreviewOrderRequest,
@@ -11,7 +14,6 @@ import {
 	type ZuoraPreviewResponseInvoiceItem,
 	zuoraPreviewResponseSchema,
 } from '../schemas';
-import type { CatalogInformation } from '../catalogInformation';
 import type { Discount } from '../discounts';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { buildSwitchRequestWithoutOptions } from './buildSwitchOrderRequest';
@@ -131,10 +133,10 @@ export const previewResponseFromZuoraResponse = (
 		invoice.invoiceItems.find(
 			(invoiceItem) =>
 				invoiceItem.productRatePlanChargeId ===
-				catalogInformation.targetProduct.contributionChargeId,
+				catalogInformation.targetProduct.contributionCharge?.id,
 		),
 		'No supporter plus invoice item found in the preview response: id: ' +
-			catalogInformation.targetProduct.contributionChargeId,
+			catalogInformation.targetProduct.contributionCharge?.id,
 	);
 
 	const response: PreviewResponse = {

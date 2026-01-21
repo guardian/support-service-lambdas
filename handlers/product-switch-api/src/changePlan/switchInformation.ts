@@ -3,76 +3,71 @@ import {
 	type IsoCurrency,
 	isSupportedCurrency,
 } from '@modules/internationalisation/currency';
-import type { Lazy } from '@modules/lazy';
+import { Lazy } from '@modules/lazy';
 import {
 	ProductCatalog,
 	ProductKey,
-	ProductRatePlan,
-	ProductRatePlanKey,
 } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
 import type { SimpleInvoiceItem } from '@modules/zuora/billingPreview';
-import {
-	RatePlanCharge,
-	ZuoraAccount,
-	ZuoraSubscription,
-} from '@modules/zuora/types';
+import { RatePlanCharge, ZuoraAccount } from '@modules/zuora/types';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import { CatalogInformation } from '../catalogInformation';
-import type { Discount } from '../discounts';
-import { getDiscount } from '../discounts';
-import type {
-	ProductSwitchGenericRequestBody,
-	ProductSwitchRequestBody,
-} from '../schemas';
+import {
+	annualContribHalfPriceSupporterPlusForOneYear,
+	Discount,
+} from '../discounts';
+import type { ProductSwitchGenericRequestBody } from '../schemas';
 import { objectValues } from '@modules/objectFunctions';
 import { getIfNonEmpty, isInList, sumNumbers } from '@modules/arrayFunctions';
 import { ValidTargetZuoraBillingPeriod } from '../validSwitches';
-import { ZuoraCatalog } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import {
-	GuardianRatePlan,
-	GuardianSubscriptionParser,
-} from './guardianSubscriptionParser';
-import { SubscriptionFilter } from './subscriptionFilter';
 import {
 	AnyGuardianCatalogKeys,
-	getSinglePlanSubscriptionOrThrow,
+	GuardianSubscriptionWithKeys,
 	SinglePlanGuardianSubscription,
 } from './getSinglePlanSubscriptionOrThrow';
-import { getIfDefined } from '@modules/nullAndUndefined';
 import { ProductMatcher } from './matchFluent';
 import { logger } from '@modules/routing/logger';
 
 export type AccountInformation = {
-	id: string;
-	identityId: string;
-	emailAddress: string;
-	firstName: string;
-	lastName: string;
-	defaultPaymentMethodId: string;
+	id: string; // create payment
+	identityId: string; // email, supporter product data
+	emailAddress: string; // email
+	firstName: string; // email
+	lastName: string; // email
+	defaultPaymentMethodId: string; // create payment
 };
 
 export type SubscriptionInformation = {
-	accountNumber: string;
+	accountNumber: string; // order
 	subscriptionNumber: string;
-	previousProductName: string;
-	previousRatePlanName: string;
-	previousAmount: number;
-	currency: IsoCurrency;
-	billingPeriod: ValidTargetZuoraBillingPeriod;
+	previousProductName: string; // sf tracking
+	previousRatePlanName: string; //sf tracking
+	previousAmount: number; //sf tracking
+	currency: IsoCurrency; // email
+	billingPeriod: ValidTargetZuoraBillingPeriod; // email, FIXME supporter product data(need TARGET rate plan name)
+};
+
+export type CatalogInformation = {
+	targetProduct: {
+		productRatePlanId: string; // order, supporter product data
+		baseChargeIds: string[]; // adjust invoice, build response // used to find the price and service end date (next payment date) from the preview invoice, also to find and adjust out any charge less than 0.50
+		contributionCharge: { id: string; contributionAmount: number } | undefined; // TBC compile errors // used to find the price from the preview invoice as above, also to do the chargeOverrides in the order to set the additional amount to take
+	};
+	sourceProduct: {
+		productRatePlanId: string; // order, find if charged through date are the same and are is today(todo can return it from single plan sub)
+		chargeIds: [string, ...string[]]; // filter invoice refund items, find if charged through date are the same and are is today(todo can return it from single plan sub) // needed to find the refund amount in the invoice (todo total it) and the charged through date (todo toSet it and check it's unique)
+	};
 };
 
 export type SwitchInformation = {
-	stage: Stage;
-	input: ProductSwitchRequestBody;
-	startNewTerm: boolean;
-	targetContribution?: TargetContribution;
-	actualTotalPrice: number;
+	startNewTerm: boolean; // order
+	targetContribution?: TargetContribution; // order
+	actualTotalPrice: number; // email, sf tracking
 	account: AccountInformation;
 	subscription: SubscriptionInformation;
 	catalog: CatalogInformation;
-	discount?: Discount;
+	discount?: Discount; // order (product rate plan id), return to client
 };
 
 const getAccountInformation = (account: ZuoraAccount): AccountInformation => {
@@ -91,74 +86,29 @@ export type TargetContribution = {
 	chargeId: string;
 };
 
-export type ConcreteSinglePlanGuardianProduct<P extends ProductKey> = Omit<
-	ProductCatalog[P],
-	'ratePlans'
-> & {
-	ratePlan: ProductRatePlan<P, ProductRatePlanKey<P>>;
-};
+class GuardianKeysValidator {
+	constructor(private productCatalog: ProductCatalog) {}
 
-// /**
-//  * gathers up all the relevant information and checks that we can switch
-//  */
-// function getValidSwitchOrThrow(
-// 	input: ProductSwitchGenericRequestBody,
-// 	singlePlanGuardianSubscription: SinglePlanGuardianSubscription,
-// ): {
-// 	zuoraBillingPeriod: ValidTargetZuoraBillingPeriod;
-// 	targetGuardianProductName: ValidTargetGuardianProductName;
-// } {
-// 	const productKey: ProductKey =
-// 		singlePlanGuardianSubscription.productCatalogKeys.productKey;
-// 	if (!isSwitchFromSupported(productKey)) {
-// 		throw new ValidationError(
-// 			`unsupported source product for switching: ${productKey}`,
-// 		);
-// 	}
-// 	const availableSwitchesForSub = switchesForProduct[productKey];
-//
-// 	const targetProduct: ValidTargetGuardianProductName = input.targetProduct;
-//
-// 	if (!isSwitchToSupported(availableSwitchesForSub, targetProduct)) {
-// 		throw new ValidationError(
-// 			`switch is not supported: from ${productKey} to ${targetProduct}`,
-// 		);
-// 	}
-//
-// 	const validBillingPeriodsForThisSwitch =
-// 		availableSwitchesForSub[targetProduct];
-//
-// 	const billingPeriod = getIfDefined(
-// 		objectValues(
-// 			singlePlanGuardianSubscription.subscription.ratePlan.ratePlanCharges,
-// 		)[0]?.billingPeriod,
-// 		`No rate plan charge found on the rate plan ${prettyPrint(
-// 			singlePlanGuardianSubscription.subscription.ratePlan,
-// 		)}`,
-// 	);
-//
-// 	if (
-// 		billingPeriod === undefined ||
-// 		!isValidSwitchableBillingPeriod(billingPeriod) ||
-// 		!validBillingPeriodsForThisSwitch.includes(billingPeriod)
-// 	) {
-// 		throw new ValidationError(
-// 			`switch is not supported: from ${productKey} to ${targetProduct} with billing period ${billingPeriod}`,
-// 		);
-// 	}
-//
-// 	return {
-// 		targetGuardianProductName: targetProduct,
-// 		zuoraBillingPeriod: billingPeriod,
-// 	};
-// }
+	validateOrThrow<P extends ProductKey>(
+		targetGuardianProductName: P,
+		productRatePlanKey: string,
+	): AnyGuardianCatalogKeys {
+		const ratePlans = this.productCatalog[targetGuardianProductName].ratePlans;
+		if (!this.hasRatePlan(productRatePlanKey, ratePlans)) {
+			throw new ValidationError(
+				`Unsupported target rate plan key: ${String(
+					productRatePlanKey,
+				)} for product ${targetGuardianProductName}`,
+			);
+		}
 
-function validGuardianCatalogKeysOrThrow<P extends ProductKey>(
-	productCatalog: ProductCatalog,
-	targetGuardianProductName: P,
-	productRatePlanKey: string,
-): AnyGuardianCatalogKeys {
-	const hasRatePlan = <
+		return {
+			productKey: targetGuardianProductName,
+			productRatePlanKey,
+		};
+	}
+
+	hasRatePlan = <
 		TKeys extends string | number | symbol,
 		TMap extends Record<TKeys, unknown>,
 	>(
@@ -167,235 +117,270 @@ function validGuardianCatalogKeysOrThrow<P extends ProductKey>(
 	): key is Extract<keyof TMap, string | number | symbol> => {
 		return key in map;
 	};
-
-	const ratePlans = productCatalog[targetGuardianProductName].ratePlans;
-	if (!hasRatePlan(productRatePlanKey, ratePlans)) {
-		throw new ValidationError(
-			`Unsupported target rate plan key: ${String(
-				productRatePlanKey,
-			)} for product ${targetGuardianProductName}`,
-		);
-	}
-
-	const validTargetProductCatalogKeys: AnyGuardianCatalogKeys = {
-		productKey: targetGuardianProductName,
-		productRatePlanKey,
-	};
-	return validTargetProductCatalogKeys;
 }
 
-const getCurrency = (contributionRatePlan: GuardianRatePlan): IsoCurrency => {
-	const currency = getIfDefined(
-		objectValues(contributionRatePlan.ratePlanCharges)[0]?.currency,
-		'No currency found on the rate plan charge',
-	);
-
-	if (isSupportedCurrency(currency)) {
+const getCurrency = (currency: string): IsoCurrency => {
+	if (!isSupportedCurrency(currency)) {
 		// TODO move check to zod reader
-		return currency;
+		throw new Error(`Unsupported currency ${currency}`);
 	}
-	throw new Error(`Unsupported currency ${currency}`);
+	return currency;
 };
 
-const getSwitchInformation = async <P extends ProductKey>(
-	stage: Stage,
-	input: ProductSwitchGenericRequestBody,
-	zuoraSubscription: ZuoraSubscription,
-	account: ZuoraAccount,
-	productCatalog: ProductCatalog,
-	zuoraCatalog: ZuoraCatalog, // maybe ProductCatalog alone has enough information?
-	lazyBillingPreview: Lazy<SimpleInvoiceItem[]>,
-	today: Dayjs,
-): Promise<SwitchInformation> => {
-	const guardianSubscriptionParser = new GuardianSubscriptionParser(
-		zuoraCatalog,
-	);
-	const subscriptionFilter =
-		SubscriptionFilter.activeCurrentSubscriptionFilter(today);
-
-	const singlePlanGuardianSubscription: SinglePlanGuardianSubscription =
-		getSinglePlanSubscriptionOrThrow(
-			subscriptionFilter.filterSubscription(
-				guardianSubscriptionParser.parse(zuoraSubscription),
-			),
-		);
-
-	// const { targetGuardianProductName, zuoraBillingPeriod } =
-	// 	getValidSwitchOrThrow(input, singlePlanGuardianSubscription);
-
-	const currency = getCurrency(
-		singlePlanGuardianSubscription.subscription.ratePlan,
-	);
-
-	// TODO:delete comment - use ProductMatcher to derive source product info and valid target products
-	const sourceSource = new ProductMatcher(
+function buildSourceProductMatcher(productCatalog: ProductCatalog) {
+	return new ProductMatcher(
 		productCatalog,
 		'current product cannot be switched from',
 	)
 		.matchProduct('Contribution')
 		.matchRatePlans(['Annual', 'Monthly'])
-		.matchCharges({
-			Contribution: (charge) => charge.id,
-		})
+		.mapCharges((charge) => charge.id)
 		.buildRatePlanResult((ratePlan, chargesResult) => ({
-			billingPeriod: ratePlan.billingPeriod,
+			sourceZuoraBillingPeriod: ratePlan.billingPeriod,
 			productRatePlanId: ratePlan.id,
-			chargeIds: chargesResult,
+			chargeIds: getIfNonEmpty(chargesResult, 'no charges'),
 		}))
-		.buildProductResult((product, ratePlanResult) => ({
-			...ratePlanResult,
-			validTargetProducts: ['SupporterPlus'] as const,
+		.buildProductResult(
+			(
+				product,
+				{ sourceZuoraBillingPeriod, productRatePlanId, chargeIds },
+			) => ({
+				sourceProduct: {
+					productRatePlanId,
+					chargeIds,
+				} satisfies CatalogInformation['sourceProduct'],
+				sourceZuoraBillingPeriod,
+				validTargetProducts: ['SupporterPlus'] as const,
+			}),
+		)
+		.matchProduct('SupporterPlus')
+		.matchRatePlans(['Annual', 'Monthly'])
+		.mapCharges((charge) => charge.id)
+		.buildRatePlanResult((ratePlan, chargesResult) => ({
+			sourceZuoraBillingPeriod: ratePlan.billingPeriod,
+			productRatePlanId: ratePlan.id,
+			chargeIds: getIfNonEmpty(chargesResult, 'no charges'),
 		}))
-		.run(singlePlanGuardianSubscription.productCatalogKeys);
-
-	const sourceProduct1: CatalogInformation['sourceProduct'] = {
-		productRatePlanId: sourceSource.productRatePlanId,
-		chargeIds: getIfNonEmpty(sourceSource.chargeIds, 'no charges'),
-	};
-
-	const requestedTargetProduct: ProductKey = input.targetProduct;
-	if (!isInList(sourceSource.validTargetProducts)(requestedTargetProduct))
-		throw new ValidationError(
-			`not a valid target product: ${input.targetProduct}`,
+		.buildProductResult(
+			(
+				product,
+				{ sourceZuoraBillingPeriod, productRatePlanId, chargeIds },
+			) => ({
+				sourceProduct: {
+					productRatePlanId,
+					chargeIds,
+				} satisfies CatalogInformation['sourceProduct'],
+				sourceZuoraBillingPeriod,
+				validTargetProducts: ['DigitalSubscription'] as const,
+			}),
 		);
+}
 
-	const validTargetProductCatalogKeys: AnyGuardianCatalogKeys =
-		validGuardianCatalogKeysOrThrow(
-			productCatalog,
-			requestedTargetProduct,
-			singlePlanGuardianSubscription.productCatalogKeys.productRatePlanKey,
-		);
-
-	logger.log(`switching from/to`, {
-		from: singlePlanGuardianSubscription.productCatalogKeys,
-		to: validTargetProductCatalogKeys,
-	});
-
-	const targetTarget = new ProductMatcher(
-		productCatalog,
-		'target product not supported',
-	)
+function buildTargetProductMatcher(
+	productCatalog: ProductCatalog,
+	stage: Stage,
+	currency: IsoCurrency,
+	userRequestedAmount: number | undefined,
+	previousAmount: number,
+	generallyEligibleForDiscount: boolean,
+) {
+	return new ProductMatcher(productCatalog, 'target product not supported')
 		.matchProduct('SupporterPlus')
 		.matchRatePlans(['Monthly', 'Annual'])
 		.matchCharges({
 			Contribution: () => undefined,
 			Subscription: (c) => c.id,
 		})
-		.buildRatePlanResult((ratePlan, charges) => ({
-			billingPeriod: ratePlan.billingPeriod,
-			productRatePlanId: ratePlan.id,
-			contributionChargeId: ratePlan.charges.Contribution.id,
-			chargeIds: charges.filter((c) => c !== undefined),
-			catalogBasePrice: ratePlan.pricing[currency],
-		}))
-		.buildProductResult((product, ratePlanResultInner) => ({
-			...ratePlanResultInner,
-		}))
+		.buildRatePlanResult((ratePlan, charges) => {
+			const targetCatalogBasePrice = ratePlan.pricing[currency];
+			const discountDetails =
+				annualContribHalfPriceSupporterPlusForOneYear(stage);
+			const discountedPrice =
+				(targetCatalogBasePrice * (100 - discountDetails.discountPercentage)) /
+				100;
+			const isEligible =
+				ratePlan.billingPeriod === 'Annual' &&
+				previousAmount <= discountedPrice &&
+				generallyEligibleForDiscount;
+			const maybeDiscount = isEligible
+				? { ...discountDetails, discountedPrice }
+				: undefined;
+
+			const targetDiscountedBasePrice =
+				maybeDiscount?.discountedPrice ?? targetCatalogBasePrice;
+
+			// Validate that the user's desired amount is at least the base Supporter Plus price
+			// Only validate when newAmount is explicitly provided by the frontend
+			if (
+				userRequestedAmount !== undefined &&
+				userRequestedAmount < targetDiscountedBasePrice
+			) {
+				throw new ValidationError(
+					`Cannot switch to Supporter Plus: desired amount (${userRequestedAmount}) is less than the minimum Supporter Plus price (${targetDiscountedBasePrice}). Use the members-data-api to modify contribution amounts instead.`,
+				);
+			}
+			const priceWeWillCharge = Math.max(
+				userRequestedAmount ?? previousAmount,
+				targetDiscountedBasePrice,
+			);
+
+			const contributionAmount = priceWeWillCharge - targetDiscountedBasePrice;
+
+			return {
+				priceWeWillCharge,
+				targetProduct: {
+					productRatePlanId: ratePlan.id,
+					contributionCharge: {
+						id: ratePlan.charges.Contribution.id,
+						contributionAmount,
+					},
+					baseChargeIds: charges.filter((c) => c !== undefined),
+				} satisfies CatalogInformation['targetProduct'],
+				maybeDiscount,
+			};
+		})
+		.buildProductResult((product, ratePlanResultInner) => ratePlanResultInner)
 		.matchProduct('DigitalSubscription')
 		.matchRatePlans(['Monthly', 'Annual'])
 		.matchCharges({
 			Subscription: (c) => c.id,
 		})
-		.buildRatePlanResult((ratePlan, charges) => ({
-			billingPeriod: ratePlan.billingPeriod,
-			productRatePlanId: ratePlan.id,
-			contributionChargeId: undefined,
-			chargeIds: charges.filter((c) => c !== undefined),
-			catalogBasePrice: ratePlan.pricing[currency],
-		}))
-		.buildProductResult((product, ratePlanResultInner) => ({
-			...ratePlanResultInner,
-		}))
-		.run(validTargetProductCatalogKeys);
+		.buildRatePlanResult((ratePlan, charges) => {
+			const catalogPrice = ratePlan.pricing[currency];
+			if ((userRequestedAmount ?? previousAmount) !== catalogPrice)
+				throw new ValidationError('this product has no contribution element');
+			return {
+				priceWeWillCharge: catalogPrice,
+				targetProduct: {
+					productRatePlanId: ratePlan.id,
+					contributionCharge: undefined,
+					baseChargeIds: charges.filter((c) => c !== undefined),
+				} satisfies CatalogInformation['targetProduct'],
+				maybeDiscount: undefined,
+			};
+		})
+		.buildProductResult((product, ratePlanResultInner) => ratePlanResultInner);
+}
 
-	const targetProduct: CatalogInformation['targetProduct'] = {
-		productRatePlanId: targetTarget.productRatePlanId,
-		contributionChargeId: targetTarget.contributionChargeId,
-		baseChargeIds: targetTarget.chargeIds,
-	};
+function isGenerallyEligibleForDiscount(
+	subscription: SinglePlanGuardianSubscription,
+	mode: 'switch' | 'save',
+	account: ZuoraAccount,
+	lazyBillingPreview: Lazy<SimpleInvoiceItem[]>,
+): Lazy<boolean> {
+	if (
+		subscription.status === 'Active' &&
+		mode === 'save' &&
+		account.metrics.totalInvoiceBalance === 0
+	) {
+		return lazyBillingPreview.then((nextInvoiceItems) => {
+			const hasUpcomingDiscount = nextInvoiceItems.some(
+				(invoiceItem) => invoiceItem.amount < 0,
+			);
 
-	const catalogInformation: CatalogInformation = {
-		targetProduct,
-		sourceProduct: sourceProduct1,
-	};
+			return !hasUpcomingDiscount;
+		});
+	}
+	return new Lazy(() => Promise.resolve(false), 'not eligible for discount');
+}
 
-	const catalogBasePrice: number = targetTarget.catalogBasePrice;
+export function validTargetForSourceOrThrow<
+	T extends string,
+	A extends readonly [T, ...T[]],
+>(validTargets: A, requested: string): A[number] {
+	const isValid = isInList(validTargets);
+	if (!isValid(requested)) {
+		throw new ValidationError(`not a valid target product: ${requested}`);
+	}
+	return requested;
+}
 
-	const previousAmount = sumNumbers(
-		objectValues(
-			singlePlanGuardianSubscription.subscription.ratePlan.ratePlanCharges,
-		).flatMap((c: RatePlanCharge) => (c.price !== null ? [c.price] : [])),
+function getSubscriptionTotalChargeAmount(
+	subscription: SinglePlanGuardianSubscription,
+) {
+	return sumNumbers(
+		objectValues(subscription.ratePlan.ratePlanCharges).flatMap(
+			(c: RatePlanCharge) => (c.price !== null ? [c.price] : []),
+		),
 	);
+}
 
-	const zuoraBillingPeriod = sourceSource.billingPeriod;
-
-	const maybeDiscount = await getDiscount(
-		!!input.applyDiscountIfAvailable,
-		previousAmount,
-		catalogBasePrice,
-		zuoraBillingPeriod,
-		singlePlanGuardianSubscription.subscription.status,
-		account.metrics.totalInvoiceBalance,
-		stage,
-		lazyBillingPreview,
-	);
-
-	const actualBasePrice = maybeDiscount?.discountedPrice ?? catalogBasePrice;
-
-	// newAmount is only passed in where the user is in the switch journey - for cancellation saves the new amount is discounted for the first year - they always get the base price (with discount)
-	const userDesiredAmount = input.newAmount ?? previousAmount;
-
-	// Validate that the user's desired amount is at least the base Supporter Plus price
-	// Only validate when newAmount is explicitly provided by the frontend
-	if (input.newAmount && userDesiredAmount < actualBasePrice) {
+const getSwitchInformation = async <P extends ProductKey>(
+	stage: Stage,
+	input: ProductSwitchGenericRequestBody,
+	{ subscription, productCatalogKeys }: GuardianSubscriptionWithKeys,
+	account: ZuoraAccount,
+	productCatalog: ProductCatalog,
+	lazyBillingPreview: Lazy<SimpleInvoiceItem[]>,
+	today: Dayjs,
+): Promise<SwitchInformation> => {
+	const mode: 'switch' | 'save' = !!input.applyDiscountIfAvailable
+		? 'save'
+		: 'switch';
+	if (mode === 'save' && input.newAmount) {
 		throw new ValidationError(
-			`Cannot switch to Supporter Plus: desired amount (${userDesiredAmount}) is less than the minimum Supporter Plus price (${actualBasePrice}). Use the members-data-api to modify contribution amounts instead.`,
+			'you cannot currently choose your amount during the save journey',
 		);
 	}
 
-	const contributionAmount = Math.max(0, userDesiredAmount - actualBasePrice);
+	const { sourceProduct, sourceZuoraBillingPeriod, validTargetProducts } =
+		buildSourceProductMatcher(productCatalog).run(productCatalogKeys);
 
-	let targetContribution: TargetContribution | undefined;
-	if (catalogInformation.targetProduct.contributionChargeId === undefined) {
-		if (contributionAmount === 0) targetContribution = undefined;
-		else
-			throw new ValidationError(
-				`target product has a fixed price of ${actualBasePrice} so it isn't possible to charge ${userDesiredAmount}`,
-			);
-	} else
-		targetContribution = {
-			contributionAmount,
-			chargeId: catalogInformation.targetProduct.contributionChargeId,
-		};
+	const validTargetProductCatalogKeys: AnyGuardianCatalogKeys =
+		new GuardianKeysValidator(productCatalog).validateOrThrow(
+			validTargetForSourceOrThrow(validTargetProducts, input.targetProduct),
+			productCatalogKeys.productRatePlanKey,
+		);
+
+	logger.log(`switching from/to`, {
+		from: productCatalogKeys,
+		to: validTargetProductCatalogKeys,
+	});
+
+	const previousAmount = getSubscriptionTotalChargeAmount(subscription);
+
+	const generallyEligibleForDiscount = await isGenerallyEligibleForDiscount(
+		subscription,
+		mode,
+		account,
+		lazyBillingPreview,
+	).get(); // TODO better to defer until we know the product - but then the whole product matcher system needs to be async
+
+	const currency: IsoCurrency = getCurrency(account.metrics.currency);
+
+	const { targetProduct, maybeDiscount, priceWeWillCharge } =
+		buildTargetProductMatcher(
+			productCatalog,
+			stage,
+			currency,
+			input.newAmount,
+			previousAmount,
+			generallyEligibleForDiscount,
+		).run(validTargetProductCatalogKeys);
 
 	const subscriptionInformation: SubscriptionInformation = {
-		accountNumber: singlePlanGuardianSubscription.subscription.accountNumber,
-		subscriptionNumber:
-			singlePlanGuardianSubscription.subscription.subscriptionNumber,
-		previousProductName:
-			singlePlanGuardianSubscription.subscription.ratePlan.productName,
-		previousRatePlanName:
-			singlePlanGuardianSubscription.subscription.ratePlan.ratePlanName,
+		accountNumber: subscription.accountNumber,
+		subscriptionNumber: subscription.subscriptionNumber,
+		previousProductName: subscription.ratePlan.productName,
+		previousRatePlanName: subscription.ratePlan.ratePlanName,
 		previousAmount,
 		currency,
-		billingPeriod: zuoraBillingPeriod,
+		billingPeriod: sourceZuoraBillingPeriod,
 	};
 
-	const termStartDate = dayjs(
-		singlePlanGuardianSubscription.subscription.termStartDate,
-	).startOf('day');
+	const termStartDate = dayjs(subscription.termStartDate).startOf('day');
 	const startOfToday = today.startOf('day');
 	const startNewTerm = termStartDate.isBefore(startOfToday);
 
 	return {
-		stage,
-		input,
 		startNewTerm,
-		targetContribution,
-		actualTotalPrice: contributionAmount + actualBasePrice,
+		actualTotalPrice: priceWeWillCharge,
 		account: getAccountInformation(account),
 		subscription: subscriptionInformation,
-		catalog: catalogInformation,
+		catalog: {
+			targetProduct,
+			sourceProduct,
+		},
 		discount: maybeDiscount,
 	} satisfies SwitchInformation;
 };

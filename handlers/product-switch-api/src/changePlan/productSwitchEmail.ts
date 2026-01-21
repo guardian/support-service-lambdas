@@ -5,6 +5,7 @@ import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { getCurrencyInfo } from '@modules/internationalisation/currency';
 import dayjs from 'dayjs';
 import type { SwitchInformation } from './switchInformation';
+import { Stage } from '@modules/stage';
 
 type Payment = { date: dayjs.Dayjs; amount: number };
 
@@ -45,6 +46,7 @@ export const buildEmailMessage = (
 };
 
 export const sendThankYouEmail = async (
+	stage: Stage,
 	firstPaymentAmount: number,
 	switchInformation: SwitchInformation,
 ) => {
@@ -79,5 +81,5 @@ export const sendThankYouEmail = async (
 		identityId,
 	);
 
-	return await sendEmail(switchInformation.stage, emailMessage);
+	return await sendEmail(stage, emailMessage);
 };

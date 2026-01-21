@@ -7,9 +7,9 @@ import type { OrderRequest } from '@modules/zuora/orders/orderRequests';
 import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import type { CatalogInformation } from '../catalogInformation';
 import type { Discount } from '../discounts';
 import type {
+	CatalogInformation,
 	SwitchInformation,
 	TargetContribution,
 } from './switchInformation';
