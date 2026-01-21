@@ -68,17 +68,13 @@ export const DataExtensionNames = {
 	},
 } as const;
 
-// This type allows to get types from the nested DataExtensionNames objects eg.
-// const a: DataExtensionName = 'day0Emails.guardianWeekly';
-type RecursiveKeys<T> = T extends object
-	? {
-			[K in keyof T & string]: T[K] extends object
-				? `${K}.${RecursiveKeys<T[K]>}`
-				: K;
-		}[keyof T & string]
-	: never;
+// This type extracts all possible string values from nested objects, to support eg.
+// const a: DataExtensionName = DataExtensionNames.day0Emails.homeDeliveryObserver;
+type RecursiveValues<T> = T extends object
+	? { [K in keyof T]: RecursiveValues<T[K]> }[keyof T]
+	: T;
 
-export type DataExtensionName = RecursiveKeys<typeof DataExtensionNames>;
+export type DataExtensionName = RecursiveValues<typeof DataExtensionNames>;
 
 export const sendEmail = async (
 	stage: Stage,
