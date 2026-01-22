@@ -1,0 +1,106 @@
+import {
+	GuardianSubscriptionWithKeys,
+	SinglePlanGuardianSubscription,
+} from './getSinglePlanFlattenedSubscriptionOrThrow';
+import { RatePlanCharge } from '@modules/zuora/types';
+import { objectValues } from '@modules/objectFunctions';
+import {
+	distinct,
+	getIfNonEmpty,
+	getSingleOrThrow,
+	sumNumbers,
+} from '@modules/arrayFunctions';
+import dayjs from 'dayjs';
+import {
+	isValidSwitchableRatePlanKey,
+	ValidRatePlanKey,
+} from '../validSwitches';
+
+export type SubscriptionInformation = {
+	accountNumber: string; // order
+	subscriptionNumber: string;
+	previousProductName: string; // sf tracking
+	previousRatePlanName: string; //sf tracking
+	previousAmount: number; //sf tracking
+	productRatePlanKey: ValidRatePlanKey; // email, FIXME supporter product data(need TARGET rate plan name)
+	termStartDate: Date; // order
+	chargedThroughDate: Date; // refund check
+	productRatePlanId: string; // order
+	chargeIds: [string, ...string[]]; // filter invoice refund items, find if charged through date are the same and are is today(todo can return it from single plan sub) // needed to find the refund amount in the invoice (todo total it) and the charged through date (todo toSet it and check it's unique)
+};
+
+function getSubscriptionTotalChargeAmount(
+	subscription: SinglePlanGuardianSubscription,
+) {
+	return sumNumbers(
+		objectValues(subscription.ratePlan.ratePlanCharges).flatMap(
+			(c: RatePlanCharge) => (c.price !== null ? [c.price] : []),
+		),
+	);
+}
+
+export function shouldStartNewTerm(termStartDate: Date, today: dayjs.Dayjs) {
+	const termStartDate1 = dayjs(termStartDate).startOf('day');
+	const startOfToday = today.startOf('day');
+	const startNewTerm = termStartDate1.isBefore(startOfToday);
+	return startNewTerm;
+}
+
+function getDistinctNonNullChargeValue<T>(
+	subscription: SinglePlanGuardianSubscription,
+	getValue: (value: RatePlanCharge) => T | null,
+): T {
+	const sourceCharges = objectValues(subscription.ratePlan.ratePlanCharges);
+
+	const chargedThroughDates = sourceCharges.flatMap(
+		(ratePlanCharge: RatePlanCharge) => {
+			const value = getValue(ratePlanCharge);
+			return value !== null ? [value] : [];
+		},
+	);
+	const chargedThroughDate: T = getSingleOrThrow(
+		distinct(chargedThroughDates),
+		(msg) =>
+			new Error(
+				"couldn't extract a chargedThroughDate from the charges: " + msg,
+			),
+	);
+	return chargedThroughDate;
+}
+
+export function getSubscriptionInformation({
+	subscription,
+	productCatalogKeys,
+}: GuardianSubscriptionWithKeys) {
+	const chargedThroughDate = getDistinctNonNullChargeValue(
+		subscription,
+		(ratePlanCharge: RatePlanCharge) => ratePlanCharge.chargedThroughDate,
+	);
+
+	const productRatePlanKey = productCatalogKeys.productRatePlanKey;
+	if (!isValidSwitchableRatePlanKey(productRatePlanKey))
+		// TODO move check to high level sub reader
+		throw new Error(`unsupported rate plan key ${productRatePlanKey}`);
+
+	const previousAmount = getSubscriptionTotalChargeAmount(subscription);
+
+	const chargeIds = getIfNonEmpty(
+		objectValues(subscription.ratePlan.ratePlanCharges).map(
+			(c) => c.productRatePlanChargeId,
+		),
+		'missing charges',
+	);
+
+	return {
+		accountNumber: subscription.accountNumber,
+		subscriptionNumber: subscription.subscriptionNumber,
+		previousProductName: subscription.ratePlan.productName,
+		previousRatePlanName: subscription.ratePlan.ratePlanName,
+		previousAmount,
+		productRatePlanKey,
+		termStartDate: subscription.termStartDate,
+		chargedThroughDate,
+		productRatePlanId: subscription.ratePlan.productRatePlanId,
+		chargeIds,
+	} satisfies SubscriptionInformation;
+}

@@ -6,7 +6,7 @@ import {
 	ProductRatePlan,
 	ProductRatePlanKey,
 } from '@modules/product-catalog/productCatalog';
-import { GuardianCatalogKeys } from './getSinglePlanSubscriptionOrThrow';
+import { GuardianCatalogKeys } from './getSinglePlanFlattenedSubscriptionOrThrow';
 
 // export type GuardianCatalogKeys<
 // 	P extends ProductKey,
@@ -280,7 +280,7 @@ function demo<P extends ProductKey, RP extends ProductRatePlanKey<P>>(
 }
 console.log(demo.toString());
 
-// example moved out of switchInformation.ts in favour of matchFluent instead
+// example moved out of targetInformation.ts in favour of matchFluent instead
 // const supporterPlus = (
 // 	ratePlan: ProductRatePlan<'SupporterPlus', 'Monthly' | 'Annual'>,
 // ) => {

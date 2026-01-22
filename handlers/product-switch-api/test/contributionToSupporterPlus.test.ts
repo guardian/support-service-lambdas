@@ -16,7 +16,7 @@ import {
 import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 // import { buildEmailMessage } from '../src/changePlan/productSwitchEmail';
-import getSwitchInformation from '../src/changePlan/switchInformation';
+import getSwitchInformation from '../src/changePlan/targetInformation';
 import accountJson from './fixtures/account.json';
 import alreadySwitchedJson from './fixtures/already-switched-subscription.json';
 // import jsonWithNoContribution from './fixtures/subscription-with-no-contribution.json';

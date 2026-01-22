@@ -41,7 +41,7 @@ type PlanWithKeys<P extends ProductKey> = {
  *
  * @param subWithCurrentPlans
  */
-export function getSinglePlanSubscriptionOrThrow(
+export function getSinglePlanFlattenedSubscriptionOrThrow(
 	subWithCurrentPlans: GuardianSubscription,
 ): GuardianSubscriptionWithKeys {
 	const { products, ...restSubWithCurrentPlans } = subWithCurrentPlans;

@@ -4,10 +4,10 @@
 
 import { sendToSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
 import { supporterRatePlanItemFromSwitchInformation } from '../src/supporterProductData';
-import type { SwitchInformation } from '../src/changePlan/switchInformation';
+import type { TargetInformation } from '../src/changePlan/targetInformation';
 
 test('supporter product data', async () => {
-	const switchInformation: SwitchInformation = {
+	const switchInformation: TargetInformation = {
 		stage: 'CODE',
 		actualTotalPrice: 10,
 		input: {

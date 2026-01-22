@@ -7,15 +7,14 @@ import type { OrderRequest } from '@modules/zuora/orders/orderRequests';
 import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import type { Discount } from '../discounts';
-import type {
-	CatalogInformation,
-	SwitchInformation,
-	TargetContribution,
-} from './switchInformation';
+import { TargetContribution } from './targetInformation';
+import {
+	shouldStartNewTerm,
+	SubscriptionInformation,
+} from './subscriptionInformation';
 
 const buildAddDiscountOrderAction = (
-	discount: Discount,
+	productRatePlanId: string,
 	orderDate: Dayjs,
 ): OrderAction[] => {
 	return [
@@ -23,7 +22,7 @@ const buildAddDiscountOrderAction = (
 			type: 'AddProduct',
 			triggerDates: singleTriggerDate(orderDate),
 			addProduct: {
-				productRatePlanId: discount.productRatePlanId,
+				productRatePlanId,
 			},
 		},
 	];
@@ -31,26 +30,27 @@ const buildAddDiscountOrderAction = (
 
 const buildChangePlanOrderAction = (
 	orderDate: Dayjs,
-	catalog: CatalogInformation,
-	targetContribution?: TargetContribution,
+	productRatePlanId: string,
+	contributionCharge: TargetContribution | undefined,
+	sourceProductRatePlanId: string,
 ): ChangePlanOrderAction => {
 	return {
 		type: 'ChangePlan',
 		triggerDates: singleTriggerDate(orderDate),
 		changePlan: {
-			productRatePlanId: catalog.sourceProduct.productRatePlanId,
+			productRatePlanId: sourceProductRatePlanId,
 			subType: 'Upgrade',
 			newProductRatePlan: {
-				productRatePlanId: catalog.targetProduct.productRatePlanId,
+				productRatePlanId,
 				chargeOverrides:
-					targetContribution === undefined
+					contributionCharge === undefined
 						? undefined
 						: [
 								{
-									productRatePlanChargeId: targetContribution.chargeId,
+									productRatePlanChargeId: contributionCharge.id,
 									pricing: {
 										recurringFlatFee: {
-											listPrice: targetContribution.contributionAmount,
+											listPrice: contributionCharge.contributionAmount,
 										},
 									},
 								},
@@ -80,21 +80,25 @@ function buildNewTermOrderActions(orderDate: dayjs.Dayjs): OrderAction[] {
 }
 
 export function buildSwitchRequestWithoutOptions(
-	productSwitchInformation: SwitchInformation,
+	productRatePlanId: string,
+	contributionCharge: TargetContribution | undefined,
+	discountProductRatePlanId: string | undefined,
+	subscriptionInformation: SubscriptionInformation,
 	orderDate: dayjs.Dayjs,
 	preview: boolean,
 ): OrderRequest {
-	const { startNewTerm, targetContribution, catalog } =
-		productSwitchInformation;
-	const { accountNumber, subscriptionNumber } =
-		productSwitchInformation.subscription;
+	// const { targetContribution, catalog } = targetInformation;
+	const { accountNumber, subscriptionNumber, termStartDate } =
+		subscriptionInformation;
 
 	// don't preview term update, because future dated amendments might prevent it
 	const maybeNewTermOrderActions: OrderAction[] =
-		startNewTerm && !preview ? buildNewTermOrderActions(orderDate) : [];
+		shouldStartNewTerm(termStartDate, orderDate) && !preview
+			? buildNewTermOrderActions(orderDate)
+			: [];
 
-	const discountOrderAction = productSwitchInformation.discount
-		? buildAddDiscountOrderAction(productSwitchInformation.discount, orderDate)
+	const discountOrderAction = discountProductRatePlanId
+		? buildAddDiscountOrderAction(discountProductRatePlanId, orderDate)
 		: [];
 
 	return {
@@ -105,7 +109,12 @@ export function buildSwitchRequestWithoutOptions(
 				subscriptionNumber,
 				customFields: { LastPlanAddedDate__c: zuoraDateFormat(orderDate) },
 				orderActions: [
-					buildChangePlanOrderAction(orderDate, catalog, targetContribution),
+					buildChangePlanOrderAction(
+						orderDate,
+						productRatePlanId,
+						contributionCharge,
+						subscriptionInformation.productRatePlanId,
+					),
 					...discountOrderAction,
 					...maybeNewTermOrderActions,
 				],

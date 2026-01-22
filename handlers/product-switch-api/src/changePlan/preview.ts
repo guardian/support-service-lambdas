@@ -1,9 +1,7 @@
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type {
-	CatalogInformation,
-	SwitchInformation,
-} from './switchInformation';
+import { TargetInformation } from './targetInformation';
 import {
+	OrderRequest,
 	previewOrderRequest,
 	PreviewOrderRequest,
 } from '@modules/zuora/orders/orderRequests';
@@ -14,16 +12,10 @@ import {
 	type ZuoraPreviewResponseInvoiceItem,
 	zuoraPreviewResponseSchema,
 } from '../schemas';
-import type { Discount } from '../discounts';
 import { getIfDefined } from '@modules/nullAndUndefined';
-import { buildSwitchRequestWithoutOptions } from './buildSwitchOrderRequest';
-import {
-	RatePlan,
-	RatePlanCharge,
-	ZuoraSubscription,
-} from '@modules/zuora/types/objects/subscription';
 import { zuoraDateFormat } from '@modules/zuora/utils/common';
-import { distinct, getSingleOrThrow } from '@modules/arrayFunctions';
+import { SubscriptionInformation } from './subscriptionInformation';
+import { Stage } from '@modules/stage';
 
 export type PreviewResponse = {
 	amountPayableToday: number;
@@ -41,51 +33,20 @@ export interface SwitchDiscountResponse {
 }
 
 export const refundExpected = (
-	catalogInformation: CatalogInformation,
-	subscription: ZuoraSubscription,
+	chargedThroughDate: Date,
 	currentDate: Date,
 ): boolean => {
-	const ratePlan = getIfDefined(
-		subscription.ratePlans.find(
-			(ratePlan: RatePlan) =>
-				ratePlan.productRatePlanId ===
-				catalogInformation.sourceProduct.productRatePlanId,
-		),
-		'No matching RatePlan found in Subscription,',
-	);
-
-	const sourceCharges = ratePlan.ratePlanCharges.filter((ratePlanCharge) =>
-		catalogInformation.sourceProduct.chargeIds.includes(
-			ratePlanCharge.productRatePlanChargeId,
-		),
-	);
-	const chargedThroughDates = sourceCharges.flatMap(
-		(ratePlanCharge: RatePlanCharge) =>
-			ratePlanCharge.chargedThroughDate !== null
-				? [ratePlanCharge.chargedThroughDate]
-				: [],
-	);
-	const chargedThroughDate: Date = getSingleOrThrow(
-		distinct(chargedThroughDates),
-		(msg) =>
-			new Error(
-				"couldn't extract a chargedThroughDate from the charges: " + msg,
-			),
-	);
-
 	return currentDate.toDateString() !== chargedThroughDate.toDateString();
 };
 
 export const getContributionRefundAmount = (
 	zuoraPreviewInvoice: ZuoraPreviewResponseInvoice,
-	catalogInformation: CatalogInformation,
-	subscription: ZuoraSubscription,
+	sourceChargeIds: [string, ...string[]],
+	chargedThroughDate: Date,
 ): number => {
 	const contributionRefundAmount = zuoraPreviewInvoice.invoiceItems
 		.filter((invoiceItem: ZuoraPreviewResponseInvoiceItem) =>
-			catalogInformation.sourceProduct.chargeIds.includes(
-				invoiceItem.productRatePlanChargeId,
-			),
+			sourceChargeIds.includes(invoiceItem.productRatePlanChargeId),
 		)
 		.reduceRight(
 			(accu, invoiceItem) =>
@@ -94,7 +55,7 @@ export const getContributionRefundAmount = (
 		);
 	if (
 		contributionRefundAmount == undefined &&
-		refundExpected(catalogInformation, subscription, new Date())
+		refundExpected(chargedThroughDate, new Date())
 	) {
 		throw Error('No contribution refund amount found in the preview response');
 	}
@@ -103,10 +64,11 @@ export const getContributionRefundAmount = (
 };
 
 export const previewResponseFromZuoraResponse = (
+	stage: Stage,
 	zuoraResponse: ZuoraPreviewResponse,
-	catalogInformation: CatalogInformation,
-	subscription: ZuoraSubscription,
-	possibleDiscount?: Discount,
+	targetInformation: TargetInformation,
+	sourceProductChargeIds: [string, ...string[]],
+	chargedThroughDate: Date,
 ): PreviewResponse => {
 	const invoice: ZuoraPreviewResponseInvoice = getIfDefined(
 		zuoraResponse.previewResult?.invoices[0],
@@ -115,28 +77,28 @@ export const previewResponseFromZuoraResponse = (
 
 	const contributionRefundAmount = getContributionRefundAmount(
 		invoice,
-		catalogInformation,
-		subscription,
+		sourceProductChargeIds,
+		chargedThroughDate,
 	);
 
 	const supporterPlusSubscriptionInvoiceItem = getIfDefined(
-		invoice.invoiceItems.find((invoiceItem: ZuoraPreviewResponseInvoiceItem) =>
-			catalogInformation.targetProduct.baseChargeIds.includes(
+		invoice.invoiceItems.find(
+			(invoiceItem: ZuoraPreviewResponseInvoiceItem) =>
+				targetInformation.subscriptionChargeId ===
 				invoiceItem.productRatePlanChargeId,
-			),
 		),
 		'No supporter plus invoice item found in the preview response: id: ' +
-			catalogInformation.targetProduct.baseChargeIds,
+			targetInformation.subscriptionChargeId,
 	);
 
 	const supporterPlusContributionItem = getIfDefined(
 		invoice.invoiceItems.find(
 			(invoiceItem) =>
 				invoiceItem.productRatePlanChargeId ===
-				catalogInformation.targetProduct.contributionCharge?.id,
+				targetInformation.contributionCharge?.id,
 		),
 		'No supporter plus invoice item found in the preview response: id: ' +
-			catalogInformation.targetProduct.contributionCharge?.id,
+			targetInformation.contributionCharge?.id,
 	);
 
 	const response: PreviewResponse = {
@@ -150,11 +112,12 @@ export const previewResponseFromZuoraResponse = (
 		),
 	};
 
+	const possibleDiscount = targetInformation.discount;
 	if (possibleDiscount) {
 		const discountInvoiceItem = invoice.invoiceItems.find(
 			(invoiceItem) =>
 				invoiceItem.productRatePlanChargeId ===
-				possibleDiscount.productRatePlanChargeId,
+				possibleDiscount.productRatePlanChargeId[stage],
 		);
 		if (discountInvoiceItem) {
 			response.discount = {
@@ -171,14 +134,17 @@ export const previewResponseFromZuoraResponse = (
 
 	return response;
 };
+
 export const preview = async (
 	zuoraClient: ZuoraClient,
-	productSwitchInformation: SwitchInformation,
-	subscription: ZuoraSubscription,
+	stage: Stage,
+	subscriptionInformation: SubscriptionInformation,
+	targetInformation: TargetInformation,
+	orderRequest: OrderRequest,
 ): Promise<PreviewResponse> => {
 	const requestBody: PreviewOrderRequest = buildPreviewRequestBody(
 		dayjs(),
-		productSwitchInformation,
+		orderRequest,
 	);
 	const zuoraResponse: ZuoraPreviewResponse = await previewOrderRequest(
 		zuoraClient,
@@ -186,15 +152,17 @@ export const preview = async (
 		zuoraPreviewResponseSchema,
 	);
 	return previewResponseFromZuoraResponse(
+		stage,
 		zuoraResponse,
-		productSwitchInformation.catalog,
-		subscription,
-		productSwitchInformation.discount,
+		targetInformation,
+		subscriptionInformation.chargeIds,
+		subscriptionInformation.chargedThroughDate,
 	);
 };
+
 const buildPreviewRequestBody = (
 	orderDate: Dayjs,
-	productSwitchInformation: SwitchInformation,
+	orderRequest: OrderRequest,
 ): PreviewOrderRequest => {
 	return {
 		previewOptions: {
@@ -202,10 +170,6 @@ const buildPreviewRequestBody = (
 			previewTypes: ['BillingDocs'],
 			specificPreviewThruDate: zuoraDateFormat(orderDate),
 		},
-		...buildSwitchRequestWithoutOptions(
-			productSwitchInformation,
-			orderDate,
-			true,
-		),
+		...orderRequest,
 	};
 };

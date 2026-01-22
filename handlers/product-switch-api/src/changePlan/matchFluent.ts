@@ -7,7 +7,7 @@ import {
 	ProductRatePlanKey,
 } from '@modules/product-catalog/productCatalog';
 import { logger } from '@modules/routing/logger';
-import { GuardianCatalogKeys } from './getSinglePlanSubscriptionOrThrow';
+import { GuardianCatalogKeys } from './getSinglePlanFlattenedSubscriptionOrThrow';
 
 type NotInferred = { __brand: 'NotInferred' };
 

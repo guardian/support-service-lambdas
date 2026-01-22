@@ -7,21 +7,21 @@ import {
 import { createPayment } from '@modules/zuora/payment';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
-import type { ZuoraSwitchResponse } from './schemas';
 
 export const adjustNonCollectedInvoice = async (
 	zuoraClient: ZuoraClient,
 	invoiceId: string, // this must be an id, NOT the invoice number
 	paymentAmount: number,
-	baseChargeIds: string[],
+	subscriptionChargeId: string,
 ) => {
 	console.log(`Writing off amount ${paymentAmount} from invoice ${invoiceId}`);
 	const invoiceItems = await getInvoiceItems(zuoraClient, invoiceId);
 	const supporterPlusInvoiceItem = getIfDefined(
-		invoiceItems.invoiceItems.find((invoiceItem) =>
-			baseChargeIds.includes(invoiceItem.productRatePlanChargeId),
+		invoiceItems.invoiceItems.find(
+			(invoiceItem) =>
+				subscriptionChargeId === invoiceItem.productRatePlanChargeId,
 		),
-		`No supporter plus invoice item (id: ${baseChargeIds} ) found in the invoice ${invoiceId}`,
+		`No supporter plus invoice item (id: ${subscriptionChargeId} ) found in the invoice ${invoiceId}`,
 	);
 	return await creditInvoice(
 		dayjs(),
@@ -37,16 +37,11 @@ export const adjustNonCollectedInvoice = async (
 
 export const takePaymentOrAdjustInvoice = async (
 	zuoraClient: ZuoraClient,
-	switchResponse: ZuoraSwitchResponse,
-	baseChargeIds: string[],
+	invoiceId: string,
+	subscriptionChargeId: string,
 	accountId: string,
 	paymentMethodId: string,
 ): Promise<number> => {
-	const invoiceId = getIfDefined(
-		switchResponse.invoiceIds?.at(0),
-		'No invoice number found in the switch response',
-	);
-
 	const invoice = await getInvoice(zuoraClient, invoiceId);
 	const amountPayableToday = invoice.amount;
 
@@ -58,7 +53,7 @@ export const takePaymentOrAdjustInvoice = async (
 			zuoraClient,
 			invoiceId,
 			amountPayableToday,
-			baseChargeIds,
+			subscriptionChargeId,
 		);
 		return 0;
 	} else {

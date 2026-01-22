@@ -14,7 +14,7 @@ import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 import type { ZuoraSwitchResponse } from '../src/schemas';
-import getSwitchInformation from '../src/changePlan/switchInformation';
+import getSwitchInformation from '../src/changePlan/targetInformation';
 import accountJson from './fixtures/account.json';
 import pendingAmendmentsJson from './fixtures/pendingAmendments.json';
 import { preview } from '../src/changePlan/preview';

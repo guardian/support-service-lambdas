@@ -1,11 +1,11 @@
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import dayjs from 'dayjs';
 import { supporterRatePlanItemFromSwitchInformation } from '../src/supporterProductData';
-import type { SwitchInformation } from '../src/changePlan/switchInformation';
+import type { TargetInformation } from '../src/changePlan/targetInformation';
 
 const getSwitchInformation = (
 	contributionAmount: number,
-): SwitchInformation => ({
+): TargetInformation => ({
 	stage: 'CODE',
 	actualTotalPrice: 1,
 	input: {
@@ -45,7 +45,7 @@ const getSwitchInformation = (
 });
 
 test('supporterRatePlanItemFromSwitchInformation works with no contribution element', () => {
-	const switchInformation: SwitchInformation = getSwitchInformation(0);
+	const switchInformation: TargetInformation = getSwitchInformation(0);
 
 	expect(
 		supporterRatePlanItemFromSwitchInformation(switchInformation),
@@ -60,7 +60,7 @@ test('supporterRatePlanItemFromSwitchInformation works with no contribution elem
 });
 
 test('supporterRatePlanItemFromSwitchInformation works with a contribution element', () => {
-	const switchInformation: SwitchInformation = getSwitchInformation(10);
+	const switchInformation: TargetInformation = getSwitchInformation(10);
 
 	expect(
 		supporterRatePlanItemFromSwitchInformation(switchInformation),

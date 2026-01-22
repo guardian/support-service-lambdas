@@ -22,15 +22,15 @@ import dayjs from 'dayjs';
 import type { ContributionTestAdditionalOptions } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import { createContribution } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import { adjustNonCollectedInvoice } from '../src/payment';
-import type { SwitchInformation } from '../src/changePlan/switchInformation';
-import getSwitchInformation from '../src/changePlan/switchInformation';
+import type { TargetInformation } from '../src/changePlan/targetInformation';
+import getSwitchInformation from '../src/changePlan/targetInformation';
 import { preview } from '../src/changePlan/preview';
 import { doSwitch } from '../src/changePlan/switch';
 
 interface ContributionCreationDetails {
 	zuoraClient: ZuoraClient;
 	subscription: ZuoraSubscription;
-	switchInformation: SwitchInformation;
+	switchInformation: TargetInformation;
 }
 
 const jestConsole = console;
