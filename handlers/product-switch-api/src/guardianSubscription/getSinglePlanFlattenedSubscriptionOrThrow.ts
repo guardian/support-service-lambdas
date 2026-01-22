@@ -7,19 +7,11 @@ import { getSingleOrThrow } from '@modules/arrayFunctions';
 import { objectEntries } from '@modules/objectFunctions';
 import { ValidationError } from '@modules/errors';
 import {
+	GuardianCatalogKeys,
 	ProductKey,
 	ProductRatePlanKey,
 } from '@modules/product-catalog/productCatalog';
 import { RestSubscription } from './groupSubscriptionByZuoraCatalogIds';
-
-export type AnyGuardianCatalogKeys = GuardianCatalogKeys<ProductKey>;
-
-export type GuardianCatalogKeys<P extends ProductKey> = {
-	[P in ProductKey]: {
-		productKey: P;
-		productRatePlanKey: ProductRatePlanKey<P>;
-	};
-}[P];
 
 export type SinglePlanGuardianSubscription = {
 	ratePlan: GuardianRatePlan;

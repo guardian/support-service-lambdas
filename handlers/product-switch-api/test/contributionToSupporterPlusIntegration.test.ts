@@ -22,10 +22,10 @@ import dayjs from 'dayjs';
 import type { ContributionTestAdditionalOptions } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import { createContribution } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import { adjustNonCollectedInvoice } from '../src/payment';
-import type { TargetInformation } from '../src/changePlan/targetInformation';
-import getSwitchInformation from '../src/changePlan/targetInformation';
-import { preview } from '../src/changePlan/preview';
-import { doSwitch } from '../src/changePlan/switch';
+import type { TargetInformation } from '../src/changePlan/prepare/targetInformation';
+import getSwitchInformation from '../src/changePlan/prepare/targetInformation';
+import { preview } from '../src/changePlan/action/preview';
+import { doSwitch } from '../src/changePlan/action/switch';
 
 interface ContributionCreationDetails {
 	zuoraClient: ZuoraClient;

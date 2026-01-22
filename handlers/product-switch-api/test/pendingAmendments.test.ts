@@ -14,11 +14,11 @@ import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 import type { ZuoraSwitchResponse } from '../src/schemas';
-import getSwitchInformation from '../src/changePlan/targetInformation';
+import getSwitchInformation from '../src/changePlan/prepare/targetInformation';
 import accountJson from './fixtures/account.json';
 import pendingAmendmentsJson from './fixtures/pendingAmendments.json';
-import { preview } from '../src/changePlan/preview';
-import { switchToSupporterPlus } from '../src/changePlan/switch';
+import { preview } from '../src/changePlan/action/preview';
+import { switchToSupporterPlus } from '../src/changePlan/action/switch';
 
 const mockZuoraClient = {
 	get: jest.fn(),
@@ -197,7 +197,7 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 		jest.doMock('../src/payment', () => ({
 			takePaymentOrAdjustInvoice,
 		}));
-		jest.doMock('../src/changePlan/productSwitchEmail', () => ({
+		jest.doMock('../src/changePlan/action/productSwitchEmail', () => ({
 			sendThankYouEmail,
 		}));
 		jest.doMock('../src/salesforceTracking', () => ({

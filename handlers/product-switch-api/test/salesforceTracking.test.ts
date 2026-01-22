@@ -1,5 +1,5 @@
 import { createSQSMessageBody } from '../src/salesforceTracking';
-import type { TargetInformation } from '../src/changePlan/targetInformation';
+import type { TargetInformation } from '../src/changePlan/prepare/targetInformation';
 
 test('salesforce tracking data is serialised to the queue correctly', () => {
 	const testData: TargetInformation = {

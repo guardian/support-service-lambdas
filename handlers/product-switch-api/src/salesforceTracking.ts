@@ -1,10 +1,10 @@
 import { sendMessageToQueue } from '@modules/aws/sqs';
 import { prettyPrint } from '@modules/prettyPrint';
 import { logger } from '@modules/routing/logger';
-import type { TargetInformation } from './changePlan/targetInformation';
+import type { TargetInformation } from './changePlan/prepare/targetInformation';
 import { ProductSwitchRequestBody } from './schemas';
 import { Stage } from '@modules/stage';
-import { SubscriptionInformation } from './changePlan/subscriptionInformation';
+import { SubscriptionInformation } from './changePlan/prepare/subscriptionInformation';
 
 export type SalesforceTrackingInput = {
 	subscriptionName: string;

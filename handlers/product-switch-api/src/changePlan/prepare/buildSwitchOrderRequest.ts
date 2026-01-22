@@ -79,46 +79,48 @@ function buildNewTermOrderActions(orderDate: dayjs.Dayjs): OrderAction[] {
 	];
 }
 
-export function buildSwitchRequestWithoutOptions(
-	productRatePlanId: string,
-	contributionCharge: TargetContribution | undefined,
-	discountProductRatePlanId: string | undefined,
-	subscriptionInformation: SubscriptionInformation,
-	orderDate: dayjs.Dayjs,
-	preview: boolean,
-): OrderRequest {
-	// const { targetContribution, catalog } = targetInformation;
-	const { accountNumber, subscriptionNumber, termStartDate } =
-		subscriptionInformation;
+export class SwitchOrderRequestBuilder {
+	constructor(
+		private productRatePlanId: string,
+		private contributionCharge: TargetContribution | undefined,
+		private discountProductRatePlanId: string | undefined,
+		private subscriptionInformation: SubscriptionInformation,
+		private preview: boolean,
+	) {}
 
-	// don't preview term update, because future dated amendments might prevent it
-	const maybeNewTermOrderActions: OrderAction[] =
-		shouldStartNewTerm(termStartDate, orderDate) && !preview
-			? buildNewTermOrderActions(orderDate)
+	build(orderDate: dayjs.Dayjs): OrderRequest {
+		const { accountNumber, subscriptionNumber, termStartDate } =
+			this.subscriptionInformation;
+
+		// don't preview term update, because future dated amendments might prevent it
+		const maybeNewTermOrderActions: OrderAction[] =
+			shouldStartNewTerm(termStartDate, orderDate) && !this.preview
+				? buildNewTermOrderActions(orderDate)
+				: [];
+
+		const discountOrderAction = this.discountProductRatePlanId
+			? buildAddDiscountOrderAction(this.discountProductRatePlanId, orderDate)
 			: [];
 
-	const discountOrderAction = discountProductRatePlanId
-		? buildAddDiscountOrderAction(discountProductRatePlanId, orderDate)
-		: [];
-
-	return {
-		orderDate: zuoraDateFormat(orderDate),
-		existingAccountNumber: accountNumber,
-		subscriptions: [
-			{
-				subscriptionNumber,
-				customFields: { LastPlanAddedDate__c: zuoraDateFormat(orderDate) },
-				orderActions: [
-					buildChangePlanOrderAction(
-						orderDate,
-						productRatePlanId,
-						contributionCharge,
-						subscriptionInformation.productRatePlanId,
-					),
-					...discountOrderAction,
-					...maybeNewTermOrderActions,
-				],
-			},
-		],
-	};
+		return {
+			orderDate: zuoraDateFormat(orderDate),
+			existingAccountNumber: accountNumber,
+			subscriptions: [
+				{
+					subscriptionNumber,
+					customFields: { LastPlanAddedDate__c: zuoraDateFormat(orderDate) },
+					orderActions: [
+						buildChangePlanOrderAction(
+							orderDate,
+							this.productRatePlanId,
+							this.contributionCharge,
+							this.subscriptionInformation.productRatePlanId,
+						),
+						...discountOrderAction,
+						...maybeNewTermOrderActions,
+					],
+				},
+			],
+		};
+	}
 }

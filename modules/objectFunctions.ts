@@ -1,8 +1,9 @@
 import { difference } from '@modules/arrayFunctions';
 
-export function objectKeys<O extends object>(libs: O): (keyof O)[] {
+type DistributedKeyof<T> = T extends unknown ? keyof T : never;
+export function objectKeys<O extends object>(libs: O): DistributedKeyof<O>[] {
 	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- allowed in utility function - get back type lost by Object.keys
-	return Object.keys(libs) as (keyof O)[];
+	return Object.keys(libs) as DistributedKeyof<O>[];
 }
 
 export function objectKeysNonEmpty<
@@ -33,12 +34,18 @@ export function objectFromEntries<K extends string, V>(
 	return Object.fromEntries(libs) as Record<K, V>;
 }
 
-export function objectEntries<T extends Record<string, unknown>>(
-	theMappings: T,
-): Array<{ [K in keyof T]: [K, T[K]] }[keyof T]> {
+export function objectEntries<T extends object>(
+	theMappings: (T | {}) | T,
+): Array<
+	{
+		[K in keyof T]: [K, T[K]];
+	}[keyof T]
+> {
 	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- allowed in utility function - get back type lost by Object.entries
 	return Object.entries(theMappings) as Array<
-		{ [K in keyof T]: [K, T[K]] }[keyof T]
+		{
+			[K in keyof T]: [K, T[K]];
+		}[keyof T]
 	>;
 }
 
@@ -48,7 +55,7 @@ export function objectLeftJoin<K extends string, VA, VB, KR extends K>(
 ): [VA, VB | undefined][] {
 	const lKeys = objectKeys(l);
 	return lKeys.map(
-		(key) => [l[key], key in r ? r[key as KR] : undefined] as const,
+		(key) => [l[key], key in r ? r[key as unknown as KR] : undefined] as const,
 	);
 }
 
@@ -57,7 +64,7 @@ export function objectJoin<K extends string, VA, VB>(
 	r: Record<K, VB>,
 ): [VA, VB][] {
 	const lKeys = objectKeys(l);
-	const [onlyInL, onlyInR] = difference(lKeys, objectKeys(r));
+	const [onlyInL, onlyInR] = difference(lKeys as K[], objectKeys(r) as K[]);
 
 	if (onlyInL.length + onlyInR.length !== 0) {
 		throw new Error(

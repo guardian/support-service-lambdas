@@ -1,7 +1,6 @@
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { TargetInformation } from './targetInformation';
+import { TargetInformation } from '../prepare/targetInformation';
 import {
-	OrderRequest,
 	previewOrderRequest,
 	PreviewOrderRequest,
 } from '@modules/zuora/orders/orderRequests';
@@ -11,11 +10,12 @@ import {
 	type ZuoraPreviewResponseInvoice,
 	type ZuoraPreviewResponseInvoiceItem,
 	zuoraPreviewResponseSchema,
-} from '../schemas';
+} from '../../schemas';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { zuoraDateFormat } from '@modules/zuora/utils/common';
-import { SubscriptionInformation } from './subscriptionInformation';
+import { SubscriptionInformation } from '../prepare/subscriptionInformation';
 import { Stage } from '@modules/stage';
+import { SwitchOrderRequestBuilder } from '../prepare/buildSwitchOrderRequest';
 
 export type PreviewResponse = {
 	amountPayableToday: number;
@@ -135,34 +135,38 @@ export const previewResponseFromZuoraResponse = (
 	return response;
 };
 
-export const preview = async (
-	zuoraClient: ZuoraClient,
-	stage: Stage,
-	subscriptionInformation: SubscriptionInformation,
-	targetInformation: TargetInformation,
-	orderRequest: OrderRequest,
-): Promise<PreviewResponse> => {
-	const requestBody: PreviewOrderRequest = buildPreviewRequestBody(
-		dayjs(),
-		orderRequest,
-	);
-	const zuoraResponse: ZuoraPreviewResponse = await previewOrderRequest(
-		zuoraClient,
-		requestBody,
-		zuoraPreviewResponseSchema,
-	);
-	return previewResponseFromZuoraResponse(
-		stage,
-		zuoraResponse,
-		targetInformation,
-		subscriptionInformation.chargeIds,
-		subscriptionInformation.chargedThroughDate,
-	);
-};
-
+export class DoPreviewAction {
+	constructor(
+		private zuoraClient: ZuoraClient,
+		private stage: Stage,
+		private today: Dayjs,
+	) {}
+	preview = async (
+		subscriptionInformation: SubscriptionInformation,
+		targetInformation: TargetInformation,
+		orderRequest: SwitchOrderRequestBuilder,
+	): Promise<PreviewResponse> => {
+		const requestBody: PreviewOrderRequest = buildPreviewRequestBody(
+			this.today,
+			orderRequest,
+		);
+		const zuoraResponse: ZuoraPreviewResponse = await previewOrderRequest(
+			this.zuoraClient,
+			requestBody,
+			zuoraPreviewResponseSchema,
+		);
+		return previewResponseFromZuoraResponse(
+			this.stage,
+			zuoraResponse,
+			targetInformation,
+			subscriptionInformation.chargeIds,
+			subscriptionInformation.chargedThroughDate,
+		);
+	};
+}
 const buildPreviewRequestBody = (
 	orderDate: Dayjs,
-	orderRequest: OrderRequest,
+	orderRequest: SwitchOrderRequestBuilder,
 ): PreviewOrderRequest => {
 	return {
 		previewOptions: {
@@ -170,6 +174,6 @@ const buildPreviewRequestBody = (
 			previewTypes: ['BillingDocs'],
 			specificPreviewThruDate: zuoraDateFormat(orderDate),
 		},
-		...orderRequest,
+		...orderRequest.build(orderDate),
 	};
 };

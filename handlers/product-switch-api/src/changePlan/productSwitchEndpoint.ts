@@ -15,24 +15,18 @@ import type {
 	ProductSwitchGenericRequestBody,
 	ProductSwitchRequestBody,
 } from '../schemas';
-import getTargetInformation from './targetInformation';
-import { preview } from './preview';
-import { switchToSupporterPlus } from './switch';
+import { DoPreviewAction } from './action/preview';
+import { DoSwitchAction } from './action/switch';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
-import { SubscriptionFilter } from './subscriptionFilter';
-import { GuardianSubscriptionParser } from './guardianSubscriptionParser';
+import { SubscriptionFilter } from '../guardianSubscription/subscriptionFilter';
+import { GuardianSubscriptionParser } from '../guardianSubscription/guardianSubscriptionParser';
 import {
 	getSinglePlanFlattenedSubscriptionOrThrow,
 	GuardianSubscriptionWithKeys,
-} from './getSinglePlanFlattenedSubscriptionOrThrow';
-import { getAccountInformation } from './accountInformation';
-import {
-	getSubscriptionInformation,
-	SubscriptionInformation,
-} from './subscriptionInformation';
-import { buildSwitchRequestWithoutOptions } from './buildSwitchOrderRequest';
-import { OrderRequest } from '@modules/zuora/orders/orderRequests';
-import { isGenerallyEligibleForDiscount } from './isGenerallyEligibleForDiscount';
+} from '../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
+import { SwitchOrderRequestBuilder } from './prepare/buildSwitchOrderRequest';
+import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
+import { getSwitchInformation } from './prepare/switchInformation';
 
 export function contributionToSupporterPlusEndpoint(
 	stage: Stage,
@@ -52,6 +46,21 @@ export function contributionToSupporterPlusEndpoint(
 		);
 }
 
+function getLazySimpleInvoiceItems(
+	zuoraClient: ZuoraClient,
+	today: dayjs.Dayjs,
+	accountNumber: string,
+	subscriptionNumber: string,
+) {
+	return new Lazy(
+		() =>
+			getBillingPreview(zuoraClient, today.add(13, 'months'), accountNumber),
+		'get billing preview for the subscription',
+	)
+		.then(itemsForSubscription(subscriptionNumber))
+		.then(toSimpleInvoiceItems);
+}
+
 export function productSwitchEndpoint(stage: Stage, today: dayjs.Dayjs) {
 	return async (
 		body: ProductSwitchGenericRequestBody,
@@ -60,23 +69,22 @@ export function productSwitchEndpoint(stage: Stage, today: dayjs.Dayjs) {
 		account: ZuoraAccount,
 	): Promise<APIGatewayProxyResult> => {
 		logger.log('Loading the product catalog');
-		const productCatalog = await getProductCatalogFromApi(stage);
-		const guardianSubscriptionParser = new GuardianSubscriptionParser(
-			await getZuoraCatalogFromS3(stage), // TODO maybe we can build from product catalog?
+		const productCatalogHelper = new ProductCatalogHelper(
+			await getProductCatalogFromApi(stage),
 		);
+		const guardianSubscriptionParser = new GuardianSubscriptionParser(
+			await getZuoraCatalogFromS3(stage), // TODO maybe we can build from product catalog instead?
+		);
+		const doSwitchAction = new DoSwitchAction(zuoraClient, stage, dayjs());
+		const doPreviewAction = new DoPreviewAction(zuoraClient, stage, dayjs());
 
 		// don't get the billing preview until we know the subscription is not cancelled
-		const lazyBillingPreview = new Lazy(
-			() =>
-				getBillingPreview(
-					zuoraClient,
-					today.add(13, 'months'),
-					subscription.accountNumber,
-				),
-			'get billing preview for the subscription',
-		)
-			.then(itemsForSubscription(subscription.subscriptionNumber))
-			.then(toSimpleInvoiceItems);
+		const lazyBillingPreview = getLazySimpleInvoiceItems(
+			zuoraClient,
+			today,
+			subscription.accountNumber,
+			subscription.subscriptionNumber,
+		);
 
 		const activeCurrentSubscriptionFilter =
 			SubscriptionFilter.activeCurrentSubscriptionFilter(today);
@@ -88,55 +96,42 @@ export function productSwitchEndpoint(stage: Stage, today: dayjs.Dayjs) {
 				),
 			);
 
-		const accountInformation = getAccountInformation(account);
-
-		const subscriptionInformation: SubscriptionInformation =
-			getSubscriptionInformation(guardianSubscriptionWithKeys);
-
 		const mode: 'switch' | 'save' = !!body.applyDiscountIfAvailable
 			? 'save'
 			: 'switch';
 
-		const generallyEligibleForDiscount = isGenerallyEligibleForDiscount(
-			guardianSubscriptionWithKeys.subscription.status,
+		const switchInformation = await getSwitchInformation(
+			productCatalogHelper,
+			body,
 			mode,
-			account.metrics.totalInvoiceBalance,
+			account,
+			guardianSubscriptionWithKeys,
 			lazyBillingPreview,
 		);
 
-		const targetInformation = await getTargetInformation(
-			mode,
-			body,
-			guardianSubscriptionWithKeys.productCatalogKeys,
-			generallyEligibleForDiscount,
-			accountInformation.currency,
-			subscriptionInformation.previousAmount,
-			productCatalog,
-		);
-		const orderRequest: OrderRequest = buildSwitchRequestWithoutOptions(
-			targetInformation.productRatePlanId,
-			targetInformation.contributionCharge,
-			targetInformation.discount?.productRatePlanId[stage],
-			subscriptionInformation,
-			dayjs(),
-			body.preview,
-		);
+		logger.log(`switching from/to`, {
+			from: guardianSubscriptionWithKeys.productCatalogKeys,
+			to: body.targetProduct,
+		});
+
+		const orderRequest: SwitchOrderRequestBuilder =
+			new SwitchOrderRequestBuilder(
+				switchInformation.target.productRatePlanId,
+				switchInformation.target.contributionCharge,
+				switchInformation.target.discount?.productRatePlanId[stage],
+				switchInformation.subscription,
+				body.preview,
+			);
+
 		const response = body.preview
-			? await preview(
-					zuoraClient,
-					stage,
-					subscriptionInformation,
-					targetInformation,
+			? await doPreviewAction.preview(
+					switchInformation.subscription,
+					switchInformation.target,
 					orderRequest,
 				)
-			: await switchToSupporterPlus(
-					zuoraClient,
-					stage,
+			: await doSwitchAction.switchToSupporterPlus(
 					body,
-					accountInformation,
-					targetInformation,
-					subscriptionInformation,
-					dayjs(),
+					switchInformation,
 					orderRequest,
 				);
 

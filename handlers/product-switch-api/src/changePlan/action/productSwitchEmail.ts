@@ -3,10 +3,8 @@ import { DataExtensionNames, sendEmail } from '@modules/email/email';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { getCurrencyInfo } from '@modules/internationalisation/currency';
 import dayjs from 'dayjs';
-import type { TargetInformation } from './targetInformation';
 import { Stage } from '@modules/stage';
-import { AccountInformation } from './accountInformation';
-import { SubscriptionInformation } from './subscriptionInformation';
+import { SwitchInformation } from '../prepare/switchInformation';
 
 type Payment = { date: dayjs.Dayjs; amount: number };
 
@@ -49,13 +47,12 @@ export const buildEmailMessage = (
 export const sendThankYouEmail = async (
 	stage: Stage,
 	firstPaymentAmount: number,
-	targetInformation: TargetInformation,
-	accountInformation: AccountInformation,
-	subscriptionInformation: SubscriptionInformation,
+	switchInformation: SwitchInformation,
 ) => {
 	const { emailAddress, firstName, lastName, identityId, currency } =
-		accountInformation;
-	const { subscriptionNumber, productRatePlanKey } = subscriptionInformation;
+		switchInformation.account;
+	const { subscriptionNumber, productRatePlanKey } =
+		switchInformation.subscription;
 
 	const [billingPeriodMonths, frequency] = (
 		{
@@ -72,14 +69,14 @@ export const sendThankYouEmail = async (
 			},
 			next: {
 				date: dayjs().add(billingPeriodMonths, 'month'),
-				amount: targetInformation.actualTotalPrice,
+				amount: switchInformation.target.actualTotalPrice,
 			},
 		},
 		emailAddress,
 		firstName,
 		lastName,
 		currency,
-		targetInformation.actualTotalPrice,
+		switchInformation.target.actualTotalPrice,
 		frequency,
 		subscriptionNumber,
 		identityId,

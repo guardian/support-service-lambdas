@@ -1,7 +1,7 @@
 import {
 	GuardianSubscriptionWithKeys,
 	SinglePlanGuardianSubscription,
-} from './getSinglePlanFlattenedSubscriptionOrThrow';
+} from '../../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import { RatePlanCharge } from '@modules/zuora/types';
 import { objectValues } from '@modules/objectFunctions';
 import {
@@ -13,8 +13,8 @@ import {
 import dayjs from 'dayjs';
 import {
 	isValidSwitchableRatePlanKey,
-	ValidRatePlanKey,
-} from '../validSwitches';
+	ValidSwitchableRatePlanKey,
+} from './switchesHelper';
 
 export type SubscriptionInformation = {
 	accountNumber: string; // order
@@ -22,7 +22,7 @@ export type SubscriptionInformation = {
 	previousProductName: string; // sf tracking
 	previousRatePlanName: string; //sf tracking
 	previousAmount: number; //sf tracking
-	productRatePlanKey: ValidRatePlanKey; // email, FIXME supporter product data(need TARGET rate plan name)
+	productRatePlanKey: ValidSwitchableRatePlanKey; // email, FIXME supporter product data(need TARGET rate plan name)
 	termStartDate: Date; // order
 	chargedThroughDate: Date; // refund check
 	productRatePlanId: string; // order

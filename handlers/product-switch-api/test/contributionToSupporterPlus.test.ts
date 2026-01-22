@@ -16,7 +16,7 @@ import {
 import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 // import { buildEmailMessage } from '../src/changePlan/productSwitchEmail';
-import getSwitchInformation from '../src/changePlan/targetInformation';
+import getSwitchInformation from '../src/changePlan/prepare/targetInformation';
 import accountJson from './fixtures/account.json';
 import alreadySwitchedJson from './fixtures/already-switched-subscription.json';
 // import jsonWithNoContribution from './fixtures/subscription-with-no-contribution.json';
@@ -25,9 +25,9 @@ import zuoraSubscriptionWithMonthlyContribution from './fixtures/zuora-subscript
 import {
 	previewResponseFromZuoraResponse,
 	refundExpected,
-} from '../src/changePlan/preview';
+} from '../src/changePlan/action/preview';
 import { EmailMessageWithUserId } from '@modules/email/email';
-import { buildEmailMessage } from '../src/changePlan/productSwitchEmail';
+import { buildEmailMessage } from '../src/changePlan/action/productSwitchEmail';
 import { CatalogInformation } from '../src/catalogInformation';
 // import { ValidationError } from '@modules/errors';
 

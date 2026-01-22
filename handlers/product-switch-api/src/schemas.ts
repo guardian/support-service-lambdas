@@ -1,6 +1,5 @@
 import { z } from 'zod';
-
-import { validTargetProductKeys } from './validSwitches';
+import { validTargetProductKeys } from './changePlan/prepare/switchesHelper';
 
 export const productSwitchRequestSchema = z.object({
 	preview: z.boolean(),
@@ -22,6 +21,10 @@ export type ProductSwitchRequestBody = z.infer<
 
 export type ProductSwitchGenericRequestBody = z.infer<
 	typeof productSwitchGenericRequestSchema
+>;
+export type ProductSwitchTargetBody = Pick<
+	ProductSwitchGenericRequestBody,
+	'targetProduct' | 'newAmount'
 >;
 
 export const zuoraPreviewResponseInvoiceItemSchema = z.object({
