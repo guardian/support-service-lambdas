@@ -58,6 +58,11 @@ export class BrazeClient {
 			external_ids: [userId],
 		};
 
+		const fullUrl = `${this.rest.baseURL}/users/delete`;
+		logger.log(
+			`Braze DELETE request - URL: ${fullUrl}, userId: ${userId}, body: ${JSON.stringify(requestBody)}`,
+		);
+
 		try {
 			return await this.rest.makeRESTRequest(logger.getCallerInfo(1))(
 				'POST',
@@ -133,6 +138,14 @@ export async function deleteBrazeUser(
 			};
 		}
 	} catch (error) {
+		// Handle 404 as success - user already deleted (idempotent)
+		if (error instanceof HttpError && error.statusCode === 404) {
+			logger.log(
+				`User ${userId} not found in Braze (404) - treating as successful deletion`,
+			);
+			return { success: true };
+		}
+
 		logger.error(`Unexpected error deleting user ${userId} from Braze`, error);
 		return {
 			success: false,
