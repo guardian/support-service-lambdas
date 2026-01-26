@@ -3,8 +3,8 @@ import {
 	zuoraSubscriptionsFromAccountSchema,
 } from '@modules/zuora/types';
 import subscriptionJson from './fixtures/subscription.json';
-import subWithDiscountJson from './fixtures/subWithDiscount.json';
 import subscriptionsFromAccountJson from './fixtures/subscriptions-from-account-number-response.json';
+import subWithDiscountJson from './fixtures/subWithDiscount.json';
 
 test('ChargedThroughDate is null in the model when it is null in Zuora', () => {
 	const result = zuoraSubscriptionSchema.parse(subscriptionJson);

@@ -188,7 +188,7 @@ export const findDuplicates = <T>(array: T[]) =>
 
 // see SameValueZero column of  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Equality_comparisons_and_sameness#comparing_equality_methods
 // objects would work in theory but are tested by identity rather than structurally
-export type SafeForDistinct = number | string | undefined;
+export type SafeForDistinct = number | string | undefined | null;
 
 export const distinct = <T extends SafeForDistinct>(array: T[]) =>
 	Array.from(new Set(array));

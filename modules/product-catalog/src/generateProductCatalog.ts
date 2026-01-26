@@ -75,7 +75,7 @@ const getProductRatePlanCharges = (
  */
 export const getBillingPeriod = (
 	name: string,
-	billingPeriodList: (string | null)[],
+	billingPeriodList: Array<string | null>,
 ) => {
 	const billingPeriods = new Set(billingPeriodList);
 	if (billingPeriods.size > 1) {

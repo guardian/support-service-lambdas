@@ -10,7 +10,7 @@ type ProductBillingSystem = 'stripe' | 'zuora';
 export type ProductCatalog = z.infer<typeof productCatalogSchema>;
 
 // -------- Product --------
-export type ProductKey = keyof ProductCatalog & string;
+export type ProductKey = keyof ProductCatalog;
 export const isProductKey = isInList(
 	objectKeysNonEmpty(productCatalogSchema._def.shape()),
 );
