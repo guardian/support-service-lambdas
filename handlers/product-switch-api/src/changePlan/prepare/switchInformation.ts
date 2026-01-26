@@ -1,6 +1,6 @@
 import { ZuoraAccount } from '@modules/zuora/types';
 import { GuardianSubscriptionWithKeys } from '../../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
-import { ProductSwitchTargetBody } from '../../schemas';
+import { ProductSwitchTargetBody } from '../schemas';
 import { Lazy } from '@modules/lazy';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import {
@@ -12,7 +12,11 @@ import {
 	SubscriptionInformation,
 } from './subscriptionInformation';
 import { isGenerallyEligibleForDiscount } from './isGenerallyEligibleForDiscount';
-import { getTargetInformation, TargetInformation } from './targetInformation';
+import {
+	getTargetInformation,
+	SwitchMode,
+	TargetInformation,
+} from './targetInformation';
 import { SimpleInvoiceItem } from '@modules/zuora/billingPreview';
 
 export type SwitchInformation = {
@@ -24,7 +28,7 @@ export type SwitchInformation = {
 export async function getSwitchInformation(
 	productCatalogHelper: ProductCatalogHelper,
 	input: ProductSwitchTargetBody,
-	mode: 'switch' | 'save',
+	mode: SwitchMode,
 	account: ZuoraAccount,
 	guardianSubscriptionWithKeys: GuardianSubscriptionWithKeys,
 	lazyBillingPreview: Lazy<SimpleInvoiceItem[]>,

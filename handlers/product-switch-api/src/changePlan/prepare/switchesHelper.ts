@@ -8,7 +8,7 @@ import { SwitchActionData, TargetInformation } from './targetInformation';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { distinct, getIfNonEmpty, isInList } from '@modules/arrayFunctions';
 import { objectKeys, objectValues } from '@modules/objectFunctions';
-import { productSwitchesData } from '../productSwitchesData';
+import { productSwitchesData } from '../switchDefinition/productSwitchesData';
 
 export type ValidSwitchHandler<
 	P extends ProductKey,

@@ -1,18 +1,9 @@
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import dayjs from 'dayjs';
 import { supporterRatePlanItemFromSwitchInformation } from '../src/supporterProductData';
-import type { TargetInformation } from '../src/changePlan/prepare/targetInformation';
+import { SwitchInformation } from '../src/changePlan/prepare/switchInformation';
 
-const getSwitchInformation = (
-	contributionAmount: number,
-): TargetInformation => ({
-	stage: 'CODE',
-	actualTotalPrice: 1,
-	input: {
-		preview: false,
-	},
-	startNewTerm: true,
-	contributionAmount,
+const getSwitchInformation = (): SwitchInformation => ({
 	account: {
 		id: 'accountId',
 		identityId: 'identityId',
@@ -20,47 +11,29 @@ const getSwitchInformation = (
 		firstName: 'firstName',
 		lastName: 'lastName',
 		defaultPaymentMethodId: 'defaultPaymentMethodId',
+		currency: 'GBP',
 	},
 	subscription: {
-		billingPeriod: 'Month',
 		subscriptionNumber: 'subscriptionNumber',
 		accountNumber: 'accountNumber',
 		previousProductName: 'previousProductName',
 		previousRatePlanName: 'previousRatePlanName',
 		previousAmount: 1,
-		currency: 'GBP',
+		productRatePlanKey: 'Monthly',
+		termStartDate: new Date(),
+		productRatePlanId: 'contributionProductRatePlanId',
+		chargeIds: ['chargeId'],
 	},
-	catalog: {
-		targetProduct: {
-			productRatePlanId: 'supporterPlusProductRatePlanId',
-			catalogBasePrice: 1,
-			subscriptionChargeId: 'subscriptionChargeId',
-			contributionChargeId: 'contributionChargeId',
-		},
-		sourceProduct: {
-			productRatePlanId: 'contributionProductRatePlanId',
-			chargeId: 'chargeId',
-		},
+	target: {
+		productRatePlanId: 'supporterPlusProductRatePlanId',
+		subscriptionChargeId: 'subscriptionChargeId',
+		actualTotalPrice: 1,
+		ratePlanName: 'Supporter Plus V2 - Monthly',
 	},
 });
 
 test('supporterRatePlanItemFromSwitchInformation works with no contribution element', () => {
-	const switchInformation: TargetInformation = getSwitchInformation(0);
-
-	expect(
-		supporterRatePlanItemFromSwitchInformation(switchInformation),
-	).toStrictEqual({
-		subscriptionName: 'subscriptionNumber',
-		identityId: 'identityId',
-		productRatePlanId: 'supporterPlusProductRatePlanId',
-		productRatePlanName: 'Supporter Plus V2 - Monthly',
-		termEndDate: zuoraDateFormat(dayjs().add(1, 'year')),
-		contractEffectiveDate: zuoraDateFormat(dayjs()),
-	});
-});
-
-test('supporterRatePlanItemFromSwitchInformation works with a contribution element', () => {
-	const switchInformation: TargetInformation = getSwitchInformation(10);
+	const switchInformation: SwitchInformation = getSwitchInformation();
 
 	expect(
 		supporterRatePlanItemFromSwitchInformation(switchInformation),

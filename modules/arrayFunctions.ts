@@ -177,18 +177,22 @@ export const headOption = <T>(
 	if (array.length > 1) {
 		throw error('Array had more than one matching element');
 	}
-	if (array.length === 0) {
+	if (array.length === 0 || !array[0]) {
 		return undefined;
-	}
-	if (!array[0]) {
-		throw error('Matching element was null or undefined');
 	}
 	return array[0];
 };
 
 export const findDuplicates = <T>(array: T[]) =>
 	array.filter((item, index) => array.indexOf(item) !== index);
-export const distinct = <T>(array: T[]) => Array.from(new Set(array));
+
+// see SameValueZero column of  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Equality_comparisons_and_sameness#comparing_equality_methods
+// objects would work in theory but are tested by identity rather than structurally
+export type SafeForDistinct = number | string | undefined;
+
+export const distinct = <T extends SafeForDistinct>(array: T[]) =>
+	Array.from(new Set(array));
+
 export const arrayToObject = <T>(array: Array<Record<string, T>>) => {
 	return array.reduce((acc, val) => {
 		return { ...acc, ...val };

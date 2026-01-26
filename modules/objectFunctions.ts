@@ -34,18 +34,24 @@ export function objectFromEntries<K extends string, V>(
 	return Object.fromEntries(libs) as Record<K, V>;
 }
 
+type NonUndefined<T> = T extends undefined ? never : T;
+
 export function objectEntries<T extends object>(
 	theMappings: (T | {}) | T,
 ): Array<
-	{
-		[K in keyof T]: [K, T[K]];
-	}[keyof T]
+	NonUndefined<
+		{
+			[K in keyof T]: [K, NonUndefined<T[K]>];
+		}[keyof T]
+	>
 > {
 	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- allowed in utility function - get back type lost by Object.entries
 	return Object.entries(theMappings) as Array<
-		{
-			[K in keyof T]: [K, T[K]];
-		}[keyof T]
+		NonUndefined<
+			{
+				[K in keyof T]: [K, NonUndefined<T[K]>];
+			}[keyof T]
+		>
 	>;
 }
 
@@ -80,16 +86,16 @@ export function objectJoin<K extends string, VA, VB>(
  * just e.g. the ratePlans and keep everything else the same.
  *
  * @param obj
- * @param property
+ * @param propertyName
  * @param mapFn
  */
-export function mapProperty<T, K extends keyof T, V>(
+export function mapValue<T, K extends keyof T, V>(
 	obj: T,
-	property: K,
+	propertyName: K,
 	mapFn: (value: T[K]) => V,
 ): Omit<T, K> & { [P in K]: V } {
 	return {
 		...obj,
-		[property]: mapFn(obj[property]),
+		[propertyName]: mapFn(obj[propertyName]),
 	};
 }

@@ -5,7 +5,6 @@
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
-import { getCatalogRatePlanName } from '../src/catalogInformation';
 import { selectCandidateSubscriptionCharge } from '../src/frequencySwitchEndpoint';
 import { productCatalog } from './productCatalogFixture';
 
@@ -424,22 +423,5 @@ describe('selectCandidateSubscriptionCharge', () => {
 				zuoraClient,
 			),
 		).rejects.toThrow('next invoice has no negative items');
-	});
-});
-
-describe('getCatalogRatePlanName', () => {
-	test('converts "Month" to "Monthly"', () => {
-		expect(getCatalogRatePlanName('Month')).toBe('Monthly');
-	});
-
-	test('converts "Annual" to "Annual"', () => {
-		expect(getCatalogRatePlanName('Annual')).toBe('Annual');
-	});
-
-	test('throws error for unsupported billing period', () => {
-		const invalidPeriod = 'Quarter' as unknown as 'Month' | 'Annual';
-		expect(() => getCatalogRatePlanName(invalidPeriod)).toThrow(
-			'Unsupported billing period Quarter',
-		);
 	});
 });

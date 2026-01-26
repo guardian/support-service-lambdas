@@ -7,14 +7,16 @@ import { objectValues } from '@modules/objectFunctions';
 import {
 	distinct,
 	getIfNonEmpty,
-	getSingleOrThrow,
+	headOption,
+	SafeForDistinct,
 	sumNumbers,
 } from '@modules/arrayFunctions';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import {
 	isValidSwitchableRatePlanKey,
 	ValidSwitchableRatePlanKey,
 } from './switchesHelper';
+import { GuardianRatePlanCharges } from '../../guardianSubscription/guardianSubscriptionParser';
 
 export type SubscriptionInformation = {
 	accountNumber: string; // order
@@ -24,7 +26,7 @@ export type SubscriptionInformation = {
 	previousAmount: number; //sf tracking
 	productRatePlanKey: ValidSwitchableRatePlanKey; // email, FIXME supporter product data(need TARGET rate plan name)
 	termStartDate: Date; // order
-	chargedThroughDate: Date; // refund check
+	chargedThroughDate?: Dayjs; // refund check
 	productRatePlanId: string; // order
 	chargeIds: [string, ...string[]]; // filter invoice refund items, find if charged through date are the same and are is today(todo can return it from single plan sub) // needed to find the refund amount in the invoice (todo total it) and the charged through date (todo toSet it and check it's unique)
 };
@@ -46,36 +48,44 @@ export function shouldStartNewTerm(termStartDate: Date, today: dayjs.Dayjs) {
 	return startNewTerm;
 }
 
-function getDistinctNonNullChargeValue<T>(
-	subscription: SinglePlanGuardianSubscription,
-	getValue: (value: RatePlanCharge) => T | null,
-): T {
-	const sourceCharges = objectValues(subscription.ratePlan.ratePlanCharges);
+function getDistinctChargeValue<T extends SafeForDistinct>(
+	ratePlanCharges: GuardianRatePlanCharges,
+	getValue: (value: RatePlanCharge) => T,
+): T | undefined {
+	const sourceCharges = objectValues(ratePlanCharges);
 
-	const chargedThroughDates = sourceCharges.flatMap(
-		(ratePlanCharge: RatePlanCharge) => {
-			const value = getValue(ratePlanCharge);
-			return value !== null ? [value] : [];
-		},
-	);
-	const chargedThroughDate: T = getSingleOrThrow(
-		distinct(chargedThroughDates),
+	const values = sourceCharges.map(getValue);
+	const asSet = distinct(values);
+	const value: T | undefined = headOption(
+		asSet,
 		(msg) =>
 			new Error(
-				"couldn't extract a chargedThroughDate from the charges: " + msg,
+				"couldn't extract a chargedThroughDate from the charges: " +
+					msg +
+					' was: ' +
+					JSON.stringify(asSet),
 			),
 	);
-	return chargedThroughDate;
+	return value;
+}
+
+function getChargedThroughDate(subscription: SinglePlanGuardianSubscription) {
+	return getDistinctChargeValue(
+		subscription.ratePlan.ratePlanCharges,
+		(ratePlanCharge: RatePlanCharge) =>
+			ratePlanCharge.chargedThroughDate?.getTime(),
+	);
 }
 
 export function getSubscriptionInformation({
 	subscription,
 	productCatalogKeys,
 }: GuardianSubscriptionWithKeys) {
-	const chargedThroughDate = getDistinctNonNullChargeValue(
-		subscription,
-		(ratePlanCharge: RatePlanCharge) => ratePlanCharge.chargedThroughDate,
-	);
+	const bareChargedThrough = getChargedThroughDate(subscription);
+	const chargedThroughDate: Dayjs | undefined =
+		bareChargedThrough !== undefined
+			? dayjs(new Date(bareChargedThrough))
+			: undefined;
 
 	const productRatePlanKey = productCatalogKeys.productRatePlanKey;
 	if (!isValidSwitchableRatePlanKey(productRatePlanKey))

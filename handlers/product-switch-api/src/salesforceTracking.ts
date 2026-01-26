@@ -2,7 +2,7 @@ import { sendMessageToQueue } from '@modules/aws/sqs';
 import { prettyPrint } from '@modules/prettyPrint';
 import { logger } from '@modules/routing/logger';
 import type { TargetInformation } from './changePlan/prepare/targetInformation';
-import { ProductSwitchRequestBody } from './schemas';
+import { ProductSwitchRequestBody } from './changePlan/schemas';
 import { Stage } from '@modules/stage';
 import { SubscriptionInformation } from './changePlan/prepare/subscriptionInformation';
 
@@ -23,7 +23,7 @@ export type SalesforceTrackingInput = {
 export function createSQSMessageBody(
 	targetInformation: TargetInformation,
 	subscriptionInformation: SubscriptionInformation,
-	input: ProductSwitchRequestBody,
+	input: Pick<ProductSwitchRequestBody, 'csrUserId' | 'caseId'>,
 	paidAmount: number,
 	now: Date,
 ) {
@@ -52,7 +52,7 @@ export function createSQSMessageBody(
 
 export const sendSalesforceTracking = async (
 	stage: Stage,
-	input: ProductSwitchRequestBody,
+	input: Pick<ProductSwitchRequestBody, 'csrUserId' | 'caseId'>,
 	paidAmount: number,
 	targetInformation: TargetInformation,
 	subscriptionInformation: SubscriptionInformation,

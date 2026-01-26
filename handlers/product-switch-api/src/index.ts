@@ -9,12 +9,12 @@ import { frequencySwitchHandler } from './frequencySwitchEndpoint';
 import { frequencySwitchRequestSchema } from './frequencySwitchSchemas';
 import {
 	contributionToSupporterPlusEndpoint,
-	productSwitchEndpoint,
+	ProductSwitchEndpoint,
 } from './changePlan/productSwitchEndpoint';
 import {
 	productSwitchGenericRequestSchema,
 	productSwitchRequestSchema,
-} from './schemas';
+} from './changePlan/schemas';
 
 const stage = stageFromEnvironment();
 
@@ -53,7 +53,7 @@ export const handler: Handler = Router([
 			productSwitchGenericRequestSchema,
 			withMMAIdentityCheck(
 				stage,
-				productSwitchEndpoint(stage, dayjs()),
+				ProductSwitchEndpoint.handler(stage, dayjs()),
 				(parsed) => parsed.path.subscriptionNumber,
 			),
 		),

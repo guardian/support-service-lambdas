@@ -1,24 +1,26 @@
-import { Lazy } from '@modules/lazy';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { OrderAction } from '@modules/zuora/orders/orderActions';
 import type { OrderRequest } from '@modules/zuora/orders/orderRequests';
-import type {
-	GetInvoiceResponse,
-	ZuoraUpperCaseSuccess,
-} from '@modules/zuora/types';
 import {
+	GetInvoiceResponse,
 	zuoraAccountSchema,
 	zuoraSubscriptionSchema,
+	ZuoraUpperCaseSuccess,
 } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
-import zuoraCatalogFixture from '../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
-import type { ZuoraSwitchResponse } from '../src/schemas';
-import getSwitchInformation from '../src/changePlan/prepare/targetInformation';
-import accountJson from './fixtures/account.json';
-import pendingAmendmentsJson from './fixtures/pendingAmendments.json';
-import { preview } from '../src/changePlan/action/preview';
-import { switchToSupporterPlus } from '../src/changePlan/action/switch';
+import zuoraCatalogFixture from '../../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
+import type { ZuoraSwitchResponse } from '../../../src/changePlan/schemas';
+import { TargetInformation } from '../../../src/changePlan/prepare/targetInformation';
+import accountJson from '../../fixtures/account.json';
+import pendingAmendmentsJson from '../../fixtures/pendingAmendments.json';
+import { DoPreviewAction } from '../../../src/changePlan/action/preview';
+import { getSubscriptionInformation } from '../../../src/changePlan/prepare/subscriptionInformation';
+import { SwitchOrderRequestBuilder } from '../../../src/changePlan/prepare/buildSwitchOrderRequest';
+import { loadSubscription } from '../prepare/subscriptionInformation.test';
+import { DoSwitchAction } from '../../../src/changePlan/action/switch';
+import { supporterPlusTargetInformation } from '../../../src/changePlan/switchDefinition/supporterPlusTargetInformation';
+import { getAccountInformation } from '../../../src/changePlan/prepare/accountInformation';
 
 const mockZuoraClient = {
 	get: jest.fn(),
@@ -28,20 +30,29 @@ const mockZuoraClient = {
 
 const productCatalog = generateProductCatalog(zuoraCatalogFixture);
 
-const subscription = zuoraSubscriptionSchema.parse(pendingAmendmentsJson);
+const { guardianSubscriptionWithKeys } = loadSubscription(
+	zuoraSubscriptionSchema.parse(pendingAmendmentsJson),
+	dayjs('2024-12-05'),
+);
 const account = zuoraAccountSchema.parse(accountJson);
+//
+// const today = dayjs('2024-12-05T22:42:06');
 
-const today = dayjs('2024-12-05T22:42:06');
-
-const getTestSwitchInformation = async () =>
-	await getSwitchInformation(
-		'CODE',
-		{ preview: false },
-		subscription,
-		account,
-		productCatalog,
-		new Lazy(() => Promise.resolve([]), 'test'),
-		today,
+const getTestTargetInformation = async () =>
+	await supporterPlusTargetInformation(
+		productCatalog.SupporterPlus.ratePlans.Annual,
+		{
+			mode: 'switchToBasePrice',
+			currency: 'GBP',
+			previousAmount: 10,
+			// 'CODE',
+			// { preview: false },
+			// subscription,
+			// account,
+			// productCatalog,
+			// new Lazy(() => Promise.resolve([]), 'test'),
+			// today,
+		},
 	);
 
 function getOrderData() {
@@ -52,6 +63,7 @@ function getOrderData() {
 	return { url, orderTypes };
 }
 
+// pending amendment means the chargedThroughDate disappears to null, and the effective start date goes to "next payment date"
 describe('pendingAmendments, e.g. contribution amount changes, are dealt with correctly', () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
@@ -125,13 +137,27 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 			},
 		});
 
-		const switchInformation = await getTestSwitchInformation();
+		const switchInformation: TargetInformation =
+			await getTestTargetInformation();
 
-		const result = await preview(
-			mockZuoraClient as unknown as ZuoraClient,
-			switchInformation,
-			subscription,
+		const subscriptionInformation = getSubscriptionInformation(
+			guardianSubscriptionWithKeys,
 		);
+
+		const orderRequest: SwitchOrderRequestBuilder =
+			new SwitchOrderRequestBuilder(
+				switchInformation.productRatePlanId,
+				switchInformation.contributionCharge,
+				switchInformation.discount?.productRatePlanId['CODE'],
+				subscriptionInformation,
+				true,
+			);
+
+		const result = await new DoPreviewAction(
+			mockZuoraClient as unknown as ZuoraClient,
+			'CODE',
+			dayjs('2025-09-16'),
+		).preview(subscriptionInformation, switchInformation, orderRequest);
 
 		expect(result.amountPayableToday).toBe(75);
 		expect(result.supporterPlusPurchaseAmount).toBe(150);
@@ -194,25 +220,49 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 		const sendSalesforceTracking = jest.fn().mockResolvedValue(undefined);
 		const sendToSupporterProductData = jest.fn().mockResolvedValue(undefined);
 
-		jest.doMock('../src/payment', () => ({
+		jest.doMock('../../../src/payment', () => ({
 			takePaymentOrAdjustInvoice,
 		}));
-		jest.doMock('../src/changePlan/action/productSwitchEmail', () => ({
+		jest.doMock('../../../src/changePlan/action/productSwitchEmail', () => ({
 			sendThankYouEmail,
 		}));
-		jest.doMock('../src/salesforceTracking', () => ({
+		jest.doMock('../../../src/salesforceTracking', () => ({
 			sendSalesforceTracking,
 		}));
-		jest.doMock('../src/supporterProductData', () => ({
+		jest.doMock('../../../src/supporterProductData', () => ({
 			sendToSupporterProductData,
 		}));
 
-		const switchInformation = await getTestSwitchInformation();
+		const targetInformation: TargetInformation =
+			await getTestTargetInformation();
 
-		const result = await switchToSupporterPlus(
+		const subscriptionInformation = getSubscriptionInformation(
+			guardianSubscriptionWithKeys,
+		);
+
+		const orderRequest: SwitchOrderRequestBuilder =
+			new SwitchOrderRequestBuilder(
+				targetInformation.productRatePlanId,
+				targetInformation.contributionCharge,
+				targetInformation.discount?.productRatePlanId['CODE'],
+				subscriptionInformation,
+				false,
+			);
+
+		const accountInformation = getAccountInformation(account);
+
+		const result = await new DoSwitchAction(
 			mockZuoraClient as unknown as ZuoraClient,
-			switchInformation,
+			'CODE',
 			dayjs('2025-09-16'),
+		).switchToSupporterPlus(
+			{ caseId: 'asdfCaseId', csrUserId: 'asdfCsrUserId' },
+			{
+				account: accountInformation,
+				subscription: subscriptionInformation,
+				target: targetInformation,
+			},
+			orderRequest,
 		);
 
 		expect(result.message).toContain('Product move completed successfully');
@@ -222,5 +272,6 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 			url: 'v1/orders?returnIds=true',
 			orderTypes: ['ChangePlan', 'TermsAndConditions', 'RenewSubscription'],
 		});
+		// TODO might be worth checking that it actually removed the pending amendments - need to mock the getLatestAmendment call
 	});
 });

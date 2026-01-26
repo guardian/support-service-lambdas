@@ -4,7 +4,7 @@ import {
 	ProductSwitchRequestBody,
 	ZuoraSwitchResponse,
 	zuoraSwitchResponseSchema,
-} from '../../schemas';
+} from '../schemas';
 import { removePendingUpdateAmendments } from '../../amendments';
 import { takePaymentOrAdjustInvoice } from '../../payment';
 import { sendThankYouEmail } from './productSwitchEmail';
@@ -29,7 +29,7 @@ export class DoSwitchAction {
 		private today: dayjs.Dayjs,
 	) {}
 	async switchToSupporterPlus(
-		input: ProductSwitchRequestBody,
+		input: Pick<ProductSwitchRequestBody, 'csrUserId' | 'caseId'>,
 		switchInformation: SwitchInformation,
 		orderRequest: SwitchOrderRequestBuilder,
 	): Promise<SwitchResponse> {
@@ -69,7 +69,7 @@ export class DoSwitchAction {
 		};
 	}
 
-	doSwitch = async (orderRequest: OrderRequest): Promise<string> => {
+	private doSwitch = async (orderRequest: OrderRequest): Promise<string> => {
 		const requestBody = buildSwitchRequestBody(orderRequest);
 
 		const switchResponse: ZuoraSwitchResponse = await this.zuoraClient.post(

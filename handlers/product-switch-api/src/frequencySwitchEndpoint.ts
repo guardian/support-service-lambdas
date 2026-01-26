@@ -19,10 +19,7 @@ import type {
 	OrderRequest,
 	PreviewOrderRequest,
 } from '@modules/zuora/orders/orderRequests';
-import {
-	executeOrderRequest,
-	previewOrderRequest,
-} from '@modules/zuora/orders/orderRequests';
+import { executeOrderRequest } from '@modules/zuora/orders/orderRequests';
 import type { ZuoraAccount } from '@modules/zuora/types';
 import type {
 	RatePlan,
@@ -40,11 +37,8 @@ import type {
 	FrequencySwitchRequestBody,
 	FrequencySwitchSuccessResponse,
 } from './frequencySwitchSchemas';
-import type { ZuoraPreviewResponse } from './schemas';
-import {
-	zuoraPreviewResponseSchema,
-	zuoraSwitchResponseSchema,
-} from './schemas';
+import { zuoraSwitchResponseSchema } from './changePlan/schemas';
+import { doPreviewInvoices, ZuoraPreviewResponse } from './doPreviewInvoices';
 
 /**
  * Validation requirements for frequency switch eligibility.
@@ -325,10 +319,9 @@ export async function previewFrequencySwitch(
 		...baseOrderRequest,
 	};
 
-	const zuoraPreview: ZuoraPreviewResponse = await previewOrderRequest(
+	const zuoraPreview: ZuoraPreviewResponse = await doPreviewInvoices(
 		zuoraClient,
 		orderRequest,
-		zuoraPreviewResponseSchema,
 	);
 
 	logger.log('Orders preview returned successful response', zuoraPreview);

@@ -4,17 +4,10 @@
 
 import { sendToSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
 import { supporterRatePlanItemFromSwitchInformation } from '../src/supporterProductData';
-import type { TargetInformation } from '../src/changePlan/prepare/targetInformation';
+import { SwitchInformation } from '../src/changePlan/prepare/switchInformation';
 
 test('supporter product data', async () => {
-	const switchInformation: TargetInformation = {
-		stage: 'CODE',
-		actualTotalPrice: 10,
-		input: {
-			preview: false,
-		},
-		startNewTerm: true,
-		contributionAmount: 0,
+	const switchInformation: SwitchInformation = {
 		account: {
 			id: 'accountId',
 			identityId: '999999111',
@@ -22,27 +15,24 @@ test('supporter product data', async () => {
 			firstName: 'firstName',
 			lastName: 'lastName',
 			defaultPaymentMethodId: 'defaultPaymentMethodId',
+			currency: 'GBP',
 		},
 		subscription: {
-			billingPeriod: 'Month',
 			subscriptionNumber: 'A-S1234567',
 			accountNumber: 'accountNumber',
 			previousProductName: 'previousProductName',
 			previousRatePlanName: 'previousRatePlanName',
 			previousAmount: 1,
-			currency: 'GBP',
+			productRatePlanKey: 'Monthly',
+			termStartDate: new Date(),
+			productRatePlanId: 'contributionProductRatePlanId',
+			chargeIds: ['chargeId'],
 		},
-		catalog: {
-			targetProduct: {
-				productRatePlanId: '8a128ed885fc6ded018602296ace3eb8',
-				catalogBasePrice: 10,
-				subscriptionChargeId: 'subscriptionChargeId',
-				contributionChargeId: 'contributionChargeId',
-			},
-			sourceProduct: {
-				productRatePlanId: 'contributionProductRatePlanId',
-				chargeId: 'chargeId',
-			},
+		target: {
+			productRatePlanId: '8a128ed885fc6ded018602296ace3eb8',
+			subscriptionChargeId: 'subscriptionChargeId',
+			actualTotalPrice: 10,
+			ratePlanName: 'Supporter Plus V2 - Monthly',
 		},
 	};
 

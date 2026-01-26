@@ -4,11 +4,7 @@ import {
 } from '@modules/product-catalog/productCatalog';
 import { RatePlanCharge, ZuoraSubscription } from '@modules/zuora/types';
 import { ZuoraCatalog } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import {
-	mapProperty,
-	objectJoin,
-	objectLeftJoin,
-} from '@modules/objectFunctions';
+import { mapValue, objectJoin, objectLeftJoin } from '@modules/objectFunctions';
 import {
 	groupSubscriptionByZuoraCatalogIds,
 	RestRatePlan,
@@ -27,7 +23,7 @@ import {
 } from './buildZuoraProductIdToKey';
 import { groupMapSingleOrThrow } from '@modules/arrayFunctions';
 
-type GuardianRatePlanCharges = Record<
+export type GuardianRatePlanCharges = Record<
 	string, // guardian rate plan charge key e.g. 'Subscription' or 'Saturday' - FIXME use ProductRatePlanChargeKey<P> & string
 	RatePlanCharge // is technically the zuora charge but we don't need to touch it
 >;
@@ -41,7 +37,7 @@ export type GuardianRatePlans<P extends ProductKey> = Record<
 	GuardianRatePlan[]
 >;
 export type GuardianSubscriptionProducts = {
-	[K in ProductKey]: GuardianRatePlans<K>;
+	[K in ProductKey]?: GuardianRatePlans<K>;
 };
 export type GuardianSubscription = {
 	products: GuardianSubscriptionProducts;
@@ -112,7 +108,7 @@ export class GuardianSubscriptionParser {
 	}
 
 	parse(zuoraSubscription: ZuoraSubscription): GuardianSubscription {
-		return mapProperty(
+		return mapValue(
 			groupSubscriptionByZuoraCatalogIds(zuoraSubscription),
 			'products',
 			(zuoraSubscriptionProducts) =>
@@ -187,7 +183,7 @@ class GuardianRatePlansBuilder<P extends ProductKey> {
 	buildGuardianRatePlan(
 		zuoraSubscriptionRatePlan: ZuoraRatePlanWithChargesByPRPCId,
 	): GuardianRatePlan {
-		return mapProperty(
+		return mapValue(
 			zuoraSubscriptionRatePlan,
 			'ratePlanCharges',
 			(ratePlanCharges) => this.buildGuardianRatePlanCharges(ratePlanCharges),

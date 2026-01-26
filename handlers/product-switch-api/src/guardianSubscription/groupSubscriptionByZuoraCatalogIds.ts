@@ -9,7 +9,7 @@ import {
 	RatePlanCharge,
 	ZuoraSubscription,
 } from '@modules/zuora/types';
-import { mapProperty } from '@modules/objectFunctions';
+import { mapValue } from '@modules/objectFunctions';
 
 export type RestRatePlan = Omit<RatePlan, 'ratePlanCharges'>;
 export type RestSubscription = Omit<ZuoraSubscription, 'ratePlans'>;
@@ -82,7 +82,7 @@ function doubleGroupRatePlans(
  * @param ratePlan
  */
 function indexTheCharges(ratePlan: RatePlan): ZuoraRatePlanWithChargesByPRPCId {
-	return mapProperty(ratePlan, 'ratePlanCharges', (ratePlanCharges) =>
+	return mapValue(ratePlan, 'ratePlanCharges', (ratePlanCharges) =>
 		groupSingleOrThrow(
 			ratePlanCharges,
 			(rpc) => rpc.productRatePlanChargeId,

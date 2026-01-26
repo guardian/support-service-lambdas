@@ -1,21 +1,18 @@
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { TargetInformation } from '../prepare/targetInformation';
-import {
-	previewOrderRequest,
-	PreviewOrderRequest,
-} from '@modules/zuora/orders/orderRequests';
+import { PreviewOrderRequest } from '@modules/zuora/orders/orderRequests';
 import dayjs, { type Dayjs } from 'dayjs';
-import {
-	ZuoraPreviewResponse,
-	type ZuoraPreviewResponseInvoice,
-	type ZuoraPreviewResponseInvoiceItem,
-	zuoraPreviewResponseSchema,
-} from '../../schemas';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import { SubscriptionInformation } from '../prepare/subscriptionInformation';
 import { Stage } from '@modules/stage';
 import { SwitchOrderRequestBuilder } from '../prepare/buildSwitchOrderRequest';
+import {
+	doPreviewInvoices,
+	ZuoraPreviewResponse,
+	ZuoraPreviewResponseInvoice,
+	ZuoraPreviewResponseInvoiceItem,
+} from '../../doPreviewInvoices';
 
 export type PreviewResponse = {
 	amountPayableToday: number;
@@ -33,16 +30,19 @@ export interface SwitchDiscountResponse {
 }
 
 export const refundExpected = (
-	chargedThroughDate: Date,
-	currentDate: Date,
+	chargedThroughDate: Dayjs | undefined,
+	currentDate: Dayjs,
 ): boolean => {
-	return currentDate.toDateString() !== chargedThroughDate.toDateString();
+	// FIXME think about what happens if someone switches T1->2->3 within a month?
+	return (
+		chargedThroughDate !== undefined && !currentDate.isSame(chargedThroughDate)
+	);
 };
 
 export const getContributionRefundAmount = (
 	zuoraPreviewInvoice: ZuoraPreviewResponseInvoice,
 	sourceChargeIds: [string, ...string[]],
-	chargedThroughDate: Date,
+	chargedThroughDate?: Dayjs,
 ): number => {
 	const contributionRefundAmount = zuoraPreviewInvoice.invoiceItems
 		.filter((invoiceItem: ZuoraPreviewResponseInvoiceItem) =>
@@ -55,7 +55,7 @@ export const getContributionRefundAmount = (
 		);
 	if (
 		contributionRefundAmount == undefined &&
-		refundExpected(chargedThroughDate, new Date())
+		refundExpected(chargedThroughDate, dayjs())
 	) {
 		throw Error('No contribution refund amount found in the preview response');
 	}
@@ -68,7 +68,7 @@ export const previewResponseFromZuoraResponse = (
 	zuoraResponse: ZuoraPreviewResponse,
 	targetInformation: TargetInformation,
 	sourceProductChargeIds: [string, ...string[]],
-	chargedThroughDate: Date,
+	chargedThroughDate?: Dayjs,
 ): PreviewResponse => {
 	const invoice: ZuoraPreviewResponseInvoice = getIfDefined(
 		zuoraResponse.previewResult?.invoices[0],
@@ -146,14 +146,17 @@ export class DoPreviewAction {
 		targetInformation: TargetInformation,
 		orderRequest: SwitchOrderRequestBuilder,
 	): Promise<PreviewResponse> => {
-		const requestBody: PreviewOrderRequest = buildPreviewRequestBody(
-			this.today,
-			orderRequest,
-		);
-		const zuoraResponse: ZuoraPreviewResponse = await previewOrderRequest(
+		const requestBody: PreviewOrderRequest = {
+			previewOptions: {
+				previewThruType: 'SpecificDate',
+				previewTypes: ['BillingDocs'],
+				specificPreviewThruDate: zuoraDateFormat(this.today),
+			},
+			...orderRequest.build(this.today),
+		};
+		const zuoraResponse: ZuoraPreviewResponse = await doPreviewInvoices(
 			this.zuoraClient,
 			requestBody,
-			zuoraPreviewResponseSchema,
 		);
 		return previewResponseFromZuoraResponse(
 			this.stage,
@@ -164,16 +167,3 @@ export class DoPreviewAction {
 		);
 	};
 }
-const buildPreviewRequestBody = (
-	orderDate: Dayjs,
-	orderRequest: SwitchOrderRequestBuilder,
-): PreviewOrderRequest => {
-	return {
-		previewOptions: {
-			previewThruType: 'SpecificDate',
-			previewTypes: ['BillingDocs'],
-			specificPreviewThruDate: zuoraDateFormat(orderDate),
-		},
-		...orderRequest.build(orderDate),
-	};
-};

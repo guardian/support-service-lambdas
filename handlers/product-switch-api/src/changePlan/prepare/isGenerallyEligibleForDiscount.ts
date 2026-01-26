@@ -1,10 +1,11 @@
 import { Lazy } from '@modules/lazy';
 import type { SimpleInvoiceItem } from '@modules/zuora/billingPreview';
+import { SwitchMode } from './targetInformation';
 
 // TODO use central eligibility checker pattern
 export function isGenerallyEligibleForDiscount(
 	subscriptionStatus: string,
-	mode: 'switch' | 'save',
+	mode: SwitchMode,
 	totalInvoiceBalance: number,
 	lazyBillingPreview: Lazy<SimpleInvoiceItem[]>,
 ): Lazy<boolean> {

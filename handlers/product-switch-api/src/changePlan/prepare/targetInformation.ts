@@ -1,4 +1,3 @@
-import { ValidationError } from '@modules/errors';
 import { type IsoCurrency } from '@modules/internationalisation/currency';
 import { Lazy } from '@modules/lazy';
 import {
@@ -6,14 +5,15 @@ import {
 	ProductCatalogHelper,
 	ProductKey,
 } from '@modules/product-catalog/productCatalog';
-import { Discount } from '../../discounts';
-import { ProductSwitchTargetBody } from '../../schemas';
+import { Discount } from '../switchDefinition/discounts';
+import { ProductSwitchTargetBody } from '../schemas';
 import {
 	getAvailableSwitchesFrom,
 	getSwitchTo,
 	ValidSwitchesFromRatePlan,
 	ValidTargetProduct,
 } from './switchesHelper';
+import { getIfDefined } from '@modules/nullAndUndefined';
 
 export type TargetInformation = {
 	actualTotalPrice: number; // email, sf tracking
@@ -29,19 +29,35 @@ export type TargetContribution = {
 	contributionAmount: number;
 };
 
+export type SwitchMode =
+	| 'switchToBasePrice'
+	| 'switchWithPriceOverride'
+	| 'save';
 export type SwitchActionData = {
+	mode: SwitchMode;
 	currency: IsoCurrency;
-	previousAmount: number;
-	generallyEligibleForDiscount: Lazy<boolean>;
-	userRequestedAmount: number | undefined;
-};
+} & (
+	| {
+			mode: 'switchToBasePrice';
+			previousAmount: number;
+	  }
+	| {
+			mode: 'switchWithPriceOverride';
+			userRequestedAmount: number;
+	  }
+	| {
+			mode: 'save';
+			previousAmount: number;
+			generallyEligibleForDiscount: Lazy<boolean>;
+	  }
+);
 
 /**
  * validate that the requested switch is possible and allowed for the situation, returning any information needed to
  * add the new subscription correctly.
  */
 export const getTargetInformation = (
-	mode: 'switch' | 'save',
+	mode: SwitchMode,
 	input: ProductSwitchTargetBody,
 	productCatalogKeys: GuardianCatalogKeys<ProductKey>,
 	generallyEligibleForDiscount: Lazy<boolean>,
@@ -49,24 +65,40 @@ export const getTargetInformation = (
 	previousAmount: number,
 	productCatalogHelper: ProductCatalogHelper,
 ): Promise<TargetInformation> => {
-	if (mode === 'save' && input.newAmount) {
-		throw new ValidationError(
-			'you cannot currently choose your amount during the save journey',
-		);
-	}
-
 	const targetProductKeys: GuardianCatalogKeys<typeof input.targetProduct> =
 		productCatalogHelper.validateOrThrow(
 			input.targetProduct,
 			productCatalogKeys.productRatePlanKey, // keep the rate plan name (frequency) as the existing sub
 		);
 
-	const switchActionData: SwitchActionData = {
-		currency,
-		previousAmount,
-		generallyEligibleForDiscount,
-		userRequestedAmount: input.newAmount,
-	};
+	let switchActionData: SwitchActionData;
+	switch (mode) {
+		case 'switchToBasePrice':
+			switchActionData = {
+				mode,
+				currency,
+				previousAmount,
+			};
+			break;
+		case 'switchWithPriceOverride':
+			switchActionData = {
+				mode,
+				currency,
+				userRequestedAmount: getIfDefined(
+					input.newAmount,
+					'type error - missing amount',
+				),
+			};
+			break;
+		case 'save':
+			switchActionData = {
+				mode,
+				currency,
+				previousAmount,
+				generallyEligibleForDiscount,
+			};
+			break;
+	}
 
 	return getSwitchSpecificTargetInformationOrThrow(
 		productCatalogHelper,
@@ -76,7 +108,7 @@ export const getTargetInformation = (
 	);
 };
 
-export function getSwitchSpecificTargetInformationOrThrow<
+function getSwitchSpecificTargetInformationOrThrow<
 	SP extends ProductKey, // change to ValidSwitchFromKeys to simplify types?
 	TP extends ValidTargetProduct,
 >(

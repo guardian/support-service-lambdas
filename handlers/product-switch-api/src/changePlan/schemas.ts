@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { validTargetProductKeys } from './changePlan/prepare/switchesHelper';
+import { validTargetProductKeys } from './prepare/switchesHelper';
 
 export const productSwitchRequestSchema = z.object({
 	preview: z.boolean(),
@@ -24,48 +24,8 @@ export type ProductSwitchGenericRequestBody = z.infer<
 >;
 export type ProductSwitchTargetBody = Pick<
 	ProductSwitchGenericRequestBody,
-	'targetProduct' | 'newAmount'
+	'targetProduct' | 'newAmount' | 'applyDiscountIfAvailable'
 >;
-
-export const zuoraPreviewResponseInvoiceItemSchema = z.object({
-	serviceStartDate: z.string(),
-	serviceEndDate: z.string(),
-	amountWithoutTax: z.number(),
-	taxAmount: z.number(),
-	chargeName: z.string(),
-	processingType: z.string(),
-	productName: z.string(),
-	productRatePlanChargeId: z.string(),
-	unitPrice: z.number(),
-	subscriptionNumber: z.string(),
-});
-
-export type ZuoraPreviewResponseInvoiceItem = z.infer<
-	typeof zuoraPreviewResponseInvoiceItemSchema
->;
-
-export const zuoraPreviewResponseInvoiceSchema = z.object({
-	amount: z.number(),
-	amountWithoutTax: z.number(),
-	taxAmount: z.number(),
-	targetDate: z.string(),
-	invoiceItems: z.array(zuoraPreviewResponseInvoiceItemSchema),
-});
-
-export type ZuoraPreviewResponseInvoice = z.infer<
-	typeof zuoraPreviewResponseInvoiceSchema
->;
-
-export const zuoraPreviewResponseSchema = z.object({
-	previewResult: z.optional(
-		z.object({
-			invoices: z.array(zuoraPreviewResponseInvoiceSchema),
-		}),
-	),
-	reasons: z.optional(z.array(z.object({ message: z.string() }))),
-});
-
-export type ZuoraPreviewResponse = z.infer<typeof zuoraPreviewResponseSchema>;
 
 export const zuoraSwitchResponseSchema = z.object({
 	invoiceIds: z.optional(z.array(z.string())),

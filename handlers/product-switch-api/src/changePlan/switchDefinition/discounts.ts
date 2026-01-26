@@ -9,12 +9,9 @@ export type Discount = {
 	upToPeriods: number;
 	upToPeriodsType: 'Months' | 'Years';
 	discountPercentage: number;
-	discountedPrice: number;
 };
 
-type PartialDiscount = Omit<Discount, 'discountedPrice'>;
-
-export const annualContribHalfPriceSupporterPlusForOneYear: PartialDiscount = {
+export const annualContribHalfPriceSupporterPlusForOneYear: Discount = {
 	productRatePlanId: {
 		PROD: '8a12994695aa4f680195ae2dc9d221d8',
 		CODE: '71a1383e2b395842e6f58a2754ad00c1',
