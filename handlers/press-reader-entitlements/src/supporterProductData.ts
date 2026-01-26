@@ -7,6 +7,7 @@ import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import { getSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
+import { zuoraDateFormat } from '@modules/zuora/utils';
 
 export async function getLatestSubscription(
 	stage: Stage,
@@ -52,9 +53,8 @@ export function getLatestValidSubscription(
 				?.zuoraProduct,
 		),
 	);
-	const latestSubscription = sortBy(
-		validSubscriptions,
-		(item) => item.termEndDate,
+	const latestSubscription = sortBy(validSubscriptions, (item) =>
+		zuoraDateFormat(item.termEndDate),
 	).reverse()[0];
 	console.log(
 		`User has ${validSubscriptions.length} valid subscriptions, returning latest: ${JSON.stringify(latestSubscription)}`,

@@ -25,20 +25,20 @@ export const validatePromotion = (
 	}
 
 	checkPromotionIsActive(promotion);
-	console.log(`${promotion.promoCode} is active`);
+	logger.log(`${promotion.promoCode} is active`);
 
 	checkHasDiscount(promotion);
-	console.log(
+	logger.log(
 		`${promotion.promoCode} has a duration of ${promotion.discount.durationMonths}`,
 	);
 
 	validateForCountryGroup(promotion, appliedPromotion.supportRegionId);
-	console.log(
+	logger.log(
 		`Promotion ${promotion.promoCode} is valid for country group ${appliedPromotion.supportRegionId}`,
 	);
 
 	validateProductRatePlan(promotion, productRatePlanId);
-	console.log(
+	logger.log(
 		`Promotion ${promotion.promoCode} is valid for product rate plan ${productRatePlanId}`,
 	);
 

@@ -33,16 +33,17 @@ const getSwitchInformation = (): SwitchInformation => ({
 });
 
 test('supporterRatePlanItemFromSwitchInformation works with no contribution element', () => {
+	const now = dayjs();
 	const switchInformation: SwitchInformation = getSwitchInformation();
 
 	expect(
-		supporterRatePlanItemFromSwitchInformation(switchInformation),
+		supporterRatePlanItemFromSwitchInformation(now, switchInformation),
 	).toStrictEqual({
 		subscriptionName: 'subscriptionNumber',
 		identityId: 'identityId',
 		productRatePlanId: 'supporterPlusProductRatePlanId',
 		productRatePlanName: 'Supporter Plus V2 - Monthly',
-		termEndDate: zuoraDateFormat(dayjs().add(1, 'year')),
-		contractEffectiveDate: zuoraDateFormat(dayjs()),
+		termEndDate: now.add(1, 'year'),
+		contractEffectiveDate: now,
 	});
 });

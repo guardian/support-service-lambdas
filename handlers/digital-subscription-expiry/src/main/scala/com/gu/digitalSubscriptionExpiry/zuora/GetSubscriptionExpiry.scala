@@ -28,11 +28,14 @@ object GetSubscriptionExpiry {
 
   implicit def dateOrdering: Ordering[LocalDate] = Ordering.fromLessThan(_ isAfter _)
 
-  private val digipackChargeNamePrefixes = List("DIGIPACK", "DIGITAL PACK", "DIGITALPACK")
+  private val digitalPlusChargeNamePrefixes = List("DIGIPACK", "DIGITAL PACK", "DIGITALPACK")
 
-  private def isDigipackName(chargeName: String) = {
+  private val supporterPlusChargeNamePrefixes = List("SUPPORTER PLUS") // includes Tier Three
+
+  private def chargeProvisionsDigitalAccess(chargeName: String) = {
     val upperCaseName = chargeName.toUpperCase
-    digipackChargeNamePrefixes.exists(upperCaseName.contains(_))
+    digitalPlusChargeNamePrefixes.exists(upperCaseName.startsWith) ||
+      supporterPlusChargeNamePrefixes.exists(upperCaseName.startsWith)
   }
 
   private def getExpiryDateForValidSubscription(
@@ -50,17 +53,17 @@ object GetSubscriptionExpiry {
       !charge.effectiveEndDate.isBefore(dateToCheck) &&
         !charge.effectiveStartDate.isAfter(dateToCheck)
 
-    def isActiveDigipack(charge: RatePlanCharge) = isDigipackName(charge.name) && chargeSpansDate(charge)
-    val hasActiveDigipackCharges = subscription.ratePlans.flatMap(_.ratePlanCharges).exists(isActiveDigipack)
+    def chargeIsValidDigitalSub(charge: RatePlanCharge) = chargeProvisionsDigitalAccess(charge.name) && chargeSpansDate(charge)
+    val isValidDigitalSub = subscription.ratePlans.flatMap(_.ratePlanCharges).exists(chargeIsValidDigitalSub)
 
     @deprecated(
       "should only exist during Coronavirus measures (where digipack access is expanded to cover paper customers)",
     ) // FIXME remove after Coronavirus
-    def isNewspaper(ratePlan: RatePlan) = ratePlan.productName.toUpperCase.startsWith("NEWSPAPER")
+    def ratePlanIsNewspaper(ratePlan: RatePlan) = ratePlan.productName.toUpperCase.startsWith("NEWSPAPER")
     val isValidNewspaperSub =
-      subscription.ratePlans.filter(isNewspaper).flatMap(_.ratePlanCharges).exists(chargeSpansDate)
+      subscription.ratePlans.filter(ratePlanIsNewspaper).flatMap(_.ratePlanCharges).exists(chargeSpansDate)
 
-    if (hasActiveDigipackCharges || isValidNewspaperSub) {
+    if (isValidDigitalSub || isValidNewspaperSub) {
       Some(subscription.endDate.plusDays(1))
     } else None
   }

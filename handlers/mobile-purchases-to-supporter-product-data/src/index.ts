@@ -84,8 +84,8 @@ export const fetchSubscriptionAndDoUpdate = async (
 		subscriptionName: subscription.subscriptionId,
 		productRatePlanId: inAppPurchaseProductRatePlanId,
 		productRatePlanName: subscription.productId,
-		termEndDate: subscription.to.toISOString(),
-		contractEffectiveDate: subscription.from.toISOString(),
+		termEndDate: subscription.to,
+		contractEffectiveDate: subscription.from,
 	};
 	await sendToSupporterProductData(stage, supporterProductDataItem);
 	logger.log(

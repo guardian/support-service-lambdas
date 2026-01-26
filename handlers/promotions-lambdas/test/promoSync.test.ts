@@ -216,12 +216,14 @@ describe('promoSync handler', () => {
 		expect(mockedWriteToDynamoDb).not.toHaveBeenCalled();
 	});
 
-	it('should not include landingPage when title is undefined', async () => {
+	it('should allow landingPage with some undefined fields', async () => {
 		const imageWithoutLandingPageTitle: Record<string, AttributeValue> = {
 			...validNewImage,
 			landingPage: {
 				M: {
 					type: { S: 'supporterPlus' },
+					description: { S: 'description' },
+					// some fields are undefined
 				},
 			},
 		};
@@ -240,7 +242,7 @@ describe('promoSync handler', () => {
 
 		const calls = mockedWriteToDynamoDb.mock.calls as Array<[object, string]>;
 		calls.forEach(([item]) => {
-			expect(item).not.toHaveProperty('landingPage');
+			expect(item).toHaveProperty('landingPage');
 		});
 	});
 });
