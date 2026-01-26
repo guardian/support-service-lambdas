@@ -1,5 +1,4 @@
-import type {
-	SafeForDistinct} from '@modules/arrayFunctions';
+import type { SafeForDistinct } from '@modules/arrayFunctions';
 import {
 	distinct,
 	getIfNonEmpty,
@@ -15,11 +14,8 @@ import type {
 	SinglePlanGuardianSubscription,
 } from '../../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import type { GuardianRatePlanCharges } from '../../guardianSubscription/guardianSubscriptionParser';
-import type {
-	ValidSwitchableRatePlanKey} from './switchesHelper';
-import {
-	isValidSwitchableRatePlanKey
-} from './switchesHelper';
+import type { ValidSwitchableRatePlanKey } from './switchesHelper';
+import { isValidSwitchableRatePlanKey } from './switchesHelper';
 
 export type SubscriptionInformation = {
 	accountNumber: string; // order
@@ -90,10 +86,11 @@ export function getSubscriptionInformation({
 			? dayjs(new Date(bareChargedThrough))
 			: undefined;
 
-	const productRatePlanKey = productCatalogKeys.productRatePlanKey;
-	if (!isValidSwitchableRatePlanKey(productRatePlanKey))
+	const productRatePlanKey: string = productCatalogKeys.productRatePlanKey;
+	if (!isValidSwitchableRatePlanKey(productRatePlanKey)) {
 		// TODO move check to high level sub reader
-		{throw new Error(`unsupported rate plan key ${productRatePlanKey}`);}
+		throw new Error(`unsupported rate plan key ${productRatePlanKey}`);
+	}
 
 	const previousAmount = getSubscriptionTotalChargeAmount(subscription);
 

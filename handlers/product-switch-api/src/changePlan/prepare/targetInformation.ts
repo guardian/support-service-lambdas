@@ -10,11 +10,9 @@ import type { ProductSwitchTargetBody } from '../schemas';
 import type { Discount } from '../switchDefinition/discounts';
 import type {
 	ValidSwitchesFromRatePlan,
-	ValidTargetProduct} from './switchesHelper';
-import {
-	getAvailableSwitchesFrom,
-	getSwitchTo
+	ValidTargetProduct,
 } from './switchesHelper';
+import { getAvailableSwitchesFrom, getSwitchTo } from './switchesHelper';
 
 export type TargetInformation = {
 	actualTotalPrice: number; // email, sf tracking

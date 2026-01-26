@@ -9,11 +9,8 @@ import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 import { getTargetInformation } from '../../../src/changePlan/prepare/targetInformation';
 import { annualContribHalfPriceSupporterPlusForOneYear } from '../../../src/changePlan/switchDefinition/discounts';
-import type {
-	GuardianSubscriptionWithKeys} from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
-import {
-	getSinglePlanFlattenedSubscriptionOrThrow
-} from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
+import type { GuardianSubscriptionWithKeys } from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
+import { getSinglePlanFlattenedSubscriptionOrThrow } from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import { GuardianSubscriptionParser } from '../../../src/guardianSubscription/guardianSubscriptionParser';
 import { SubscriptionFilter } from '../../../src/guardianSubscription/subscriptionFilter';
 import subscriptionJson from '../../fixtures/subscription.json';
@@ -101,7 +98,7 @@ describe('getTargetInformation', () => {
 		expect(targetInfo.contributionCharge?.contributionAmount).toBe(0);
 	});
 
-	test('throws when requesting a target product that is not a valid switch', async () => {
+	test('throws when requesting a target product that is not a valid switch', () => {
 		const guardianSubscriptionWithKeys = buildGuardianSubscriptionWithKeys();
 
 		expect(() =>

@@ -4,23 +4,13 @@ import type { SimpleInvoiceItem } from '@modules/zuora/billingPreview';
 import type { ZuoraAccount } from '@modules/zuora/types';
 import type { GuardianSubscriptionWithKeys } from '../../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import type { ProductSwitchTargetBody } from '../schemas';
-import type {
-	AccountInformation} from './accountInformation';
-import {
-	getAccountInformation,
-} from './accountInformation';
+import type { AccountInformation } from './accountInformation';
+import { getAccountInformation } from './accountInformation';
 import { isGenerallyEligibleForDiscount } from './isGenerallyEligibleForDiscount';
-import type {
-	SubscriptionInformation} from './subscriptionInformation';
-import {
-	getSubscriptionInformation
-} from './subscriptionInformation';
-import type {
-	SwitchMode,
-	TargetInformation} from './targetInformation';
-import {
-	getTargetInformation
-} from './targetInformation';
+import type { SubscriptionInformation } from './subscriptionInformation';
+import { getSubscriptionInformation } from './subscriptionInformation';
+import type { SwitchMode, TargetInformation } from './targetInformation';
+import { getTargetInformation } from './targetInformation';
 
 export type SwitchInformation = {
 	account: AccountInformation;

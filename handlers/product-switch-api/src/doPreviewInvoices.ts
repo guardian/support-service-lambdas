@@ -1,8 +1,5 @@
-import type {
-	PreviewOrderRequest} from '@modules/zuora/orders/orderRequests';
-import {
-	previewOrderRequest
-} from '@modules/zuora/orders/orderRequests';
+import type { PreviewOrderRequest } from '@modules/zuora/orders/orderRequests';
+import { previewOrderRequest } from '@modules/zuora/orders/orderRequests';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import z from 'zod';
 

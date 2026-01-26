@@ -2,16 +2,10 @@ import { getIfDefined } from '@modules/nullAndUndefined';
 import { zuoraSubscriptionSchema } from '@modules/zuora/types';
 import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
-import type {
-	GuardianSubscriptionWithKeys} from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
-import {
-	getSinglePlanFlattenedSubscriptionOrThrow
-} from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
-import type {
-	GuardianSubscription} from '../../../src/guardianSubscription/guardianSubscriptionParser';
-import {
-	GuardianSubscriptionParser,
-} from '../../../src/guardianSubscription/guardianSubscriptionParser';
+import type { GuardianSubscriptionWithKeys } from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
+import { getSinglePlanFlattenedSubscriptionOrThrow } from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
+import type { GuardianSubscription } from '../../../src/guardianSubscription/guardianSubscriptionParser';
+import { GuardianSubscriptionParser } from '../../../src/guardianSubscription/guardianSubscriptionParser';
 import { SubscriptionFilter } from '../../../src/guardianSubscription/subscriptionFilter';
 import alreadySwitchedJson from '../../fixtures/already-switched-subscription.json';
 import subscriptionJson from '../../fixtures/subscription.json';

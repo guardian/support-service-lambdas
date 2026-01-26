@@ -10,20 +10,18 @@ import type {
 	ZuoraProductIdToKey,
 	ZuoraProductKeyNode,
 	ZuoraProductRatePlanChargeIdToKey,
-	ZuoraProductRatePlanKeyNode} from './buildZuoraProductIdToKey';
-import {
-	buildZuoraProductIdToKey
+	ZuoraProductRatePlanKeyNode,
 } from './buildZuoraProductIdToKey';
+import { buildZuoraProductIdToKey } from './buildZuoraProductIdToKey';
 import type {
 	RestRatePlan,
 	RestSubscription,
 	ZuoraPIdToPRPIdToSubscriptionRatePlans,
 	ZuoraPRPIdToSubscriptionRatePlans,
 	ZuoraRatePlanChargesByPRPCId,
-	ZuoraRatePlanWithChargesByPRPCId} from './groupSubscriptionByZuoraCatalogIds';
-import {
-	groupSubscriptionByZuoraCatalogIds
+	ZuoraRatePlanWithChargesByPRPCId,
 } from './groupSubscriptionByZuoraCatalogIds';
+import { groupSubscriptionByZuoraCatalogIds } from './groupSubscriptionByZuoraCatalogIds';
 
 export type GuardianRatePlanCharges = Record<
 	string, // guardian rate plan charge key e.g. 'Subscription' or 'Saturday' - FIXME use ProductRatePlanChargeKey<P> & string
@@ -45,6 +43,10 @@ export type GuardianSubscription = {
 	products: GuardianSubscriptionProducts;
 } & RestSubscription;
 
+type FFF<K extends ProductKey> = {
+	[P in K]: GuardianRatePlans<P>;
+};
+
 /**
  * this is a bit like groupMapSingleOrThrow, only it maintains the relationship
  * between the key and value.
@@ -56,22 +58,18 @@ function groupMapSingleOrThrowCorrelated<K extends ProductKey, A, B>(
 	items: Array<[A, B]>,
 	project: (item: [A, B]) => readonly [K, GuardianRatePlans<K>],
 	msg: string,
-): {
-	[P in K]: GuardianRatePlans<P>;
-} {
-	const entries: {
-		[P in K]: GuardianRatePlans<P>;
-	} = {} as unknown as {
-		[P in K]: GuardianRatePlans<P>;
-	};
+): FFF<K> {
+	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- utility function but TODO look again at this
+	const entries: Partial<FFF<K>> = {} as unknown as Partial<FFF<K>>;
 	for (const item of items) {
 		const result = project(item);
 		if (entries[result[0]]) {
-			throw new Error(`${msg}: multiple entries for ${item}`);
+			throw new Error(`${msg}: multiple entries for ${result[0]}`);
 		}
 		entries[result[0]] = result[1];
 	}
-	return entries;
+	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- utility function but TODO look again at this
+	return entries as FFF<K>;
 }
 
 /**

@@ -4,11 +4,8 @@ import type {
 	SwitchActionData,
 	TargetInformation,
 } from '../prepare/targetInformation';
-import type {
-	Discount} from './discounts';
-import {
-	annualContribHalfPriceSupporterPlusForOneYear
-} from './discounts';
+import type { Discount } from './discounts';
+import { annualContribHalfPriceSupporterPlusForOneYear } from './discounts';
 
 export async function supporterPlusTargetInformation(
 	ratePlan: ProductRatePlan<'SupporterPlus', 'Annual' | 'Monthly'>,

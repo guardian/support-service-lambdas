@@ -7,10 +7,9 @@ import dayjs, { type Dayjs } from 'dayjs';
 import type {
 	ZuoraPreviewResponse,
 	ZuoraPreviewResponseInvoice,
-	ZuoraPreviewResponseInvoiceItem} from '../../doPreviewInvoices';
-import {
-	doPreviewInvoices
+	ZuoraPreviewResponseInvoiceItem,
 } from '../../doPreviewInvoices';
+import { doPreviewInvoices } from '../../doPreviewInvoices';
 import type { SwitchOrderRequestBuilder } from '../prepare/buildSwitchOrderRequest';
 import type { SubscriptionInformation } from '../prepare/subscriptionInformation';
 import type { TargetInformation } from '../prepare/targetInformation';
@@ -45,23 +44,24 @@ export const getContributionRefundAmount = (
 	sourceChargeIds: [string, ...string[]],
 	chargedThroughDate?: Dayjs,
 ): number => {
-	const contributionRefundAmount = zuoraPreviewInvoice.invoiceItems
-		.filter((invoiceItem: ZuoraPreviewResponseInvoiceItem) =>
-			sourceChargeIds.includes(invoiceItem.productRatePlanChargeId),
-		)
-		.reduceRight(
-			(accu, invoiceItem) =>
-				accu + invoiceItem.amountWithoutTax + invoiceItem.taxAmount,
-			0,
+	const sourceSubscriptionReversalItems =
+		zuoraPreviewInvoice.invoiceItems.filter(
+			(invoiceItem: ZuoraPreviewResponseInvoiceItem) =>
+				sourceChargeIds.includes(invoiceItem.productRatePlanChargeId),
 		);
+	const contributionRefundAmount = sourceSubscriptionReversalItems.reduceRight(
+		(accu, invoiceItem) =>
+			accu + invoiceItem.amountWithoutTax + invoiceItem.taxAmount,
+		0,
+	);
 	if (
-		contributionRefundAmount == undefined &&
+		sourceSubscriptionReversalItems.length === 0 &&
 		refundExpected(chargedThroughDate, dayjs())
 	) {
 		throw Error('No contribution refund amount found in the preview response');
 	}
 
-	return contributionRefundAmount ?? 0;
+	return contributionRefundAmount;
 };
 
 export const previewResponseFromZuoraResponse = (

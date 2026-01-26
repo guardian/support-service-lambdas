@@ -26,7 +26,9 @@ export type ValidSwitchesFromRatePlan = {
 	[P in ProductKey]?: ValidSwitchToProduct<P>;
 };
 
-type ValidSwitchFromProduct<P extends ProductKey> = Partial<Record<ProductRatePlanKey<P>, ValidSwitchesFromRatePlan>>;
+type ValidSwitchFromProduct<P extends ProductKey> = Partial<
+	Record<ProductRatePlanKey<P>, ValidSwitchesFromRatePlan>
+>;
 
 export type ValidSwitches = {
 	[P in ProductKey]?: ValidSwitchFromProduct<P>;
@@ -85,7 +87,7 @@ export const validTargetProductKeys: [
 	distinct(
 		objectValues(productSwitchesData)
 			.flatMap(objectValues)
-			.flatMap((value): ValidTargetProduct[] => objectKeys(value) ?? []),
+			.flatMap((value): ValidTargetProduct[] => objectKeys(value)),
 	),
 	'todo',
 );
@@ -98,9 +100,7 @@ export type ValidSwitchableRatePlanKey = Normalize<
 
 const validSwitchableRatePlanKeys = getIfNonEmpty(
 	distinct(
-		objectValues(productSwitchesData).flatMap(
-			(value) => objectKeys(value) ?? [],
-		),
+		objectValues(productSwitchesData).flatMap((value) => objectKeys(value)),
 	),
 	'todo',
 );

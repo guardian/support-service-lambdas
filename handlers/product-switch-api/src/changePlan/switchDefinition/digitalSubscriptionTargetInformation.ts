@@ -21,8 +21,9 @@ export function digitalSubscriptionTargetInformation(
 	}
 
 	const catalogPrice = ratePlan.pricing[switchActionData.currency];
-	if (switchActionData.previousAmount > catalogPrice)
-		{throw new ValidationError('this product has no contribution element');}
+	if (switchActionData.previousAmount > catalogPrice) {
+		throw new ValidationError('this product has no contribution element');
+	}
 	return Promise.resolve({
 		actualTotalPrice: catalogPrice,
 		productRatePlanId: ratePlan.id,

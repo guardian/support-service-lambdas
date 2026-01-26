@@ -61,7 +61,9 @@ export function buildZuoraProductIdToKey(
 function buildZuoraProductKeyNode(
 	product: CatalogProduct,
 ): [string, ZuoraProductKeyNode<ProductKey>] | undefined {
-	if (!isSupportedProduct(product.name)) {return undefined;}
+	if (!isSupportedProduct(product.name)) {
+		return undefined;
+	}
 	const productKey = getZuoraProductKey(product.name);
 	return [
 		product.id,
@@ -86,14 +88,17 @@ function buildZuoraProductRatePlanIdToKey<P extends ProductKey>(
 function buildZuoraProductRatePlanKeyNode<P extends ProductKey>(
 	prp: ZuoraProductRatePlan,
 ): [string, ZuoraProductRatePlanKeyNode<P>] | undefined {
-	if (!isSupportedProductRatePlan(prp.name)) {return undefined;}
+	if (!isSupportedProductRatePlan(prp.name)) {
+		return undefined;
+	}
 	const productRatePlanCharges = buildZuoraProductRatePlanChargeIdToKey(prp);
 	return [
 		prp.id,
 		{
+			// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- TODO check - bad return type on existing getProductRatePlanKey function
 			productRatePlanKey: getProductRatePlanKey(
 				prp.name,
-			) as ProductRatePlanKey<P> & string, // bad return type on existing getProductRatePlanKey function
+			) as ProductRatePlanKey<P> & string,
 			productRatePlanCharges,
 		},
 	];

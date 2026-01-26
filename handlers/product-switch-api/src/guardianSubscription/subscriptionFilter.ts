@@ -7,6 +7,7 @@ import { mapValue, objectKeys } from '@modules/objectFunctions';
 import type { ProductKey } from '@modules/product-catalog/productCatalog';
 import { logger } from '@modules/routing/logger';
 import type { RatePlanCharge } from '@modules/zuora/types';
+import { zuoraDateFormat } from '@modules/zuora/utils';
 import dayjs from 'dayjs';
 import type {
 	GuardianRatePlan,
@@ -44,8 +45,8 @@ export class SubscriptionFilter {
 				dayjs(rpc.effectiveStartDate).isSame(today)
 					? dayjs(rpc.effectiveEndDate).isAfter(today)
 						? undefined
-						: `plan has finished: today: ${today} >= end: ${dayjs(rpc.effectiveEndDate)}`
-					: `plan has not started: today: ${today} < start: ${dayjs(rpc.effectiveStartDate)}`,
+						: `plan has finished: today: ${zuoraDateFormat(today)} >= end: ${zuoraDateFormat(dayjs(rpc.effectiveEndDate))}`
+					: `plan has not started: today: ${zuoraDateFormat(today)} < start: ${zuoraDateFormat(dayjs(rpc.effectiveStartDate))}`,
 		);
 	}
 
@@ -63,7 +64,7 @@ export class SubscriptionFilter {
 			(rpc) =>
 				dayjs(rpc.effectiveEndDate).isAfter(today)
 					? undefined
-					: `plan has finished: today: ${today} >= end: ${dayjs(rpc.effectiveEndDate)}`,
+					: `plan has finished: today: ${zuoraDateFormat(today)} >= end: ${zuoraDateFormat(dayjs(rpc.effectiveEndDate))}`,
 		);
 	}
 
@@ -87,8 +88,9 @@ export class SubscriptionFilter {
 		const [discarded, ratePlans] = partitionByType(
 			guardianSubRatePlans.map((rp: GuardianRatePlan) => {
 				const maybeDiscardWholePlan = this.ratePlanDiscardReason(rp);
-				if (maybeDiscardWholePlan !== undefined)
-					{return `${rp.ratePlanName}: ${maybeDiscardWholePlan}`;}
+				if (maybeDiscardWholePlan !== undefined) {
+					return `${rp.ratePlanName}: ${maybeDiscardWholePlan}`;
+				}
 
 				const { errors, filteredCharges } = this.filterCharges(
 					rp.ratePlanCharges,
@@ -99,8 +101,9 @@ export class SubscriptionFilter {
 						? `${rp.ratePlanName}: all charges discarded: ` +
 							JSON.stringify(errors)
 						: undefined;
-				if (maybeAllChargesDiscarded !== undefined)
-					{return maybeAllChargesDiscarded;}
+				if (maybeAllChargesDiscarded !== undefined) {
+					return maybeAllChargesDiscarded;
+				}
 				return { ...rp, ratePlanCharges: filteredCharges };
 			}),
 			(o) => typeof o === 'string',
@@ -115,12 +118,15 @@ export class SubscriptionFilter {
 			mapValues(jbp, (guardianSubRatePlans: GuardianRatePlan[]) => {
 				const { discarded, ratePlans } =
 					this.filterRatePlanList(guardianSubRatePlans);
-				if (discarded.length > 0) {logger.log(`discarded rateplans:`, discarded);} // could be spammy?
-				if (ratePlans.length > 0)
-					{logger.log(
+				if (discarded.length > 0) {
+					logger.log(`discarded rateplans:`, discarded);
+				} // could be spammy?
+				if (ratePlans.length > 0) {
+					logger.log(
 						`retained rateplans:`,
 						ratePlans.map((rp) => rp.ratePlanName),
-					);} // could be very spammy?
+					);
+				} // could be very spammy?
 				return ratePlans;
 			}) satisfies GuardianRatePlans<K>;
 	}
@@ -145,8 +151,10 @@ export function mapValuesCorrelated<K extends ProductKey>(
 	obj: { [T in K]?: GuardianRatePlans<T> },
 	fn: <Q extends K>(v: GuardianRatePlans<Q>, k: K) => GuardianRatePlans<Q>,
 ): { [T in K]?: GuardianRatePlans<T> } {
+	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- utility function but TODO look again at this
 	const res = {} as { [T in K]?: GuardianRatePlans<T> };
 	for (const key of objectKeys(obj)) {
+		// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- utility function but TODO look again at this
 		res[key as K] = obj[key] ? fn(obj[key], key) : undefined;
 	}
 	return res;

@@ -32,7 +32,7 @@ describe('digitalSubscriptionTargetInformation', () => {
 		expect(result.discount).toBeUndefined();
 	});
 
-	test('throws ValidationError when user-requested amount does not match catalog price', async () => {
+	test('throws ValidationError when user-requested amount does not match catalog price', () => {
 		const catalogPrice = annualDigitalSubscriptionRatePlan.pricing.GBP;
 
 		const switchActionData: SwitchActionData = {
@@ -66,7 +66,7 @@ describe('digitalSubscriptionTargetInformation', () => {
 		expect(result.actualTotalPrice).toBe(catalogPrice);
 	});
 
-	test('throws ValidationError in save mode', async () => {
+	test('throws ValidationError in save mode', () => {
 		const catalogPrice = annualDigitalSubscriptionRatePlan.pricing.GBP;
 
 		const switchActionData: SwitchActionData = {
@@ -87,7 +87,7 @@ describe('digitalSubscriptionTargetInformation', () => {
 		).toThrow(ValidationError);
 	});
 
-	test('throws ValidationError in switchWithPriceOverride mode', async () => {
+	test('throws ValidationError in switchWithPriceOverride mode', () => {
 		const catalogPrice = annualDigitalSubscriptionRatePlan.pricing.GBP;
 
 		const switchActionData: SwitchActionData = {
