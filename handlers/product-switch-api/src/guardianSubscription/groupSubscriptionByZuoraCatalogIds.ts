@@ -4,12 +4,12 @@ import {
 	groupSingleOrThrow,
 	mapValues,
 } from '@modules/arrayFunctions';
-import {
+import { mapValue } from '@modules/objectFunctions';
+import type {
 	RatePlan,
 	RatePlanCharge,
 	ZuoraSubscription,
 } from '@modules/zuora/types';
-import { mapValue } from '@modules/objectFunctions';
 
 export type RestRatePlan = Omit<RatePlan, 'ratePlanCharges'>;
 export type RestSubscription = Omit<ZuoraSubscription, 'ratePlans'>;

@@ -2,9 +2,9 @@ import type { EmailMessageWithUserId } from '@modules/email/email';
 import { DataExtensionNames, sendEmail } from '@modules/email/email';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { getCurrencyInfo } from '@modules/internationalisation/currency';
+import type { Stage } from '@modules/stage';
 import dayjs from 'dayjs';
-import { Stage } from '@modules/stage';
-import { SwitchInformation } from '../prepare/switchInformation';
+import type { SwitchInformation } from '../prepare/switchInformation';
 
 type Payment = { date: dayjs.Dayjs; amount: number };
 

@@ -1,8 +1,8 @@
-import { ZuoraAccount } from '@modules/zuora/types';
 import {
 	type IsoCurrency,
 	isSupportedCurrency,
 } from '@modules/internationalisation/currency';
+import type { ZuoraAccount } from '@modules/zuora/types';
 
 export type AccountInformation = {
 	id: string; // create payment

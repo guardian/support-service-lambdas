@@ -1,6 +1,6 @@
-import { ValidSwitches } from '../prepare/switchesHelper';
-import { supporterPlusTargetInformation } from './supporterPlusTargetInformation';
+import type { ValidSwitches } from '../prepare/switchesHelper';
 import { digitalSubscriptionTargetInformation } from './digitalSubscriptionTargetInformation';
+import { supporterPlusTargetInformation } from './supporterPlusTargetInformation';
 
 export const productSwitchesData = {
 	Contribution: {

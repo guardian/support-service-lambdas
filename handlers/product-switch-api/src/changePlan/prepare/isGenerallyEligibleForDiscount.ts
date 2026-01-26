@@ -1,6 +1,6 @@
 import { Lazy } from '@modules/lazy';
 import type { SimpleInvoiceItem } from '@modules/zuora/billingPreview';
-import { SwitchMode } from './targetInformation';
+import type { SwitchMode } from './targetInformation';
 
 // TODO use central eligibility checker pattern
 export function isGenerallyEligibleForDiscount(

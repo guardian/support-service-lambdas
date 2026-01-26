@@ -1,27 +1,29 @@
-import {
+import { groupMapSingleOrThrow } from '@modules/arrayFunctions';
+import { mapValue, objectJoin, objectLeftJoin } from '@modules/objectFunctions';
+import type {
 	ProductKey,
 	ProductRatePlanKey,
 } from '@modules/product-catalog/productCatalog';
-import { RatePlanCharge, ZuoraSubscription } from '@modules/zuora/types';
-import { ZuoraCatalog } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import { mapValue, objectJoin, objectLeftJoin } from '@modules/objectFunctions';
+import type { RatePlanCharge, ZuoraSubscription } from '@modules/zuora/types';
+import type { ZuoraCatalog } from '@modules/zuora-catalog/zuoraCatalogSchema';
+import type {
+	ZuoraProductIdToKey,
+	ZuoraProductKeyNode,
+	ZuoraProductRatePlanChargeIdToKey,
+	ZuoraProductRatePlanKeyNode} from './buildZuoraProductIdToKey';
 import {
-	groupSubscriptionByZuoraCatalogIds,
+	buildZuoraProductIdToKey
+} from './buildZuoraProductIdToKey';
+import type {
 	RestRatePlan,
 	RestSubscription,
 	ZuoraPIdToPRPIdToSubscriptionRatePlans,
 	ZuoraPRPIdToSubscriptionRatePlans,
 	ZuoraRatePlanChargesByPRPCId,
-	ZuoraRatePlanWithChargesByPRPCId,
-} from './groupSubscriptionByZuoraCatalogIds';
+	ZuoraRatePlanWithChargesByPRPCId} from './groupSubscriptionByZuoraCatalogIds';
 import {
-	buildZuoraProductIdToKey,
-	ZuoraProductIdToKey,
-	ZuoraProductKeyNode,
-	ZuoraProductRatePlanChargeIdToKey,
-	ZuoraProductRatePlanKeyNode,
-} from './buildZuoraProductIdToKey';
-import { groupMapSingleOrThrow } from '@modules/arrayFunctions';
+	groupSubscriptionByZuoraCatalogIds
+} from './groupSubscriptionByZuoraCatalogIds';
 
 export type GuardianRatePlanCharges = Record<
 	string, // guardian rate plan charge key e.g. 'Subscription' or 'Saturday' - FIXME use ProductRatePlanChargeKey<P> & string
@@ -51,7 +53,7 @@ export type GuardianSubscription = {
  * @param project
  */
 function groupMapSingleOrThrowCorrelated<K extends ProductKey, A, B>(
-	items: [A, B][],
+	items: Array<[A, B]>,
 	project: (item: [A, B]) => readonly [K, GuardianRatePlans<K>],
 	msg: string,
 ): {

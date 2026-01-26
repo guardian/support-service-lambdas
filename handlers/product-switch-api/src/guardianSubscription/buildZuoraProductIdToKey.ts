@@ -1,9 +1,8 @@
-import {
-	CatalogProduct,
-	ZuoraCatalog,
-	ZuoraProductRatePlan,
-	ZuoraProductRatePlanCharge,
-} from '@modules/zuora-catalog/zuoraCatalogSchema';
+import { groupMapSingleOrThrow } from '@modules/arrayFunctions';
+import type {
+	ProductKey,
+	ProductRatePlanKey,
+} from '@modules/product-catalog/productCatalog';
 import {
 	getProductRatePlanChargeKey,
 	getProductRatePlanKey,
@@ -11,11 +10,12 @@ import {
 	isSupportedProduct,
 	isSupportedProductRatePlan,
 } from '@modules/product-catalog/zuoraToProductNameMappings';
-import { groupMapSingleOrThrow } from '@modules/arrayFunctions';
-import {
-	ProductKey,
-	ProductRatePlanKey,
-} from '@modules/product-catalog/productCatalog';
+import type {
+	CatalogProduct,
+	ZuoraCatalog,
+	ZuoraProductRatePlan,
+	ZuoraProductRatePlanCharge,
+} from '@modules/zuora-catalog/zuoraCatalogSchema';
 
 type ZuoraProductRatePlanChargeKeyNode = { productRatePlanChargeKey: string };
 export type ZuoraProductRatePlanChargeIdToKey = Record<
@@ -61,7 +61,7 @@ export function buildZuoraProductIdToKey(
 function buildZuoraProductKeyNode(
 	product: CatalogProduct,
 ): [string, ZuoraProductKeyNode<ProductKey>] | undefined {
-	if (!isSupportedProduct(product.name)) return undefined;
+	if (!isSupportedProduct(product.name)) {return undefined;}
 	const productKey = getZuoraProductKey(product.name);
 	return [
 		product.id,
@@ -86,7 +86,7 @@ function buildZuoraProductRatePlanIdToKey<P extends ProductKey>(
 function buildZuoraProductRatePlanKeyNode<P extends ProductKey>(
 	prp: ZuoraProductRatePlan,
 ): [string, ZuoraProductRatePlanKeyNode<P>] | undefined {
-	if (!isSupportedProductRatePlan(prp.name)) return undefined;
+	if (!isSupportedProductRatePlan(prp.name)) {return undefined;}
 	const productRatePlanCharges = buildZuoraProductRatePlanChargeIdToKey(prp);
 	return [
 		prp.id,

@@ -1,9 +1,9 @@
 import dayjs from 'dayjs';
-import { TargetInformation } from '../../../src/changePlan/prepare/targetInformation';
 import {
 	previewResponseFromZuoraResponse,
 	refundExpected,
 } from '../../../src/changePlan/action/preview';
+import type { TargetInformation } from '../../../src/changePlan/prepare/targetInformation';
 
 test('preview amounts are correct', () => {
 	const apiResponse = {

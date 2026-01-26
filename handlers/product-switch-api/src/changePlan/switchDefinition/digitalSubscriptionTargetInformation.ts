@@ -1,9 +1,9 @@
-import { ProductRatePlan } from '@modules/product-catalog/productCatalog';
-import {
+import { ValidationError } from '@modules/errors';
+import type { ProductRatePlan } from '@modules/product-catalog/productCatalog';
+import type {
 	SwitchActionData,
 	TargetInformation,
 } from '../prepare/targetInformation';
-import { ValidationError } from '@modules/errors';
 
 export function digitalSubscriptionTargetInformation(
 	ratePlan: ProductRatePlan<'DigitalSubscription', 'Annual' | 'Monthly'>,
@@ -22,7 +22,7 @@ export function digitalSubscriptionTargetInformation(
 
 	const catalogPrice = ratePlan.pricing[switchActionData.currency];
 	if (switchActionData.previousAmount > catalogPrice)
-		throw new ValidationError('this product has no contribution element');
+		{throw new ValidationError('this product has no contribution element');}
 	return Promise.resolve({
 		actualTotalPrice: catalogPrice,
 		productRatePlanId: ratePlan.id,

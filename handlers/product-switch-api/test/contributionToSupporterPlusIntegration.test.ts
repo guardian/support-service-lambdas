@@ -12,9 +12,8 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import type { ContributionTestAdditionalOptions } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import { createContribution } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
-import { SwitchResponse } from '../src/changePlan/action/switch';
-import { ProductSwitchGenericRequestBody } from '../src/changePlan/schemas';
 import { ProductSwitchEndpoint } from '../src/changePlan/productSwitchEndpoint';
+import type { ProductSwitchGenericRequestBody } from '../src/changePlan/schemas';
 
 interface ContributionCreationDetails {
 	zuoraClient: ZuoraClient;
@@ -73,14 +72,14 @@ async function testPreview(testData: ContributionCreationDetails) {
 }
 
 async function testSwitch(testData: ContributionCreationDetails) {
-	return (await new ProductSwitchEndpoint(
+	return await new ProductSwitchEndpoint(
 		'CODE',
 		dayjs(),
 		testData.input,
 		testData.zuoraClient,
 		testData.subscription,
 		testData.account,
-	).doSwitch()) as SwitchResponse;
+	).doSwitch();
 }
 
 describe('product-switching behaviour', () => {

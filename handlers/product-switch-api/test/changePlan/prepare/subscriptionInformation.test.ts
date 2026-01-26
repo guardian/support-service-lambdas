@@ -1,21 +1,21 @@
-import dayjs from 'dayjs';
+import { mapValue } from '@modules/objectFunctions';
+import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import {
-	zuoraSubscriptionSchema,
 	type ZuoraSubscription,
+	zuoraSubscriptionSchema,
 } from '@modules/zuora/types';
-import subscriptionJson from '../../fixtures/subscription.json';
-import alreadySwitchedJson from '../../fixtures/already-switched-subscription.json';
+import { zuoraDateFormat } from '@modules/zuora/utils';
+import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
-import { GuardianSubscriptionParser } from '../../../src/guardianSubscription/guardianSubscriptionParser';
-import { SubscriptionFilter } from '../../../src/guardianSubscription/subscriptionFilter';
-import { getSinglePlanFlattenedSubscriptionOrThrow } from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import {
 	getSubscriptionInformation,
 	shouldStartNewTerm,
 } from '../../../src/changePlan/prepare/subscriptionInformation';
-import { mapValue } from '@modules/objectFunctions';
-import { zuoraDateFormat } from '@modules/zuora/utils';
-import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
+import { getSinglePlanFlattenedSubscriptionOrThrow } from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
+import { GuardianSubscriptionParser } from '../../../src/guardianSubscription/guardianSubscriptionParser';
+import { SubscriptionFilter } from '../../../src/guardianSubscription/subscriptionFilter';
+import alreadySwitchedJson from '../../fixtures/already-switched-subscription.json';
+import subscriptionJson from '../../fixtures/subscription.json';
 
 const guardianSubscriptionParser = new GuardianSubscriptionParser(
 	zuoraCatalogFixture,

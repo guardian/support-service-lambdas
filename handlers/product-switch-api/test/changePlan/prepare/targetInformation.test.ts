@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import { Lazy } from '@modules/lazy';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
@@ -6,16 +5,18 @@ import {
 	type ZuoraSubscription,
 	zuoraSubscriptionSchema,
 } from '@modules/zuora/types';
-import subscriptionJson from '../../fixtures/subscription.json';
+import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
-import { GuardianSubscriptionParser } from '../../../src/guardianSubscription/guardianSubscriptionParser';
-import {
-	getSinglePlanFlattenedSubscriptionOrThrow,
-	GuardianSubscriptionWithKeys,
-} from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
-import { SubscriptionFilter } from '../../../src/guardianSubscription/subscriptionFilter';
-import { annualContribHalfPriceSupporterPlusForOneYear } from '../../../src/changePlan/switchDefinition/discounts';
 import { getTargetInformation } from '../../../src/changePlan/prepare/targetInformation';
+import { annualContribHalfPriceSupporterPlusForOneYear } from '../../../src/changePlan/switchDefinition/discounts';
+import type {
+	GuardianSubscriptionWithKeys} from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
+import {
+	getSinglePlanFlattenedSubscriptionOrThrow
+} from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
+import { GuardianSubscriptionParser } from '../../../src/guardianSubscription/guardianSubscriptionParser';
+import { SubscriptionFilter } from '../../../src/guardianSubscription/subscriptionFilter';
+import subscriptionJson from '../../fixtures/subscription.json';
 
 const referenceDate = dayjs('2024-05-10');
 const subscriptionFixture: ZuoraSubscription =

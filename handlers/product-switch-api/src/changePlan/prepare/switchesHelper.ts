@@ -1,14 +1,14 @@
-import {
+import { distinct, getIfNonEmpty, isInList } from '@modules/arrayFunctions';
+import { getIfDefined } from '@modules/nullAndUndefined';
+import { objectKeys, objectValues } from '@modules/objectFunctions';
+import type {
 	Normalize,
 	ProductKey,
 	ProductRatePlan,
 	ProductRatePlanKey,
 } from '@modules/product-catalog/productCatalog';
-import { SwitchActionData, TargetInformation } from './targetInformation';
-import { getIfDefined } from '@modules/nullAndUndefined';
-import { distinct, getIfNonEmpty, isInList } from '@modules/arrayFunctions';
-import { objectKeys, objectValues } from '@modules/objectFunctions';
 import { productSwitchesData } from '../switchDefinition/productSwitchesData';
+import type { SwitchActionData, TargetInformation } from './targetInformation';
 
 export type ValidSwitchHandler<
 	P extends ProductKey,
@@ -26,9 +26,7 @@ export type ValidSwitchesFromRatePlan = {
 	[P in ProductKey]?: ValidSwitchToProduct<P>;
 };
 
-type ValidSwitchFromProduct<P extends ProductKey> = {
-	[RPK in ProductRatePlanKey<P>]?: ValidSwitchesFromRatePlan;
-};
+type ValidSwitchFromProduct<P extends ProductKey> = Partial<Record<ProductRatePlanKey<P>, ValidSwitchesFromRatePlan>>;
 
 export type ValidSwitches = {
 	[P in ProductKey]?: ValidSwitchFromProduct<P>;

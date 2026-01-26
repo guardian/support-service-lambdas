@@ -1,12 +1,13 @@
-import { ProductRatePlan } from '@modules/product-catalog/productCatalog';
-import {
+import { ValidationError } from '@modules/errors';
+import type { ProductRatePlan } from '@modules/product-catalog/productCatalog';
+import type {
 	SwitchActionData,
 	TargetInformation,
 } from '../prepare/targetInformation';
-import { ValidationError } from '@modules/errors';
+import type {
+	Discount} from './discounts';
 import {
-	annualContribHalfPriceSupporterPlusForOneYear,
-	Discount,
+	annualContribHalfPriceSupporterPlusForOneYear
 } from './discounts';
 
 export async function supporterPlusTargetInformation(

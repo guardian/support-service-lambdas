@@ -1,24 +1,21 @@
-import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import dayjs from 'dayjs';
-import {
-	ProductSwitchRequestBody,
-	ZuoraSwitchResponse,
-	zuoraSwitchResponseSchema,
-} from '../schemas';
-import { removePendingUpdateAmendments } from '../../amendments';
-import { takePaymentOrAdjustInvoice } from '../../payment';
-import { sendThankYouEmail } from './productSwitchEmail';
-import { sendSalesforceTracking } from '../../salesforceTracking';
+import { getIfDefined } from '@modules/nullAndUndefined';
+import type { Stage } from '@modules/stage';
 import { sendToSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
-import { supporterRatePlanItemFromSwitchInformation } from '../../supporterProductData';
-import {
+import type {
 	CreateOrderRequest,
 	OrderRequest,
 } from '@modules/zuora/orders/orderRequests';
-import { Stage } from '@modules/stage';
-import { getIfDefined } from '@modules/nullAndUndefined';
-import { SwitchInformation } from '../prepare/switchInformation';
-import { SwitchOrderRequestBuilder } from '../prepare/buildSwitchOrderRequest';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type dayjs from 'dayjs';
+import { removePendingUpdateAmendments } from '../../amendments';
+import { takePaymentOrAdjustInvoice } from '../../payment';
+import { sendSalesforceTracking } from '../../salesforceTracking';
+import { supporterRatePlanItemFromSwitchInformation } from '../../supporterProductData';
+import type { SwitchOrderRequestBuilder } from '../prepare/buildSwitchOrderRequest';
+import type { SwitchInformation } from '../prepare/switchInformation';
+import { zuoraSwitchResponseSchema } from '../schemas';
+import type { ProductSwitchRequestBody, ZuoraSwitchResponse } from '../schemas';
+import { sendThankYouEmail } from './productSwitchEmail';
 
 export type SwitchResponse = { message: string };
 
@@ -61,7 +58,10 @@ export class DoSwitchAction {
 			),
 			sendToSupporterProductData(
 				this.stage,
-				supporterRatePlanItemFromSwitchInformation(switchInformation),
+				supporterRatePlanItemFromSwitchInformation(
+					this.today,
+					switchInformation,
+				),
 			),
 		]);
 		return {

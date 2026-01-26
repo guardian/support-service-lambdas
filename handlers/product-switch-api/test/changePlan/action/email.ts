@@ -1,5 +1,5 @@
+import type { EmailMessageWithUserId } from '@modules/email/email';
 import dayjs from 'dayjs';
-import { EmailMessageWithUserId } from '@modules/email/email';
 import { buildEmailMessage } from '../../../src/changePlan/action/productSwitchEmail';
 
 test('Email message body is correct', () => {

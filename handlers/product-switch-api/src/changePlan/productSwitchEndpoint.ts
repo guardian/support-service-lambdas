@@ -1,5 +1,7 @@
+import { ValidationError } from '@modules/errors';
 import { Lazy } from '@modules/lazy';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
+import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import {
@@ -7,28 +9,27 @@ import {
 	itemsForSubscription,
 	toSimpleInvoiceItems,
 } from '@modules/zuora/billingPreview';
-import { ZuoraAccount, ZuoraSubscription } from '@modules/zuora/types/objects';
+import type { ZuoraAccount, ZuoraSubscription } from '@modules/zuora/types/objects';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 import type { APIGatewayProxyResult } from 'aws-lambda';
-import dayjs from 'dayjs';
+import type dayjs from 'dayjs';
+import type {
+	GuardianSubscriptionWithKeys} from '../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
+import {
+	getSinglePlanFlattenedSubscriptionOrThrow
+} from '../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
+import { GuardianSubscriptionParser } from '../guardianSubscription/guardianSubscriptionParser';
+import { SubscriptionFilter } from '../guardianSubscription/subscriptionFilter';
+import { DoPreviewAction } from './action/preview';
+import { DoSwitchAction } from './action/switch';
+import { SwitchOrderRequestBuilder } from './prepare/buildSwitchOrderRequest';
+import { getSwitchInformation } from './prepare/switchInformation';
+import type { SwitchMode } from './prepare/targetInformation';
 import type {
 	ProductSwitchGenericRequestBody,
 	ProductSwitchRequestBody,
 } from './schemas';
-import { DoPreviewAction } from './action/preview';
-import { DoSwitchAction } from './action/switch';
-import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
-import { SubscriptionFilter } from '../guardianSubscription/subscriptionFilter';
-import { GuardianSubscriptionParser } from '../guardianSubscription/guardianSubscriptionParser';
-import {
-	getSinglePlanFlattenedSubscriptionOrThrow,
-	GuardianSubscriptionWithKeys,
-} from '../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
-import { SwitchOrderRequestBuilder } from './prepare/buildSwitchOrderRequest';
-import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
-import { getSwitchInformation } from './prepare/switchInformation';
-import { SwitchMode } from './prepare/targetInformation';
-import { ValidationError } from '@modules/errors';
 
 export class ProductSwitchEndpoint {
 	private doPreviewAction: DoPreviewAction;

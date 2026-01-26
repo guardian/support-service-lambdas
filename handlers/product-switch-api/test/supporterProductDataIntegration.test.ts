@@ -4,10 +4,12 @@
 
 import { sendToSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
 import dayjs from 'dayjs';
+import type { SwitchInformation } from '../src/changePlan/prepare/switchInformation';
 import { supporterRatePlanItemFromSwitchInformation } from '../src/supporterProductData';
-import { SwitchInformation } from '../src/changePlan/prepare/switchInformation';
 
 test('supporter product data', async () => {
+	const now = dayjs();
+
 	const switchInformation: SwitchInformation = {
 		account: {
 			id: 'accountId',
@@ -39,7 +41,7 @@ test('supporter product data', async () => {
 
 	const result = await sendToSupporterProductData(
 		'CODE',
-		supporterRatePlanItemFromSwitchInformation(dayjs(), switchInformation),
+		supporterRatePlanItemFromSwitchInformation(now, switchInformation),
 	);
 
 	console.log(result);

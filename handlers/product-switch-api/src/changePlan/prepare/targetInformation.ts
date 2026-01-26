@@ -1,19 +1,20 @@
 import { type IsoCurrency } from '@modules/internationalisation/currency';
-import { Lazy } from '@modules/lazy';
-import {
+import type { Lazy } from '@modules/lazy';
+import { getIfDefined } from '@modules/nullAndUndefined';
+import type {
 	GuardianCatalogKeys,
 	ProductCatalogHelper,
 	ProductKey,
 } from '@modules/product-catalog/productCatalog';
-import { Discount } from '../switchDefinition/discounts';
-import { ProductSwitchTargetBody } from '../schemas';
+import type { ProductSwitchTargetBody } from '../schemas';
+import type { Discount } from '../switchDefinition/discounts';
+import type {
+	ValidSwitchesFromRatePlan,
+	ValidTargetProduct} from './switchesHelper';
 import {
 	getAvailableSwitchesFrom,
-	getSwitchTo,
-	ValidSwitchesFromRatePlan,
-	ValidTargetProduct,
+	getSwitchTo
 } from './switchesHelper';
-import { getIfDefined } from '@modules/nullAndUndefined';
 
 export type TargetInformation = {
 	actualTotalPrice: number; // email, sf tracking

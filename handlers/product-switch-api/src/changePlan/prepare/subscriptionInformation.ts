@@ -1,22 +1,25 @@
-import {
-	GuardianSubscriptionWithKeys,
-	SinglePlanGuardianSubscription,
-} from '../../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
-import { RatePlanCharge } from '@modules/zuora/types';
-import { objectValues } from '@modules/objectFunctions';
+import type {
+	SafeForDistinct} from '@modules/arrayFunctions';
 import {
 	distinct,
 	getIfNonEmpty,
 	headOption,
-	SafeForDistinct,
 	sumNumbers,
 } from '@modules/arrayFunctions';
-import dayjs, { Dayjs } from 'dayjs';
+import { objectValues } from '@modules/objectFunctions';
+import type { RatePlanCharge } from '@modules/zuora/types';
+import type { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
+import type {
+	GuardianSubscriptionWithKeys,
+	SinglePlanGuardianSubscription,
+} from '../../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
+import type { GuardianRatePlanCharges } from '../../guardianSubscription/guardianSubscriptionParser';
+import type {
+	ValidSwitchableRatePlanKey} from './switchesHelper';
 import {
-	isValidSwitchableRatePlanKey,
-	ValidSwitchableRatePlanKey,
+	isValidSwitchableRatePlanKey
 } from './switchesHelper';
-import { GuardianRatePlanCharges } from '../../guardianSubscription/guardianSubscriptionParser';
 
 export type SubscriptionInformation = {
 	accountNumber: string; // order
@@ -90,7 +93,7 @@ export function getSubscriptionInformation({
 	const productRatePlanKey = productCatalogKeys.productRatePlanKey;
 	if (!isValidSwitchableRatePlanKey(productRatePlanKey))
 		// TODO move check to high level sub reader
-		throw new Error(`unsupported rate plan key ${productRatePlanKey}`);
+		{throw new Error(`unsupported rate plan key ${productRatePlanKey}`);}
 
 	const previousAmount = getSubscriptionTotalChargeAmount(subscription);
 

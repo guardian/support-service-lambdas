@@ -6,12 +6,13 @@ import { singleTriggerDate } from '@modules/zuora/orders/orderActions';
 import type { OrderRequest } from '@modules/zuora/orders/orderRequests';
 import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import type { Dayjs } from 'dayjs';
-import dayjs from 'dayjs';
-import { TargetContribution } from './targetInformation';
+import type dayjs from 'dayjs';
+import type {
+	SubscriptionInformation} from './subscriptionInformation';
 import {
-	shouldStartNewTerm,
-	SubscriptionInformation,
+	shouldStartNewTerm
 } from './subscriptionInformation';
+import type { TargetContribution } from './targetInformation';
 
 const buildAddDiscountOrderAction = (
 	productRatePlanId: string,

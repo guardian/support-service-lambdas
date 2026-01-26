@@ -5,8 +5,6 @@ import { stageFromEnvironment } from '@modules/stage';
 import type { Handler } from 'aws-lambda';
 import dayjs from 'dayjs';
 import { z } from 'zod';
-import { frequencySwitchHandler } from './frequencySwitchEndpoint';
-import { frequencySwitchRequestSchema } from './frequencySwitchSchemas';
 import {
 	contributionToSupporterPlusEndpoint,
 	ProductSwitchEndpoint,
@@ -15,6 +13,8 @@ import {
 	productSwitchGenericRequestSchema,
 	productSwitchRequestSchema,
 } from './changePlan/schemas';
+import { frequencySwitchHandler } from './frequencySwitchEndpoint';
+import { frequencySwitchRequestSchema } from './frequencySwitchSchemas';
 
 const stage = stageFromEnvironment();
 

@@ -1,18 +1,18 @@
 import {
-	GuardianRatePlan,
-	GuardianRatePlans,
-	GuardianSubscription,
-} from './guardianSubscriptionParser';
-import { RatePlanCharge } from '@modules/zuora/types';
-import dayjs from 'dayjs';
-import {
 	mapValues,
 	partitionByType,
 	partitionByValueType,
 } from '@modules/arrayFunctions';
 import { mapValue, objectKeys } from '@modules/objectFunctions';
-import { ProductKey } from '@modules/product-catalog/productCatalog';
+import type { ProductKey } from '@modules/product-catalog/productCatalog';
 import { logger } from '@modules/routing/logger';
+import type { RatePlanCharge } from '@modules/zuora/types';
+import dayjs from 'dayjs';
+import type {
+	GuardianRatePlan,
+	GuardianRatePlans,
+	GuardianSubscription,
+} from './guardianSubscriptionParser';
 
 /**
  * This lets you iterate through rate plans and charges removing ones that you aren't interested in
@@ -88,7 +88,7 @@ export class SubscriptionFilter {
 			guardianSubRatePlans.map((rp: GuardianRatePlan) => {
 				const maybeDiscardWholePlan = this.ratePlanDiscardReason(rp);
 				if (maybeDiscardWholePlan !== undefined)
-					return `${rp.ratePlanName}: ${maybeDiscardWholePlan}`;
+					{return `${rp.ratePlanName}: ${maybeDiscardWholePlan}`;}
 
 				const { errors, filteredCharges } = this.filterCharges(
 					rp.ratePlanCharges,
@@ -100,7 +100,7 @@ export class SubscriptionFilter {
 							JSON.stringify(errors)
 						: undefined;
 				if (maybeAllChargesDiscarded !== undefined)
-					return maybeAllChargesDiscarded;
+					{return maybeAllChargesDiscarded;}
 				return { ...rp, ratePlanCharges: filteredCharges };
 			}),
 			(o) => typeof o === 'string',
@@ -115,12 +115,12 @@ export class SubscriptionFilter {
 			mapValues(jbp, (guardianSubRatePlans: GuardianRatePlan[]) => {
 				const { discarded, ratePlans } =
 					this.filterRatePlanList(guardianSubRatePlans);
-				if (discarded.length > 0) logger.log(`discarded rateplans:`, discarded); // could be spammy?
+				if (discarded.length > 0) {logger.log(`discarded rateplans:`, discarded);} // could be spammy?
 				if (ratePlans.length > 0)
-					logger.log(
+					{logger.log(
 						`retained rateplans:`,
 						ratePlans.map((rp) => rp.ratePlanName),
-					); // could be very spammy?
+					);} // could be very spammy?
 				return ratePlans;
 			}) satisfies GuardianRatePlans<K>;
 	}

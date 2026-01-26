@@ -1,17 +1,17 @@
-import {
-	GuardianRatePlan,
-	GuardianRatePlans,
-	GuardianSubscription,
-} from './guardianSubscriptionParser';
 import { getSingleOrThrow } from '@modules/arrayFunctions';
-import { objectEntries } from '@modules/objectFunctions';
 import { ValidationError } from '@modules/errors';
-import {
+import { objectEntries } from '@modules/objectFunctions';
+import type {
 	GuardianCatalogKeys,
 	ProductKey,
 	ProductRatePlanKey,
 } from '@modules/product-catalog/productCatalog';
-import { RestSubscription } from './groupSubscriptionByZuoraCatalogIds';
+import type { RestSubscription } from './groupSubscriptionByZuoraCatalogIds';
+import type {
+	GuardianRatePlan,
+	GuardianRatePlans,
+	GuardianSubscription,
+} from './guardianSubscriptionParser';
 
 export type SinglePlanGuardianSubscription = {
 	ratePlan: GuardianRatePlan;
@@ -38,7 +38,7 @@ export function getSinglePlanFlattenedSubscriptionOrThrow(
 ): GuardianSubscriptionWithKeys {
 	const { products, ...restSubWithCurrentPlans } = subWithCurrentPlans;
 
-	const allPlansWithKeys: PlanWithKeys<ProductKey>[] = objectEntries(
+	const allPlansWithKeys: Array<PlanWithKeys<ProductKey>> = objectEntries(
 		products,
 	).flatMap(
 		([productKey, ratePlansGroupsByKey]: [
@@ -49,7 +49,7 @@ export function getSinglePlanFlattenedSubscriptionOrThrow(
 				([productRatePlanKey, ratePlans]: [
 					ProductRatePlanKey<typeof productKey>,
 					GuardianRatePlan[],
-				]): PlanWithKeys<typeof productKey>[] => {
+				]): Array<PlanWithKeys<typeof productKey>> => {
 					const productCatalogKeys: GuardianCatalogKeys<typeof productKey> = {
 						productKey,
 						productRatePlanKey,

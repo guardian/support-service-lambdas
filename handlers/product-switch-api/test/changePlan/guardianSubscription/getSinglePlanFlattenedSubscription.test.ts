@@ -1,18 +1,20 @@
-import dayjs from 'dayjs';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import { zuoraSubscriptionSchema } from '@modules/zuora/types';
-import subscriptionJson from '../../fixtures/subscription.json';
-import alreadySwitchedJson from '../../fixtures/already-switched-subscription.json';
+import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
+import type {
+	GuardianSubscriptionWithKeys} from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import {
-	GuardianSubscription,
+	getSinglePlanFlattenedSubscriptionOrThrow
+} from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
+import type {
+	GuardianSubscription} from '../../../src/guardianSubscription/guardianSubscriptionParser';
+import {
 	GuardianSubscriptionParser,
 } from '../../../src/guardianSubscription/guardianSubscriptionParser';
-import {
-	getSinglePlanFlattenedSubscriptionOrThrow,
-	GuardianSubscriptionWithKeys,
-} from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import { SubscriptionFilter } from '../../../src/guardianSubscription/subscriptionFilter';
-import { getIfDefined } from '@modules/nullAndUndefined';
+import alreadySwitchedJson from '../../fixtures/already-switched-subscription.json';
+import subscriptionJson from '../../fixtures/subscription.json';
 import { productCatalog } from '../../productCatalogFixture';
 
 const referenceDate = dayjs('2024-05-10');

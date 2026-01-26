@@ -1,23 +1,26 @@
-import { ZuoraAccount } from '@modules/zuora/types';
-import { GuardianSubscriptionWithKeys } from '../../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
-import { ProductSwitchTargetBody } from '../schemas';
-import { Lazy } from '@modules/lazy';
-import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
+import type { Lazy } from '@modules/lazy';
+import type { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
+import type { SimpleInvoiceItem } from '@modules/zuora/billingPreview';
+import type { ZuoraAccount } from '@modules/zuora/types';
+import type { GuardianSubscriptionWithKeys } from '../../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
+import type { ProductSwitchTargetBody } from '../schemas';
+import type {
+	AccountInformation} from './accountInformation';
 import {
-	AccountInformation,
 	getAccountInformation,
 } from './accountInformation';
-import {
-	getSubscriptionInformation,
-	SubscriptionInformation,
-} from './subscriptionInformation';
 import { isGenerallyEligibleForDiscount } from './isGenerallyEligibleForDiscount';
+import type {
+	SubscriptionInformation} from './subscriptionInformation';
 import {
-	getTargetInformation,
+	getSubscriptionInformation
+} from './subscriptionInformation';
+import type {
 	SwitchMode,
-	TargetInformation,
+	TargetInformation} from './targetInformation';
+import {
+	getTargetInformation
 } from './targetInformation';
-import { SimpleInvoiceItem } from '@modules/zuora/billingPreview';
 
 export type SwitchInformation = {
 	account: AccountInformation;

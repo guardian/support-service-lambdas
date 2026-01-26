@@ -1,6 +1,6 @@
-import { createSQSMessageBody } from '../src/salesforceTracking';
+import type { SubscriptionInformation } from '../src/changePlan/prepare/subscriptionInformation';
 import type { TargetInformation } from '../src/changePlan/prepare/targetInformation';
-import { SubscriptionInformation } from '../src/changePlan/prepare/subscriptionInformation';
+import { createSQSMessageBody } from '../src/salesforceTracking';
 
 test('salesforce tracking data is serialised to the queue correctly', () => {
 	const targetInformation: TargetInformation = {

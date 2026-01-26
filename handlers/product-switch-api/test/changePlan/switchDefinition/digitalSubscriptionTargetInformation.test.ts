@@ -1,8 +1,8 @@
+import { ValidationError } from '@modules/errors';
 import { Lazy } from '@modules/lazy';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
-import { ValidationError } from '@modules/errors';
 import zuoraCatalogFixture from '../../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
-import { SwitchActionData } from '../../../src/changePlan/prepare/targetInformation';
+import type { SwitchActionData } from '../../../src/changePlan/prepare/targetInformation';
 import { digitalSubscriptionTargetInformation } from '../../../src/changePlan/switchDefinition/digitalSubscriptionTargetInformation';
 
 const productCatalog = generateProductCatalog(zuoraCatalogFixture);

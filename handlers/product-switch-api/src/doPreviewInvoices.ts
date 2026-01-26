@@ -1,8 +1,9 @@
-import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type {
+	PreviewOrderRequest} from '@modules/zuora/orders/orderRequests';
 import {
-	previewOrderRequest,
-	PreviewOrderRequest,
+	previewOrderRequest
 } from '@modules/zuora/orders/orderRequests';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import z from 'zod';
 
 const zuoraPreviewResponseInvoiceItemSchema = z.object({

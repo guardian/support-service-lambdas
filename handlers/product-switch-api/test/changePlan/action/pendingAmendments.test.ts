@@ -1,26 +1,27 @@
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { OrderAction } from '@modules/zuora/orders/orderActions';
 import type { OrderRequest } from '@modules/zuora/orders/orderRequests';
-import {
+import type {
 	GetInvoiceResponse,
+	ZuoraUpperCaseSuccess} from '@modules/zuora/types';
+import {
 	zuoraAccountSchema,
-	zuoraSubscriptionSchema,
-	ZuoraUpperCaseSuccess,
+	zuoraSubscriptionSchema
 } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
+import { DoPreviewAction } from '../../../src/changePlan/action/preview';
+import { DoSwitchAction } from '../../../src/changePlan/action/switch';
+import { getAccountInformation } from '../../../src/changePlan/prepare/accountInformation';
+import { SwitchOrderRequestBuilder } from '../../../src/changePlan/prepare/buildSwitchOrderRequest';
+import { getSubscriptionInformation } from '../../../src/changePlan/prepare/subscriptionInformation';
+import type { TargetInformation } from '../../../src/changePlan/prepare/targetInformation';
 import type { ZuoraSwitchResponse } from '../../../src/changePlan/schemas';
-import { TargetInformation } from '../../../src/changePlan/prepare/targetInformation';
+import { supporterPlusTargetInformation } from '../../../src/changePlan/switchDefinition/supporterPlusTargetInformation';
 import accountJson from '../../fixtures/account.json';
 import pendingAmendmentsJson from '../../fixtures/pendingAmendments.json';
-import { DoPreviewAction } from '../../../src/changePlan/action/preview';
-import { getSubscriptionInformation } from '../../../src/changePlan/prepare/subscriptionInformation';
-import { SwitchOrderRequestBuilder } from '../../../src/changePlan/prepare/buildSwitchOrderRequest';
 import { loadSubscription } from '../prepare/subscriptionInformation.test';
-import { DoSwitchAction } from '../../../src/changePlan/action/switch';
-import { supporterPlusTargetInformation } from '../../../src/changePlan/switchDefinition/supporterPlusTargetInformation';
-import { getAccountInformation } from '../../../src/changePlan/prepare/accountInformation';
 
 const mockZuoraClient = {
 	get: jest.fn(),

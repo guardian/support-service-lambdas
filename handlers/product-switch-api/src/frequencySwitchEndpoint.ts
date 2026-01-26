@@ -30,6 +30,9 @@ import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { EligibilityChecker } from '../../discount-api/src/eligibilityChecker';
+import { zuoraSwitchResponseSchema } from './changePlan/schemas';
+import type { ZuoraPreviewResponse } from './doPreviewInvoices';
+import { doPreviewInvoices } from './doPreviewInvoices';
 import { sendFrequencySwitchConfirmationEmail } from './frequencySwitchEmail';
 import type {
 	FrequencySwitchErrorResponse,
@@ -37,8 +40,6 @@ import type {
 	FrequencySwitchRequestBody,
 	FrequencySwitchSuccessResponse,
 } from './frequencySwitchSchemas';
-import { zuoraSwitchResponseSchema } from './changePlan/schemas';
-import { doPreviewInvoices, ZuoraPreviewResponse } from './doPreviewInvoices';
 
 /**
  * Validation requirements for frequency switch eligibility.
@@ -280,7 +281,7 @@ function prepareFrequencySwitchInfo(
 		type: 'ChangePlan',
 		triggerDates,
 		changePlan: {
-			ratePlanId: currentRatePlan.id,
+			productRatePlanId: currentRatePlan.productRatePlanId,
 			subType: 'Upgrade',
 			newProductRatePlan: {
 				productRatePlanId: targetRatePlanId,
