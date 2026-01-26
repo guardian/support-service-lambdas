@@ -138,6 +138,7 @@ jobs:
           sbt "project ${{ matrix.subproject }}" riffRaffUpload
 
   zuora-callout-apis:
+    name: build (zuora-callout-apis)
     runs-on: ubuntu-latest
     permissions:
       id-token: write
