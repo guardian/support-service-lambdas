@@ -41,7 +41,6 @@ export const refundExpected = (
 	chargedThroughDate: Dayjs | undefined,
 	currentDate: Dayjs,
 ): boolean => {
-	// FIXME think about what happens if someone switches T1->2->3 within a month?
 	return (
 		chargedThroughDate !== undefined && !currentDate.isSame(chargedThroughDate)
 	);
