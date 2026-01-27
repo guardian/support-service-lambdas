@@ -65,7 +65,7 @@ export class ZuoraAutoCancel extends SrStack {
 					new PolicyStatement({
 						actions: ['sqs:SendMessage', 'sqs:GetQueueUrl'],
 						resources: [
-							`arn:aws:sqs:${this.region}:${this.account}:comms-${this.stage}-EmailQueue`,
+							`arn:aws:sqs:${this.region}:${this.account}:braze-emails-${this.stage}`,
 						],
 					}),
 				],
