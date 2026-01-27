@@ -9,6 +9,7 @@ import {
 	getZuoraProductKey,
 	isSupportedProduct,
 	isSupportedProductRatePlan,
+	isSupportedProductRatePlanCharge,
 } from '@modules/product-catalog/zuoraToProductNameMappings';
 import type {
 	CatalogProduct,
@@ -22,21 +23,25 @@ export type ZuoraProductRatePlanChargeIdToKey = Record<
 	string, // product rate plan charge id
 	ZuoraProductRatePlanChargeKeyNode
 >;
-export type ZuoraProductRatePlanKeyNode<P extends ProductKey> = {
-	productRatePlanKey: ProductRatePlanKey<P> & string;
+export type ProductWithDiscountRatePlanKey<P extends ProductKeyWithDiscount> =
+	P extends 'Discounts' ? string : ProductRatePlanKey<Extract<P, ProductKey>>;
+export type ZuoraProductRatePlanKeyNode<P extends ProductKeyWithDiscount> = {
+	productRatePlanKey: ProductWithDiscountRatePlanKey<P>;
 	productRatePlanCharges: ZuoraProductRatePlanChargeIdToKey;
 };
-export type ZuoraProductRatePlanIdToKey<P extends ProductKey> = Record<
-	string, // product rate plan id
-	ZuoraProductRatePlanKeyNode<P>
->;
-export type ZuoraProductKeyNode<P extends ProductKey> = {
+export type ZuoraProductRatePlanIdToKey<P extends ProductKeyWithDiscount> =
+	Record<
+		string, // product rate plan id
+		ZuoraProductRatePlanKeyNode<P>
+	>;
+export type ProductKeyWithDiscount = ProductKey | 'Discounts';
+export type ZuoraProductKeyNode<P extends ProductKeyWithDiscount> = {
 	productKey: P;
 	productRatePlans: ZuoraProductRatePlanIdToKey<P>;
 };
 export type ZuoraProductIdToKey = Record<
 	string, // product id
-	ZuoraProductKeyNode<ProductKey>
+	ZuoraProductKeyNode<ProductKeyWithDiscount>
 >;
 
 /**
@@ -60,11 +65,14 @@ export function buildZuoraProductIdToKey(
 
 function buildZuoraProductKeyNode(
 	product: CatalogProduct,
-): [string, ZuoraProductKeyNode<ProductKey>] | undefined {
-	if (!isSupportedProduct(product.name)) {
+): [string, ZuoraProductKeyNode<ProductKeyWithDiscount>] | undefined {
+	if (!isSupportedProduct(product.name) && product.name !== 'Discounts') {
 		return undefined;
 	}
-	const productKey = getZuoraProductKey(product.name);
+	const productKey =
+		product.name !== 'Discounts'
+			? getZuoraProductKey(product.name)
+			: 'Discounts';
 	return [
 		product.id,
 		{
@@ -75,7 +83,7 @@ function buildZuoraProductKeyNode(
 	];
 }
 
-function buildZuoraProductRatePlanIdToKey<P extends ProductKey>(
+function buildZuoraProductRatePlanIdToKey<P extends ProductKeyWithDiscount>(
 	product: CatalogProduct,
 ): ZuoraProductRatePlanIdToKey<P> {
 	return groupMapSingleOrThrow(
@@ -85,20 +93,17 @@ function buildZuoraProductRatePlanIdToKey<P extends ProductKey>(
 	);
 }
 
-function buildZuoraProductRatePlanKeyNode<P extends ProductKey>(
+function buildZuoraProductRatePlanKeyNode<P extends ProductKeyWithDiscount>(
 	prp: ZuoraProductRatePlan,
 ): [string, ZuoraProductRatePlanKeyNode<P>] | undefined {
-	if (!isSupportedProductRatePlan(prp.name)) {
-		return undefined;
-	}
 	const productRatePlanCharges = buildZuoraProductRatePlanChargeIdToKey(prp);
 	return [
 		prp.id,
 		{
 			// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- TODO check - bad return type on existing getProductRatePlanKey function
-			productRatePlanKey: getProductRatePlanKey(
-				prp.name,
-			) as ProductRatePlanKey<P> & string,
+			productRatePlanKey: (isSupportedProductRatePlan(prp.name)
+				? getProductRatePlanKey(prp.name)
+				: prp.name) as ProductWithDiscountRatePlanKey<P>, // no proper guardian name for some rate plans e.g. discount - fall back to catalog name
 			productRatePlanCharges,
 		},
 	];
@@ -120,7 +125,9 @@ function buildZuoraProductRatePlanChargeKeyNode(
 	return [
 		prpc.id,
 		{
-			productRatePlanChargeKey: getProductRatePlanChargeKey(prpc.name),
+			productRatePlanChargeKey: isSupportedProductRatePlanCharge(prpc.name)
+				? getProductRatePlanChargeKey(prpc.name)
+				: prpc.name, // no proper guardian name for some rate plan charges e.g. discount charges - fall back to catalog name
 		},
 	];
 }

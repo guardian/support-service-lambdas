@@ -1,12 +1,14 @@
 import { groupMapSingleOrThrow } from '@modules/arrayFunctions';
-import { mapValue, objectJoin, objectLeftJoin } from '@modules/objectFunctions';
-import type {
-	ProductKey,
-	ProductRatePlanKey,
-} from '@modules/product-catalog/productCatalog';
+import {
+	mapValue,
+	objectInnerJoin,
+	objectJoinBijective,
+} from '@modules/objectFunctions';
 import type { RatePlanCharge, ZuoraSubscription } from '@modules/zuora/types';
 import type { ZuoraCatalog } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import type {
+	ProductKeyWithDiscount,
+	ProductWithDiscountRatePlanKey,
 	ZuoraProductIdToKey,
 	ZuoraProductKeyNode,
 	ZuoraProductRatePlanChargeIdToKey,
@@ -32,19 +34,19 @@ export type GuardianRatePlan = {
 	ratePlanCharges: GuardianRatePlanCharges;
 } & RestRatePlan;
 
-export type GuardianRatePlans<P extends ProductKey> = Record<
-	ProductRatePlanKey<P> & string,
+export type GuardianRatePlans<P extends ProductKeyWithDiscount> = Record<
+	ProductWithDiscountRatePlanKey<P>,
 	GuardianRatePlan[]
 >;
 export type GuardianSubscriptionProducts = {
-	[K in ProductKey]?: GuardianRatePlans<K>;
+	[K in ProductKeyWithDiscount]?: GuardianRatePlans<K>;
 };
 export type GuardianSubscription = {
 	products: GuardianSubscriptionProducts;
 } & RestSubscription;
 
-type FFF<K extends ProductKey> = {
-	[P in K]: GuardianRatePlans<P>;
+type GuardianKeyToRatePlans<K extends ProductKeyWithDiscount> = {
+	[P in K]?: GuardianRatePlans<P>;
 };
 
 /**
@@ -54,13 +56,17 @@ type FFF<K extends ProductKey> = {
  * @param items
  * @param project
  */
-function groupMapSingleOrThrowCorrelated<K extends ProductKey, A, B>(
+function groupMapSingleOrThrowCorrelated<
+	K extends ProductKeyWithDiscount,
+	A,
+	B,
+>(
 	items: Array<[A, B]>,
 	project: (item: [A, B]) => readonly [K, GuardianRatePlans<K>],
 	msg: string,
-): FFF<K> {
-	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- utility function but TODO look again at this
-	const entries: Partial<FFF<K>> = {} as unknown as Partial<FFF<K>>;
+): GuardianKeyToRatePlans<K> {
+	const entries: GuardianKeyToRatePlans<K> = // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- utility function but TODO look again at this
+		{} as unknown as GuardianKeyToRatePlans<K>;
 	for (const item of items) {
 		const result = project(item);
 		if (entries[result[0]]) {
@@ -68,8 +74,8 @@ function groupMapSingleOrThrowCorrelated<K extends ProductKey, A, B>(
 		}
 		entries[result[0]] = result[1];
 	}
-	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- utility function but TODO look again at this
-	return entries as FFF<K>;
+
+	return entries;
 }
 
 /**
@@ -81,7 +87,7 @@ function groupMapSingleOrThrowCorrelated<K extends ProductKey, A, B>(
  *
  * GuardianSubscription
  * ├─ ...(other ZuoraSubscription fields)...
- * └─ products: GuardianSubscriptionProducts
+ * └─ products: GuardianSubscriptionProducts + Discounts
  *    ├─ Contribution: GuardianRatePlans
  *    │  └─ Monthly: GuardianRatePlan[]
  *    │     └─ [0] First (or only, or maybe no) monthly contribution
@@ -98,8 +104,9 @@ function groupMapSingleOrThrowCorrelated<K extends ProductKey, A, B>(
  *    │           │  └─ ...(usual Zuora rate plan charge fields)...
  *    │           └─ Contribution: RatePlanCharge
  *    │              └─ ...(usual Zuora rate plan charge fields)...
- *    └─ ...(other products in catalog)...
+ *    └─ ...(other products in subscription)...
  * It maintains all current and historical plans and charges.
+ * Note: If a rate plan isn't in the product catalog, it uses the zuora catalog name.
  */
 export class GuardianSubscriptionParser {
 	private zuoraProductIdGuardianLookup: ZuoraProductIdToKey;
@@ -120,9 +127,10 @@ export class GuardianSubscriptionParser {
 		zuoraSubscriptionProducts: ZuoraPIdToPRPIdToSubscriptionRatePlans,
 	): GuardianSubscriptionProducts {
 		return groupMapSingleOrThrowCorrelated(
-			objectLeftJoin(
-				this.zuoraProductIdGuardianLookup,
+			objectInnerJoin(
+				// discards any products not in the (filtered) catalog
 				zuoraSubscriptionProducts,
+				this.zuoraProductIdGuardianLookup,
 			),
 			buildGuardianRatePlansByProductKey,
 			'duplicate product keys',
@@ -130,17 +138,17 @@ export class GuardianSubscriptionParser {
 	}
 }
 
-function buildGuardianRatePlansByProductKey<P extends ProductKey>([
-	zuoraProductKeyNode,
+function buildGuardianRatePlansByProductKey<P extends ProductKeyWithDiscount>([
 	zuoraSubscriptionRatePlans,
-]: [ZuoraProductKeyNode<P>, ZuoraPRPIdToSubscriptionRatePlans | undefined]): [
+	zuoraProductKeyNode,
+]: [ZuoraPRPIdToSubscriptionRatePlans, ZuoraProductKeyNode<P>]): [
 	P,
 	GuardianRatePlans<P>,
 ] {
 	const guardianRatePlans: GuardianRatePlans<P> = groupMapSingleOrThrow(
-		objectLeftJoin(
+		objectInnerJoin(
+			zuoraSubscriptionRatePlans,
 			zuoraProductKeyNode.productRatePlans,
-			zuoraSubscriptionRatePlans ?? {},
 		),
 		buildGuardianRatePlansByRatePlanKey,
 		'duplicate rate plan keys',
@@ -148,24 +156,22 @@ function buildGuardianRatePlansByProductKey<P extends ProductKey>([
 	return [zuoraProductKeyNode.productKey, guardianRatePlans];
 }
 
-function buildGuardianRatePlansByRatePlanKey<P extends ProductKey>([
-	zuoraProductRatePlanKeyNode,
+function buildGuardianRatePlansByRatePlanKey<P extends ProductKeyWithDiscount>([
 	subscriptionRatePlan,
-]: [
-	ZuoraProductRatePlanKeyNode<P>,
-	ZuoraPRPIdToSubscriptionRatePlans[P] | undefined,
-]): [ProductRatePlanKey<P> & string, GuardianRatePlan[]] {
+	zuoraProductRatePlanKeyNode,
+]: [ZuoraPRPIdToSubscriptionRatePlans[P], ZuoraProductRatePlanKeyNode<P>]): [
+	ProductWithDiscountRatePlanKey<P> & string,
+	GuardianRatePlan[],
+] {
 	return [
 		zuoraProductRatePlanKeyNode.productRatePlanKey,
-		subscriptionRatePlan !== undefined
-			? new GuardianRatePlansBuilder<P>(
-					zuoraProductRatePlanKeyNode.productRatePlanCharges,
-				).buildGuardianRatePlans(subscriptionRatePlan)
-			: [],
+		new GuardianRatePlansBuilder<P>(
+			zuoraProductRatePlanKeyNode.productRatePlanCharges,
+		).buildGuardianRatePlans(subscriptionRatePlan),
 	];
 }
 
-class GuardianRatePlansBuilder<P extends ProductKey> {
+class GuardianRatePlansBuilder<P extends ProductKeyWithDiscount> {
 	constructor(
 		private productRatePlanCharges: ZuoraProductRatePlanChargeIdToKey,
 	) {}
@@ -194,7 +200,10 @@ class GuardianRatePlansBuilder<P extends ProductKey> {
 		zuoraSubscriptionRatePlanCharges: ZuoraRatePlanChargesByPRPCId,
 	): GuardianRatePlanCharges {
 		return groupMapSingleOrThrow(
-			objectJoin(this.productRatePlanCharges, zuoraSubscriptionRatePlanCharges),
+			objectJoinBijective(
+				this.productRatePlanCharges,
+				zuoraSubscriptionRatePlanCharges,
+			),
 			([{ productRatePlanChargeKey }, subCharge]) => [
 				productRatePlanChargeKey,
 				subCharge,

@@ -5,6 +5,7 @@ import {
 	headOption,
 	sumNumbers,
 } from '@modules/arrayFunctions';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import { objectValues } from '@modules/objectFunctions';
 import type { RatePlanCharge } from '@modules/zuora/types';
 import type { Dayjs } from 'dayjs';
@@ -23,19 +24,20 @@ export type SubscriptionInformation = {
 	previousProductName: string; // sf tracking
 	previousRatePlanName: string; //sf tracking
 	previousAmount: number; //sf tracking
-	productRatePlanKey: ValidSwitchableRatePlanKey; // email, FIXME supporter product data(need TARGET rate plan name)
+	productRatePlanKey: ValidSwitchableRatePlanKey; // email
 	termStartDate: Date; // order
 	chargedThroughDate?: Dayjs; // refund check
 	productRatePlanId: string; // order
-	chargeIds: [string, ...string[]]; // filter invoice refund items, find if charged through date are the same and are is today(todo can return it from single plan sub) // needed to find the refund amount in the invoice (todo total it) and the charged through date (todo toSet it and check it's unique)
+	chargeIds: [string, ...string[]]; // filter invoice refund items
 };
 
 function getSubscriptionTotalChargeAmount(
 	subscription: SinglePlanGuardianSubscription,
 ) {
 	return sumNumbers(
-		objectValues(subscription.ratePlan.ratePlanCharges).flatMap(
-			(c: RatePlanCharge) => (c.price !== null ? [c.price] : []),
+		objectValues(subscription.ratePlan.ratePlanCharges).map(
+			(c: RatePlanCharge) =>
+				getIfDefined(c.price, 'non priced charge on the rate plan (discount?)'),
 		),
 	);
 }

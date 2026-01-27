@@ -2,6 +2,7 @@
  * Unit tests for frequency switch functionality.
  * Tests the candidate selection logic and edge cases without external API calls.
  */
+import type { IsoCurrency } from '@modules/internationalisation/currency';
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
@@ -35,7 +36,7 @@ function makeMockZuoraClient(): ZuoraClient {
 function makeAccount(overrides?: {
 	totalInvoiceBalance?: number;
 	creditBalance?: number;
-	currency?: string;
+	currency?: IsoCurrency;
 }) {
 	return {
 		success: true,

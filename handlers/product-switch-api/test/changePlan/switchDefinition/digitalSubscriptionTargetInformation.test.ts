@@ -1,5 +1,4 @@
 import { ValidationError } from '@modules/errors';
-import { Lazy } from '@modules/lazy';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import zuoraCatalogFixture from '../../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 import type { SwitchActionData } from '../../../src/changePlan/prepare/targetInformation';
@@ -73,10 +72,6 @@ describe('digitalSubscriptionTargetInformation', () => {
 			mode: 'save',
 			currency: 'GBP',
 			previousAmount: catalogPrice,
-			generallyEligibleForDiscount: new Lazy(
-				() => Promise.resolve(false),
-				'not eligible',
-			),
 		};
 
 		expect(() =>

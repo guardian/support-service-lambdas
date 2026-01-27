@@ -1,5 +1,4 @@
 import { ValidationError } from '@modules/errors';
-import { Lazy } from '@modules/lazy';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import zuoraCatalogFixture from '../../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 import type { SwitchActionData } from '../../../src/changePlan/prepare/targetInformation';
@@ -71,7 +70,7 @@ describe('getSupporterPlusTargetInformation', () => {
 		expect(result.contributionCharge?.contributionAmount).toBe(100);
 	});
 
-	test('throws ValidationError when user-requested amount is below base price', async () => {
+	test('throws ValidationError when user-requested amount is below base price', () => {
 		const basePrice = annualSupporterPlusRatePlan.pricing.GBP;
 		const userRequestedAmount = basePrice - 10;
 
@@ -81,12 +80,12 @@ describe('getSupporterPlusTargetInformation', () => {
 			userRequestedAmount,
 		};
 
-		await expect(
+		expect(() =>
 			supporterPlusTargetInformation(
 				annualSupporterPlusRatePlan,
 				switchActionData,
 			),
-		).rejects.toThrow(ValidationError);
+		).toThrow(ValidationError);
 	});
 
 	test('applies discount when eligible for annual plan with low previous amount', async () => {
@@ -98,10 +97,6 @@ describe('getSupporterPlusTargetInformation', () => {
 			mode: 'save',
 			currency: 'GBP',
 			previousAmount,
-			generallyEligibleForDiscount: new Lazy(
-				() => Promise.resolve(true),
-				'eligible',
-			),
 		};
 
 		const result = await supporterPlusTargetInformation(
@@ -119,7 +114,7 @@ describe('getSupporterPlusTargetInformation', () => {
 		expect(result.contributionCharge?.contributionAmount).toBe(0);
 	});
 
-	test('does not apply discount when previous amount exceeds discounted price', async () => {
+	test('does not apply discount when previous amount exceeds discounted price', () => {
 		const basePrice = annualSupporterPlusRatePlan.pricing.GBP;
 		const discountedPrice = basePrice / 2;
 		const previousAmount = discountedPrice + 10;
@@ -128,18 +123,14 @@ describe('getSupporterPlusTargetInformation', () => {
 			mode: 'save',
 			currency: 'GBP',
 			previousAmount,
-			generallyEligibleForDiscount: new Lazy(
-				() => Promise.resolve(true),
-				'eligible',
-			),
 		};
 
-		await expect(
+		expect(() =>
 			supporterPlusTargetInformation(
 				annualSupporterPlusRatePlan,
 				switchActionData,
 			),
-		).rejects.toThrow(ValidationError);
+		).toThrow(ValidationError);
 	});
 
 	test('does not apply discount when not generally eligible', async () => {

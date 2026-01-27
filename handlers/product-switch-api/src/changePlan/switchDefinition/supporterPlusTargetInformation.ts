@@ -7,7 +7,7 @@ import type {
 import type { Discount } from './discounts';
 import { annualContribHalfPriceSupporterPlusForOneYear } from './discounts';
 
-export async function supporterPlusTargetInformation(
+export function supporterPlusTargetInformation(
 	ratePlan: ProductRatePlan<'SupporterPlus', 'Annual' | 'Monthly'>,
 	switchActionData: SwitchActionData,
 ): Promise<TargetInformation> {
@@ -35,8 +35,7 @@ export async function supporterPlusTargetInformation(
 
 		const isEligible =
 			ratePlan.billingPeriod === 'Annual' &&
-			switchActionData.previousAmount <= discountedPrice &&
-			(await switchActionData.generallyEligibleForDiscount.get()); // TODO use central eligibility checker pattern
+			switchActionData.previousAmount <= discountedPrice;
 		if (isEligible) {
 			discount = discountDetails;
 			contributionAmount = 0;
@@ -55,7 +54,7 @@ export async function supporterPlusTargetInformation(
 		contributionAmount = actualTotalPrice - targetCatalogBasePrice;
 	}
 
-	return {
+	return Promise.resolve({
 		actualTotalPrice,
 		productRatePlanId: ratePlan.id,
 		ratePlanName:
@@ -68,5 +67,5 @@ export async function supporterPlusTargetInformation(
 		},
 		subscriptionChargeId: ratePlan.charges.Subscription.id,
 		discount,
-	} satisfies TargetInformation;
+	} satisfies TargetInformation);
 }

@@ -1,13 +1,8 @@
-import { Lazy } from '@modules/lazy';
+import { ValidationError } from '@modules/errors';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
-import {
-	getBillingPreview,
-	itemsForSubscription,
-	toSimpleInvoiceItems,
-} from '@modules/zuora/billingPreview';
 import type {
 	ZuoraAccount,
 	ZuoraSubscription,
@@ -23,6 +18,7 @@ import { SubscriptionFilter } from '../guardianSubscription/subscriptionFilter';
 import { DoPreviewAction } from './action/preview';
 import { DoSwitchAction } from './action/switch';
 import { SwitchOrderRequestBuilder } from './prepare/buildSwitchOrderRequest';
+import { isEligibleForSwitch } from './prepare/isEligibleForSwitch';
 import { getSwitchInformation } from './prepare/switchInformation';
 import type { ProductSwitchRequestBody } from './schemas';
 
@@ -34,7 +30,7 @@ export class ChangePlanEndpoint {
 		private stage: Stage,
 		private today: dayjs.Dayjs,
 		private body: ProductSwitchRequestBody,
-		private zuoraClient: ZuoraClient,
+		zuoraClient: ZuoraClient,
 		private subscription: ZuoraSubscription,
 		private account: ZuoraAccount,
 	) {
@@ -134,30 +130,37 @@ export class ChangePlanEndpoint {
 		const guardianSubscriptionParser = new GuardianSubscriptionParser(
 			await getZuoraCatalogFromS3(this.stage), // TODO maybe we can build from product catalog instead?
 		);
-		// don't get the billing preview until we know the subscription is not cancelled
-		const lazyBillingPreview = getLazySimpleInvoiceItems(
-			this.zuoraClient,
-			this.today,
-			this.subscription.accountNumber,
-			this.subscription.subscriptionNumber,
-		);
 
 		const activeCurrentSubscriptionFilter =
 			SubscriptionFilter.activeNonEndedSubscriptionFilter(this.today);
 
+		const highLevelSub = guardianSubscriptionParser.parse(this.subscription);
+		const subWithCurrentPlans =
+			activeCurrentSubscriptionFilter.filterSubscription(highLevelSub);
+
 		const guardianSubscriptionWithKeys: GuardianSubscriptionWithKeys =
-			getSinglePlanFlattenedSubscriptionOrThrow(
-				activeCurrentSubscriptionFilter.filterSubscription(
-					guardianSubscriptionParser.parse(this.subscription),
-				),
+			getSinglePlanFlattenedSubscriptionOrThrow(subWithCurrentPlans);
+
+		logger.log('guardian subscription', guardianSubscriptionWithKeys);
+
+		if (
+			!isEligibleForSwitch(
+				guardianSubscriptionWithKeys.subscription.status,
+				this.account.metrics.totalInvoiceBalance,
+				guardianSubscriptionWithKeys.subscription.discountRatePlan,
+				this.today,
+			)
+		) {
+			throw new ValidationError(
+				`not eligible for switch ${guardianSubscriptionWithKeys.subscription.status} ${this.account.metrics.totalInvoiceBalance}`,
 			);
+		}
 
 		const switchInformation = await getSwitchInformation(
 			productCatalogHelper,
 			this.body,
 			this.account,
 			guardianSubscriptionWithKeys,
-			lazyBillingPreview,
 		);
 
 		logger.log(`switching from/to`, {
@@ -167,19 +170,4 @@ export class ChangePlanEndpoint {
 
 		return switchInformation;
 	}
-}
-
-function getLazySimpleInvoiceItems(
-	zuoraClient: ZuoraClient,
-	today: dayjs.Dayjs,
-	accountNumber: string,
-	subscriptionNumber: string,
-) {
-	return new Lazy(
-		() =>
-			getBillingPreview(zuoraClient, today.add(13, 'months'), accountNumber),
-		'get billing preview for the subscription',
-	)
-		.then(itemsForSubscription(subscriptionNumber))
-		.then(toSimpleInvoiceItems);
 }

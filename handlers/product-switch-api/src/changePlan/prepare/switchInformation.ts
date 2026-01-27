@@ -1,12 +1,9 @@
-import type { Lazy } from '@modules/lazy';
 import type { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
-import type { SimpleInvoiceItem } from '@modules/zuora/billingPreview';
 import type { ZuoraAccount } from '@modules/zuora/types';
 import type { GuardianSubscriptionWithKeys } from '../../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import type { ProductSwitchTargetBody } from '../schemas';
 import type { AccountInformation } from './accountInformation';
 import { getAccountInformation } from './accountInformation';
-import { isGenerallyEligibleForDiscount } from './isGenerallyEligibleForDiscount';
 import type { SubscriptionInformation } from './subscriptionInformation';
 import { getSubscriptionInformation } from './subscriptionInformation';
 import type { TargetInformation } from './targetInformation';
@@ -23,24 +20,15 @@ export async function getSwitchInformation(
 	input: ProductSwitchTargetBody,
 	account: ZuoraAccount,
 	guardianSubscriptionWithKeys: GuardianSubscriptionWithKeys,
-	lazyBillingPreview: Lazy<SimpleInvoiceItem[]>,
 ): Promise<SwitchInformation> {
 	const accountInformation = getAccountInformation(account);
 
 	const subscriptionInformation: SubscriptionInformation =
 		getSubscriptionInformation(guardianSubscriptionWithKeys);
 
-	const generallyEligibleForDiscount = isGenerallyEligibleForDiscount(
-		guardianSubscriptionWithKeys.subscription.status,
-		input.mode,
-		account.metrics.totalInvoiceBalance,
-		lazyBillingPreview,
-	);
-
 	const targetInformation = await getTargetInformation(
 		input,
 		guardianSubscriptionWithKeys.productCatalogKeys,
-		generallyEligibleForDiscount,
 		accountInformation.currency,
 		subscriptionInformation.previousAmount,
 		productCatalogHelper,

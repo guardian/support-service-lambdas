@@ -57,7 +57,9 @@ export const getRefundAmount = (
 		sourceSubscriptionReversalItems.length === 0 &&
 		refundExpected(chargedThroughDate, dayjs())
 	) {
-		throw Error('No contribution refund amount found in the preview response');
+		throw Error(
+			'No refund amount for the old subscription found in the preview response',
+		);
 	}
 
 	return contributionRefundAmount;
@@ -141,6 +143,7 @@ export class DoPreviewAction {
 		private stage: Stage,
 		private today: Dayjs,
 	) {}
+
 	preview = async (
 		subscriptionInformation: SubscriptionInformation,
 		targetInformation: TargetInformation,

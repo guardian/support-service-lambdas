@@ -65,7 +65,15 @@ export function objectLeftJoin<K extends string, VA, VB, KR extends K>(
 	);
 }
 
-export function objectJoin<K extends string, VA, VB>(
+export function objectInnerJoin<K extends string, VA, VB>(
+	l: Record<K, VA>,
+	r: Record<K, VB>,
+): [VA, VB][] {
+	const lKeys = objectKeys(l);
+	return lKeys.flatMap((key) => (key in r ? [[l[key], r[key]] as const] : []));
+}
+
+export function objectJoinBijective<K extends string, VA, VB>(
 	l: Record<K, VA>,
 	r: Record<K, VB>,
 ): [VA, VB][] {

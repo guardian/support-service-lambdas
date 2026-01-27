@@ -1,5 +1,4 @@
 import { type IsoCurrency } from '@modules/internationalisation/currency';
-import type { Lazy } from '@modules/lazy';
 import type {
 	GuardianCatalogKeys,
 	ProductCatalogHelper,
@@ -32,17 +31,12 @@ export type SwitchActionData = {
 	currency: IsoCurrency;
 } & (
 	| {
-			mode: 'switchToBasePrice';
+			mode: 'switchToBasePrice' | 'save';
 			previousAmount: number;
 	  }
 	| {
 			mode: 'switchWithPriceOverride';
 			userRequestedAmount: number;
-	  }
-	| {
-			mode: 'save';
-			previousAmount: number;
-			generallyEligibleForDiscount: Lazy<boolean>;
 	  }
 );
 
@@ -53,7 +47,6 @@ export type SwitchActionData = {
 export const getTargetInformation = (
 	input: ProductSwitchTargetBody,
 	productCatalogKeys: GuardianCatalogKeys<ProductKey>,
-	generallyEligibleForDiscount: Lazy<boolean>,
 	currency: IsoCurrency,
 	previousAmount: number,
 	productCatalogHelper: ProductCatalogHelper,
@@ -85,7 +78,6 @@ export const getTargetInformation = (
 				mode: input.mode,
 				currency,
 				previousAmount,
-				generallyEligibleForDiscount,
 			};
 			break;
 	}

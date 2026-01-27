@@ -1,7 +1,4 @@
-import {
-	type IsoCurrency,
-	isSupportedCurrency,
-} from '@modules/internationalisation/currency';
+import { type IsoCurrency } from '@modules/internationalisation/currency';
 import type { ZuoraAccount } from '@modules/zuora/types';
 
 export type AccountInformation = {
@@ -16,12 +13,7 @@ export type AccountInformation = {
 export const getAccountInformation = (
 	account: ZuoraAccount,
 ): AccountInformation => {
-	const currency = account.metrics.currency;
-
-	if (!isSupportedCurrency(currency)) {
-		// TODO move check to zod reader
-		throw new Error(`Unsupported currency ${currency}`);
-	}
+	const currency: IsoCurrency = account.metrics.currency;
 
 	return {
 		id: account.basicInfo.id,

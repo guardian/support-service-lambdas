@@ -8,6 +8,7 @@ import { ValidationError } from '@modules/errors';
 import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraAccount, ZuoraSubscription } from '@modules/zuora/types';
+import { voidSchema } from '@modules/zuora/types';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
@@ -80,6 +81,39 @@ async function testSwitch(
 }
 
 describe('product-switching behaviour', () => {
+	it("paused (discounted) contributions can't be switched", async () => {
+		const zuoraClient = await ZuoraClient.create(stage);
+		const subscriptionNumber = await createContribution(zuoraClient, {
+			price: 20,
+			billingPeriod: 'Month',
+		});
+
+		const path = `/v1/subscriptions/${subscriptionNumber}`;
+		const twoMonthPauseProductRatePlanId = '8ad081dd8fd3d9df018fe2b6a7bc379d';
+		const body = JSON.stringify({
+			add: [
+				{
+					contractEffectiveDate: zuoraDateFormat(dayjs()),
+					productRatePlanId: twoMonthPauseProductRatePlanId,
+				},
+			],
+		});
+		await zuoraClient.put(path, body, voidSchema);
+
+		const subscription = await getSubscription(zuoraClient, subscriptionNumber);
+		const testData: ContributionCreationDetails = {
+			account: await getAccount(zuoraClient, subscription.accountNumber),
+			subscription,
+			zuoraClient,
+		};
+		const input: ProductSwitchRequestBody = {
+			mode: 'switchToBasePrice',
+			targetProduct: 'SupporterPlus',
+		};
+
+		await expect(testPreview(testData, input)).rejects.toThrow(ValidationError);
+	});
+
 	it('can preview an annual recurring contribution switch with an additional contribution element', async () => {
 		const contributionPrice = 20;
 		const testData = await createTestContribution(contributionPrice, {

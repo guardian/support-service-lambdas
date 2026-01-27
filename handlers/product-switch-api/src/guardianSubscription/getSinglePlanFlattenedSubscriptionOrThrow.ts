@@ -1,4 +1,8 @@
-import { getSingleOrThrow } from '@modules/arrayFunctions';
+import {
+	getSingleOrThrow,
+	headOption,
+	partitionByType,
+} from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import { objectEntries } from '@modules/objectFunctions';
 import type {
@@ -6,6 +10,10 @@ import type {
 	ProductKey,
 	ProductRatePlanKey,
 } from '@modules/product-catalog/productCatalog';
+import type {
+	ProductKeyWithDiscount,
+	ProductWithDiscountRatePlanKey,
+} from './buildZuoraProductIdToKey';
 import type { RestSubscription } from './groupSubscriptionByZuoraCatalogIds';
 import type {
 	GuardianRatePlan,
@@ -15,16 +23,30 @@ import type {
 
 export type SinglePlanGuardianSubscription = {
 	ratePlan: GuardianRatePlan;
+	discountRatePlan?: GuardianRatePlan;
 } & RestSubscription;
 export type GuardianSubscriptionWithKeys = {
 	subscription: SinglePlanGuardianSubscription;
 	productCatalogKeys: GuardianCatalogKeys<ProductKey>;
 };
 
-type PlanWithKeys<P extends ProductKey> = {
+type PlanWithKeys<
+	RP extends GuardianCatalogKeysWithDiscount<ProductKeyWithDiscount>,
+> = {
 	ratePlan: GuardianRatePlan;
-	productCatalogKeys: GuardianCatalogKeys<P>;
+	productCatalogKeys: RP;
 };
+
+type GuardianCatalogKeysWithDiscount<
+	P extends ProductKeyWithDiscount,
+	PRP extends
+		ProductWithDiscountRatePlanKey<P> = ProductWithDiscountRatePlanKey<P>,
+> = {
+	[P in ProductKeyWithDiscount]: {
+		productKey: P;
+		productRatePlanKey: PRP;
+	};
+}[P];
 
 /**
  * this takes a subscription and effectively does a "flatten.getSingle" on it to reduce it down to a single rate plan.
@@ -38,19 +60,23 @@ export function getSinglePlanFlattenedSubscriptionOrThrow(
 ): GuardianSubscriptionWithKeys {
 	const { products, ...restSubWithCurrentPlans } = subWithCurrentPlans;
 
-	const allPlansWithKeys: Array<PlanWithKeys<ProductKey>> = objectEntries(
-		products,
-	).flatMap(
+	const allPlansWithKeys: Array<
+		PlanWithKeys<GuardianCatalogKeysWithDiscount<ProductKeyWithDiscount>>
+	> = objectEntries(products).flatMap(
 		([productKey, ratePlansGroupsByKey]: [
-			ProductKey,
-			GuardianRatePlans<ProductKey>,
+			ProductKeyWithDiscount,
+			GuardianRatePlans<ProductKeyWithDiscount>,
 		]) => {
 			return objectEntries(ratePlansGroupsByKey).flatMap(
 				([productRatePlanKey, ratePlans]: [
-					ProductRatePlanKey<typeof productKey>,
+					ProductWithDiscountRatePlanKey<typeof productKey>,
 					GuardianRatePlan[],
-				]): Array<PlanWithKeys<typeof productKey>> => {
-					const productCatalogKeys: GuardianCatalogKeys<typeof productKey> = {
+				]): Array<
+					PlanWithKeys<GuardianCatalogKeysWithDiscount<typeof productKey>>
+				> => {
+					const productCatalogKeys: GuardianCatalogKeysWithDiscount<
+						typeof productKey
+					> = {
 						productKey,
 						productRatePlanKey,
 					};
@@ -63,15 +89,39 @@ export function getSinglePlanFlattenedSubscriptionOrThrow(
 		},
 	);
 
-	const { ratePlan, productCatalogKeys } = getSingleOrThrow(
+	const mainAndDiscountRatePlans: [
+		Array<PlanWithKeys<ProductRatePlanKey<ProductKey>>>,
+		Array<
+			PlanWithKeys<GuardianCatalogKeysWithDiscount<ProductKeyWithDiscount>>
+		>,
+	] = partitionByType(
 		allPlansWithKeys,
+		(t): t is PlanWithKeys<ProductRatePlanKey<ProductKey>> =>
+			t.productCatalogKeys.productKey !== 'Discounts',
+	);
+	const [mainRatePlans, discountRatePlans] = mainAndDiscountRatePlans;
+
+	const { ratePlan, productCatalogKeys } = getSingleOrThrow(
+		mainRatePlans,
 		(msg) =>
 			new ValidationError(
 				"subscription didn't have exactly one known product: " + msg,
 			),
 	);
+	const maybeDiscount = headOption(
+		discountRatePlans,
+		(msg) =>
+			new ValidationError(
+				"subscription didn't have one or zero discounts: " + msg,
+			),
+	);
+	const subscription: SinglePlanGuardianSubscription = {
+		...restSubWithCurrentPlans,
+		ratePlan,
+		discountRatePlan: maybeDiscount?.ratePlan,
+	};
 	return {
-		subscription: { ...restSubWithCurrentPlans, ratePlan },
+		subscription,
 		productCatalogKeys,
 	};
 }

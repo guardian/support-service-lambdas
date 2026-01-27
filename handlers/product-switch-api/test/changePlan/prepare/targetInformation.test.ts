@@ -1,4 +1,3 @@
-import { Lazy } from '@modules/lazy';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import {
@@ -46,7 +45,6 @@ describe('getTargetInformation', () => {
 				targetProduct: 'SupporterPlus',
 			},
 			guardianSubscriptionWithKeys.productCatalogKeys,
-			new Lazy(() => Promise.resolve(false), 'no discount eligibility'),
 			'EUR',
 			previousAmount,
 			productCatalogHelper,
@@ -84,7 +82,6 @@ describe('getTargetInformation', () => {
 				targetProduct: 'SupporterPlus',
 			},
 			guardianSubscriptionWithKeys.productCatalogKeys,
-			new Lazy(() => Promise.resolve(true), 'eligible for discount'),
 			'EUR',
 			discountEligiblePreviousAmount,
 			productCatalogHelper,
@@ -108,7 +105,6 @@ describe('getTargetInformation', () => {
 					targetProduct: 'DigitalSubscription',
 				},
 				guardianSubscriptionWithKeys.productCatalogKeys,
-				new Lazy(() => Promise.resolve(false), 'no discount eligibility'),
 				'EUR',
 				50,
 				productCatalogHelper,
