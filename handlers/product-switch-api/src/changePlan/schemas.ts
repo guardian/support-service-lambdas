@@ -6,15 +6,7 @@ export const productSwitchCommonRequestSchema = z.object({
 	caseId: z.optional(z.string()),
 });
 
-export const productSwitchRequestSchema = z
-	.object({
-		preview: z.boolean(),
-		newAmount: z.optional(z.number().positive()),
-		applyDiscountIfAvailable: z.optional(z.boolean()),
-	})
-	.extend(productSwitchCommonRequestSchema.shape);
-
-export const productSwitchGenericRequestSchema = z.discriminatedUnion('mode', [
+export const productSwitchRequestSchema = z.discriminatedUnion('mode', [
 	z
 		.object({
 			mode: z.literal('switchToBasePrice'),
@@ -36,29 +28,19 @@ export const productSwitchGenericRequestSchema = z.discriminatedUnion('mode', [
 		.extend(productSwitchCommonRequestSchema.shape),
 ]);
 
-export type SwitchMode = ProductSwitchGenericRequestBody['mode'];
+export type SwitchMode = ProductSwitchRequestBody['mode'];
 
 export type ProductSwitchRequestBody = z.infer<
 	typeof productSwitchRequestSchema
 >;
 
-export type ProductSwitchGenericRequestBody = z.infer<
-	typeof productSwitchGenericRequestSchema
->;
-
 export type ProductSwitchTargetBody =
 	| Pick<
-			Extract<
-				ProductSwitchGenericRequestBody,
-				{ mode: 'switchToBasePrice' | 'save' }
-			>,
+			Extract<ProductSwitchRequestBody, { mode: 'switchToBasePrice' | 'save' }>,
 			'mode' | 'targetProduct'
 	  >
 	| Pick<
-			Extract<
-				ProductSwitchGenericRequestBody,
-				{ mode: 'switchWithPriceOverride' }
-			>,
+			Extract<ProductSwitchRequestBody, { mode: 'switchWithPriceOverride' }>,
 			'mode' | 'targetProduct' | 'newAmount'
 	  >;
 

@@ -14,14 +14,6 @@ import type { SwitchOrderRequestBuilder } from '../prepare/buildSwitchOrderReque
 import type { SubscriptionInformation } from '../prepare/subscriptionInformation';
 import type { TargetInformation } from '../prepare/targetInformation';
 
-export type PreviewLegacyResponse = {
-	amountPayableToday: number;
-	contributionRefundAmount: number;
-	supporterPlusPurchaseAmount: number;
-	nextPaymentDate: string;
-	discount?: SwitchDiscountResponse;
-};
-
 export type PreviewResponse = {
 	amountPayableToday: number;
 	proratedRefundAmount: number;

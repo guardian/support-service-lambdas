@@ -15,7 +15,7 @@ import type { ContributionTestAdditionalOptions } from '../../../../modules/zuor
 import { createContribution } from '../../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import { ChangePlanEndpoint } from '../../src/changePlan/changePlanEndpoint';
 import type { ValidTargetProduct } from '../../src/changePlan/prepare/switchesHelper';
-import type { ProductSwitchGenericRequestBody } from '../../src/changePlan/schemas';
+import type { ProductSwitchRequestBody } from '../../src/changePlan/schemas';
 
 interface ContributionCreationDetails {
 	zuoraClient: ZuoraClient;
@@ -53,7 +53,7 @@ const createTestContribution = async (
 
 async function testPreview(
 	testData: ContributionCreationDetails,
-	input: ProductSwitchGenericRequestBody,
+	input: ProductSwitchRequestBody,
 ) {
 	return await new ChangePlanEndpoint(
 		'CODE',
@@ -67,7 +67,7 @@ async function testPreview(
 
 async function testSwitch(
 	testData: ContributionCreationDetails,
-	input: ProductSwitchGenericRequestBody,
+	input: ProductSwitchRequestBody,
 ) {
 	return await new ChangePlanEndpoint(
 		'CODE',
@@ -85,7 +85,7 @@ describe('product-switching behaviour', () => {
 		const testData = await createTestContribution(contributionPrice, {
 			billingPeriod: 'Month',
 		});
-		const input: ProductSwitchGenericRequestBody = {
+		const input: ProductSwitchRequestBody = {
 			mode: 'switchWithPriceOverride',
 			newAmount: contributionPrice,
 			targetProduct: 'SupporterPlus',
@@ -99,7 +99,7 @@ describe('product-switching behaviour', () => {
 	it('can preview an annual recurring contribution switch at catalog price', async () => {
 		const contributionPrice = 120;
 		const testData = await createTestContribution(contributionPrice);
-		const input: ProductSwitchGenericRequestBody = {
+		const input: ProductSwitchRequestBody = {
 			mode: 'switchWithPriceOverride',
 			newAmount: contributionPrice,
 			targetProduct: 'SupporterPlus',
@@ -118,7 +118,7 @@ describe('product-switching behaviour', () => {
 	it('can preview an annual recurring contribution switch with 50% discount', async () => {
 		const contributionPrice = 60;
 		const testData = await createTestContribution(contributionPrice);
-		const input: ProductSwitchGenericRequestBody = {
+		const input: ProductSwitchRequestBody = {
 			mode: 'save',
 			targetProduct: 'SupporterPlus',
 		};
@@ -147,7 +147,7 @@ describe('product-switching behaviour', () => {
 			billingCountry: 'Germany',
 			paymentMethod: 'visaCard',
 		});
-		const input: ProductSwitchGenericRequestBody = {
+		const input: ProductSwitchRequestBody = {
 			mode: 'save',
 			targetProduct: 'SupporterPlus',
 		};
@@ -173,7 +173,7 @@ describe('product-switching behaviour', () => {
 	it('preview of annual recurring contribution switch with 50% discount fails validation check if from a high amount', async () => {
 		const contributionPrice = 200;
 		const testData = await createTestContribution(contributionPrice);
-		const input: ProductSwitchGenericRequestBody = {
+		const input: ProductSwitchRequestBody = {
 			mode: 'save',
 			targetProduct: 'SupporterPlus',
 		};
@@ -191,7 +191,7 @@ describe('product-switching behaviour', () => {
 				targetProduct: ValidTargetProduct,
 				testData: ContributionCreationDetails,
 			) {
-				const input: ProductSwitchGenericRequestBody = {
+				const input: ProductSwitchRequestBody = {
 					mode: 'switchToBasePrice',
 					targetProduct,
 				};

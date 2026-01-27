@@ -5,14 +5,12 @@ import { stageFromEnvironment } from '@modules/stage';
 import type { Handler } from 'aws-lambda';
 import dayjs from 'dayjs';
 import { z } from 'zod';
+import { ChangePlanEndpoint } from './changePlan/changePlanEndpoint';
 import {
-	ChangePlanEndpoint,
-	deprecatedContributionToSupporterPlusEndpoint,
-} from './changePlan/changePlanEndpoint';
-import {
-	productSwitchGenericRequestSchema,
-	productSwitchRequestSchema,
-} from './changePlan/schemas';
+	legacyContributionToSupporterPlusEndpoint,
+	legacyProductSwitchRequestSchema,
+} from './changePlan/legacyContributionToSupporterPlusEndpoint';
+import { productSwitchRequestSchema } from './changePlan/schemas';
 import { frequencySwitchHandler } from './frequencySwitchEndpoint';
 import { frequencySwitchRequestSchema } from './frequencySwitchSchemas';
 
@@ -37,10 +35,10 @@ export const handler: Handler = Router([
 		path: '/product-move/recurring-contribution-to-supporter-plus/{subscriptionNumber}',
 		handler: withParsers(
 			pathParserSchema,
-			productSwitchRequestSchema,
+			legacyProductSwitchRequestSchema,
 			withMMAIdentityCheck(
 				stage,
-				deprecatedContributionToSupporterPlusEndpoint(stage, dayjs()),
+				legacyContributionToSupporterPlusEndpoint(stage, dayjs()),
 				(parsed) => parsed.path.subscriptionNumber,
 			),
 		),
@@ -50,7 +48,7 @@ export const handler: Handler = Router([
 		path: '/subscriptions/{subscriptionNumber}/change-plan',
 		handler: withParsers(
 			pathParserSchema,
-			productSwitchGenericRequestSchema,
+			productSwitchRequestSchema,
 			withMMAIdentityCheck(
 				stage,
 				ChangePlanEndpoint.handler(stage, dayjs()),
@@ -63,7 +61,7 @@ export const handler: Handler = Router([
 		path: '/subscriptions/{subscriptionNumber}/change-plan/preview',
 		handler: withParsers(
 			pathParserSchema,
-			productSwitchGenericRequestSchema,
+			productSwitchRequestSchema,
 			withMMAIdentityCheck(
 				stage,
 				ChangePlanEndpoint.previewHandler(stage, dayjs()),

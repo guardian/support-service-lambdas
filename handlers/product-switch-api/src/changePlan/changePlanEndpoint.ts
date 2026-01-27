@@ -1,6 +1,4 @@
-import { ValidationError } from '@modules/errors';
 import { Lazy } from '@modules/lazy';
-import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import { logger } from '@modules/routing/logger';
@@ -26,10 +24,7 @@ import { DoPreviewAction } from './action/preview';
 import { DoSwitchAction } from './action/switch';
 import { SwitchOrderRequestBuilder } from './prepare/buildSwitchOrderRequest';
 import { getSwitchInformation } from './prepare/switchInformation';
-import type {
-	ProductSwitchGenericRequestBody,
-	ProductSwitchRequestBody,
-} from './schemas';
+import type { ProductSwitchRequestBody } from './schemas';
 
 export class ChangePlanEndpoint {
 	private doPreviewAction: DoPreviewAction;
@@ -38,7 +33,7 @@ export class ChangePlanEndpoint {
 	constructor(
 		private stage: Stage,
 		private today: dayjs.Dayjs,
-		private body: ProductSwitchGenericRequestBody,
+		private body: ProductSwitchRequestBody,
 		private zuoraClient: ZuoraClient,
 		private subscription: ZuoraSubscription,
 		private account: ZuoraAccount,
@@ -49,7 +44,7 @@ export class ChangePlanEndpoint {
 
 	static previewHandler(stage: Stage, today: dayjs.Dayjs) {
 		return async (
-			body: ProductSwitchGenericRequestBody,
+			body: ProductSwitchRequestBody,
 			zuoraClient: ZuoraClient,
 			subscription: ZuoraSubscription,
 			account: ZuoraAccount,
@@ -72,7 +67,7 @@ export class ChangePlanEndpoint {
 
 	static handler(stage: Stage, today: dayjs.Dayjs) {
 		return async (
-			body: ProductSwitchGenericRequestBody,
+			body: ProductSwitchRequestBody,
 			zuoraClient: ZuoraClient,
 			subscription: ZuoraSubscription,
 			account: ZuoraAccount,
@@ -187,76 +182,4 @@ function getLazySimpleInvoiceItems(
 	)
 		.then(itemsForSubscription(subscriptionNumber))
 		.then(toSimpleInvoiceItems);
-}
-
-// just a wrapper for now for the old endpoint (deprecated)
-export function deprecatedContributionToSupporterPlusEndpoint(
-	stage: Stage,
-	today: dayjs.Dayjs,
-) {
-	return async (
-		body: ProductSwitchRequestBody,
-		zuoraClient: ZuoraClient,
-		subscription: ZuoraSubscription,
-		account: ZuoraAccount,
-	) => {
-		const productSwitchEndpoint = new ChangePlanEndpoint(
-			stage,
-			today,
-			{
-				...body,
-				targetProduct: 'SupporterPlus',
-				...deprecatedGetModeFromInput(body),
-			},
-			zuoraClient,
-			subscription,
-			account,
-		);
-
-		if (body.preview) {
-			const intermediate = await productSwitchEndpoint.doPreview();
-			const response = {
-				contributionRefundAmount: intermediate.proratedRefundAmount,
-				discount: intermediate.discount,
-				nextPaymentDate: intermediate.nextPaymentDate,
-				supporterPlusPurchaseAmount: intermediate.targetCatalogPrice,
-				amountPayableToday: intermediate.amountPayableToday,
-			};
-			return {
-				body: JSON.stringify(response),
-				statusCode: 200,
-			};
-		} else {
-			const response = await productSwitchEndpoint.doSwitch();
-			return {
-				body: JSON.stringify(response),
-				statusCode: 200,
-			};
-		}
-	};
-}
-
-function deprecatedGetModeFromInput(body: ProductSwitchRequestBody) {
-	const toMatch = [
-		!!body.applyDiscountIfAvailable,
-		body.newAmount !== undefined,
-	].join(',');
-
-	switch (toMatch) {
-		case 'true,false':
-			return { mode: 'save' } as const;
-		case 'false,false':
-			return { mode: 'switchToBasePrice' } as const;
-		case 'false,true':
-			return {
-				mode: 'switchWithPriceOverride',
-				newAmount: getIfDefined(body.newAmount, 'type error'),
-			} as const;
-		case 'true,true':
-			throw new ValidationError(
-				'you cannot currently choose your amount during the save journey',
-			);
-		default:
-			throw new ValidationError('unexpected missing case: ' + toMatch);
-	}
 }

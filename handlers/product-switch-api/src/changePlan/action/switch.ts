@@ -13,8 +13,8 @@ import { sendSalesforceTracking } from '../../salesforceTracking';
 import { supporterRatePlanItemFromSwitchInformation } from '../../supporterProductData';
 import type { SwitchOrderRequestBuilder } from '../prepare/buildSwitchOrderRequest';
 import type { SwitchInformation } from '../prepare/switchInformation';
-import { zuoraSwitchResponseSchema } from '../schemas';
 import type { ProductSwitchRequestBody, ZuoraSwitchResponse } from '../schemas';
+import { zuoraSwitchResponseSchema } from '../schemas';
 import { sendThankYouEmail } from './productSwitchEmail';
 
 export type SwitchResponse = { message: string };
