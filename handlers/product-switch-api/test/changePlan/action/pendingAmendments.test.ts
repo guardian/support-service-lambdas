@@ -162,8 +162,8 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 		).preview(subscriptionInformation, switchInformation, orderRequest);
 
 		expect(result.amountPayableToday).toBe(75);
-		expect(result.supporterPlusPurchaseAmount).toBe(150);
-		expect(result.contributionRefundAmount).toBe(75);
+		expect(result.targetCatalogPrice).toBe(150);
+		expect(result.proratedRefundAmount).toBe(75);
 		expect(result.nextPaymentDate).toBe('2025-11-10');
 
 		expect(mockZuoraClient.post).toHaveBeenCalled();

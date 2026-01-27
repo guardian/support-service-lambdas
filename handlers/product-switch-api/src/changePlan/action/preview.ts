@@ -14,10 +14,18 @@ import type { SwitchOrderRequestBuilder } from '../prepare/buildSwitchOrderReque
 import type { SubscriptionInformation } from '../prepare/subscriptionInformation';
 import type { TargetInformation } from '../prepare/targetInformation';
 
-export type PreviewResponse = {
+export type PreviewLegacyResponse = {
 	amountPayableToday: number;
 	contributionRefundAmount: number;
 	supporterPlusPurchaseAmount: number;
+	nextPaymentDate: string;
+	discount?: SwitchDiscountResponse;
+};
+
+export type PreviewResponse = {
+	amountPayableToday: number;
+	proratedRefundAmount: number;
+	targetCatalogPrice: number;
 	nextPaymentDate: string;
 	discount?: SwitchDiscountResponse;
 };
@@ -39,7 +47,7 @@ export const refundExpected = (
 	);
 };
 
-export const getContributionRefundAmount = (
+export const getRefundAmount = (
 	zuoraPreviewInvoice: ZuoraPreviewResponseInvoice,
 	sourceChargeIds: [string, ...string[]],
 	chargedThroughDate?: Dayjs,
@@ -76,7 +84,7 @@ export const previewResponseFromZuoraResponse = (
 		'No invoice found in the preview response',
 	);
 
-	const contributionRefundAmount = getContributionRefundAmount(
+	const proratedRefundAmount = getRefundAmount(
 		invoice,
 		sourceProductChargeIds,
 		chargedThroughDate,
@@ -104,8 +112,8 @@ export const previewResponseFromZuoraResponse = (
 
 	const response: PreviewResponse = {
 		amountPayableToday: invoice.amount,
-		contributionRefundAmount,
-		supporterPlusPurchaseAmount:
+		proratedRefundAmount,
+		targetCatalogPrice:
 			supporterPlusSubscriptionInvoiceItem.unitPrice +
 			supporterPlusContributionItem.unitPrice,
 		nextPaymentDate: zuoraDateFormat(

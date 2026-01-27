@@ -4,6 +4,7 @@
  * @group integration
  */
 import console from 'console';
+import { ValidationError } from '@modules/errors';
 import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraAccount, ZuoraSubscription } from '@modules/zuora/types';
@@ -12,10 +13,9 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import type { ContributionTestAdditionalOptions } from '../../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import { createContribution } from '../../../../modules/zuora/test/it-helpers/createGuardianSubscription';
-import { ProductSwitchEndpoint } from '../../src/changePlan/productSwitchEndpoint';
+import { ChangePlanEndpoint } from '../../src/changePlan/changePlanEndpoint';
+import type { ValidTargetProduct } from '../../src/changePlan/prepare/switchesHelper';
 import type { ProductSwitchGenericRequestBody } from '../../src/changePlan/schemas';
-import { ValidTargetProduct } from '../../src/changePlan/prepare/switchesHelper';
-import { ValidationError } from '@modules/errors';
 
 interface ContributionCreationDetails {
 	zuoraClient: ZuoraClient;
@@ -55,7 +55,7 @@ async function testPreview(
 	testData: ContributionCreationDetails,
 	input: ProductSwitchGenericRequestBody,
 ) {
-	return await new ProductSwitchEndpoint(
+	return await new ChangePlanEndpoint(
 		'CODE',
 		dayjs(),
 		input,
@@ -69,7 +69,7 @@ async function testSwitch(
 	testData: ContributionCreationDetails,
 	input: ProductSwitchGenericRequestBody,
 ) {
-	return await new ProductSwitchEndpoint(
+	return await new ChangePlanEndpoint(
 		'CODE',
 		dayjs(),
 		input,
@@ -86,24 +86,22 @@ describe('product-switching behaviour', () => {
 			billingPeriod: 'Month',
 		});
 		const input: ProductSwitchGenericRequestBody = {
+			mode: 'switchWithPriceOverride',
 			newAmount: contributionPrice,
-			preview: true,
-			applyDiscountIfAvailable: false,
 			targetProduct: 'SupporterPlus',
 		};
 
 		const result = await testPreview(testData, input);
 
-		expect(result.supporterPlusPurchaseAmount).toEqual(contributionPrice);
+		expect(result.targetCatalogPrice).toEqual(contributionPrice);
 	});
 
 	it('can preview an annual recurring contribution switch at catalog price', async () => {
 		const contributionPrice = 120;
 		const testData = await createTestContribution(contributionPrice);
 		const input: ProductSwitchGenericRequestBody = {
+			mode: 'switchWithPriceOverride',
 			newAmount: contributionPrice,
-			preview: true,
-			applyDiscountIfAvailable: false,
 			targetProduct: 'SupporterPlus',
 		};
 
@@ -121,8 +119,7 @@ describe('product-switching behaviour', () => {
 		const contributionPrice = 60;
 		const testData = await createTestContribution(contributionPrice);
 		const input: ProductSwitchGenericRequestBody = {
-			preview: true,
-			applyDiscountIfAvailable: true,
+			mode: 'save',
 			targetProduct: 'SupporterPlus',
 		};
 
@@ -151,8 +148,7 @@ describe('product-switching behaviour', () => {
 			paymentMethod: 'visaCard',
 		});
 		const input: ProductSwitchGenericRequestBody = {
-			preview: true,
-			applyDiscountIfAvailable: true,
+			mode: 'save',
 			targetProduct: 'SupporterPlus',
 		};
 
@@ -178,8 +174,7 @@ describe('product-switching behaviour', () => {
 		const contributionPrice = 200;
 		const testData = await createTestContribution(contributionPrice);
 		const input: ProductSwitchGenericRequestBody = {
-			preview: true,
-			applyDiscountIfAvailable: true,
+			mode: 'save',
 			targetProduct: 'SupporterPlus',
 		};
 
@@ -197,8 +192,7 @@ describe('product-switching behaviour', () => {
 				testData: ContributionCreationDetails,
 			) {
 				const input: ProductSwitchGenericRequestBody = {
-					preview: false,
-					applyDiscountIfAvailable: false,
+					mode: 'switchToBasePrice',
 					targetProduct,
 				};
 

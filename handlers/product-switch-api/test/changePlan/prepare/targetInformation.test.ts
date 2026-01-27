@@ -41,8 +41,8 @@ describe('getTargetInformation', () => {
 		const previousAmount = 50;
 
 		const targetInfo = await getTargetInformation(
-			'switchToBasePrice',
 			{
+				mode: 'switchToBasePrice',
 				targetProduct: 'SupporterPlus',
 			},
 			guardianSubscriptionWithKeys.productCatalogKeys,
@@ -79,8 +79,8 @@ describe('getTargetInformation', () => {
 		const discountedPrice = targetBasePrice / 2;
 		const discountEligiblePreviousAmount = Math.min(50, discountedPrice);
 		const targetInfo = await getTargetInformation(
-			'save',
 			{
+				mode: 'save',
 				targetProduct: 'SupporterPlus',
 			},
 			guardianSubscriptionWithKeys.productCatalogKeys,
@@ -103,8 +103,8 @@ describe('getTargetInformation', () => {
 
 		expect(() =>
 			getTargetInformation(
-				'switchToBasePrice',
 				{
+					mode: 'switchToBasePrice',
 					targetProduct: 'DigitalSubscription',
 				},
 				guardianSubscriptionWithKeys.productCatalogKeys,

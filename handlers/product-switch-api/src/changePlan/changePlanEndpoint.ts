@@ -1,5 +1,6 @@
 import { ValidationError } from '@modules/errors';
 import { Lazy } from '@modules/lazy';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import { logger } from '@modules/routing/logger';
@@ -25,13 +26,12 @@ import { DoPreviewAction } from './action/preview';
 import { DoSwitchAction } from './action/switch';
 import { SwitchOrderRequestBuilder } from './prepare/buildSwitchOrderRequest';
 import { getSwitchInformation } from './prepare/switchInformation';
-import type { SwitchMode } from './prepare/targetInformation';
 import type {
 	ProductSwitchGenericRequestBody,
 	ProductSwitchRequestBody,
 } from './schemas';
 
-export class ProductSwitchEndpoint {
+export class ChangePlanEndpoint {
 	private doPreviewAction: DoPreviewAction;
 	private doSwitchAction: DoSwitchAction;
 
@@ -47,14 +47,14 @@ export class ProductSwitchEndpoint {
 		this.doPreviewAction = new DoPreviewAction(zuoraClient, stage, today);
 	}
 
-	static handler(stage: Stage, today: dayjs.Dayjs) {
+	static previewHandler(stage: Stage, today: dayjs.Dayjs) {
 		return async (
 			body: ProductSwitchGenericRequestBody,
 			zuoraClient: ZuoraClient,
 			subscription: ZuoraSubscription,
 			account: ZuoraAccount,
 		): Promise<APIGatewayProxyResult> => {
-			const productSwitchEndpoint = new ProductSwitchEndpoint(
+			const productSwitchEndpoint = new ChangePlanEndpoint(
 				stage,
 				today,
 				body,
@@ -62,9 +62,30 @@ export class ProductSwitchEndpoint {
 				subscription,
 				account,
 			);
-			const response = body.preview
-				? await productSwitchEndpoint.doPreview()
-				: await productSwitchEndpoint.doSwitch();
+			const response = await productSwitchEndpoint.doPreview();
+			return {
+				body: JSON.stringify(response),
+				statusCode: 200,
+			};
+		};
+	}
+
+	static handler(stage: Stage, today: dayjs.Dayjs) {
+		return async (
+			body: ProductSwitchGenericRequestBody,
+			zuoraClient: ZuoraClient,
+			subscription: ZuoraSubscription,
+			account: ZuoraAccount,
+		): Promise<APIGatewayProxyResult> => {
+			const productSwitchEndpoint = new ChangePlanEndpoint(
+				stage,
+				today,
+				body,
+				zuoraClient,
+				subscription,
+				account,
+			);
+			const response = await productSwitchEndpoint.doSwitch();
 			return {
 				body: JSON.stringify(response),
 				statusCode: 200,
@@ -73,7 +94,17 @@ export class ProductSwitchEndpoint {
 	}
 
 	async doPreview() {
-		const { switchInformation, orderRequest } = await this.gatherSwitchData();
+		const switchInformation = await this.gatherSwitchData();
+
+		const orderRequest: SwitchOrderRequestBuilder =
+			new SwitchOrderRequestBuilder(
+				switchInformation.target.productRatePlanId,
+				switchInformation.target.contributionCharge,
+				switchInformation.target.discount?.productRatePlanId[this.stage],
+				switchInformation.subscription,
+				true,
+			);
+
 		return await this.doPreviewAction.preview(
 			switchInformation.subscription,
 			switchInformation.target,
@@ -82,34 +113,22 @@ export class ProductSwitchEndpoint {
 	}
 
 	async doSwitch() {
-		const { switchInformation, orderRequest } = await this.gatherSwitchData();
+		const switchInformation = await this.gatherSwitchData();
+
+		const orderRequest: SwitchOrderRequestBuilder =
+			new SwitchOrderRequestBuilder(
+				switchInformation.target.productRatePlanId,
+				switchInformation.target.contributionCharge,
+				switchInformation.target.discount?.productRatePlanId[this.stage],
+				switchInformation.subscription,
+				false,
+			);
+
 		return await this.doSwitchAction.switchToSupporterPlus(
 			this.body,
 			switchInformation,
 			orderRequest,
 		);
-	}
-
-	private getMode(): SwitchMode {
-		const toMatch = [
-			!!this.body.applyDiscountIfAvailable,
-			this.body.newAmount !== undefined,
-		].join(',');
-
-		switch (toMatch) {
-			case 'true,false':
-				return 'save';
-			case 'false,false':
-				return 'switchToBasePrice';
-			case 'false,true':
-				return 'switchWithPriceOverride';
-			case 'true,true':
-				throw new ValidationError(
-					'you cannot currently choose your amount during the save journey',
-				);
-			default:
-				throw new ValidationError('unexpected missing case: ' + toMatch);
-		}
 	}
 
 	async gatherSwitchData() {
@@ -138,12 +157,9 @@ export class ProductSwitchEndpoint {
 				),
 			);
 
-		const mode: SwitchMode = this.getMode();
-
 		const switchInformation = await getSwitchInformation(
 			productCatalogHelper,
 			this.body,
-			mode,
 			this.account,
 			guardianSubscriptionWithKeys,
 			lazyBillingPreview,
@@ -154,15 +170,7 @@ export class ProductSwitchEndpoint {
 			to: this.body.targetProduct,
 		});
 
-		const orderRequest: SwitchOrderRequestBuilder =
-			new SwitchOrderRequestBuilder(
-				switchInformation.target.productRatePlanId,
-				switchInformation.target.contributionCharge,
-				switchInformation.target.discount?.productRatePlanId[this.stage],
-				switchInformation.subscription,
-				this.body.preview,
-			);
-		return { switchInformation, orderRequest };
+		return switchInformation;
 	}
 }
 
@@ -182,23 +190,73 @@ function getLazySimpleInvoiceItems(
 }
 
 // just a wrapper for now for the old endpoint (deprecated)
-export function contributionToSupporterPlusEndpoint(
+export function deprecatedContributionToSupporterPlusEndpoint(
 	stage: Stage,
 	today: dayjs.Dayjs,
 ) {
-	return (
+	return async (
 		body: ProductSwitchRequestBody,
 		zuoraClient: ZuoraClient,
 		subscription: ZuoraSubscription,
 		account: ZuoraAccount,
-	) =>
-		ProductSwitchEndpoint.handler(stage, today)(
+	) => {
+		const productSwitchEndpoint = new ChangePlanEndpoint(
+			stage,
+			today,
 			{
 				...body,
 				targetProduct: 'SupporterPlus',
+				...deprecatedGetModeFromInput(body),
 			},
 			zuoraClient,
 			subscription,
 			account,
 		);
+
+		if (body.preview) {
+			const intermediate = await productSwitchEndpoint.doPreview();
+			const response = {
+				contributionRefundAmount: intermediate.proratedRefundAmount,
+				discount: intermediate.discount,
+				nextPaymentDate: intermediate.nextPaymentDate,
+				supporterPlusPurchaseAmount: intermediate.targetCatalogPrice,
+				amountPayableToday: intermediate.amountPayableToday,
+			};
+			return {
+				body: JSON.stringify(response),
+				statusCode: 200,
+			};
+		} else {
+			const response = await productSwitchEndpoint.doSwitch();
+			return {
+				body: JSON.stringify(response),
+				statusCode: 200,
+			};
+		}
+	};
+}
+
+function deprecatedGetModeFromInput(body: ProductSwitchRequestBody) {
+	const toMatch = [
+		!!body.applyDiscountIfAvailable,
+		body.newAmount !== undefined,
+	].join(',');
+
+	switch (toMatch) {
+		case 'true,false':
+			return { mode: 'save' } as const;
+		case 'false,false':
+			return { mode: 'switchToBasePrice' } as const;
+		case 'false,true':
+			return {
+				mode: 'switchWithPriceOverride',
+				newAmount: getIfDefined(body.newAmount, 'type error'),
+			} as const;
+		case 'true,true':
+			throw new ValidationError(
+				'you cannot currently choose your amount during the save journey',
+			);
+		default:
+			throw new ValidationError('unexpected missing case: ' + toMatch);
+	}
 }

@@ -1,19 +1,42 @@
 import { z } from 'zod';
 import { validTargetProductKeys } from './prepare/switchesHelper';
 
-export const productSwitchRequestSchema = z.object({
-	preview: z.boolean(),
-	newAmount: z.optional(z.number().positive()),
+export const productSwitchCommonRequestSchema = z.object({
 	csrUserId: z.optional(z.string()),
 	caseId: z.optional(z.string()),
-	applyDiscountIfAvailable: z.optional(z.boolean()),
 });
 
-export const productSwitchGenericRequestSchema = z
+export const productSwitchRequestSchema = z
 	.object({
-		targetProduct: z.enum(validTargetProductKeys),
+		preview: z.boolean(),
+		newAmount: z.optional(z.number().positive()),
+		applyDiscountIfAvailable: z.optional(z.boolean()),
 	})
-	.extend(productSwitchRequestSchema.shape);
+	.extend(productSwitchCommonRequestSchema.shape);
+
+export const productSwitchGenericRequestSchema = z.discriminatedUnion('mode', [
+	z
+		.object({
+			mode: z.literal('switchToBasePrice'),
+			targetProduct: z.enum(validTargetProductKeys),
+		})
+		.extend(productSwitchCommonRequestSchema.shape),
+	z
+		.object({
+			mode: z.literal('switchWithPriceOverride'),
+			newAmount: z.number().positive(),
+			targetProduct: z.enum(validTargetProductKeys),
+		})
+		.extend(productSwitchCommonRequestSchema.shape),
+	z
+		.object({
+			mode: z.literal('save'),
+			targetProduct: z.enum(validTargetProductKeys),
+		})
+		.extend(productSwitchCommonRequestSchema.shape),
+]);
+
+export type SwitchMode = ProductSwitchGenericRequestBody['mode'];
 
 export type ProductSwitchRequestBody = z.infer<
 	typeof productSwitchRequestSchema
@@ -22,10 +45,22 @@ export type ProductSwitchRequestBody = z.infer<
 export type ProductSwitchGenericRequestBody = z.infer<
 	typeof productSwitchGenericRequestSchema
 >;
-export type ProductSwitchTargetBody = Pick<
-	ProductSwitchGenericRequestBody,
-	'targetProduct' | 'newAmount' | 'applyDiscountIfAvailable'
->;
+
+export type ProductSwitchTargetBody =
+	| Pick<
+			Extract<
+				ProductSwitchGenericRequestBody,
+				{ mode: 'switchToBasePrice' | 'save' }
+			>,
+			'mode' | 'targetProduct'
+	  >
+	| Pick<
+			Extract<
+				ProductSwitchGenericRequestBody,
+				{ mode: 'switchWithPriceOverride' }
+			>,
+			'mode' | 'targetProduct' | 'newAmount'
+	  >;
 
 export const zuoraSwitchResponseSchema = z.object({
 	invoiceIds: z.optional(z.array(z.string())),

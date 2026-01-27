@@ -81,8 +81,8 @@ test('preview amounts are correct', () => {
 
 	const expectedOutput = {
 		amountPayableToday: 63.2,
-		contributionRefundAmount: -31.8,
-		supporterPlusPurchaseAmount: 95.0,
+		proratedRefundAmount: -31.8,
+		targetCatalogPrice: 95.0,
 		nextPaymentDate: '2025-03-21',
 	};
 

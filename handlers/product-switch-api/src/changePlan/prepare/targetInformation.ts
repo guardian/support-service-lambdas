@@ -1,12 +1,11 @@
 import { type IsoCurrency } from '@modules/internationalisation/currency';
 import type { Lazy } from '@modules/lazy';
-import { getIfDefined } from '@modules/nullAndUndefined';
 import type {
 	GuardianCatalogKeys,
 	ProductCatalogHelper,
 	ProductKey,
 } from '@modules/product-catalog/productCatalog';
-import type { ProductSwitchTargetBody } from '../schemas';
+import type { ProductSwitchTargetBody, SwitchMode } from '../schemas';
 import type { Discount } from '../switchDefinition/discounts';
 import type {
 	ValidSwitchesFromRatePlan,
@@ -28,10 +27,6 @@ export type TargetContribution = {
 	contributionAmount: number;
 };
 
-export type SwitchMode =
-	| 'switchToBasePrice'
-	| 'switchWithPriceOverride'
-	| 'save';
 export type SwitchActionData = {
 	mode: SwitchMode;
 	currency: IsoCurrency;
@@ -56,7 +51,6 @@ export type SwitchActionData = {
  * add the new subscription correctly.
  */
 export const getTargetInformation = (
-	mode: SwitchMode,
 	input: ProductSwitchTargetBody,
 	productCatalogKeys: GuardianCatalogKeys<ProductKey>,
 	generallyEligibleForDiscount: Lazy<boolean>,
@@ -71,27 +65,24 @@ export const getTargetInformation = (
 		);
 
 	let switchActionData: SwitchActionData;
-	switch (mode) {
+	switch (input.mode) {
 		case 'switchToBasePrice':
 			switchActionData = {
-				mode,
+				mode: input.mode,
 				currency,
 				previousAmount,
 			};
 			break;
 		case 'switchWithPriceOverride':
 			switchActionData = {
-				mode,
+				mode: input.mode,
 				currency,
-				userRequestedAmount: getIfDefined(
-					input.newAmount,
-					'type error - missing amount',
-				),
+				userRequestedAmount: input.newAmount,
 			};
 			break;
 		case 'save':
 			switchActionData = {
-				mode,
+				mode: input.mode,
 				currency,
 				previousAmount,
 				generallyEligibleForDiscount,

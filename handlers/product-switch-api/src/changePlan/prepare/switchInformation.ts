@@ -9,7 +9,7 @@ import { getAccountInformation } from './accountInformation';
 import { isGenerallyEligibleForDiscount } from './isGenerallyEligibleForDiscount';
 import type { SubscriptionInformation } from './subscriptionInformation';
 import { getSubscriptionInformation } from './subscriptionInformation';
-import type { SwitchMode, TargetInformation } from './targetInformation';
+import type { TargetInformation } from './targetInformation';
 import { getTargetInformation } from './targetInformation';
 
 export type SwitchInformation = {
@@ -21,7 +21,6 @@ export type SwitchInformation = {
 export async function getSwitchInformation(
 	productCatalogHelper: ProductCatalogHelper,
 	input: ProductSwitchTargetBody,
-	mode: SwitchMode,
 	account: ZuoraAccount,
 	guardianSubscriptionWithKeys: GuardianSubscriptionWithKeys,
 	lazyBillingPreview: Lazy<SimpleInvoiceItem[]>,
@@ -33,13 +32,12 @@ export async function getSwitchInformation(
 
 	const generallyEligibleForDiscount = isGenerallyEligibleForDiscount(
 		guardianSubscriptionWithKeys.subscription.status,
-		mode,
+		input.mode,
 		account.metrics.totalInvoiceBalance,
 		lazyBillingPreview,
 	);
 
 	const targetInformation = await getTargetInformation(
-		mode,
 		input,
 		guardianSubscriptionWithKeys.productCatalogKeys,
 		generallyEligibleForDiscount,

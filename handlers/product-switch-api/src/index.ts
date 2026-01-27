@@ -6,9 +6,9 @@ import type { Handler } from 'aws-lambda';
 import dayjs from 'dayjs';
 import { z } from 'zod';
 import {
-	contributionToSupporterPlusEndpoint,
-	ProductSwitchEndpoint,
-} from './changePlan/productSwitchEndpoint';
+	ChangePlanEndpoint,
+	deprecatedContributionToSupporterPlusEndpoint,
+} from './changePlan/changePlanEndpoint';
 import {
 	productSwitchGenericRequestSchema,
 	productSwitchRequestSchema,
@@ -40,7 +40,7 @@ export const handler: Handler = Router([
 			productSwitchRequestSchema,
 			withMMAIdentityCheck(
 				stage,
-				contributionToSupporterPlusEndpoint(stage, dayjs()),
+				deprecatedContributionToSupporterPlusEndpoint(stage, dayjs()),
 				(parsed) => parsed.path.subscriptionNumber,
 			),
 		),
@@ -53,7 +53,20 @@ export const handler: Handler = Router([
 			productSwitchGenericRequestSchema,
 			withMMAIdentityCheck(
 				stage,
-				ProductSwitchEndpoint.handler(stage, dayjs()),
+				ChangePlanEndpoint.handler(stage, dayjs()),
+				(parsed) => parsed.path.subscriptionNumber,
+			),
+		),
+	},
+	{
+		httpMethod: 'POST',
+		path: '/subscriptions/{subscriptionNumber}/change-plan/preview',
+		handler: withParsers(
+			pathParserSchema,
+			productSwitchGenericRequestSchema,
+			withMMAIdentityCheck(
+				stage,
+				ChangePlanEndpoint.previewHandler(stage, dayjs()),
 				(parsed) => parsed.path.subscriptionNumber,
 			),
 		),
