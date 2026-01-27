@@ -91,24 +91,24 @@ export class ProductSwitchEndpoint {
 	}
 
 	private getMode(): SwitchMode {
-		switch (
-			[
-				!!this.body.applyDiscountIfAvailable,
-				this.body.newAmount !== undefined,
-			] as const
-		) {
-			case [true, false] as const:
+		const toMatch = [
+			!!this.body.applyDiscountIfAvailable,
+			this.body.newAmount !== undefined,
+		].join(',');
+
+		switch (toMatch) {
+			case 'true,false':
 				return 'save';
-			case [false, false] as const:
+			case 'false,false':
 				return 'switchToBasePrice';
-			case [false, true] as const:
+			case 'false,true':
 				return 'switchWithPriceOverride';
-			case [true, true] as const:
+			case 'true,true':
 				throw new ValidationError(
 					'you cannot currently choose your amount during the save journey',
 				);
 			default:
-				throw new ValidationError('unexpected missing case');
+				throw new ValidationError('unexpected missing case: ' + toMatch);
 		}
 	}
 

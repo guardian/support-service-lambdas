@@ -125,6 +125,7 @@ function getSwitchSpecificTargetInformationOrThrow<
 		validSwitches,
 		targetProductKeys.productKey,
 		targetProductKeys.productRatePlanKey,
+		`${sourceProductKeys.productKey} ${sourceProductKeys.productRatePlanKey}`,
 	);
 
 	return buildTargetInformation(

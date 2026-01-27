@@ -10,16 +10,17 @@ import type { ZuoraAccount, ZuoraSubscription } from '@modules/zuora/types';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
-import type { ContributionTestAdditionalOptions } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
-import { createContribution } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
-import { ProductSwitchEndpoint } from '../src/changePlan/productSwitchEndpoint';
-import type { ProductSwitchGenericRequestBody } from '../src/changePlan/schemas';
+import type { ContributionTestAdditionalOptions } from '../../../../modules/zuora/test/it-helpers/createGuardianSubscription';
+import { createContribution } from '../../../../modules/zuora/test/it-helpers/createGuardianSubscription';
+import { ProductSwitchEndpoint } from '../../src/changePlan/productSwitchEndpoint';
+import type { ProductSwitchGenericRequestBody } from '../../src/changePlan/schemas';
+import { ValidTargetProduct } from '../../src/changePlan/prepare/switchesHelper';
+import { ValidationError } from '@modules/errors';
 
 interface ContributionCreationDetails {
 	zuoraClient: ZuoraClient;
 	account: ZuoraAccount;
 	subscription: ZuoraSubscription;
-	input: ProductSwitchGenericRequestBody;
 }
 
 const jestConsole = console;
@@ -34,9 +35,6 @@ const stage = 'CODE';
 
 const createTestContribution = async (
 	price: number,
-	switchPrice: number,
-	preview: boolean,
-	clientRequestedSwitchDiscount: boolean,
 	additionOptions?: Exclude<ContributionTestAdditionalOptions, 'price'>,
 ): Promise<ContributionCreationDetails> => {
 	const zuoraClient = await ZuoraClient.create(stage);
@@ -47,35 +45,34 @@ const createTestContribution = async (
 		price,
 		...additionOptions,
 	});
-
-	const input = {
-		newAmount: switchPrice,
-		preview,
-		applyDiscountIfAvailable: clientRequestedSwitchDiscount,
-		targetProduct: 'SupporterPlus',
-	} satisfies ProductSwitchGenericRequestBody;
 	const subscription = await getSubscription(zuoraClient, subscriptionNumber);
 	const account = await getAccount(zuoraClient, subscription.accountNumber);
 
-	return { zuoraClient, input, account, subscription };
+	return { zuoraClient, account, subscription };
 };
 
-async function testPreview(testData: ContributionCreationDetails) {
+async function testPreview(
+	testData: ContributionCreationDetails,
+	input: ProductSwitchGenericRequestBody,
+) {
 	return await new ProductSwitchEndpoint(
 		'CODE',
 		dayjs(),
-		testData.input,
+		input,
 		testData.zuoraClient,
 		testData.subscription,
 		testData.account,
 	).doPreview();
 }
 
-async function testSwitch(testData: ContributionCreationDetails) {
+async function testSwitch(
+	testData: ContributionCreationDetails,
+	input: ProductSwitchGenericRequestBody,
+) {
 	return await new ProductSwitchEndpoint(
 		'CODE',
 		dayjs(),
-		testData.input,
+		input,
 		testData.zuoraClient,
 		testData.subscription,
 		testData.account,
@@ -85,29 +82,32 @@ async function testSwitch(testData: ContributionCreationDetails) {
 describe('product-switching behaviour', () => {
 	it('can preview an annual recurring contribution switch with an additional contribution element', async () => {
 		const contributionPrice = 20;
-		const testData = await createTestContribution(
-			contributionPrice,
-			contributionPrice,
-			true,
-			false,
-			{ billingPeriod: 'Month' },
-		);
+		const testData = await createTestContribution(contributionPrice, {
+			billingPeriod: 'Month',
+		});
+		const input: ProductSwitchGenericRequestBody = {
+			newAmount: contributionPrice,
+			preview: true,
+			applyDiscountIfAvailable: false,
+			targetProduct: 'SupporterPlus',
+		};
 
-		const result = await testPreview(testData);
+		const result = await testPreview(testData, input);
 
 		expect(result.supporterPlusPurchaseAmount).toEqual(contributionPrice);
 	});
 
 	it('can preview an annual recurring contribution switch at catalog price', async () => {
 		const contributionPrice = 120;
-		const testData = await createTestContribution(
-			contributionPrice,
-			contributionPrice,
-			true,
-			false,
-		);
+		const testData = await createTestContribution(contributionPrice);
+		const input: ProductSwitchGenericRequestBody = {
+			newAmount: contributionPrice,
+			preview: true,
+			applyDiscountIfAvailable: false,
+			targetProduct: 'SupporterPlus',
+		};
 
-		const result = await testPreview(testData);
+		const result = await testPreview(testData, input);
 
 		const expectedResult = {
 			supporterPlusPurchaseAmount: contributionPrice,
@@ -119,14 +119,14 @@ describe('product-switching behaviour', () => {
 
 	it('can preview an annual recurring contribution switch with 50% discount', async () => {
 		const contributionPrice = 60;
-		const testData = await createTestContribution(
-			contributionPrice,
-			contributionPrice,
-			true,
-			true,
-		);
+		const testData = await createTestContribution(contributionPrice);
+		const input: ProductSwitchGenericRequestBody = {
+			preview: true,
+			applyDiscountIfAvailable: true,
+			targetProduct: 'SupporterPlus',
+		};
 
-		const result = await testPreview(testData);
+		const result = await testPreview(testData, input);
 
 		const expectedResult = {
 			supporterPlusPurchaseAmount: 120,
@@ -145,65 +145,79 @@ describe('product-switching behaviour', () => {
 	});
 
 	it('can preview an annual recurring contribution (non UK - German) switch with 50% discount', async () => {
-		const contributionPrice = 120;
-		const testData = await createTestContribution(
-			contributionPrice,
-			contributionPrice,
-			true,
-			true,
-			{
-				billingCountry: 'Germany',
-				paymentMethod: 'visaCard',
-			},
-		);
-
-		const result = await testPreview(testData);
-
-		const expectedResult = {
-			supporterPlusPurchaseAmount: contributionPrice,
-			nextPaymentDate: zuoraDateFormat(dayjs().add(1, 'year').endOf('day')),
-			amountPayableToday: 0,
-			contributionRefundAmount: -120,
+		const contributionPrice = 40;
+		const testData = await createTestContribution(contributionPrice, {
+			billingCountry: 'Germany',
+			paymentMethod: 'visaCard',
+		});
+		const input: ProductSwitchGenericRequestBody = {
+			preview: true,
+			applyDiscountIfAvailable: true,
+			targetProduct: 'SupporterPlus',
 		};
 
-		expect(result).toEqual(expectedResult);
-	});
-
-	it('preview of annual recurring contribution switch with 50% discount fails validation check', async () => {
-		const contributionPrice = 200;
-		const testData = await createTestContribution(
-			contributionPrice,
-			contributionPrice,
-			true,
-			true,
-		);
-
-		const result = await testPreview(testData);
+		const result = await testPreview(testData, input);
 
 		const expectedResult = {
 			supporterPlusPurchaseAmount: 120,
 			nextPaymentDate: zuoraDateFormat(dayjs().add(1, 'year').endOf('day')),
-			amountPayableToday: -80,
-			contributionRefundAmount: -200,
+			amountPayableToday: 20,
+			contributionRefundAmount: -40,
+			discount: {
+				discountPercentage: 50,
+				discountedPrice: 60,
+				upToPeriods: 1,
+				upToPeriodsType: 'Years',
+			},
 		};
 
 		expect(result).toEqual(expectedResult);
 	});
 
+	it('preview of annual recurring contribution switch with 50% discount fails validation check if from a high amount', async () => {
+		const contributionPrice = 200;
+		const testData = await createTestContribution(contributionPrice);
+		const input: ProductSwitchGenericRequestBody = {
+			preview: true,
+			applyDiscountIfAvailable: true,
+			targetProduct: 'SupporterPlus',
+		};
+
+		await expect(testPreview(testData, input)).rejects.toThrow(ValidationError);
+	});
+
 	it(
-		'can switch a recurring contribution',
+		'can switch a recurring contribution to S+ and then to D+',
 		async () => {
 			const contributionPrice = 120;
-			const testData = await createTestContribution(
-				contributionPrice,
-				contributionPrice,
-				false,
-				false,
+			const testData = await createTestContribution(contributionPrice);
+
+			async function testSwitchLocal(
+				targetProduct: ValidTargetProduct,
+				testData: ContributionCreationDetails,
+			) {
+				const input: ProductSwitchGenericRequestBody = {
+					preview: false,
+					applyDiscountIfAvailable: false,
+					targetProduct,
+				};
+
+				const response = await testSwitch(testData, input);
+
+				expect(response.message).toContain(
+					'Product move completed successfully',
+				);
+			}
+
+			await testSwitchLocal('SupporterPlus', testData);
+			const subscriptionAfter = await getSubscription(
+				testData.zuoraClient,
+				testData.subscription.subscriptionNumber,
 			);
-
-			const response = await testSwitch(testData);
-
-			expect(response.message).toContain('Product move completed successfully');
+			await testSwitchLocal('DigitalSubscription', {
+				...testData,
+				subscription: subscriptionAfter,
+			});
 		},
 		1000 * 60,
 	);

@@ -45,11 +45,14 @@ export function getAvailableSwitchesFrom<
 		widenedValidSwitches[productKey];
 	const validSwitch1: ValidSwitchFromProduct<P> = getIfDefined(
 		validSwitch2,
-		'todo',
+		`couldn't find a switch from ${productKey}`,
 	);
 	const validSwitch: ValidSwitchesFromRatePlan | undefined =
 		validSwitch1[productRatePlanKey];
-	return getIfDefined(validSwitch, 'no switch for that TODO');
+	return getIfDefined(
+		validSwitch,
+		`couldn't find a switch from ${productKey} for ${productRatePlanKey}`,
+	);
 }
 
 export function getSwitchTo<
@@ -59,17 +62,21 @@ export function getSwitchTo<
 	validSwitches: ValidSwitchesFromRatePlan,
 	productKey: P,
 	productRatePlanKey: PRP,
+	msg: string,
 ) {
 	const widenedValidSwitches: ValidSwitchesFromRatePlan = validSwitches;
 	const validSwitch2: ValidSwitchToProduct<P> | undefined =
 		widenedValidSwitches[productKey];
 	const validSwitch1: ValidSwitchToProduct<P> = getIfDefined(
 		validSwitch2,
-		'todo',
+		`couldn't find a switch from ${msg} to ${productKey}`,
 	);
 	const validSwitch: ValidSwitchHandler<P, PRP> | undefined =
 		validSwitch1[productRatePlanKey];
-	return getIfDefined(validSwitch, 'no switch for that TODO');
+	return getIfDefined(
+		validSwitch,
+		`couldn't find a switch from ${msg} ${productKey} to ${productRatePlanKey}`,
+	);
 }
 
 export type ValidTargetProduct = Normalize<

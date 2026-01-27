@@ -11,7 +11,7 @@ export const productSwitchesData = {
 		},
 		Monthly: {
 			SupporterPlus: {
-				Annual: supporterPlusTargetInformation,
+				Monthly: supporterPlusTargetInformation,
 			},
 		},
 	},

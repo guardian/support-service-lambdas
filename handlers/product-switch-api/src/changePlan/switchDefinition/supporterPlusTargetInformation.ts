@@ -43,7 +43,7 @@ export async function supporterPlusTargetInformation(
 			actualTotalPrice = discountedPrice;
 		} else {
 			throw new ValidationError(
-				`Cannot switch to Supporter Plus: not eligible for a save discount`,
+				`Cannot switch to Supporter Plus: not eligible for a save discount: ${ratePlan.billingPeriod} === Annual, ${switchActionData.previousAmount} <= ${discountedPrice}`,
 			);
 		}
 	} else {
