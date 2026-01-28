@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import {
+	isRefundExpected,
 	previewResponseFromZuoraResponse,
-	refundExpected,
 } from '../../../src/changePlan/action/preview';
 import type { TargetInformation } from '../../../src/changePlan/prepare/targetInformation';
 import type { ZuoraPreviewResponse } from '../../../src/doPreviewInvoices';
@@ -75,12 +75,12 @@ This tests a scenario that occurs when the product switch occurs on the day that
 test('dont expect a refund if switching on the charged through date', () => {
 	const currentDate = dayjs('2025-01-01');
 
-	expect(refundExpected(currentDate, currentDate)).toBe(false);
+	expect(isRefundExpected(currentDate, currentDate)).toBe(false);
 });
 
 test('expect a refund if switching before the charged through date', () => {
 	const currentDate = dayjs('2025-01-01');
 	const chargedThroughDate = currentDate.add(1, 'day');
 
-	expect(refundExpected(chargedThroughDate, currentDate)).toBe(true);
+	expect(isRefundExpected(chargedThroughDate, currentDate)).toBe(true);
 });

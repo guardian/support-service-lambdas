@@ -34,13 +34,12 @@ const zuoraPreviewResponseInvoiceSchema = z.object({
 export type ZuoraPreviewResponseInvoice = z.infer<
 	typeof zuoraPreviewResponseInvoiceSchema
 >;
+export type ZuoraPreviewInvoiceItem =
+	ZuoraPreviewResponseInvoice['invoiceItems'][number];
 export const zuoraPreviewResponseSchema = z.object({
-	previewResult: z.optional(
-		z.object({
-			invoices: z.array(zuoraPreviewResponseInvoiceSchema),
-		}),
-	),
-	reasons: z.optional(z.array(z.object({ message: z.string() }))),
+	previewResult: z.object({
+		invoices: z.array(zuoraPreviewResponseInvoiceSchema),
+	}),
 });
 export type ZuoraPreviewResponse = z.infer<typeof zuoraPreviewResponseSchema>;
 

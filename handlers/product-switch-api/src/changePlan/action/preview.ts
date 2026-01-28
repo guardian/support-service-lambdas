@@ -1,13 +1,14 @@
-import { getIfDefined } from '@modules/nullAndUndefined';
+import { groupSingleOrThrow } from '@modules/arrayFunctions';
+import { getIfDefined, mapOption } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import type { PreviewOrderRequest } from '@modules/zuora/orders/orderRequests';
 import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs, { type Dayjs } from 'dayjs';
 import type {
+	ZuoraPreviewInvoiceItem,
 	ZuoraPreviewResponse,
 	ZuoraPreviewResponseInvoice,
-	ZuoraPreviewResponseInvoiceItem,
 } from '../../doPreviewInvoices';
 import { doPreviewInvoices } from '../../doPreviewInvoices';
 import type { SwitchOrderRequestBuilder } from '../prepare/buildSwitchOrderRequest';
@@ -29,7 +30,7 @@ export interface SwitchDiscountResponse {
 	discountPercentage: number;
 }
 
-export const refundExpected = (
+export const isRefundExpected = (
 	chargedThroughDate: Dayjs | undefined,
 	currentDate: Dayjs,
 ): boolean => {
@@ -39,27 +40,27 @@ export const refundExpected = (
 };
 
 export const getRefundAmount = (
-	zuoraPreviewInvoice: ZuoraPreviewResponseInvoice,
+	itemsById: Record<string, ZuoraPreviewInvoiceItem>,
 	sourceChargeIds: [string, ...string[]],
 	chargedThroughDate?: Dayjs,
 ): number => {
-	const sourceSubscriptionReversalItems =
-		zuoraPreviewInvoice.invoiceItems.filter(
-			(invoiceItem: ZuoraPreviewResponseInvoiceItem) =>
-				sourceChargeIds.includes(invoiceItem.productRatePlanChargeId),
+	const sourceSubscriptionReversalItems = sourceChargeIds.flatMap((id) =>
+		itemsById[id] !== undefined ? [itemsById[id]] : [],
+	);
+	const refundExpected = isRefundExpected(chargedThroughDate, dayjs());
+	if (
+		sourceSubscriptionReversalItems.length !== sourceChargeIds.length &&
+		(sourceSubscriptionReversalItems.length !== 0 || refundExpected)
+	) {
+		throw Error(
+			`Did not find a refund for every charge in the old subscription in the preview response: expected: ${JSON.stringify(sourceChargeIds)}`,
 		);
-	const contributionRefundAmount = sourceSubscriptionReversalItems.reduceRight(
+	}
+
+	const contributionRefundAmount = sourceSubscriptionReversalItems.reduce(
 		(accu, invoiceItem) => accu - invoiceItem.amount,
 		0,
 	);
-	if (
-		sourceSubscriptionReversalItems.length === 0 &&
-		refundExpected(chargedThroughDate, dayjs())
-	) {
-		throw Error(
-			'No refund amount for the old subscription found in the preview response',
-		);
-	}
 
 	return contributionRefundAmount;
 };
@@ -72,68 +73,63 @@ export const previewResponseFromZuoraResponse = (
 	chargedThroughDate?: Dayjs,
 ): PreviewResponse => {
 	const invoice: ZuoraPreviewResponseInvoice = getIfDefined(
-		zuoraResponse.previewResult?.invoices[0],
+		zuoraResponse.previewResult.invoices[0],
 		'No invoice found in the preview response',
+	);
+	const itemsById: Record<string, ZuoraPreviewInvoiceItem> = groupSingleOrThrow(
+		invoice.invoiceItems,
+		(item) => item.productRatePlanChargeId,
+		'duplicate productRatePlanChargeId in the same invoice',
 	);
 
 	const proratedRefundAmount = getRefundAmount(
-		invoice,
+		itemsById,
 		sourceProductChargeIds,
 		chargedThroughDate,
 	);
 
 	const targetBaseInvoiceItem = getIfDefined(
-		invoice.invoiceItems.find(
-			(invoiceItem: ZuoraPreviewResponseInvoiceItem) =>
-				targetInformation.subscriptionChargeId ===
-				invoiceItem.productRatePlanChargeId,
-		),
+		itemsById[targetInformation.subscriptionChargeId],
 		'No supporter plus invoice item found in the preview response: id: ' +
 			targetInformation.subscriptionChargeId,
 	);
 
-	const contributionChargeId: string | undefined =
-		targetInformation.contributionCharge?.id;
-	const targetContributionInvoiceItem =
-		contributionChargeId === undefined
-			? undefined
-			: getIfDefined(
-					invoice.invoiceItems.find(
-						(invoiceItem) =>
-							invoiceItem.productRatePlanChargeId === contributionChargeId,
-					),
-					'No supporter plus invoice item found in the preview response: id: ' +
-						contributionChargeId,
-				);
+	const targetContributionUnitPrice = mapOption(
+		targetInformation.contributionCharge?.id,
+		(contributionChargeId) =>
+			getIfDefined(
+				itemsById[contributionChargeId],
+				'No supporter plus invoice item found in the preview response: id: ' +
+					contributionChargeId,
+			).unitPrice,
+	);
+
+	const maybeDiscount: SwitchDiscountResponse | undefined = mapOption(
+		targetInformation.discount,
+		(possibleDiscount) =>
+			mapOption(
+				itemsById[possibleDiscount.productRatePlanChargeId[stage]],
+				(discountInvoiceItem) =>
+					({
+						discountedPrice:
+							targetBaseInvoiceItem.unitPrice + discountInvoiceItem.amount,
+						discountPercentage: possibleDiscount.discountPercentage,
+						upToPeriods: possibleDiscount.upToPeriods,
+						upToPeriodsType: possibleDiscount.upToPeriodsType,
+					}) satisfies SwitchDiscountResponse,
+			),
+	);
 
 	const response: PreviewResponse = {
 		amountPayableToday: invoice.amount,
 		proratedRefundAmount,
 		targetCatalogPrice:
-			targetBaseInvoiceItem.unitPrice +
-			(targetContributionInvoiceItem?.unitPrice ?? 0),
+			targetBaseInvoiceItem.unitPrice + (targetContributionUnitPrice ?? 0),
 		nextPaymentDate: zuoraDateFormat(
 			dayjs(targetBaseInvoiceItem.serviceEndDate).add(1, 'days'),
 		),
+		...(maybeDiscount === undefined ? {} : { discount: maybeDiscount }),
 	};
-
-	const possibleDiscount = targetInformation.discount;
-	if (possibleDiscount) {
-		const discountInvoiceItem = invoice.invoiceItems.find(
-			(invoiceItem) =>
-				invoiceItem.productRatePlanChargeId ===
-				possibleDiscount.productRatePlanChargeId[stage],
-		);
-		if (discountInvoiceItem) {
-			response.discount = {
-				discountedPrice:
-					targetBaseInvoiceItem.unitPrice + discountInvoiceItem.amount,
-				discountPercentage: possibleDiscount.discountPercentage,
-				upToPeriods: possibleDiscount.upToPeriods,
-				upToPeriodsType: possibleDiscount.upToPeriodsType,
-			};
-		}
-	}
 
 	return response;
 };
