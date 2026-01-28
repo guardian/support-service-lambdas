@@ -1,4 +1,8 @@
-import { distinct, getIfNonEmpty, isInList } from '@modules/arrayFunctions';
+import {
+	distinct,
+	getNonEmptyOrThrow,
+	isInList,
+} from '@modules/arrayFunctions';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { objectKeys, objectValues } from '@modules/objectFunctions';
 import type {
@@ -90,7 +94,7 @@ export type ValidTargetProduct = Normalize<
 export const validTargetProductKeys: [
 	ValidTargetProduct,
 	...ValidTargetProduct[],
-] = getIfNonEmpty(
+] = getNonEmptyOrThrow(
 	distinct(
 		objectValues(productSwitchesData)
 			.flatMap(objectValues)
@@ -105,7 +109,7 @@ export type ValidSwitchableRatePlanKey = Normalize<
 	}[keyof typeof productSwitchesData]
 >;
 
-const validSwitchableRatePlanKeys = getIfNonEmpty(
+const validSwitchableRatePlanKeys = getNonEmptyOrThrow(
 	distinct(
 		objectValues(productSwitchesData).flatMap((value) => objectKeys(value)),
 	),

@@ -1,9 +1,9 @@
+import { mapValues, partitionByType } from '@modules/arrayFunctions';
 import {
-	mapValues,
-	partitionByType,
-	partitionByValueType,
-} from '@modules/arrayFunctions';
-import { mapValue, objectKeys } from '@modules/objectFunctions';
+	mapValue,
+	objectKeys,
+	partitionObjectByValueType,
+} from '@modules/objectFunctions';
 import type { ProductKey } from '@modules/product-catalog/productCatalog';
 import { logger } from '@modules/routing/logger';
 import type { RatePlanCharge } from '@modules/zuora/types';
@@ -69,7 +69,7 @@ export class SubscriptionFilter {
 	}
 
 	private filterCharges(charges: Record<string, RatePlanCharge>) {
-		const [errors, filteredCharges] = partitionByValueType(
+		const [errors, filteredCharges] = partitionObjectByValueType(
 			mapValues(charges, (rpc: RatePlanCharge) => {
 				const chargeDiscardReason1 = this.chargeDiscardReason(rpc);
 				return chargeDiscardReason1 !== undefined

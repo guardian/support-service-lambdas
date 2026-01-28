@@ -1,6 +1,6 @@
 import {
+	getMaybeSingleOrThrow,
 	getSingleOrThrow,
-	headOption,
 	partitionByType,
 } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
@@ -108,7 +108,7 @@ export function getSinglePlanFlattenedSubscriptionOrThrow(
 				"subscription didn't have exactly one known product: " + msg,
 			),
 	);
-	const maybeDiscount = headOption(
+	const maybeDiscount = getMaybeSingleOrThrow(
 		discountRatePlans,
 		(msg) =>
 			new ValidationError(

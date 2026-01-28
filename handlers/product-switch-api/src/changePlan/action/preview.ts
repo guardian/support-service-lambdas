@@ -1,4 +1,4 @@
-import { groupSingleOrThrow } from '@modules/arrayFunctions';
+import { groupByUniqueId } from '@modules/arrayFunctions';
 import { getIfDefined, mapOption } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import type { PreviewOrderRequest } from '@modules/zuora/orders/orderRequests';
@@ -76,7 +76,7 @@ export const previewResponseFromZuoraResponse = (
 		zuoraResponse.previewResult.invoices[0],
 		'No invoice found in the preview response',
 	);
-	const itemsById: Record<string, ZuoraPreviewInvoiceItem> = groupSingleOrThrow(
+	const itemsById: Record<string, ZuoraPreviewInvoiceItem> = groupByUniqueId(
 		invoice.invoiceItems,
 		(item) => item.productRatePlanChargeId,
 		'duplicate productRatePlanChargeId in the same invoice',

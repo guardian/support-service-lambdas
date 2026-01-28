@@ -26,6 +26,14 @@ export const groupBy = <T, I extends string>(
 	}, {});
 };
 
+/**
+ * groupMap creates an object where its keys are the result of the group function, and the values are the result
+ * of the map function
+ *
+ * @param array
+ * @param group
+ * @param map
+ */
 export const groupMap = <T, R>(
 	array: readonly T[],
 	group: (item: T) => string,
@@ -39,13 +47,21 @@ export const groupMap = <T, R>(
 	);
 };
 
-export const groupMap2 = <T, R, K extends string>(
+/**
+ * groupCollect creates an object where the keys are the first element returned by toMaybeEntry,
+ * and the values are the second element.
+ * If the function returns undefined, the item is discarded.
+ *
+ * @param array
+ * @param toMaybeEntry
+ */
+export const groupCollect = <T, R, K extends string>(
 	array: readonly T[],
-	groupFn: (item: T) => [K, R] | undefined,
+	toMaybeEntry: (item: T) => [K, R] | undefined,
 ): Record<K, R[]> => {
 	return array.reduce<Record<K, R[]>>(
 		(acc, item) => {
-			const keyValue = groupFn(item);
+			const keyValue = toMaybeEntry(item);
 			if (keyValue !== undefined) {
 				const [key, value] = keyValue;
 				const group = acc[key] ?? [];
@@ -81,29 +97,6 @@ export const mapValues = <T extends object, RES>(
 		}
 	}
 	return res;
-};
-
-/**
- * this goes through the object, applying the function to each value.  If the result is true, the value goes into the first list
- * otherwise it goes into the second list.  The keys are discarded.
- * @param obj
- * @param fn
- */
-export const partitionByValueType = <T extends object, U extends T[keyof T]>(
-	obj: T,
-	fn: (v: T[keyof T], k: keyof T) => v is U,
-): [Record<string, U>, Record<string, Exclude<T[keyof T], U>>] => {
-	const pass: Record<string, U> = {};
-	const fail: Record<string, Exclude<T[keyof T], U>> = {};
-	for (const key in obj) {
-		const value = obj[key];
-		if (fn(value, key)) {
-			pass[key] = value;
-		} else {
-			fail[key] = value as Exclude<T[keyof T], U>;
-		}
-	}
-	return [pass, fail];
 };
 
 export const partition = <T>(
@@ -170,7 +163,7 @@ export const getSingleOrThrow = <T>(
  * @param array
  * @param error
  */
-export const headOption = <T>(
+export const getMaybeSingleOrThrow = <T>(
 	array: T[],
 	error: (msg: string) => Error,
 ): T | undefined => {
@@ -242,7 +235,7 @@ export const difference = <T>(a: T[], b: T[]) => {
 	return [onlyInA, onlyInB] as const;
 };
 
-export function getIfNonEmpty<T>(
+export function getNonEmptyOrThrow<T>(
 	array: T[],
 	errorMessage: string,
 ): [T, ...T[]] {
@@ -253,35 +246,39 @@ export function getIfNonEmpty<T>(
 }
 
 /**
- * safer than objectFromEntries, this does a groupBy and then extracts a single item
+ * this does a groupBy and then extracts a single item from each group.
+ *
+ * This is safer than objectFromEntries which silently discards clashes.
  *
  * @param ratePlanCharges
  * @param by
  * @param msg
  */
-export function groupSingleOrThrow<T, K extends string>(
+export function groupByUniqueId<T, K extends string>(
 	ratePlanCharges: T[],
 	by: (t: T) => K,
 	msg: string,
 ): Record<K, T> {
-	return groupMapSingleOrThrow(ratePlanCharges, (a) => [by(a), a], msg);
+	return groupCollectByUniqueId(ratePlanCharges, (a) => [by(a), a], msg);
 }
 
 /**
- * safer than objectFromEntries and mapValues, this does a groupMap and then extracts a single item
+ * this does a groupCollect and then extracts a single item.
  *
  * @param ratePlanCharges
  * @param by
  * @param map
  * @param msg
  */
-export function groupMapSingleOrThrow<T, R, K extends string>(
+export function groupCollectByUniqueId<T, R, K extends string>(
 	ratePlanCharges: T[],
 	by: (t: T) => [K, R] | undefined,
-	// map: (item: T) => R,
 	msg: string,
 ): Record<K, R> {
-	return mapValues(groupMap2(ratePlanCharges, by), (arr) =>
-		getSingleOrThrow(arr, (msg2) => new Error('oops: ' + msg + ' ' + msg2)),
+	return mapValues(groupCollect(ratePlanCharges, by), (arr) =>
+		getSingleOrThrow(
+			arr,
+			(msg2) => new Error('duplicate keys: ' + msg + ', ' + msg2),
+		),
 	);
 }

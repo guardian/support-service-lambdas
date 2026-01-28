@@ -1,4 +1,4 @@
-import { groupMapSingleOrThrow } from '@modules/arrayFunctions';
+import { groupCollectByUniqueId } from '@modules/arrayFunctions';
 import {
 	mapValue,
 	objectInnerJoin,
@@ -145,7 +145,7 @@ function buildGuardianRatePlansByProductKey<P extends ProductKeyWithDiscount>([
 	P,
 	GuardianRatePlans<P>,
 ] {
-	const guardianRatePlans: GuardianRatePlans<P> = groupMapSingleOrThrow(
+	const guardianRatePlans: GuardianRatePlans<P> = groupCollectByUniqueId(
 		objectInnerJoin(
 			zuoraSubscriptionRatePlans,
 			zuoraProductKeyNode.productRatePlans,
@@ -199,7 +199,7 @@ class GuardianRatePlansBuilder<P extends ProductKeyWithDiscount> {
 	private buildGuardianRatePlanCharges(
 		zuoraSubscriptionRatePlanCharges: ZuoraRatePlanChargesByPRPCId,
 	): GuardianRatePlanCharges {
-		return groupMapSingleOrThrow(
+		return groupCollectByUniqueId(
 			objectJoinBijective(
 				this.productRatePlanCharges,
 				zuoraSubscriptionRatePlanCharges,

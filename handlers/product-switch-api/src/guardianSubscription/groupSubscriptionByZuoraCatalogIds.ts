@@ -1,9 +1,5 @@
 //zuora
-import {
-	groupBy,
-	groupSingleOrThrow,
-	mapValues,
-} from '@modules/arrayFunctions';
+import { groupBy, groupByUniqueId, mapValues } from '@modules/arrayFunctions';
 import { mapValue } from '@modules/objectFunctions';
 import type {
 	RatePlan,
@@ -83,7 +79,7 @@ function doubleGroupRatePlans(
  */
 function indexTheCharges(ratePlan: RatePlan): ZuoraRatePlanWithChargesByPRPCId {
 	return mapValue(ratePlan, 'ratePlanCharges', (ratePlanCharges) =>
-		groupSingleOrThrow(
+		groupByUniqueId(
 			ratePlanCharges,
 			(rpc) => rpc.productRatePlanChargeId,
 			'duplicate charges',

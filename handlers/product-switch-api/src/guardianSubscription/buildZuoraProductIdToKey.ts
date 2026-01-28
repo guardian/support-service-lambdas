@@ -1,4 +1,4 @@
-import { groupMapSingleOrThrow } from '@modules/arrayFunctions';
+import { groupCollectByUniqueId } from '@modules/arrayFunctions';
 import type {
 	ProductKey,
 	ProductRatePlanKey,
@@ -56,7 +56,7 @@ export type ZuoraProductIdToKey = Record<
 export function buildZuoraProductIdToKey(
 	catalog: ZuoraCatalog,
 ): ZuoraProductIdToKey {
-	return groupMapSingleOrThrow(
+	return groupCollectByUniqueId(
 		catalog.products,
 		buildZuoraProductKeyNode,
 		'duplicate product id',
@@ -86,7 +86,7 @@ function buildZuoraProductKeyNode(
 function buildZuoraProductRatePlanIdToKey<P extends ProductKeyWithDiscount>(
 	product: CatalogProduct,
 ): ZuoraProductRatePlanIdToKey<P> {
-	return groupMapSingleOrThrow(
+	return groupCollectByUniqueId(
 		product.productRatePlans,
 		buildZuoraProductRatePlanKeyNode<P>,
 		`duplicate product rate plan id in ${product.name}`,
@@ -112,7 +112,7 @@ function buildZuoraProductRatePlanKeyNode<P extends ProductKeyWithDiscount>(
 function buildZuoraProductRatePlanChargeIdToKey(
 	prp: ZuoraProductRatePlan,
 ): ZuoraProductRatePlanChargeIdToKey {
-	return groupMapSingleOrThrow(
+	return groupCollectByUniqueId(
 		prp.productRatePlanCharges,
 		buildZuoraProductRatePlanChargeKeyNode,
 		`duplicate product rate plan charge id in rate plan ${prp.name}`,

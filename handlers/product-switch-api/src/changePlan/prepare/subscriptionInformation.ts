@@ -1,8 +1,8 @@
 import type { SafeForDistinct } from '@modules/arrayFunctions';
 import {
 	distinct,
-	getIfNonEmpty,
-	headOption,
+	getMaybeSingleOrThrow,
+	getNonEmptyOrThrow,
 	sumNumbers,
 } from '@modules/arrayFunctions';
 import { getIfDefined } from '@modules/nullAndUndefined';
@@ -57,7 +57,7 @@ function getDistinctChargeValue<T extends SafeForDistinct>(
 
 	const values = sourceCharges.map(getValue);
 	const asSet = distinct(values);
-	const value: T | undefined = headOption(
+	const value: T | undefined = getMaybeSingleOrThrow(
 		asSet,
 		(msg) =>
 			new Error(
@@ -96,7 +96,7 @@ export function getSubscriptionInformation({
 
 	const previousAmount = getSubscriptionTotalChargeAmount(subscription);
 
-	const chargeIds = getIfNonEmpty(
+	const chargeIds = getNonEmptyOrThrow(
 		objectValues(subscription.ratePlan.ratePlanCharges).map(
 			(c) => c.productRatePlanChargeId,
 		),
