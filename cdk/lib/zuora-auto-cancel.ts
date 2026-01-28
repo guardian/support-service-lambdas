@@ -19,6 +19,7 @@ export class ZuoraAutoCancel extends SrStack {
 			'Zuora auto-cancellations are not being processed. Subscriptions with failed payments may not be cancelled.';
 
 		const lambda = new SrSqsLambda(this, 'Lambda', {
+			nameSuffix: 'sqs', // Avoid conflict with existing zuora-auto-cancel-PROD Lambda
 			monitoring: { errorImpact },
 			maxReceiveCount: 3,
 			visibilityTimeout: Duration.minutes(6), // Must be > Lambda timeout
