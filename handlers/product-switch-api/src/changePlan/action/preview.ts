@@ -49,8 +49,7 @@ export const getRefundAmount = (
 				sourceChargeIds.includes(invoiceItem.productRatePlanChargeId),
 		);
 	const contributionRefundAmount = sourceSubscriptionReversalItems.reduceRight(
-		(accu, invoiceItem) =>
-			accu - (invoiceItem.amountWithoutTax + invoiceItem.taxAmount),
+		(accu, invoiceItem) => accu - invoiceItem.amount,
 		0,
 	);
 	if (
@@ -83,7 +82,7 @@ export const previewResponseFromZuoraResponse = (
 		chargedThroughDate,
 	);
 
-	const supporterPlusSubscriptionInvoiceItem = getIfDefined(
+	const targetBaseInvoiceItem = getIfDefined(
 		invoice.invoiceItems.find(
 			(invoiceItem: ZuoraPreviewResponseInvoiceItem) =>
 				targetInformation.subscriptionChargeId ===
@@ -93,24 +92,28 @@ export const previewResponseFromZuoraResponse = (
 			targetInformation.subscriptionChargeId,
 	);
 
-	const supporterPlusContributionItem = getIfDefined(
-		invoice.invoiceItems.find(
-			(invoiceItem) =>
-				invoiceItem.productRatePlanChargeId ===
-				targetInformation.contributionCharge?.id,
-		),
-		'No supporter plus invoice item found in the preview response: id: ' +
-			targetInformation.contributionCharge?.id,
-	);
+	const contributionChargeId: string | undefined =
+		targetInformation.contributionCharge?.id;
+	const targetContributionInvoiceItem =
+		contributionChargeId === undefined
+			? undefined
+			: getIfDefined(
+					invoice.invoiceItems.find(
+						(invoiceItem) =>
+							invoiceItem.productRatePlanChargeId === contributionChargeId,
+					),
+					'No supporter plus invoice item found in the preview response: id: ' +
+						contributionChargeId,
+				);
 
 	const response: PreviewResponse = {
 		amountPayableToday: invoice.amount,
 		proratedRefundAmount,
 		targetCatalogPrice:
-			supporterPlusSubscriptionInvoiceItem.unitPrice +
-			supporterPlusContributionItem.unitPrice,
+			targetBaseInvoiceItem.unitPrice +
+			(targetContributionInvoiceItem?.unitPrice ?? 0),
 		nextPaymentDate: zuoraDateFormat(
-			dayjs(supporterPlusSubscriptionInvoiceItem.serviceEndDate).add(1, 'days'),
+			dayjs(targetBaseInvoiceItem.serviceEndDate).add(1, 'days'),
 		),
 	};
 
@@ -124,9 +127,7 @@ export const previewResponseFromZuoraResponse = (
 		if (discountInvoiceItem) {
 			response.discount = {
 				discountedPrice:
-					supporterPlusSubscriptionInvoiceItem.unitPrice +
-					(discountInvoiceItem.amountWithoutTax +
-						discountInvoiceItem.taxAmount),
+					targetBaseInvoiceItem.unitPrice + discountInvoiceItem.amount,
 				discountPercentage: possibleDiscount.discountPercentage,
 				upToPeriods: possibleDiscount.upToPeriods,
 				upToPeriodsType: possibleDiscount.upToPeriodsType,

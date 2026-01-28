@@ -4,74 +4,32 @@ import {
 	refundExpected,
 } from '../../../src/changePlan/action/preview';
 import type { TargetInformation } from '../../../src/changePlan/prepare/targetInformation';
+import type { ZuoraPreviewResponse } from '../../../src/doPreviewInvoices';
 
 test('preview amounts are correct', () => {
-	const apiResponse = {
-		success: true,
+	const apiResponse: ZuoraPreviewResponse = {
 		previewResult: {
 			invoices: [
 				{
 					amount: 63.2,
-					amountWithoutTax: 63.2,
-					taxAmount: 0.0,
-					targetDate: '2024-03-21',
 					invoiceItems: [
 						{
-							serviceStartDate: '2024-03-21',
 							serviceEndDate: '2025-03-20',
-							amountWithoutTax: 95.0,
-							taxAmount: 0.0,
-							chargeName: 'Subscription',
-							processingType: 'Charge',
-							productName: 'Supporter Plus',
+							amount: 95.0,
 							productRatePlanChargeId: '8ad08e1a858672180185880566606fad',
 							unitPrice: 95.0,
-							subscriptionNumber: 'A-S00504165',
-							additionalInfo: {
-								quantity: 1,
-								unitOfMeasure: '',
-								numberOfDeliveries: 0.0,
-							},
 						},
 						{
-							serviceStartDate: '2024-03-21',
 							serviceEndDate: '2025-03-20',
-							amountWithoutTax: 0.0,
-							taxAmount: 0.0,
-							chargeDescription: '',
-							chargeName: 'Contribution',
-							chargeNumber: null,
-							processingType: 'Charge',
-							productName: 'Supporter Plus',
+							amount: 0.0,
 							productRatePlanChargeId: '8ad096ca858682bb0185881568385d73',
 							unitPrice: 0.0,
-							subscriptionNumber: 'A-S00504165',
-							orderLineItemNumber: null,
-							additionalInfo: {
-								quantity: 1,
-								unitOfMeasure: '',
-								numberOfDeliveries: 0.0,
-							},
 						},
 						{
-							serviceStartDate: '2024-03-21',
 							serviceEndDate: '2024-09-30',
-							amountWithoutTax: -31.8,
-							taxAmount: 0.0,
-							chargeDescription: '',
-							chargeName: 'Contribution',
-							chargeNumber: 'C-00839692',
-							processingType: 'Charge',
-							productName: 'Contributor',
+							amount: -31.8,
 							productRatePlanChargeId: '2c92c0f85e2d19af015e3896e84d092e',
 							unitPrice: 60.0,
-							subscriptionNumber: 'A-S00504165',
-							orderLineItemNumber: null,
-							additionalInfo: {
-								quantity: 1,
-								unitOfMeasure: '',
-								numberOfDeliveries: 0.0,
-							},
 						},
 					],
 				},

@@ -20,6 +20,7 @@ import { getSubscriptionInformation } from '../../../src/changePlan/prepare/subs
 import type { TargetInformation } from '../../../src/changePlan/prepare/targetInformation';
 import type { ZuoraSwitchResponse } from '../../../src/changePlan/schemas';
 import { supporterPlusTargetInformation } from '../../../src/changePlan/switchDefinition/supporterPlusTargetInformation';
+import type { ZuoraPreviewResponse } from '../../../src/doPreviewInvoices';
 import accountJson from '../../fixtures/account.json';
 import pendingAmendmentsJson from '../../fixtures/pendingAmendments.json';
 import { loadSubscription } from '../prepare/subscriptionInformation.test';
@@ -64,71 +65,34 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 
 	test('preview=true doesnt preview term changes as zuora wont allow it', async () => {
 		mockZuoraClient.post.mockResolvedValueOnce({
-			success: true,
 			previewResult: {
 				invoices: [
 					{
 						amount: 75,
-						amountWithoutTax: 75,
-						taxAmount: 0,
-						targetDate: '2025-11-09',
 						invoiceItems: [
 							{
-								serviceStartDate: '2025-11-09',
 								serviceEndDate: '2025-11-09',
-								amountWithoutTax: 75,
-								taxAmount: 0,
-								chargeName: 'splus',
-								processingType: 'Charge',
-								productName: 'Contributor',
+								amount: 75,
 								productRatePlanChargeId: '8a12892d85fc6df4018602451322287f',
 								unitPrice: 75,
-								subscriptionNumber: 'A-S12345984',
-								additionalInfo: {
-									quantity: 1,
-									unitOfMeasure: '',
-									numberOfDeliveries: 0.0,
-								},
 							},
 							{
-								serviceStartDate: '2025-11-09',
 								serviceEndDate: '2025-11-09',
-								amountWithoutTax: 75,
-								taxAmount: 0,
-								chargeName: 'splus',
-								processingType: 'Charge',
-								productName: 'Contributor',
+								amount: 75,
 								productRatePlanChargeId: '8a128ed885fc6ded01860228f7cb3d5f',
 								unitPrice: 75,
-								subscriptionNumber: 'A-S12345984',
-								additionalInfo: {
-									quantity: 1,
-									unitOfMeasure: '',
-									numberOfDeliveries: 0.0,
-								},
 							},
 							{
-								serviceStartDate: '2025-11-09',
 								serviceEndDate: '2025-11-09',
-								amountWithoutTax: -75,
-								taxAmount: 0,
-								chargeName: 'contrib',
-								processingType: 'Charge',
-								productName: 'Contributor',
+								amount: -75,
 								productRatePlanChargeId: '2c92a0fc5e1dc084015e37f58c7b0f34',
 								unitPrice: 75,
-								subscriptionNumber: 'A-S12345984',
-								additionalInfo: {
-									quantity: 1,
-									unitOfMeasure: '',
-									numberOfDeliveries: 0.0,
-								},
 							},
 						],
 					},
 				],
 			},
-		});
+		} satisfies ZuoraPreviewResponse);
 
 		const switchInformation: TargetInformation =
 			await getTestTargetInformation();
