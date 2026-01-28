@@ -1,4 +1,3 @@
-import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import { sendToSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
 import type {
@@ -13,8 +12,11 @@ import { sendSalesforceTracking } from '../../salesforceTracking';
 import { supporterRatePlanItemFromSwitchInformation } from '../../supporterProductData';
 import type { SwitchOrderRequestBuilder } from '../prepare/buildSwitchOrderRequest';
 import type { SwitchInformation } from '../prepare/switchInformation';
-import type { ProductSwitchRequestBody, ZuoraSwitchResponse } from '../schemas';
-import { zuoraSwitchResponseSchema } from '../schemas';
+import type {
+	ProductSwitchRequestBody,
+	ZuoraSwitchResponseWithIds,
+} from '../schemas';
+import { zuoraSwitchResponseWithIdsSchema } from '../schemas';
 import { sendThankYouEmail } from './productSwitchEmail';
 
 export type SwitchResponse = { message: string };
@@ -70,30 +72,21 @@ export class DoSwitchAction {
 	}
 
 	private doSwitch = async (orderRequest: OrderRequest): Promise<string> => {
-		const requestBody = buildSwitchRequestBody(orderRequest);
+		const requestBody: CreateOrderRequest = {
+			processingOptions: {
+				runBilling: true,
+				collectPayment: false, // We will take payment separately because we don't want to charge the user if the amount payable is less than 50 pence/cents
+			},
+			...orderRequest,
+		};
 
-		const switchResponse: ZuoraSwitchResponse = await this.zuoraClient.post(
-			'v1/orders?returnIds=true',
-			JSON.stringify(requestBody),
-			zuoraSwitchResponseSchema,
-		);
-		const invoiceId = getIfDefined(
-			switchResponse.invoiceIds?.at(0),
-			'No invoice number found in the switch response',
-		);
+		const switchResponse: ZuoraSwitchResponseWithIds =
+			await this.zuoraClient.post(
+				'v1/orders?returnIds=true',
+				JSON.stringify(requestBody),
+				zuoraSwitchResponseWithIdsSchema,
+			);
 
-		return invoiceId;
+		return switchResponse.invoiceIds[0];
 	};
 }
-
-export const buildSwitchRequestBody = (
-	orderRequest: OrderRequest,
-): CreateOrderRequest => {
-	return {
-		processingOptions: {
-			runBilling: true,
-			collectPayment: false, // We will take payment separately because we don't want to charge the user if the amount payable is less than 50 pence/cents
-		},
-		...orderRequest,
-	};
-};

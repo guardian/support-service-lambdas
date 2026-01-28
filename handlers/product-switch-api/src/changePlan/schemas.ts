@@ -44,21 +44,23 @@ export type ProductSwitchTargetBody =
 			'mode' | 'targetProduct' | 'newAmount'
 	  >;
 
-export const zuoraSwitchResponseSchema = z.object({
-	invoiceIds: z.optional(z.array(z.string())),
-	reasons: z.optional(z.array(z.object({ message: z.string() }))),
-});
+export const zuoraSwitchResponseSchema = z.object({});
 
 export type ZuoraSwitchResponse = z.infer<typeof zuoraSwitchResponseSchema>;
 
+export const zuoraSwitchResponseWithIdsSchema = z.object({
+	invoiceIds: z.array(z.string()).nonempty(),
+});
+
+export type ZuoraSwitchResponseWithIds = z.infer<
+	typeof zuoraSwitchResponseWithIdsSchema
+>;
+
 export const zuoraGetAmendmentResponseSchema = z.object({
-	id: z.optional(z.string()),
-	status: z.optional(z.string()),
-	type: z.optional(z.string()),
-	customerAcceptanceDate: z.optional(z.string()),
-	reasons: z.optional(
-		z.array(z.object({ code: z.number(), message: z.string() })),
-	),
+	id: z.string(),
+	status: z.string(),
+	type: z.string(),
+	customerAcceptanceDate: z.string(),
 });
 
 export type ZuoraGetAmendmentResponse = z.infer<

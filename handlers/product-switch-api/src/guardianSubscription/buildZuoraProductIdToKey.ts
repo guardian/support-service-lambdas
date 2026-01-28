@@ -1,4 +1,5 @@
 import { groupCollectByUniqueId } from '@modules/arrayFunctions';
+import { mapOption } from '@modules/nullAndUndefined';
 import type {
 	ProductKey,
 	ProductRatePlanKey,
@@ -6,10 +7,9 @@ import type {
 import {
 	getProductRatePlanChargeKey,
 	getProductRatePlanKey,
-	getZuoraProductKey,
-	isSupportedProduct,
 	isSupportedProductRatePlan,
 	isSupportedProductRatePlanCharge,
+	zuoraCatalogToProductKey,
 } from '@modules/product-catalog/zuoraToProductNameMappings';
 import type {
 	CatalogProduct,
@@ -18,11 +18,19 @@ import type {
 	ZuoraProductRatePlanCharge,
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
 
+/*
+This file deals with building a tree mapping zuora product*id to their associated product catalog keys
+ */
+
+// these are the data structures that define the tree of product->rateplan->charge
+// and let us attach the relevant ids and keys
+
 type ZuoraProductRatePlanChargeKeyNode = { productRatePlanChargeKey: string };
 export type ZuoraProductRatePlanChargeIdToKey = Record<
 	string, // product rate plan charge id
 	ZuoraProductRatePlanChargeKeyNode
 >;
+
 export type ProductWithDiscountRatePlanKey<P extends ProductKeyWithDiscount> =
 	P extends 'Discounts' ? string : ProductRatePlanKey<Extract<P, ProductKey>>;
 export type ZuoraProductRatePlanKeyNode<P extends ProductKeyWithDiscount> = {
@@ -34,6 +42,7 @@ export type ZuoraProductRatePlanIdToKey<P extends ProductKeyWithDiscount> =
 		string, // product rate plan id
 		ZuoraProductRatePlanKeyNode<P>
 	>;
+
 export type ProductKeyWithDiscount = ProductKey | 'Discounts';
 export type ZuoraProductKeyNode<P extends ProductKeyWithDiscount> = {
 	productKey: P;
@@ -45,89 +54,101 @@ export type ZuoraProductIdToKey = Record<
 >;
 
 /**
- * This lets us look up the guardian product catalog keys for give product*Ids
+ * main entry point to build the whole tree
  *
- * This is essential when linking an existing subscription to its associated product catalog entry.
- *
- * Note: It may be possible to build this from the guardian product catalog instead
- *
- * @param catalog
+ * @param catalog zuora catalog (this is needed as Discounts is not in the product-catalog at present)
  */
 export function buildZuoraProductIdToKey(
 	catalog: ZuoraCatalog,
 ): ZuoraProductIdToKey {
 	return groupCollectByUniqueId(
 		catalog.products,
-		buildZuoraProductKeyNode,
+		wrapZuoraProductKeyNode,
 		'duplicate product id',
 	);
 }
 
-function buildZuoraProductKeyNode(
+function wrapZuoraProductKeyNode(
 	product: CatalogProduct,
 ): [string, ZuoraProductKeyNode<ProductKeyWithDiscount>] | undefined {
-	if (!isSupportedProduct(product.name) && product.name !== 'Discounts') {
-		return undefined;
-	}
-	const productKey =
-		product.name !== 'Discounts'
-			? getZuoraProductKey(product.name)
-			: 'Discounts';
-	return [
+	const productKey: ProductKeyWithDiscount | undefined =
+		product.name === 'Discounts'
+			? ('Discounts' as const)
+			: zuoraCatalogToProductKey[product.name];
+	return mapOption(productKey, (key) => [
 		product.id,
-		{
-			productKey,
-			productRatePlans:
-				buildZuoraProductRatePlanIdToKey<typeof productKey>(product),
-		},
-	];
+		buildZuoraProductKeyNode(product, key),
+	]);
 }
 
+function buildZuoraProductKeyNode(
+	product: CatalogProduct,
+	productKey: ProductKeyWithDiscount,
+): ZuoraProductKeyNode<ProductKeyWithDiscount> {
+	return {
+		productKey,
+		productRatePlans:
+			buildZuoraProductRatePlanIdToKey<typeof productKey>(product),
+	};
+}
+
+/**
+ * main entry point for building rate plans
+ */
 function buildZuoraProductRatePlanIdToKey<P extends ProductKeyWithDiscount>(
 	product: CatalogProduct,
 ): ZuoraProductRatePlanIdToKey<P> {
 	return groupCollectByUniqueId(
 		product.productRatePlans,
-		buildZuoraProductRatePlanKeyNode<P>,
+		wrapZuoraProductRatePlanKeyNode<P>,
 		`duplicate product rate plan id in ${product.name}`,
 	);
 }
 
-function buildZuoraProductRatePlanKeyNode<P extends ProductKeyWithDiscount>(
+function wrapZuoraProductRatePlanKeyNode<P extends ProductKeyWithDiscount>(
 	prp: ZuoraProductRatePlan,
 ): [string, ZuoraProductRatePlanKeyNode<P>] | undefined {
-	const productRatePlanCharges = buildZuoraProductRatePlanChargeIdToKey(prp);
-	return [
-		prp.id,
-		{
-			// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- TODO check - bad return type on existing getProductRatePlanKey function
-			productRatePlanKey: (isSupportedProductRatePlan(prp.name)
-				? getProductRatePlanKey(prp.name)
-				: prp.name) as ProductWithDiscountRatePlanKey<P>, // no proper guardian name for some rate plans e.g. discount - fall back to catalog name
-			productRatePlanCharges,
-		},
-	];
+	return [prp.id, buildZuoraProductRatePlanKeyNode(prp)];
 }
 
+function buildZuoraProductRatePlanKeyNode<P extends ProductKeyWithDiscount>(
+	prp: ZuoraProductRatePlan,
+): ZuoraProductRatePlanKeyNode<P> {
+	const productRatePlanCharges = buildZuoraProductRatePlanChargeIdToKey(prp);
+	return {
+		// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- TODO check - bad return type on existing getProductRatePlanKey function
+		productRatePlanKey: (isSupportedProductRatePlan(prp.name)
+			? getProductRatePlanKey(prp.name)
+			: prp.name) as ProductWithDiscountRatePlanKey<P>, // no proper guardian name for some rate plans e.g. discount - fall back to catalog name
+		productRatePlanCharges,
+	};
+}
+
+/**
+ * main entry point for building rate plan charges
+ */
 function buildZuoraProductRatePlanChargeIdToKey(
 	prp: ZuoraProductRatePlan,
 ): ZuoraProductRatePlanChargeIdToKey {
 	return groupCollectByUniqueId(
 		prp.productRatePlanCharges,
-		buildZuoraProductRatePlanChargeKeyNode,
+		wrapZuoraProductRatePlanChargeKeyNode,
 		`duplicate product rate plan charge id in rate plan ${prp.name}`,
 	);
 }
 
-function buildZuoraProductRatePlanChargeKeyNode(
+function wrapZuoraProductRatePlanChargeKeyNode(
 	prpc: ZuoraProductRatePlanCharge,
 ): [string, ZuoraProductRatePlanChargeKeyNode] {
-	return [
-		prpc.id,
-		{
-			productRatePlanChargeKey: isSupportedProductRatePlanCharge(prpc.name)
-				? getProductRatePlanChargeKey(prpc.name)
-				: prpc.name, // no proper guardian name for some rate plan charges e.g. discount charges - fall back to catalog name
-		},
-	];
+	return [prpc.id, buildZuoraProductRatePlanChargeKeyNode(prpc)];
+}
+
+function buildZuoraProductRatePlanChargeKeyNode(
+	prpc: ZuoraProductRatePlanCharge,
+): ZuoraProductRatePlanChargeKeyNode {
+	return {
+		productRatePlanChargeKey: isSupportedProductRatePlanCharge(prpc.name)
+			? getProductRatePlanChargeKey(prpc.name)
+			: prpc.name, // no proper guardian name for some rate plan charges e.g. discount charges - fall back to catalog name
+	};
 }

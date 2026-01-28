@@ -33,10 +33,9 @@ const amendmentIsPending = (
 ) => dayjs(amendment.customerAcceptanceDate).isAfter(today);
 
 const amendmentShouldBeDeleted = (
-	amendment: ZuoraGetAmendmentResponse | undefined,
+	amendment: ZuoraGetAmendmentResponse,
 	today: dayjs.Dayjs,
 ) =>
-	amendment &&
 	amendmentIsPending(amendment, today) &&
 	amendment.status === 'Completed' &&
 	amendment.type === 'UpdateProduct';
@@ -48,12 +47,15 @@ export const removePendingUpdateAmendments = async (
 ): Promise<void> => {
 	logger.log('Checking for pending amendments');
 	const lastAmendment = await getLastAmendment(zuoraClient, subscriptionNumber);
-	if (amendmentShouldBeDeleted(lastAmendment, today)) {
+	if (
+		lastAmendment !== undefined &&
+		amendmentShouldBeDeleted(lastAmendment, today)
+	) {
 		logger.log(
 			`Subscription ${subscriptionNumber} has a pending update amendment. Deleting it.`,
 		);
 		await zuoraClient.delete(
-			`v1/object/amendment/${lastAmendment?.id}`,
+			`v1/object/amendment/${lastAmendment.id}`,
 			voidSchema,
 		);
 		return await removePendingUpdateAmendments(
