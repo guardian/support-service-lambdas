@@ -1,26 +1,43 @@
 stacks:
-- membership
+  - support
 regions:
-- eu-west-1
+  - eu-west-1
 allowedStages:
   - CODE
   - PROD
 deployments:
-  cfn:
-    type: cloud-formation
+  # Upload JAR to S3 first (needed before CloudFormation can create the Lambda)
+  zuora-auto-cancel-upload:
+    type: aws-s3
+    app: zuora-auto-cancel
     parameters:
-      templatePath: cfn.yaml
-      cloudFormationStackName: zuora-auto-cancel
+      bucketSsmLookup: true
+      prefixStack: true
+      prefixApp: true
+      prefixStage: true
+      publicReadAcl: false
+      cacheControl: private
+
+  zuora-auto-cancel-cloudformation:
+    type: cloud-formation
+    app: zuora-auto-cancel
+    parameters:
+      templateStagePaths:
+        CODE: zuora-auto-cancel-CODE.template.json
+        PROD: zuora-auto-cancel-PROD.template.json
       cloudFormationStackByTags: false
-      prependStackToCloudFormationStackName: false
-      createStackIfAbsent: false
+      createStackIfAbsent: true
+    dependencies:
+      - zuora-auto-cancel-upload
+
   zuora-callout-apis:
     type: aws-lambda
     parameters:
       fileName: zuora-callout-apis.jar
-      bucket: support-service-lambdas-dist
+      bucketSsmLookup: true
       prefixStack: false
       functionNames:
-      - zuora-auto-cancel-
-    dependencies: [cfn]
-    
+        - zuora-auto-cancel-
+    dependencies:
+      - zuora-auto-cancel-cloudformation
+
