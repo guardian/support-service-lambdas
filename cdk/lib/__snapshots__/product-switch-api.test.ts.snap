@@ -120,6 +120,27 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
+    "S3catalogreadpolicyE18911B4": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-CODE/*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "S3catalogreadpolicyE18911B4",
+        "Roles": [
+          {
+            "Ref": "productswitchapilambdaServiceRole4826BDA0",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "SQSsendpolicy967EA932": {
       "Properties": {
         "PolicyDocument": {
@@ -1140,6 +1161,27 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
         ],
       },
       "Type": "AWS::ApiGateway::DomainName",
+    },
+    "S3catalogreadpolicyE18911B4": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-PROD/*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "S3catalogreadpolicyE18911B4",
+        "Roles": [
+          {
+            "Ref": "productswitchapilambdaServiceRole4826BDA0",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
     "SQSsendpolicy967EA932": {
       "Properties": {
