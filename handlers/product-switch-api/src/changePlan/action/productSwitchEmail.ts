@@ -1,10 +1,10 @@
-import type { BillingPeriod } from '@modules/billingPeriod';
 import type { EmailMessageWithUserId } from '@modules/email/email';
 import { DataExtensionNames, sendEmail } from '@modules/email/email';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { getCurrencyInfo } from '@modules/internationalisation/currency';
+import type { Stage } from '@modules/stage';
 import dayjs from 'dayjs';
-import type { SwitchInformation } from './switchInformation';
+import type { SwitchInformation } from '../prepare/switchInformation';
 
 type Payment = { date: dayjs.Dayjs; amount: number };
 
@@ -15,7 +15,7 @@ export const buildEmailMessage = (
 	lastName: string,
 	currency: IsoCurrency,
 	productPrice: number,
-	billingPeriod: BillingPeriod,
+	frequency: string,
 	subscriptionNumber: string,
 	identityId: string,
 ) => {
@@ -33,7 +33,7 @@ export const buildEmailMessage = (
 					date_of_first_payment: first.date.format('DD MMMM YYYY'),
 					next_payment_amount: next.amount.toFixed(2),
 					date_of_next_payment: next.date.format('DD MMMM YYYY'),
-					payment_frequency: `${billingPeriod}ly`,
+					payment_frequency: frequency,
 					subscription_id: subscriptionNumber,
 				},
 			},
@@ -45,19 +45,21 @@ export const buildEmailMessage = (
 };
 
 export const sendThankYouEmail = async (
+	stage: Stage,
 	firstPaymentAmount: number,
 	switchInformation: SwitchInformation,
 ) => {
-	const { emailAddress, firstName, lastName, identityId } =
+	const { emailAddress, firstName, lastName, identityId, currency } =
 		switchInformation.account;
-	const { subscriptionNumber, currency, billingPeriod } =
+	const { subscriptionNumber, productRatePlanKey } =
 		switchInformation.subscription;
 
-	const billingPeriodMonths: number = {
-		Month: 1,
-		Quarter: 3,
-		Annual: 12,
-	}[switchInformation.subscription.billingPeriod];
+	const [billingPeriodMonths, frequency] = (
+		{
+			Monthly: [1, 'Monthly'],
+			Annual: [12, 'Annually'],
+		} as const
+	)[productRatePlanKey];
 
 	const emailMessage: EmailMessageWithUserId = buildEmailMessage(
 		{
@@ -67,18 +69,18 @@ export const sendThankYouEmail = async (
 			},
 			next: {
 				date: dayjs().add(billingPeriodMonths, 'month'),
-				amount: switchInformation.actualTotalPrice,
+				amount: switchInformation.target.actualTotalPrice,
 			},
 		},
 		emailAddress,
 		firstName,
 		lastName,
 		currency,
-		switchInformation.actualTotalPrice,
-		billingPeriod,
+		switchInformation.target.actualTotalPrice,
+		frequency,
 		subscriptionNumber,
 		identityId,
 	);
 
-	return await sendEmail(switchInformation.stage, emailMessage);
+	return await sendEmail(stage, emailMessage);
 };
