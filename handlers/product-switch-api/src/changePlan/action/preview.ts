@@ -6,9 +6,9 @@ import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs, { type Dayjs } from 'dayjs';
 import type {
-	ZuoraPreviewInvoiceItem,
 	ZuoraPreviewResponse,
 	ZuoraPreviewResponseInvoice,
+	ZuoraPreviewResponseInvoiceItem,
 } from '../../doPreviewInvoices';
 import { doPreviewInvoices } from '../../doPreviewInvoices';
 import type { SwitchOrderRequestBuilder } from '../prepare/buildSwitchOrderRequest';
@@ -40,7 +40,7 @@ export const isRefundExpected = (
 };
 
 export const getRefundAmount = (
-	itemsById: Record<string, ZuoraPreviewInvoiceItem>,
+	itemsById: Record<string, ZuoraPreviewResponseInvoiceItem>,
 	sourceChargeIds: [string, ...string[]],
 	chargedThroughDate?: Dayjs,
 ): number => {
@@ -67,20 +67,17 @@ export const getRefundAmount = (
 
 export const previewResponseFromZuoraResponse = (
 	stage: Stage,
-	zuoraResponse: ZuoraPreviewResponse,
+	invoice: ZuoraPreviewResponseInvoice,
 	targetInformation: TargetInformation,
 	sourceProductChargeIds: [string, ...string[]],
 	chargedThroughDate?: Dayjs,
 ): PreviewResponse => {
-	const invoice: ZuoraPreviewResponseInvoice = getIfDefined(
-		zuoraResponse.previewResult.invoices[0],
-		'No invoice found in the preview response',
-	);
-	const itemsById: Record<string, ZuoraPreviewInvoiceItem> = groupByUniqueId(
-		invoice.invoiceItems,
-		(item) => item.productRatePlanChargeId,
-		'duplicate productRatePlanChargeId in the same invoice',
-	);
+	const itemsById: Record<string, ZuoraPreviewResponseInvoiceItem> =
+		groupByUniqueId(
+			invoice.invoiceItems,
+			(item) => item.productRatePlanChargeId,
+			'duplicate productRatePlanChargeId in the same invoice',
+		);
 
 	const proratedRefundAmount = getRefundAmount(
 		itemsById,
@@ -160,7 +157,7 @@ export class DoPreviewAction {
 		);
 		return previewResponseFromZuoraResponse(
 			this.stage,
-			zuoraResponse,
+			zuoraResponse.previewResult.invoices[0],
 			targetInformation,
 			subscriptionInformation.chargeIds,
 			subscriptionInformation.chargedThroughDate,

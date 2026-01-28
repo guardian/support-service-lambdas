@@ -4,37 +4,31 @@ import {
 	previewResponseFromZuoraResponse,
 } from '../../../src/changePlan/action/preview';
 import type { TargetInformation } from '../../../src/changePlan/prepare/targetInformation';
-import type { ZuoraPreviewResponse } from '../../../src/doPreviewInvoices';
+import type { ZuoraPreviewResponseInvoice } from '../../../src/doPreviewInvoices';
 
 test('preview amounts are correct', () => {
-	const apiResponse: ZuoraPreviewResponse = {
-		previewResult: {
-			invoices: [
-				{
-					amount: 63.2,
-					invoiceItems: [
-						{
-							serviceEndDate: '2025-03-20',
-							amount: 95.0,
-							productRatePlanChargeId: '8ad08e1a858672180185880566606fad',
-							unitPrice: 95.0,
-						},
-						{
-							serviceEndDate: '2025-03-20',
-							amount: 0.0,
-							productRatePlanChargeId: '8ad096ca858682bb0185881568385d73',
-							unitPrice: 0.0,
-						},
-						{
-							serviceEndDate: '2024-09-30',
-							amount: -31.8,
-							productRatePlanChargeId: '2c92c0f85e2d19af015e3896e84d092e',
-							unitPrice: 60.0,
-						},
-					],
-				},
-			],
-		},
+	const invoice: ZuoraPreviewResponseInvoice = {
+		amount: 63.2,
+		invoiceItems: [
+			{
+				serviceEndDate: '2025-03-20',
+				amount: 95.0,
+				productRatePlanChargeId: '8ad08e1a858672180185880566606fad',
+				unitPrice: 95.0,
+			},
+			{
+				serviceEndDate: '2025-03-20',
+				amount: 0.0,
+				productRatePlanChargeId: '8ad096ca858682bb0185881568385d73',
+				unitPrice: 0.0,
+			},
+			{
+				serviceEndDate: '2024-09-30',
+				amount: -31.8,
+				productRatePlanChargeId: '2c92c0f85e2d19af015e3896e84d092e',
+				unitPrice: 60.0,
+			},
+		],
 	};
 
 	const expectedOutput = {
@@ -59,7 +53,7 @@ test('preview amounts are correct', () => {
 	expect(
 		previewResponseFromZuoraResponse(
 			'CODE',
-			apiResponse,
+			invoice,
 			targetInformation as TargetInformation,
 			['2c92c0f85e2d19af015e3896e84d092e'],
 			dayjs('2024-07-06'),
