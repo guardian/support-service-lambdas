@@ -50,7 +50,7 @@ export const getRefundAmount = (
 		);
 	const contributionRefundAmount = sourceSubscriptionReversalItems.reduceRight(
 		(accu, invoiceItem) =>
-			accu + invoiceItem.amountWithoutTax + invoiceItem.taxAmount,
+			accu - (invoiceItem.amountWithoutTax + invoiceItem.taxAmount),
 		0,
 	);
 	if (

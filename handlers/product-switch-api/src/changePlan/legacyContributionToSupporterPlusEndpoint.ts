@@ -41,7 +41,7 @@ export function legacyContributionToSupporterPlusEndpoint(
 			const intermediate: PreviewResponse =
 				await productSwitchEndpoint.doPreview();
 			const response: LegacyPreviewResponse = {
-				contributionRefundAmount: intermediate.proratedRefundAmount,
+				contributionRefundAmount: intermediate.proratedRefundAmount * -1,
 				discount: intermediate.discount,
 				nextPaymentDate: intermediate.nextPaymentDate,
 				supporterPlusPurchaseAmount: intermediate.targetCatalogPrice,

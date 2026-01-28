@@ -37,8 +37,6 @@ const { guardianSubscriptionWithKeys } = loadSubscription(
 	dayjs('2024-12-05'),
 );
 const account = zuoraAccountSchema.parse(accountJson);
-//
-// const today = dayjs('2024-12-05T22:42:06');
 
 const getTestTargetInformation = async () =>
 	await supporterPlusTargetInformation(
@@ -47,13 +45,6 @@ const getTestTargetInformation = async () =>
 			mode: 'switchToBasePrice',
 			currency: 'GBP',
 			previousAmount: 10,
-			// 'CODE',
-			// { preview: false },
-			// subscription,
-			// account,
-			// productCatalog,
-			// new Lazy(() => Promise.resolve([]), 'test'),
-			// today,
 		},
 	);
 
@@ -119,7 +110,7 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 							{
 								serviceStartDate: '2025-11-09',
 								serviceEndDate: '2025-11-09',
-								amountWithoutTax: 75,
+								amountWithoutTax: -75,
 								taxAmount: 0,
 								chargeName: 'contrib',
 								processingType: 'Charge',
@@ -274,6 +265,6 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 			url: 'v1/orders?returnIds=true',
 			orderTypes: ['ChangePlan', 'TermsAndConditions', 'RenewSubscription'],
 		});
-		// TODO might be worth checking that it actually removed the pending amendments - need to mock the getLatestAmendment call
+		// might be worth checking that it actually removed the pending amendments - need to mock the getLatestAmendment call
 	});
 });
