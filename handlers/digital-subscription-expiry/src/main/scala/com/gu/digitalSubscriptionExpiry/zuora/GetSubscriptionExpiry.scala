@@ -35,7 +35,7 @@ object GetSubscriptionExpiry {
   private def chargeProvisionsDigitalAccess(chargeName: String) = {
     val upperCaseName = chargeName.toUpperCase
     digitalPlusChargeNamePrefixes.exists(upperCaseName.startsWith) ||
-      supporterPlusChargeNamePrefixes.exists(upperCaseName.startsWith)
+    supporterPlusChargeNamePrefixes.exists(upperCaseName.startsWith)
   }
 
   private def getExpiryDateForValidSubscription(
@@ -53,7 +53,8 @@ object GetSubscriptionExpiry {
       !charge.effectiveEndDate.isBefore(dateToCheck) &&
         !charge.effectiveStartDate.isAfter(dateToCheck)
 
-    def chargeIsValidDigitalSub(charge: RatePlanCharge) = chargeProvisionsDigitalAccess(charge.name) && chargeSpansDate(charge)
+    def chargeIsValidDigitalSub(charge: RatePlanCharge) =
+      chargeProvisionsDigitalAccess(charge.name) && chargeSpansDate(charge)
     val isValidDigitalSub = subscription.ratePlans.flatMap(_.ratePlanCharges).exists(chargeIsValidDigitalSub)
 
     @deprecated(

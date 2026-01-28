@@ -5,11 +5,23 @@ import com.gu.effects.sqs.SqsAsync
 import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.email.serialisers.GuardianWeeklyEmailDataSerialiser._
-import com.gu.newproduct.api.addsubscription.email.{DeliveryAgentDetails, EtSqsSend, GuardianWeeklyEmailData, PaperEmailData, SendConfirmationEmail}
+import com.gu.newproduct.api.addsubscription.email.{
+  DeliveryAgentDetails,
+  EtSqsSend,
+  GuardianWeeklyEmailData,
+  PaperEmailData,
+  SendConfirmationEmail,
+}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, SortCode}
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{
+  BankAccountName,
+  BankAccountNumberMask,
+  DirectDebit,
+  MandateId,
+  SortCode,
+}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.newproduct.api.productcatalog.PlanId.{GuardianWeeklyROWMonthly, NationalDeliveryWeekend}
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
@@ -86,7 +98,7 @@ object SendGWEmailsManualTest {
         MandateId("MandateId"),
       ),
       currency = GBP,
-      discountMessage= None,
+      discountMessage = None,
     )
   }
 
