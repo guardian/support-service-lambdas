@@ -97,15 +97,6 @@ function createMember(
 							),
 						},
 					},
-					{
-						product: {
-							productID: 'the-observer',
-							enddate: zuoraDateFormat(latestSubscription.termEndDate),
-							startdate: zuoraDateFormat(
-								latestSubscription.contractEffectiveDate,
-							),
-						},
-					},
 				]
 			: [],
 	};
