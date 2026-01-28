@@ -41,7 +41,7 @@ export type GuardianRatePlans<P extends ProductKeyWithDiscount> = Record<
 export type GuardianSubscriptionProducts = {
 	[K in ProductKeyWithDiscount]?: GuardianRatePlans<K>;
 };
-export type GuardianSubscription = {
+export type GuardianSubscriptionWithProducts = {
 	products: GuardianSubscriptionProducts;
 } & RestSubscription;
 
@@ -114,7 +114,9 @@ export class GuardianSubscriptionParser {
 		this.zuoraProductIdGuardianLookup = buildZuoraProductIdToKey(catalog);
 	}
 
-	parse(zuoraSubscription: ZuoraSubscription): GuardianSubscription {
+	parse(
+		zuoraSubscription: ZuoraSubscription,
+	): GuardianSubscriptionWithProducts {
 		return mapValue(
 			groupSubscriptionByZuoraCatalogIds(zuoraSubscription),
 			'products',

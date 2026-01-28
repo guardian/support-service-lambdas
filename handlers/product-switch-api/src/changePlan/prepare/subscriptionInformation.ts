@@ -11,8 +11,8 @@ import type { RatePlanCharge } from '@modules/zuora/types';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import type {
+	GuardianSubscription,
 	GuardianSubscriptionWithKeys,
-	SinglePlanGuardianSubscription,
 } from '../../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import type { GuardianRatePlanCharges } from '../../guardianSubscription/guardianSubscriptionParser';
 import type { ValidSwitchableRatePlanKey } from './switchesHelper';
@@ -31,9 +31,7 @@ export type SubscriptionInformation = {
 	chargeIds: [string, ...string[]]; // filter invoice refund items
 };
 
-function getSubscriptionTotalChargeAmount(
-	subscription: SinglePlanGuardianSubscription,
-) {
+function getSubscriptionTotalChargeAmount(subscription: GuardianSubscription) {
 	return sumNumbers(
 		objectValues(subscription.ratePlan.ratePlanCharges).map(
 			(c: RatePlanCharge) =>
@@ -70,7 +68,7 @@ function getDistinctChargeValue<T extends SafeForDistinct>(
 	return value;
 }
 
-function getChargedThroughDate(subscription: SinglePlanGuardianSubscription) {
+function getChargedThroughDate(subscription: GuardianSubscription) {
 	return getDistinctChargeValue(
 		subscription.ratePlan.ratePlanCharges,
 		(ratePlanCharge: RatePlanCharge) =>

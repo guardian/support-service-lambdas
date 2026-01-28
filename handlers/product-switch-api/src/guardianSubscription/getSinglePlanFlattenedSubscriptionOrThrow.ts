@@ -18,35 +18,18 @@ import type { RestSubscription } from './groupSubscriptionByZuoraCatalogIds';
 import type {
 	GuardianRatePlan,
 	GuardianRatePlans,
-	GuardianSubscription,
+	GuardianSubscriptionWithProducts,
 } from './guardianSubscriptionParser';
 
-export type SinglePlanGuardianSubscription = {
+export type GuardianSubscription = {
 	ratePlan: GuardianRatePlan;
 	discountRatePlan?: GuardianRatePlan;
 } & RestSubscription;
+
 export type GuardianSubscriptionWithKeys = {
-	subscription: SinglePlanGuardianSubscription;
+	subscription: GuardianSubscription;
 	productCatalogKeys: GuardianCatalogKeys<ProductKey>;
 };
-
-type PlanWithKeys<
-	RP extends GuardianCatalogKeysWithDiscount<ProductKeyWithDiscount>,
-> = {
-	ratePlan: GuardianRatePlan;
-	productCatalogKeys: RP;
-};
-
-type GuardianCatalogKeysWithDiscount<
-	P extends ProductKeyWithDiscount,
-	PRP extends
-		ProductWithDiscountRatePlanKey<P> = ProductWithDiscountRatePlanKey<P>,
-> = {
-	[P in ProductKeyWithDiscount]: {
-		productKey: P;
-		productRatePlanKey: PRP;
-	};
-}[P];
 
 /**
  * this takes a subscription and effectively does a "flatten.getSingle" on it to reduce it down to a single rate plan.
@@ -56,7 +39,7 @@ type GuardianCatalogKeysWithDiscount<
  * @param subWithCurrentPlans
  */
 export function getSinglePlanFlattenedSubscriptionOrThrow(
-	subWithCurrentPlans: GuardianSubscription,
+	subWithCurrentPlans: GuardianSubscriptionWithProducts,
 ): GuardianSubscriptionWithKeys {
 	const { products, ...restSubWithCurrentPlans } = subWithCurrentPlans;
 
@@ -115,7 +98,7 @@ export function getSinglePlanFlattenedSubscriptionOrThrow(
 				"subscription didn't have one or zero discounts: " + msg,
 			),
 	);
-	const subscription: SinglePlanGuardianSubscription = {
+	const subscription: GuardianSubscription = {
 		...restSubWithCurrentPlans,
 		ratePlan,
 		discountRatePlan: maybeDiscount?.ratePlan,
@@ -125,3 +108,21 @@ export function getSinglePlanFlattenedSubscriptionOrThrow(
 		productCatalogKeys,
 	};
 }
+
+type PlanWithKeys<
+	RP extends GuardianCatalogKeysWithDiscount<ProductKeyWithDiscount>,
+> = {
+	ratePlan: GuardianRatePlan;
+	productCatalogKeys: RP;
+};
+
+type GuardianCatalogKeysWithDiscount<
+	P extends ProductKeyWithDiscount,
+	PRP extends
+		ProductWithDiscountRatePlanKey<P> = ProductWithDiscountRatePlanKey<P>,
+> = {
+	[P in ProductKeyWithDiscount]: {
+		productKey: P;
+		productRatePlanKey: PRP;
+	};
+}[P];

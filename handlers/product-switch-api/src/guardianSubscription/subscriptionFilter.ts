@@ -12,7 +12,7 @@ import dayjs from 'dayjs';
 import type {
 	GuardianRatePlan,
 	GuardianRatePlans,
-	GuardianSubscription,
+	GuardianSubscriptionWithProducts,
 } from './guardianSubscriptionParser';
 
 /**
@@ -131,7 +131,9 @@ export class SubscriptionFilter {
 			}) satisfies GuardianRatePlans<K>;
 	}
 
-	filterSubscription(highLevelSub: GuardianSubscription): GuardianSubscription {
+	filterSubscription(
+		highLevelSub: GuardianSubscriptionWithProducts,
+	): GuardianSubscriptionWithProducts {
 		return mapValue(
 			highLevelSub,
 			'products',
