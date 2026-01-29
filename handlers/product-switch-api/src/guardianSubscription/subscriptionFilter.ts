@@ -10,10 +10,10 @@ import type { RatePlanCharge } from '@modules/zuora/types';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import dayjs from 'dayjs';
 import type {
+	GroupedGuardianSubscription,
 	GuardianRatePlan,
 	GuardianRatePlans,
 	GuardianSubscriptionProducts,
-	GuardianSubscriptionWithProducts,
 } from './guardianSubscriptionParser';
 
 /**
@@ -138,8 +138,8 @@ export class SubscriptionFilter {
 	}
 
 	filterSubscription(
-		highLevelSub: GuardianSubscriptionWithProducts,
-	): GuardianSubscriptionWithProducts {
+		highLevelSub: GroupedGuardianSubscription,
+	): GroupedGuardianSubscription {
 		return mapValue(
 			highLevelSub,
 			'products',

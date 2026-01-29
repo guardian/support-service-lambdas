@@ -11,9 +11,9 @@ import type {
 	RestSubscription,
 } from './groupSubscriptionByZuoraCatalogIds';
 import type {
+	GroupedGuardianSubscription,
 	GuardianRatePlan,
 	GuardianRatePlans,
-	GuardianSubscriptionWithProducts,
 } from './guardianSubscriptionParser';
 
 export type GuardianSubscription = {
@@ -22,17 +22,16 @@ export type GuardianSubscription = {
 } & RestSubscription;
 
 /**
- * this takes a subscription and effectively does a "flatten.getSingle" on it to reduce it down to a single rate plan.
+ * this takes a subscription and effectively does a "flatten.getSingle" on it to reduce it down to a single (required) rate plan.
+ * It does the same with any (optional) Discount that is present
  *
- * It also returns the keys needed to access the associated product catalog entry.
- *
- * @param subWithCurrentPlans
+ * This is useful because in the guardian, all subscriptions have at most one active rateplan, plus maybe a discount
  */
 export function getSinglePlanFlattenedSubscriptionOrThrow(
-	subWithCurrentPlans: GuardianSubscriptionWithProducts,
+	groupedGuardianSubscription: GroupedGuardianSubscription,
 ): GuardianSubscription {
-	const { products, productsNotInCatalog, ...restSubWithCurrentPlans } =
-		subWithCurrentPlans;
+	const { products, productsNotInCatalog, ...restGroupedGuardianSubscription } =
+		groupedGuardianSubscription;
 
 	const allPlans: GuardianRatePlan[] = objectValues(
 		// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- retaining the product key just causes a huge union
@@ -68,7 +67,7 @@ export function getSinglePlanFlattenedSubscriptionOrThrow(
 		);
 
 	const subscription: GuardianSubscription = {
-		...restSubWithCurrentPlans,
+		...restGroupedGuardianSubscription,
 		ratePlan,
 		discountRatePlan: maybeDiscountRatePlan,
 	};

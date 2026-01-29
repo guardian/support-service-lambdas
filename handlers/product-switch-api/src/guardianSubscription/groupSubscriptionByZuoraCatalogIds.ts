@@ -27,9 +27,7 @@ export type IndexedZuoraSubscriptionRatePlansByProduct = Record<
 	string, // product id/name
 	IndexedZuoraSubscriptionRatePlans
 >;
-/**
- * this is a normal zuora subscription, however rateplans are now grouped by product id and rate plan id
- */
+
 export type ZuoraSubscriptionByCatalogIds = RestSubscription & {
 	products: IndexedZuoraSubscriptionRatePlansByProduct;
 };
@@ -40,6 +38,21 @@ type Indicies = {
 	getProductRatePlanChargeIndex: (rpc: RatePlanCharge) => string;
 };
 
+/**
+ * This is similar to buildZuoraProductIdToKey only it works on the subscription instead of the catalog.
+ *
+ * This rejigs a normal zuora subscription to index everything off the product*Ids or names as required.
+ *
+ * In the case of product*Id makes it easier to connect a subscription with the catalog
+ *
+ * In the case of names, it makes non-catalog things like Discounts more usable.
+ *
+ * Note that if a sub has multiple of the same product and rateplan, the list will have multiple entries
+ * which can be filtered down later.
+ *
+ * @param zuoraSubscription
+ * @private
+ */
 export class ZuoraSubscriptionIndexer {
 	private constructor(private indicies: Indicies) {}
 
@@ -60,16 +73,6 @@ export class ZuoraSubscriptionIndexer {
 		getProductRatePlanChargeIndex: (rpc: RatePlanCharge) => rpc.name,
 	});
 
-	/**
-	 * This rejigs a normal zuora subscription to index everything off the product*Ids
-	 *
-	 * This makes it easier to connect a subscription with the catalog
-	 *
-	 * Note that if a sub has multiple of the same product and rateplan, the list will have multiple entries.
-	 *
-	 * @param zuoraSubscription
-	 * @private
-	 */
 	groupSubscription(
 		zuoraSubscription: ZuoraSubscription,
 	): ZuoraSubscriptionByCatalogIds {

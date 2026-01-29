@@ -135,11 +135,11 @@ export class ChangePlanEndpoint {
 			SubscriptionFilter.activeNonEndedSubscriptionFilter(this.today);
 
 		const highLevelSub = guardianSubscriptionParser.parse(this.subscription);
-		const subWithCurrentPlans =
+		const groupedGuardianSubscription =
 			activeCurrentSubscriptionFilter.filterSubscription(highLevelSub);
 
 		const subscription: GuardianSubscription =
-			getSinglePlanFlattenedSubscriptionOrThrow(subWithCurrentPlans);
+			getSinglePlanFlattenedSubscriptionOrThrow(groupedGuardianSubscription);
 
 		logger.log('guardian subscription', subscription);
 

@@ -16,10 +16,6 @@ import type {
 	ZuoraProductRatePlanCharge,
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
 
-/*
-This file deals with building a tree mapping zuora product*id to their associated product catalog keys
- */
-
 // these are the data structures that define the tree of product->rateplan->charge
 // and let us attach the relevant ids and keys
 
@@ -48,7 +44,10 @@ export type ZuoraProductIdToKey = Record<
 >;
 
 /**
- * main entry point to build the whole tree
+ * Build a tree mapping zuora product*id to their associated product catalog keys
+ *
+ * This is needed so that we can attach catalog keys to the subscription, therefore not needing to
+ * keep the original catalog around and filter by id.
  *
  * @param catalog zuora catalog (this is needed as Discounts is not in the product-catalog at present)
  */
@@ -108,12 +107,10 @@ function buildZuoraProductRatePlanKeyNode<P extends ProductKey>(
 ): ZuoraProductRatePlanKeyNode<P> | undefined {
 	const productRatePlanCharges = buildZuoraProductRatePlanChargeIdToKey(prp);
 	return mapOption(
-		// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- TODO check - bad return type on existing getProductRatePlanKey function
-		zuoraCatalogToProductRatePlanKey[prp.name] as
-			| ProductRatePlanKey<P>
-			| undefined,
+		zuoraCatalogToProductRatePlanKey[prp.name],
 		(productRatePlanKey) => ({
-			productRatePlanKey,
+			// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- zuoraCatalogToProductRatePlanKey doesn't retain the hierarchy
+			productRatePlanKey: productRatePlanKey as ProductRatePlanKey<P>,
 			productRatePlanCharges,
 		}),
 	);

@@ -57,8 +57,7 @@ type GroupedProducts = {
 	productsNotInCatalog: IndexedZuoraSubscriptionRatePlansByProduct;
 };
 
-export type GuardianSubscriptionWithProducts = GroupedProducts &
-	RestSubscription;
+export type GroupedGuardianSubscription = GroupedProducts & RestSubscription;
 
 type GuardianKeyToRatePlans<K extends ProductKey> = {
 	[P in K]?: GuardianRatePlans<P>;
@@ -125,9 +124,7 @@ export class GuardianSubscriptionParser {
 		this.zuoraProductIdGuardianLookup = buildZuoraProductIdToKey(catalog);
 	}
 
-	parse(
-		zuoraSubscription: ZuoraSubscription,
-	): GuardianSubscriptionWithProducts {
+	parse(zuoraSubscription: ZuoraSubscription): GroupedGuardianSubscription {
 		const { products: productsById, ...restSubscription } =
 			ZuoraSubscriptionIndexer.byProductIds.groupSubscription(
 				zuoraSubscription,
