@@ -168,8 +168,10 @@ export class GuardianSubscriptionParser {
 			notInCatalogAndUndefined
 				.flatMap(([x]) => objectValues(x).flat(1))
 				.map((cs) => mapValue(cs, 'ratePlanCharges', (c) => objectValues(c)));
-		const productsNotInCatalog =
-			ZuoraSubscriptionIndexer.byName.groupRatePlans(notInCatalog);
+
+		// byNames could be unreliable as the names may not match the catalog names, should use product*Ids to correlate
+		const productsNotInCatalog: IndexedZuoraSubscriptionRatePlansByProduct =
+			ZuoraSubscriptionIndexer.byNames.groupRatePlans(notInCatalog);
 
 		return { products: guardianKeyToRatePlans, productsNotInCatalog };
 	}

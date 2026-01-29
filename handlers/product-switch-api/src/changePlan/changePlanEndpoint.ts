@@ -128,7 +128,7 @@ export class ChangePlanEndpoint {
 			await getProductCatalogFromApi(this.stage),
 		);
 		const guardianSubscriptionParser = new GuardianSubscriptionParser(
-			await getZuoraCatalogFromS3(this.stage), // TODO maybe we can build from product catalog instead?
+			await getZuoraCatalogFromS3(this.stage), // need zuora catalog to identify non product-catalog plans e.g. Discount
 		);
 
 		const activeCurrentSubscriptionFilter =

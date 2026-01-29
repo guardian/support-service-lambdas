@@ -52,7 +52,7 @@ export class ZuoraSubscriptionIndexer {
 			rpc.productRatePlanChargeId,
 	});
 
-	static byName = new ZuoraSubscriptionIndexer({
+	static byNames = new ZuoraSubscriptionIndexer({
 		getProductIndex: (rp: RestRatePlan) => rp.productName,
 
 		getProductRatePlanIndex: (rp: RestRatePlan) => rp.ratePlanName,
