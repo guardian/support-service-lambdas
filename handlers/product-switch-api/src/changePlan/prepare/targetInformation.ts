@@ -7,10 +7,13 @@ import type {
 import type { ProductSwitchTargetBody, SwitchMode } from '../schemas';
 import type { Discount } from '../switchDefinition/discounts';
 import type {
-	ValidSwitchesFromRatePlan,
+	AvailableTargetProducts,
 	ValidTargetProduct,
-} from './switchesHelper';
-import { getAvailableSwitchesFrom, getSwitchTo } from './switchesHelper';
+} from './switchCatalogHelper';
+import {
+	getAvailableTargetProducts,
+	getSwitchTargetInformation,
+} from './switchCatalogHelper';
 
 export type TargetInformation = {
 	actualTotalPrice: number; // email, sf tracking
@@ -26,6 +29,9 @@ export type TargetContribution = {
 	contributionAmount: number;
 };
 
+/**
+ * this holds input or existing subscription information needed in order to add the new product
+ */
 export type SwitchActionData = {
 	mode: SwitchMode;
 	currency: IsoCurrency;
@@ -42,7 +48,7 @@ export type SwitchActionData = {
 
 /**
  * validate that the requested switch is possible and allowed for the situation, returning any information needed to
- * add the new subscription correctly.
+ * add the new subscription correctly (or report the preview as appropriate)
  */
 export const getTargetInformation = (
 	input: ProductSwitchTargetBody,
@@ -99,19 +105,19 @@ function getSwitchSpecificTargetInformationOrThrow<
 	targetProductKeys: GuardianCatalogKeys<TP>,
 	switchActionData: SwitchActionData,
 ): Promise<TargetInformation> {
-	const validSwitches: ValidSwitchesFromRatePlan = getAvailableSwitchesFrom(
+	const validSwitches: AvailableTargetProducts = getAvailableTargetProducts(
 		sourceProductKeys.productKey,
 		sourceProductKeys.productRatePlanKey,
 	);
 
-	const buildTargetInformation = getSwitchTo(
+	const targetInformation = getSwitchTargetInformation(
 		validSwitches,
 		targetProductKeys.productKey,
 		targetProductKeys.productRatePlanKey,
 		`${sourceProductKeys.productKey} ${sourceProductKeys.productRatePlanKey}`,
 	);
 
-	return buildTargetInformation(
+	return targetInformation.fromUserInformation(
 		productCatalogHelper.getProductRatePlan(
 			targetProductKeys.productKey,
 			targetProductKeys.productRatePlanKey,

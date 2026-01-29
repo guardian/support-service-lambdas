@@ -15,7 +15,7 @@ import dayjs from 'dayjs';
 import type { ContributionTestAdditionalOptions } from '../../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import { createContribution } from '../../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import { ChangePlanEndpoint } from '../../src/changePlan/changePlanEndpoint';
-import type { ValidTargetProduct } from '../../src/changePlan/prepare/switchesHelper';
+import type { ValidTargetProduct } from '../../src/changePlan/prepare/switchCatalogHelper';
 import type { ProductSwitchRequestBody } from '../../src/changePlan/schemas';
 
 interface ContributionCreationDetails {

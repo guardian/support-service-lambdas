@@ -6,7 +6,7 @@ import type {
 } from '../prepare/targetInformation';
 
 export function digitalSubscriptionTargetInformation(
-	ratePlan: ProductRatePlan<'DigitalSubscription', 'Annual' | 'Monthly'>,
+	productRatePlan: ProductRatePlan<'DigitalSubscription', 'Annual' | 'Monthly'>,
 	switchActionData: SwitchActionData,
 ): Promise<TargetInformation> {
 	if (switchActionData.mode === 'save') {
@@ -15,24 +15,26 @@ export function digitalSubscriptionTargetInformation(
 		);
 	}
 	if (switchActionData.mode === 'switchWithPriceOverride') {
-		throw new ValidationError(
-			'only base price is possible for the t2->3 switch',
-		);
+		throw new ValidationError("digital plus doesn't have a variable amount");
 	}
 
-	const catalogPrice = ratePlan.pricing[switchActionData.currency];
+	const catalogPrice = productRatePlan.pricing[switchActionData.currency];
 	if (switchActionData.previousAmount > catalogPrice) {
-		throw new ValidationError('this product has no contribution element');
+		throw new ValidationError(
+			'existing amount is above the base digital plus price',
+		);
 	}
+	const ratePlanName =
+		productRatePlan.billingPeriod === 'Month'
+			? `Digital Pack Monthly`
+			: `Digital Pack Annual`;
+
 	return Promise.resolve({
 		actualTotalPrice: catalogPrice,
-		productRatePlanId: ratePlan.id,
-		ratePlanName:
-			ratePlan.billingPeriod === 'Month'
-				? `Digital Pack Monthly`
-				: `Digital Pack Annual`,
+		productRatePlanId: productRatePlan.id,
+		ratePlanName,
 		contributionCharge: undefined,
-		subscriptionChargeId: ratePlan.charges.Subscription.id,
+		subscriptionChargeId: productRatePlan.charges.Subscription.id,
 		discount: undefined,
 	} satisfies TargetInformation);
 }

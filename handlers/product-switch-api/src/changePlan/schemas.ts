@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { validTargetProductKeys } from './prepare/switchesHelper';
+import { validTargetProductKeys } from './prepare/switchCatalogHelper';
 
 export const productSwitchCommonRequestSchema = z.object({
 	csrUserId: z.optional(z.string()),

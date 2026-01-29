@@ -8,10 +8,11 @@ import type { Discount } from './discounts';
 import { annualContribHalfPriceSupporterPlusForOneYear } from './discounts';
 
 export function supporterPlusTargetInformation(
-	ratePlan: ProductRatePlan<'SupporterPlus', 'Annual' | 'Monthly'>,
+	productRatePlan: ProductRatePlan<'SupporterPlus', 'Annual' | 'Monthly'>,
 	switchActionData: SwitchActionData,
 ): Promise<TargetInformation> {
-	const targetCatalogBasePrice = ratePlan.pricing[switchActionData.currency];
+	const targetCatalogBasePrice =
+		productRatePlan.pricing[switchActionData.currency];
 
 	// Validate that the user's desired amount is at least the base Supporter Plus price
 	// Only validate when newAmount is explicitly provided by the frontend
@@ -34,7 +35,7 @@ export function supporterPlusTargetInformation(
 			100;
 
 		const isEligible =
-			ratePlan.billingPeriod === 'Annual' &&
+			productRatePlan.billingPeriod === 'Annual' &&
 			switchActionData.previousAmount <= discountedPrice;
 		if (isEligible) {
 			discount = discountDetails;
@@ -42,7 +43,7 @@ export function supporterPlusTargetInformation(
 			actualTotalPrice = discountedPrice;
 		} else {
 			throw new ValidationError(
-				`Cannot switch to Supporter Plus: not eligible for a save discount: ${ratePlan.billingPeriod} === Annual, ${switchActionData.previousAmount} <= ${discountedPrice}`,
+				`Cannot switch to Supporter Plus: not eligible for a save discount: ${productRatePlan.billingPeriod} === Annual, ${switchActionData.previousAmount} <= ${discountedPrice}`,
 			);
 		}
 	} else {
@@ -54,18 +55,20 @@ export function supporterPlusTargetInformation(
 		contributionAmount = actualTotalPrice - targetCatalogBasePrice;
 	}
 
+	const ratePlanName =
+		productRatePlan.billingPeriod === 'Month'
+			? `Supporter Plus V2 - Monthly`
+			: `Supporter Plus V2 - Annual`;
+
 	return Promise.resolve({
 		actualTotalPrice,
-		productRatePlanId: ratePlan.id,
-		ratePlanName:
-			ratePlan.billingPeriod === 'Month'
-				? `Supporter Plus V2 - Monthly`
-				: `Supporter Plus V2 - Annual`,
+		productRatePlanId: productRatePlan.id,
+		ratePlanName,
 		contributionCharge: {
-			id: ratePlan.charges.Contribution.id,
+			id: productRatePlan.charges.Contribution.id,
 			contributionAmount,
 		},
-		subscriptionChargeId: ratePlan.charges.Subscription.id,
+		subscriptionChargeId: productRatePlan.charges.Subscription.id,
 		discount,
 	} satisfies TargetInformation);
 }

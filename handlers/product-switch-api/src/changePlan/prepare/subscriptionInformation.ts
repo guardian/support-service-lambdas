@@ -5,15 +5,15 @@ import {
 	getNonEmptyOrThrow,
 	sumNumbers,
 } from '@modules/arrayFunctions';
-import { getIfDefined } from '@modules/nullAndUndefined';
+import { getIfDefined, mapOption } from '@modules/nullAndUndefined';
 import { objectValues } from '@modules/objectFunctions';
 import type { RatePlanCharge } from '@modules/zuora/types';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import type { GuardianSubscription } from '../../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import type { GuardianRatePlanCharges } from '../../guardianSubscription/guardianSubscriptionParser';
-import type { ValidSwitchableRatePlanKey } from './switchesHelper';
-import { isValidSwitchableRatePlanKey } from './switchesHelper';
+import type { ValidSwitchableRatePlanKey } from './switchCatalogHelper';
+import { asSwitchableRatePlanKey } from './switchCatalogHelper';
 
 export type SubscriptionInformation = {
 	accountNumber: string; // order
@@ -35,13 +35,6 @@ function getSubscriptionTotalChargeAmount(subscription: GuardianSubscription) {
 				getIfDefined(c.price, 'non priced charge on the rate plan (discount?)'),
 		),
 	);
-}
-
-export function shouldStartNewTerm(termStartDate: Date, today: dayjs.Dayjs) {
-	const termStartDate1 = dayjs(termStartDate).startOf('day');
-	const startOfToday = today.startOf('day');
-	const startNewTerm = termStartDate1.isBefore(startOfToday);
-	return startNewTerm;
 }
 
 function getDistinctChargeValue<T extends SafeForDistinct>(
@@ -66,27 +59,21 @@ function getDistinctChargeValue<T extends SafeForDistinct>(
 }
 
 function getChargedThroughDate(subscription: GuardianSubscription) {
-	return getDistinctChargeValue(
-		subscription.ratePlan.ratePlanCharges,
-		(ratePlanCharge: RatePlanCharge) =>
-			ratePlanCharge.chargedThroughDate?.getTime(),
+	return mapOption(
+		getDistinctChargeValue(
+			subscription.ratePlan.ratePlanCharges,
+			(ratePlanCharge: RatePlanCharge) =>
+				ratePlanCharge.chargedThroughDate?.getTime(),
+		),
+		(e) => dayjs(new Date(e)),
 	);
 }
 
-export function getSubscriptionInformation(subscription: GuardianSubscription) {
-	const bareChargedThrough = getChargedThroughDate(subscription);
-	const chargedThroughDate: Dayjs | undefined =
-		bareChargedThrough !== undefined
-			? dayjs(new Date(bareChargedThrough))
-			: undefined;
-
-	const productRatePlanKey: string = subscription.ratePlan.productRatePlanKey;
-	if (!isValidSwitchableRatePlanKey(productRatePlanKey)) {
-		// TODO move check to high level sub reader
-		throw new Error(`unsupported rate plan key ${productRatePlanKey}`);
-	}
-
-	const previousAmount = getSubscriptionTotalChargeAmount(subscription);
+export function getSubscriptionInformation(
+	subscription: GuardianSubscription,
+): SubscriptionInformation {
+	const productRatePlanKey: ValidSwitchableRatePlanKey =
+		asSwitchableRatePlanKey(subscription.ratePlan.productRatePlanKey);
 
 	const chargeIds = getNonEmptyOrThrow(
 		objectValues(subscription.ratePlan.ratePlanCharges).map(
@@ -100,10 +87,10 @@ export function getSubscriptionInformation(subscription: GuardianSubscription) {
 		subscriptionNumber: subscription.subscriptionNumber,
 		previousProductName: subscription.ratePlan.productName,
 		previousRatePlanName: subscription.ratePlan.ratePlanName,
-		previousAmount,
+		previousAmount: getSubscriptionTotalChargeAmount(subscription),
 		productRatePlanKey,
 		termStartDate: subscription.termStartDate,
-		chargedThroughDate,
+		chargedThroughDate: getChargedThroughDate(subscription),
 		productRatePlanId: subscription.ratePlan.productRatePlanId,
 		chargeIds,
 	} satisfies SubscriptionInformation;

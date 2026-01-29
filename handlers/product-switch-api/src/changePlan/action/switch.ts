@@ -6,7 +6,6 @@ import type {
 } from '@modules/zuora/orders/orderRequests';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type dayjs from 'dayjs';
-import { removePendingUpdateAmendments } from '../../amendments';
 import { takePaymentOrAdjustInvoice } from '../../payment';
 import { sendSalesforceTracking } from '../../salesforceTracking';
 import { supporterRatePlanItemFromSwitchInformation } from '../../supporterProductData';
@@ -17,6 +16,7 @@ import type {
 	ZuoraSwitchResponseWithIds,
 } from '../schemas';
 import { zuoraSwitchResponseWithIdsSchema } from '../schemas';
+import { removePendingUpdateAmendments } from './amendments';
 import { sendThankYouEmail } from './productSwitchEmail';
 
 export type SwitchResponse = { message: string };

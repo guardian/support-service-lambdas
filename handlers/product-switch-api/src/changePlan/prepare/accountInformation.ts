@@ -12,16 +12,12 @@ export type AccountInformation = {
 };
 export const getAccountInformation = (
 	account: ZuoraAccount,
-): AccountInformation => {
-	const currency: IsoCurrency = account.metrics.currency;
-
-	return {
-		id: account.basicInfo.id,
-		identityId: account.basicInfo.identityId,
-		emailAddress: account.billToContact.workEmail,
-		firstName: account.billToContact.firstName,
-		lastName: account.billToContact.lastName,
-		currency,
-		defaultPaymentMethodId: account.billingAndPayment.defaultPaymentMethodId,
-	};
-};
+): AccountInformation => ({
+	id: account.basicInfo.id,
+	identityId: account.basicInfo.identityId,
+	emailAddress: account.billToContact.workEmail,
+	firstName: account.billToContact.firstName,
+	lastName: account.billToContact.lastName,
+	currency: account.metrics.currency,
+	defaultPaymentMethodId: account.billingAndPayment.defaultPaymentMethodId,
+});

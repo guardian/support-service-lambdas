@@ -6,9 +6,8 @@ import { singleTriggerDate } from '@modules/zuora/orders/orderActions';
 import type { OrderRequest } from '@modules/zuora/orders/orderRequests';
 import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import type { Dayjs } from 'dayjs';
-import type dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import type { SubscriptionInformation } from './subscriptionInformation';
-import { shouldStartNewTerm } from './subscriptionInformation';
 import type { TargetContribution } from './targetInformation';
 
 const buildAddDiscountOrderAction = (
@@ -75,6 +74,13 @@ function buildNewTermOrderActions(orderDate: dayjs.Dayjs): OrderAction[] {
 			triggerDates: singleTriggerDate(orderDate),
 		},
 	];
+}
+
+export function shouldStartNewTerm(termStartDate: Date, today: dayjs.Dayjs) {
+	const termStartDate1 = dayjs(termStartDate).startOf('day');
+	const startOfToday = today.startOf('day');
+	const startNewTerm = termStartDate1.isBefore(startOfToday);
+	return startNewTerm;
 }
 
 export class SwitchOrderRequestBuilder {
