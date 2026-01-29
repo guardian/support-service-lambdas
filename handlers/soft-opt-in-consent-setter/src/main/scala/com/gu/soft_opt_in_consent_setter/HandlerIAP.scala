@@ -64,7 +64,29 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       userConsentsOverrides: Option[UserConsentsOverrides],
   )
   object WireMessageBody {
-    implicit val decoderUserConsentsOverrides: Decoder[UserConsentsOverrides] = deriveDecoder[UserConsentsOverrides]
+    implicit val decoderUserConsentsOverrides: Decoder[UserConsentsOverrides] = (cursor) => {
+      cursor.downField("similarGuardianProducts").as[io.circe.Json].flatMap { json =>
+        if (json.isNull) {
+          Right(UserConsentsOverrides(None))
+        } else if (json.isBoolean) {
+          json.asBoolean
+            .map(b => UserConsentsOverrides(Some(b)))
+            .toRight(
+              io.circe.DecodingFailure("similarGuardianProducts must be a boolean", cursor.history),
+            )
+        } else if (json.isString) {
+          json.asString match {
+            case Some("") => Right(UserConsentsOverrides(None))
+            case _ =>
+              Left(
+                io.circe.DecodingFailure("similarGuardianProducts must be a boolean or empty string", cursor.history),
+              )
+          }
+        } else {
+          Left(io.circe.DecodingFailure("similarGuardianProducts must be a boolean or empty string", cursor.history))
+        }
+      }
+    }
     implicit val decoder: Decoder[WireMessageBody] = deriveDecoder[WireMessageBody]
   }
 

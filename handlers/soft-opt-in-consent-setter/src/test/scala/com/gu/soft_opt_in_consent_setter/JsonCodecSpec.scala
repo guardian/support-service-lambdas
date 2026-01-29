@@ -81,6 +81,32 @@ class JsonCodecSpec extends AnyFlatSpec with should.Matchers with Inside {
     }
   }
 
+  it should "handle empty string for similarGuardianProducts" in {
+    val testData =
+      """{
+        |    "subscriptionId": "A-S000",
+        |    "identityId": "1234",
+        |    "eventType": "Acquisition",
+        |    "productName": "SUPPORTER_PLUS",
+        |    "previousProductName": null,
+        |    "userConsentsOverrides": {
+        |        "similarGuardianProducts": ""
+        |    }
+        |}""".stripMargin
+    val expected = WireMessageBody(
+      subscriptionId = "A-S000",
+      identityId = Some("1234"),
+      eventType = Acquisition,
+      productName = "SUPPORTER_PLUS",
+      printProduct = None,
+      previousProductName = None,
+      userConsentsOverrides = Some(UserConsentsOverrides(None)),
+    )
+    inside(decode[WireMessageBody](testData)) { case Right(actual) =>
+      actual should be(expected)
+    }
+  }
+
   def makeTestData(identityId: String = "null", productName: String) =
     s"""{
       |    "subscriptionId": "A-S000",
