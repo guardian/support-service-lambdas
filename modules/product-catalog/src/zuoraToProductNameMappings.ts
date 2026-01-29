@@ -41,7 +41,7 @@ export const activeProducts = [
 	'Contribution',
 ];
 
-const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
+export const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
 	'Annual Contribution': 'Annual',
 	'Monthly Contribution': 'Monthly',
 	// Digital Pack rate plans
@@ -126,7 +126,7 @@ const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
 	Percentage: 'Discount',
 } as const;
 
-const zuoraCatalogToProductRatePlanChargeKey: Record<string, string> = {
+export const zuoraCatalogToProductRatePlanChargeKey: Record<string, string> = {
 	'Digital Pack Monthly': 'Subscription',
 	'Digital Pack Annual': 'Subscription',
 	'Digital Pack Quarterly': 'Subscription',

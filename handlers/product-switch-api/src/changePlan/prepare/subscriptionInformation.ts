@@ -10,10 +10,7 @@ import { objectValues } from '@modules/objectFunctions';
 import type { RatePlanCharge } from '@modules/zuora/types';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import type {
-	GuardianSubscription,
-	GuardianSubscriptionWithKeys,
-} from '../../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
+import type { GuardianSubscription } from '../../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import type { GuardianRatePlanCharges } from '../../guardianSubscription/guardianSubscriptionParser';
 import type { ValidSwitchableRatePlanKey } from './switchesHelper';
 import { isValidSwitchableRatePlanKey } from './switchesHelper';
@@ -76,17 +73,14 @@ function getChargedThroughDate(subscription: GuardianSubscription) {
 	);
 }
 
-export function getSubscriptionInformation({
-	subscription,
-	productCatalogKeys,
-}: GuardianSubscriptionWithKeys) {
+export function getSubscriptionInformation(subscription: GuardianSubscription) {
 	const bareChargedThrough = getChargedThroughDate(subscription);
 	const chargedThroughDate: Dayjs | undefined =
 		bareChargedThrough !== undefined
 			? dayjs(new Date(bareChargedThrough))
 			: undefined;
 
-	const productRatePlanKey: string = productCatalogKeys.productRatePlanKey;
+	const productRatePlanKey: string = subscription.ratePlan.productRatePlanKey;
 	if (!isValidSwitchableRatePlanKey(productRatePlanKey)) {
 		// TODO move check to high level sub reader
 		throw new Error(`unsupported rate plan key ${productRatePlanKey}`);

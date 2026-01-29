@@ -1,13 +1,13 @@
 import { objectValues } from '@modules/objectFunctions';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import type { GuardianRatePlan } from '../../guardianSubscription/guardianSubscriptionParser';
+import type { IndexedZuoraRatePlanWithCharges } from '../../guardianSubscription/groupSubscriptionByZuoraCatalogIds';
 
 // TODO use central eligibility checker pattern
 export function isEligibleForSwitch(
 	subscriptionStatus: string,
 	totalInvoiceBalance: number,
-	discountRatePlan: GuardianRatePlan | undefined,
+	discountRatePlan: IndexedZuoraRatePlanWithCharges | undefined,
 	today: Dayjs,
 ): boolean {
 	const hasDiscountToday: boolean =

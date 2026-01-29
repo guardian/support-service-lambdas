@@ -125,14 +125,13 @@ type AnyProductRatePlan = {
 
 export type TermType = z.infer<typeof termTypeSchema>;
 
-export type GuardianCatalogKeys<
-	P extends ProductKey,
-	PRP extends ProductRatePlanKey<P> = ProductRatePlanKey<P>,
-> = {
-	[P in ProductKey]: {
-		productKey: P;
-		productRatePlanKey: PRP;
-	};
+export type GuardianCatalogKeys<P extends ProductKey> = {
+	productKey: P;
+	productRatePlanKey: AnyProductRatePlanKey<P>; // constantly collapses to never if you distribute and use ProductRatePlanKey<P>
+};
+
+export type AnyProductRatePlanKey<P extends ProductKey = ProductKey> = {
+	[K in P]: ProductRatePlanKey<K>;
 }[P];
 
 // handy if there are duplicates in a union, makes it look better in the IDE
@@ -186,7 +185,7 @@ export class ProductCatalogHelper {
 	validateOrThrow<P extends ProductKey>(
 		targetGuardianProductName: P,
 		productRatePlanKey: string,
-	): GuardianCatalogKeys<P, ProductRatePlanKey<P>> {
+	): GuardianCatalogKeys<P> {
 		const ratePlans = this.catalogData[targetGuardianProductName].ratePlans;
 		if (!this.hasRatePlan(productRatePlanKey, ratePlans)) {
 			throw new Error(

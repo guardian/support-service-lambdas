@@ -21,13 +21,9 @@ export function objectKeysNonEmpty<
 
 export function objectValues<V, T extends Record<string, V>>(
 	libs: T,
-): {
-	[K in keyof T]: T[K];
-} extends infer V
-	? Array<V[keyof V]>
-	: never {
+): Array<NonUndefined<T[keyof T]>> {
 	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- allowed in utility function - get back type lost by Object.values
-	return Object.values(libs) as any;
+	return Object.values(libs) as Array<NonUndefined<T[keyof T]>>;
 }
 
 export function objectFromEntries<K extends string, V>(

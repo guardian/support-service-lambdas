@@ -1,6 +1,6 @@
 import type { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import type { ZuoraAccount } from '@modules/zuora/types';
-import type { GuardianSubscriptionWithKeys } from '../../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
+import type { GuardianSubscription } from '../../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import type { ProductSwitchTargetBody } from '../schemas';
 import type { AccountInformation } from './accountInformation';
 import { getAccountInformation } from './accountInformation';
@@ -19,16 +19,16 @@ export async function getSwitchInformation(
 	productCatalogHelper: ProductCatalogHelper,
 	input: ProductSwitchTargetBody,
 	account: ZuoraAccount,
-	guardianSubscriptionWithKeys: GuardianSubscriptionWithKeys,
+	subscription: GuardianSubscription,
 ): Promise<SwitchInformation> {
 	const accountInformation = getAccountInformation(account);
 
 	const subscriptionInformation: SubscriptionInformation =
-		getSubscriptionInformation(guardianSubscriptionWithKeys);
+		getSubscriptionInformation(subscription);
 
 	const targetInformation = await getTargetInformation(
 		input,
-		guardianSubscriptionWithKeys.productCatalogKeys,
+		subscription.ratePlan,
 		accountInformation.currency,
 		subscriptionInformation.previousAmount,
 		productCatalogHelper,

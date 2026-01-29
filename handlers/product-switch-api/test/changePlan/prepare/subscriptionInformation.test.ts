@@ -27,7 +27,7 @@ export function loadSubscription(
 ) {
 	const subscriptionFixture: ZuoraSubscription =
 		zuoraSubscriptionSchema.parse(subscriptionData);
-	const guardianSubscriptionWithKeys = (() => {
+	const subscription = (() => {
 		const guardianSubscription =
 			guardianSubscriptionParser.parse(subscriptionFixture);
 		const filter =
@@ -36,17 +36,17 @@ export function loadSubscription(
 			filter.filterSubscription(guardianSubscription),
 		);
 	})();
-	return { subscriptionFixture, guardianSubscriptionWithKeys };
+	return { subscriptionFixture, subscription };
 }
 
 describe('getSubscriptionInformation', () => {
 	test('extracts subscription information from the guardian subscription fixture', () => {
-		const { subscriptionFixture, guardianSubscriptionWithKeys } =
-			loadSubscription(subscriptionJson, dayjs('2024-05-10'));
-
-		const subscriptionInformation = getSubscriptionInformation(
-			guardianSubscriptionWithKeys,
+		const { subscriptionFixture, subscription } = loadSubscription(
+			subscriptionJson,
+			dayjs('2024-05-10'),
 		);
+
+		const subscriptionInformation = getSubscriptionInformation(subscription);
 
 		expect(
 			mapValue(subscriptionInformation, 'chargedThroughDate', (d) =>
@@ -55,17 +55,13 @@ describe('getSubscriptionInformation', () => {
 		).toStrictEqual({
 			accountNumber: subscriptionFixture.accountNumber,
 			subscriptionNumber: subscriptionFixture.subscriptionNumber,
-			previousProductName:
-				guardianSubscriptionWithKeys.subscription.ratePlan.productName,
-			previousRatePlanName:
-				guardianSubscriptionWithKeys.subscription.ratePlan.ratePlanName,
+			previousProductName: subscription.ratePlan.productName,
+			previousRatePlanName: subscription.ratePlan.ratePlanName,
 			previousAmount: 50, // EUR
-			productRatePlanKey:
-				guardianSubscriptionWithKeys.productCatalogKeys.productRatePlanKey,
-			termStartDate: guardianSubscriptionWithKeys.subscription.termStartDate,
+			productRatePlanKey: subscription.ratePlan.productRatePlanKey,
+			termStartDate: subscription.termStartDate,
 			chargedThroughDate: '2025-05-09',
-			productRatePlanId:
-				guardianSubscriptionWithKeys.subscription.ratePlan.productRatePlanId,
+			productRatePlanId: subscription.ratePlan.productRatePlanId,
 			chargeIds: [
 				productCatalog.Contribution.ratePlans.Annual.charges.Contribution.id,
 			],
@@ -73,12 +69,12 @@ describe('getSubscriptionInformation', () => {
 	});
 
 	test('gets the charged through date correctly for a switched sub', () => {
-		const { subscriptionFixture, guardianSubscriptionWithKeys } =
-			loadSubscription(alreadySwitchedJson, dayjs('2024-06-10'));
-
-		const subscriptionInformation = getSubscriptionInformation(
-			guardianSubscriptionWithKeys,
+		const { subscriptionFixture, subscription } = loadSubscription(
+			alreadySwitchedJson,
+			dayjs('2024-06-10'),
 		);
+
+		const subscriptionInformation = getSubscriptionInformation(subscription);
 
 		expect(
 			mapValue(subscriptionInformation, 'chargedThroughDate', (d) =>
@@ -87,17 +83,13 @@ describe('getSubscriptionInformation', () => {
 		).toStrictEqual({
 			accountNumber: subscriptionFixture.accountNumber,
 			subscriptionNumber: subscriptionFixture.subscriptionNumber,
-			previousProductName:
-				guardianSubscriptionWithKeys.subscription.ratePlan.productName,
-			previousRatePlanName:
-				guardianSubscriptionWithKeys.subscription.ratePlan.ratePlanName,
+			previousProductName: subscription.ratePlan.productName,
+			previousRatePlanName: subscription.ratePlan.ratePlanName,
 			previousAmount: 17, // AUD
-			productRatePlanKey:
-				guardianSubscriptionWithKeys.productCatalogKeys.productRatePlanKey,
-			termStartDate: guardianSubscriptionWithKeys.subscription.termStartDate,
+			productRatePlanKey: subscription.ratePlan.productRatePlanKey,
+			termStartDate: subscription.termStartDate,
 			chargedThroughDate: '2024-07-06', // it ignores the removed contribution charge
-			productRatePlanId:
-				guardianSubscriptionWithKeys.subscription.ratePlan.productRatePlanId,
+			productRatePlanId: subscription.ratePlan.productRatePlanId,
 			chargeIds: [
 				productCatalog.SupporterPlus.ratePlans.Monthly.charges.Contribution.id,
 				productCatalog.SupporterPlus.ratePlans.Monthly.charges.Subscription.id,

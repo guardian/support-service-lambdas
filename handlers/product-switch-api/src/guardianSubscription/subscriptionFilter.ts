@@ -12,6 +12,7 @@ import dayjs from 'dayjs';
 import type {
 	GuardianRatePlan,
 	GuardianRatePlans,
+	GuardianSubscriptionProducts,
 	GuardianSubscriptionWithProducts,
 } from './guardianSubscriptionParser';
 
@@ -81,13 +82,18 @@ export class SubscriptionFilter {
 		return { errors, filteredCharges };
 	}
 
-	private filterRatePlanList(guardianSubRatePlans: GuardianRatePlan[]): {
+	private filterRatePlanList<P extends ProductKey>(
+		guardianSubRatePlans: Array<GuardianRatePlan<P>>,
+	): {
 		discarded: string[];
-		ratePlans: GuardianRatePlan[];
+		ratePlans: Array<GuardianRatePlan<P>>;
 	} {
 		const [discarded, ratePlans] = partitionByType(
-			guardianSubRatePlans.map((rp: GuardianRatePlan) => {
-				const maybeDiscardWholePlan = this.ratePlanDiscardReason(rp);
+			guardianSubRatePlans.map((rp: GuardianRatePlan<P>) => {
+				const maybeDiscardWholePlan = this.ratePlanDiscardReason(
+					// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- TS functions aren't contravariant in their params
+					rp satisfies GuardianRatePlan<P> as GuardianRatePlan,
+				);
 				if (maybeDiscardWholePlan !== undefined) {
 					return `${rp.ratePlanName}: ${maybeDiscardWholePlan}`;
 				}
@@ -111,11 +117,11 @@ export class SubscriptionFilter {
 		return { discarded, ratePlans };
 	}
 
-	private filterRatePlanses<K extends ProductKey>(): (
-		jbp: GuardianRatePlans<K>,
-	) => GuardianRatePlans<K> {
-		return (jbp: GuardianRatePlans<K>) =>
-			mapValues(jbp, (guardianSubRatePlans: GuardianRatePlan[]) => {
+	private filterRatePlanses<P extends ProductKey>(): (
+		jbp: GuardianRatePlans<P>,
+	) => GuardianRatePlans<P> {
+		return (jbp: GuardianRatePlans<P>) =>
+			mapValues(jbp, (guardianSubRatePlans: Array<GuardianRatePlan<P>>) => {
 				const { discarded, ratePlans } =
 					this.filterRatePlanList(guardianSubRatePlans);
 				if (discarded.length > 0) {
@@ -127,8 +133,8 @@ export class SubscriptionFilter {
 						ratePlans.map((rp) => rp.ratePlanName),
 					);
 				} // could be very spammy?
-				return ratePlans;
-			}) satisfies GuardianRatePlans<K>;
+				return ratePlans.length === 0 ? undefined : ratePlans;
+			}) satisfies GuardianRatePlans<P>;
 	}
 
 	filterSubscription(
@@ -149,15 +155,22 @@ export class SubscriptionFilter {
  * @param obj
  * @param fn
  */
-export function mapValuesCorrelated<K extends ProductKey>(
-	obj: { [T in K]?: GuardianRatePlans<T> },
-	fn: <Q extends K>(v: GuardianRatePlans<Q>, k: K) => GuardianRatePlans<Q>,
-): { [T in K]?: GuardianRatePlans<T> } {
-	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- utility function but TODO look again at this
-	const res = {} as { [T in K]?: GuardianRatePlans<T> };
+export function mapValuesCorrelated(
+	obj: GuardianSubscriptionProducts,
+	fn: (v: GuardianRatePlans, k: ProductKey) => GuardianRatePlans,
+): GuardianSubscriptionProducts {
+	const res: Partial<Record<ProductKey, GuardianRatePlans>> = {};
 	for (const key of objectKeys(obj)) {
-		// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- utility function but TODO look again at this
-		res[key as K] = obj[key] ? fn(obj[key], key) : undefined;
+		const beforeValue = obj[key];
+		if (beforeValue) {
+			const singleResult = fn(
+				// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- functions not contravariant
+				beforeValue as GuardianRatePlans,
+				key,
+			);
+			res[key] = singleResult;
+		}
 	}
-	return res;
+	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- type checker can't handle maintaining the types at all times within this function
+	return res as GuardianSubscriptionProducts;
 }

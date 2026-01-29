@@ -1,20 +1,15 @@
 import {
 	getMaybeSingleOrThrow,
 	getSingleOrThrow,
-	partitionByType,
 } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
-import { objectEntries } from '@modules/objectFunctions';
+import { objectValues } from '@modules/objectFunctions';
+import type { ProductKey } from '@modules/product-catalog/productCatalog';
 import type {
-	GuardianCatalogKeys,
-	ProductKey,
-	ProductRatePlanKey,
-} from '@modules/product-catalog/productCatalog';
-import type {
-	ProductKeyWithDiscount,
-	ProductWithDiscountRatePlanKey,
-} from './buildZuoraProductIdToKey';
-import type { RestSubscription } from './groupSubscriptionByZuoraCatalogIds';
+	IndexedZuoraRatePlanWithCharges,
+	IndexedZuoraSubscriptionRatePlans,
+	RestSubscription,
+} from './groupSubscriptionByZuoraCatalogIds';
 import type {
 	GuardianRatePlan,
 	GuardianRatePlans,
@@ -23,13 +18,8 @@ import type {
 
 export type GuardianSubscription = {
 	ratePlan: GuardianRatePlan;
-	discountRatePlan?: GuardianRatePlan;
+	discountRatePlan?: IndexedZuoraRatePlanWithCharges;
 } & RestSubscription;
-
-export type GuardianSubscriptionWithKeys = {
-	subscription: GuardianSubscription;
-	productCatalogKeys: GuardianCatalogKeys<ProductKey>;
-};
 
 /**
  * this takes a subscription and effectively does a "flatten.getSingle" on it to reduce it down to a single rate plan.
@@ -40,89 +30,47 @@ export type GuardianSubscriptionWithKeys = {
  */
 export function getSinglePlanFlattenedSubscriptionOrThrow(
 	subWithCurrentPlans: GuardianSubscriptionWithProducts,
-): GuardianSubscriptionWithKeys {
-	const { products, ...restSubWithCurrentPlans } = subWithCurrentPlans;
+): GuardianSubscription {
+	const { products, productsNotInCatalog, ...restSubWithCurrentPlans } =
+		subWithCurrentPlans;
 
-	const allPlansWithKeys: Array<
-		PlanWithKeys<GuardianCatalogKeysWithDiscount<ProductKeyWithDiscount>>
-	> = objectEntries(products).flatMap(
-		([productKey, ratePlansGroupsByKey]: [
-			ProductKeyWithDiscount,
-			GuardianRatePlans<ProductKeyWithDiscount>,
-		]) => {
-			return objectEntries(ratePlansGroupsByKey).flatMap(
-				([productRatePlanKey, ratePlans]: [
-					ProductWithDiscountRatePlanKey<typeof productKey>,
-					GuardianRatePlan[],
-				]): Array<
-					PlanWithKeys<GuardianCatalogKeysWithDiscount<typeof productKey>>
-				> => {
-					const productCatalogKeys: GuardianCatalogKeysWithDiscount<
-						typeof productKey
-					> = {
-						productKey,
-						productRatePlanKey,
-					};
-					return ratePlans.map((ratePlan) => ({
-						productCatalogKeys,
-						ratePlan,
-					}));
-				},
-			);
-		},
-	);
+	const allPlans: GuardianRatePlan[] = objectValues(
+		// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- retaining the product key just causes a huge union
+		products as Record<ProductKey, GuardianRatePlans>,
+	).flatMap((ratePlansGroupsByKey: GuardianRatePlans) => {
+		const ratePlanGroups: GuardianRatePlan[][] = objectValues(
+			ratePlansGroupsByKey satisfies Record<string, GuardianRatePlan[]>,
+		);
+		const ratePlans: GuardianRatePlan[] = ratePlanGroups.flat(1);
+		return ratePlans;
+	});
 
-	const mainAndDiscountRatePlans: [
-		Array<PlanWithKeys<ProductRatePlanKey<ProductKey>>>,
-		Array<
-			PlanWithKeys<GuardianCatalogKeysWithDiscount<ProductKeyWithDiscount>>
-		>,
-	] = partitionByType(
-		allPlansWithKeys,
-		(t): t is PlanWithKeys<ProductRatePlanKey<ProductKey>> =>
-			t.productCatalogKeys.productKey !== 'Discounts',
-	);
-	const [mainRatePlans, discountRatePlans] = mainAndDiscountRatePlans;
-
-	const { ratePlan, productCatalogKeys } = getSingleOrThrow(
-		mainRatePlans,
+	const ratePlan = getSingleOrThrow(
+		allPlans,
 		(msg) =>
 			new ValidationError(
 				"subscription didn't have exactly one known product: " + msg,
 			),
 	);
-	const maybeDiscount = getMaybeSingleOrThrow(
-		discountRatePlans,
-		(msg) =>
-			new ValidationError(
-				"subscription didn't have one or zero discounts: " + msg,
-			),
-	);
+
+	const discountRatePlanGroups: IndexedZuoraSubscriptionRatePlans =
+		productsNotInCatalog['Discounts'] ?? {};
+	const discountRatePlans: IndexedZuoraRatePlanWithCharges[] = objectValues(
+		discountRatePlanGroups,
+	).flat(1);
+	const maybeDiscountRatePlan: IndexedZuoraRatePlanWithCharges | undefined =
+		getMaybeSingleOrThrow(
+			discountRatePlans,
+			(msg) =>
+				new ValidationError(
+					"subscription didn't have one or zero discounts: " + msg,
+				),
+		);
+
 	const subscription: GuardianSubscription = {
 		...restSubWithCurrentPlans,
 		ratePlan,
-		discountRatePlan: maybeDiscount?.ratePlan,
+		discountRatePlan: maybeDiscountRatePlan,
 	};
-	return {
-		subscription,
-		productCatalogKeys,
-	};
+	return subscription;
 }
-
-type PlanWithKeys<
-	RP extends GuardianCatalogKeysWithDiscount<ProductKeyWithDiscount>,
-> = {
-	ratePlan: GuardianRatePlan;
-	productCatalogKeys: RP;
-};
-
-type GuardianCatalogKeysWithDiscount<
-	P extends ProductKeyWithDiscount,
-	PRP extends
-		ProductWithDiscountRatePlanKey<P> = ProductWithDiscountRatePlanKey<P>,
-> = {
-	[P in ProductKeyWithDiscount]: {
-		productKey: P;
-		productRatePlanKey: PRP;
-	};
-}[P];

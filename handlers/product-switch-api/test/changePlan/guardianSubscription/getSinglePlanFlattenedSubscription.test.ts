@@ -2,7 +2,7 @@ import { getIfDefined } from '@modules/nullAndUndefined';
 import { zuoraSubscriptionSchema } from '@modules/zuora/types';
 import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
-import type { GuardianSubscriptionWithKeys } from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
+import type { GuardianSubscription } from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import { getSinglePlanFlattenedSubscriptionOrThrow } from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import type { GuardianSubscriptionWithProducts } from '../../../src/guardianSubscription/guardianSubscriptionParser';
 import { GuardianSubscriptionParser } from '../../../src/guardianSubscription/guardianSubscriptionParser';
@@ -28,20 +28,19 @@ describe('getSinglePlanFlattenedSubscriptionOrThrow', () => {
 		const filteredSubscription =
 			filter.filterSubscription(guardianSubscription);
 
-		const result: GuardianSubscriptionWithKeys =
+		const subscription: GuardianSubscription =
 			getSinglePlanFlattenedSubscriptionOrThrow(filteredSubscription);
 
-		expect(result.subscription.ratePlan).toBeDefined();
-		expect(result.subscription.ratePlan.productName).toBe('Contributor');
+		expect(subscription.ratePlan).toBeDefined();
+		expect(subscription.ratePlan.productName).toBe('Contributor');
 		expect(
-			result.subscription.ratePlan.ratePlanCharges['Contribution']
+			subscription.ratePlan.ratePlanCharges['Contribution']
 				?.productRatePlanChargeId,
 		).toBe(
 			productCatalog.Contribution.ratePlans.Annual.charges.Contribution.id,
 		);
-		expect(result.productCatalogKeys).toBeDefined();
-		expect(result.productCatalogKeys.productKey).toBe('Contribution');
-		expect(result.productCatalogKeys.productRatePlanKey).toBe('Annual');
+		expect(subscription.ratePlan.productKey).toBe('Contribution');
+		expect(subscription.ratePlan.productRatePlanKey).toBe('Annual');
 	});
 
 	test('returns flattened subscription with product catalog keys for a post switch contribution->s+', () => {
@@ -55,26 +54,25 @@ describe('getSinglePlanFlattenedSubscriptionOrThrow', () => {
 		const filteredSubscription =
 			filter.filterSubscription(guardianSubscription);
 
-		const result: GuardianSubscriptionWithKeys =
+		const subscription: GuardianSubscription =
 			getSinglePlanFlattenedSubscriptionOrThrow(filteredSubscription);
 
-		expect(result.subscription.ratePlan).toBeDefined();
-		expect(result.subscription.ratePlan.productName).toBe('Supporter Plus');
+		expect(subscription.ratePlan).toBeDefined();
+		expect(subscription.ratePlan.productName).toBe('Supporter Plus');
 		expect(
-			result.subscription.ratePlan.ratePlanCharges['Contribution']
+			subscription.ratePlan.ratePlanCharges['Contribution']
 				?.productRatePlanChargeId,
 		).toBe(
 			productCatalog.SupporterPlus.ratePlans.Monthly.charges.Contribution.id,
 		);
 		expect(
-			result.subscription.ratePlan.ratePlanCharges['Subscription']
+			subscription.ratePlan.ratePlanCharges['Subscription']
 				?.productRatePlanChargeId,
 		).toBe(
 			productCatalog.SupporterPlus.ratePlans.Monthly.charges.Subscription.id,
 		);
-		expect(result.productCatalogKeys).toBeDefined();
-		expect(result.productCatalogKeys.productKey).toBe('SupporterPlus');
-		expect(result.productCatalogKeys.productRatePlanKey).toBe('Monthly');
+		expect(subscription.ratePlan.productKey).toBe('SupporterPlus');
+		expect(subscription.ratePlan.productRatePlanKey).toBe('Monthly');
 	});
 
 	test('extracts correct subscription metadata from a contribution', () => {
@@ -85,16 +83,14 @@ describe('getSinglePlanFlattenedSubscriptionOrThrow', () => {
 		const filteredSubscription =
 			filter.filterSubscription(guardianSubscription);
 
-		const result =
+		const subscription =
 			getSinglePlanFlattenedSubscriptionOrThrow(filteredSubscription);
 
-		expect(result.subscription.subscriptionNumber).toBe(
+		expect(subscription.subscriptionNumber).toBe(
 			subscriptionFixture.subscriptionNumber,
 		);
-		expect(result.subscription.accountNumber).toBe(
-			subscriptionFixture.accountNumber,
-		);
-		expect(result.subscription.status).toBe(subscriptionFixture.status);
+		expect(subscription.accountNumber).toBe(subscriptionFixture.accountNumber);
+		expect(subscription.status).toBe(subscriptionFixture.status);
 	});
 
 	test('extracts correct subscription metadata from a contribution', () => {
@@ -105,16 +101,14 @@ describe('getSinglePlanFlattenedSubscriptionOrThrow', () => {
 		const filteredSubscription =
 			filter.filterSubscription(guardianSubscription);
 
-		const result =
+		const subscription =
 			getSinglePlanFlattenedSubscriptionOrThrow(filteredSubscription);
 
-		expect(result.subscription.subscriptionNumber).toBe(
+		expect(subscription.subscriptionNumber).toBe(
 			subscriptionFixture.subscriptionNumber,
 		);
-		expect(result.subscription.accountNumber).toBe(
-			subscriptionFixture.accountNumber,
-		);
-		expect(result.subscription.status).toBe(subscriptionFixture.status);
+		expect(subscription.accountNumber).toBe(subscriptionFixture.accountNumber);
+		expect(subscription.status).toBe(subscriptionFixture.status);
 	});
 
 	test('throws error when subscription has no rate plans', () => {
@@ -132,6 +126,7 @@ describe('getSinglePlanFlattenedSubscriptionOrThrow', () => {
 			status: 'Active',
 			termStartDate: new Date('2024-01-01'),
 			products: {},
+			productsNotInCatalog: {},
 		};
 
 		expect(() =>
@@ -180,10 +175,10 @@ describe('getSinglePlanFlattenedSubscriptionOrThrow', () => {
 		const filteredSubscription =
 			filter.filterSubscription(guardianSubscription);
 
-		const result =
+		const subscription =
 			getSinglePlanFlattenedSubscriptionOrThrow(filteredSubscription);
 
-		const charges = Object.values(result.subscription.ratePlan.ratePlanCharges);
+		const charges = Object.values(subscription.ratePlan.ratePlanCharges);
 		expect(charges.length).toBeGreaterThan(0);
 		expect(charges[0]).toHaveProperty('productRatePlanChargeId');
 		expect(charges[0]).toHaveProperty('price');

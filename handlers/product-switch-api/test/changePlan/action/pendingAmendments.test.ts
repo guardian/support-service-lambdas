@@ -33,7 +33,7 @@ const mockZuoraClient = {
 
 const productCatalog = generateProductCatalog(zuoraCatalogFixture);
 
-const { guardianSubscriptionWithKeys } = loadSubscription(
+const { subscription } = loadSubscription(
 	zuoraSubscriptionSchema.parse(pendingAmendmentsJson),
 	dayjs('2024-12-05'),
 );
@@ -97,9 +97,7 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 		const switchInformation: TargetInformation =
 			await getTestTargetInformation();
 
-		const subscriptionInformation = getSubscriptionInformation(
-			guardianSubscriptionWithKeys,
-		);
+		const subscriptionInformation = getSubscriptionInformation(subscription);
 
 		const orderRequest: SwitchOrderRequestBuilder =
 			new SwitchOrderRequestBuilder(
@@ -193,9 +191,7 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 		const targetInformation: TargetInformation =
 			await getTestTargetInformation();
 
-		const subscriptionInformation = getSubscriptionInformation(
-			guardianSubscriptionWithKeys,
-		);
+		const subscriptionInformation = getSubscriptionInformation(subscription);
 
 		const orderRequest: SwitchOrderRequestBuilder =
 			new SwitchOrderRequestBuilder(

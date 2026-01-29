@@ -11,7 +11,7 @@ import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import type dayjs from 'dayjs';
-import type { GuardianSubscriptionWithKeys } from '../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
+import type { GuardianSubscription } from '../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import { getSinglePlanFlattenedSubscriptionOrThrow } from '../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import { GuardianSubscriptionParser } from '../guardianSubscription/guardianSubscriptionParser';
 import { SubscriptionFilter } from '../guardianSubscription/subscriptionFilter';
@@ -138,21 +138,21 @@ export class ChangePlanEndpoint {
 		const subWithCurrentPlans =
 			activeCurrentSubscriptionFilter.filterSubscription(highLevelSub);
 
-		const guardianSubscriptionWithKeys: GuardianSubscriptionWithKeys =
+		const subscription: GuardianSubscription =
 			getSinglePlanFlattenedSubscriptionOrThrow(subWithCurrentPlans);
 
-		logger.log('guardian subscription', guardianSubscriptionWithKeys);
+		logger.log('guardian subscription', subscription);
 
 		if (
 			!isEligibleForSwitch(
-				guardianSubscriptionWithKeys.subscription.status,
+				subscription.status,
 				this.account.metrics.totalInvoiceBalance,
-				guardianSubscriptionWithKeys.subscription.discountRatePlan,
+				subscription.discountRatePlan,
 				this.today,
 			)
 		) {
 			throw new ValidationError(
-				`not eligible for switch ${guardianSubscriptionWithKeys.subscription.status} ${this.account.metrics.totalInvoiceBalance}`,
+				`not eligible for switch ${subscription.status} ${this.account.metrics.totalInvoiceBalance}`,
 			);
 		}
 
@@ -160,11 +160,14 @@ export class ChangePlanEndpoint {
 			productCatalogHelper,
 			this.body,
 			this.account,
-			guardianSubscriptionWithKeys,
+			subscription,
 		);
 
 		logger.log(`switching from/to`, {
-			from: guardianSubscriptionWithKeys.productCatalogKeys,
+			from: {
+				productKey: subscription.ratePlan.productKey,
+				productRatePlanKey: subscription.ratePlan.productRatePlanKey,
+			},
 			to: this.body.targetProduct,
 		});
 

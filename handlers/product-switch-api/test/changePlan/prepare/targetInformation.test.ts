@@ -8,7 +8,7 @@ import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 import { getTargetInformation } from '../../../src/changePlan/prepare/targetInformation';
 import { annualContribHalfPriceSupporterPlusForOneYear } from '../../../src/changePlan/switchDefinition/discounts';
-import type { GuardianSubscriptionWithKeys } from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
+import type { GuardianSubscription } from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import { getSinglePlanFlattenedSubscriptionOrThrow } from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import { GuardianSubscriptionParser } from '../../../src/guardianSubscription/guardianSubscriptionParser';
 import { SubscriptionFilter } from '../../../src/guardianSubscription/subscriptionFilter';
@@ -24,7 +24,7 @@ const guardianSubscriptionParser = new GuardianSubscriptionParser(
 const productCatalog = generateProductCatalog(zuoraCatalogFixture);
 const productCatalogHelper = new ProductCatalogHelper(productCatalog);
 
-const buildGuardianSubscriptionWithKeys = (): GuardianSubscriptionWithKeys => {
+const buildGuardianSubscriptionWithKeys = (): GuardianSubscription => {
 	const guardianSubscription =
 		guardianSubscriptionParser.parse(subscriptionFixture);
 	const filter =
@@ -36,7 +36,7 @@ const buildGuardianSubscriptionWithKeys = (): GuardianSubscriptionWithKeys => {
 
 describe('getTargetInformation', () => {
 	test('returns supporter plus target info for a valid contribution switch', async () => {
-		const guardianSubscriptionWithKeys = buildGuardianSubscriptionWithKeys();
+		const subscription = buildGuardianSubscriptionWithKeys();
 		const previousAmount = 50;
 
 		const targetInfo = await getTargetInformation(
@@ -44,7 +44,7 @@ describe('getTargetInformation', () => {
 				mode: 'switchToBasePrice',
 				targetProduct: 'SupporterPlus',
 			},
-			guardianSubscriptionWithKeys.productCatalogKeys,
+			subscription.ratePlan,
 			'EUR',
 			previousAmount,
 			productCatalogHelper,
@@ -71,7 +71,7 @@ describe('getTargetInformation', () => {
 	});
 
 	test('applies the supporter plus annual discount during save flows when eligible', async () => {
-		const guardianSubscriptionWithKeys = buildGuardianSubscriptionWithKeys();
+		const subscription = buildGuardianSubscriptionWithKeys();
 		const targetRatePlan = productCatalog.SupporterPlus.ratePlans.Annual;
 		const targetBasePrice = targetRatePlan.pricing.EUR;
 		const discountedPrice = targetBasePrice / 2;
@@ -81,7 +81,7 @@ describe('getTargetInformation', () => {
 				mode: 'save',
 				targetProduct: 'SupporterPlus',
 			},
-			guardianSubscriptionWithKeys.productCatalogKeys,
+			subscription.ratePlan,
 			'EUR',
 			discountEligiblePreviousAmount,
 			productCatalogHelper,
@@ -96,7 +96,7 @@ describe('getTargetInformation', () => {
 	});
 
 	test('throws when requesting a target product that is not a valid switch', () => {
-		const guardianSubscriptionWithKeys = buildGuardianSubscriptionWithKeys();
+		const subscription = buildGuardianSubscriptionWithKeys();
 
 		expect(() =>
 			getTargetInformation(
@@ -104,7 +104,7 @@ describe('getTargetInformation', () => {
 					mode: 'switchToBasePrice',
 					targetProduct: 'DigitalSubscription',
 				},
-				guardianSubscriptionWithKeys.productCatalogKeys,
+				subscription.ratePlan,
 				'EUR',
 				50,
 				productCatalogHelper,
