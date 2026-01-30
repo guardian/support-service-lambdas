@@ -12,21 +12,21 @@ test('preview amounts are correct', () => {
 		invoiceItems: [
 			{
 				serviceEndDate: '2025-03-20',
-				amount: 95.0,
+				amountMinorUnits: 9500,
 				productRatePlanChargeId: '8ad08e1a858672180185880566606fad',
-				unitPrice: 95.0,
+				unitPriceMinorUnits: 9500,
 			},
 			{
 				serviceEndDate: '2025-03-20',
-				amount: 0.0,
+				amountMinorUnits: 0,
 				productRatePlanChargeId: '8ad096ca858682bb0185881568385d73',
-				unitPrice: 0.0,
+				unitPriceMinorUnits: 0,
 			},
 			{
 				serviceEndDate: '2024-09-30',
-				amount: -31.8,
+				amountMinorUnits: -3180,
 				productRatePlanChargeId: '2c92c0f85e2d19af015e3896e84d092e',
-				unitPrice: 60.0,
+				unitPriceMinorUnits: 6000,
 			},
 		],
 	};

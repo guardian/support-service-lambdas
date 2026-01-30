@@ -11,9 +11,10 @@ const zuoraPreviewResponseInvoiceItemSchema = z
 		productRatePlanChargeId: z.string(),
 		unitPrice: z.number(),
 	})
-	.transform(({ amountWithoutTax, taxAmount, ...rest }) => ({
+	.transform(({ amountWithoutTax, taxAmount, unitPrice, ...rest }) => ({
 		...rest,
-		amount: amountWithoutTax + taxAmount,
+		unitPriceMinorUnits: unitPrice * 100,
+		amountMinorUnits: amountWithoutTax * 100 + taxAmount * 100,
 	}));
 
 export type ZuoraPreviewResponseInvoiceItem = z.infer<

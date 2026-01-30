@@ -39,7 +39,7 @@ export const isRefundExpected = (
 	);
 };
 
-export const getRefundAmount = (
+export const getRefundAmountMinorUnits = (
 	itemsById: Record<string, ZuoraPreviewResponseInvoiceItem>,
 	sourceChargeIds: [string, ...string[]],
 	chargedThroughDate?: Dayjs,
@@ -58,7 +58,7 @@ export const getRefundAmount = (
 	}
 
 	const contributionRefundAmount = sourceSubscriptionReversalItems.reduce(
-		(accu, invoiceItem) => accu - invoiceItem.amount,
+		(accu, invoiceItem) => accu - invoiceItem.amountMinorUnits,
 		0,
 	);
 
@@ -79,7 +79,7 @@ export const previewResponseFromZuoraResponse = (
 			'duplicate productRatePlanChargeId in the same invoice',
 		);
 
-	const proratedRefundAmount = getRefundAmount(
+	const proratedRefundAmount = getRefundAmountMinorUnits(
 		itemsById,
 		sourceProductChargeIds,
 		chargedThroughDate,
@@ -98,7 +98,7 @@ export const previewResponseFromZuoraResponse = (
 				itemsById[contributionChargeId],
 				'No supporter plus invoice item found in the preview response: id: ' +
 					contributionChargeId,
-			).unitPrice,
+			).unitPriceMinorUnits,
 	);
 
 	const maybeDiscount: SwitchDiscountResponse | undefined = mapOption(
@@ -109,7 +109,9 @@ export const previewResponseFromZuoraResponse = (
 				(discountInvoiceItem) =>
 					({
 						discountedPrice:
-							targetBaseInvoiceItem.unitPrice + discountInvoiceItem.amount,
+							(targetBaseInvoiceItem.unitPriceMinorUnits +
+								discountInvoiceItem.amountMinorUnits) /
+							100,
 						discountPercentage: possibleDiscount.discountPercentage,
 						upToPeriods: possibleDiscount.upToPeriods,
 						upToPeriodsType: possibleDiscount.upToPeriodsType,
@@ -119,9 +121,11 @@ export const previewResponseFromZuoraResponse = (
 
 	const response: PreviewResponse = {
 		amountPayableToday: invoice.amount,
-		proratedRefundAmount,
+		proratedRefundAmount: proratedRefundAmount / 100,
 		targetCatalogPrice:
-			targetBaseInvoiceItem.unitPrice + (targetContributionUnitPrice ?? 0),
+			(targetBaseInvoiceItem.unitPriceMinorUnits +
+				(targetContributionUnitPrice ?? 0)) /
+			100,
 		nextPaymentDate: zuoraDateFormat(
 			dayjs(targetBaseInvoiceItem.serviceEndDate).add(1, 'days'),
 		),

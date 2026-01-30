@@ -72,21 +72,21 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 						invoiceItems: [
 							{
 								serviceEndDate: '2025-11-09',
-								amount: 75,
+								amountMinorUnits: 7500,
 								productRatePlanChargeId: '8a12892d85fc6df4018602451322287f',
-								unitPrice: 75,
+								unitPriceMinorUnits: 7500,
 							},
 							{
 								serviceEndDate: '2025-11-09',
-								amount: 75,
+								amountMinorUnits: 7500,
 								productRatePlanChargeId: '8a128ed885fc6ded01860228f7cb3d5f',
-								unitPrice: 75,
+								unitPriceMinorUnits: 7500,
 							},
 							{
 								serviceEndDate: '2025-11-09',
-								amount: -75,
+								amountMinorUnits: -7500,
 								productRatePlanChargeId: '2c92a0fc5e1dc084015e37f58c7b0f34',
-								unitPrice: 75,
+								unitPriceMinorUnits: 7500,
 							},
 						],
 					},

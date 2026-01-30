@@ -1,4 +1,3 @@
-//zuora
 import { groupBy, groupByUniqueId, mapValues } from '@modules/arrayFunctions';
 import { mapValue } from '@modules/objectFunctions';
 import type {
@@ -9,10 +8,11 @@ import type {
 
 export type RestRatePlan = Omit<RatePlan, 'ratePlanCharges'>;
 export type RestSubscription = Omit<ZuoraSubscription, 'ratePlans'>;
+export type RestRatePlanCharge = RatePlanCharge;
 
 export type IndexedZuoraSubscriptionRatePlanCharges = Record<
 	string, // product rate plan charge id/name
-	RatePlanCharge
+	RestRatePlanCharge
 >;
 
 export type IndexedZuoraRatePlanWithCharges = RestRatePlan & {
@@ -33,8 +33,8 @@ export type ZuoraSubscriptionByCatalogIds = RestSubscription & {
 };
 
 type Indicies = {
-	getProductIndex: (rp: RestRatePlan) => string;
-	getProductRatePlanIndex: (rp: RestRatePlan) => string;
+	getProductIndex: (rp: RatePlan) => string;
+	getProductRatePlanIndex: (rp: RatePlan) => string;
 	getProductRatePlanChargeIndex: (rpc: RatePlanCharge) => string;
 };
 
@@ -57,21 +57,21 @@ export class ZuoraSubscriptionIndexer {
 	private constructor(private indicies: Indicies) {}
 
 	static byProductIds = new ZuoraSubscriptionIndexer({
-		getProductIndex: (rp: RestRatePlan) => rp.productId,
+		getProductIndex: (rp: RatePlan) => rp.productId,
 
-		getProductRatePlanIndex: (rp: RestRatePlan) => rp.productRatePlanId,
+		getProductRatePlanIndex: (rp: RatePlan) => rp.productRatePlanId,
 
 		getProductRatePlanChargeIndex: (rpc: RatePlanCharge) =>
 			rpc.productRatePlanChargeId,
 	});
 
-	static byNames = new ZuoraSubscriptionIndexer({
-		getProductIndex: (rp: RestRatePlan) => rp.productName,
-
-		getProductRatePlanIndex: (rp: RestRatePlan) => rp.ratePlanName,
-
-		getProductRatePlanChargeIndex: (rpc: RatePlanCharge) => rpc.name,
-	});
+	// static byNames = new ZuoraSubscriptionIndexer({
+	// 	getProductIndex: (rp: RatePlan) => rp.productName,
+	//
+	// 	getProductRatePlanIndex: (rp: RatePlan) => rp.ratePlanName,
+	//
+	// 	getProductRatePlanChargeIndex: (rpc: RatePlanCharge) => rpc.name,
+	// });
 
 	groupSubscription(
 		zuoraSubscription: ZuoraSubscription,
@@ -89,8 +89,8 @@ export class ZuoraSubscriptionIndexer {
 		ratePlans: ZuoraSubscription['ratePlans'],
 	): IndexedZuoraSubscriptionRatePlansByProduct {
 		const doubleGroupedRatePlans: IndexedZuoraSubscriptionRatePlansByProduct =
-			this.byProductAndRatePlan(
-				ratePlans.map((rp) => this.indexTheCharges(rp)),
+			mapValues(this.byProductAndRatePlan(ratePlans), (x) =>
+				mapValues(x, (rps) => rps.map((rp) => this.indexTheCharges(rp))),
 			);
 		return doubleGroupedRatePlans;
 	}
@@ -101,12 +101,14 @@ export class ZuoraSubscriptionIndexer {
 	 * @param zuoraRatePlanWithChargesByPRPCId
 	 */
 	private byProductAndRatePlan(
-		zuoraRatePlanWithChargesByPRPCId: IndexedZuoraRatePlanWithCharges[],
-	): IndexedZuoraSubscriptionRatePlansByProduct {
-		return mapValues(
-			groupBy(zuoraRatePlanWithChargesByPRPCId, this.indicies.getProductIndex),
-			(productRatePlanMap) =>
-				groupBy(productRatePlanMap, this.indicies.getProductRatePlanIndex),
+		zuoraRatePlanWithChargesByPRPCId: RatePlan[], //IndexedZuoraRatePlanWithCharges[],
+	): Record<string, Record<string, RatePlan[]>> {
+		const ratePlansById: Record<string, RatePlan[]> = groupBy(
+			zuoraRatePlanWithChargesByPRPCId,
+			this.indicies.getProductIndex,
+		);
+		return mapValues(ratePlansById, (productRatePlanMap) =>
+			groupBy(productRatePlanMap, this.indicies.getProductRatePlanIndex),
 		);
 	}
 

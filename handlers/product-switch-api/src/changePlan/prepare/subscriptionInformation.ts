@@ -11,7 +11,10 @@ import type { RatePlanCharge } from '@modules/zuora/types';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import type { GuardianSubscription } from '../../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
-import type { GuardianRatePlanCharges } from '../../guardianSubscription/guardianSubscriptionParser';
+import type {
+	GuardianRatePlanCharge,
+	GuardianRatePlanCharges,
+} from '../../guardianSubscription/guardianSubscriptionParser';
 import type { ValidSwitchableRatePlanKey } from './switchCatalogHelper';
 import { asSwitchableRatePlanKey } from './switchCatalogHelper';
 
@@ -31,7 +34,7 @@ export type SubscriptionInformation = {
 function getSubscriptionTotalChargeAmount(subscription: GuardianSubscription) {
 	return sumNumbers(
 		objectValues(subscription.ratePlan.ratePlanCharges).map(
-			(c: RatePlanCharge) =>
+			(c: GuardianRatePlanCharge) =>
 				getIfDefined(c.price, 'non priced charge on the rate plan (discount?)'),
 		),
 	);

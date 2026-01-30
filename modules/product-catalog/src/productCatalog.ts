@@ -117,7 +117,7 @@ export type ProductRatePlan<
 	PRP extends ProductRatePlanKey<P>,
 > = ProductCatalog[P]['ratePlans'][PRP];
 
-type AnyProductRatePlan = {
+export type AnyProductRatePlan = {
 	[P in ProductKey]: {
 		[PRP in ProductRatePlanKey<P>]: ProductRatePlan<P, PRP>;
 	}[ProductRatePlanKey<P>];

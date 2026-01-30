@@ -14,10 +14,11 @@ import { SubscriptionFilter } from '../../../src/guardianSubscription/subscripti
 import alreadySwitchedJson from '../../fixtures/already-switched-subscription.json';
 import subscriptionJson from '../../fixtures/subscription.json';
 
+const productCatalog = generateProductCatalog(zuoraCatalogFixture);
 const guardianSubscriptionParser = new GuardianSubscriptionParser(
 	zuoraCatalogFixture,
+	productCatalog,
 );
-const productCatalog = generateProductCatalog(zuoraCatalogFixture);
 export function loadSubscription(
 	subscriptionData: unknown,
 	referenceDate: dayjs.Dayjs,

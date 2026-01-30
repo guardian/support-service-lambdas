@@ -6,9 +6,9 @@ import {
 } from '@modules/objectFunctions';
 import type { ProductKey } from '@modules/product-catalog/productCatalog';
 import { logger } from '@modules/routing/logger';
-import type { RatePlanCharge } from '@modules/zuora/types';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import dayjs from 'dayjs';
+import type { RestRatePlanCharge } from './groupSubscriptionByZuoraCatalogIds';
 import type {
 	GenericRatePlan,
 	GroupedGuardianSubscription,
@@ -29,7 +29,9 @@ export class SubscriptionFilter {
 		private ratePlanDiscardReason: (
 			rp: GenericRatePlan<object, unknown>, //MergedSubscription['joinedByProduct'][ProductKey][string],
 		) => string | undefined,
-		private chargeDiscardReason: (rpc: RatePlanCharge) => string | undefined,
+		private chargeDiscardReason: (
+			rpc: RestRatePlanCharge,
+		) => string | undefined,
 	) {}
 
 	/**
@@ -71,12 +73,12 @@ export class SubscriptionFilter {
 		);
 	}
 
-	private filterCharges(charges: Record<string, RatePlanCharge>) {
+	private filterCharges(charges: Record<string, RestRatePlanCharge>) {
 		const [errors, filteredCharges] = partitionObjectByValueType(
-			mapValues(charges, (rpc: RatePlanCharge) => {
+			mapValues(charges, (rpc: RestRatePlanCharge) => {
 				const chargeDiscardReason1 = this.chargeDiscardReason(rpc);
 				return chargeDiscardReason1 !== undefined
-					? `${rpc.name}: ${chargeDiscardReason1}`
+					? `${rpc.id}: ${chargeDiscardReason1}`
 					: rpc;
 			}),
 			(o) => typeof o === 'string',
@@ -94,7 +96,7 @@ export class SubscriptionFilter {
 			guardianSubRatePlans.map((rp: RP) => {
 				const maybeDiscardWholePlan = this.ratePlanDiscardReason(rp);
 				if (maybeDiscardWholePlan !== undefined) {
-					return `${rp.ratePlanName}: ${maybeDiscardWholePlan}`;
+					return `${rp.id}: ${maybeDiscardWholePlan}`;
 				}
 
 				const { errors, filteredCharges } = this.filterCharges(
@@ -103,8 +105,7 @@ export class SubscriptionFilter {
 
 				const maybeAllChargesDiscarded =
 					objectKeys(filteredCharges).length === 0
-						? `${rp.ratePlanName}: all charges discarded: ` +
-							JSON.stringify(errors)
+						? `${rp.id}: all charges discarded: ` + JSON.stringify(errors)
 						: undefined;
 				if (maybeAllChargesDiscarded !== undefined) {
 					return maybeAllChargesDiscarded;
@@ -127,7 +128,7 @@ export class SubscriptionFilter {
 		if (ratePlans.length > 0) {
 			logger.log(
 				`retained rateplans:`,
-				ratePlans.map((rp) => rp.ratePlanName),
+				ratePlans.map((rp) => rp.id),
 			);
 		} // could be very spammy?
 		return ratePlans;

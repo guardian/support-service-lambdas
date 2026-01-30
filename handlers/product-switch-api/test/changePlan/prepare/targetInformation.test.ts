@@ -17,11 +17,11 @@ import subscriptionJson from '../../fixtures/subscription.json';
 const referenceDate = dayjs('2024-05-10');
 const subscriptionFixture: ZuoraSubscription =
 	zuoraSubscriptionSchema.parse(subscriptionJson);
-// const accountFixture = zuoraAccountSchema.parse(accountJson);
+const productCatalog = generateProductCatalog(zuoraCatalogFixture);
 const guardianSubscriptionParser = new GuardianSubscriptionParser(
 	zuoraCatalogFixture,
+	productCatalog,
 );
-const productCatalog = generateProductCatalog(zuoraCatalogFixture);
 const productCatalogHelper = new ProductCatalogHelper(productCatalog);
 
 const buildGuardianSubscriptionWithKeys = (): GuardianSubscription => {

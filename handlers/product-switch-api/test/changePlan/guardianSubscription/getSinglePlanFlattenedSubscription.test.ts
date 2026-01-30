@@ -18,6 +18,7 @@ const alreadySwitchedFixture =
 	zuoraSubscriptionSchema.parse(alreadySwitchedJson);
 const guardianSubscriptionParser = new GuardianSubscriptionParser(
 	zuoraCatalogFixture,
+	productCatalog,
 );
 
 describe('getSinglePlanFlattenedSubscriptionOrThrow', () => {

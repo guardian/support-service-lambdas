@@ -124,11 +124,11 @@ export class ChangePlanEndpoint {
 
 	async gatherSwitchData() {
 		logger.log('Loading the product catalog');
-		const productCatalogHelper = new ProductCatalogHelper(
-			await getProductCatalogFromApi(this.stage),
-		);
+		const productCatalog = await getProductCatalogFromApi(this.stage);
+		const productCatalogHelper = new ProductCatalogHelper(productCatalog);
 		const guardianSubscriptionParser = new GuardianSubscriptionParser(
 			await getZuoraCatalogFromS3(this.stage), // need zuora catalog to identify non product-catalog plans e.g. Discount
+			productCatalog,
 		);
 
 		const activeCurrentSubscriptionFilter =
@@ -162,7 +162,6 @@ export class ChangePlanEndpoint {
 			this.account,
 			subscription,
 		);
-
 		logger.log(`switching from/to`, {
 			from: {
 				productKey: subscription.ratePlan.productKey,

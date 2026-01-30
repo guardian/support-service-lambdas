@@ -3,6 +3,7 @@ import {
 	getSingleOrThrow,
 } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
+import type { ProductKey } from '@modules/product-catalog/productCatalog';
 import type {
 	IndexedZuoraRatePlanWithCharges,
 	RestSubscription,
@@ -13,8 +14,8 @@ import type {
 	ZuoraRatePlan,
 } from './guardianSubscriptionParser';
 
-export type GuardianSubscription = {
-	ratePlan: GuardianRatePlan;
+export type GuardianSubscription<P extends ProductKey = ProductKey> = {
+	ratePlan: GuardianRatePlan<P>;
 	discountRatePlan?: IndexedZuoraRatePlanWithCharges;
 } & RestSubscription;
 
