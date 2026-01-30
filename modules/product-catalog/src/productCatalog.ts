@@ -123,12 +123,36 @@ export type AnyProductRatePlan = {
 	}[ProductRatePlanKey<P>];
 }[ProductKey];
 
+export type ProductRatePlanChargeKey<
+	P extends ProductKey,
+	PRP extends ProductRatePlanKey<P>,
+> = {
+	[PK in P]: {
+		[K in ProductRatePlanKey<PK> &
+			PRP]: ProductCatalog[PK]['ratePlans'][K] extends { charges: infer C }
+			? keyof C & string
+			: never;
+	}[ProductRatePlanKey<PK> & PRP];
+}[P];
+
 export type TermType = z.infer<typeof termTypeSchema>;
 
-export type GuardianCatalogKeys<P extends ProductKey> = {
-	productKey: P;
-	productRatePlanKey: AnyProductRatePlanKey<P>; // constantly collapses to never if you distribute and use ProductRatePlanKey<P>
-};
+export type GuardianCatalogKeys<P extends ProductKey = ProductKey> = {
+	[K in P]: {
+		[RPK in ProductRatePlanKey<K>]: {
+			productKey: K;
+			productRatePlanKey: RPK;
+		};
+	}[ProductRatePlanKey<K>];
+}[P];
+
+// export type GuardianCatalogKeys<
+// 	P extends ProductKey,
+// 	PRP extends ProductRatePlanKey<P> = ProductRatePlanKey<P>,
+// > = {
+// 	productKey: P;
+// 	productRatePlanKey: PRP; // constantly collapses to never if you distribute and use ProductRatePlanKey<P>
+// };
 
 export type AnyProductRatePlanKey<P extends ProductKey = ProductKey> = {
 	[K in P]: ProductRatePlanKey<K>;

@@ -52,7 +52,7 @@ export type SwitchActionData = {
  */
 export const getTargetInformation = (
 	input: ProductSwitchTargetBody,
-	productCatalogKeys: GuardianCatalogKeys<ProductKey>,
+	productCatalogKeys: GuardianCatalogKeys,
 	currency: IsoCurrency,
 	previousAmount: number,
 	productCatalogHelper: ProductCatalogHelper,

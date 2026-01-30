@@ -11,10 +11,8 @@ import type { RatePlanCharge } from '@modules/zuora/types';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import type { GuardianSubscription } from '../../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
-import type {
-	GuardianRatePlanCharge,
-	GuardianRatePlanCharges,
-} from '../../guardianSubscription/guardianSubscriptionParser';
+import type { RestRatePlanCharge } from '../../guardianSubscription/groupSubscriptionByZuoraCatalogIds';
+import type { GuardianRatePlan } from '../../guardianSubscription/guardianSubscriptionParser';
 import type { ValidSwitchableRatePlanKey } from './switchCatalogHelper';
 import { asSwitchableRatePlanKey } from './switchCatalogHelper';
 
@@ -31,22 +29,21 @@ export type SubscriptionInformation = {
 	chargeIds: [string, ...string[]]; // filter invoice refund items
 };
 
-function getSubscriptionTotalChargeAmount(subscription: GuardianSubscription) {
+function getSubscriptionTotalChargeAmount(
+	ratePlanCharges: RestRatePlanCharge[],
+) {
 	return sumNumbers(
-		objectValues(subscription.ratePlan.ratePlanCharges).map(
-			(c: GuardianRatePlanCharge) =>
-				getIfDefined(c.price, 'non priced charge on the rate plan (discount?)'),
+		ratePlanCharges.map((c: RestRatePlanCharge) =>
+			getIfDefined(c.price, 'non priced charge on the rate plan (discount?)'),
 		),
 	);
 }
 
 function getDistinctChargeValue<T extends SafeForDistinct>(
-	ratePlanCharges: GuardianRatePlanCharges,
+	ratePlanCharges: RestRatePlanCharge[],
 	getValue: (value: RatePlanCharge) => T,
 ): T | undefined {
-	const sourceCharges = objectValues(ratePlanCharges);
-
-	const values = sourceCharges.map(getValue);
+	const values = ratePlanCharges.map(getValue);
 	const asSet = distinct(values);
 	const value: T | undefined = getMaybeSingleOrThrow(
 		asSet,
@@ -61,12 +58,10 @@ function getDistinctChargeValue<T extends SafeForDistinct>(
 	return value;
 }
 
-function getChargedThroughDate(subscription: GuardianSubscription) {
+function getChargedThroughDate(ratePlanCharges: RestRatePlanCharge[]) {
 	return mapOption(
-		getDistinctChargeValue(
-			subscription.ratePlan.ratePlanCharges,
-			(ratePlanCharge: RatePlanCharge) =>
-				ratePlanCharge.chargedThroughDate?.getTime(),
+		getDistinctChargeValue(ratePlanCharges, (ratePlanCharge: RatePlanCharge) =>
+			ratePlanCharge.chargedThroughDate?.getTime(),
 		),
 		(e) => dayjs(new Date(e)),
 	);
@@ -75,11 +70,12 @@ function getChargedThroughDate(subscription: GuardianSubscription) {
 export function getSubscriptionInformation(
 	subscription: GuardianSubscription,
 ): SubscriptionInformation {
+	const ratePlan: GuardianRatePlan = subscription.ratePlan;
 	const productRatePlanKey: ValidSwitchableRatePlanKey =
-		asSwitchableRatePlanKey(subscription.ratePlan.productRatePlanKey);
+		asSwitchableRatePlanKey(ratePlan.productRatePlanKey);
 
 	const chargeIds = getNonEmptyOrThrow(
-		objectValues(subscription.ratePlan.ratePlanCharges).map(
+		objectValues(ratePlan.ratePlanCharges).map(
 			(c) => c.productRatePlanChargeId,
 		),
 		'missing charges',
@@ -88,13 +84,17 @@ export function getSubscriptionInformation(
 	return {
 		accountNumber: subscription.accountNumber,
 		subscriptionNumber: subscription.subscriptionNumber,
-		previousProductName: subscription.ratePlan.productName,
-		previousRatePlanName: subscription.ratePlan.ratePlanName,
-		previousAmount: getSubscriptionTotalChargeAmount(subscription),
+		previousProductName: ratePlan.productName,
+		previousRatePlanName: ratePlan.ratePlanName,
+		previousAmount: getSubscriptionTotalChargeAmount(
+			objectValues(ratePlan.ratePlanCharges),
+		),
 		productRatePlanKey,
 		termStartDate: subscription.termStartDate,
-		chargedThroughDate: getChargedThroughDate(subscription),
-		productRatePlanId: subscription.ratePlan.productRatePlanId,
+		chargedThroughDate: getChargedThroughDate(
+			objectValues(ratePlan.ratePlanCharges),
+		),
+		productRatePlanId: ratePlan.productRatePlanId,
 		chargeIds,
 	} satisfies SubscriptionInformation;
 }

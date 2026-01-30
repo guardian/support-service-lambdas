@@ -36,14 +36,18 @@ describe('getSinglePlanFlattenedSubscriptionOrThrow', () => {
 		logger.log('subscription.ratePlan', subscription.ratePlan);
 		expect(subscription.ratePlan).toBeDefined();
 		expect(subscription.ratePlan.productName).toBe('Contributor');
+		if (
+			subscription.ratePlan.productKey !== 'Contribution' ||
+			subscription.ratePlan.productRatePlanKey !== 'Annual'
+		) {
+			throw new Error('invalid value');
+		}
 		expect(
-			subscription.ratePlan.ratePlanCharges['Contribution']
-				?.productRatePlanChargeId,
+			subscription.ratePlan.ratePlanCharges.Contribution
+				.productRatePlanChargeId,
 		).toBe(
 			productCatalog.Contribution.ratePlans.Annual.charges.Contribution.id,
 		);
-		expect(subscription.ratePlan.productKey).toBe('Contribution');
-		expect(subscription.ratePlan.productRatePlanKey).toBe('Annual');
 	});
 
 	test('returns flattened subscription with product catalog keys for a post switch contribution->s+', () => {
@@ -62,20 +66,24 @@ describe('getSinglePlanFlattenedSubscriptionOrThrow', () => {
 
 		expect(subscription.ratePlan).toBeDefined();
 		expect(subscription.ratePlan.productName).toBe('Supporter Plus');
+		if (
+			subscription.ratePlan.productKey !== 'SupporterPlus' ||
+			subscription.ratePlan.productRatePlanKey !== 'Monthly'
+		) {
+			throw new Error('invalid value');
+		}
 		expect(
-			subscription.ratePlan.ratePlanCharges['Contribution']
-				?.productRatePlanChargeId,
+			subscription.ratePlan.ratePlanCharges.Contribution
+				.productRatePlanChargeId,
 		).toBe(
 			productCatalog.SupporterPlus.ratePlans.Monthly.charges.Contribution.id,
 		);
 		expect(
-			subscription.ratePlan.ratePlanCharges['Subscription']
-				?.productRatePlanChargeId,
+			subscription.ratePlan.ratePlanCharges.Subscription
+				.productRatePlanChargeId,
 		).toBe(
 			productCatalog.SupporterPlus.ratePlans.Monthly.charges.Subscription.id,
 		);
-		expect(subscription.ratePlan.productKey).toBe('SupporterPlus');
-		expect(subscription.ratePlan.productRatePlanKey).toBe('Monthly');
 	});
 
 	test('extracts correct subscription metadata from a contribution', () => {

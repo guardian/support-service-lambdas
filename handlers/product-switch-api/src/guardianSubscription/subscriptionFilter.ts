@@ -4,7 +4,6 @@ import {
 	objectKeys,
 	partitionObjectByValueType,
 } from '@modules/objectFunctions';
-import type { ProductKey } from '@modules/product-catalog/productCatalog';
 import { logger } from '@modules/routing/logger';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import dayjs from 'dayjs';
@@ -13,8 +12,6 @@ import type {
 	GenericRatePlan,
 	GroupedGuardianSubscription,
 	GuardianRatePlan,
-	GuardianRatePlans,
-	GuardianSubscriptionProducts,
 	ZuoraRatePlan,
 } from './guardianSubscriptionParser';
 
@@ -26,9 +23,7 @@ import type {
  */
 export class SubscriptionFilter {
 	constructor(
-		private ratePlanDiscardReason: (
-			rp: GenericRatePlan<object, unknown>, //MergedSubscription['joinedByProduct'][ProductKey][string],
-		) => string | undefined,
+		private ratePlanDiscardReason: (rp: GenericRatePlan) => string | undefined,
 		private chargeDiscardReason: (
 			rpc: RestRatePlanCharge,
 		) => string | undefined,
@@ -44,7 +39,8 @@ export class SubscriptionFilter {
 		today: dayjs.Dayjs,
 	): SubscriptionFilter {
 		return new SubscriptionFilter(
-			(rp) => (rp.lastChangeType === 'Remove' ? 'plan is removed' : undefined),
+			(rp: GenericRatePlan) =>
+				rp.lastChangeType === 'Remove' ? 'plan is removed' : undefined,
 			(rpc) =>
 				dayjs(rpc.effectiveStartDate).isBefore(today) ||
 				dayjs(rpc.effectiveStartDate).isSame(today)
@@ -86,7 +82,7 @@ export class SubscriptionFilter {
 		return { errors, filteredCharges };
 	}
 
-	private filterRatePlanList<RP extends GenericRatePlan<object, unknown>>(
+	private filterRatePlanList<RP extends GenericRatePlan>(
 		guardianSubRatePlans: RP[],
 	): {
 		discarded: string[];
@@ -117,7 +113,7 @@ export class SubscriptionFilter {
 		return { discarded, ratePlans };
 	}
 
-	private filterRatePlanses<RP extends GenericRatePlan<object, unknown>>(
+	private filterRatePlanses<RP extends GenericRatePlan>(
 		guardianSubRatePlans: RP[],
 	): RP[] {
 		const { discarded, ratePlans } =
@@ -145,31 +141,4 @@ export class SubscriptionFilter {
 			(ratePlans) => this.filterRatePlanses<ZuoraRatePlan>(ratePlans),
 		);
 	}
-}
-
-/**
- * non generic version of mapValues needed to maintain the relationship between key and value
- * (in a similar way to groupMapSingleOrThrowCorrelated)
- *
- * @param obj
- * @param fn
- */
-export function mapValuesCorrelated(
-	obj: GuardianSubscriptionProducts,
-	fn: (v: GuardianRatePlans, k: ProductKey) => GuardianRatePlans,
-): GuardianSubscriptionProducts {
-	const res: Partial<Record<ProductKey, GuardianRatePlans>> = {};
-	for (const key of objectKeys(obj)) {
-		const beforeValue = obj[key];
-		if (beforeValue) {
-			const singleResult = fn(
-				// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- functions not contravariant
-				beforeValue as GuardianRatePlans,
-				key,
-			);
-			res[key] = singleResult;
-		}
-	}
-	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- type checker can't handle maintaining the types at all times within this function
-	return res as GuardianSubscriptionProducts;
 }

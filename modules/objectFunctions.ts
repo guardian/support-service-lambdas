@@ -19,11 +19,12 @@ export function objectKeysNonEmpty<
 	return keys as [keyof O, ...Array<keyof O>];
 }
 
-export function objectValues<V, T extends Record<string, V>>(
+type DistributedValues<T> = T extends unknown ? T[keyof T] : never;
+export function objectValues<T extends object>(
 	libs: T,
-): Array<NonUndefined<T[keyof T]>> {
+): Array<NonUndefined<DistributedValues<T>>> {
 	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- allowed in utility function - get back type lost by Object.values
-	return Object.values(libs) as Array<NonUndefined<T[keyof T]>>;
+	return Object.values(libs) as Array<NonUndefined<DistributedValues<T>>>;
 }
 
 export function objectFromEntries<K extends string, V>(
