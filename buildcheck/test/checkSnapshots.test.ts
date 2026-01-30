@@ -44,7 +44,8 @@ function testFilesMatch(
 }
 
 describe('file on disk (+) contains the expected content (-)', () => {
-	const handlers = build.map((pkg) => pkg.name);
+	const handlers = build.handlers.map((pkg) => pkg.name);
+	const modules = build.modules.map((pkg) => pkg.name);
 
 	const repoRoot = path.resolve(__dirname, '../..');
 	console.log('repoRoot', repoRoot);
@@ -52,13 +53,22 @@ describe('file on disk (+) contains the expected content (-)', () => {
 	const allFiles = generate();
 
 	const rootLevelFiles = allFiles.filter(
-		(generatedFile) => !generatedFile.targetPath.startsWith('handlers/'),
+		(generatedFile) =>
+			!generatedFile.targetPath.startsWith('handlers/') &&
+			!generatedFile.targetPath.startsWith('modules/'),
 	);
 	testFilesMatch(true, rootLevelFiles, repoRoot);
 
 	handlers.map((handlerName) => {
 		const files = allFiles.filter((generatedFile) =>
 			generatedFile.targetPath.startsWith('handlers/' + handlerName),
+		);
+		testFilesMatch(false, files, repoRoot);
+	});
+
+	modules.map((moduleName) => {
+		const files = allFiles.filter((generatedFile) =>
+			generatedFile.targetPath.startsWith('modules/' + moduleName),
 		);
 		testFilesMatch(false, files, repoRoot);
 	});

@@ -23,7 +23,7 @@ object DigipackEmailDataSerialiser {
 object DigipackEmailFields {
 
   val digipackPlans =
-    List(VoucherWeekendPlus, VoucherEveryDayPlus, VoucherSixDayPlus, VoucherSundayPlus, VoucherSaturdayPlus)
+    List(VoucherWeekendPlus, VoucherEveryDayPlus, VoucherSixDayPlus, VoucherSaturdayPlus)
   val dateformat = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
   def nounFor(billingPeriod: BillingPeriod) = billingPeriod match {
@@ -36,18 +36,13 @@ object DigipackEmailFields {
       data: DigipackEmailData,
   ): Map[String, String] = {
 
-    val emailAddress = data.contacts.billTo.email.map(_.value).getOrElse("")
     val paymentPLan = data.plan.paymentPlans.get(data.currency)
 
     Map(
-      "ZuoraSubscriberId" -> data.subscriptionName.value,
-      "SubscriberKey" -> emailAddress,
-      "Subscription term" -> paymentPLan.map(plan => nounFor(plan.billingPeriod)).getOrElse(""),
-      "Payment amount" -> paymentPLan.map(_.amountMinorUnits.formatted).getOrElse(""),
-      "Date of first payment" -> data.firstPaymentDate.format(dateformat),
-      "Currency" -> data.currency.glyph,
-      "Trial period" -> data.trialPeriod.days.toString,
-      "Subscription details" -> data.discountMessage
+      "subscriber_id" -> data.subscriptionName.value,
+      "first_payment_date" -> data.firstPaymentDate.format(dateformat),
+      "currency" -> data.currency.glyph,
+      "subscription_rate" -> data.discountMessage
         .map(_.value)
         .getOrElse(paymentPLan.map(_.description).getOrElse("")),
     ) ++ paymentMethodFields(data.paymentMethod) ++ addressFields(data.contacts.billTo)
@@ -57,29 +52,22 @@ object DigipackEmailFields {
   def paymentMethodFields(paymentMethod: PaymentMethod) = paymentMethod match {
     case DirectDebit(status, accountName, accountNumberMask, sortCode, mandateId) =>
       Map(
-        "Account number" -> accountNumberMask.value,
-        "Sort Code" -> sortCode.hyphenated,
-        "Account Name" -> accountName.value,
-        "MandateID" -> mandateId.value,
-        "Default payment method" -> toDescription(BankTransfer),
+        "bank_account_no" -> accountNumberMask.value,
+        "bank_sort_code" -> sortCode.hyphenated,
+        "account_holder" -> accountName.value,
+        "mandate_id" -> mandateId.value,
+        "payment_method" -> toDescription(BankTransfer),
       )
     case NonDirectDebitMethod(_, paymentMethodType) =>
       Map(
-        "Default payment method" -> toDescription(paymentMethodType),
+        "payment_method" -> toDescription(paymentMethodType),
       )
   }
 
   def addressFields(contact: BillToContact) = {
-    val address = contact.address
     Map(
-      "First Name" -> contact.firstName.value,
-      "Last Name" -> contact.lastName.value,
-      "EmailAddress" -> contact.email.map(_.value).getOrElse(""),
-      "Address 1" -> address.address1.map(_.value).getOrElse(""),
-      "Address 2" -> address.address2.map(_.value).getOrElse(""),
-      "City" -> address.city.map(_.value).getOrElse(""),
-      "Post Code" -> address.postcode.map(_.value).getOrElse(""),
-      "Country" -> address.country.map(_.name).getOrElse(""),
+      "first_name" -> contact.firstName.value,
+      "last_name" -> contact.lastName.value,
     )
   }
 }

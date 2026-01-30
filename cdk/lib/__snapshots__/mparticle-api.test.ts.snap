@@ -51,6 +51,11 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
       "Default": "/CODE/support/mparticle-api/sarResultsBucket",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
+    "appConfigIdentityMmaSnsDeletionRequestTopicArn": {
+      "Default": "/CODE/support/mparticle-api/IdentityMmaSnsDeletionRequestTopicArn",
+      "Description": "parameter to look up IdentityMmaSnsDeletionRequestTopicArn from SSM",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
   },
   "Resources": {
     "BatonInvokeRoleF250FA62": {
@@ -197,7 +202,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Tags": [
           {
             "Key": "App",
@@ -586,7 +591,9 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
               "Action": "sqs:SendMessage",
               "Condition": {
                 "ArnEquals": {
-                  "aws:SourceArn": "AAAAAAAAAAAA",
+                  "aws:SourceArn": {
+                    "Ref": "appConfigIdentityMmaSnsDeletionRequestTopicArn",
+                  },
                 },
               },
               "Effect": "Allow",
@@ -951,7 +958,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Tags": [
           {
             "Key": "App",
@@ -1195,7 +1202,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Tags": [
           {
             "Key": "App",
@@ -1460,6 +1467,11 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
     },
     "SarResultsBucketParameter": {
       "Default": "/PROD/support/mparticle-api/sarResultsBucket",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+    "appConfigIdentityMmaSnsDeletionRequestTopicArn": {
+      "Default": "/PROD/support/mparticle-api/IdentityMmaSnsDeletionRequestTopicArn",
+      "Description": "parameter to look up IdentityMmaSnsDeletionRequestTopicArn from SSM",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
   },
@@ -1960,7 +1972,7 @@ DLQ: https://",
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Tags": [
           {
             "Key": "App",
@@ -2349,7 +2361,9 @@ DLQ: https://",
               "Action": "sqs:SendMessage",
               "Condition": {
                 "ArnEquals": {
-                  "aws:SourceArn": "AAAAAAAAAAAA",
+                  "aws:SourceArn": {
+                    "Ref": "appConfigIdentityMmaSnsDeletionRequestTopicArn",
+                  },
                 },
               },
               "Effect": "Allow",
@@ -2714,7 +2728,7 @@ DLQ: https://",
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Tags": [
           {
             "Key": "App",
@@ -2958,7 +2972,7 @@ DLQ: https://",
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Tags": [
           {
             "Key": "App",

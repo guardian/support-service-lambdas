@@ -48,7 +48,7 @@ export const productBenefitMapping: Record<
 };
 
 const itemIsLessThanThreeMonthsOld = (item: SupporterRatePlanItem) =>
-	dayjs(item.contractEffectiveDate).add(3, 'month').isAfter(dayjs());
+	item.contractEffectiveDate.add(3, 'month').isAfter(dayjs());
 
 export const itemIsValidForProduct = (
 	item: SupporterRatePlanItem,

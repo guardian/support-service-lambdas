@@ -1,4 +1,3 @@
-import { zuoraDateFormat } from '@modules/zuora/utils';
 import dayjs from 'dayjs';
 import { supporterRatePlanItemFromSwitchInformation } from '../src/supporterProductData';
 import type { SwitchInformation } from '../src/switchInformation';
@@ -46,30 +45,30 @@ const getSwitchInformation = (
 
 test('supporterRatePlanItemFromSwitchInformation works with no contribution element', () => {
 	const switchInformation: SwitchInformation = getSwitchInformation(0);
-
+	const now = dayjs();
 	expect(
-		supporterRatePlanItemFromSwitchInformation(switchInformation),
+		supporterRatePlanItemFromSwitchInformation(now, switchInformation),
 	).toStrictEqual({
 		subscriptionName: 'subscriptionNumber',
 		identityId: 'identityId',
 		productRatePlanId: 'supporterPlusProductRatePlanId',
 		productRatePlanName: 'Supporter Plus V2 - Monthly',
-		termEndDate: zuoraDateFormat(dayjs().add(1, 'year')),
-		contractEffectiveDate: zuoraDateFormat(dayjs()),
+		termEndDate: now.add(1, 'year'),
+		contractEffectiveDate: now,
 	});
 });
 
 test('supporterRatePlanItemFromSwitchInformation works with a contribution element', () => {
 	const switchInformation: SwitchInformation = getSwitchInformation(10);
-
+	const now = dayjs();
 	expect(
-		supporterRatePlanItemFromSwitchInformation(switchInformation),
+		supporterRatePlanItemFromSwitchInformation(now, switchInformation),
 	).toStrictEqual({
 		subscriptionName: 'subscriptionNumber',
 		identityId: 'identityId',
 		productRatePlanId: 'supporterPlusProductRatePlanId',
 		productRatePlanName: 'Supporter Plus V2 - Monthly',
-		termEndDate: zuoraDateFormat(dayjs().add(1, 'year')),
-		contractEffectiveDate: zuoraDateFormat(dayjs()),
+		termEndDate: now.add(1, 'year'),
+		contractEffectiveDate: now,
 	});
 });

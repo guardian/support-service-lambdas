@@ -1,15 +1,16 @@
 import { Router } from '@modules/routing/router';
 import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
 import { withParsers } from '@modules/routing/withParsers';
-import type { Stage } from '@modules/stage';
+import { stageFromEnvironment } from '@modules/stage';
 import type { Handler } from 'aws-lambda';
 import dayjs from 'dayjs';
 import { z } from 'zod';
+import { frequencySwitchHandler } from './frequencySwitchEndpoint';
+import { frequencySwitchRequestSchema } from './frequencySwitchSchemas';
 import { contributionToSupporterPlusEndpoint } from './productSwitchEndpoint';
 import { productSwitchRequestSchema } from './schemas';
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo fix in next refactor
-const stage = process.env.STAGE as Stage;
+const stage = stageFromEnvironment();
 
 const pathParserSchema = z.object({
 	subscriptionNumber: z
@@ -33,6 +34,19 @@ export const handler: Handler = Router([
 			withMMAIdentityCheck(
 				stage,
 				contributionToSupporterPlusEndpoint(stage, dayjs()),
+				(parsed) => parsed.path.subscriptionNumber,
+			),
+		),
+	},
+	{
+		httpMethod: 'POST',
+		path: '/product-switch/billing-frequency/{subscriptionNumber}',
+		handler: withParsers(
+			pathParserSchema,
+			frequencySwitchRequestSchema,
+			withMMAIdentityCheck(
+				stage,
+				frequencySwitchHandler(stage, dayjs()),
 				(parsed) => parsed.path.subscriptionNumber,
 			),
 		),

@@ -38,6 +38,7 @@ import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
 import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
 import { UserBenefits } from '../lib/user-benefits';
 import { WriteOffUnpaidInvoices } from '../lib/write-off-unpaid-invoices';
+import { ZuoraAutoCancel } from '../lib/zuora-auto-cancel';
 import { ZuoraSalesforceLinkRemover } from '../lib/zuora-salesforce-link-remover';
 
 const app = new App();
@@ -124,8 +125,18 @@ new SingleContributionSalesforceWrites(
 	{ stack: 'membership', stage: 'PROD' },
 );
 
+new PromotionsLambdas(app, 'CODE', {
+	oldPromoCampaignStreamLabel: '2025-12-17T11:57:50.933',
+	oldPromoStreamLabel: '2023-04-28T14:57:20.201',
+	newPromoStreamLabel: '2026-01-05T11:33:36.603',
+});
+new PromotionsLambdas(app, 'PROD', {
+	oldPromoCampaignStreamLabel: '2025-12-17T11:57:59.560',
+	oldPromoStreamLabel: '2016-06-01T13:26:09.654',
+	newPromoStreamLabel: '2026-01-05T11:50:46.239',
+});
+
 const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
-	PromotionsLambdas,
 	DiscountApi,
 	ProductSwitchApi,
 	UpdateSupporterPlusAmount,
@@ -138,6 +149,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	TicketTailorWebhook,
 	MobilePurchasesToSupporterProductData,
 	StripeDisputes,
+	ZuoraAutoCancel,
 ];
 
 // generate all stacks for all stages

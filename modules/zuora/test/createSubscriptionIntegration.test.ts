@@ -9,8 +9,8 @@ import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
-import { getPromotions } from '@modules/promotions/v1/getPromotions';
-import type { Promotion } from '@modules/promotions/v1/schema';
+import { getPromotion } from '@modules/promotions/v2/getPromotion';
+import type { Promo } from '@modules/promotions/v2/schema';
 import dayjs from 'dayjs';
 import { z } from 'zod';
 import type { CreateSubscriptionInputFields } from '@modules/zuora/createSubscription/createSubscription';
@@ -44,7 +44,7 @@ describe('createSubscription integration', () => {
 	const productPurchase: ProductPurchase = {
 		product: 'NationalDelivery',
 		ratePlan: 'EverydayPlus',
-		firstDeliveryDate: dayjs().add(1, 'month').toDate(),
+		firstDeliveryDate: dayjs().add(1, 'week').toDate(),
 		deliveryContact: contact,
 		deliveryInstructions: 'Leave at front door',
 		deliveryAgent: 123,
@@ -73,31 +73,29 @@ describe('createSubscription integration', () => {
 		collectPayment: true,
 	};
 	const discountAmount = 25;
-	const mockPromotions: Promotion[] = [
-		{
-			name: 'Test Promotion',
-			promotionType: {
-				name: 'percent_discount',
-				durationMonths: 3,
-				amount: discountAmount,
-			},
-			appliesTo: {
-				productRatePlanIds: new Set(['71a116628be96ab11606b51ec6060555']),
-				countries: new Set(['GB']),
-			},
-			codes: { 'Test Channel': ['TEST_CODE'] },
-			starts: new Date(dayjs().subtract(1, 'day').toISOString()),
-			expires: new Date(dayjs().add(1, 'month').toISOString()),
+	const mockPromotion: Promo = {
+		name: 'Test Promotion',
+		campaignCode: 'campaign',
+		discount: {
+			durationMonths: 3,
+			amount: discountAmount,
 		},
-	];
+		appliesTo: {
+			productRatePlanIds: ['71a116628be96ab11606b51ec6060555'],
+			countries: ['GB'],
+		},
+		promoCode: 'TEST_CODE',
+		startTimestamp: dayjs().subtract(1, 'day').toISOString(),
+		endTimestamp: dayjs().add(1, 'month').toISOString(),
+	};
 
 	test('We can create a subscription with a new account', async () => {
 		const client = await ZuoraClient.create('CODE');
 		const response = await createSubscription(
 			client,
 			productCatalog,
-			mockPromotions,
 			createInputFields,
+			undefined,
 		);
 		expect(response.subscriptionNumbers.length).toEqual(1);
 	});
@@ -113,14 +111,14 @@ describe('createSubscription integration', () => {
 		const response = await createSubscription(
 			client,
 			productCatalog,
-			mockPromotions,
 			inputFields,
+			undefined,
 		);
 		const response2 = await createSubscription(
 			client,
 			productCatalog,
-			mockPromotions,
 			inputFields,
+			undefined,
 		);
 		expect(response).toEqual(response2);
 	}, 10000);
@@ -136,8 +134,8 @@ describe('createSubscription integration', () => {
 		const response = await previewCreateSubscription(
 			client,
 			productCatalog,
-			mockPromotions,
 			inputFields,
+			undefined,
 		);
 		console.log(JSON.stringify(response));
 		expect(response.previewResult.invoices.length).toBeGreaterThan(0);
@@ -157,8 +155,8 @@ describe('createSubscription integration', () => {
 		const response = await createSubscription(
 			client,
 			productCatalog,
-			mockPromotions,
 			inputFields,
+			undefined,
 		);
 		expect(response.subscriptionNumbers.length).toEqual(1);
 	});
@@ -190,8 +188,8 @@ describe('createSubscription integration', () => {
 		const response = await createSubscription(
 			client,
 			productCatalog,
-			mockPromotions,
 			inputFields,
+			undefined,
 		);
 		expect(response.subscriptionNumbers.length).toEqual(1);
 		const invoiceNumber = getIfDefined(
@@ -202,7 +200,7 @@ describe('createSubscription integration', () => {
 		expect(zuoraInvoice.amount).toEqual(12);
 	});
 	test('We can create a subscription with a promotion', async () => {
-		const promotions = await getPromotions('CODE');
+		const promotion = await getPromotion('E2E_TEST_SPLUS_MONTHLY', 'CODE');
 		const productPurchase: ProductPurchase = {
 			product: 'SupporterPlus',
 			ratePlan: 'Monthly',
@@ -220,8 +218,8 @@ describe('createSubscription integration', () => {
 		const response = await createSubscription(
 			client,
 			productCatalog,
-			promotions,
 			inputFields,
+			promotion,
 		);
 		expect(response.subscriptionNumbers.length).toEqual(1);
 		const subscriptionWithPromotionSchema = zuoraSubscriptionSchema.extend({
@@ -254,8 +252,8 @@ describe('createSubscription integration', () => {
 		const response = await previewCreateSubscription(
 			client,
 			productCatalog,
-			mockPromotions,
 			inputFields,
+			mockPromotion,
 		);
 		console.log(JSON.stringify(response));
 		expect(
@@ -263,5 +261,60 @@ describe('createSubscription integration', () => {
 				(item) => item.productName === 'Discounts',
 			)?.unitPrice,
 		).toEqual(discountAmount);
+	});
+	test('Recurring payment schedule is not truncated by the subscription term', async () => {
+		const inputFields: PreviewCreateSubscriptionInputFields = {
+			stage: 'CODE',
+			accountNumber: 'A01036826',
+			currency: currency,
+			productPurchase: productPurchase,
+		};
+		const client = await ZuoraClient.create('CODE');
+		const response = await previewCreateSubscription(
+			client,
+			productCatalog,
+			inputFields,
+			undefined,
+		);
+
+		// Check that all Digital Pack items have the same amount.
+		// Previously we had a bug where the last item in the payment schedule was only covering the period
+		// up until the end of the subscription term, causing it to be a different amount from all the other items.
+		const digitalPackInvoiceItems =
+			response.previewResult.invoices[0]?.invoiceItems.filter(
+				(item) => item.chargeName === 'Digital Pack',
+			) ?? [];
+
+		const [firstDigitalPackItem] = digitalPackInvoiceItems;
+		expect(
+			digitalPackInvoiceItems.every(
+				(item) =>
+					firstDigitalPackItem !== undefined &&
+					item.amountWithoutTax === firstDigitalPackItem.amountWithoutTax,
+			),
+		).toBe(true);
+	});
+
+	test('Gift payment schedule is not truncated by the subscription term', async () => {
+		const giftProductPurchase: ProductPurchase = {
+			product: 'GuardianWeeklyDomestic',
+			ratePlan: 'ThreeMonthGift',
+			firstDeliveryDate: dayjs().add(1, 'month').toDate(),
+			deliveryContact: contact,
+		};
+		const inputFields: PreviewCreateSubscriptionInputFields = {
+			stage: 'CODE',
+			accountNumber: 'A01036826',
+			currency: currency,
+			productPurchase: giftProductPurchase,
+		};
+		const client = await ZuoraClient.create('CODE');
+		const response = await previewCreateSubscription(
+			client,
+			productCatalog,
+			inputFields,
+			undefined,
+		);
+		expect(response.previewResult.invoices.length).toBe(1); // Gift subs are fixed term so should only have one invoice
 	});
 });

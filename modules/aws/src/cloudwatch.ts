@@ -11,26 +11,17 @@ import {
 export type Stage = 'CODE' | 'DEV' | 'PROD';
 export const metricNamespace = 'support-service-lambdas';
 
-const getStage = (): Stage | undefined => {
-	const stage = process.env.STAGE;
-	if (stage === undefined) {
-		throw new Error('Stage is not defined as an environment variable');
-	}
-	return stage as Stage;
-};
-
-export async function putMetric(metricName: string): Promise<void> {
-	const stage = getStage();
-	if (stage == 'DEV') {
-		console.log('No metrics sent as running local test');
-		return;
-	}
-
+export async function putMetric(
+	metricName: string,
+	stage: string,
+	dimensionsOverride?: Dimension[],
+	namespaceOverride?: string,
+): Promise<void> {
 	const cloudwatch = new CloudWatchClient({
 		region: process.env.AWS_REGION ?? 'eu-west-1',
 	});
 
-	const dimensions: Dimension[] = [
+	const dimensions: Dimension[] = dimensionsOverride ?? [
 		{
 			Name: 'App',
 			Value: process.env.APP,
@@ -42,7 +33,7 @@ export async function putMetric(metricName: string): Promise<void> {
 	];
 
 	const params: PutMetricDataCommandInput = {
-		Namespace: metricNamespace,
+		Namespace: namespaceOverride ?? metricNamespace,
 		MetricData: [
 			{
 				MetricName: metricName,

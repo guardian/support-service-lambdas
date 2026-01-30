@@ -7,11 +7,13 @@ import { Router } from '@modules/routing/router';
 import type { Stage } from '@modules/stage';
 import { stageFromEnvironment } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
+import { zuoraDateFormat } from '@modules/zuora/utils';
 import type {
 	APIGatewayProxyEvent,
 	APIGatewayProxyResult,
 	Handler,
 } from 'aws-lambda';
+import dayjs from 'dayjs';
 import { getClientAccessToken, getUserDetails } from './identity';
 import { getLatestSubscription } from './supporterProductData';
 import type { Member } from './xmlBuilder';
@@ -64,8 +66,8 @@ export async function getMemberDetails(
 	);
 	if (userHasGuardianEmail(userDetails.email)) {
 		return createMember(userId, {
-			contractEffectiveDate: '1821-05-05',
-			termEndDate: '2099-01-01',
+			contractEffectiveDate: dayjs('1821-05-05'),
+			termEndDate: dayjs('2099-01-01'),
 		});
 	}
 	const latestSubscription = await getLatestSubscription(
@@ -89,15 +91,10 @@ function createMember(
 					{
 						product: {
 							productID: 'the-guardian',
-							enddate: latestSubscription.termEndDate,
-							startdate: latestSubscription.contractEffectiveDate,
-						},
-					},
-					{
-						product: {
-							productID: 'the-observer',
-							enddate: latestSubscription.termEndDate,
-							startdate: latestSubscription.contractEffectiveDate,
+							enddate: zuoraDateFormat(latestSubscription.termEndDate),
+							startdate: zuoraDateFormat(
+								latestSubscription.contractEffectiveDate,
+							),
 						},
 					},
 				]

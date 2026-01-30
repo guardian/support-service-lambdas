@@ -1,10 +1,14 @@
-import { isoCountrySchema } from '@modules/internationalisation/schemas';
+import {
+	isoCountrySchema,
+	supportRegionSchema,
+} from '@modules/internationalisation/schemas';
+import { optionalDropNulls } from '@modules/schemaUtils';
 import { z } from 'zod';
 
 export const promoProductSchema = z.enum([
 	'SupporterPlus',
 	'TierThree',
-	'DigitalPack',
+	'DigitalSubscription',
 	'Newspaper',
 	'Weekly',
 ]);
@@ -20,7 +24,7 @@ export type PromoCampaign = z.infer<typeof promoCampaignSchema>;
 
 export const appliesToSchema = z.object({
 	productRatePlanIds: z.array(z.string()),
-	countryGroups: z.array(isoCountrySchema),
+	countries: z.array(isoCountrySchema),
 });
 
 export const discountDetailsSchema = z.object({
@@ -29,9 +33,9 @@ export const discountDetailsSchema = z.object({
 });
 
 export const landingPageSchema = z.object({
-	title: z.string().optional(),
-	description: z.string().optional(),
-	roundelHtml: z.string().optional(),
+	title: optionalDropNulls(z.string()),
+	description: optionalDropNulls(z.string()),
+	roundelHtml: optionalDropNulls(z.string()),
 });
 
 export const promoSchema = z.object({
@@ -40,10 +44,16 @@ export const promoSchema = z.object({
 	campaignCode: z.string(),
 	appliesTo: appliesToSchema,
 	startTimestamp: z.string(),
-	endTimestamp: z.string().optional(),
-	discount: discountDetailsSchema.optional(),
-	description: z.string().optional(),
-	landingPage: landingPageSchema.optional(),
+	endTimestamp: optionalDropNulls(z.string()),
+	discount: optionalDropNulls(discountDetailsSchema),
+	description: optionalDropNulls(z.string()),
+	landingPage: optionalDropNulls(landingPageSchema),
 });
 
 export type Promo = z.infer<typeof promoSchema>;
+
+export const appliedPromotionSchema = z.object({
+	promoCode: z.string(),
+	supportRegionId: supportRegionSchema,
+});
+export type AppliedPromotion = z.infer<typeof appliedPromotionSchema>;

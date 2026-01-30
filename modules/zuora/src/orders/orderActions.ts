@@ -24,7 +24,18 @@ export type OrderActionType =
 	| 'RenewSubscription'
 	| 'UpdateProduct'
 	| 'CreateSubscription'
-	| 'AddProduct';
+	| 'AddProduct'
+	| 'RemoveProduct';
+
+type ChangePlanTarget =
+	| {
+			productRatePlanId: string;
+			ratePlanId?: never;
+	  }
+	| {
+			productRatePlanId?: never;
+			ratePlanId: string;
+	  };
 
 type BaseOrderAction = {
 	type: OrderActionType;
@@ -33,21 +44,18 @@ type BaseOrderAction = {
 
 export type ChangePlanOrderAction = BaseOrderAction & {
 	type: 'ChangePlan';
-	changePlan: {
-		productRatePlanId: string;
+	changePlan: ChangePlanTarget & {
 		subType: 'Upgrade';
 		newProductRatePlan: {
 			productRatePlanId: string;
-			chargeOverrides: [
-				{
-					productRatePlanChargeId: string;
-					pricing: {
-						recurringFlatFee: {
-							listPrice: number;
-						};
+			chargeOverrides?: Array<{
+				productRatePlanChargeId: string;
+				pricing: {
+					recurringFlatFee: {
+						listPrice: number;
 					};
-				},
-			];
+				};
+			}>;
 		};
 	};
 };
@@ -55,6 +63,12 @@ export type DiscountOrderAction = BaseOrderAction & {
 	type: 'AddProduct';
 	addProduct: {
 		productRatePlanId: string;
+	};
+};
+export type RemoveProductOrderAction = BaseOrderAction & {
+	type: 'RemoveProduct';
+	removeProduct: {
+		ratePlanId: string;
 	};
 };
 export type UpdateProductOrderAction = BaseOrderAction & {
@@ -144,6 +158,7 @@ export type OrderAction =
 	| TermsAndConditionsOrderAction
 	| UpdateProductOrderAction
 	| DiscountOrderAction
+	| RemoveProductOrderAction
 	| CreateSubscriptionOrderAction;
 
 export function singleTriggerDate(applyFromDate: Dayjs): TriggerDates {
@@ -242,7 +257,7 @@ export function buildCreateSubscriptionOrderAction({
 
 	const [initialPeriodLength, initialPeriodType, autoRenew] =
 		termType === 'Recurring'
-			? ([12, 'Month', true] as const)
+			? ([termLengthInMonths, 'Month', true] as const)
 			: ([
 					initialTermInDays(
 						contractEffectiveDate,

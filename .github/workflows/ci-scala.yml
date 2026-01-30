@@ -32,7 +32,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.1
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v5
@@ -103,10 +103,42 @@ jobs:
           - sf-emails-to-s3-exporter
           - sf-gocardless-sync
           - sf-move-subscriptions-api
-          - zuora-callout-apis
           - zuora-datalake-export
           - zuora-rer
           - zuora-sar
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.1
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
+          aws-region: eu-west-1
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'corretto'
+          java-version: '21'
+          cache: 'sbt'
+
+      - name: Setup SBT
+        uses: sbt/setup-sbt@v1
+
+      - name: Build
+        run: |
+          LAST_TEAMCITY_BUILD=6410
+          export GITHUB_RUN_NUMBER=$(( $GITHUB_RUN_NUMBER + $LAST_TEAMCITY_BUILD ))
+          sbt "project ${{ matrix.subproject }}" riffRaffUpload
+
+  zuora-callout-apis:
+    name: build (zuora-callout-apis)
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -132,8 +164,33 @@ jobs:
       - name: Setup SBT
         uses: sbt/setup-sbt@v1
 
-      - name: Build
-        run: |
-          LAST_TEAMCITY_BUILD=6410
-          export GITHUB_RUN_NUMBER=$(( $GITHUB_RUN_NUMBER + $LAST_TEAMCITY_BUILD ))
-          sbt "project ${{ matrix.subproject }}" riffRaffUpload
+      - name: Run tests and build subproject JAR
+        run: sbt "project zuora-callout-apis" test assembly
+
+      - run: npm install --global corepack@0.31.0
+      - run: corepack enable
+        shell: bash
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - run: pnpm install
+      - run: pnpm --filter cdk package
+
+      - name: Upload to Riff-Raff
+        uses: guardian/actions-riff-raff@v4
+        with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
+          projectName: support-service-lambdas::zuora-callout-apis
+          buildNumberOffset: 7000
+          configPath: ./handlers/zuora-callout-apis/riff-raff.yaml
+          commentingEnabled: 'false'
+          contentDirectories: |
+            zuora-auto-cancel-upload:
+              - ./handlers/zuora-callout-apis/target/scala-2.13/zuora-callout-apis.jar
+            zuora-auto-cancel-cloudformation:
+              - ./cdk/cdk.out/zuora-auto-cancel-CODE.template.json
+              - ./cdk/cdk.out/zuora-auto-cancel-PROD.template.json
+            zuora-callout-apis:
+              - ./handlers/zuora-callout-apis/target/scala-2.13/zuora-callout-apis.jar

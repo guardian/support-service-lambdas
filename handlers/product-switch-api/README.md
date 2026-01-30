@@ -24,3 +24,19 @@ To work with this project
 
 There are also a number integration tests which will carry out switches with real subscriptions in the Zuora code environment. 
 To run these you will need fresh Janus credentials, then you can run `pnpm --filter product-switch-api it-test` from the root of the monorepo. 
+
+## Frequency switch endpoint
+
+POST `/product-switch/billing-frequency/{subscriptionNumber}`
+
+Body:
+```
+{
+	"preview": true | false,
+	"targetBillingPeriod": "Annual",
+	"csrUserId": "optional CSR id",
+	"caseId": "optional Salesforce case id"
+}
+```
+
+Note: Only monthly to annual switching is supported.
