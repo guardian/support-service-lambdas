@@ -1,4 +1,5 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
+import { logger } from '@modules/routing/logger';
 import { zuoraSubscriptionSchema } from '@modules/zuora/types';
 import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
@@ -31,6 +32,7 @@ describe('getSinglePlanFlattenedSubscriptionOrThrow', () => {
 		const subscription: GuardianSubscription =
 			getSinglePlanFlattenedSubscriptionOrThrow(filteredSubscription);
 
+		logger.log('subscription.ratePlan', subscription.ratePlan);
 		expect(subscription.ratePlan).toBeDefined();
 		expect(subscription.ratePlan.productName).toBe('Contributor');
 		expect(
@@ -125,8 +127,8 @@ describe('getSinglePlanFlattenedSubscriptionOrThrow', () => {
 			accountNumber: 'A00000001',
 			status: 'Active',
 			termStartDate: new Date('2024-01-01'),
-			products: {},
-			productsNotInCatalog: {},
+			ratePlans: [],
+			productsNotInCatalog: [],
 		};
 
 		expect(() =>
@@ -145,21 +147,16 @@ describe('getSinglePlanFlattenedSubscriptionOrThrow', () => {
 		// Duplicate the rate plan to simulate multiple plans
 		const multiPlanSubscription: GroupedGuardianSubscription = {
 			...filteredSubscription,
-			products: {
-				Contribution: {
-					Annual: [
-						...getIfDefined(
-							filteredSubscription.products.Contribution?.Annual,
-							"test sub isn't an annual contribution",
-						),
-						...getIfDefined(
-							filteredSubscription.products.Contribution?.Annual,
-							"test sub isn't an annual contribution",
-						),
-					],
-					Monthly: [],
-				},
-			},
+			ratePlans: [
+				getIfDefined(
+					filteredSubscription.ratePlans[0],
+					'test sub has no rateplans',
+				),
+				getIfDefined(
+					filteredSubscription.ratePlans[0],
+					'test sub has no rateplans',
+				),
+			],
 		};
 
 		expect(() =>

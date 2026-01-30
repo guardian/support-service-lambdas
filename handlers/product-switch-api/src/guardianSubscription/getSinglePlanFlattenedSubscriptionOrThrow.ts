@@ -3,17 +3,14 @@ import {
 	getSingleOrThrow,
 } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
-import { objectValues } from '@modules/objectFunctions';
-import type { ProductKey } from '@modules/product-catalog/productCatalog';
 import type {
 	IndexedZuoraRatePlanWithCharges,
-	IndexedZuoraSubscriptionRatePlans,
 	RestSubscription,
 } from './groupSubscriptionByZuoraCatalogIds';
 import type {
 	GroupedGuardianSubscription,
 	GuardianRatePlan,
-	GuardianRatePlans,
+	ZuoraRatePlan,
 } from './guardianSubscriptionParser';
 
 export type GuardianSubscription = {
@@ -30,33 +27,34 @@ export type GuardianSubscription = {
 export function getSinglePlanFlattenedSubscriptionOrThrow(
 	groupedGuardianSubscription: GroupedGuardianSubscription,
 ): GuardianSubscription {
-	const { products, productsNotInCatalog, ...restGroupedGuardianSubscription } =
-		groupedGuardianSubscription;
+	const {
+		ratePlans,
+		productsNotInCatalog,
+		...restGroupedGuardianSubscription
+	} = groupedGuardianSubscription;
 
-	const allPlans: GuardianRatePlan[] = objectValues(
-		// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- retaining the product key just causes a huge union
-		products as Record<ProductKey, GuardianRatePlans>,
-	).flatMap((ratePlansGroupsByKey: GuardianRatePlans) => {
-		const ratePlanGroups: GuardianRatePlan[][] = objectValues(
-			ratePlansGroupsByKey satisfies Record<string, GuardianRatePlan[]>,
-		);
-		const ratePlans: GuardianRatePlan[] = ratePlanGroups.flat(1);
-		return ratePlans;
-	});
+	// const allPlans: GuardianRatePlan[] = objectValues(
+	// 	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- retaining the product key just causes a huge union
+	// 	products as Record<ProductKey, GuardianRatePlans>,
+	// ).flatMap((ratePlansGroupsByKey: GuardianRatePlans) => {
+	// 	const ratePlanGroups: GuardianRatePlan[][] = objectValues(
+	// 		ratePlansGroupsByKey satisfies Record<string, GuardianRatePlan[]>,
+	// 	);
+	// 	const ratePlans: GuardianRatePlan[] = ratePlanGroups.flat(1);
+	// 	return ratePlans;
+	// });
 
 	const ratePlan = getSingleOrThrow(
-		allPlans,
+		ratePlans,
 		(msg) =>
 			new ValidationError(
 				"subscription didn't have exactly one known product: " + msg,
 			),
 	);
 
-	const discountRatePlanGroups: IndexedZuoraSubscriptionRatePlans =
-		productsNotInCatalog['Discounts'] ?? {};
-	const discountRatePlans: IndexedZuoraRatePlanWithCharges[] = objectValues(
-		discountRatePlanGroups,
-	).flat(1);
+	const discountRatePlans: ZuoraRatePlan[] = productsNotInCatalog.filter(
+		(rp) => rp.product.name === 'Discounts',
+	);
 	const maybeDiscountRatePlan: IndexedZuoraRatePlanWithCharges | undefined =
 		getMaybeSingleOrThrow(
 			discountRatePlans,

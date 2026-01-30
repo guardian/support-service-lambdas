@@ -54,6 +54,11 @@ export function objectEntries<T extends object>(
 	>;
 }
 
+/**
+ * joins two objects by their keys, if a left is missing from the right, use undefined
+ * @param l
+ * @param r
+ */
 export function objectLeftJoin<K extends string, VA, VB, KR extends K>(
 	l: Record<K, VA>,
 	r: Record<KR, VB>,
@@ -64,6 +69,11 @@ export function objectLeftJoin<K extends string, VA, VB, KR extends K>(
 	);
 }
 
+/**
+ * joins two objects by their keys, throwing away any entries that don't exist in both
+ * @param l
+ * @param r
+ */
 export function objectInnerJoin<K extends string, VA, VB>(
 	l: Record<K, VA>,
 	r: Record<K, VB>,
@@ -72,6 +82,11 @@ export function objectInnerJoin<K extends string, VA, VB>(
 	return lKeys.flatMap((key) => (key in r ? [[l[key], r[key]] as const] : []));
 }
 
+/**
+ * joins two objects by their keys, throwing if there isn't an exact match
+ * @param l
+ * @param r
+ */
 export function objectJoinBijective<K extends string, VA, VB>(
 	l: Record<K, VA>,
 	r: Record<K, VB>,

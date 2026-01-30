@@ -10,10 +10,12 @@ import type { RatePlanCharge } from '@modules/zuora/types';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import dayjs from 'dayjs';
 import type {
+	GenericRatePlan,
 	GroupedGuardianSubscription,
 	GuardianRatePlan,
 	GuardianRatePlans,
 	GuardianSubscriptionProducts,
+	ZuoraRatePlan,
 } from './guardianSubscriptionParser';
 
 /**
@@ -25,7 +27,7 @@ import type {
 export class SubscriptionFilter {
 	constructor(
 		private ratePlanDiscardReason: (
-			rp: GuardianRatePlan, //MergedSubscription['joinedByProduct'][ProductKey][string],
+			rp: GenericRatePlan<object, unknown>, //MergedSubscription['joinedByProduct'][ProductKey][string],
 		) => string | undefined,
 		private chargeDiscardReason: (rpc: RatePlanCharge) => string | undefined,
 	) {}
@@ -82,18 +84,15 @@ export class SubscriptionFilter {
 		return { errors, filteredCharges };
 	}
 
-	private filterRatePlanList<P extends ProductKey>(
-		guardianSubRatePlans: Array<GuardianRatePlan<P>>,
+	private filterRatePlanList<RP extends GenericRatePlan<object, unknown>>(
+		guardianSubRatePlans: RP[],
 	): {
 		discarded: string[];
-		ratePlans: Array<GuardianRatePlan<P>>;
+		ratePlans: RP[];
 	} {
 		const [discarded, ratePlans] = partitionByType(
-			guardianSubRatePlans.map((rp: GuardianRatePlan<P>) => {
-				const maybeDiscardWholePlan = this.ratePlanDiscardReason(
-					// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- TS functions aren't contravariant in their params
-					rp satisfies GuardianRatePlan<P> as GuardianRatePlan,
-				);
+			guardianSubRatePlans.map((rp: RP) => {
+				const maybeDiscardWholePlan = this.ratePlanDiscardReason(rp);
 				if (maybeDiscardWholePlan !== undefined) {
 					return `${rp.ratePlanName}: ${maybeDiscardWholePlan}`;
 				}
@@ -117,33 +116,32 @@ export class SubscriptionFilter {
 		return { discarded, ratePlans };
 	}
 
-	private filterRatePlanses<P extends ProductKey>(): (
-		jbp: GuardianRatePlans<P>,
-	) => GuardianRatePlans<P> {
-		return (jbp: GuardianRatePlans<P>) =>
-			mapValues(jbp, (guardianSubRatePlans: Array<GuardianRatePlan<P>>) => {
-				const { discarded, ratePlans } =
-					this.filterRatePlanList(guardianSubRatePlans);
-				if (discarded.length > 0) {
-					logger.log(`discarded rateplans:`, discarded);
-				} // could be spammy?
-				if (ratePlans.length > 0) {
-					logger.log(
-						`retained rateplans:`,
-						ratePlans.map((rp) => rp.ratePlanName),
-					);
-				} // could be very spammy?
-				return ratePlans.length === 0 ? undefined : ratePlans;
-			}) satisfies GuardianRatePlans<P>;
+	private filterRatePlanses<RP extends GenericRatePlan<object, unknown>>(
+		guardianSubRatePlans: RP[],
+	): RP[] {
+		const { discarded, ratePlans } =
+			this.filterRatePlanList(guardianSubRatePlans);
+		if (discarded.length > 0) {
+			logger.log(`discarded rateplans:`, discarded);
+		} // could be spammy?
+		if (ratePlans.length > 0) {
+			logger.log(
+				`retained rateplans:`,
+				ratePlans.map((rp) => rp.ratePlanName),
+			);
+		} // could be very spammy?
+		return ratePlans;
 	}
 
 	filterSubscription(
 		highLevelSub: GroupedGuardianSubscription,
 	): GroupedGuardianSubscription {
 		return mapValue(
-			highLevelSub,
-			'products',
-			(products) => mapValuesCorrelated(products, this.filterRatePlanses()), // mapValues breaks the correlation, need to retain it
+			mapValue(highLevelSub, 'ratePlans', (ratePlans) =>
+				this.filterRatePlanses<GuardianRatePlan>(ratePlans),
+			),
+			'productsNotInCatalog',
+			(ratePlans) => this.filterRatePlanses<ZuoraRatePlan>(ratePlans),
 		);
 	}
 }
