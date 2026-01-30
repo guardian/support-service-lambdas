@@ -3,6 +3,8 @@ import type {
 	GuardianCatalogKeys,
 	ProductCatalogHelper,
 	ProductKey,
+	ProductRatePlan,
+	ProductRatePlanKey,
 } from '@modules/product-catalog/productCatalog';
 import type { ProductSwitchTargetBody, SwitchMode } from '../schemas';
 import type { Discount } from '../switchDefinition/discounts';
@@ -97,7 +99,7 @@ export const getTargetInformation = (
 };
 
 function getSwitchSpecificTargetInformationOrThrow<
-	SP extends ProductKey, // change to ValidSwitchFromKeys to simplify types?
+	SP extends ProductKey,
 	TP extends ValidTargetProduct,
 >(
 	productCatalogHelper: ProductCatalogHelper,
@@ -117,11 +119,16 @@ function getSwitchSpecificTargetInformationOrThrow<
 		`${sourceProductKeys.productKey} ${sourceProductKeys.productRatePlanKey}`,
 	);
 
+	const targetProductRatePlan: ProductRatePlan<
+		TP,
+		ProductRatePlanKey<TP>
+	> = productCatalogHelper.getProductRatePlan(
+		targetProductKeys.productKey,
+		targetProductKeys.productRatePlanKey,
+	);
+
 	return targetInformation.fromUserInformation(
-		productCatalogHelper.getProductRatePlan(
-			targetProductKeys.productKey,
-			targetProductKeys.productRatePlanKey,
-		),
+		targetProductRatePlan,
 		switchActionData,
 	);
 }

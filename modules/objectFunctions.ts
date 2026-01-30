@@ -1,4 +1,4 @@
-import { difference } from '@modules/arrayFunctions';
+import { difference, partitionByType } from '@modules/arrayFunctions';
 
 type DistributedKeyof<T> = T extends unknown ? keyof T : never;
 export function objectKeys<O extends object>(
@@ -68,6 +68,31 @@ export function objectLeftJoin<K extends string, VA, VB, KR extends K>(
 	return lKeys.map(
 		(key) => [l[key], key in r ? r[key as unknown as KR] : undefined] as const,
 	);
+}
+
+/**
+ * this does a join between the keys of left and right, however if any item in `l`
+ * can't be looked up in r, it throws an error
+ */
+export function joinAllLeft<K extends string, VA, VB, KR extends K>(
+	l: Record<K, VA>,
+	r: Record<KR, VB>,
+) {
+	const [linked, errors] = partitionByType(
+		objectLeftJoin(
+			// attaches any products not in the (filtered) catalog to `undefined`
+			l,
+			r,
+		),
+		(pair): pair is [VA, VB] => pair[1] !== undefined,
+	);
+	if (errors.length > 0) {
+		throw new Error(
+			`left had an id that was missing from the right lookup ${errors.length}: ` +
+				JSON.stringify(errors),
+		);
+	}
+	return linked;
 }
 
 /**

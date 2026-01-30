@@ -65,14 +65,6 @@ export class ZuoraSubscriptionIndexer {
 			rpc.productRatePlanChargeId,
 	});
 
-	// static byNames = new ZuoraSubscriptionIndexer({
-	// 	getProductIndex: (rp: RatePlan) => rp.productName,
-	//
-	// 	getProductRatePlanIndex: (rp: RatePlan) => rp.ratePlanName,
-	//
-	// 	getProductRatePlanChargeIndex: (rpc: RatePlanCharge) => rpc.name,
-	// });
-
 	groupSubscription(
 		zuoraSubscription: ZuoraSubscription,
 	): ZuoraSubscriptionByCatalogIds {

@@ -7,19 +7,18 @@ import {
 import { logger } from '@modules/routing/logger';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import dayjs from 'dayjs';
-import type { RestRatePlanCharge } from './groupSubscriptionByZuoraCatalogIds';
+import type { RestRatePlanCharge } from './group/groupSubscriptionByZuoraCatalogIds';
 import type {
 	GenericRatePlan,
-	GroupedGuardianSubscription,
 	GuardianRatePlan,
+	GuardianSubscriptionMultiPlan,
 	ZuoraRatePlan,
 } from './guardianSubscriptionParser';
 
 /**
- * This lets you iterate through rate plans and charges removing ones that you aren't interested in
+ * This removes irrelevant rate plans and charges from the subscription.
  *
- * It provides a useful activeCurrentSubscriptionFilter for when we're only interested
- * in products that are not removed and effective as of today.
+ * The static methods provide some useful filters, or provide your own special one.
  */
 export class SubscriptionFilter {
 	constructor(
@@ -30,17 +29,17 @@ export class SubscriptionFilter {
 	) {}
 
 	/**
-	 * this filters out all Removed rate plans and charges outside of their effective dates
+	 * this filters out all charges outside of their effective dates
+	 * This would be useful if you want to know what someone is on right now, even
+	 * if there's a future dated product switch.
 	 *
-	 * Note: This means that products with pending changes will be filtered out e.g. switch or amount change
 	 * @param today
 	 */
 	static activeCurrentSubscriptionFilter(
 		today: dayjs.Dayjs,
 	): SubscriptionFilter {
 		return new SubscriptionFilter(
-			(rp: GenericRatePlan) =>
-				rp.lastChangeType === 'Remove' ? 'plan is removed' : undefined,
+			() => undefined,
 			(rpc) =>
 				dayjs(rpc.effectiveStartDate).isBefore(today) ||
 				dayjs(rpc.effectiveStartDate).isSame(today)
@@ -131,14 +130,17 @@ export class SubscriptionFilter {
 	}
 
 	filterSubscription(
-		highLevelSub: GroupedGuardianSubscription,
-	): GroupedGuardianSubscription {
-		return mapValue(
-			mapValue(highLevelSub, 'ratePlans', (ratePlans) =>
-				this.filterRatePlanses<GuardianRatePlan>(ratePlans),
-			),
-			'productsNotInCatalog',
-			(ratePlans) => this.filterRatePlanses<ZuoraRatePlan>(ratePlans),
+		highLevelSub: GuardianSubscriptionMultiPlan,
+	): GuardianSubscriptionMultiPlan {
+		const withFilteredRatePlans: GuardianSubscriptionMultiPlan = mapValue(
+			highLevelSub,
+			'ratePlans',
+			(ratePlans) => this.filterRatePlanses<GuardianRatePlan>(ratePlans),
 		);
+		const withFilteredNonCatalogProducts: GuardianSubscriptionMultiPlan =
+			mapValue(withFilteredRatePlans, 'productsNotInCatalog', (ratePlans) =>
+				this.filterRatePlanses<ZuoraRatePlan>(ratePlans),
+			);
+		return withFilteredNonCatalogProducts;
 	}
 }

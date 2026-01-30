@@ -11,7 +11,7 @@ import type { RatePlanCharge } from '@modules/zuora/types';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import type { GuardianSubscription } from '../../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
-import type { RestRatePlanCharge } from '../../guardianSubscription/groupSubscriptionByZuoraCatalogIds';
+import type { RestRatePlanCharge } from '../../guardianSubscription/group/groupSubscriptionByZuoraCatalogIds';
 import type { GuardianRatePlan } from '../../guardianSubscription/guardianSubscriptionParser';
 import type { ValidSwitchableRatePlanKey } from './switchCatalogHelper';
 import { asSwitchableRatePlanKey } from './switchCatalogHelper';

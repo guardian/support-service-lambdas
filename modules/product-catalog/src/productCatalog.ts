@@ -105,23 +105,17 @@ export function getCustomerFacingName(productKey: ProductKey): string {
 
 export type Product<P extends ProductKey> = ProductCatalog[P];
 
-type AnyProduct = {
-	[P in ProductKey]: Product<P>;
-}[ProductKey];
-
 // -------- Product Rate Plan --------
 export type ProductRatePlanKey<P extends ProductKey> =
 	keyof ProductCatalog[P]['ratePlans'] & string;
 export type ProductRatePlan<
 	P extends ProductKey,
 	PRP extends ProductRatePlanKey<P>,
-> = ProductCatalog[P]['ratePlans'][PRP];
-
-export type AnyProductRatePlan = {
-	[P in ProductKey]: {
-		[PRP in ProductRatePlanKey<P>]: ProductRatePlan<P, PRP>;
-	}[ProductRatePlanKey<P>];
-}[ProductKey];
+> = P extends ProductKey
+	? PRP extends keyof ProductCatalog[P]['ratePlans']
+		? ProductCatalog[P]['ratePlans'][PRP]
+		: never
+	: never;
 
 export type ProductRatePlanChargeKey<
 	P extends ProductKey,
@@ -146,18 +140,6 @@ export type GuardianCatalogKeys<P extends ProductKey = ProductKey> = {
 	}[ProductRatePlanKey<K>];
 }[P];
 
-// export type GuardianCatalogKeys<
-// 	P extends ProductKey,
-// 	PRP extends ProductRatePlanKey<P> = ProductRatePlanKey<P>,
-// > = {
-// 	productKey: P;
-// 	productRatePlanKey: PRP; // constantly collapses to never if you distribute and use ProductRatePlanKey<P>
-// };
-
-export type AnyProductRatePlanKey<P extends ProductKey = ProductKey> = {
-	[K in P]: ProductRatePlanKey<K>;
-}[P];
-
 // handy if there are duplicates in a union, makes it look better in the IDE
 export type Normalize<T> = T extends infer U ? U : never;
 
@@ -175,7 +157,7 @@ export class ProductCatalogHelper {
 	): ProductRatePlan<P, PRP> => {
 		const ratePlans: ProductCatalog[P]['ratePlans'] =
 			this.catalogData[productKey].ratePlans;
-		return ratePlans[productRatePlanKey];
+		return ratePlans[productRatePlanKey] as ProductRatePlan<P, PRP>;
 	};
 
 	getAllProductDetailsForBillingSystem = (
@@ -187,11 +169,11 @@ export class ProductCatalogHelper {
 
 	getAllProductDetails = () =>
 		objectEntries(this.catalogData).flatMap(
-			([productKey, product]: [ProductKey, AnyProduct]) =>
+			<P extends ProductKey>([productKey, product]: [P, Product<P>]) =>
 				objectEntries(product.ratePlans).flatMap(
 					([productRatePlanKey, productRatePlan]: [
-						ProductRatePlanKey<ProductKey>,
-						AnyProductRatePlan,
+						ProductRatePlanKey<P>,
+						ProductRatePlan<P, ProductRatePlanKey<P>>,
 					]) => ({
 						zuoraProduct: productKey,
 						billingSystem: product.billingSystem,

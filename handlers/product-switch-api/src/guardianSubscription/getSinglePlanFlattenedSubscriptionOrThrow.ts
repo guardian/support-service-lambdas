@@ -7,10 +7,10 @@ import type { ProductKey } from '@modules/product-catalog/productCatalog';
 import type {
 	IndexedZuoraRatePlanWithCharges,
 	RestSubscription,
-} from './groupSubscriptionByZuoraCatalogIds';
+} from './group/groupSubscriptionByZuoraCatalogIds';
 import type {
-	GroupedGuardianSubscription,
 	GuardianRatePlan,
+	GuardianSubscriptionMultiPlan,
 	ZuoraRatePlan,
 } from './guardianSubscriptionParser';
 
@@ -26,24 +26,13 @@ export type GuardianSubscription<P extends ProductKey = ProductKey> = {
  * This is useful because in the guardian, all subscriptions have at most one active rateplan, plus maybe a discount
  */
 export function getSinglePlanFlattenedSubscriptionOrThrow(
-	groupedGuardianSubscription: GroupedGuardianSubscription,
+	groupedGuardianSubscription: GuardianSubscriptionMultiPlan,
 ): GuardianSubscription {
 	const {
 		ratePlans,
 		productsNotInCatalog,
 		...restGroupedGuardianSubscription
 	} = groupedGuardianSubscription;
-
-	// const allPlans: GuardianRatePlan[] = objectValues(
-	// 	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- retaining the product key just causes a huge union
-	// 	products as Record<ProductKey, GuardianRatePlans>,
-	// ).flatMap((ratePlansGroupsByKey: GuardianRatePlans) => {
-	// 	const ratePlanGroups: GuardianRatePlan[][] = objectValues(
-	// 		ratePlansGroupsByKey satisfies Record<string, GuardianRatePlan[]>,
-	// 	);
-	// 	const ratePlans: GuardianRatePlan[] = ratePlanGroups.flat(1);
-	// 	return ratePlans;
-	// });
 
 	const ratePlan = getSingleOrThrow(
 		ratePlans,
@@ -65,10 +54,9 @@ export function getSinglePlanFlattenedSubscriptionOrThrow(
 				),
 		);
 
-	const subscription: GuardianSubscription = {
+	return {
 		...restGroupedGuardianSubscription,
 		ratePlan,
 		discountRatePlan: maybeDiscountRatePlan,
-	};
-	return subscription;
+	} satisfies GuardianSubscription;
 }

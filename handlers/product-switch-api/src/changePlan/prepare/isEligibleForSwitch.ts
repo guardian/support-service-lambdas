@@ -1,7 +1,7 @@
 import { objectValues } from '@modules/objectFunctions';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import type { IndexedZuoraRatePlanWithCharges } from '../../guardianSubscription/groupSubscriptionByZuoraCatalogIds';
+import type { IndexedZuoraRatePlanWithCharges } from '../../guardianSubscription/group/groupSubscriptionByZuoraCatalogIds';
 
 // TODO use central eligibility checker pattern
 export function isEligibleForSwitch(

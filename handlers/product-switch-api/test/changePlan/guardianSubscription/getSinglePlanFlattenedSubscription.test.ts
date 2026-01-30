@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 import type { GuardianSubscription } from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import { getSinglePlanFlattenedSubscriptionOrThrow } from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
-import type { GroupedGuardianSubscription } from '../../../src/guardianSubscription/guardianSubscriptionParser';
+import type { GuardianSubscriptionMultiPlan } from '../../../src/guardianSubscription/guardianSubscriptionParser';
 import { GuardianSubscriptionParser } from '../../../src/guardianSubscription/guardianSubscriptionParser';
 import { SubscriptionFilter } from '../../../src/guardianSubscription/subscriptionFilter';
 import alreadySwitchedJson from '../../fixtures/already-switched-subscription.json';
@@ -123,7 +123,7 @@ describe('getSinglePlanFlattenedSubscriptionOrThrow', () => {
 	});
 
 	test('throws error when subscription has no rate plans', () => {
-		const emptySubscription: GroupedGuardianSubscription = {
+		const emptySubscription: GuardianSubscriptionMultiPlan = {
 			contractEffectiveDate: new Date('2024-01-01'),
 			customerAcceptanceDate: new Date('2024-01-01'),
 			id: '',
@@ -154,7 +154,7 @@ describe('getSinglePlanFlattenedSubscriptionOrThrow', () => {
 			filter.filterSubscription(guardianSubscription);
 
 		// Duplicate the rate plan to simulate multiple plans
-		const multiPlanSubscription: GroupedGuardianSubscription = {
+		const multiPlanSubscription: GuardianSubscriptionMultiPlan = {
 			...filteredSubscription,
 			ratePlans: [
 				getIfDefined(

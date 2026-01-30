@@ -13,6 +13,7 @@ import type { APIGatewayProxyResult } from 'aws-lambda';
 import type dayjs from 'dayjs';
 import type { GuardianSubscription } from '../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import { getSinglePlanFlattenedSubscriptionOrThrow } from '../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
+import type { GuardianSubscriptionMultiPlan } from '../guardianSubscription/guardianSubscriptionParser';
 import { GuardianSubscriptionParser } from '../guardianSubscription/guardianSubscriptionParser';
 import { SubscriptionFilter } from '../guardianSubscription/subscriptionFilter';
 import { DoPreviewAction } from './action/preview';
@@ -134,12 +135,17 @@ export class ChangePlanEndpoint {
 		const activeCurrentSubscriptionFilter =
 			SubscriptionFilter.activeNonEndedSubscriptionFilter(this.today);
 
-		const highLevelSub = guardianSubscriptionParser.parse(this.subscription);
-		const groupedGuardianSubscription =
-			activeCurrentSubscriptionFilter.filterSubscription(highLevelSub);
+		const guardianSubscriptionAllPlans: GuardianSubscriptionMultiPlan =
+			guardianSubscriptionParser.parse(this.subscription);
+		const guardianSubscriptionCurrentPlans: GuardianSubscriptionMultiPlan =
+			activeCurrentSubscriptionFilter.filterSubscription(
+				guardianSubscriptionAllPlans,
+			);
 
 		const subscription: GuardianSubscription =
-			getSinglePlanFlattenedSubscriptionOrThrow(groupedGuardianSubscription);
+			getSinglePlanFlattenedSubscriptionOrThrow(
+				guardianSubscriptionCurrentPlans,
+			);
 
 		logger.log('guardian subscription', subscription);
 
