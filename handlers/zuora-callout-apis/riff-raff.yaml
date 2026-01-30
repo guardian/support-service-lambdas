@@ -37,7 +37,7 @@ deployments:
       bucketSsmLookup: true
       prefixStack: false
       functionNames:
-        - zuora-auto-cancel-
+        - zuora-auto-cancel-sqs-
     dependencies:
       - zuora-auto-cancel-cloudformation
 
