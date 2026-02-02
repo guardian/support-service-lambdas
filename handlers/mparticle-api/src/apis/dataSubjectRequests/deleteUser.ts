@@ -9,6 +9,12 @@ import { deleteMParticleUser } from '../../services/mparticleDeletion';
 import type { DeletionResult } from '../../types/deletionMessage';
 
 /**
+ * Sleep for a specified number of milliseconds
+ */
+const sleep = (ms: number): Promise<void> =>
+	new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
  * Process a user deletion request
  *
  * This function implements idempotent deletion logic:
@@ -42,6 +48,13 @@ export async function processUserDeletion(
 
 	let brazeResult: DeletionResult | null = null;
 	if (brazeId && brazeId.trim() !== '') {
+		// Wait 10 seconds before deleting from Braze to allow Identity system
+		// to unsubscribe user from newsletters first
+		logger.log(
+			`Waiting 10 seconds before Braze deletion for user ${identityId} to allow newsletter unsubscription`,
+		);
+		await sleep(10000);
+
 		brazeResult = await deleteBrazeUser(brazeClient, brazeId);
 	} else {
 		logger.log(
