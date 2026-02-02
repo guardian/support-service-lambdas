@@ -126,7 +126,7 @@ const mparticleApi: HandlerDefinition = {
 	],
 	testTimeoutSeconds: 15,
 	extraScripts: {
-		'check-config': 'ts-node runManual/runLoadConfig.ts',
+		'check-config': 'tsx runManual/runLoadConfig.ts',
 	},
 	dependencies: {
 		...dep['@peculiar/x509'],
@@ -137,6 +137,7 @@ const mparticleApi: HandlerDefinition = {
 		...devDeps['@faker-js/faker'],
 		...devDeps['@types/aws-lambda'],
 		...dep['@aws-sdk/client-s3'],
+		...devDeps['tsx'],
 	},
 };
 

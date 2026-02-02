@@ -13,7 +13,7 @@
     "cdk:test-update": "pnpm --filter cdk test-update mparticle-api",
     "update-lambda": "../../update-lambda.sh \"mparticle-api\" mparticle-api-http- mparticle-api-baton- mparticle-api-mma-user-deletion-",
     "update-stack": "../../update-stack.sh \"mparticle-api\"",
-    "check-config": "ts-node runManual/runLoadConfig.ts"
+    "check-config": "tsx runManual/runLoadConfig.ts"
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
@@ -25,6 +25,7 @@
   "devDependencies": {
     "@faker-js/faker": "^9.8.0",
     "@types/aws-lambda": "^8.10.147",
-    "@aws-sdk/client-s3": "^3.940.0"
+    "@aws-sdk/client-s3": "^3.940.0",
+    "tsx": "^4.21.0"
   }
 }
