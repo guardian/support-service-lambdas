@@ -9,6 +9,44 @@ import type { PreviewResponse, SwitchDiscountResponse } from './action/preview';
 import { ChangePlanEndpoint } from './changePlanEndpoint';
 import { productSwitchCommonRequestSchema } from './schemas';
 
+export async function legacyContributionToSupporterPlus(
+	stage: Stage,
+	today: dayjs.Dayjs,
+	body: LegacyProductSwitchRequestBody,
+	zuoraClient: ZuoraClient,
+	subscription: ZuoraSubscription,
+	account: ZuoraAccount,
+) {
+	const productSwitchEndpoint = new ChangePlanEndpoint(
+		stage,
+		today,
+		{
+			...body,
+			targetProduct: 'SupporterPlus',
+			...legacyGetModeFromInput(body),
+		},
+		zuoraClient,
+		subscription,
+		account,
+	);
+
+	if (body.preview) {
+		const intermediate: PreviewResponse =
+			await productSwitchEndpoint.doPreview();
+		const response: LegacyPreviewResponse = {
+			contributionRefundAmount: intermediate.proratedRefundAmount * -1,
+			discount: intermediate.discount,
+			nextPaymentDate: intermediate.nextPaymentDate,
+			supporterPlusPurchaseAmount: intermediate.targetCatalogPrice,
+			amountPayableToday: intermediate.amountPayableToday,
+		};
+		return response;
+	} else {
+		const response = await productSwitchEndpoint.doSwitch();
+		return response;
+	}
+}
+
 /**
  * this file is just wrapper functionality for the legacy endpoint (deprecated)
  *
@@ -24,40 +62,18 @@ export function legacyContributionToSupporterPlusEndpoint(
 		subscription: ZuoraSubscription,
 		account: ZuoraAccount,
 	) => {
-		const productSwitchEndpoint = new ChangePlanEndpoint(
+		const response = await legacyContributionToSupporterPlus(
 			stage,
 			today,
-			{
-				...body,
-				targetProduct: 'SupporterPlus',
-				...legacyGetModeFromInput(body),
-			},
+			body,
 			zuoraClient,
 			subscription,
 			account,
 		);
-
-		if (body.preview) {
-			const intermediate: PreviewResponse =
-				await productSwitchEndpoint.doPreview();
-			const response: LegacyPreviewResponse = {
-				contributionRefundAmount: intermediate.proratedRefundAmount * -1,
-				discount: intermediate.discount,
-				nextPaymentDate: intermediate.nextPaymentDate,
-				supporterPlusPurchaseAmount: intermediate.targetCatalogPrice,
-				amountPayableToday: intermediate.amountPayableToday,
-			};
-			return {
-				body: JSON.stringify(response),
-				statusCode: 200,
-			};
-		} else {
-			const response = await productSwitchEndpoint.doSwitch();
-			return {
-				body: JSON.stringify(response),
-				statusCode: 200,
-			};
-		}
+		return {
+			body: JSON.stringify(response),
+			statusCode: 200,
+		};
 	};
 }
 
