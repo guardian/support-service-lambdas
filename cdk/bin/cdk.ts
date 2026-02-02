@@ -137,6 +137,7 @@ new PromotionsLambdas(app, 'PROD', {
 });
 
 const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
+	ImovoRewards,
 	DiscountApi,
 	ProductSwitchApi,
 	UpdateSupporterPlusAmount,
@@ -284,3 +285,5 @@ new SalesforceEventBus(app, 'salesforce-event-bus-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 });
+
+import { ImovoRewards } from '../lib/imovo-rewards';

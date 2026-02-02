@@ -1,3 +1,4 @@
+	imovoRewards,
 import { dep, deprecatedDeps, devDeps } from './dependencies';
 
 /*

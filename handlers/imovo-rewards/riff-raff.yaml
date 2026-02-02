@@ -1,0 +1,26 @@
+stacks:
+  - membership
+
+regions:
+  - eu-west-1
+
+allowedStages:
+  - CODE
+  - PROD
+
+deployments:
+  cfn:
+    type: cloud-formation
+    app: imovo-rewards
+    parameters:
+      templatePath: cfn.yaml
+
+  imovo-rewards-lambda:
+    type: aws-lambda
+    parameters:
+      fileName: imovo-rewards.jar
+      bucket: support-service-lambdas-dist
+      prefixStack: false
+      functionNames:
+        - imovo-rewards-
+    dependencies: [cfn]
