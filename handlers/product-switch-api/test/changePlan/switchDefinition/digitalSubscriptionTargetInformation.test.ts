@@ -17,6 +17,7 @@ describe('digitalSubscriptionTargetInformation', () => {
 			mode: 'switchToBasePrice',
 			currency: 'GBP',
 			previousAmount: catalogPrice,
+			isGuardianEmail: true,
 		};
 
 		const result = await digitalSubscriptionTargetInformation(
@@ -29,6 +30,18 @@ describe('digitalSubscriptionTargetInformation', () => {
 		expect(result.ratePlanName).toBe('Digital Pack Annual');
 		expect(result.contributionCharge).toBeUndefined();
 		expect(result.discount).toBeUndefined();
+
+		const nonGuardianSwitchActionData: SwitchActionData = {
+			...switchActionData,
+			isGuardianEmail: false,
+		};
+
+		expect(() =>
+			digitalSubscriptionTargetInformation(
+				annualDigitalSubscriptionRatePlan,
+				nonGuardianSwitchActionData,
+			),
+		).toThrow(ValidationError);
 	});
 
 	test('throws ValidationError when user-requested amount does not match catalog price', () => {
@@ -38,6 +51,7 @@ describe('digitalSubscriptionTargetInformation', () => {
 			mode: 'switchToBasePrice',
 			currency: 'GBP',
 			previousAmount: catalogPrice + 5,
+			isGuardianEmail: true,
 		};
 
 		expect(() =>
@@ -55,6 +69,7 @@ describe('digitalSubscriptionTargetInformation', () => {
 			mode: 'switchToBasePrice',
 			currency: 'GBP',
 			previousAmount: catalogPrice,
+			isGuardianEmail: true,
 		};
 
 		const result = await digitalSubscriptionTargetInformation(
@@ -72,6 +87,7 @@ describe('digitalSubscriptionTargetInformation', () => {
 			mode: 'save',
 			currency: 'GBP',
 			previousAmount: catalogPrice,
+			isGuardianEmail: true,
 		};
 
 		expect(() =>
@@ -89,6 +105,7 @@ describe('digitalSubscriptionTargetInformation', () => {
 			mode: 'switchWithPriceOverride',
 			currency: 'GBP',
 			userRequestedAmount: catalogPrice,
+			isGuardianEmail: true,
 		};
 
 		expect(() =>

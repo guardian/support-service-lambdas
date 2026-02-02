@@ -46,6 +46,7 @@ const getTestTargetInformation = async () =>
 			mode: 'switchToBasePrice',
 			currency: 'GBP',
 			previousAmount: 10,
+			isGuardianEmail: false,
 		},
 	);
 

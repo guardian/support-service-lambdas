@@ -18,6 +18,7 @@ describe('getSupporterPlusTargetInformation', () => {
 			mode: 'switchToBasePrice',
 			currency: 'GBP',
 			previousAmount,
+			isGuardianEmail: false,
 		};
 
 		const result = await supporterPlusTargetInformation(
@@ -40,6 +41,7 @@ describe('getSupporterPlusTargetInformation', () => {
 			mode: 'switchToBasePrice',
 			currency: 'GBP',
 			previousAmount,
+			isGuardianEmail: false,
 		};
 
 		const result = await supporterPlusTargetInformation(
@@ -59,6 +61,7 @@ describe('getSupporterPlusTargetInformation', () => {
 			mode: 'switchWithPriceOverride',
 			currency: 'GBP',
 			userRequestedAmount,
+			isGuardianEmail: false,
 		};
 
 		const result = await supporterPlusTargetInformation(
@@ -78,6 +81,7 @@ describe('getSupporterPlusTargetInformation', () => {
 			mode: 'switchWithPriceOverride',
 			currency: 'GBP',
 			userRequestedAmount,
+			isGuardianEmail: false,
 		};
 
 		expect(() =>
@@ -97,6 +101,7 @@ describe('getSupporterPlusTargetInformation', () => {
 			mode: 'save',
 			currency: 'GBP',
 			previousAmount,
+			isGuardianEmail: false,
 		};
 
 		const result = await supporterPlusTargetInformation(
@@ -123,6 +128,7 @@ describe('getSupporterPlusTargetInformation', () => {
 			mode: 'save',
 			currency: 'GBP',
 			previousAmount,
+			isGuardianEmail: false,
 		};
 
 		expect(() =>
@@ -146,6 +152,7 @@ describe('getSupporterPlusTargetInformation', () => {
 			mode: 'switchToBasePrice',
 			currency: 'GBP',
 			previousAmount,
+			isGuardianEmail: false,
 		};
 
 		const result = await supporterPlusTargetInformation(

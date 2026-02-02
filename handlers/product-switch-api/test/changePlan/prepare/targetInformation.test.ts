@@ -47,6 +47,7 @@ describe('getTargetInformation', () => {
 			subscription.ratePlan,
 			'EUR',
 			previousAmount,
+			false,
 			productCatalogHelper,
 		);
 
@@ -84,6 +85,7 @@ describe('getTargetInformation', () => {
 			subscription.ratePlan,
 			'EUR',
 			discountEligiblePreviousAmount,
+			false,
 			productCatalogHelper,
 		);
 
@@ -107,6 +109,7 @@ describe('getTargetInformation', () => {
 				subscription.ratePlan,
 				'EUR',
 				50,
+				false,
 				productCatalogHelper,
 			),
 		).toThrow(ReferenceError);

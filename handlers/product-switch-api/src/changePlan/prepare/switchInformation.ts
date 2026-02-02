@@ -1,3 +1,4 @@
+import { userHasGuardianEmail } from '@modules/product-benefits/userBenefits';
 import type { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import type { ZuoraAccount } from '@modules/zuora/types';
 import type { GuardianSubscription } from '../../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
@@ -31,6 +32,7 @@ export async function getSwitchInformation(
 		subscription.ratePlan,
 		accountInformation.currency,
 		subscriptionInformation.previousAmount,
+		userHasGuardianEmail(account.billToContact.workEmail),
 		productCatalogHelper,
 	);
 
