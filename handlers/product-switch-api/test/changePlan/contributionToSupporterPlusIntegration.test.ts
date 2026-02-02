@@ -468,6 +468,7 @@ describe('product-switching behaviour', () => {
 				testData.subscription.subscriptionNumber,
 			);
 			await testSwitchLocal('DigitalSubscription', {
+				// should take the extra payment
 				...testData,
 				subscription: subscriptionAfter,
 			});
@@ -510,8 +511,9 @@ describe('product-switching behaviour', () => {
 			await addAmountChange(testData, nextMonth);
 
 			const input: ProductSwitchRequestBody = {
-				mode: 'switchToBasePrice',
+				mode: 'switchWithPriceOverride',
 				targetProduct: 'SupporterPlus',
+				newAmount: 120.1, // should get written off
 			};
 
 			const response = await testSwitch(testData, input);
@@ -520,63 +522,6 @@ describe('product-switching behaviour', () => {
 		},
 		1000 * 60,
 	);
-
-	// it(
-	// 	'can take a payment after a switch',
-	// 	async () => {
-	// 		const contributionPrice = 2;
-	// 		const testData = await createTestContribution(
-	// 			contributionPrice,
-	// 			12,
-	// 			false,
-	// 			false,
-	// 			{ billingPeriod: 'Month' },
-	// 		);
-	//
-	// 		const response = await testSwitch(testData);
-	//
-	// 		await createPayment(
-	// 			testData.zuoraClient,
-	// 			response.invoiceIds?.[0] ?? '',
-	// 			10,
-	// 			testData.account.basicInfo.id,
-	// 			testData.account.billingAndPayment.defaultPaymentMethodId,
-	// 			dayjs(),
-	// 		);
-	// 	},
-	// 	1000 * 60,
-	// );
-	//
-	// it(
-	// 	'can adjust an invoice to zero',
-	// 	async () => {
-	// 		const contributionPrice = 11.9;
-	// 		const testData = await createTestContribution(
-	// 			contributionPrice,
-	// 			12,
-	// 			false,
-	// 			false,
-	// 			{ billingPeriod: 'Month' },
-	// 		);
-	//
-	// 		const switchResponse = await testSwitch(testData);
-	//
-	// 		const invoiceId = getIfDefined(
-	// 			switchResponse.invoiceIds?.[0],
-	// 			'invoice id was undefined in response from Zuora',
-	// 		);
-	//
-	// 		const response = await adjustNonCollectedInvoice(
-	// 			zuoraClient,
-	// 			invoiceId,
-	// 			0.1,
-	// 			'8ad08cbd8586721c01858804e3715378',
-	// 		);
-	//
-	// 		expect(response.Id).toBeDefined();
-	// 	},
-	// 	1000 * 60,
-	// );
 });
 
 const emptyRequestContext = {
