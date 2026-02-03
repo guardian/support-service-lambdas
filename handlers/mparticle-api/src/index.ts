@@ -106,9 +106,6 @@ export const handlerDeletion: Handler<SQSEvent, void> = async (
 	logger.log('Finished processing deletion messages');
 };
 
-/**
- * Process a single SQS record
- */
 async function processSQSRecord(
 	record: SQSRecord,
 	mParticleClient: MParticleClientType<BulkDeletionAPI>,
