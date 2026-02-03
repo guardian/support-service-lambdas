@@ -25,45 +25,6 @@ test('salesforce tracking data is serialised to the queue correctly', () => {
 		subscriptionNumber: 'A-S0123',
 		termStartDate: new Date(),
 	};
-	// const testData: TargetInformation = {
-	// 	input: {
-	// 		preview: false,
-	// 		// csrUserId: undefined,
-	// 		// caseId: undefined,
-	// 	},
-	// 	actualTotalPrice: 45.5,
-	// 	startNewTerm: false,
-	// 	contributionAmount: 10.5,
-	// 	account: {
-	// 		id: '',
-	// 		identityId: '',
-	// 		emailAddress: '',
-	// 		firstName: '',
-	// 		lastName: '',
-	// 		defaultPaymentMethodId: '',
-	// 	},
-	// 	subscription: {
-	// 		accountNumber: '',
-	// 		subscriptionNumber: 'A-S0123',
-	// 		previousProductName: 'Contributor',
-	// 		previousRatePlanName: 'Monthly Contribution',
-	// 		previousAmount: 20,
-	// 		currency: 'GBP',
-	// 		billingPeriod: 'Month',
-	// 	},
-	// 	catalog: {
-	// 		targetProduct: {
-	// 			catalogBasePrice: 0,
-	// 			productRatePlanId: '',
-	// 			subscriptionChargeId: '',
-	// 			contributionChargeId: '',
-	// 		},
-	// 		sourceProduct: {
-	// 			productRatePlanId: '',
-	// 			chargeId: '',
-	// 		},
-	// 	},
-	// };
 	const expected = {
 		subscriptionName: 'A-S0123',
 		previousAmount: 20,

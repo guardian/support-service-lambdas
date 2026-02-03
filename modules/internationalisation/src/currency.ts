@@ -50,9 +50,7 @@ const currencies: Record<IsoCurrency, CurrencyInfo> = {
 	},
 };
 
-export const isSupportedCurrency: (
-	productKey: string,
-) => productKey is IsoCurrency = isInList(CurrencyValues);
+export const isSupportedCurrency = isInList(CurrencyValues);
 
 export const getCurrencyInfo = (currency: IsoCurrency): CurrencyInfo =>
 	currencies[currency];

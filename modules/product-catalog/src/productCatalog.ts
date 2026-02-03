@@ -140,13 +140,18 @@ export type GuardianCatalogKeys<P extends ProductKey = ProductKey> = {
 	}[ProductRatePlanKey<K>];
 }[P];
 
-// handy if there are duplicates in a union, makes it look better in the IDE
+/**
+ * handy if there are duplicates in a union, makes it look better in the IDE
+ *
+ * converts
+ * A | B | A | B
+ * to
+ * A | B
+ */
 export type Normalize<T> = T extends infer U ? U : never;
 
 export class ProductCatalogHelper {
-	constructor(private catalogData: ProductCatalog) {
-		// console.log(shouldCompile.toString()); // TODO delete, just to stop ts unused warnings
-	}
+	constructor(private catalogData: ProductCatalog) {}
 
 	getProductRatePlan = <
 		P extends ProductKey,
@@ -188,6 +193,9 @@ export class ProductCatalogHelper {
 		return allProducts.find((product) => product.id === productRatePlanId);
 	};
 
+	/**
+	 * validates the rate plan key against the product and returns the combined object
+	 */
 	validateOrThrow<P extends ProductKey>(
 		targetGuardianProductName: P,
 		productRatePlanKey: string,

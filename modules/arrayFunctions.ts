@@ -111,30 +111,6 @@ export const partition = <T>(
 	return [pass, fail];
 };
 
-// export type ExcludeByDiscriminant<
-// 	T,
-// 	K extends PropertyKey,
-// 	V
-// > = T extends { [P in K]: V } ? never : T;
-//
-// export const partitionByDiscriminatedUnion = <T, U extends T, K extends PropertyKey, V>(
-// 	arr: T[],
-// 	fn: (t: T) => t is U,
-// 	discriminantKey: K,
-// 	discriminantValue: V,
-// ): [U[], Array<ExcludeByDiscriminant<T, K, V>>] =>
-// 	arr.reduce<[U[], Array<ExcludeByDiscriminant<T, K, V>>]>(
-// 		(acc, val) => {
-// 			if (fn(val)) {
-// 				acc[0].push(val);
-// 			} else {
-// 				acc[1].push(val as ExcludeByDiscriminant<T, K, V>);
-// 			}
-// 			return acc;
-// 		},
-// 		[[], []],
-// 	);
-
 export const partitionByType = <T, U extends T>(
 	arr: T[],
 	fn: (t: T) => t is U,

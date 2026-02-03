@@ -1,5 +1,4 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
-import { objectKeys } from '@modules/objectFunctions';
 import type {
 	ProductKey,
 	TermType,
@@ -214,12 +213,6 @@ export const getTermTypeName = (zuoraTermType: string | null): TermType => {
 export const getTermLength = (zuoraTermLength: string | null): number => {
 	return zuoraTermLength === null ? 12 : Number(zuoraTermLength); //If the default term is null, we assume it's 12 months
 };
-export const isSupportedProductRatePlanCharge = (
-	productRatePlanCharge: string,
-) =>
-	objectKeys(zuoraCatalogToProductRatePlanChargeKey).includes(
-		productRatePlanCharge,
-	);
 export const isSupportedProductRatePlan = (productRatePlan: string) =>
 	Object.keys(zuoraCatalogToProductRatePlanKey).includes(productRatePlan);
 export const isSupportedProduct = (product: string) =>
