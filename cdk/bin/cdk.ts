@@ -13,6 +13,7 @@ import {
 import { DiscountApi } from '../lib/discount-api';
 import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
+import { ImovoRewards } from '../lib/imovo-rewards';
 import { MetricPushApi } from '../lib/metric-push-api';
 import { MobilePurchasesToSupporterProductData } from '../lib/mobile-purchases-to-supporter-product-data';
 import { MParticleApi } from '../lib/mparticle-api';
@@ -285,5 +286,3 @@ new SalesforceEventBus(app, 'salesforce-event-bus-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 });
-
-import { ImovoRewards } from '../lib/imovo-rewards';
