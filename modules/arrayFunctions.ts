@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { objectEntries, objectFromEntries } from '@modules/objectFunctions';
 
 export function isInList<T extends string>(values: readonly [T, ...T[]]) {
 	return (productKey: string): productKey is T => {
@@ -12,10 +13,10 @@ export const sum = <T>(array: T[], fn: (item: T) => number): number => {
 export const sumNumbers = (array: number[]): number => {
 	return sum(array, (item) => item);
 };
-export const groupBy = <T>(
-	array: T[],
-	fn: (item: T) => string,
-): Record<string, T[]> => {
+export const groupBy = <T, I extends string>(
+	array: readonly T[],
+	fn: (item: T) => I,
+): Record<I, T[]> => {
 	return array.reduce<Record<string, T[]>>((acc, item) => {
 		const key = fn(item);
 		const group = acc[key] ?? [];
@@ -25,16 +26,51 @@ export const groupBy = <T>(
 	}, {});
 };
 
+/**
+ * groupMap creates an object where its keys are the result of the group function, and the values are the result
+ * of the map function
+ *
+ * @param array
+ * @param group
+ * @param map
+ */
 export const groupMap = <T, R>(
-	array: T[],
+	array: readonly T[],
 	group: (item: T) => string,
 	map: (item: T) => R,
 ): Record<string, R[]> => {
-	return Object.fromEntries(
-		Object.entries(groupBy(array, group)).map(([key, values]) => [
+	return objectFromEntries(
+		objectEntries(groupBy(array, group)).map(([key, values]) => [
 			key,
 			values.map(map),
 		]),
+	);
+};
+
+/**
+ * groupCollect creates an object where the keys are the first element returned by toMaybeEntry,
+ * and the values are the second element.
+ * If the function returns undefined, the item is discarded.
+ *
+ * @param array
+ * @param toMaybeEntry
+ */
+export const groupCollect = <T, R, K extends string>(
+	array: readonly T[],
+	toMaybeEntry: (item: T) => [K, R] | undefined,
+): Record<K, R[]> => {
+	return array.reduce<Record<K, R[]>>(
+		(acc, item) => {
+			const keyValue = toMaybeEntry(item);
+			if (keyValue !== undefined) {
+				const [key, value] = keyValue;
+				const group = acc[key] ?? [];
+				group.push(value);
+				acc[key] = group;
+			}
+			return acc;
+		},
+		{} as Record<K, R[]>,
 	);
 };
 
@@ -49,16 +85,16 @@ export const chunkArray = <T>(array: T[], chunkSize: number): T[][] => {
 	return result;
 };
 
-export const mapValues = <
-	T extends object,
-	RES extends { [K in keyof T]: any },
->(
+export const mapValues = <T extends object, RES>(
 	obj: T,
-	fn: <K extends keyof T>(v: T[K], k: K) => RES[K],
-): RES => {
-	const res = {} as RES;
+	fn: <K extends keyof T>(v: T[K], k: K) => RES | undefined,
+): Record<keyof T, RES> => {
+	const res = {} as Record<keyof T, RES>;
 	for (const key in obj) {
-		res[key] = fn(obj[key], key);
+		const maybeNewValue = fn(obj[key], key);
+		if (maybeNewValue !== undefined) {
+			res[key] = maybeNewValue;
+		}
 	}
 	return res;
 };
@@ -121,9 +157,35 @@ export const getSingleOrThrow = <T>(
 	return array[0];
 };
 
+/**
+ * returns the first value or undefined, but throws if there are multiple
+ *
+ * @param array
+ * @param error
+ */
+export const getMaybeSingleOrThrow = <T>(
+	array: T[],
+	error: (msg: string) => Error,
+): T | undefined => {
+	if (array.length > 1) {
+		throw error('Array had more than one matching element');
+	}
+	if (array.length === 0 || !array[0]) {
+		return undefined;
+	}
+	return array[0];
+};
+
 export const findDuplicates = <T>(array: T[]) =>
 	array.filter((item, index) => array.indexOf(item) !== index);
-export const distinct = <T>(array: T[]) => Array.from(new Set(array));
+
+// see SameValueZero column of  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Equality_comparisons_and_sameness#comparing_equality_methods
+// objects would work in theory but are tested by identity rather than structurally
+export type SafeForDistinct = number | string | undefined | null;
+
+export const distinct = <T extends SafeForDistinct>(array: T[]) =>
+	Array.from(new Set(array));
+
 export const arrayToObject = <T>(array: Array<Record<string, T>>) => {
 	return array.reduce((acc, val) => {
 		return { ...acc, ...val };
@@ -164,3 +226,59 @@ export const intersection = <T>(a: T[], b: T[]) => {
 	const setB = new Set(b);
 	return [...new Set(a)].filter((x) => setB.has(x));
 };
+
+export const difference = <T>(a: T[], b: T[]) => {
+	const setA = new Set(a);
+	const setB = new Set(b);
+	const onlyInA = [...setA].filter((x) => !setB.has(x));
+	const onlyInB = [...setB].filter((x) => !setA.has(x));
+	return [onlyInA, onlyInB] as const;
+};
+
+export function getNonEmptyOrThrow<T>(
+	array: T[],
+	errorMessage: string,
+): [T, ...T[]] {
+	if (array[0] === undefined) {
+		throw new Error(errorMessage);
+	}
+	return [array[0], ...array.slice(1)];
+}
+
+/**
+ * this does a groupBy and then extracts a single item from each group.
+ *
+ * This is safer than objectFromEntries which silently discards clashes.
+ *
+ * @param ratePlanCharges
+ * @param by
+ * @param msg
+ */
+export function groupByUniqueId<T, K extends string>(
+	ratePlanCharges: T[],
+	by: (t: T) => K,
+	msg: string,
+): Record<K, T> {
+	return groupCollectByUniqueId(ratePlanCharges, (a) => [by(a), a], msg);
+}
+
+/**
+ * this does a groupCollect and then extracts a single item.
+ *
+ * @param ratePlanCharges
+ * @param by
+ * @param map
+ * @param msg
+ */
+export function groupCollectByUniqueId<T, R, K extends string>(
+	ratePlanCharges: T[],
+	by: (t: T) => [K, R] | undefined,
+	msg: string,
+): Record<K, R> {
+	return mapValues(groupCollect(ratePlanCharges, by), (arr) =>
+		getSingleOrThrow(
+			arr,
+			(msg2) => new Error('duplicate keys: ' + msg + ', ' + msg2),
+		),
+	);
+}

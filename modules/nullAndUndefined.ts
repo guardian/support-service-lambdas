@@ -38,3 +38,13 @@ export function isNonEmpty<T>(arr: T[]): arr is [T, ...T[]] {
 	// this way, TypeScript knows that arr[0] is of type T and not undefined
 	return arr.length > 0;
 }
+
+export const mapOption = <T, O>(
+	value: T | undefined,
+	fn: (value: T) => O,
+): O | undefined => {
+	if (value === undefined) {
+		return undefined;
+	}
+	return fn(value);
+};

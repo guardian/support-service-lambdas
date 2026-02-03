@@ -33,6 +33,7 @@ export const dep = separateDepRecords({
 		'client-lambda',
 		'credential-provider-node',
 		'lib-storage',
+		'client-cloudwatch-logs',
 	]),
 });
 

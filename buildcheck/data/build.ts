@@ -195,6 +195,8 @@ const productSwitchApi: HandlerDefinition = {
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
+		...dep['@aws-sdk/client-cloudwatch-logs'],
+		...dep['@aws-sdk/credential-providers'],
 	},
 };
 
