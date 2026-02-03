@@ -92,8 +92,7 @@ export const handlerDeletion: Handler<SQSEvent, void> = async (
 	const mParticleEnvironment: 'production' | 'development' =
 		stage === 'PROD' ? 'production' : 'development';
 
-	// Process each record independently
-	// SQS will retry failed messages automatically
+	// there will only be a single record, sqs will retry the batch on error
 	for (const record of event.Records) {
 		await processSQSRecord(
 			record,
