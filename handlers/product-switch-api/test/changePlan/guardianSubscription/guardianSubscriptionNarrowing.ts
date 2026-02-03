@@ -7,10 +7,12 @@ function shouldCompile(ratePlan: GuardianRatePlan) {
 		ratePlan.productKey === 'SupporterPlus' &&
 		ratePlan.productRatePlanKey === 'OneYearStudent'
 	) {
-		const a = ratePlan.product.customerFacingName;
-		const b = ratePlan.productRatePlan.pricing.NZD;
-		const c = ratePlan.ratePlanCharges.Subscription.price;
-		return { a, b, c };
+		const a1: string = ratePlan.product.customerFacingName;
+		const a2: number = ratePlan.productRatePlan.pricing.NZD;
+		const a3: number | null = ratePlan.ratePlanCharges.Subscription.price;
+		// @ts-expect-error -- ensure that we can't see charges on other rate plans
+		const a4 = ratePlan.ratePlanCharges.Contribution as unknown;
+		return { a1, a2, a3, a4 };
 	}
 
 	if (
@@ -18,9 +20,9 @@ function shouldCompile(ratePlan: GuardianRatePlan) {
 		(ratePlan.productRatePlanKey === 'Monthly' ||
 			ratePlan.productRatePlanKey === 'Annual')
 	) {
-		const d = ratePlan.product.customerFacingName;
-		const e = ratePlan.productRatePlan.pricing.AUD;
-		const f = ratePlan.ratePlanCharges.Contribution.price;
-		return { d, e, f };
+		const b1: string = ratePlan.product.customerFacingName;
+		const b2: number = ratePlan.productRatePlan.pricing.AUD;
+		const b3: number | null = ratePlan.ratePlanCharges.Contribution.price;
+		return { b1, b2, b3 };
 	}
 }
