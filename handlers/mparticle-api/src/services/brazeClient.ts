@@ -15,9 +15,6 @@ type BrazeDeleteRequest = {
 	external_ids: string[];
 };
 
-/**
- * Braze API Response Schema
- */
 const BrazeDeleteResponseSchema = z.object({
 	deleted: z.number().optional(),
 	message: z.string().optional(),
