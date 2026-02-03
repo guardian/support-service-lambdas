@@ -1,43 +1,46 @@
-import { groupCollectByUniqueId } from '@modules/arrayFunctions';
-import { getIfDefined, mapOption } from '@modules/nullAndUndefined';
-import { joinAllLeft, objectJoinBijective } from '@modules/objectFunctions';
+import { joinAllLeft } from '@modules/objectFunctions';
 import type {
-	Product,
 	ProductCatalog,
 	ProductKey,
-	ProductRatePlan,
-	ProductRatePlanChargeKey,
 	ProductRatePlanKey,
 } from '@modules/product-catalog/productCatalog';
-import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import {
 	zuoraCatalogToProductKey,
-	zuoraCatalogToProductRatePlanChargeKey,
 	zuoraCatalogToProductRatePlanKey,
 } from '@modules/product-catalog/zuoraToProductNameMappings';
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import type {
 	CatalogProduct,
 	ZuoraCatalog,
-	ZuoraProductRatePlan,
-	ZuoraProductRatePlanCharge,
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import type {
 	ZuoraProductIdMap,
-	ZuoraProductNode,
-	ZuoraProductRatePlanChargeIdMap,
 	ZuoraProductRatePlanNode,
 } from './group/buildZuoraProductIdToKey';
 import { buildZuoraProductIdToKey } from './group/buildZuoraProductIdToKey';
 import type {
 	IndexedZuoraRatePlanWithCharges,
-	IndexedZuoraSubscriptionRatePlanCharges,
-	IndexedZuoraSubscriptionRatePlans,
-	RestRatePlan,
-	RestRatePlanCharge,
 	RestSubscription,
 } from './group/groupSubscriptionByZuoraCatalogIds';
 import { ZuoraSubscriptionIndexer } from './group/groupSubscriptionByZuoraCatalogIds';
+import type { GuardianRatePlan } from './reprocessRatePlans/guardianRatePlanBuilder';
+import { GuardianRatePlanBuilder } from './reprocessRatePlans/guardianRatePlanBuilder';
+import type { ZuoraRatePlan } from './reprocessRatePlans/zuoraRatePlanBuilder';
+import { ZuoraRatePlanBuilder } from './reprocessRatePlans/zuoraRatePlanBuilder';
+
+/**
+ * This represents what extra info we attach to the subscription to make a "guardian" subscription.
+ */
+type RatePlansWithCatalogData = {
+	ratePlans: GuardianRatePlan[];
+	productsNotInCatalog: ZuoraRatePlan[]; // slightly different type needed with zuora catalog attached
+};
+
+/**
+ * represents a zuora subscription that has been augmented with guardian and zuora catalog information
+ */
+export type GuardianSubscriptionMultiPlan = RatePlansWithCatalogData &
+	RestSubscription;
 
 /**
  * this takes a basic zuora subscription and converts it to a guardian "product catalog"
@@ -119,44 +122,27 @@ export class GuardianSubscriptionParser {
 				zuoraSubscription,
 			);
 
-		const { ratePlans, productsNotInCatalog } = joinAllLeft(
+		// we join and then flatten both the product and rateplan levels to avoid undue nesting
+		const guardianRatePlans: RatePlansWithCatalogData = joinFlatMap(
 			products,
 			this.zuoraProductIdGuardianLookup,
-		)
-			.map(([sub, cat]) => this.buildGuardianRatePlansByProductKey(sub, cat))
-			.reduce((rp1, rp2) => ({
-				ratePlans: [...rp1.ratePlans, ...rp2.ratePlans],
-				productsNotInCatalog: [
-					...rp1.productsNotInCatalog,
-					...rp2.productsNotInCatalog,
-				],
-			}));
+			(ratePlansById, { zuoraProduct, productRatePlans }) =>
+				joinFlatMap(
+					ratePlansById,
+					productRatePlans,
+					(ratePlansForId, productRatePlanAndChargesMap) =>
+						this.buildRatePlansWithCatalogData(
+							ratePlansForId,
+							productRatePlanAndChargesMap,
+							zuoraProduct,
+						),
+				),
+		);
 
 		return {
 			...restSubscription,
-			ratePlans,
-			productsNotInCatalog,
+			...guardianRatePlans,
 		};
-	}
-
-	/**
-	 * looking at a specific productId, join the rate plans underneath, process the list, and then merge all the results
-	 */
-	private buildGuardianRatePlansByProductKey(
-		zuoraSubscriptionRatePlans: IndexedZuoraSubscriptionRatePlans,
-		productNode: ZuoraProductNode,
-	): RatePlansWithCatalogData {
-		return joinAllLeft(zuoraSubscriptionRatePlans, productNode.productRatePlans)
-			.map(([sub, cat]) =>
-				this.buildRatePlansWithCatalogData(sub, cat, productNode.zuoraProduct),
-			)
-			.reduce((rp1, rp2) => ({
-				ratePlans: [...rp1.ratePlans, ...rp2.ratePlans],
-				productsNotInCatalog: [
-					...rp1.productsNotInCatalog,
-					...rp2.productsNotInCatalog,
-				],
-			}));
 	}
 
 	/**
@@ -170,28 +156,30 @@ export class GuardianSubscriptionParser {
 		product: CatalogProduct,
 	): RatePlansWithCatalogData {
 		const productKey = zuoraCatalogToProductKey[product.name];
-		const maybeRatePlans: GuardianRatePlan[] | undefined = mapOption(
-			productKey,
-			(productKey) =>
-				this.buildRatePlansWithCatalogDataForProductKey(
-					productKey,
-					productRatePlanNode,
-					subscriptionRatePlansForProductRatePlan,
-				),
-		);
-		return (
-			mapOption(maybeRatePlans, (ratePlans) => ({
-				ratePlans,
-				productsNotInCatalog: [],
-			})) ?? {
-				ratePlans: [],
-				productsNotInCatalog: buildZuoraRatePlans(
-					product,
-					productRatePlanNode,
-					subscriptionRatePlansForProductRatePlan,
-				),
+		if (productKey !== undefined) {
+			const maybeRatePlans = this.buildRatePlansWithCatalogDataForProductKey(
+				productKey,
+				productRatePlanNode,
+				subscriptionRatePlansForProductRatePlan,
+			);
+			if (maybeRatePlans !== undefined) {
+				return {
+					ratePlans: maybeRatePlans,
+					productsNotInCatalog: [],
+				};
 			}
+		}
+		// not in product catalog - attach to zuora catalog instead
+		const zuoraRatePlanBuilder = new ZuoraRatePlanBuilder(
+			product,
+			productRatePlanNode,
 		);
+		return {
+			ratePlans: [],
+			productsNotInCatalog: zuoraRatePlanBuilder.buildZuoraRatePlans(
+				subscriptionRatePlansForProductRatePlan,
+			),
+		};
 	}
 
 	/**
@@ -211,266 +199,37 @@ export class GuardianSubscriptionParser {
 				productRatePlanNode.zuoraProductRatePlan.name
 			] as ProductRatePlanKey<P> | undefined;
 
-		return mapOption(productRatePlanKey, (productRatePlanKey) =>
-			this.buildGuardianRatePlans(
+		if (productRatePlanKey !== undefined) {
+			const guardianRatePlanBuilder = new GuardianRatePlanBuilder(
+				this.productCatalog,
 				productKey,
 				productRatePlanKey,
+			);
+			return guardianRatePlanBuilder.buildGuardianRatePlans(
 				productRatePlanNode,
 				subscriptionRatePlansForProductRatePlan,
-			),
-		);
-	}
-
-	/**
-	 * given that the product and rateplan are in the product catalog, return a modified rate plan object
-	 * that contains the product-catalog keys and values, as well as the charges keyed as per the product
-	 * catalog.
-	 */
-	private buildGuardianRatePlans<
-		P extends ProductKey,
-		PRP extends ProductRatePlanKey<P>,
-	>(
-		productKey: P,
-		productRatePlanKey: PRP,
-		productRatePlanNode: ZuoraProductRatePlanNode,
-		subscriptionRatePlansForProductRatePlan: readonly IndexedZuoraRatePlanWithCharges[],
-	): Array<GuardianRatePlan<P>> {
-		const productCatalogHelper = new ProductCatalogHelper(this.productCatalog);
-		const product: Product<typeof productKey> = this.productCatalog[productKey];
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- just discarded an omitted variable
-		const { ratePlans: _unused1, ...restProduct } = product;
-		const productRatePlan = productCatalogHelper.getProductRatePlan(
-			productKey,
-			productRatePlanKey,
-		);
-
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- discard an omitted variable
-		const { charges: _unused2, ...restProductRatePlan } = productRatePlan;
-		const keys = (
-			ratePlanCharges: Record<
-				ProductRatePlanChargeKey<P, typeof productRatePlanKey>,
-				RestRatePlanCharge
-			>,
-		): GuardianCatalogValues<typeof productKey> => {
-			return {
-				productKey: productKey,
-				product: restProduct,
-				productRatePlanKey: productRatePlanKey,
-				productRatePlan: restProductRatePlan,
-				ratePlanCharges: ratePlanCharges,
-			};
-		};
-		const guardianRatePlans: Array<GuardianRatePlan<P>> = new RatePlansBuilder<
-			GuardianCatalogValues<P>,
-			ProductRatePlanChargeKey<P, ProductRatePlanKey<P>>,
-			RestRatePlanCharge
-		>(
-			productRatePlanNode.productRatePlanCharges,
-			keys,
-			(restRatePlanCharge, zuoraProductRatePlanCharge) => {
-				const chargeKey: ProductRatePlanChargeKey<
-					P,
-					ProductRatePlanKey<P>
-					// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- missing type from underlying record type
-				> = getIfDefined(
-					zuoraCatalogToProductRatePlanChargeKey[
-						zuoraProductRatePlanCharge.name
-					],
-					'some charges of this product are missing from the product-catalog keys lookup',
-				) as ProductRatePlanChargeKey<P, ProductRatePlanKey<P>>;
-				return [chargeKey, restRatePlanCharge];
-			},
-		).buildGenericRatePlans(subscriptionRatePlansForProductRatePlan);
-		return guardianRatePlans;
+			);
+		}
+		return undefined;
 	}
 }
 
 /**
- * if it's not a product catalog product, we build a basic ZuoraRatePlan instead
- *
- * This is mostly useful for Discounts, but there will be other products not represented.
+ * attaches a subscription rate plan id to a catalog id, and flattens out the
+ * resulting lists
  */
-function buildZuoraRatePlans(
-	product: CatalogProduct,
-	productRatePlanNode: ZuoraProductRatePlanNode,
-	subscriptionRatePlansForProductRatePlan: readonly IndexedZuoraRatePlanWithCharges[],
-): ZuoraRatePlan[] {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- throw away children
-	const { productRatePlans: _discard1, ...restProduct } = product;
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- throw away children
-	const { productRatePlanCharges: _discard2, ...restProductRatePlan } =
-		productRatePlanNode.zuoraProductRatePlan;
-
-	// build a zuora-catalog rateplan
-	const productsNotInCatalog: ZuoraRatePlan[] = new RatePlansBuilder<
-		ZuoraCatalogValues,
-		string,
-		ZuoraRatePlanCharge
-	>(
-		productRatePlanNode.productRatePlanCharges,
-		(ratePlanCharges) =>
-			({
-				product: restProduct,
-				productRatePlan: restProductRatePlan,
-				ratePlanCharges,
-			}) satisfies ZuoraCatalogValues,
-		(
-			restRatePlanCharge: RestRatePlanCharge,
-			productRatePlanCharge: ZuoraProductRatePlanCharge,
-		) => [
-			productRatePlanCharge.name,
-			{
-				...restRatePlanCharge,
-				productRatePlanCharge,
-			} satisfies ZuoraRatePlanCharge,
-		],
-	).buildGenericRatePlans(subscriptionRatePlansForProductRatePlan);
-	return productsNotInCatalog;
+function joinFlatMap<S, C>(
+	subLookup: Record<string, S>,
+	catLookup: Record<string, C>,
+	mapFn: (sub: S, cat: C) => RatePlansWithCatalogData,
+) {
+	return joinAllLeft(subLookup, catLookup)
+		.map(([sub, cat]: [S, C]) => mapFn(sub, cat))
+		.reduce((rp1, rp2) => ({
+			ratePlans: [...rp1.ratePlans, ...rp2.ratePlans],
+			productsNotInCatalog: [
+				...rp1.productsNotInCatalog,
+				...rp2.productsNotInCatalog,
+			],
+		}));
 }
-
-/**
- * this class handles reprocessing a rate plan and its charges to remove the standard charges field
- * and replace with appropriate catalog specific fields.
- */
-class RatePlansBuilder<
-	RP extends { ratePlanCharges: Record<string, RestRatePlanCharge> },
-	K extends string,
-	RPC,
-> {
-	constructor(
-		private productRatePlanCharges: ZuoraProductRatePlanChargeIdMap,
-		private ratePlanExtra: (r: Record<K, RPC>) => RP,
-		private toRPC: (
-			s: RestRatePlanCharge,
-			c: ZuoraProductRatePlanCharge,
-		) => [K, RPC],
-	) {}
-
-	buildGenericRatePlans(
-		zuoraSubscriptionRatePlans: readonly IndexedZuoraRatePlanWithCharges[],
-	): Array<GenericRatePlan<RP>> {
-		return zuoraSubscriptionRatePlans.map(
-			(zuoraSubscriptionRatePlan: IndexedZuoraRatePlanWithCharges) => {
-				return this.buildGuardianRatePlan(zuoraSubscriptionRatePlan);
-			},
-		);
-	}
-
-	buildGuardianRatePlan(
-		zuoraSubscriptionRatePlan: IndexedZuoraRatePlanWithCharges,
-	): GenericRatePlan<RP> {
-		const { ratePlanCharges, ...rest } = zuoraSubscriptionRatePlan;
-
-		return {
-			...rest,
-			...this.ratePlanExtra(this.buildGuardianRatePlanCharges(ratePlanCharges)),
-		};
-	}
-
-	private buildGuardianRatePlanCharges(
-		zuoraSubscriptionRatePlanCharges: IndexedZuoraSubscriptionRatePlanCharges,
-	): Record<K, RPC> {
-		return groupCollectByUniqueId(
-			objectJoinBijective(
-				this.productRatePlanCharges,
-				zuoraSubscriptionRatePlanCharges,
-			),
-			([zuoraProductRatePlanCharge, subCharge]) => {
-				return this.toRPC(subCharge, zuoraProductRatePlanCharge);
-			},
-			'duplicate rate plan charge keys',
-		);
-	}
-}
-
-/**
- * this is what we attach to the rate plans in place of zuora's basic rate plans array.
- *
- * this type looks convoluted, but it means that if we use an if or switch statement
- * to narrow down the product key and rate plan key, we can access the charges
- * by key rather than filtering them.  Also the product and productRatePlan are
- * correctly typed for the product.
- *
- * 	if (
- * 		ratePlan.productKey === 'SupporterPlus' &&
- * 		ratePlan.productRatePlanKey === 'Monthly'
- * 	) {
- * 		const a = ratePlan.product.customerFacingName;
- * 		const b = ratePlan.productRatePlan.pricing.NZD; // NZD doesn't exist for all products
- * 		const c = ratePlan.ratePlanCharges.Contribution.price; // Contribution exists on Monthly (but not all) S+
- * 	}
- *
- * 	if (
- * 		ratePlan.productKey === 'SupporterPlus' &&
- * 		(ratePlan.productRatePlanKey === 'Monthly' ||
- * 			ratePlan.productRatePlanKey === 'Annual')
- * 	) {
- * 		const d = ratePlan.product.customerFacingName;
- * 		const e = ratePlan.productRatePlan.pricing.AUD;
- * 		const f = ratePlan.ratePlanCharges.Contribution.price; // Contribution exists on Monthly and Annual
- * 	}
- *
- */
-type GuardianCatalogValues<P extends ProductKey = ProductKey> = {
-	[K in P]: {
-		[RPK in ProductRatePlanKey<K>]: {
-			productKey: K;
-			product: Omit<Product<K>, 'ratePlans'>;
-			productRatePlanKey: RPK;
-			productRatePlan: Omit<ProductRatePlan<K, RPK>, 'charges'>;
-			ratePlanCharges: Record<
-				ProductRatePlanChargeKey<K, RPK>,
-				RestRatePlanCharge
-			>;
-		};
-	}[ProductRatePlanKey<K>];
-}[P];
-
-/**
- * this is what we attach to the rate plan in place of zuora's basic rate plans array if it's a non-product-catalog one
- * e.g. Discounts or other non-standard products.
- */
-type ZuoraCatalogValues = {
-	product: Omit<CatalogProduct, 'productRatePlans'>;
-	productRatePlan: Omit<ZuoraProductRatePlan, 'productRatePlanCharges'>;
-	ratePlanCharges: Record<string, ZuoraRatePlanCharge>; // index by zuora charge name
-};
-
-// rateplan types for a "guardian" subscription
-
-/**
- * EXTRA represents whatever extra info we attach to the rateplan to make a "guardian" rateplan
- */
-export type GenericRatePlan<
-	EXTRA extends { ratePlanCharges: Record<string, RestRatePlanCharge> } = {
-		ratePlanCharges: Record<string, RestRatePlanCharge>;
-	},
-> = RestRatePlan & EXTRA;
-
-export type GuardianRatePlan<P extends ProductKey = ProductKey> =
-	GenericRatePlan<GuardianCatalogValues<P>>;
-
-export type ZuoraRatePlan = GenericRatePlan<ZuoraCatalogValues>;
-
-/**
- * For non-product-catalog charges, we retain the full catalog info
- *
- * (Note: For product-catalog charges, the charge only contains the id so it's not worth keeping)
- */
-type ZuoraRatePlanCharge = RestRatePlanCharge & {
-	productRatePlanCharge: ZuoraProductRatePlanCharge;
-};
-
-/**
- * This represents what extra info we attach to the subscription to make a "guardian" subscription.
- */
-type RatePlansWithCatalogData = {
-	ratePlans: GuardianRatePlan[];
-	productsNotInCatalog: ZuoraRatePlan[]; // slightly different type needed with zuora catalog attached
-};
-
-/**
- * represents a zuora subscription that has been augmented with guardian and zuora catalog information
- */
-export type GuardianSubscriptionMultiPlan = RatePlansWithCatalogData &
-	RestSubscription;

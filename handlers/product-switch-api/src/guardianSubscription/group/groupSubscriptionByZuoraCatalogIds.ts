@@ -8,11 +8,10 @@ import type {
 
 export type RestRatePlan = Omit<RatePlan, 'ratePlanCharges'>;
 export type RestSubscription = Omit<ZuoraSubscription, 'ratePlans'>;
-export type RestRatePlanCharge = RatePlanCharge;
 
 export type IndexedZuoraSubscriptionRatePlanCharges = Record<
 	string, // product rate plan charge id/name
-	RestRatePlanCharge
+	RatePlanCharge
 >;
 
 export type IndexedZuoraRatePlanWithCharges = RestRatePlan & {
@@ -39,16 +38,20 @@ type Indicies = {
 };
 
 /**
- * This is similar to buildZuoraProductIdToKey only it works on the subscription instead of the catalog.
+ * This is similar to buildZuoraProductIdToKey only it works on the
+ * subscription instead of the catalog.
  *
- * This rejigs a normal zuora subscription to index everything off the product*Ids or names as required.
+ * This rejigs a normal zuora subscription to index everything off the
+ * product*Ids or names as required.
  *
- * In the case of product*Id makes it easier to connect a subscription with the catalog
+ * In the case of product*Id makes it easier to connect a subscription with the
+ * catalog
  *
- * In the case of names, it makes non-catalog things like Discounts more usable.
+ * In the case of names, it makes non-catalog things like Discounts more
+ * usable.
  *
- * Note that if a sub has multiple of the same product and rateplan, the list will have multiple entries
- * which can be filtered down later.
+ * Note that if a sub has multiple of the same product and rateplan, the list
+ * will have multiple entries which can be filtered down later.
  *
  * @param zuoraSubscription
  * @private
@@ -69,7 +72,7 @@ export class ZuoraSubscriptionIndexer {
 		zuoraSubscription: ZuoraSubscription,
 	): ZuoraSubscriptionByCatalogIds {
 		const { ratePlans, ...restSubscription } = zuoraSubscription;
-		const doubleGroupedRatePlans = this.groupRatePlans(ratePlans);
+		const doubleGroupedRatePlans = this.doubleGroupRatePlans(ratePlans);
 
 		return {
 			...restSubscription,
@@ -77,7 +80,7 @@ export class ZuoraSubscriptionIndexer {
 		};
 	}
 
-	groupRatePlans(
+	doubleGroupRatePlans(
 		ratePlans: ZuoraSubscription['ratePlans'],
 	): IndexedZuoraSubscriptionRatePlansByProduct {
 		const doubleGroupedRatePlans: IndexedZuoraSubscriptionRatePlansByProduct =

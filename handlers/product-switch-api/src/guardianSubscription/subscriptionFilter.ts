@@ -5,16 +5,14 @@ import {
 	partitionObjectByValueType,
 } from '@modules/objectFunctions';
 import { logger } from '@modules/routing/logger';
+import type { RatePlanCharge } from '@modules/zuora/types';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import type { RestRatePlanCharge } from './group/groupSubscriptionByZuoraCatalogIds';
-import type {
-	GenericRatePlan,
-	GuardianRatePlan,
-	GuardianSubscriptionMultiPlan,
-	ZuoraRatePlan,
-} from './guardianSubscriptionParser';
+import type { GuardianSubscriptionMultiPlan } from './guardianSubscriptionParser';
+import type { GuardianRatePlan } from './reprocessRatePlans/guardianRatePlanBuilder';
+import type { GenericRatePlan } from './reprocessRatePlans/ratePlansBuilder';
+import type { ZuoraRatePlan } from './reprocessRatePlans/zuoraRatePlanBuilder';
 
 /**
  * This removes irrelevant rate plans and charges from the subscription.
@@ -25,7 +23,7 @@ export class SubscriptionFilter {
 	constructor(
 		private ratePlanDiscardReason: (rp: GenericRatePlan) => string | undefined,
 		private chargeDiscardReason: (
-			rpc: RestRatePlanCharge,
+			rpc: RatePlanCharge,
 			cancellationEffectiveDate: Dayjs | undefined,
 		) => string | undefined,
 	) {}
@@ -169,14 +167,14 @@ export class SubscriptionFilter {
 	}
 
 	private filterCharges(
-		charges: Record<string, RestRatePlanCharge>,
+		charges: Record<string, RatePlanCharge>,
 		cancellationEffectiveDate: Dayjs | undefined,
 	): {
 		errors: Record<string, string>;
-		filteredCharges: Record<string, RestRatePlanCharge>;
+		filteredCharges: Record<string, RatePlanCharge>;
 	} {
 		const [errors, filteredCharges] = partitionObjectByValueType(
-			mapValues(charges, (rpc: RestRatePlanCharge) => {
+			mapValues(charges, (rpc: RatePlanCharge) => {
 				const chargeDiscardReason1 = this.chargeDiscardReason(
 					rpc,
 					cancellationEffectiveDate,

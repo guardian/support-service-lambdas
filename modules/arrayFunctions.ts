@@ -57,7 +57,7 @@ export const groupMap = <T, R>(
  */
 export const groupCollect = <T, R, K extends string>(
 	array: readonly T[],
-	toMaybeEntry: (item: T) => [K, R] | undefined,
+	toMaybeEntry: (item: T) => readonly [K, R] | undefined,
 ): Record<K, R[]> => {
 	return array.reduce<Record<K, R[]>>(
 		(acc, item) => {
@@ -272,7 +272,7 @@ export function groupByUniqueId<T, K extends string>(
  */
 export function groupCollectByUniqueId<T, R, K extends string>(
 	ratePlanCharges: T[],
-	by: (t: T) => [K, R] | undefined,
+	by: (t: T) => readonly [K, R] | undefined,
 	msg: string,
 ): Record<K, R> {
 	return mapValues(groupCollect(ratePlanCharges, by), (arr) =>

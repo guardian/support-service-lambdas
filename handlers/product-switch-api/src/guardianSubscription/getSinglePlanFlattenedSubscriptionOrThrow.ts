@@ -5,11 +5,9 @@ import type {
 	IndexedZuoraRatePlanWithCharges,
 	RestSubscription,
 } from './group/groupSubscriptionByZuoraCatalogIds';
-import type {
-	GuardianRatePlan,
-	GuardianSubscriptionMultiPlan,
-	ZuoraRatePlan,
-} from './guardianSubscriptionParser';
+import type { GuardianSubscriptionMultiPlan } from './guardianSubscriptionParser';
+import type { GuardianRatePlan } from './reprocessRatePlans/guardianRatePlanBuilder';
+import type { ZuoraRatePlan } from './reprocessRatePlans/zuoraRatePlanBuilder';
 
 export type GuardianSubscription<P extends ProductKey = ProductKey> = {
 	ratePlan: GuardianRatePlan<P>;
