@@ -127,7 +127,7 @@ describe('processUserDeletion', () => {
 	});
 
 	describe('Non-retryable errors', () => {
-		it('should not throw if mParticle fails with non-retryable error', async () => {
+		it('should throw if mParticle fails with non-retryable error', async () => {
 			mockDeleteMParticleUser.mockResolvedValue({
 				success: false,
 				error: new Error('Invalid request'),
@@ -135,20 +135,23 @@ describe('processUserDeletion', () => {
 			});
 			mockDeleteBrazeUser.mockResolvedValue({ success: true });
 
-			// Should not throw - message will be removed from queue
-			await processUserDeletion(
-				userId,
-				brazeId,
-				mockMParticleClient,
-				mockBrazeClient,
-				'production',
-			);
+			// All errors now throw to ensure DLQ visibility for compliance
+			await expect(
+				processUserDeletion(
+					userId,
+					brazeId,
+					mockMParticleClient,
+					mockBrazeClient,
+					'production',
+				),
+			).rejects.toThrow('Invalid request');
 
 			expect(mockDeleteMParticleUser).toHaveBeenCalled();
+			// Braze is still called after the 10 second delay even if mParticle fails
 			expect(mockDeleteBrazeUser).toHaveBeenCalled();
 		});
 
-		it('should not throw if Braze fails with non-retryable error', async () => {
+		it('should throw if Braze fails with non-retryable error', async () => {
 			mockDeleteMParticleUser.mockResolvedValue({ success: true });
 			mockDeleteBrazeUser.mockResolvedValue({
 				success: false,
@@ -156,14 +159,16 @@ describe('processUserDeletion', () => {
 				retryable: false,
 			});
 
-			// Should not throw - message will be removed from queue
-			await processUserDeletion(
-				userId,
-				brazeId,
-				mockMParticleClient,
-				mockBrazeClient,
-				'production',
-			);
+			// All errors now throw to ensure DLQ visibility for compliance
+			await expect(
+				processUserDeletion(
+					userId,
+					brazeId,
+					mockMParticleClient,
+					mockBrazeClient,
+					'production',
+				),
+			).rejects.toThrow('Invalid API key');
 		});
 	});
 

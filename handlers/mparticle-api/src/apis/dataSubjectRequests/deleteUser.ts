@@ -21,8 +21,8 @@ const sleep = (ms: number): Promise<void> =>
  * 1. Calls both mParticle and Braze deletion APIs
  * 2. Treats 404 responses as success (user already deleted - idempotent)
  * 3. If both succeed: message removed from queue
- * 4. If either fails with retryable error: throws to trigger SQS retry
- * 5. SQS automatically retries up to maxReceiveCount, then moves to DLQ
+ * 4. If either fails: throws to trigger SQS retry
+ * 5. After maxReceiveCount retries, message moves to DLQ for investigation
  *
  * @param identityId - The identity ID (customerId) to delete
  * @param brazeId - Optional Braze ID for the user
@@ -62,38 +62,24 @@ export async function processUserDeletion(
 		);
 	}
 
-	// If mParticle failed with retryable error, throw to trigger SQS retry
+	// If mParticle failed, throw to trigger SQS retry
+	// After maxReceiveCount retries, message will move to DLQ for investigation
 	if (!mParticleResult.success) {
-		if (mParticleResult.retryable) {
-			logger.error(
-				`mParticle deletion failed for user ${identityId} - will retry`,
-				mParticleResult.error,
-			);
-			throw mParticleResult.error;
-		} else {
-			logger.error(
-				`Non-retryable mParticle error for user ${identityId} - giving up`,
-				mParticleResult.error,
-			);
-			// Don't throw - message will be removed from queue
-		}
+		logger.error(
+			`mParticle deletion failed for user ${identityId} - will retry`,
+			mParticleResult.error,
+		);
+		throw mParticleResult.error;
 	}
 
-	// If Braze failed with retryable error, throw to trigger SQS retry
+	// If Braze failed, throw to trigger SQS retry
+	// After maxReceiveCount retries, message will move to DLQ for investigation
 	if (brazeResult && !brazeResult.success) {
-		if (brazeResult.retryable) {
-			logger.error(
-				`Braze deletion failed for user ${identityId} - will retry`,
-				brazeResult.error,
-			);
-			throw brazeResult.error;
-		} else {
-			logger.error(
-				`Non-retryable Braze error for user ${identityId} - giving up`,
-				brazeResult.error,
-			);
-			// Don't throw - message will be removed from queue
-		}
+		logger.error(
+			`Braze deletion failed for user ${identityId} - will retry`,
+			brazeResult.error,
+		);
+		throw brazeResult.error;
 	}
 
 	logger.log(
