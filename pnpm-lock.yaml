@@ -226,9 +226,6 @@ importers:
 
   handlers/mparticle-api:
     dependencies:
-      '@aws-sdk/client-sqs':
-        specifier: ^3.940.0
-        version: 3.940.0
       '@peculiar/x509':
         specifier: ^1.12.3
         version: 1.14.2

@@ -131,7 +131,6 @@ const mparticleApi: HandlerDefinition = {
 	dependencies: {
 		...dep['@peculiar/x509'],
 		...dep.zod,
-		...dep['@aws-sdk/client-sqs'],
 	},
 	devDependencies: {
 		...devDeps['@faker-js/faker'],
