@@ -121,7 +121,6 @@ async function processSQSRecord(
 		JSON.parse(snsNotification.Message),
 	);
 
-	// Process the deletion - throws on retryable failure
 	await processUserDeletion(
 		body.userId,
 		body.brazeId,
