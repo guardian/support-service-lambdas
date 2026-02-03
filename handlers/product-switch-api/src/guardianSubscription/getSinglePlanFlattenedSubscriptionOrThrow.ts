@@ -1,7 +1,4 @@
-import {
-	getMaybeSingleOrThrow,
-	getSingleOrThrow,
-} from '@modules/arrayFunctions';
+import { getSingleOrThrow } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import type { ProductKey } from '@modules/product-catalog/productCatalog';
 import type {
@@ -16,7 +13,7 @@ import type {
 
 export type GuardianSubscription<P extends ProductKey = ProductKey> = {
 	ratePlan: GuardianRatePlan<P>;
-	discountRatePlan?: IndexedZuoraRatePlanWithCharges;
+	discountRatePlans: IndexedZuoraRatePlanWithCharges[];
 } & RestSubscription;
 
 /**
@@ -45,18 +42,10 @@ export function getSinglePlanFlattenedSubscriptionOrThrow(
 	const discountRatePlans: ZuoraRatePlan[] = productsNotInCatalog.filter(
 		(rp) => rp.product.name === 'Discounts',
 	);
-	const maybeDiscountRatePlan: IndexedZuoraRatePlanWithCharges | undefined =
-		getMaybeSingleOrThrow(
-			discountRatePlans,
-			(msg) =>
-				new ValidationError(
-					"subscription didn't have one or zero discounts: " + msg,
-				),
-		);
 
 	return {
 		...restGroupedGuardianSubscription,
 		ratePlan,
-		discountRatePlan: maybeDiscountRatePlan,
+		discountRatePlans,
 	} satisfies GuardianSubscription;
 }

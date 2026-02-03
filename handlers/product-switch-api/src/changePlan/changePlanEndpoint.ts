@@ -136,7 +136,7 @@ export class ChangePlanEndpoint {
 			SubscriptionFilter.activeNonEndedSubscriptionFilter(this.today);
 
 		const guardianSubscriptionAllPlans: GuardianSubscriptionMultiPlan =
-			guardianSubscriptionParser.parse(this.subscription);
+			guardianSubscriptionParser.toGuardianSubscription(this.subscription);
 		const guardianSubscriptionCurrentPlans: GuardianSubscriptionMultiPlan =
 			activeCurrentSubscriptionFilter.filterSubscription(
 				guardianSubscriptionAllPlans,
@@ -153,8 +153,7 @@ export class ChangePlanEndpoint {
 			!isEligibleForSwitch(
 				subscription.status,
 				this.account.metrics.totalInvoiceBalance,
-				subscription.discountRatePlan,
-				this.today,
+				subscription.discountRatePlans,
 			)
 		) {
 			throw new ValidationError(

@@ -306,7 +306,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 	test('throws when subscription status is not Active', async () => {
 		const now = dayjs();
 		const subscription = makeSubscriptionWithSingleCharge('Month', 10);
-		subscription.status = 'Suspended';
+		subscription.status = 'Cancelled';
 		const account = makeAccount();
 		const zuoraClient = makeMockZuoraClient();
 		await expect(

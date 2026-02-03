@@ -111,7 +111,9 @@ export class GuardianSubscriptionParser {
 	/**
 	 * attach all subscription and catalog products together and process the combination, merging the results
 	 */
-	parse(zuoraSubscription: ZuoraSubscription): GuardianSubscriptionMultiPlan {
+	toGuardianSubscription(
+		zuoraSubscription: ZuoraSubscription,
+	): GuardianSubscriptionMultiPlan {
 		const { products, ...restSubscription } =
 			ZuoraSubscriptionIndexer.byProductIds.groupSubscription(
 				zuoraSubscription,

@@ -6,6 +6,7 @@ import {
 } from '@modules/objectFunctions';
 import { logger } from '@modules/routing/logger';
 import { zuoraDateFormat } from '@modules/zuora/utils';
+import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import type { RestRatePlanCharge } from './group/groupSubscriptionByZuoraCatalogIds';
 import type {
@@ -25,6 +26,7 @@ export class SubscriptionFilter {
 		private ratePlanDiscardReason: (rp: GenericRatePlan) => string | undefined,
 		private chargeDiscardReason: (
 			rpc: RestRatePlanCharge,
+			cancellationEffectiveDate: Dayjs | undefined,
 		) => string | undefined,
 	) {}
 
@@ -33,6 +35,8 @@ export class SubscriptionFilter {
 	 * This would be useful if you want to know what someone is on right now, even
 	 * if there's a future dated product switch.
 	 *
+	 * For cancelled subscriptions, it returns charges that are effective on the cancellation date.
+	 *
 	 * @param today
 	 */
 	static activeCurrentSubscriptionFilter(
@@ -40,9 +44,13 @@ export class SubscriptionFilter {
 	): SubscriptionFilter {
 		return new SubscriptionFilter(
 			() => undefined,
-			(rpc) =>
-				dayjs(rpc.effectiveStartDate).isBefore(today) ||
-				dayjs(rpc.effectiveStartDate).isSame(today)
+			(rpc, cancellationEffectiveDate) =>
+				(
+					cancellationEffectiveDate === undefined
+						? dayjs(rpc.effectiveStartDate).isBefore(today) ||
+							dayjs(rpc.effectiveStartDate).isSame(today)
+						: dayjs(rpc.effectiveEndDate) === cancellationEffectiveDate
+				)
 					? dayjs(rpc.effectiveEndDate).isAfter(today)
 						? undefined
 						: `plan has finished: today: ${zuoraDateFormat(today)} >= end: ${zuoraDateFormat(dayjs(rpc.effectiveEndDate))}`
@@ -53,6 +61,8 @@ export class SubscriptionFilter {
 	/**
 	 * this filters out all Removed rate plans and charges after their effective end date
 	 *
+	 * For cancelled subscriptions, it returns charges that were active on the cancellation date
+	 *
 	 * Note: This means that products with pending changes will be retained e.g. switch or amount change
 	 * @param today
 	 */
@@ -61,28 +71,73 @@ export class SubscriptionFilter {
 	): SubscriptionFilter {
 		return new SubscriptionFilter(
 			(rp) => (rp.lastChangeType === 'Remove' ? 'plan is removed' : undefined),
-			(rpc) =>
-				dayjs(rpc.effectiveEndDate).isAfter(today)
+			(rpc, cancellationEffectiveDate) =>
+				(
+					cancellationEffectiveDate === undefined
+						? dayjs(rpc.effectiveEndDate).isAfter(today)
+						: dayjs(rpc.effectiveEndDate).isSame(cancellationEffectiveDate)
+				)
 					? undefined
 					: `plan has finished: today: ${zuoraDateFormat(today)} >= end: ${zuoraDateFormat(dayjs(rpc.effectiveEndDate))}`,
 		);
 	}
 
-	private filterCharges(charges: Record<string, RestRatePlanCharge>) {
-		const [errors, filteredCharges] = partitionObjectByValueType(
-			mapValues(charges, (rpc: RestRatePlanCharge) => {
-				const chargeDiscardReason1 = this.chargeDiscardReason(rpc);
-				return chargeDiscardReason1 !== undefined
-					? `${rpc.id}: ${chargeDiscardReason1}`
-					: rpc;
-			}),
-			(o) => typeof o === 'string',
+	/**
+	 * main entry point to filter out non relevant rate plans/charges
+	 */
+	filterSubscription(
+		highLevelSub: GuardianSubscriptionMultiPlan,
+	): GuardianSubscriptionMultiPlan {
+		let cancellationEffectiveDate: Dayjs | undefined;
+		switch (highLevelSub.status) {
+			case 'Active':
+				cancellationEffectiveDate = undefined;
+				break;
+			case 'Cancelled':
+				cancellationEffectiveDate = dayjs(highLevelSub.termEndDate);
+		}
+		const withFilteredRatePlans: GuardianSubscriptionMultiPlan = mapValue(
+			highLevelSub,
+			'ratePlans',
+			(ratePlans) =>
+				this.filterRatePlanses<GuardianRatePlan>(
+					ratePlans,
+					cancellationEffectiveDate,
+				),
 		);
-		return { errors, filteredCharges };
+		const withFilteredNonCatalogProducts: GuardianSubscriptionMultiPlan =
+			mapValue(withFilteredRatePlans, 'productsNotInCatalog', (ratePlans) =>
+				this.filterRatePlanses<ZuoraRatePlan>(
+					ratePlans,
+					cancellationEffectiveDate,
+				),
+			);
+		return withFilteredNonCatalogProducts;
+	}
+
+	private filterRatePlanses<RP extends GenericRatePlan>(
+		guardianSubRatePlans: RP[],
+		cancellationEffectiveDate: Dayjs | undefined,
+	): RP[] {
+		const { discarded, ratePlans } = this.filterRatePlanList(
+			guardianSubRatePlans,
+			cancellationEffectiveDate,
+		);
+		if (discarded.length > 0) {
+			logger.log(`discarded rateplans:`, discarded);
+		} // could be spammy?
+		if (ratePlans.length > 0) {
+			logger.log(
+				`retained rateplans:`,
+				ratePlans.map((rp) => rp.id),
+			);
+		} // could be very spammy?
+		return ratePlans;
 	}
 
 	private filterRatePlanList<RP extends GenericRatePlan>(
 		guardianSubRatePlans: RP[],
+		cancellationEffectiveDate: Dayjs | undefined,
 	): {
 		discarded: string[];
 		ratePlans: RP[];
@@ -96,6 +151,7 @@ export class SubscriptionFilter {
 
 				const { errors, filteredCharges } = this.filterCharges(
 					rp.ratePlanCharges,
+					cancellationEffectiveDate,
 				);
 
 				const maybeAllChargesDiscarded =
@@ -112,35 +168,25 @@ export class SubscriptionFilter {
 		return { discarded, ratePlans };
 	}
 
-	private filterRatePlanses<RP extends GenericRatePlan>(
-		guardianSubRatePlans: RP[],
-	): RP[] {
-		const { discarded, ratePlans } =
-			this.filterRatePlanList(guardianSubRatePlans);
-		if (discarded.length > 0) {
-			logger.log(`discarded rateplans:`, discarded);
-		} // could be spammy?
-		if (ratePlans.length > 0) {
-			logger.log(
-				`retained rateplans:`,
-				ratePlans.map((rp) => rp.id),
-			);
-		} // could be very spammy?
-		return ratePlans;
-	}
-
-	filterSubscription(
-		highLevelSub: GuardianSubscriptionMultiPlan,
-	): GuardianSubscriptionMultiPlan {
-		const withFilteredRatePlans: GuardianSubscriptionMultiPlan = mapValue(
-			highLevelSub,
-			'ratePlans',
-			(ratePlans) => this.filterRatePlanses<GuardianRatePlan>(ratePlans),
+	private filterCharges(
+		charges: Record<string, RestRatePlanCharge>,
+		cancellationEffectiveDate: Dayjs | undefined,
+	): {
+		errors: Record<string, string>;
+		filteredCharges: Record<string, RestRatePlanCharge>;
+	} {
+		const [errors, filteredCharges] = partitionObjectByValueType(
+			mapValues(charges, (rpc: RestRatePlanCharge) => {
+				const chargeDiscardReason1 = this.chargeDiscardReason(
+					rpc,
+					cancellationEffectiveDate,
+				);
+				return chargeDiscardReason1 !== undefined
+					? `${rpc.id}: ${chargeDiscardReason1}`
+					: rpc;
+			}),
+			(o) => typeof o === 'string',
 		);
-		const withFilteredNonCatalogProducts: GuardianSubscriptionMultiPlan =
-			mapValue(withFilteredRatePlans, 'productsNotInCatalog', (ratePlans) =>
-				this.filterRatePlanses<ZuoraRatePlan>(ratePlans),
-			);
-		return withFilteredNonCatalogProducts;
+		return { errors, filteredCharges };
 	}
 }

@@ -27,7 +27,7 @@ export function loadSubscription(
 		zuoraSubscriptionSchema.parse(subscriptionData);
 	const subscription = (() => {
 		const guardianSubscription =
-			guardianSubscriptionParser.parse(subscriptionFixture);
+			guardianSubscriptionParser.toGuardianSubscription(subscriptionFixture);
 		const filter =
 			SubscriptionFilter.activeNonEndedSubscriptionFilter(referenceDate);
 		return getSinglePlanFlattenedSubscriptionOrThrow(

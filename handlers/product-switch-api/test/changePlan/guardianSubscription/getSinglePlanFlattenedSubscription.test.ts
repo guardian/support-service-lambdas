@@ -24,7 +24,7 @@ const guardianSubscriptionParser = new GuardianSubscriptionParser(
 describe('getSinglePlanFlattenedSubscriptionOrThrow', () => {
 	test('returns flattened subscription with product catalog keys for valid contribution', () => {
 		const guardianSubscription =
-			guardianSubscriptionParser.parse(subscriptionFixture);
+			guardianSubscriptionParser.toGuardianSubscription(subscriptionFixture);
 		const filter =
 			SubscriptionFilter.activeNonEndedSubscriptionFilter(referenceDate);
 		const filteredSubscription =
@@ -52,9 +52,8 @@ describe('getSinglePlanFlattenedSubscriptionOrThrow', () => {
 
 	test('returns flattened subscription with product catalog keys for a post switch contribution->s+', () => {
 		const postSwitchReferenceDate = dayjs('2024-06-10');
-		const guardianSubscription = guardianSubscriptionParser.parse(
-			alreadySwitchedFixture,
-		);
+		const guardianSubscription =
+			guardianSubscriptionParser.toGuardianSubscription(alreadySwitchedFixture);
 		const filter = SubscriptionFilter.activeNonEndedSubscriptionFilter(
 			postSwitchReferenceDate,
 		);
@@ -88,7 +87,7 @@ describe('getSinglePlanFlattenedSubscriptionOrThrow', () => {
 
 	test('extracts correct subscription metadata from a contribution', () => {
 		const guardianSubscription =
-			guardianSubscriptionParser.parse(subscriptionFixture);
+			guardianSubscriptionParser.toGuardianSubscription(subscriptionFixture);
 		const filter =
 			SubscriptionFilter.activeNonEndedSubscriptionFilter(referenceDate);
 		const filteredSubscription =
@@ -106,7 +105,7 @@ describe('getSinglePlanFlattenedSubscriptionOrThrow', () => {
 
 	test('extracts correct subscription metadata from a contribution', () => {
 		const guardianSubscription =
-			guardianSubscriptionParser.parse(subscriptionFixture);
+			guardianSubscriptionParser.toGuardianSubscription(subscriptionFixture);
 		const filter =
 			SubscriptionFilter.activeNonEndedSubscriptionFilter(referenceDate);
 		const filteredSubscription =
@@ -147,7 +146,7 @@ describe('getSinglePlanFlattenedSubscriptionOrThrow', () => {
 
 	test('throws error when subscription has multiple rate plans', () => {
 		const guardianSubscription =
-			guardianSubscriptionParser.parse(subscriptionFixture);
+			guardianSubscriptionParser.toGuardianSubscription(subscriptionFixture);
 		const filter =
 			SubscriptionFilter.activeNonEndedSubscriptionFilter(referenceDate);
 		const filteredSubscription =
@@ -175,7 +174,7 @@ describe('getSinglePlanFlattenedSubscriptionOrThrow', () => {
 
 	test('includes rate plan charges in the flattened subscription', () => {
 		const guardianSubscription =
-			guardianSubscriptionParser.parse(subscriptionFixture);
+			guardianSubscriptionParser.toGuardianSubscription(subscriptionFixture);
 		const filter =
 			SubscriptionFilter.activeNonEndedSubscriptionFilter(referenceDate);
 		const filteredSubscription =

@@ -26,7 +26,7 @@ const productCatalogHelper = new ProductCatalogHelper(productCatalog);
 
 const buildGuardianSubscriptionWithKeys = (): GuardianSubscription => {
 	const guardianSubscription =
-		guardianSubscriptionParser.parse(subscriptionFixture);
+		guardianSubscriptionParser.toGuardianSubscription(subscriptionFixture);
 	const filter =
 		SubscriptionFilter.activeNonEndedSubscriptionFilter(referenceDate);
 	return getSinglePlanFlattenedSubscriptionOrThrow(
