@@ -1,4 +1,3 @@
-	imovoRewards,
 import { dep, deprecatedDeps, devDeps } from './dependencies';
 
 /*
@@ -87,6 +86,13 @@ const generateProductCatalog: HandlerDefinition = {
 	name: 'generate-product-catalog',
 	devDependencies: {
 		...dep['@aws-sdk/client-s3'],
+		...devDeps['@types/aws-lambda'],
+	},
+};
+
+const imovoRewards: HandlerDefinition = {
+	name: 'imovo-rewards',
+	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 	},
 };
@@ -550,6 +556,7 @@ export const build: BuildDefinition = {
 		discountApi,
 		discountExpiryNotifier,
 		generateProductCatalog,
+		imovoRewards,
 		metricPushApi,
 		mobilePurchasesToSupporterProductData,
 		mparticleApi,
