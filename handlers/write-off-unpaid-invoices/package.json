@@ -17,7 +17,7 @@
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
-    "@aws-sdk/client-secrets-manager": "^3.940.0",
+    "@aws-sdk/client-secrets-manager": "^3.981.0",
     "dayjs": "^1.11.13"
   }
 }
