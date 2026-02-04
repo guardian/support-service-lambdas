@@ -7,7 +7,7 @@ allowedStages:
   - CODE
   - PROD
 deployments:
-  stripe-disputes-cloudformation:
+  imovo-rewards-cloudformation:
     type: cloud-formation
     app: imovo-rewards
     parameters:
