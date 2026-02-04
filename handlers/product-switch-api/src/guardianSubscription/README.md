@@ -15,31 +15,31 @@ and product catalog data (or zuora catalog data if it's not in the product catal
 - **Pre defined filters**: Built-in utilities to filter subscriptions by charge dates or custom filters.
 - **Type Safety**: adding the product catalog keys makes the subscription a discriminated union giving added type safety.
 - **Validation**: Ensures subscriptions have exactly one active rate plan before processing
-- **Decoupling**: Isolates business logic from Zuora's generic data model
 
 ## How to Use
 
 ### Basic Parsing and Filtering
 
 ```typescript
-import {GuardianSubscriptionParser} from './guardianSubscriptionParser';
-import {SubscriptionFilter} from './subscriptionFilter';
-import {getSinglePlanFlattenedSubscriptionOrThrow} from './getSinglePlanFlattenedSubscriptionOrThrow';
-import {zuoraSubscriptionSchema} from '@modules/zuora/types';
+import { GuardianSubscriptionParser } from './guardianSubscriptionParser';
+import { SubscriptionFilter } from './subscriptionFilter';
+import { getSinglePlanFlattenedSubscriptionOrThrow } from './getSinglePlanFlattenedSubscriptionOrThrow';
+import { zuoraSubscriptionSchema } from '@modules/zuora/types';
 import zuoraCatalog from './catalog-prod.json';
-import {productCatalog} from './productCatalog';
+import { productCatalog } from './productCatalog';
 import dayjs from 'dayjs';
-import {getSubscription} from "./subscription";
+import { getSubscription } from "./subscription";
+
+const today = dayjs();
 
 // fetch subscription in the usual way, e.g.
 const zuoraSubscription = getSubscription(zuoraClient, subscriptionNumber);
 
-// Link to catalog and add keys
+// Link subscription to catalog and add keys
 const parser = new GuardianSubscriptionParser(zuoraCatalog, productCatalog);
 const guardianSubscription = parser.toGuardianSubscription(zuoraSubscription);
 
 // Filter to only rate plans that we are interested in
-const today = dayjs();
 const filter = SubscriptionFilter.activeNonEndedSubscriptionFilter(today);
 const filteredSubscription = filter.filterSubscription(guardianSubscription);
 
@@ -55,29 +55,29 @@ console.log(subscription.accountNumber);
 console.log(subscription.status);
 
 // Product catalog keys are attached
-console.log(subscription.ratePlan.productKey); // 'Contribution' | 'SupporterPlus'
-console.log(subscription.ratePlan.productRatePlanKey); // 'Monthly' | 'Annual'
+console.log(subscription.ratePlan.productKey); // 'Contribution' | 'SupporterPlus' | etc
+console.log(subscription.ratePlan.productRatePlanKey); // 'Monthly' | 'Annual' | 'OneYearStudent' | etc
 
 // old style zuora catalog name is unaffected
-console.log(subscription.ratePlan.productName); // 'Contributor' | 'Supporter Plus'
+console.log(subscription.ratePlan.productName); // 'Contributor' | 'Supporter Plus' | etc
 
 // Charges organized by product type
 if (subscription.ratePlan.productKey === 'Contribution') {
-    // contribution annual and monthly both have only a charge called Contribution
+    // contribution annual and monthly both have only a charge called "Contribution"
     const contributionCharge = subscription.ratePlan.ratePlanCharges.Contribution;
     console.log(contributionCharge.price);
     console.log(contributionCharge.productRatePlanChargeId);
 }
 
-// Supporter Plus student includes only Subscription charge
 if (
     subscription.ratePlan.productKey === 'SupporterPlus' &&
     subscription.ratePlan.productRatePlanKey === 'OneYearStudent'
 ) {
+    // type checker knows that Supporter Plus student includes "Subscription" charge
     const subscriptionCharge = subscription.ratePlan.ratePlanCharges.Subscription;
-    // Contribution only exists for Monthly/Annual so does not compile
-    const contributionCharge = subscription.ratePlan.ratePlanCharges.Contribution;
     console.log(subscriptionCharge.price);
+    // @ts-expect-error "Contribution" only exists for Monthly/Annual so doesn't type check
+    const contributionCharge = subscription.ratePlan.ratePlanCharges.Contribution; // XXX
 }
 ```
 
@@ -260,11 +260,12 @@ Key test files under `handlers/product-switch-api/`:
 - `test/changePlan/guardianSubscription/getSinglePlanFlattenedSubscription.test.ts`
   - Unit tests covering parsing, filtering, and validation
 - `runManual/realSusbcriptions/testRealSubscriptions.ts`
-  - tests against downloaded, redacted production subscription data
+  - tests against downloaded, redacted production subscription data - see the readme there
 
 ## Future Improvements
 
-- **More subscription types**: To use in MMA account overview we will need to support paper, membership, and more
-- **Type Inference**: Close a few gaps in type inference
+- **Test more subscription types**: To use in MMA account overview we will need to support paper, membership, and more
+- **Type Inference**: Close/refine a few gaps in type inference
 - **Remove redundant fields**: Do we really need things like `lastBookingDate`?
 - **Rationalise existing fields**: Can/should more fields be enums?
+- **Add withMMAIdentityCheck style wrapper**: withMMAIdentityCheck returns a ZuoraSubscription - consider a withGuardianSubscription wrapper.
