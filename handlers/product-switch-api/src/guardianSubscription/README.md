@@ -85,7 +85,7 @@ if (
 
 See the inline notes on this example from the CODE environment.
 
-```json
+```js
 {
   id: "71a11631bb39c22b088c23ed34e1205b",
   accountNumber: "A01234567",
