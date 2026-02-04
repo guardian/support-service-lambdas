@@ -1,0 +1,29 @@
+{
+  "name": "imovo-rewards",
+  "scripts": {
+    "test": "jest --group=-integration",
+    "it-test": "jest --group=integration",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
+    "check-formatting": "prettier --check \"**/*.ts\"",
+    "fix-formatting": "prettier --write \"**/*.ts\"",
+    "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/producer.ts src/consumer.ts --sourcemap",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr imovo-rewards.zip ./*.js.map ./*.js",
+    "cdk:test": "pnpm --filter cdk test imovo-rewards",
+    "cdk:test-update": "pnpm --filter cdk test-update imovo-rewards",
+    "update-lambda": "../../update-lambda.sh \"imovo-rewards\" imovo-rewards-producer- imovo-rewards-consumer-",
+    "update-stack": "../../update-stack.sh \"imovo-rewards\""
+  },
+  "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
+  "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
+  "dependencies": {
+    "aws-sdk": "^2.1692.0",
+    "dayjs": "^1.11.13",
+    "stripe": "^18.5.0",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.147",
+    "@types/stripe": "^8.0.417"
+  }
+}

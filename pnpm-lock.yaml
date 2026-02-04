@@ -193,6 +193,28 @@ importers:
         specifier: ^8.10.147
         version: 8.10.158
 
+  handlers/imovo-rewards:
+    dependencies:
+      aws-sdk:
+        specifier: ^2.1692.0
+        version: 2.1692.0
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.19
+      stripe:
+        specifier: ^18.5.0
+        version: 18.5.0(@types/node@24.10.1)
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.147
+        version: 8.10.158
+      '@types/stripe':
+        specifier: ^8.0.417
+        version: 8.0.417(@types/node@24.10.1)
+
   handlers/metric-push-api:
     devDependencies:
       '@types/aws-lambda':

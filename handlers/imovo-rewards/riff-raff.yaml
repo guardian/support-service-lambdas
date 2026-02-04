@@ -1,0 +1,27 @@
+# MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/riff-raff.yaml.ts
+stacks:
+  - support
+regions:
+  - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  stripe-disputes-cloudformation:
+    type: cloud-formation
+    app: imovo-rewards
+    parameters:
+      templateStagePaths:
+        CODE: imovo-rewards-CODE.template.json
+        PROD: imovo-rewards-PROD.template.json
+  imovo-rewards:
+    type: aws-lambda
+    parameters:
+      fileName: imovo-rewards.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+        - imovo-rewards-producer-
+        - imovo-rewards-consumer-
+    dependencies:
+      - imovo-rewards-cloudformation
