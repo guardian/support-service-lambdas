@@ -1,6 +1,6 @@
 import { objectEntries } from '@modules/objectFunctions';
 
-type Team =
+export type Team =
 	| 'VALUE'
 	| 'GROWTH'
 	| 'PORTFOLIO'

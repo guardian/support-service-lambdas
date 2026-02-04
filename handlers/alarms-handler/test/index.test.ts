@@ -1,5 +1,5 @@
-import type { SQSEvent, SQSRecord } from 'aws-lambda';
-import { getChatMessages, handlerWithStage } from '../src';
+import type { SQSRecord } from 'aws-lambda';
+import { getChatMessages, handleSQSRecord } from '../src';
 import { buildAlarmMappings } from '../src/alarmMappings';
 import type { WebhookUrls } from '../src/configSchema';
 
@@ -17,36 +17,28 @@ describe('Handler', () => {
 	};
 
 	const mockCloudWatchAlarmEvent = {
-		Records: [
-			{
-				body: JSON.stringify({
-					Message: JSON.stringify({
-						AlarmArn: 'mock-arn',
-						AlarmName: 'mock-alarm',
-						NewStateReason: 'mock-reason',
-						NewStateValue: 'ALARM',
-						AlarmDescription: 'description',
-						AWSAccountId: '111111',
-						StateChangeTime: '2024-10-09T07:23:16.236+0000',
-					}),
-				}),
-			},
-		],
-	} as SQSEvent;
+		body: JSON.stringify({
+			Message: JSON.stringify({
+				AlarmArn: 'mock-arn',
+				AlarmName: 'mock-alarm',
+				NewStateReason: 'mock-reason',
+				NewStateValue: 'ALARM',
+				AlarmDescription: 'description',
+				AWSAccountId: '111111',
+				StateChangeTime: '2024-10-09T07:23:16.236+0000',
+			}),
+		}),
+	} as SQSRecord;
 
 	const mockSnsPublishMessageEvent = {
-		Records: [
-			{
-				body: JSON.stringify({
-					Message: 'mock-message',
-					MessageAttributes: {
-						app: { Type: 'String', Value: 'mock-app' },
-						stage: { Type: 'String', Value: 'PROD' },
-					},
-				}),
+		body: JSON.stringify({
+			Message: 'mock-message',
+			MessageAttributes: {
+				app: { Type: 'String', Value: 'mock-app' },
+				stage: { Type: 'String', Value: 'PROD' },
 			},
-		],
-	} as SQSEvent;
+		}),
+	} as SQSRecord;
 
 	beforeEach(() => {
 		jest.resetModules();
@@ -65,7 +57,7 @@ describe('Handler', () => {
 			.spyOn(global, 'fetch')
 			.mockResolvedValue(Promise.resolve(new Response(JSON.stringify({}))));
 
-		await handlerWithStage(mockCloudWatchAlarmEvent, dummyWebhookUrls, getTags);
+		await handleSQSRecord(mockCloudWatchAlarmEvent, dummyWebhookUrls, getTags);
 
 		expect(getTags).toHaveBeenCalledWith('mock-arn', '111111');
 		expect(fetch).toHaveBeenCalledWith(
@@ -156,7 +148,7 @@ describe('Handler', () => {
 			.spyOn(global, 'fetch')
 			.mockResolvedValue(Promise.resolve(new Response(JSON.stringify({}))));
 
-		await handlerWithStage(
+		await handleSQSRecord(
 			mockSnsPublishMessageEvent,
 			dummyWebhookUrls,
 			getTags,
@@ -175,7 +167,7 @@ describe('Handler', () => {
 			.mockResolvedValue(Promise.reject(new Error('Fetch error')));
 
 		await expect(
-			handlerWithStage(mockCloudWatchAlarmEvent, dummyWebhookUrls, getTags),
+			handleSQSRecord(mockCloudWatchAlarmEvent, dummyWebhookUrls, getTags),
 		).rejects.toThrow('Fetch error');
 	});
 
@@ -185,24 +177,20 @@ describe('Handler', () => {
 			.spyOn(global, 'fetch')
 			.mockResolvedValue(Promise.resolve(new Response(JSON.stringify({}))));
 		const mockCloudWatchOkEvent = {
-			Records: [
-				{
-					body: JSON.stringify({
-						Message: JSON.stringify({
-							AlarmArn: 'mock-arn',
-							AlarmName: 'mock-alarm',
-							NewStateReason: 'mock-reason',
-							NewStateValue: 'OK',
-							AlarmDescription: 'description',
-							AWSAccountId: '111111',
-							StateChangeTime: '2024-10-09T07:23:16.236+0000',
-						}),
-					}),
-				},
-			],
-		} as SQSEvent;
+			body: JSON.stringify({
+				Message: JSON.stringify({
+					AlarmArn: 'mock-arn',
+					AlarmName: 'mock-alarm',
+					NewStateReason: 'mock-reason',
+					NewStateValue: 'OK',
+					AlarmDescription: 'description',
+					AWSAccountId: '111111',
+					StateChangeTime: '2024-10-09T07:23:16.236+0000',
+				}),
+			}),
+		} as SQSRecord;
 
-		await handlerWithStage(mockCloudWatchOkEvent, dummyWebhookUrls, getTags);
+		await handleSQSRecord(mockCloudWatchOkEvent, dummyWebhookUrls, getTags);
 
 		expect(fetch).toHaveBeenCalledWith(
 			dummyWebhookUrls.SRE,

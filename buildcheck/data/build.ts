@@ -31,8 +31,12 @@ export interface BuildDefinition {
 
 const alarmsHandler: HandlerDefinition = {
 	name: 'alarms-handler',
-	functionNames: ['alarms-handler-', 'alarms-handler-scheduled-'],
-	entryPoints: ['src/index.ts', 'src/indexScheduled.ts'],
+	functionNames: [
+		'alarms-handler-',
+		'alarms-handler-scheduled-',
+		'alarms-handler-summary-',
+	],
+	entryPoints: ['src/index.ts', 'src/indexScheduled.ts', 'src/indexSummary.ts'],
 	dependencies: {
 		...dep['@aws-sdk/client-cloudwatch'],
 		...dep['@aws-sdk/credential-providers'],
@@ -448,6 +452,7 @@ const moduleRouting: ModuleDefinition = {
 	name: 'routing',
 	dependencies: {
 		...dep['zod'],
+		...dep['dayjs'],
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],

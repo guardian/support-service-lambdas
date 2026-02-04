@@ -164,3 +164,11 @@ export const intersection = <T>(a: T[], b: T[]) => {
 	const setB = new Set(b);
 	return [...new Set(a)].filter((x) => setB.has(x));
 };
+
+export const difference = <T>(a: T[], b: T[]) => {
+	const setA = new Set(a);
+	const setB = new Set(b);
+	const onlyInA = [...setA].filter((x) => !setB.has(x));
+	const onlyInB = [...setB].filter((x) => !setA.has(x));
+	return [onlyInA, onlyInB] as const;
+};
