@@ -1,5 +1,3 @@
-import { difference } from '@modules/arrayFunctions';
-
 export function objectKeys<O extends object>(libs: O): Array<keyof O> {
 	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- allowed in utility function - get back type lost by Object.keys
 	return Object.keys(libs) as Array<keyof O>;
@@ -50,25 +48,4 @@ export function objectInnerJoin<K extends string, VA, VB>(
 	return lKeys.flatMap((key) =>
 		key in r ? [[l[key], r[key], key] as const] : [],
 	);
-}
-
-/**
- * joins two objects by their keys, throwing if there isn't an exact match
- * @param l
- * @param r
- */
-export function objectJoinBijective<K extends string, VA, VB>(
-	l: Record<K, VA>,
-	r: Record<K, VB>,
-): Array<[VA, VB, K]> {
-	const lKeys = objectKeys(l);
-	const [onlyInL, onlyInR] = difference(lKeys, objectKeys(r));
-
-	if (onlyInL.length + onlyInR.length !== 0) {
-		throw new Error(
-			`Keys do not match between records: onlyInL: ${onlyInL} onlyInR: ${onlyInR}`,
-		);
-	}
-
-	return lKeys.map((key) => [l[key], r[key], key] as const);
 }
