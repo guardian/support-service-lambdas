@@ -60,6 +60,9 @@ export const productPurchaseSchema = z.discriminatedUnion('product', [
 		firstDeliveryDate: dateOrDateStringSchema,
 		product: z.literal('GuardianWeeklyRestOfWorld'),
 		ratePlan: z.union([
+			z.literal('AnnualPlus'),
+			z.literal('MonthlyPlus'),
+			z.literal('QuarterlyPlus'),
 			z.literal('OneYearGift'),
 			z.literal('ThreeMonthGift'),
 			z.literal('Annual'),
