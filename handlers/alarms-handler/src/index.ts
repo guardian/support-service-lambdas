@@ -1,4 +1,4 @@
-import type { HandlerProps } from '@modules/routing/lambdaHandler';
+import type { HandlerEnv } from '@modules/routing/lambdaHandler';
 import { logger } from '@modules/routing/logger';
 import { SQSHandler } from '@modules/routing/sqsHandler';
 import type { SNSEventRecord, SQSRecord } from 'aws-lambda';
@@ -28,27 +28,33 @@ const cloudWatchAlarmMessageSchema = z.object({
 
 type CloudWatchAlarmMessage = z.infer<typeof cloudWatchAlarmMessageSchema>;
 
-// called by AWS
-export const handler = SQSHandler(ConfigSchema, handleSingleMessageWrapper);
+export type Services = {
+	webhookUrls: WebhookUrls;
+	getTags: (alarmArn: string, awsAccountId: string) => Promise<Tags>;
+};
 
-async function handleSingleMessageWrapper(
-	{ config }: HandlerProps<ConfigSchema>,
-	record: SQSRecord,
-) {
-	const getTags = buildCloudwatch(config.accounts).getTags;
-	await handleSQSRecord(record, config.webhookUrls, getTags);
+// called by AWS
+export const handler = SQSHandler(
+	ConfigSchema,
+	handlerWithStage,
+	buildServices,
+);
+
+// runs on cold start only
+function buildServices({ config }: HandlerEnv<ConfigSchema>) {
+	return {
+		webhookUrls: config.webhookUrls,
+		getTags: buildCloudwatch(config.accounts).getTags,
+	};
 }
 
-export async function handleSQSRecord(
-	record: SQSRecord,
-	webhookUrls: WebhookUrls,
-	getTags: (alarmArn: string, awsAccountId: string) => Promise<Tags>,
-) {
+// runs for every record
+export async function handlerWithStage(record: SQSRecord, services: Services) {
 	const maybeChatMessages = await getChatMessages(
 		record,
 		prodAppToTeams,
-		getTags,
-		webhookUrls,
+		services.getTags,
+		services.webhookUrls,
 	);
 
 	if (maybeChatMessages) {

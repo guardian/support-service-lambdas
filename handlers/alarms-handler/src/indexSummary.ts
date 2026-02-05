@@ -2,7 +2,7 @@ import type { AlarmHistoryItem } from '@aws-sdk/client-cloudwatch';
 import { groupMap } from '@modules/arrayFunctions';
 import type { Lazy } from '@modules/lazy';
 import { objectEntries, objectKeys } from '@modules/objectFunctions';
-import type { HandlerProps } from '@modules/routing/lambdaHandler';
+import type { HandlerEnv } from '@modules/routing/lambdaHandler';
 import { LambdaHandler } from '@modules/routing/lambdaHandler';
 import { logger } from '@modules/routing/logger';
 import { z } from 'zod';
@@ -21,15 +21,14 @@ const weeklySummaryTeams: Team[] = ['VALUE'];
 // called by AWS
 export const handler = LambdaHandler(ConfigSchema, handlerWithStage);
 
-export async function handlerWithStage({
-	now,
-	stage,
-	config,
-}: HandlerProps<ConfigSchema>) {
+export async function handlerWithStage(
+	ev: unknown,
+	{ now, stage, config }: HandlerEnv<ConfigSchema>,
+) {
 	try {
 		const cloudwatch = buildCloudwatch(config.accounts);
 		const alarmHistory: AlarmHistoryWithTags[] =
-			await cloudwatch.getAlarmHistory(now);
+			await cloudwatch.getAlarmHistory(now());
 
 		const chatMessages = await getChatMessages(
 			stage,

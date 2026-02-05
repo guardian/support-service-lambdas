@@ -1,7 +1,7 @@
 import type { MetricAlarm } from '@aws-sdk/client-cloudwatch';
 import { flatten, groupMap } from '@modules/arrayFunctions';
 import { getIfDefined } from '@modules/nullAndUndefined';
-import type { HandlerProps } from '@modules/routing/lambdaHandler';
+import type { HandlerEnv } from '@modules/routing/lambdaHandler';
 import { LambdaHandler } from '@modules/routing/lambdaHandler';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
@@ -16,16 +16,15 @@ import { buildDiagnosticLinks } from './index';
 // called by AWS
 export const handler = LambdaHandler(ConfigSchema, handlerWithStage);
 
-export async function handlerWithStage({
-	now,
-	stage,
-	config,
-}: HandlerProps<ConfigSchema>) {
+export async function handlerWithStage(
+	ev: unknown,
+	{ now, stage, config }: HandlerEnv<ConfigSchema>,
+) {
 	try {
 		const alarms = await buildCloudwatch(config.accounts).getAllAlarmsInAlarm();
 
 		const chatMessages = await getChatMessages(
-			now,
+			now(),
 			stage,
 			alarms,
 			prodAppToTeams,

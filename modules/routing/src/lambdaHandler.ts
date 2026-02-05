@@ -5,22 +5,44 @@ import dayjs from 'dayjs';
 import type { z } from 'zod';
 import { logger } from '@modules/routing/logger';
 
-export type HandlerProps<ConfigType> = {
-	now: dayjs.Dayjs;
+export type HandlerEnv<ConfigType> = {
+	now: () => dayjs.Dayjs;
 	stage: string;
 	config: ConfigType;
 };
 
 /**
- * This is a similar wrapper to the Router only it handles loading config
+ * This is a similar wrapper to the Router, it handles loading config on
+ * cold start.
+ *
+ * This means your handler function is cleaner and also easier to unit test.
  *
  * @param configSchema schema for the SSM config for this lambda
- * @param handler the handler takes the config etc and the event, if any
+ * @param handler
  * @constructor
  */
 export function LambdaHandler<ConfigType, E>(
 	configSchema: z.ZodType<ConfigType, z.ZodTypeDef, unknown>,
-	handler: (props: HandlerProps<ConfigType>, event: E) => Promise<void>,
+	handler: (event: E, env: HandlerEnv<ConfigType>) => Promise<void>,
+) {
+	return LambdaHandlerWithServices(configSchema, handler, (p) => p);
+}
+
+/**
+ * This is a similar wrapper to the Router only it handles loading config and
+ * building any services e.g. ZuoraClient on cold start
+ *
+ * This means your handler function is cleaner and also easier to unit test.
+ *
+ * @param configSchema schema for the SSM config for this lambda
+ * @param handler
+ * @param buildServices build anything you want to be created on cold start only, it will be passed into your handler
+ * @constructor
+ */
+export function LambdaHandlerWithServices<ConfigType, Services, E>(
+	configSchema: z.ZodType<ConfigType, z.ZodTypeDef, unknown>,
+	handler: (event: E, services: Services) => Promise<void>,
+	buildServices: (handlerProps: HandlerEnv<ConfigType>) => Services,
 ) {
 	// only load config on a cold start, don't load if this file is referenced in tests
 	const lazyConfig = new Lazy(async () => {
@@ -38,12 +60,44 @@ export function LambdaHandler<ConfigType, E>(
 		logger.getCallerInfo(),
 	);
 
-	return async (event: E): Promise<void> => {
-		await handlerWithLogging(
-			{ now: dayjs(), ...(await lazyConfig.get()) },
-			event,
-		);
+	const handlerProps: Lazy<Services> = lazyConfig.then((config) =>
+		buildServices({ now: () => dayjs(), ...config }),
+	);
+
+	return async (event: E) => {
+		return await handlerWithLogging(event, await handlerProps.get());
 	};
+}
+
+/**
+ * use this when you want to run the lambda locally end to end as if it's in CODE
+ *
+ * It sets/clears the env vars which is not ideal but hopefully they won't leak
+ * anywhere they shouldn't
+ *
+ * @param handler the function that AWS lambda references
+ * @param testEvent
+ * @param app the name of the app for loading config e.g. alarms-handler
+ */
+export function runWithConfig<E>(
+	handler: (e: E) => Promise<void>,
+	testEvent: E,
+	app: string,
+): void {
+	if (process.env.APP || process.env.STAGE || process.env.STACK) {
+		throw new Error('stack/stage/app already defined');
+	}
+	process.env.APP = app;
+	process.env.STAGE = 'CODE';
+	process.env.STACK = 'support';
+	handler(testEvent)
+		.then(console.log)
+		.catch(console.error)
+		.finally(function () {
+			process.env.APP = undefined;
+			process.env.STAGE = undefined;
+			process.env.STACK = undefined;
+		});
 }
 
 export const getEnv = (env: string): string =>

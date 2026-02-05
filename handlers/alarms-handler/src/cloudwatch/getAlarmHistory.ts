@@ -72,6 +72,25 @@ export async function getAlarmHistory(
 	).then(flatten);
 }
 
+const getAlarmHistoryForClient = async (
+	client: CloudWatchClient,
+	startDate: Dayjs,
+	endDate: Dayjs,
+): Promise<AlarmHistoryItem[]> =>
+	fetchAllPages('DescribeAlarmHistoryCommand', async (token) => {
+		const request = new DescribeAlarmHistoryCommand({
+			HistoryItemType: HistoryItemType.StateUpdate,
+			StartDate: startDate.toDate(),
+			EndDate: endDate.toDate(),
+			NextToken: token,
+		});
+		const response = await client.send(request);
+		return {
+			nextToken: response.NextToken,
+			thisPage: response.AlarmHistoryItems ?? [],
+		};
+	});
+
 export type AlarmData = {
 	arn: string;
 	name: string;
@@ -132,21 +151,3 @@ const getAlarms = async (
 		)
 	).flat(1);
 };
-const getAlarmHistoryForClient = async (
-	client: CloudWatchClient,
-	startDate: Dayjs,
-	endDate: Dayjs,
-): Promise<AlarmHistoryItem[]> =>
-	fetchAllPages('DescribeAlarmHistoryCommand', async (token) => {
-		const request = new DescribeAlarmHistoryCommand({
-			HistoryItemType: HistoryItemType.StateUpdate,
-			StartDate: startDate.toDate(),
-			EndDate: endDate.toDate(),
-			NextToken: token,
-		});
-		const response = await client.send(request);
-		return {
-			nextToken: response.NextToken,
-			thisPage: response.AlarmHistoryItems ?? [],
-		};
-	});

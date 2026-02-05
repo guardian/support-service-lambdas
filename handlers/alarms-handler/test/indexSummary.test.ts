@@ -1,7 +1,10 @@
-import type { AlarmHistoryItem, MetricAlarm } from '@aws-sdk/client-cloudwatch';
+import type { AlarmHistoryItem } from '@aws-sdk/client-cloudwatch';
 import { Lazy } from '@modules/lazy';
 import type { AppToTeams } from '../src/alarmMappings';
-import type { AlarmHistoryWithTags } from '../src/cloudwatch/getAlarmHistory';
+import type {
+	AlarmData,
+	AlarmHistoryWithTags,
+} from '../src/cloudwatch/getAlarmHistory';
 import type { Tags } from '../src/cloudwatch/getTags';
 import type { WebhookUrls } from '../src/configSchema';
 import { getChatMessages } from '../src/indexSummary';
@@ -216,16 +219,12 @@ function buildAlarmHistoryItem(
 
 const testData: AlarmHistoryWithTags[] = [
 	{
-		alarmName:
-			'New message in the product-switch-refund-dead-letter-PROD dead letter queue.',
 		alarm: {
-			AlarmName:
-				'New message in the product-switch-refund-dead-letter-PROD dead letter queue.',
-			AlarmArn:
-				'arn:aws:cloudwatch:eu-west-1:12345:alarm:New message in the product-switch-refund-dead-letter-PROD dead letter queue.',
-			ActionsEnabled: true,
-			AlarmActions: ['arn:aws:sns:eu-west-1:12345:alarms-handler-topic-PROD'],
-		} as MetricAlarm,
+			name: 'New message in the product-switch-refund-dead-letter-PROD dead letter queue.',
+			arn: 'arn:aws:cloudwatch:eu-west-1:12345:alarm:New message in the product-switch-refund-dead-letter-PROD dead letter queue.',
+			actionsEnabled: true,
+			actions: ['arn:aws:sns:eu-west-1:12345:alarms-handler-topic-PROD'],
+		} satisfies AlarmData,
 		history: [
 			buildAlarmHistoryItem(
 				'New message in the product-switch-refund-dead-letter-PROD dead letter queue.',
@@ -250,18 +249,14 @@ const testData: AlarmHistoryWithTags[] = [
 				} as Tags),
 			'',
 		),
-	},
+	} satisfies AlarmHistoryWithTags,
 	{
-		alarmName:
-			'soft-opt-in-consent-setter-IAP-PROD failed and sent a message to the dead letter queue.',
 		alarm: {
-			AlarmName:
-				'soft-opt-in-consent-setter-IAP-PROD failed and sent a message to the dead letter queue.',
-			AlarmArn:
-				'arn:aws:cloudwatch:eu-west-1:12345:alarm:soft-opt-in-consent-setter-IAP-PROD failed and sent a message to the dead letter queue.',
-			ActionsEnabled: true,
-			AlarmActions: ['arn:aws:sns:eu-west-1:12345:alarms-handler-topic-PROD'],
-		} as MetricAlarm,
+			name: 'soft-opt-in-consent-setter-IAP-PROD failed and sent a message to the dead letter queue.',
+			arn: 'arn:aws:cloudwatch:eu-west-1:12345:alarm:soft-opt-in-consent-setter-IAP-PROD failed and sent a message to the dead letter queue.',
+			actionsEnabled: true,
+			actions: ['arn:aws:sns:eu-west-1:12345:alarms-handler-topic-PROD'],
+		} satisfies AlarmData,
 		history: [
 			buildAlarmHistoryItem(
 				'soft-opt-in-consent-setter-IAP-PROD failed and sent a message to the dead letter queue.',
@@ -286,17 +281,14 @@ const testData: AlarmHistoryWithTags[] = [
 				} as Tags),
 			'',
 		),
-	},
+	} satisfies AlarmHistoryWithTags,
 	{
-		alarmName: 'support-reminders-PROD: failed event on the dead letter queue',
 		alarm: {
-			AlarmName:
-				'support-reminders-PROD: failed event on the dead letter queue',
-			AlarmArn:
-				'arn:aws:cloudwatch:eu-west-1:12345:alarm:support-reminders-PROD: failed event on the dead letter queue',
-			ActionsEnabled: true,
-			AlarmActions: ['arn:aws:sns:eu-west-1:12345:alarms-handler-topic-PROD'],
-		} as MetricAlarm,
+			name: 'support-reminders-PROD: failed event on the dead letter queue',
+			arn: 'arn:aws:cloudwatch:eu-west-1:12345:alarm:support-reminders-PROD: failed event on the dead letter queue',
+			actionsEnabled: true,
+			actions: ['arn:aws:sns:eu-west-1:12345:alarms-handler-topic-PROD'],
+		} satisfies AlarmData,
 		history: [
 			buildAlarmHistoryItem(
 				'support-reminders-PROD: failed event on the dead letter queue',
@@ -311,5 +303,5 @@ const testData: AlarmHistoryWithTags[] = [
 				} as Tags),
 			'',
 		),
-	},
+	} satisfies AlarmHistoryWithTags,
 ];

@@ -1,24 +1,23 @@
 import type { SQSEvent, SQSRecord } from 'aws-lambda';
 import type { z } from 'zod';
-import type { HandlerProps } from '@modules/routing/lambdaHandler';
-import { LambdaHandler } from '@modules/routing/lambdaHandler';
+import type { HandlerEnv } from '@modules/routing/lambdaHandler';
+import { LambdaHandlerWithServices } from '@modules/routing/lambdaHandler';
 import { logger } from '@modules/routing/logger';
 
-export function SQSHandler<ConfigType>(
+export function SQSHandler<ConfigType, Services>(
 	configSchema: z.ZodType<ConfigType, z.ZodTypeDef, unknown>,
-	handler: (
-		props: HandlerProps<ConfigType>,
-		record: SQSRecord,
-	) => Promise<void>,
+	handler: (record: SQSRecord, services: Services) => Promise<void>,
+	buildServices: (handlerProps: HandlerEnv<ConfigType>) => Services,
 ) {
-	return LambdaHandler(configSchema, handleSQSMessages<ConfigType>(handler));
+	return LambdaHandlerWithServices(
+		configSchema,
+		handleSQSMessages(handler),
+		buildServices,
+	);
 }
 
-export function handleSQSMessages<ConfigType>(
-	recordHandler: (
-		props: HandlerProps<ConfigType>,
-		record: SQSRecord,
-	) => Promise<void>,
+export function handleSQSMessages<Services>(
+	recordHandler: (record: SQSRecord, services: Services) => Promise<void>,
 ) {
 	const recordHandlerWithLogging = logger.wrapRouter(
 		recordHandler,
@@ -28,10 +27,10 @@ export function handleSQSMessages<ConfigType>(
 		logger.getCallerInfo(),
 	);
 
-	return async (props: HandlerProps<ConfigType>, event: SQSEvent) => {
+	return async (event: SQSEvent, services: Services) => {
 		try {
 			for (const record of event.Records) {
-				await recordHandlerWithLogging(props, record);
+				await recordHandlerWithLogging(record, services);
 			}
 		} catch (error) {
 			console.error(error);
