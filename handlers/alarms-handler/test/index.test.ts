@@ -129,7 +129,7 @@ describe('Handler', () => {
 									},
 									{
 										textParagraph: {
-											text: '<a href="https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fmock-app-CODE/log-events$3Fstart$3D1728458220000$26filterPattern$3D$26end$3D1728458580000">Logs for mock-app-CODE between 08:17 and 08:23</a>',
+											text: '<a href="https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fmock-app-CODE/log-events$3Fstart$3D1728458220000$26filterPattern$3D$26end$3D1728458580000">Logs for mock-app-CODE between 07:17 and 07:23</a>',
 										},
 									},
 									{
@@ -283,12 +283,12 @@ describe('Handler', () => {
 									},
 									{
 										textParagraph: {
-											text: '<a href="https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fmock-app-CODE/log-events$3Fstart$3D1728458220000$26filterPattern$3D$26end$3D1728458580000">Logs for mock-app-CODE between 08:17 and 08:23</a>',
+											text: '<a href="https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fmock-app-CODE/log-events$3Fstart$3D1728458220000$26filterPattern$3D$26end$3D1728458580000">Logs for mock-app-CODE between 07:17 and 07:23</a>',
 										},
 									},
 									{
 										textParagraph: {
-											text: '<a href="https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fanother-app-CODE/log-events$3Fstart$3D1728458220000$26filterPattern$3D$26end$3D1728458580000">Logs for another-app-CODE between 08:17 and 08:23</a>',
+											text: '<a href="https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fanother-app-CODE/log-events$3Fstart$3D1728458220000$26filterPattern$3D$26end$3D1728458580000">Logs for another-app-CODE between 07:17 and 07:23</a>',
 										},
 									},
 									{

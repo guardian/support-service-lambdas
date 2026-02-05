@@ -43,7 +43,7 @@ const expected = [
 								widgets: [
 									{
 										textParagraph: {
-											text: '⏰ In alarm for <b>11 days</b> (since 2025-05-09 21:02)',
+											text: '⏰ In alarm for <b>11 days</b> (since 2025-05-09 20:02)',
 										},
 									},
 									{
@@ -59,7 +59,7 @@ const expected = [
 								widgets: [
 									{
 										textParagraph: {
-											text: '⏰ In alarm for <b>5 days</b> (since 2025-05-15 16:31)',
+											text: '⏰ In alarm for <b>6 days</b> (since 2025-05-15 15:31)',
 										},
 									},
 									{

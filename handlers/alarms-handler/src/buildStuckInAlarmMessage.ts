@@ -29,7 +29,7 @@ export const buildStuckInAlarmMessage = (
 				header: `🚨 <B>${alarm.AlarmName}</b> <a href="${alarmUrl}">alarm</a>`,
 				widgets: [
 					buildText(
-						`⏰ In alarm for <b>${daysAgo} day${daysAgo > 1 ? 's' : ''}</b> (since ${enteredAlarmDate.format('YYYY-MM-DD HH:mm')})`,
+						`⏰ In alarm for <b>${daysAgo} day${daysAgo > 1 ? 's' : ''}</b> (since ${enteredAlarmDate.utc().format('YYYY-MM-DD HH:mm')})`,
 					),
 					...links.map(({ link, linkText }) =>
 						buildText(`<a href="${link}">${linkText}</a>`),

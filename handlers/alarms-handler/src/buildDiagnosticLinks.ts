@@ -1,4 +1,7 @@
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
 
 export function buildDiagnosticLinks(
 	DiagnosticLinks: string | undefined,
@@ -98,8 +101,8 @@ export function buildLinkText(
 		alarmEndTimeMillis -
 		1000 * (alarmCoveredTimeSeconds + extraTimeForPropagation);
 
-	const startDate = dayjs(new Date(alarmStartTimeMillis)).format('HH:mm');
-	const endDate = dayjs(alarmEndTimeMillis).format('HH:mm');
+	const startDate = dayjs(new Date(alarmStartTimeMillis)).utc().format('HH:mm');
+	const endDate = dayjs(alarmEndTimeMillis).utc().format('HH:mm');
 
 	return `Logs for ${lambdaName} between ${startDate} and ${endDate}`;
 }
