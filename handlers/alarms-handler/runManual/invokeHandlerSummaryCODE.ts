@@ -1,6 +1,5 @@
-import { invokeFunction } from '@modules/aws/lambda';
+import { invokeCODELambda } from '@modules/routing/lambdaHandler';
+import { handlerTestEvent } from './invokeHandlerCODE';
 
 // run this after deploying to CODE to invoke the deployed lambda
-invokeFunction('alarms-handler-summary-CODE', '')
-	.then(console.log)
-	.catch(console.error);
+invokeCODELambda('alarms-handler-summary-CODE', handlerTestEvent);

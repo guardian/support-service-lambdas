@@ -1,4 +1,5 @@
 import { loadConfig } from '@modules/aws/appConfig';
+import { invokeFunction } from '@modules/aws/lambda';
 import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import dayjs from 'dayjs';
@@ -98,6 +99,28 @@ export function runWithConfig<E>(
 			process.env.STAGE = undefined;
 			process.env.STACK = undefined;
 		});
+}
+
+/**
+ * use this when you want to run a lambda directly against CODE
+ *
+ * Make sure you have janus credentials.
+ *
+ * Use `pnpm update-lambda` or `pnpm update-lambda --quick` first to get the
+ * latest code uploaded.
+ *
+ * @param functionName
+ * @param testEvent
+ */
+export function invokeCODELambda(functionName: string, testEvent: object) {
+	invokeFunction(functionName, JSON.stringify(testEvent))
+		.then(console.log)
+		.catch(console.error)
+		.finally(() =>
+			console.log(
+				`\n\nLog group link: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252F${functionName}`,
+			),
+		);
 }
 
 export const getEnv = (env: string): string =>
