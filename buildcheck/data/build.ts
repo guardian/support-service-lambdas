@@ -411,8 +411,7 @@ const moduleProductCatalog: ModuleDefinition = {
 		...devDeps['typescript'],
 	},
 	extraScripts: {
-		generateFiles:
-			'tsx -r tsconfig-paths/register --project ../../tsconfig.json src/generateSchemaCommand.ts',
+		generateFiles: 'tsx src/generateSchemaCommand.ts',
 		validateSchema:
 			'prettier --write src/productCatalogSchema.ts && pnpm run sortSchemaKeys',
 		sortSchemaKeys:
@@ -427,8 +426,7 @@ const moduleProductCatalog: ModuleDefinition = {
 			'for i in {1..2}; do eslint --fix src/productPurchaseSchema.ts; done',
 		validateSchemas:
 			'pnpm run validateSchema && pnpm run validateBillingPeriods && pnpm run validateProductPurchaseSchema',
-		buildGeneratedFiles:
-			'tsc --noEmit --skipLibCheck --project tsconfig-for-generated-files.json',
+		buildGeneratedFiles: 'tsc --noEmit --skipLibCheck',
 		generateSchema:
 			'pnpm run generateFiles && pnpm run validateSchemas && pnpm run buildGeneratedFiles',
 		updateSnapshots: 'jest -u --group=-integration',
