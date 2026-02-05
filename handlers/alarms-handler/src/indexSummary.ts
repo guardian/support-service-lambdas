@@ -109,13 +109,13 @@ function parseAlarmHistory(history: AlarmHistoryItem[]): AlarmStateChange[] {
 
 function sentToAlarmsHandler(stage: string) {
 	return (alarm: AlarmHistoryWithTags) =>
-		(alarm.alarm.AlarmActions?.findIndex((alarmAction) =>
+		alarm.alarm.actions.findIndex((alarmAction) =>
 			alarmAction.endsWith('alarms-handler-topic-' + stage),
-		) ?? -1) >= 0;
+		) >= 0;
 }
 
 const actionsEnabled = (alarm: AlarmHistoryWithTags): boolean =>
-	alarm.alarm.ActionsEnabled ?? true;
+	alarm.alarm.actionsEnabled;
 
 export async function getChatMessages(
 	stage: string,
@@ -130,11 +130,11 @@ export async function getChatMessages(
 	}> = alarmHistory
 		.filter(sentToAlarmsHandler(stage))
 		.filter(actionsEnabled)
-		.map(({ history, tags, alarmName }) => {
+		.map(({ history, tags, alarm }) => {
 			const count = parseAlarmHistory(history).filter(
 				(change) => change.toAlarmState,
 			).length;
-			return { alarmName, count, tags };
+			return { alarmName: alarm.name, count, tags };
 		})
 		.filter(({ count }) => count > 0);
 	logger.log(`alarmHistory ${alarmHistory.length}`);

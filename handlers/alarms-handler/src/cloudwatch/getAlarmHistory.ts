@@ -1,23 +1,22 @@
 import type {
 	AlarmHistoryItem,
 	CloudWatchClient,
-	CompositeAlarm,
-	MetricAlarm,
 } from '@aws-sdk/client-cloudwatch';
 import {
 	DescribeAlarmHistoryCommand,
 	DescribeAlarmsCommand,
 	HistoryItemType,
 } from '@aws-sdk/client-cloudwatch';
-import { chunkArray, flatten, groupBy } from '@modules/arrayFunctions';
+import {
+	chunkArray,
+	flatten,
+	groupBy,
+	groupByUniqueOrThrow,
+} from '@modules/arrayFunctions';
 import { fetchAllPages } from '@modules/aws/fetchAllPages';
 import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
-import {
-	objectFromEntries,
-	objectInnerJoin,
-	objectKeys,
-} from '@modules/objectFunctions';
+import { objectInnerJoin, objectKeys } from '@modules/objectFunctions';
 import { logger } from '@modules/routing/logger';
 import type { Dayjs } from 'dayjs';
 import type { Tags } from './getTags';
@@ -26,8 +25,7 @@ import { getTags } from './getTags';
 export type AlarmHistoryWithTags = {
 	history: AlarmHistoryItem[];
 	tags: Lazy<Tags>;
-	alarm: CompositeAlarm | MetricAlarm;
-	alarmName: string;
+	alarm: AlarmData;
 };
 
 export async function getAlarmHistory(
@@ -46,86 +44,88 @@ export async function getAlarmHistory(
 			);
 
 			const eachAlarmWithHistory = groupBy(alarmHistoryItems, (item) =>
-				getIfDefined(
-					item.AlarmName,
-					"missing alarm name shouldn't be possible",
-				),
+				get(item.AlarmName),
 			);
-			const arnForAlarmNameLookup = await getAlarms(
-				objectKeys(eachAlarmWithHistory),
-				client,
+			const arnForAlarmNameLookup = groupByUniqueOrThrow(
+				await getAlarms(objectKeys(eachAlarmWithHistory), client),
+				(a) => a.name,
+				'duplicate alarm name should not be possible',
 			);
-			// need to use an inner join because if an alarm is deleted there's no way to get its arn back
-			const alarmAndHistorys = objectInnerJoin(
+			// if an alarm is deleted there's no way to get its arn back, it doesn't return a record
+			// from getAlarms, so it will be dropped from the join and ignored
+			const alarmHistoryWithTags: AlarmHistoryWithTags[] = objectInnerJoin(
 				arnForAlarmNameLookup,
 				eachAlarmWithHistory,
-			);
-			const alarmHistoryWithTags = alarmAndHistorys.map(
-				([alarm, history, alarmName]) => {
-					const lazyTags = new Lazy(
-						() => getTags(getIfDefined(alarm.AlarmArn, ''), client),
-						'tags for ' + alarm.AlarmArn,
-					);
-					return {
-						history,
-						tags: lazyTags,
-						alarm,
-						alarmName,
-					} satisfies AlarmHistoryWithTags;
-				},
-			);
+			).map(([alarm, history]) => {
+				const lazyTags = new Lazy(
+					() => getTags(alarm.arn, client),
+					'tags for ' + alarm.arn,
+				);
+				return {
+					history,
+					tags: lazyTags,
+					alarm,
+				} satisfies AlarmHistoryWithTags;
+			});
 			return alarmHistoryWithTags;
 		}),
 	).then(flatten);
 }
 
+export type AlarmData = {
+	arn: string;
+	name: string;
+	actionsEnabled: boolean;
+	actions: string[];
+};
+
 // https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_DescribeAlarms.html#:~:text=Maximum%20number%20of%20100%20items
 const maxDescribeAlarmsArrayLength = 100;
+
+function get<T>(value: T | undefined) {
+	return getIfDefined(value, 'missing required value');
+}
 
 const getAlarms = async (
 	alarmNames: string[],
 	client: CloudWatchClient,
-): Promise<Record<string, CompositeAlarm | MetricAlarm>> => {
+): Promise<AlarmData[]> => {
 	logger.log(`fetching alarm info for ${alarmNames.length} alarms`);
 	const alarmNamesChunks = chunkArray(alarmNames, maxDescribeAlarmsArrayLength);
-	return objectFromEntries(
-		(
-			await Promise.all(
-				alarmNamesChunks.map(
-					async (alarmNamesChunk) =>
-						await fetchAllPages('DescribeAlarmsCommand', async (token) => {
-							const request = new DescribeAlarmsCommand({
-								AlarmNames: alarmNamesChunk,
-								NextToken: token,
-							});
+	return (
+		await Promise.all(
+			alarmNamesChunks.map(
+				async (alarmNamesChunk) =>
+					await fetchAllPages('DescribeAlarmsCommand', async (token) => {
+						const request = new DescribeAlarmsCommand({
+							AlarmNames: alarmNamesChunk,
+							NextToken: token,
+						});
 
-							const response = await client.send(request);
-							const nameAndArns = [
-								...(response.CompositeAlarms?.flatMap((alarm) => [
-									[
-										getIfDefined(
-											alarm.AlarmName,
-											'invalid response from describe alarms',
-										),
-										alarm,
-									] as const,
-								]) ?? []),
-								...(response.MetricAlarms?.flatMap((alarm) => [
-									[
-										getIfDefined(
-											alarm.AlarmName,
-											'invalid response from describe alarms',
-										),
-										alarm,
-									] as const,
-								]) ?? []),
-							];
-							return { nextToken: response.NextToken, thisPage: nameAndArns };
-						}),
-				),
-			)
-		).flat(1),
-	);
+						const response = await client.send(request);
+						const nameAndData = [
+							...(response.CompositeAlarms?.flatMap((alarm) => [
+								{
+									arn: get(alarm.AlarmArn),
+									name: get(alarm.AlarmName),
+									actionsEnabled: get(alarm.ActionsEnabled),
+									actions: get(alarm.AlarmActions),
+								} satisfies AlarmData,
+							]) ?? []),
+							...(response.MetricAlarms?.flatMap((alarm) => [
+								{
+									arn: get(alarm.AlarmArn),
+									name: get(alarm.AlarmName),
+									actionsEnabled: get(alarm.ActionsEnabled),
+									actions: get(alarm.AlarmActions),
+								} satisfies AlarmData,
+							]) ?? []),
+						];
+						return { nextToken: response.NextToken, thisPage: nameAndData };
+					}),
+			),
+		)
+	).flat(1);
 };
 const getAlarmHistoryForClient = async (
 	client: CloudWatchClient,
