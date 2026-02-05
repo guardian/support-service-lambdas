@@ -5,8 +5,8 @@ import type { SNSEventRecord, SQSRecord } from 'aws-lambda';
 import { z } from 'zod';
 import type { AppToTeams } from './alarmMappings';
 import { prodAppToTeams } from './alarmMappings';
-import type { Tags } from './cloudwatch';
 import { buildCloudwatch } from './cloudwatch';
+import type { Tags } from './cloudwatch/getTags';
 import type { WebhookUrls } from './configSchema';
 import { ConfigSchema } from './configSchema';
 

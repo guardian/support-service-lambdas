@@ -1,7 +1,8 @@
 import type { AlarmHistoryItem, MetricAlarm } from '@aws-sdk/client-cloudwatch';
 import { Lazy } from '@modules/lazy';
 import type { AppToTeams } from '../src/alarmMappings';
-import type { AlarmHistoryWithTags, Tags } from '../src/cloudwatch';
+import type { AlarmHistoryWithTags } from '../src/cloudwatch/getAlarmHistory';
+import type { Tags } from '../src/cloudwatch/getTags';
 import type { WebhookUrls } from '../src/configSchema';
 import { getChatMessages } from '../src/indexSummary';
 

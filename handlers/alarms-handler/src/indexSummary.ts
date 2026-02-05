@@ -9,8 +9,9 @@ import { z } from 'zod';
 import type { AppToTeams, Team } from './alarmMappings';
 import { prodAppToTeams } from './alarmMappings';
 import { buildCloudWatchSummaryMessage } from './buildCloudWatchSummaryMessage';
-import type { AlarmHistoryWithTags, Tags } from './cloudwatch';
 import { buildCloudwatch } from './cloudwatch';
+import type { AlarmHistoryWithTags } from './cloudwatch/getAlarmHistory';
+import type { Tags } from './cloudwatch/getTags';
 import type { WebhookUrls } from './configSchema';
 import { ConfigSchema } from './configSchema';
 
@@ -26,12 +27,9 @@ export async function handlerWithStage({
 	config,
 }: HandlerProps<ConfigSchema>) {
 	try {
-		const startDate = now.subtract(7, 'days').toDate();
-		const endDate = now.toDate();
-
 		const cloudwatch = buildCloudwatch(config.accounts);
 		const alarmHistory: AlarmHistoryWithTags[] =
-			await cloudwatch.getAlarmHistory(startDate, endDate);
+			await cloudwatch.getAlarmHistory(now);
 
 		const chatMessages = await getChatMessages(
 			stage,

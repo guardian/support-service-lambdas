@@ -6,8 +6,8 @@ export type AWSPage<O> = {
 };
 
 export async function fetchAllPages<O>(
+	msg: string,
 	doIt: (token?: string) => Promise<AWSPage<O>>,
-	msg: string = '',
 ): Promise<O[]> {
 	async function readNextPage(
 		token?: string,

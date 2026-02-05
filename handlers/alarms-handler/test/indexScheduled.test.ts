@@ -2,7 +2,7 @@ import type { MetricAlarm } from '@aws-sdk/client-cloudwatch';
 import { Lazy } from '@modules/lazy';
 import dayjs from 'dayjs';
 import { prodAppToTeams } from '../src/alarmMappings';
-import type { Tags } from '../src/cloudwatch';
+import type { Tags } from '../src/cloudwatch/getTags';
 import type { WebhookUrls } from '../src/configSchema';
 import { getChatMessages } from '../src/indexScheduled';
 

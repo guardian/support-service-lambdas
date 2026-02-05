@@ -30,30 +30,33 @@ export type SSMKeyValuePairs = Array<Record<string, string>>;
 
 async function readAllRecursive(configRoot: string): Promise<SSMKeyValuePairs> {
 	const ssm = new SSMClient(awsConfig);
-	return fetchAllPages<Record<string, string>>(async (token) => {
-		const command = new GetParametersByPathCommand({
-			Path: configRoot,
-			Recursive: true,
-			WithDecryption: true,
-			NextToken: token,
-		});
-		const result = await ssm.send(command);
+	return fetchAllPages<Record<string, string>>(
+		'GetParametersByPathCommand',
+		async (token) => {
+			const command = new GetParametersByPathCommand({
+				Path: configRoot,
+				Recursive: true,
+				WithDecryption: true,
+				NextToken: token,
+			});
+			const result = await ssm.send(command);
 
-		if (!result.Parameters) {
-			throw new Error(
-				`Failed to retrieve config from parameter store: ${configRoot}, ${JSON.stringify(result)}`,
-			);
-		}
+			if (!result.Parameters) {
+				throw new Error(
+					`Failed to retrieve config from parameter store: ${configRoot}, ${JSON.stringify(result)}`,
+				);
+			}
 
-		return {
-			nextToken: result.NextToken,
-			thisPage: result.Parameters.flatMap((param) =>
-				param.Value !== undefined && param.Name !== undefined
-					? [{ [param.Name]: param.Value }]
-					: [],
-			),
-		};
-	});
+			return {
+				nextToken: result.NextToken,
+				thisPage: result.Parameters.flatMap((param) =>
+					param.Value !== undefined && param.Name !== undefined
+						? [{ [param.Name]: param.Value }]
+						: [],
+				),
+			};
+		},
+	);
 }
 
 // exported for test access
