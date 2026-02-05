@@ -34,11 +34,13 @@ export async function handlerWithStage(
 		await Promise.all(
 			chatMessages.map(async (chatMessage) => {
 				console.log('sending one chat message to', chatMessage.webhookUrl);
-				return await fetch(chatMessage.webhookUrl, {
+				const response = await fetch(chatMessage.webhookUrl, {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify(chatMessage.body),
 				});
+				logger.log('http response', response, await response.text());
+				return response;
 			}),
 		);
 	} catch (error) {
@@ -105,6 +107,6 @@ export async function getChatMessages(
 	logger.log('webhookToAllTextLines', webhookToAllMetricAlarms);
 	return webhookToAllMetricAlarms.map(([webhookUrl, metricAlarms]) => ({
 		webhookUrl,
-		body: buildStuckInAlarmMessage(metricAlarms),
+		body: buildStuckInAlarmMessage(metricAlarms, now),
 	}));
 }

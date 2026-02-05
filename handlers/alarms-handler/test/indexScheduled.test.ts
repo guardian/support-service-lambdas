@@ -29,12 +29,86 @@ it('should convert some alarms into a chat message', async () => {
 
 const expected = [
 	{
+		body: {
+			cardsV2: [
+				{
+					card: {
+						header: {
+							title: 'These alarms have been going off for more than 24h',
+						},
+						sections: [
+							{
+								header:
+									'🚨 <B>soft-opt-in-consent-setter-IAP-PROD failed and sent a message to the dead letter queue.</b> <a href="https://console.aws.amazon.com/cloudwatch/home?region=eu-west-1#alarmsV2:alarm/soft-opt-in-consent-setter-IAP-PROD%20failed%20and%20sent%20a%20message%20to%20the%20dead%20letter%20queue%2E">alarm</a>',
+								widgets: [
+									{
+										textParagraph: {
+											text: '⏰ In alarm for <b>11 days</b> (since 2025-05-09 21:02)',
+										},
+									},
+									{
+										textParagraph: {
+											text: 'Alarm when the dead letter queue accumulates messages.',
+										},
+									},
+								],
+							},
+							{
+								header:
+									'🚨 <B>New message in the product-switch-refund-dead-letter-PROD dead letter queue.</b> <a href="https://console.aws.amazon.com/cloudwatch/home?region=eu-west-1#alarmsV2:alarm/New%20message%20in%20the%20product-switch-refund-dead-letter-PROD%20dead%20letter%20queue%2E">alarm</a>',
+								widgets: [
+									{
+										textParagraph: {
+											text: '⏰ In alarm for <b>5 days</b> (since 2025-05-15 16:31)',
+										},
+									},
+									{
+										textParagraph: {
+											text: 'There is a new message in the product-switch-refund-dead-letter-PROD dead letter queue. This means that a user who has cancelled their supporter plus subscription within 14 days has not received the refund that they are due. Please check the product-switch-refund-PROD logs - https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fproduct-switch-refund-PROD and the invoicing-api-refund-PROD logs - https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Finvoicing-api-refund-PROD to diagnose the issue.',
+										},
+									},
+								],
+							},
+						],
+					},
+					cardId: 'stuck-alarms',
+				},
+			],
+		},
 		webhookUrl: 'http://thegulocal.com/VALUE_WEBHOOK',
-		text: 'These alarms have been going off for more than 24h\n\n- <https://console.aws.amazon.com/cloudwatch/home?region=eu-west-1#alarmsV2:alarm/New%20message%20in%20the%20product-switch-refund-dead-letter-PROD%20dead%20letter%20queue%2E|New message in the product-switch-refund-dead-letter-PROD dead letter queue.> - 2025-05-15T15:31:44.985Z - There is a new message in the product-switch-refund-dead-letter-PROD dead letter queue. This means that a user who has cancelled their supporter plus subscription within 14 days has not received the refund that they are due. Please check the product-switch-refund-PROD logs - https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fproduct-switch-refund-PROD and the invoicing-api-refund-PROD logs - https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Finvoicing-api-refund-PROD to diagnose the issue.\n- <https://console.aws.amazon.com/cloudwatch/home?region=eu-west-1#alarmsV2:alarm/soft-opt-in-consent-setter-IAP-PROD%20failed%20and%20sent%20a%20message%20to%20the%20dead%20letter%20queue%2E|soft-opt-in-consent-setter-IAP-PROD failed and sent a message to the dead letter queue.> - 2025-05-09T20:02:56.905Z - Alarm when the dead letter queue accumulates messages.',
 	},
 	{
+		body: {
+			cardsV2: [
+				{
+					card: {
+						header: {
+							title: 'These alarms have been going off for more than 24h',
+						},
+						sections: [
+							{
+								header:
+									'🚨 <B>support-reminders-PROD: failed event on the dead letter queue</b> <a href="https://console.aws.amazon.com/cloudwatch/home?region=eu-west-1#alarmsV2:alarm/support-reminders-PROD%3A%20failed%20event%20on%20the%20dead%20letter%20queue">alarm</a>',
+								widgets: [
+									{
+										textParagraph: {
+											text: '⏰ In alarm for <b>153 days</b> (since 2024-12-19 08:35)',
+										},
+									},
+									{
+										textParagraph: {
+											text: 'A reminder signup event failed and is now on the dead letter queue.',
+										},
+									},
+								],
+							},
+						],
+					},
+					cardId: 'stuck-alarms',
+				},
+			],
+		},
 		webhookUrl: 'http://thegulocal.com/GROWTH_WEBHOOK',
-		text: 'These alarms have been going off for more than 24h\n\n- <https://console.aws.amazon.com/cloudwatch/home?region=eu-west-1#alarmsV2:alarm/support-reminders-PROD%3A%20failed%20event%20on%20the%20dead%20letter%20queue|support-reminders-PROD: failed event on the dead letter queue> - 2024-12-19T08:35:01.262Z - A reminder signup event failed and is now on the dead letter queue.',
 	},
 ];
 

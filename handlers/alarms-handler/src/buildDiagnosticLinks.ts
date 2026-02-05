@@ -1,3 +1,5 @@
+import dayjs from 'dayjs';
+
 export function buildDiagnosticLinks(
 	DiagnosticLinks: string | undefined,
 	trigger:
@@ -7,7 +9,7 @@ export function buildDiagnosticLinks(
 		  }
 		| undefined,
 	stateChangeTime: Date,
-): Array<{ link: string; lambda: string }> {
+): Array<{ link: string; linkText: string }> {
 	const diagnosticUrlTemplates = DiagnosticLinks
 		? DiagnosticLinks.split(' ').map((link) => ({
 				prefix: link.split(':', 1)[0],
@@ -24,8 +26,12 @@ export function buildDiagnosticLinks(
 			);
 			return [
 				{
-					lambda: diagnosticUrlTemplate.value,
 					link,
+					linkText: buildLinkText(
+						diagnosticUrlTemplate.value,
+						trigger,
+						stateChangeTime,
+					),
 				},
 			];
 		} else {
@@ -71,4 +77,29 @@ function getCloudwatchLogsLink(
 		alarmEndTimeMillis;
 
 	return logLink;
+}
+
+export function buildLinkText(
+	lambdaName: string,
+	trigger: { Period: number; EvaluationPeriods: number } | undefined,
+	stateChangeTime: Date,
+): string {
+	const assumedTimeForCompositeAlarms = 300;
+	const extraTimeForPropagation = 60;
+	const alarmCoveredTimeSeconds = trigger
+		? trigger.EvaluationPeriods * trigger.Period
+		: assumedTimeForCompositeAlarms;
+
+	const alarmEndTimeMillis = new Date(stateChangeTime.getTime()).setSeconds(
+		0,
+		0,
+	);
+	const alarmStartTimeMillis =
+		alarmEndTimeMillis -
+		1000 * (alarmCoveredTimeSeconds + extraTimeForPropagation);
+
+	const startDate = dayjs(new Date(alarmStartTimeMillis)).format('HH:mm');
+	const endDate = dayjs(alarmEndTimeMillis).format('HH:mm');
+
+	return `Logs for ${lambdaName} between ${startDate} and ${endDate}`;
 }

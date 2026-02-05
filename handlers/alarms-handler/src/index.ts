@@ -62,13 +62,15 @@ export async function handlerWithStage(record: SQSRecord, services: Services) {
 
 	if (maybeChatMessages) {
 		await Promise.all(
-			maybeChatMessages.webhookUrls.map((webhookUrl) => {
+			maybeChatMessages.webhookUrls.map(async (webhookUrl) => {
 				logger.log('sending message to web hook', webhookUrl);
-				return fetch(webhookUrl, {
+				const response = await fetch(webhookUrl, {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify(maybeChatMessages.body),
 				});
+				logger.log('http response', response, await response.text());
+				return response;
 			}),
 		);
 	}

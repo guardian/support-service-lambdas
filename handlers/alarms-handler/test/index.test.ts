@@ -86,13 +86,67 @@ describe('Handler', () => {
 			'arn:aws:cloudwatch:eu-west-1:1234:alarm:DISCOUNT-API-CODE Discount-api 5XX response',
 			'1234',
 		);
-		const expectedText =
-			'🚨 *ALARM:* DISCOUNT-API-CODE Discount-api 5XX response has triggered!\n\n' +
-			'*Description:* Impact - Discount api returned a 5XX response check the logs for more information: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fdiscount-api-CODE. Follow the process in https://docs.google.com/document/d/sdkjfhskjdfhksjdhf/edit\n\n' +
-			'*Reason:* Threshold Crossed: 1 datapoint [2.0 (09/10/24 07:18:00)] was greater than or equal to the threshold (1.0).\n\n' +
-			'*LogLink*: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fmock-app-CODE/log-events$3Fstart$3D1728458220000$26filterPattern$3D$26end$3D1728458580000';
+		const expectedText = {
+			cardsV2: [
+				{
+					card: {
+						header: {
+							title: 'DISCOUNT-API-CODE Discount-api 5XX response',
+						},
+						sections: [
+							{
+								widgets: [
+									{
+										textParagraph: {
+											text: '🚨 ALARM: Alarm has triggered! <a href="https://console.aws.amazon.com/cloudwatch/home?region=eu-west-1#alarmsV2:alarm/DISCOUNT-API-CODE%20Discount-api%205XX%20response">alarm</a>',
+										},
+									},
+									{
+										columns: {
+											columnItems: [
+												{
+													horizontalSizeStyle: 'FILL_MINIMUM_SPACE',
+													widgets: [
+														{
+															textParagraph: {
+																text: '<b>Reason</b>',
+															},
+														},
+													],
+												},
+												{
+													horizontalSizeStyle: 'FILL_AVAILABLE_SPACE',
+													widgets: [
+														{
+															textParagraph: {
+																text: 'Threshold Crossed: 1 datapoint [2.0 (09/10/24 07:18:00)] was greater than or equal to the threshold (1.0).',
+															},
+														},
+													],
+												},
+											],
+										},
+									},
+									{
+										textParagraph: {
+											text: '<a href="https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fmock-app-CODE/log-events$3Fstart$3D1728458220000$26filterPattern$3D$26end$3D1728458580000">Logs for mock-app-CODE between 08:17 and 08:23</a>',
+										},
+									},
+									{
+										textParagraph: {
+											text: 'Impact - Discount api returned a 5XX response check the logs for more information: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fdiscount-api-CODE. Follow the process in https://docs.google.com/document/d/sdkjfhskjdfhksjdhf/edit',
+										},
+									},
+								],
+							},
+						],
+					},
+					cardId: 'cloudwatch-alarm',
+				},
+			],
+		};
 		expect(result?.webhookUrls).toEqual([mockWebhookUrls.SRE]);
-		expect(result?.text).toEqual(expectedText);
+		expect(result?.body).toEqual(expectedText);
 	});
 
 	it('should not insert if the DiagnosticUrls are empty', async () => {
@@ -109,12 +163,62 @@ describe('Handler', () => {
 			'arn:aws:cloudwatch:eu-west-1:1234:alarm:DISCOUNT-API-CODE Discount-api 5XX response',
 			'1234',
 		);
-		const expectedText =
-			'🚨 *ALARM:* DISCOUNT-API-CODE Discount-api 5XX response has triggered!\n\n' +
-			'*Description:* Impact - Discount api returned a 5XX response check the logs for more information: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fdiscount-api-CODE. Follow the process in https://docs.google.com/document/d/sdkjfhskjdfhksjdhf/edit\n\n' +
-			'*Reason:* Threshold Crossed: 1 datapoint [2.0 (09/10/24 07:18:00)] was greater than or equal to the threshold (1.0).';
+		const expectedText = {
+			cardsV2: [
+				{
+					card: {
+						header: {
+							title: 'DISCOUNT-API-CODE Discount-api 5XX response',
+						},
+						sections: [
+							{
+								widgets: [
+									{
+										textParagraph: {
+											text: '🚨 ALARM: Alarm has triggered! <a href="https://console.aws.amazon.com/cloudwatch/home?region=eu-west-1#alarmsV2:alarm/DISCOUNT-API-CODE%20Discount-api%205XX%20response">alarm</a>',
+										},
+									},
+									{
+										columns: {
+											columnItems: [
+												{
+													horizontalSizeStyle: 'FILL_MINIMUM_SPACE',
+													widgets: [
+														{
+															textParagraph: {
+																text: '<b>Reason</b>',
+															},
+														},
+													],
+												},
+												{
+													horizontalSizeStyle: 'FILL_AVAILABLE_SPACE',
+													widgets: [
+														{
+															textParagraph: {
+																text: 'Threshold Crossed: 1 datapoint [2.0 (09/10/24 07:18:00)] was greater than or equal to the threshold (1.0).',
+															},
+														},
+													],
+												},
+											],
+										},
+									},
+									{
+										textParagraph: {
+											text: 'Impact - Discount api returned a 5XX response check the logs for more information: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fdiscount-api-CODE. Follow the process in https://docs.google.com/document/d/sdkjfhskjdfhksjdhf/edit',
+										},
+									},
+								],
+							},
+						],
+					},
+					cardId: 'cloudwatch-alarm',
+				},
+			],
+		};
 		expect(result?.webhookUrls).toEqual([mockWebhookUrls.SRE]);
-		expect(result?.text).toEqual(expectedText);
+		expect(result?.body).toEqual(expectedText);
 	});
 
 	it('should add multiple urls where specified', async () => {
@@ -136,14 +240,72 @@ describe('Handler', () => {
 			'arn:aws:cloudwatch:eu-west-1:1234:alarm:DISCOUNT-API-CODE Discount-api 5XX response',
 			'1234',
 		);
-		const expectedText =
-			'🚨 *ALARM:* DISCOUNT-API-CODE Discount-api 5XX response has triggered!\n\n' +
-			'*Description:* Impact - Discount api returned a 5XX response check the logs for more information: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fdiscount-api-CODE. Follow the process in https://docs.google.com/document/d/sdkjfhskjdfhksjdhf/edit\n\n' +
-			'*Reason:* Threshold Crossed: 1 datapoint [2.0 (09/10/24 07:18:00)] was greater than or equal to the threshold (1.0).\n\n' +
-			'*LogLink*: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fmock-app-CODE/log-events$3Fstart$3D1728458220000$26filterPattern$3D$26end$3D1728458580000\n\n' +
-			'*LogLink*: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fanother-app-CODE/log-events$3Fstart$3D1728458220000$26filterPattern$3D$26end$3D1728458580000';
+		const expectedText = {
+			cardsV2: [
+				{
+					card: {
+						header: {
+							title: 'DISCOUNT-API-CODE Discount-api 5XX response',
+						},
+						sections: [
+							{
+								widgets: [
+									{
+										textParagraph: {
+											text: '🚨 ALARM: Alarm has triggered! <a href="https://console.aws.amazon.com/cloudwatch/home?region=eu-west-1#alarmsV2:alarm/DISCOUNT-API-CODE%20Discount-api%205XX%20response">alarm</a>',
+										},
+									},
+									{
+										columns: {
+											columnItems: [
+												{
+													horizontalSizeStyle: 'FILL_MINIMUM_SPACE',
+													widgets: [
+														{
+															textParagraph: {
+																text: '<b>Reason</b>',
+															},
+														},
+													],
+												},
+												{
+													horizontalSizeStyle: 'FILL_AVAILABLE_SPACE',
+													widgets: [
+														{
+															textParagraph: {
+																text: 'Threshold Crossed: 1 datapoint [2.0 (09/10/24 07:18:00)] was greater than or equal to the threshold (1.0).',
+															},
+														},
+													],
+												},
+											],
+										},
+									},
+									{
+										textParagraph: {
+											text: '<a href="https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fmock-app-CODE/log-events$3Fstart$3D1728458220000$26filterPattern$3D$26end$3D1728458580000">Logs for mock-app-CODE between 08:17 and 08:23</a>',
+										},
+									},
+									{
+										textParagraph: {
+											text: '<a href="https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fanother-app-CODE/log-events$3Fstart$3D1728458220000$26filterPattern$3D$26end$3D1728458580000">Logs for another-app-CODE between 08:17 and 08:23</a>',
+										},
+									},
+									{
+										textParagraph: {
+											text: 'Impact - Discount api returned a 5XX response check the logs for more information: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fdiscount-api-CODE. Follow the process in https://docs.google.com/document/d/sdkjfhskjdfhksjdhf/edit',
+										},
+									},
+								],
+							},
+						],
+					},
+					cardId: 'cloudwatch-alarm',
+				},
+			],
+		};
 		expect(result?.webhookUrls).toEqual([mockWebhookUrls.SRE]);
-		expect(result?.text).toEqual(expectedText);
+		expect(result?.body).toEqual(expectedText);
 	});
 
 	it('should handle SNS publish message', async () => {
@@ -192,7 +354,7 @@ describe('Handler', () => {
 			mockWebhookUrls.SRE,
 			expect.objectContaining({
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- eslint is unhappy with any, not sure how to fix
-				body: expect.stringContaining('*ALARM OK:* mock-alarm has recovered!'),
+				body: expect.stringContaining('ALARM OK: Alarm has recovered!'),
 			}),
 		);
 	});
