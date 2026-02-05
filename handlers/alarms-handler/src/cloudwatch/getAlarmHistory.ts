@@ -82,6 +82,11 @@ export type AlarmData = {
 // https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_DescribeAlarms.html#:~:text=Maximum%20number%20of%20100%20items
 const maxDescribeAlarmsArrayLength = 100;
 
+/**
+ * for some reason loads of fields in aws sdk can be undefined when they can't in reality
+ *
+ * this function is just to declutter
+ */
 function get<T>(value: T | undefined) {
 	return getIfDefined(value, 'missing required value');
 }
