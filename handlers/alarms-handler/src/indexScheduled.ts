@@ -1,17 +1,17 @@
 import type { MetricAlarm } from '@aws-sdk/client-cloudwatch';
 import { flatten, groupMap } from '@modules/arrayFunctions';
-import { getIfDefined } from '@modules/nullAndUndefined';
 import type { HandlerEnv } from '@modules/routing/lambdaHandler';
 import { LambdaHandler } from '@modules/routing/lambdaHandler';
+import { logger } from '@modules/routing/logger';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import type { AppToTeams } from './alarmMappings';
 import { prodAppToTeams } from './alarmMappings';
+import { buildStuckInAlarmMessage } from './buildStuckInAlarmMessage';
 import { buildCloudwatch } from './cloudwatch';
 import type { AlarmWithTags } from './cloudwatch/getAllAlarmsInAlarm';
 import type { WebhookUrls } from './configSchema';
 import { ConfigSchema } from './configSchema';
-import { buildDiagnosticLinks } from './index';
 
 // called by AWS
 export const handler = LambdaHandler(ConfigSchema, handlerWithStage);
@@ -37,9 +37,7 @@ export async function handlerWithStage(
 				return await fetch(chatMessage.webhookUrl, {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({
-						text: chatMessage.text,
-					}),
+					body: JSON.stringify(chatMessage.body),
 				});
 			}),
 		);
@@ -70,73 +68,43 @@ export async function getChatMessages(
 	allAlarmData: AlarmWithTags[],
 	alarmMappings: AppToTeams,
 	configuredWebhookUrls: WebhookUrls,
-): Promise<Array<{ webhookUrl: string; text: string }>> {
+): Promise<Array<{ webhookUrl: string; body: object }>> {
 	const relevantAlarms = allAlarmData
 		.filter(activeOverOneDay(now))
 		.filter(sentToAlarmsHandler(stage))
 		.filter(actionsEnabled);
 
-	const allWebhookAndBulletPoint: Array<{ webhookUrl: string; text: string }> =
-		await Promise.all(
-			relevantAlarms.flatMap(async (alarmData) => {
-				const text = await buildCloudWatchAlarmMessage(alarmData);
+	const allWebhookAndBulletPoint: Array<{
+		webhookUrl: string;
+		alarm: { alarm: MetricAlarm; diagnosticLinks: string | undefined };
+	}> = await Promise.all(
+		relevantAlarms.flatMap(async (alarmData) => {
+			const tags = await alarmData.tags.get();
+			const teams = alarmMappings(tags.App);
 
-				const teams = alarmMappings((await alarmData.tags.get()).App);
+			const webhookUrls = teams.map((team) => configuredWebhookUrls[team]);
+			return webhookUrls.map((webhookUrl) => ({
+				webhookUrl,
+				alarm: {
+					alarm: alarmData.alarm,
+					diagnosticLinks: tags.DiagnosticLinks,
+				},
+			}));
+		}),
+	).then(flatten);
 
-				const webhookUrls = teams.map((team) => configuredWebhookUrls[team]);
-				return webhookUrls.map((webhookUrl) => ({ webhookUrl, text }));
-			}),
-		).then(flatten);
+	logger.log('allWebhookAndBulletPoint', allWebhookAndBulletPoint);
 
-	console.log('allWebhookAndBulletPoint', allWebhookAndBulletPoint);
-
-	const webhookToAllTextLines = Object.entries(
+	const webhookToAllMetricAlarms = Object.entries(
 		groupMap(
 			allWebhookAndBulletPoint,
 			(urlAndText) => urlAndText.webhookUrl,
-			(urlAndText) => urlAndText.text,
+			(urlAndText) => urlAndText.alarm,
 		),
 	);
-	console.log('webhookToAllTextLines', webhookToAllTextLines);
-	return webhookToAllTextLines.map(([webhookUrl, bulletPointsForUrl]) => ({
+	logger.log('webhookToAllTextLines', webhookToAllMetricAlarms);
+	return webhookToAllMetricAlarms.map(([webhookUrl, metricAlarms]) => ({
 		webhookUrl,
-		text:
-			'These alarms have been going off for more than 24h\n\n' +
-			bulletPointsForUrl.join('\n'),
+		body: buildStuckInAlarmMessage(metricAlarms),
 	}));
 }
-
-function getDiagnosticLinks(
-	DiagnosticLinks: string | undefined,
-	alarm: MetricAlarm,
-) {
-	const { Period, EvaluationPeriods } = alarm;
-	const trigger =
-		Period && EvaluationPeriods ? { Period, EvaluationPeriods } : undefined;
-	const stateChangeTime = getIfDefined(
-		alarm.StateTransitionedTimestamp,
-		'no transition timestamp',
-	);
-	return buildDiagnosticLinks(DiagnosticLinks, trigger, stateChangeTime);
-}
-
-const buildCloudWatchAlarmMessage = async (alarmData: AlarmWithTags) => {
-	const { App, DiagnosticLinks } = await alarmData.tags.get();
-	const links = getDiagnosticLinks(DiagnosticLinks, alarmData.alarm);
-
-	const alarmUrl = alarmData.alarm.AlarmName
-		? 'https://console.aws.amazon.com/cloudwatch/home?region=eu-west-1#alarmsV2:alarm/' +
-			encodeURIComponent(alarmData.alarm.AlarmName).replaceAll('.', '%2E') // dots break gchat url detection
-		: undefined;
-	const timestampISO =
-		alarmData.alarm.StateTransitionedTimestamp?.toISOString() ??
-		'unknown timestamp';
-	const timestampWithLink = links[0]
-		? `<${links[0]}|${timestampISO}>`
-		: timestampISO;
-	const message = `- <${alarmUrl}|${alarmData.alarm.AlarmName}> - ${timestampWithLink} - ${alarmData.alarm.AlarmDescription ?? ''}`;
-
-	console.log(`CloudWatch alarm from ${App}`, message);
-
-	return message;
-};
