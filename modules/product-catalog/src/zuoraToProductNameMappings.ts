@@ -159,6 +159,9 @@ const zuoraCatalogToProductRatePlanChargeKey: Record<string, string> = {
 	'GW - Annual - ROW': 'GuardianWeekly',
 	'GW - Monthly - ROW': 'GuardianWeekly',
 	'GW - Quarterly - ROW': 'GuardianWeekly',
+	'GW - Annual - Domestic': 'GuardianWeekly',
+	'GW - Monthly - Domestic': 'GuardianWeekly',
+	'GW - Quarterly - Domestic': 'GuardianWeekly',
 	// Old GW rate plan charges
 	'Zone A Annual': 'Subscription',
 	'Zone A Quarterly': 'Subscription',
