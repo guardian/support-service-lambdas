@@ -38,6 +38,33 @@ export const groupMap = <T, R>(
 	);
 };
 
+/**
+ * groupCollect creates an object where the keys are the first element returned by toMaybeEntry,
+ * and the values are the second element.
+ * If the function returns undefined, the item is discarded.
+ *
+ * @param array
+ * @param toMaybeEntry
+ */
+export const groupCollect = <T, R, K extends string>(
+	array: readonly T[],
+	toMaybeEntry: (item: T) => readonly [K, R] | undefined,
+): Record<K, R[]> => {
+	return array.reduce<Record<K, R[]>>(
+		(acc, item) => {
+			const keyValue = toMaybeEntry(item);
+			if (keyValue !== undefined) {
+				const [key, value] = keyValue;
+				const group = acc[key] ?? [];
+				group.push(value);
+				acc[key] = group;
+			}
+			return acc;
+		},
+		{} as Record<K, R[]>,
+	);
+};
+
 export const chunkArray = <T>(array: T[], chunkSize: number): T[][] => {
 	if (chunkSize <= 0) {
 		throw new Error('Chunk size must be greater than 0');
@@ -164,3 +191,49 @@ export const intersection = <T>(a: T[], b: T[]) => {
 	const setB = new Set(b);
 	return [...new Set(a)].filter((x) => setB.has(x));
 };
+
+export const difference = <T>(a: T[], b: T[]) => {
+	const setA = new Set(a);
+	const setB = new Set(b);
+	const onlyInA = [...setA].filter((x) => !setB.has(x));
+	const onlyInB = [...setB].filter((x) => !setA.has(x));
+	return [onlyInA, onlyInB] as const;
+};
+
+/**
+ * this does a groupBy and then extracts a single item from each group.
+ *
+ * This is safer than objectFromEntries which silently discards clashes.
+ *
+ * @param ratePlanCharges
+ * @param by
+ * @param msg
+ */
+export function groupByUniqueOrThrow<T, K extends string>(
+	ratePlanCharges: T[],
+	by: (t: T) => K,
+	msg: string,
+): Record<K, T> {
+	return groupCollectByUniqueOrThrow(ratePlanCharges, (a) => [by(a), a], msg);
+}
+
+/**
+ * this does a groupCollect and then extracts a single item.
+ *
+ * @param ratePlanCharges
+ * @param by
+ * @param map
+ * @param msg
+ */
+export function groupCollectByUniqueOrThrow<T, R, K extends string>(
+	ratePlanCharges: T[],
+	by: (t: T) => readonly [K, R] | undefined,
+	msg: string,
+): Record<K, R> {
+	return mapValues(groupCollect(ratePlanCharges, by), (arr) =>
+		getSingleOrThrow(
+			arr,
+			(msg2) => new Error('duplicate keys: ' + msg + ', ' + msg2),
+		),
+	);
+}

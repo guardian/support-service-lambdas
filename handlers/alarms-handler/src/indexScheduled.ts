@@ -1,42 +1,30 @@
 import type { MetricAlarm } from '@aws-sdk/client-cloudwatch';
 import { flatten, groupMap } from '@modules/arrayFunctions';
-import { loadConfig } from '@modules/aws/appConfig';
-import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
+import type { HandlerEnv } from '@modules/routing/lambdaHandler';
+import { LambdaHandler } from '@modules/routing/lambdaHandler';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import type { AppToTeams } from './alarmMappings';
 import { prodAppToTeams } from './alarmMappings';
-import type { AlarmWithTags } from './cloudwatch';
 import { buildCloudwatch } from './cloudwatch';
+import type { AlarmWithTags } from './cloudwatch/getAllAlarmsInAlarm';
 import type { WebhookUrls } from './configSchema';
-import { ConfigSchema, getEnv } from './configSchema';
+import { ConfigSchema } from './configSchema';
 import { buildDiagnosticLinks } from './index';
 
-// only load config on a cold start
-export const lazyConfig = new Lazy(async () => {
-	const stage = getEnv('STAGE');
-	const stack = getEnv('STACK');
-	const app = getEnv('APP');
-	return { stage, config: await loadConfig(stage, stack, app, ConfigSchema) };
-}, 'load config from SSM');
-
 // called by AWS
-export const handler = async (): Promise<void> => {
-	const { stage, config } = await lazyConfig.get();
-	await handlerWithStage(dayjs(), stage, config);
-};
+export const handler = LambdaHandler(ConfigSchema, handlerWithStage);
 
-export const handlerWithStage = async (
-	now: dayjs.Dayjs,
-	stage: string,
-	config: ConfigSchema,
-) => {
+export async function handlerWithStage(
+	ev: unknown,
+	{ now, stage, config }: HandlerEnv<ConfigSchema>,
+) {
 	try {
 		const alarms = await buildCloudwatch(config.accounts).getAllAlarmsInAlarm();
 
 		const chatMessages = await getChatMessages(
-			now,
+			now(),
 			stage,
 			alarms,
 			prodAppToTeams,
@@ -59,7 +47,7 @@ export const handlerWithStage = async (
 		console.error(error);
 		throw error;
 	}
-};
+}
 
 function activeOverOneDay(now: dayjs.Dayjs) {
 	return (alarm: AlarmWithTags) =>
