@@ -14,12 +14,15 @@ export async function fetchAllPages<O>(
 		curPage: number = 1,
 	): Promise<O[]> {
 		const { thisPage, nextToken } = await doIt(token);
-		logger.log(`${msg} page ${curPage}: got ${thisPage.length} items`);
 		if (nextToken === undefined) {
-			logger.log(`${msg} page ${curPage}: all pages complete`);
+			logger.log(
+				`${msg} page ${curPage}: got ${thisPage.length} items - all pages complete`,
+			);
 			return thisPage;
 		}
-		logger.log(`${msg} page ${curPage}: fetching next page`);
+		logger.log(
+			`${msg} page ${curPage}: got ${thisPage.length} items - fetching next page`,
+		);
 		return [...thisPage, ...(await readNextPage(nextToken, curPage + 1))];
 	}
 
