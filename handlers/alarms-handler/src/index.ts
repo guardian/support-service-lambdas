@@ -51,7 +51,7 @@ function buildServices({ config }: HandlerEnv<ConfigSchema>) {
 // runs for every record
 export async function handlerWithStage(record: SQSRecord, services: Services) {
 	const maybeChatMessages = await getChatMessages(
-		record,
+		record.body,
 		prodAppToTeams,
 		services.getTags,
 		services.webhookUrls,
@@ -72,14 +72,14 @@ export async function handlerWithStage(record: SQSRecord, services: Services) {
 }
 
 export async function getChatMessages(
-	record: SQSRecord,
+	body: string,
 	appToTeams: AppToTeams,
 	getTags: (alarmArn: string, awsAccountId: string) => Promise<Tags>,
 	configuredWebhookUrls: WebhookUrls,
 ): Promise<{ webhookUrls: string[]; text: string } | undefined> {
 	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo fix in next refactor
 	const { Message, MessageAttributes } = JSON.parse(
-		record.body,
+		body,
 	) as SNSEventRecord['Sns'];
 
 	console.log('snsEvent', Message, MessageAttributes);
