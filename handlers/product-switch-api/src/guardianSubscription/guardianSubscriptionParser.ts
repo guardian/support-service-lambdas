@@ -200,11 +200,11 @@ export class GuardianSubscriptionParser {
 		if (productRatePlanKey !== undefined) {
 			const guardianRatePlanBuilder = new GuardianRatePlanBuilder(
 				this.productCatalog,
+				productRatePlanNode.productRatePlanCharges,
 				productKey,
 				productRatePlanKey,
 			);
 			return guardianRatePlanBuilder.buildGuardianRatePlans(
-				productRatePlanNode,
 				subscriptionRatePlansForProductRatePlan,
 			);
 		}

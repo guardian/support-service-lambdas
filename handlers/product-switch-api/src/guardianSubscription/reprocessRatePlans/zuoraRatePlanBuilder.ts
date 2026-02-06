@@ -2,6 +2,7 @@ import {
 	groupCollectByUniqueOrThrowMap,
 	objectJoinBijective,
 } from '@modules/mapFunctions';
+import { mapValue } from '@modules/objectFunctions';
 import type { RatePlanCharge } from '@modules/zuora/types';
 import type {
 	CatalogProduct,
@@ -52,7 +53,7 @@ type ZuoraRatePlanCharge = RatePlanCharge & {
 export class ZuoraRatePlanBuilder {
 	private zuoraProductWithoutRatePlans: ZuoraProductWithoutRatePlans;
 	private zuoraProductRatePlanWithoutCharges: ZuoraProductRatePlanWithoutCharges;
-	private ratePlansBuilder: RatePlansBuilderZZZ;
+	private productRatePlanCharges: ZuoraProductRatePlanChargeIdMap;
 
 	constructor(
 		product: CatalogProduct,
@@ -70,90 +71,37 @@ export class ZuoraRatePlanBuilder {
 		} = productRatePlanNode.zuoraProductRatePlan;
 		this.zuoraProductRatePlanWithoutCharges =
 			zuoraProductRatePlanWithoutCharges;
-
-		this.ratePlansBuilder = new RatePlansBuilderZZZ(
-			// 	<
-			// 	ZuoraCatalogValues,
-			// 	string,
-			// 	ZuoraRatePlanCharge
-			// >
-			productRatePlanNode.productRatePlanCharges,
-			this.buildRatePlan.bind(this),
-			buildRatePlanChargeEntry,
-		);
+		this.productRatePlanCharges = productRatePlanNode.productRatePlanCharges;
 	}
 
+	/**
+	 * main entry point to convert
+	 * @param subscriptionRatePlansForProductRatePlan
+	 */
 	buildZuoraRatePlans(
 		subscriptionRatePlansForProductRatePlan: readonly ZuoraRatePlanWithIndexedCharges[],
 	): ZuoraRatePlan[] {
-		return this.ratePlansBuilder.buildGenericRatePlans(
-			subscriptionRatePlansForProductRatePlan,
-		) satisfies ZuoraRatePlan[];
-	}
-
-	private buildRatePlan(
-		ratePlanWithoutCharges: RatePlanWithoutCharges,
-		ratePlanCharges: ZuoraChargesByName,
-	): ZuoraRatePlan {
-		return {
-			...ratePlanWithoutCharges,
-			product: this.zuoraProductWithoutRatePlans,
-			productRatePlan: this.zuoraProductRatePlanWithoutCharges,
-			ratePlanCharges,
-		} satisfies ZuoraRatePlan;
-	}
-}
-
-const buildRatePlanChargeEntry = (
-	ratePlanWithoutChargesCharge: RatePlanCharge,
-	productRatePlanCharge: ZuoraProductRatePlanCharge,
-) =>
-	[
-		productRatePlanCharge.name,
-		{
-			...ratePlanWithoutChargesCharge,
-			productRatePlanCharge,
-		} satisfies ZuoraRatePlanCharge,
-	] as const;
-
-//FIXME flatten this class out
-/**
- * this class handles reprocessing a rate plan and its charges to remove the standard charges field
- * and replace with appropriate catalog specific fields.
- */
-class RatePlansBuilderZZZ {
-	constructor(
-		private productRatePlanCharges: ZuoraProductRatePlanChargeIdMap,
-		private buildRatePlan: (
-			rp: RatePlanWithoutCharges,
-			chargesByKey: ZuoraChargesByName,
-		) => ZuoraRatePlan,
-		private buildRatePlanChargeEntry: (
-			s: RatePlanCharge,
-			c: ZuoraProductRatePlanCharge,
-		) => readonly [string /*name*/, ZuoraRatePlanCharge],
-	) {}
-
-	buildGenericRatePlans(
-		zuoraSubscriptionRatePlans: readonly ZuoraRatePlanWithIndexedCharges[],
-	): ZuoraRatePlan[] {
-		return zuoraSubscriptionRatePlans.map(
-			(zuoraSubscriptionRatePlan: ZuoraRatePlanWithIndexedCharges) => {
-				const { ratePlanCharges, ...ratePlanWithoutCharges } =
-					zuoraSubscriptionRatePlan;
-
-				const chargesByKey: ZuoraChargesByName =
-					this.buildGuardianRatePlanCharges(ratePlanCharges);
-
-				return this.buildRatePlan(
-					ratePlanWithoutCharges,
-					chargesByKey,
-				) satisfies ZuoraRatePlan;
-			},
+		return subscriptionRatePlansForProductRatePlan.map(
+			(zuoraSubscriptionRatePlan) =>
+				this.buildZuoraRatePlan(zuoraSubscriptionRatePlan),
 		);
 	}
 
-	private buildGuardianRatePlanCharges(
+	private buildZuoraRatePlan(
+		zuoraSubscriptionRatePlan: ZuoraRatePlanWithIndexedCharges,
+	): ZuoraRatePlan {
+		return {
+			...mapValue(
+				zuoraSubscriptionRatePlan,
+				'ratePlanCharges',
+				(ratePlanCharges) => this.buildZuoraRatePlanCharges(ratePlanCharges),
+			),
+			product: this.zuoraProductWithoutRatePlans,
+			productRatePlan: this.zuoraProductRatePlanWithoutCharges,
+		};
+	}
+
+	private buildZuoraRatePlanCharges(
 		zuoraSubscriptionRatePlanCharges: IndexedZuoraSubscriptionRatePlanCharges,
 	): ZuoraChargesByName {
 		return groupCollectByUniqueOrThrowMap(
@@ -164,13 +112,25 @@ class RatePlansBuilderZZZ {
 			([zuoraProductRatePlanCharge, subCharge]: [
 				ZuoraProductRatePlanCharge,
 				RatePlanCharge,
-			]) => {
-				return this.buildRatePlanChargeEntry(
-					subCharge,
+			]) =>
+				this.buildZuoraRatePlanChargeEntry(
 					zuoraProductRatePlanCharge,
-				);
-			},
+					subCharge,
+				),
 			'duplicate rate plan charge keys',
 		);
+	}
+
+	private buildZuoraRatePlanChargeEntry(
+		zuoraProductRatePlanCharge: ZuoraProductRatePlanCharge,
+		subCharge: RatePlanCharge,
+	): [string, ZuoraRatePlanCharge] {
+		return [
+			zuoraProductRatePlanCharge.name, // key by catalog charge name
+			{
+				...subCharge,
+				productRatePlanCharge: zuoraProductRatePlanCharge,
+			},
+		] as const;
 	}
 }
