@@ -98,7 +98,7 @@ describe('Handler', () => {
 								widgets: [
 									{
 										textParagraph: {
-											text: '🚨 ALARM: Alarm has triggered! <a href="https://console.aws.amazon.com/cloudwatch/home?region=eu-west-1#alarmsV2:alarm/DISCOUNT-API-CODE%20Discount-api%205XX%20response">alarm</a>',
+											text: '🚨 <a href="https://console.aws.amazon.com/cloudwatch/home?region=eu-west-1#alarmsV2:alarm/DISCOUNT-API-CODE%20Discount-api%205XX%20response">Alarm</a> has triggered!',
 										},
 									},
 									{
@@ -175,7 +175,7 @@ describe('Handler', () => {
 								widgets: [
 									{
 										textParagraph: {
-											text: '🚨 ALARM: Alarm has triggered! <a href="https://console.aws.amazon.com/cloudwatch/home?region=eu-west-1#alarmsV2:alarm/DISCOUNT-API-CODE%20Discount-api%205XX%20response">alarm</a>',
+											text: '🚨 <a href="https://console.aws.amazon.com/cloudwatch/home?region=eu-west-1#alarmsV2:alarm/DISCOUNT-API-CODE%20Discount-api%205XX%20response">Alarm</a> has triggered!',
 										},
 									},
 									{
@@ -252,7 +252,7 @@ describe('Handler', () => {
 								widgets: [
 									{
 										textParagraph: {
-											text: '🚨 ALARM: Alarm has triggered! <a href="https://console.aws.amazon.com/cloudwatch/home?region=eu-west-1#alarmsV2:alarm/DISCOUNT-API-CODE%20Discount-api%205XX%20response">alarm</a>',
+											text: '🚨 <a href="https://console.aws.amazon.com/cloudwatch/home?region=eu-west-1#alarmsV2:alarm/DISCOUNT-API-CODE%20Discount-api%205XX%20response">Alarm</a> has triggered!',
 										},
 									},
 									{
@@ -354,7 +354,7 @@ describe('Handler', () => {
 			mockWebhookUrls.SRE,
 			expect.objectContaining({
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- eslint is unhappy with any, not sure how to fix
-				body: expect.stringContaining('ALARM OK: Alarm has recovered!'),
+				body: expect.stringContaining('has recovered'),
 			}),
 		);
 	});

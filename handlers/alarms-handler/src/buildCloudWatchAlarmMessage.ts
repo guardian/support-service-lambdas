@@ -26,8 +26,8 @@ export const buildCloudWatchAlarmMessage = async (
 
 	const stateText =
 		NewStateValue === 'OK'
-			? `✅ ALARM OK: Alarm has recovered! <a href="${alarmUrl}">alarm</a>`
-			: `🚨 ALARM: Alarm has triggered! <a href="${alarmUrl}">alarm</a>`;
+			? `✅ <a href="${alarmUrl}">Alarm</a> OK: Alarm has recovered!`
+			: `🚨 <a href="${alarmUrl}">Alarm</a> has triggered!`;
 
 	const widgets = [
 		buildText(stateText),
