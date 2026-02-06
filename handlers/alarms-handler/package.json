@@ -7,11 +7,11 @@
     "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
-    "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/index.ts src/indexScheduled.ts --sourcemap",
+    "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/index.ts src/indexScheduled.ts src/indexSummary.ts --sourcemap",
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr alarms-handler.zip ./*.js.map ./*.js",
     "cdk:test": "pnpm --filter cdk test alarms-handler",
     "cdk:test-update": "pnpm --filter cdk test-update alarms-handler",
-    "update-lambda": "../../update-lambda.sh \"alarms-handler\" alarms-handler- alarms-handler-scheduled-",
+    "update-lambda": "../../update-lambda.sh \"alarms-handler\" alarms-handler- alarms-handler-scheduled- alarms-handler-summary-",
     "update-stack": "../../update-stack.sh \"alarms-handler\""
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",

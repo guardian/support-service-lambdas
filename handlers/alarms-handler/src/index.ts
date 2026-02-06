@@ -1,13 +1,14 @@
-import { loadConfig } from '@modules/aws/appConfig';
-import { Lazy } from '@modules/lazy';
-import type { SNSEventRecord, SQSEvent, SQSRecord } from 'aws-lambda';
+import type { HandlerEnv } from '@modules/routing/lambdaHandler';
+import { logger } from '@modules/routing/logger';
+import { SQSHandler } from '@modules/routing/sqsHandler';
+import type { SNSEventRecord, SQSRecord } from 'aws-lambda';
 import { z } from 'zod';
 import type { AppToTeams } from './alarmMappings';
 import { prodAppToTeams } from './alarmMappings';
-import type { Tags } from './cloudwatch';
 import { buildCloudwatch } from './cloudwatch';
+import type { Tags } from './cloudwatch/getTags';
 import type { WebhookUrls } from './configSchema';
-import { ConfigSchema, getEnv } from './configSchema';
+import { ConfigSchema } from './configSchema';
 
 const cloudWatchAlarmMessageSchema = z.object({
 	AlarmArn: z.string(),
@@ -27,63 +28,58 @@ const cloudWatchAlarmMessageSchema = z.object({
 
 type CloudWatchAlarmMessage = z.infer<typeof cloudWatchAlarmMessageSchema>;
 
-// only load config on a cold start
-export const lazyConfig = new Lazy(async () => {
-	const stage = getEnv('STAGE');
-	const stack = getEnv('STACK');
-	const app = getEnv('APP');
-	return await loadConfig(stage, stack, app, ConfigSchema);
-}, 'load config from SSM');
-
-export const handler = async (event: SQSEvent): Promise<void> => {
-	const config = await lazyConfig.get();
-	const getTags = buildCloudwatch(config.accounts).getTags;
-	await handlerWithStage(event, config.webhookUrls, getTags);
+export type Services = {
+	webhookUrls: WebhookUrls;
+	getTags: (alarmArn: string, awsAccountId: string) => Promise<Tags>;
 };
 
-export const handlerWithStage = async (
-	event: SQSEvent,
-	webhookUrls: WebhookUrls,
-	getTags: (alarmArn: string, awsAccountId: string) => Promise<Tags>,
-) => {
-	try {
-		for (const record of event.Records) {
-			const maybeChatMessages = await getChatMessages(
-				record,
-				prodAppToTeams,
-				getTags,
-				webhookUrls,
-			);
+// called by AWS
+export const handler = SQSHandler(
+	ConfigSchema,
+	handlerWithStage,
+	buildServices,
+);
 
-			if (maybeChatMessages) {
-				await Promise.all(
-					maybeChatMessages.webhookUrls.map((webhookUrl) => {
-						return fetch(webhookUrl, {
-							method: 'POST',
-							headers: { 'Content-Type': 'application/json' },
-							body: JSON.stringify({ text: maybeChatMessages.text }),
-						});
-					}),
-				);
-			}
-		}
-	} catch (error) {
-		console.error(error);
-		throw error;
+// runs on cold start only
+function buildServices({ config }: HandlerEnv<ConfigSchema>) {
+	return {
+		webhookUrls: config.webhookUrls,
+		getTags: buildCloudwatch(config.accounts).getTags,
+	};
+}
+
+// runs for every record
+export async function handlerWithStage(record: SQSRecord, services: Services) {
+	const maybeChatMessages = await getChatMessages(
+		record.body,
+		prodAppToTeams,
+		services.getTags,
+		services.webhookUrls,
+	);
+
+	if (maybeChatMessages) {
+		await Promise.all(
+			maybeChatMessages.webhookUrls.map((webhookUrl) => {
+				logger.log('sending message to web hook', webhookUrl);
+				return fetch(webhookUrl, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ text: maybeChatMessages.text }),
+				});
+			}),
+		);
 	}
-};
+}
 
 export async function getChatMessages(
-	record: SQSRecord,
+	body: string,
 	appToTeams: AppToTeams,
 	getTags: (alarmArn: string, awsAccountId: string) => Promise<Tags>,
 	configuredWebhookUrls: WebhookUrls,
 ): Promise<{ webhookUrls: string[]; text: string } | undefined> {
-	console.log('sqsRecord', record);
-
 	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo fix in next refactor
 	const { Message, MessageAttributes } = JSON.parse(
-		record.body,
+		body,
 	) as SNSEventRecord['Sns'];
 
 	console.log('snsEvent', Message, MessageAttributes);

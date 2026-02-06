@@ -236,13 +236,13 @@ export const difference = <T>(a: T[], b: T[]) => {
 };
 
 export function getNonEmptyOrThrow<T>(
-	array: T[],
-	errorMessage: string,
+    array: T[],
+    errorMessage: string,
 ): [T, ...T[]] {
-	if (array[0] === undefined) {
-		throw new Error(errorMessage);
-	}
-	return [array[0], ...array.slice(1)];
+    if (array[0] === undefined) {
+        throw new Error(errorMessage);
+    }
+    return [array[0], ...array.slice(1)];
 }
 
 /**
@@ -254,12 +254,12 @@ export function getNonEmptyOrThrow<T>(
  * @param by
  * @param msg
  */
-export function groupByUniqueId<T, K extends string>(
+export function groupByUniqueOrThrow<T, K extends string>(
 	ratePlanCharges: T[],
 	by: (t: T) => K,
 	msg: string,
 ): Record<K, T> {
-	return groupCollectByUniqueId(ratePlanCharges, (a) => [by(a), a], msg);
+	return groupCollectByUniqueOrThrow(ratePlanCharges, (a) => [by(a), a], msg);
 }
 
 /**
@@ -270,7 +270,7 @@ export function groupByUniqueId<T, K extends string>(
  * @param map
  * @param msg
  */
-export function groupCollectByUniqueId<T, R, K extends string>(
+export function groupCollectByUniqueOrThrow<T, R, K extends string>(
 	ratePlanCharges: T[],
 	by: (t: T) => readonly [K, R] | undefined,
 	msg: string,

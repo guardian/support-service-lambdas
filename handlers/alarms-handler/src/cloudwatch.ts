@@ -1,16 +1,13 @@
-import type { MetricAlarm, Tag } from '@aws-sdk/client-cloudwatch';
-import {
-	CloudWatchClient,
-	DescribeAlarmsCommand,
-	ListTagsForResourceCommand,
-} from '@aws-sdk/client-cloudwatch';
+import type { AlarmHistoryItem } from '@aws-sdk/client-cloudwatch';
+import { CloudWatchClient } from '@aws-sdk/client-cloudwatch';
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
-import { flatten } from '@modules/arrayFunctions';
 import { awsConfig, getAwsConfig, isRunningLocally } from '@modules/aws/config';
-import { fetchAllPages } from '@modules/aws/fetchAllPages';
-import { Lazy } from '@modules/lazy';
-import { getIfDefined } from '@modules/nullAndUndefined';
-import { objectFromEntries } from '@modules/objectFunctions';
+import type { Dayjs } from 'dayjs';
+import { getAlarmHistory } from './cloudwatch/getAlarmHistory';
+import type { AlarmWithTags } from './cloudwatch/getAllAlarmsInAlarm';
+import { getAllAlarmsInAlarm } from './cloudwatch/getAllAlarmsInAlarm';
+import type { Tags } from './cloudwatch/getTags';
+import { getTags } from './cloudwatch/getTags';
 import type { Accounts } from './configSchema';
 
 const buildCrossAccountCloudwatchClient = (
@@ -33,11 +30,10 @@ type CloudWatchClients = {
 	membership: CloudWatchClient;
 };
 
-export type AlarmWithTags = { alarm: MetricAlarm; tags: Lazy<Tags> };
-
 export type Cloudwatch = {
 	getTags: (alarmArn: string, awsAccountId: string) => Promise<Tags>;
 	getAllAlarmsInAlarm: () => Promise<AlarmWithTags[]>;
+	getAlarmHistory: (now: Date) => Promise<AlarmHistoryItem[]>;
 };
 
 export const buildCloudwatch = (config: Accounts) => {
@@ -64,65 +60,6 @@ export const buildCloudwatch = (config: Accounts) => {
 		getTags: (alarmArn: string, awsAccountId: string) =>
 			getTags(alarmArn, buildCloudwatchClient(awsAccountId)),
 		getAllAlarmsInAlarm: () => getAllAlarmsInAlarm(cloudwatchClients),
+		getAlarmHistory: (now: Dayjs) => getAlarmHistory(cloudwatchClients, now),
 	};
 };
-
-export type Tags = {
-	App?: string;
-	DiagnosticLinks?: string;
-};
-
-const getTags = async (
-	alarmArn: string,
-	client: CloudWatchClient,
-): Promise<Tags> => {
-	const request = new ListTagsForResourceCommand({
-		ResourceARN: alarmArn,
-	});
-
-	const response = await client.send(request);
-	const tags = response.Tags ?? [];
-	const entries = tags.flatMap((tag: Tag) =>
-		tag.Key && tag.Value ? [[tag.Key, tag.Value] as const] : [],
-	);
-	return objectFromEntries(entries);
-};
-
-export async function getAllAlarmsInAlarm(
-	cloudwatchClients: Record<string, CloudWatchClient>,
-): Promise<AlarmWithTags[]> {
-	return Promise.all(
-		Object.entries(cloudwatchClients).map(async ([accountName, client]) => {
-			console.log('checking account ' + accountName);
-			return await getAlarmsInAlarmForClient(client);
-		}),
-	).then(flatten);
-}
-
-const getAlarmsInAlarmForClient = async (
-	client: CloudWatchClient,
-): Promise<AlarmWithTags[]> =>
-	fetchAllPages(async (token) => {
-		const request = new DescribeAlarmsCommand({
-			StateValue: 'ALARM',
-			NextToken: token,
-		});
-		const response = await client.send(request);
-		const metricAlarms = getIfDefined(
-			response.MetricAlarms,
-			'response didnt include MetricAlarms',
-		);
-		return {
-			nextToken: response.NextToken,
-			thisPage: metricAlarms.map((alarm) => {
-				const alarmArn = getIfDefined(alarm.AlarmArn, 'no alarm ARN');
-				return {
-					alarm,
-					tags: new Lazy(
-						() => getTags(alarmArn, client),
-						'tags for ' + alarmArn,
-					),
-				};
-			}),
-		};
-	});

@@ -16,6 +16,7 @@ export function objectKeysNonEmpty<
 	if (keys.length === 0) {
 		throw new Error('empty object');
 	}
+	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- allowed in utility function - get back type lost by Object.keys
 	return keys as [keyof O, ...Array<keyof O>];
 }
 
@@ -103,9 +104,11 @@ export function joinAllLeft<K extends string, VA, VB, KR extends K>(
 export function objectInnerJoin<K extends string, VA, VB>(
 	l: Record<K, VA>,
 	r: Record<K, VB>,
-): Array<[VA, VB]> {
+): Array<[VA, VB, K]> {
 	const lKeys = objectKeys(l);
-	return lKeys.flatMap((key) => (key in r ? [[l[key], r[key]] as const] : []));
+	return lKeys.flatMap((key) =>
+		key in r ? [[l[key], r[key], key] as const] : [],
+	);
 }
 
 /**
