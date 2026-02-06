@@ -1,5 +1,5 @@
 import { isInList } from '@modules/arrayFunctions';
-import { objectKeys, objectKeysNonEmpty } from '@modules/objectFunctions';
+import { objectEntries, objectKeysNonEmpty } from '@modules/objectFunctions';
 import { z } from 'zod';
 import type { termTypeSchema } from '@modules/product-catalog/productCatalogSchema';
 import { productCatalogSchema } from '@modules/product-catalog/productCatalogSchema';
@@ -107,16 +107,48 @@ export type Product<P extends ProductKey> = ProductCatalog[P];
 
 // -------- Product Rate Plan --------
 export type ProductRatePlanKey<P extends ProductKey> =
-	keyof ProductCatalog[P]['ratePlans'];
+	keyof ProductCatalog[P]['ratePlans'] & string;
 export type ProductRatePlan<
 	P extends ProductKey,
 	PRP extends ProductRatePlanKey<P>,
-> = ProductCatalog[P]['ratePlans'][PRP];
+> = P extends ProductKey
+	? PRP extends keyof ProductCatalog[P]['ratePlans']
+		? ProductCatalog[P]['ratePlans'][PRP]
+		: never
+	: never;
 
-export type ZuoraProductRatePlanKey<P extends ZuoraProductKey> =
-	keyof ProductCatalog[P]['ratePlans'];
+export type ProductRatePlanChargeKey<
+	P extends ProductKey,
+	PRP extends ProductRatePlanKey<P>,
+> = {
+	[PK in P]: {
+		[K in ProductRatePlanKey<PK> &
+			PRP]: ProductCatalog[PK]['ratePlans'][K] extends { charges: infer C }
+			? keyof C & string
+			: never;
+	}[ProductRatePlanKey<PK> & PRP];
+}[P];
 
 export type TermType = z.infer<typeof termTypeSchema>;
+
+export type GuardianCatalogKeys<P extends ProductKey = ProductKey> = {
+	[K in P]: {
+		[RPK in ProductRatePlanKey<K>]: {
+			productKey: K;
+			productRatePlanKey: RPK;
+		};
+	}[ProductRatePlanKey<K>];
+}[P];
+
+/**
+ * handy if there are duplicates in a union, makes it look better in the IDE
+ *
+ * converts
+ * A | B | A | B
+ * to
+ * A | B
+ */
+export type Normalize<T> = T extends infer U ? U : never;
 
 export class ProductCatalogHelper {
 	constructor(private catalogData: ProductCatalog) {}
@@ -130,7 +162,7 @@ export class ProductCatalogHelper {
 	): ProductRatePlan<P, PRP> => {
 		const ratePlans: ProductCatalog[P]['ratePlans'] =
 			this.catalogData[productKey].ratePlans;
-		return ratePlans[productRatePlanKey];
+		return ratePlans[productRatePlanKey] as ProductRatePlan<P, PRP>;
 	};
 
 	getAllProductDetailsForBillingSystem = (
@@ -140,27 +172,53 @@ export class ProductCatalogHelper {
 			(productDetail) => productDetail.billingSystem === billingSystem,
 		);
 
-	getAllProductDetails = () => {
-		const stageMapping = this.catalogData;
-		const zuoraProductKeys = objectKeysNonEmpty(stageMapping);
-		return zuoraProductKeys.flatMap((zuoraProduct) => {
-			const billingSystem = stageMapping[zuoraProduct].billingSystem;
-			const productRatePlans = stageMapping[zuoraProduct].ratePlans;
-			// the type checker thinks the following is empty/never due to there being no intersection between all ratePlans
-			const productRatePlanKeys = objectKeys(productRatePlans);
-			return productRatePlanKeys.flatMap((productRatePlan) => {
-				const { id } = this.getProductRatePlan(zuoraProduct, productRatePlan);
-				return {
-					zuoraProduct,
-					billingSystem,
-					productRatePlan,
-					id,
-				};
-			});
-		});
-	};
+	getAllProductDetails = () =>
+		objectEntries(this.catalogData).flatMap(
+			<P extends ProductKey>([productKey, product]: [P, Product<P>]) =>
+				objectEntries(product.ratePlans).flatMap(
+					([productRatePlanKey, productRatePlan]: [
+						ProductRatePlanKey<P>,
+						ProductRatePlan<P, ProductRatePlanKey<P>>,
+					]) => ({
+						zuoraProduct: productKey,
+						billingSystem: product.billingSystem,
+						productRatePlan: productRatePlanKey,
+						id: productRatePlan.id,
+					}),
+				),
+		);
+
 	findProductDetails = (productRatePlanId: string) => {
 		const allProducts = this.getAllProductDetails();
 		return allProducts.find((product) => product.id === productRatePlanId);
 	};
+
+	/**
+	 * validates the rate plan key against the product and returns the combined object
+	 */
+	validateOrThrow<P extends ProductKey>(
+		targetGuardianProductName: P,
+		productRatePlanKey: string,
+	): GuardianCatalogKeys<P> {
+		const ratePlans = this.catalogData[targetGuardianProductName].ratePlans;
+		if (!this.hasRatePlan(productRatePlanKey, ratePlans)) {
+			throw new Error(
+				`Unsupported rate plan key: ${String(
+					productRatePlanKey,
+				)} for product ${targetGuardianProductName}`,
+			);
+		}
+
+		return {
+			productKey: targetGuardianProductName,
+			productRatePlanKey: productRatePlanKey as ProductRatePlanKey<P>,
+		} as GuardianCatalogKeys<P>;
+	}
+
+	private hasRatePlan<P extends ProductKey>(
+		productRatePlanKey: string,
+		ratePlans: ProductCatalog[P]['ratePlans'],
+	): productRatePlanKey is ProductRatePlanKey<P> {
+		return productRatePlanKey in ratePlans;
+	}
 }

@@ -236,6 +236,19 @@ export class Logger {
 			});
 		};
 	}
+
+	/**
+	 * handy for logging a value on the way past without having to extract a value into a const, log, then return.
+	 *
+	 * @param message
+	 * @param value the value to log and then return
+	 * @param map apply before logging if you need to extract a field or spread an iterator
+	 */
+	tap<T>(message: string, value: T, map: (t: T) => unknown = (t) => t) {
+		const callerInfo = this.getCallerInfo();
+		this.logFn(this.getMessage(callerInfo, message, map(value)));
+		return value;
+	}
 }
 
 export type AsyncFunction<TArgs extends unknown[], TReturn> = (

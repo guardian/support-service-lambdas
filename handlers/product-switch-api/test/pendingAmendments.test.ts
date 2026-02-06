@@ -11,6 +11,7 @@ import {
 	zuoraSubscriptionSchema,
 } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 import {
@@ -28,7 +29,9 @@ const mockZuoraClient = {
 	delete: jest.fn(),
 };
 
-const productCatalog = generateProductCatalog(zuoraCatalogFixture);
+const productCatalog = generateProductCatalog(
+	zuoraCatalogSchema.parse(zuoraCatalogFixture),
+);
 
 const subscription = zuoraSubscriptionSchema.parse(pendingAmendmentsJson);
 const account = zuoraAccountSchema.parse(accountJson);
