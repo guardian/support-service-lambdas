@@ -17,7 +17,7 @@ it('should convert some alarms into a chat message', async () => {
 		PUZZLES: '',
 	};
 	const alarms = await getChatMessages(
-		dayjs(new Date(2025, 4, 21, 16, 16)),
+		dayjs(new Date(2025, 4, 21, 15, 16)),
 		'PROD',
 		testData,
 		prodAppToTeams,
@@ -59,7 +59,7 @@ const expected = [
 								widgets: [
 									{
 										textParagraph: {
-											text: '⏰ In alarm for <b>6 days</b> (since 2025-05-15 15:31)',
+											text: '⏰ In alarm for <b>5 days</b> (since 2025-05-15 15:31)',
 										},
 									},
 									{
