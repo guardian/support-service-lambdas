@@ -15,8 +15,8 @@ import type { RatePlanCharge } from '@modules/zuora/types';
 import type { ZuoraProductRatePlanCharge } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import type { ZuoraProductRatePlanNode } from '../group/buildZuoraProductIdToKey';
 import type {
-	IndexedZuoraRatePlanWithCharges,
-	RestRatePlan,
+	RatePlanWithoutCharges,
+	ZuoraRatePlanWithIndexedCharges,
 } from '../group/groupSubscriptionByZuoraCatalogIds';
 import type { GenericRatePlan } from './ratePlansBuilder';
 import { RatePlansBuilder } from './ratePlansBuilder';
@@ -64,6 +64,16 @@ export type GuardianCatalogValues<P extends ProductKey = ProductKey> = {
 	}[ProductRatePlanKey<K>];
 }[P];
 
+type ProductWithoutRatePlans<P extends ProductKey> = Omit<
+	Product<P>,
+	'ratePlans'
+>;
+
+type ProductRatePlanWithoutCharges<
+	P extends ProductKey,
+	PRP extends ProductRatePlanKey<P>,
+> = Omit<ProductRatePlan<P, PRP>, 'charges'>;
+
 /**
  * this gathers the relevant objects from the product catalog and builds a
  * combined rate plan and charge tree of the right type
@@ -72,8 +82,8 @@ export class GuardianRatePlanBuilder<
 	P extends ProductKey,
 	PRP extends ProductRatePlanKey<P>,
 > {
-	private restProduct: Omit<Product<P>, 'ratePlans'>;
-	private restProductRatePlan: Omit<ProductRatePlan<P, PRP>, 'charges'>;
+	private productWithoutRatePlans: ProductWithoutRatePlans<P>;
+	private productRatePlanWithoutCharges: ProductRatePlanWithoutCharges<P, PRP>;
 	private productCatalogHelper: ProductCatalogHelper;
 
 	constructor(
@@ -82,12 +92,10 @@ export class GuardianRatePlanBuilder<
 		private productRatePlanKey: PRP,
 	) {
 		this.productCatalogHelper = new ProductCatalogHelper(this.productCatalog);
-		const { restProduct, restProductRatePlan } = this.getProductAndRatePlanData(
-			productKey,
-			productRatePlanKey,
-		);
-		this.restProduct = restProduct;
-		this.restProductRatePlan = restProductRatePlan;
+		const { productWithoutRatePlans, productRatePlanWithoutCharges } =
+			this.getProductAndRatePlanData(productKey, productRatePlanKey);
+		this.productWithoutRatePlans = productWithoutRatePlans;
+		this.productRatePlanWithoutCharges = productRatePlanWithoutCharges;
 	}
 
 	/**
@@ -100,15 +108,16 @@ export class GuardianRatePlanBuilder<
 	>(productKey: P, productRatePlanKey: PRP) {
 		const product: Product<P> = this.productCatalog[productKey];
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- just discarded an omitted variable
-		const { ratePlans: _unused1, ...restProduct } = product;
+		const { ratePlans: _unused1, ...productWithoutRatePlans } = product;
 		const productRatePlan = this.productCatalogHelper.getProductRatePlan(
 			productKey,
 			productRatePlanKey,
 		);
 
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- discard an omitted variable
-		const { charges: _unused2, ...restProductRatePlan } = productRatePlan;
-		return { restProduct, restProductRatePlan };
+		const { charges: _unused2, ...productRatePlanWithoutCharges } =
+			productRatePlan;
+		return { productWithoutRatePlans, productRatePlanWithoutCharges };
 	}
 
 	/**
@@ -118,7 +127,7 @@ export class GuardianRatePlanBuilder<
 	 */
 	buildGuardianRatePlans(
 		productRatePlanNode: ZuoraProductRatePlanNode,
-		subscriptionRatePlansForProductRatePlan: readonly IndexedZuoraRatePlanWithCharges[],
+		subscriptionRatePlansForProductRatePlan: readonly ZuoraRatePlanWithIndexedCharges[],
 	): Array<GuardianRatePlan<P>> {
 		const ratePlansBuilder = new RatePlansBuilder<
 			GuardianCatalogValues<P>,
@@ -139,21 +148,21 @@ export class GuardianRatePlanBuilder<
 	}
 
 	private buildRatePlan = (
-		restRatePlan: RestRatePlan,
+		ratePlanWithoutCharges: RatePlanWithoutCharges,
 		ratePlanCharges: Record<ProductRatePlanChargeKey<P, PRP>, RatePlanCharge>,
 	): GuardianRatePlan<P> => {
 		return {
-			...restRatePlan,
+			...ratePlanWithoutCharges,
 			productKey: this.productKey,
-			product: this.restProduct,
+			product: this.productWithoutRatePlans,
 			productRatePlanKey: this.productRatePlanKey,
-			productRatePlan: this.restProductRatePlan,
+			productRatePlan: this.productRatePlanWithoutCharges,
 			ratePlanCharges: ratePlanCharges,
 		};
 	};
 
 	private buildRatePlanChargeEntry = (
-		restRatePlanCharge: RatePlanCharge,
+		ratePlanWithoutChargesCharge: RatePlanCharge,
 		zuoraProductRatePlanCharge: ZuoraProductRatePlanCharge,
 	): [ProductRatePlanChargeKey<P, ProductRatePlanKey<P>>, RatePlanCharge] => {
 		const chargeKey: ProductRatePlanChargeKey<
@@ -164,6 +173,6 @@ export class GuardianRatePlanBuilder<
 			zuoraCatalogToProductRatePlanChargeKey[zuoraProductRatePlanCharge.name],
 			'some charges of this product are missing from the product-catalog keys lookup',
 		) as ProductRatePlanChargeKey<P, ProductRatePlanKey<P>>;
-		return [chargeKey, restRatePlanCharge];
+		return [chargeKey, ratePlanWithoutChargesCharge];
 	};
 }

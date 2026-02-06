@@ -19,10 +19,10 @@ import type {
 } from './group/buildZuoraProductIdToKey';
 import { buildZuoraProductIdToKey } from './group/buildZuoraProductIdToKey';
 import type {
-	IndexedZuoraRatePlanWithCharges,
-	RestSubscription,
+	SubscriptionWithoutRatePlans,
+	ZuoraRatePlanWithIndexedCharges,
 } from './group/groupSubscriptionByZuoraCatalogIds';
-import { ZuoraSubscriptionIndexer } from './group/groupSubscriptionByZuoraCatalogIds';
+import { groupSubscriptionByIds } from './group/groupSubscriptionByZuoraCatalogIds';
 import type { GuardianRatePlan } from './reprocessRatePlans/guardianRatePlanBuilder';
 import { GuardianRatePlanBuilder } from './reprocessRatePlans/guardianRatePlanBuilder';
 import type { ZuoraRatePlan } from './reprocessRatePlans/zuoraRatePlanBuilder';
@@ -40,7 +40,7 @@ type RatePlansWithCatalogData = {
  * represents a zuora subscription that has been augmented with guardian and zuora catalog information
  */
 export type GuardianSubscriptionMultiPlan = RatePlansWithCatalogData &
-	RestSubscription;
+	SubscriptionWithoutRatePlans;
 
 /**
  * this takes a basic zuora subscription and converts it to a guardian "product catalog"
@@ -117,10 +117,8 @@ export class GuardianSubscriptionParser {
 	toGuardianSubscription(
 		zuoraSubscription: ZuoraSubscription,
 	): GuardianSubscriptionMultiPlan {
-		const { products, ...restSubscription } =
-			ZuoraSubscriptionIndexer.byProductIds.groupSubscription(
-				zuoraSubscription,
-			);
+		const { products, ...subscriptionWithoutRatePlans } =
+			groupSubscriptionByIds(zuoraSubscription);
 
 		// we join and then flatten both the product and rateplan levels to avoid undue nesting
 		const guardianRatePlans: RatePlansWithCatalogData = joinFlatMap(
@@ -140,7 +138,7 @@ export class GuardianSubscriptionParser {
 		);
 
 		return {
-			...restSubscription,
+			...subscriptionWithoutRatePlans,
 			...guardianRatePlans,
 		};
 	}
@@ -151,7 +149,7 @@ export class GuardianSubscriptionParser {
 	 * If so then add it to the ratePlans otherwise to the productsNotInCatalog.
 	 */
 	private buildRatePlansWithCatalogData(
-		subscriptionRatePlansForProductRatePlan: readonly IndexedZuoraRatePlanWithCharges[],
+		subscriptionRatePlansForProductRatePlan: readonly ZuoraRatePlanWithIndexedCharges[],
 		productRatePlanNode: ZuoraProductRatePlanNode,
 		product: CatalogProduct,
 	): RatePlansWithCatalogData {
@@ -191,7 +189,7 @@ export class GuardianSubscriptionParser {
 	private buildRatePlansWithCatalogDataForProductKey<P extends ProductKey>(
 		productKey: P,
 		productRatePlanNode: ZuoraProductRatePlanNode,
-		subscriptionRatePlansForProductRatePlan: readonly IndexedZuoraRatePlanWithCharges[],
+		subscriptionRatePlansForProductRatePlan: readonly ZuoraRatePlanWithIndexedCharges[],
 	): Array<GuardianRatePlan<P>> | undefined {
 		const productRatePlanKey =
 			// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- insufficient type for zuoraCatalogToProductRatePlanKey

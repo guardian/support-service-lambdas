@@ -1,3 +1,6 @@
+/**
+ * @group integration
+ */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { logger } from '@modules/routing/logger';

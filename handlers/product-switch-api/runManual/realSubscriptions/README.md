@@ -25,6 +25,4 @@ committed to a repo.
 now the location specified will be populated with redacted json files for all subscriptions found in the log files
 
 ### Run the test
-1. Rename testRealSubscriptions.ts to testRealSubscriptions.test.ts so jest can run it
-1. run the test from intellij
-1. rename the test back before committing to avoid it failing in CI
+1. run testRealSubscriptions.test.ts from intellij

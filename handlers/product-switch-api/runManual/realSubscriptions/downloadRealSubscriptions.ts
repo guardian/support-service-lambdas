@@ -10,7 +10,7 @@ import { fromIni } from '@aws-sdk/credential-providers';
 import { logGroupName, subscriptionsDir } from './config';
 
 /*
- * this script is used to prepare for running testRealSubscriptions.ts.  It
+ * this script is used to prepare for running testRealSubscriptions.test.ts.  It
  *
  * - downloads all the subscriptions used by the lambda over the past two weeks,
  * - redacts the relevant ids and numbers, and

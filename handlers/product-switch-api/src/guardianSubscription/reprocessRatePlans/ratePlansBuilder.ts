@@ -4,9 +4,9 @@ import type { RatePlanCharge } from '@modules/zuora/types';
 import type { ZuoraProductRatePlanCharge } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import type { ZuoraProductRatePlanChargeIdMap } from '../group/buildZuoraProductIdToKey';
 import type {
-	IndexedZuoraRatePlanWithCharges,
 	IndexedZuoraSubscriptionRatePlanCharges,
-	RestRatePlan,
+	RatePlanWithoutCharges,
+	ZuoraRatePlanWithIndexedCharges,
 } from '../group/groupSubscriptionByZuoraCatalogIds';
 
 /**
@@ -16,7 +16,7 @@ export type GenericRatePlan<
 	EXTRA extends { ratePlanCharges: Record<string, RatePlanCharge> } = {
 		ratePlanCharges: Record<string, RatePlanCharge>;
 	},
-> = RestRatePlan & EXTRA;
+> = RatePlanWithoutCharges & EXTRA;
 
 /**
  * this class handles reprocessing a rate plan and its charges to remove the standard charges field
@@ -30,7 +30,7 @@ export class RatePlansBuilder<
 	constructor(
 		private productRatePlanCharges: ZuoraProductRatePlanChargeIdMap,
 		private buildRatePlan: (
-			rp: RestRatePlan,
+			rp: RatePlanWithoutCharges,
 			chargesByKey: Record<K, RPC>,
 		) => GenericRatePlan<RP>,
 		private buildRatePlanChargeEntry: (
@@ -40,17 +40,18 @@ export class RatePlansBuilder<
 	) {}
 
 	buildGenericRatePlans(
-		zuoraSubscriptionRatePlans: readonly IndexedZuoraRatePlanWithCharges[],
+		zuoraSubscriptionRatePlans: readonly ZuoraRatePlanWithIndexedCharges[],
 	): Array<GenericRatePlan<RP>> {
 		return zuoraSubscriptionRatePlans.map(
-			(zuoraSubscriptionRatePlan: IndexedZuoraRatePlanWithCharges) => {
-				const { ratePlanCharges, ...restRatePlan } = zuoraSubscriptionRatePlan;
+			(zuoraSubscriptionRatePlan: ZuoraRatePlanWithIndexedCharges) => {
+				const { ratePlanCharges, ...ratePlanWithoutCharges } =
+					zuoraSubscriptionRatePlan;
 
 				const chargesByKey: Record<K, RPC> =
 					this.buildGuardianRatePlanCharges(ratePlanCharges);
 
 				return this.buildRatePlan(
-					restRatePlan,
+					ratePlanWithoutCharges,
 					chargesByKey,
 				) satisfies GenericRatePlan<RP>;
 			},

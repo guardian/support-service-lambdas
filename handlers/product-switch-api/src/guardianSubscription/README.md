@@ -259,7 +259,7 @@ See the inline notes on this example from the CODE environment.
 Key test files under `handlers/product-switch-api/`:
 - `test/changePlan/guardianSubscription/getSinglePlanFlattenedSubscription.test.ts`
   - Unit tests covering parsing, filtering, and validation
-- `runManual/realSusbcriptions/testRealSubscriptions.ts`
+- `runManual/realSusbcriptions/testRealSubscriptions.test.ts`
   - tests against downloaded, redacted production subscription data - see the readme there
 
 ## Future Improvements
