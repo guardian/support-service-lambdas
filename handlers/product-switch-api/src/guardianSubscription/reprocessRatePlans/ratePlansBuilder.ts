@@ -1,81 +1,82 @@
-import { groupCollectByUniqueOrThrow } from '@modules/arrayFunctions';
-import { objectJoinBijective } from '@modules/objectFunctions';
-import type { RatePlanCharge } from '@modules/zuora/types';
-import type { ZuoraProductRatePlanCharge } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import type { ZuoraProductRatePlanChargeIdMap } from '../group/buildZuoraProductIdToKey';
-import type {
-	IndexedZuoraSubscriptionRatePlanCharges,
-	RatePlanWithoutCharges,
-	ZuoraRatePlanWithIndexedCharges,
-} from '../group/groupSubscriptionByZuoraCatalogIds';
-
-/**
- * EXTRA represents whatever extra info we attach to the rateplan to make a "guardian" rateplan
- */
-export type GenericRatePlan<
-	EXTRA extends { ratePlanCharges: Record<string, RatePlanCharge> } = {
-		ratePlanCharges: Record<string, RatePlanCharge>;
-	},
-> = RatePlanWithoutCharges & EXTRA;
-
-/**
- * this class handles reprocessing a rate plan and its charges to remove the standard charges field
- * and replace with appropriate catalog specific fields.
- */
-export class RatePlansBuilder<
-	RP extends { ratePlanCharges: Record<string, RatePlanCharge> },
-	K extends string,
-	RPC,
-> {
-	constructor(
-		private productRatePlanCharges: ZuoraProductRatePlanChargeIdMap,
-		private buildRatePlan: (
-			rp: RatePlanWithoutCharges,
-			chargesByKey: Record<K, RPC>,
-		) => GenericRatePlan<RP>,
-		private buildRatePlanChargeEntry: (
-			s: RatePlanCharge,
-			c: ZuoraProductRatePlanCharge,
-		) => readonly [K, RPC],
-	) {}
-
-	buildGenericRatePlans(
-		zuoraSubscriptionRatePlans: readonly ZuoraRatePlanWithIndexedCharges[],
-	): Array<GenericRatePlan<RP>> {
-		return zuoraSubscriptionRatePlans.map(
-			(zuoraSubscriptionRatePlan: ZuoraRatePlanWithIndexedCharges) => {
-				const { ratePlanCharges, ...ratePlanWithoutCharges } =
-					zuoraSubscriptionRatePlan;
-
-				const chargesByKey: Record<K, RPC> =
-					this.buildGuardianRatePlanCharges(ratePlanCharges);
-
-				return this.buildRatePlan(
-					ratePlanWithoutCharges,
-					chargesByKey,
-				) satisfies GenericRatePlan<RP>;
-			},
-		);
-	}
-
-	private buildGuardianRatePlanCharges(
-		zuoraSubscriptionRatePlanCharges: IndexedZuoraSubscriptionRatePlanCharges,
-	): Record<K, RPC> {
-		return groupCollectByUniqueOrThrow(
-			objectJoinBijective(
-				this.productRatePlanCharges,
-				zuoraSubscriptionRatePlanCharges,
-			),
-			([zuoraProductRatePlanCharge, subCharge]: [
-				ZuoraProductRatePlanCharge,
-				RatePlanCharge,
-			]) => {
-				return this.buildRatePlanChargeEntry(
-					subCharge,
-					zuoraProductRatePlanCharge,
-				);
-			},
-			'duplicate rate plan charge keys',
-		);
-	}
-}
+// import {
+// 	groupCollectByUniqueOrThrowMap,
+// 	objectJoinBijective,
+// } from '@modules/mapFunctions';
+// import type { RatePlanCharge } from '@modules/zuora/types';
+// import type { ZuoraProductRatePlanCharge } from '@modules/zuora-catalog/zuoraCatalogSchema';
+// import type { ZuoraProductRatePlanChargeIdMap } from '../group/buildZuoraProductIdToKey';
+// import type {
+// 	IndexedZuoraSubscriptionRatePlanCharges,
+// 	RatePlanWithoutCharges,
+// 	ZuoraRatePlanWithIndexedCharges,
+// } from '../group/groupSubscriptionByZuoraCatalogIds';
+//
+// export type GenericRatePlan<
+// 	ExtraFields,
+// 	K,
+// 	ChargeType extends RatePlanCharge,
+// > = RatePlanWithoutCharges & {
+// 	ratePlanCharges: Map<K, ChargeType>;
+// } & ExtraFields;
+//
+// /**
+//  * this class handles reprocessing a rate plan and its charges to remove the standard charges field
+//  * and replace with appropriate catalog specific fields.
+//  */
+// export class RatePlansBuilder<
+// 	ExtraFields,
+// 	K,
+// 	ChargeType extends RatePlanCharge,
+// > {
+// 	constructor(
+// 		private productRatePlanCharges: ZuoraProductRatePlanChargeIdMap,
+// 		private buildRatePlan: (
+// 			rp: RatePlanWithoutCharges,
+// 			chargesByKey: Map<K, ChargeType>,
+// 		) => GenericRatePlan<ExtraFields, K, ChargeType>,
+// 		private buildRatePlanChargeEntry: (
+// 			s: RatePlanCharge,
+// 			c: ZuoraProductRatePlanCharge,
+// 		) => readonly [K, ChargeType],
+// 	) {}
+//
+// 	buildGenericRatePlans(
+// 		zuoraSubscriptionRatePlans: readonly ZuoraRatePlanWithIndexedCharges[],
+// 	): Array<GenericRatePlan<ExtraFields, K, ChargeType>> {
+// 		return zuoraSubscriptionRatePlans.map(
+// 			(zuoraSubscriptionRatePlan: ZuoraRatePlanWithIndexedCharges) => {
+// 				const { ratePlanCharges, ...ratePlanWithoutCharges } =
+// 					zuoraSubscriptionRatePlan;
+//
+// 				const chargesByKey: Map<K, ChargeType> =
+// 					this.buildGuardianRatePlanCharges(ratePlanCharges);
+//
+// 				return this.buildRatePlan(
+// 					ratePlanWithoutCharges,
+// 					chargesByKey,
+// 				) satisfies GenericRatePlan<ExtraFields, K, ChargeType>;
+// 			},
+// 		);
+// 	}
+//
+// 	private buildGuardianRatePlanCharges(
+// 		zuoraSubscriptionRatePlanCharges: IndexedZuoraSubscriptionRatePlanCharges,
+// 	): Map<K, ChargeType> {
+// 		return groupCollectByUniqueOrThrowMap(
+// 			objectJoinBijective(
+// 				this.productRatePlanCharges,
+// 				zuoraSubscriptionRatePlanCharges,
+// 			),
+// 			([zuoraProductRatePlanCharge, subCharge]: [
+// 				ZuoraProductRatePlanCharge,
+// 				RatePlanCharge,
+// 			]) => {
+// 				return this.buildRatePlanChargeEntry(
+// 					subCharge,
+// 					zuoraProductRatePlanCharge,
+// 				);
+// 			},
+// 			'duplicate rate plan charge keys',
+// 		);
+// 	}
+// }

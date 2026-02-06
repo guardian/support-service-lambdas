@@ -26,6 +26,19 @@ export const groupBy = <T, I extends string>(
 	}, {});
 };
 
+export const groupByToMap = <T, I extends string>(
+	array: readonly T[],
+	fn: (item: T) => I,
+): Map<I, T[]> => {
+	return array.reduce<Map<I, T[]>>((acc, item) => {
+		const key = fn(item);
+		const group = acc.get(key) ?? [];
+		group.push(item);
+		acc.set(key, group);
+		return acc;
+	}, new Map<I, T[]>());
+};
+
 /**
  * groupMap creates an object where its keys are the result of the group function, and the values are the result
  * of the map function
@@ -236,13 +249,13 @@ export const difference = <T>(a: T[], b: T[]) => {
 };
 
 export function getNonEmptyOrThrow<T>(
-    array: T[],
-    errorMessage: string,
+	array: T[],
+	errorMessage: string,
 ): [T, ...T[]] {
-    if (array[0] === undefined) {
-        throw new Error(errorMessage);
-    }
-    return [array[0], ...array.slice(1)];
+	if (array[0] === undefined) {
+		throw new Error(errorMessage);
+	}
+	return [array[0], ...array.slice(1)];
 }
 
 /**

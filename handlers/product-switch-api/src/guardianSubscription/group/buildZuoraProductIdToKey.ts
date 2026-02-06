@@ -1,6 +1,9 @@
-import { groupByUniqueOrThrow, mapValues } from '@modules/arrayFunctions';
+import { groupByUniqueOrThrowMap, mapValuesMap } from '@modules/mapFunctions';
 import type {
 	CatalogProduct,
+	ProductId,
+	ProductRatePlanChargeId,
+	ProductRatePlanId,
 	ZuoraCatalog,
 	ZuoraProductRatePlan,
 	ZuoraProductRatePlanCharge,
@@ -9,8 +12,8 @@ import type {
 // these are the data structures that define the tree of product->rateplan->charge
 // and let us attach the relevant ids and keys
 
-export type ZuoraProductRatePlanChargeIdMap = Record<
-	string, // product rate plan charge id
+export type ZuoraProductRatePlanChargeIdMap = Map<
+	ProductRatePlanChargeId,
 	ZuoraProductRatePlanCharge
 >;
 
@@ -18,8 +21,8 @@ export type ZuoraProductRatePlanNode = {
 	zuoraProductRatePlan: ZuoraProductRatePlan;
 	productRatePlanCharges: ZuoraProductRatePlanChargeIdMap;
 };
-export type ZuoraProductRatePlanIdMap = Record<
-	string, // product rate plan id
+export type ZuoraProductRatePlanIdMap = Map<
+	ProductRatePlanId,
 	ZuoraProductRatePlanNode
 >;
 
@@ -27,10 +30,7 @@ export type ZuoraProductNode = {
 	zuoraProduct: CatalogProduct;
 	productRatePlans: ZuoraProductRatePlanIdMap;
 };
-export type ZuoraProductIdMap = Record<
-	string, // product id
-	ZuoraProductNode
->;
+export type ZuoraProductIdMap = Map<ProductId, ZuoraProductNode>;
 
 /**
  * Build a tree mapping zuora product*id to their associated product catalog entries
@@ -43,8 +43,12 @@ export type ZuoraProductIdMap = Record<
 export function buildZuoraProductIdToKey(
 	catalog: ZuoraCatalog,
 ): ZuoraProductIdMap {
-	return mapValues(
-		groupByUniqueOrThrow(catalog.products, (p) => p.id, 'duplicate product id'),
+	return mapValuesMap(
+		groupByUniqueOrThrowMap(
+			catalog.products,
+			(p) => p.id,
+			'duplicate product id',
+		),
 		buildZuoraProductKeyNode,
 	);
 }
@@ -64,8 +68,8 @@ function buildZuoraProductKeyNode(
 function buildZuoraProductRatePlanIdToKey(
 	product: CatalogProduct,
 ): ZuoraProductRatePlanIdMap {
-	return mapValues(
-		groupByUniqueOrThrow(
+	return mapValuesMap(
+		groupByUniqueOrThrowMap(
 			product.productRatePlans,
 			(prp) => prp.id,
 			`duplicate product rate plan id in ${product.name}`,
@@ -89,7 +93,7 @@ function wrapZuoraProductRatePlanKeyNode(
 function buildZuoraProductRatePlanChargeIdToKey(
 	prp: ZuoraProductRatePlan,
 ): ZuoraProductRatePlanChargeIdMap {
-	return groupByUniqueOrThrow(
+	return groupByUniqueOrThrowMap(
 		prp.productRatePlanCharges,
 		(prpc: ZuoraProductRatePlanCharge) => prpc.id,
 		`duplicate product rate plan charge id in rate plan ${prp.name}`,

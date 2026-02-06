@@ -1,17 +1,15 @@
 import { getSingleOrThrow } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import type { ProductKey } from '@modules/product-catalog/productCatalog';
-import type {
-	SubscriptionWithoutRatePlans,
-	ZuoraRatePlanWithIndexedCharges,
-} from './group/groupSubscriptionByZuoraCatalogIds';
+import type { SubscriptionWithoutRatePlans } from './group/groupSubscriptionByZuoraCatalogIds';
 import type { GuardianSubscriptionMultiPlan } from './guardianSubscriptionParser';
 import type { GuardianRatePlan } from './reprocessRatePlans/guardianRatePlanBuilder';
+import { convertChargesMapToRecord } from './reprocessRatePlans/guardianRatePlanBuilder';
 import type { ZuoraRatePlan } from './reprocessRatePlans/zuoraRatePlanBuilder';
 
 export type GuardianSubscription<P extends ProductKey = ProductKey> = {
 	ratePlan: GuardianRatePlan<P>;
-	discountRatePlans: ZuoraRatePlanWithIndexedCharges[];
+	discountRatePlans: ZuoraRatePlan[];
 } & SubscriptionWithoutRatePlans;
 
 /**
@@ -43,7 +41,7 @@ export function getSinglePlanFlattenedSubscriptionOrThrow(
 
 	return {
 		...guardianSubscriptionWithoutRatePlans,
-		ratePlan,
+		ratePlan: convertChargesMapToRecord(ratePlan),
 		discountRatePlans,
 	} satisfies GuardianSubscription;
 }

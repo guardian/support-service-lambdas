@@ -1,4 +1,9 @@
+import {
+	groupCollectByUniqueOrThrowMap,
+	objectJoinBijective,
+} from '@modules/mapFunctions';
 import { getIfDefined } from '@modules/nullAndUndefined';
+import { mapValue, objectFromEntries } from '@modules/objectFunctions';
 import type {
 	Product,
 	ProductKey,
@@ -13,16 +18,60 @@ import {
 import { zuoraCatalogToProductRatePlanChargeKey } from '@modules/product-catalog/zuoraToProductNameMappings';
 import type { RatePlanCharge } from '@modules/zuora/types';
 import type { ZuoraProductRatePlanCharge } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import type { ZuoraProductRatePlanNode } from '../group/buildZuoraProductIdToKey';
 import type {
+	ZuoraProductRatePlanChargeIdMap,
+	ZuoraProductRatePlanNode,
+} from '../group/buildZuoraProductIdToKey';
+import type {
+	IndexedZuoraSubscriptionRatePlanCharges,
 	RatePlanWithoutCharges,
 	ZuoraRatePlanWithIndexedCharges,
 } from '../group/groupSubscriptionByZuoraCatalogIds';
-import type { GenericRatePlan } from './ratePlansBuilder';
-import { RatePlansBuilder } from './ratePlansBuilder';
+
+export type GuardianRatePlanMap<P extends ProductKey = ProductKey> =
+	GuardianCatalogValuesMap<P> & RatePlanWithoutCharges;
 
 export type GuardianRatePlan<P extends ProductKey = ProductKey> =
-	GenericRatePlan<GuardianCatalogValues<P>>;
+	GuardianCatalogValuesR<P> & RatePlanWithoutCharges;
+
+/**
+ * this converts the Map based charges (which are more type safe when processing)
+ * to the Record based ones (which are better for using)
+ * @param ratePlan
+ */
+export function convertChargesMapToRecord(
+	ratePlan: GuardianRatePlanMap,
+): GuardianRatePlan {
+	return mapValue(
+		ratePlan,
+		'ratePlanCharges',
+		(c) =>
+			objectFromEntries([...c.entries()]) satisfies Record<
+				ProductRatePlanChargeKey<ProductKey, ProductRatePlanKey<ProductKey>>,
+				RatePlanCharge
+			>,
+	);
+}
+
+/**
+ * this is what we attach to the rate plans in place of zuora's basic rate plans array.
+ *
+ * this type looks convoluted, but it means that if we use an if or switch statement
+ * to narrow down the product key and rate plan key, we can access the charges
+ * by key rather than filtering them.  Also the product and productRatePlan are
+ * correctly typed for the product.
+ */
+export type GuardianCatalogValuesMap<P extends ProductKey = ProductKey> = {
+	[K in P]: {
+		[RPK in ProductRatePlanKey<K>]: {
+			productKey: K;
+			product: ProductWithoutRatePlans<K>;
+			productRatePlanKey: RPK;
+			productRatePlan: ProductRatePlanWithoutCharges<K, RPK>;
+			ratePlanCharges: Map<ProductRatePlanChargeKey<K, RPK>, RatePlanCharge>;
+		};
+	}[ProductRatePlanKey<K>];
+}[P];
 
 /**
  * this is what we attach to the rate plans in place of zuora's basic rate plans array.
@@ -52,13 +101,13 @@ export type GuardianRatePlan<P extends ProductKey = ProductKey> =
  * 	}
  *
  */
-export type GuardianCatalogValues<P extends ProductKey = ProductKey> = {
+export type GuardianCatalogValuesR<P extends ProductKey = ProductKey> = {
 	[K in P]: {
 		[RPK in ProductRatePlanKey<K>]: {
 			productKey: K;
-			product: Omit<Product<K>, 'ratePlans'>;
+			product: ProductWithoutRatePlans<K>;
 			productRatePlanKey: RPK;
-			productRatePlan: Omit<ProductRatePlan<K, RPK>, 'charges'>;
+			productRatePlan: ProductRatePlanWithoutCharges<K, RPK>;
 			ratePlanCharges: Record<ProductRatePlanChargeKey<K, RPK>, RatePlanCharge>;
 		};
 	}[ProductRatePlanKey<K>];
@@ -102,10 +151,7 @@ export class GuardianRatePlanBuilder<
 	 * extracts the product and rateplan from the product catalog so we can embed
 	 * them into the subscription rate plan
 	 */
-	private getProductAndRatePlanData<
-		P extends ProductKey,
-		PRP extends ProductRatePlanKey<P>,
-	>(productKey: P, productRatePlanKey: PRP) {
+	private getProductAndRatePlanData(productKey: P, productRatePlanKey: PRP) {
 		const product: Product<P> = this.productCatalog[productKey];
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- just discarded an omitted variable
 		const { ratePlans: _unused1, ...productWithoutRatePlans } = product;
@@ -128,18 +174,14 @@ export class GuardianRatePlanBuilder<
 	buildGuardianRatePlans(
 		productRatePlanNode: ZuoraProductRatePlanNode,
 		subscriptionRatePlansForProductRatePlan: readonly ZuoraRatePlanWithIndexedCharges[],
-	): Array<GuardianRatePlan<P>> {
-		const ratePlansBuilder = new RatePlansBuilder<
-			GuardianCatalogValues<P>,
-			ProductRatePlanChargeKey<P, ProductRatePlanKey<P>>,
-			RatePlanCharge
-		>(
+	): Array<GuardianRatePlanMap<P>> {
+		const ratePlansBuilder = new RatePlansBuilderGGG<P>(
 			productRatePlanNode.productRatePlanCharges,
 			this.buildRatePlan.bind(this),
 			this.buildRatePlanChargeEntry.bind(this),
 		);
 
-		const guardianRatePlans: Array<GuardianRatePlan<P>> =
+		const guardianRatePlans: Array<GuardianRatePlanMap<P>> =
 			ratePlansBuilder.buildGenericRatePlans(
 				subscriptionRatePlansForProductRatePlan,
 			);
@@ -149,16 +191,16 @@ export class GuardianRatePlanBuilder<
 
 	private buildRatePlan = (
 		ratePlanWithoutCharges: RatePlanWithoutCharges,
-		ratePlanCharges: Record<ProductRatePlanChargeKey<P, PRP>, RatePlanCharge>,
-	): GuardianRatePlan<P> => {
-		return {
-			...ratePlanWithoutCharges,
+		ratePlanCharges: Map<ProductRatePlanChargeKey<P, PRP>, RatePlanCharge>,
+	): GuardianRatePlanMap<P> => {
+		const extra: GuardianCatalogValuesMap<P> = {
 			productKey: this.productKey,
 			product: this.productWithoutRatePlans,
 			productRatePlanKey: this.productRatePlanKey,
 			productRatePlan: this.productRatePlanWithoutCharges,
 			ratePlanCharges: ratePlanCharges,
 		};
+		return { ...extra, ...ratePlanWithoutCharges };
 	};
 
 	private buildRatePlanChargeEntry = (
@@ -175,4 +217,71 @@ export class GuardianRatePlanBuilder<
 		) as ProductRatePlanChargeKey<P, ProductRatePlanKey<P>>;
 		return [chargeKey, ratePlanWithoutChargesCharge];
 	};
+}
+
+//FIXME flatten this class out
+/**
+ * this class handles reprocessing a rate plan and its charges to remove the standard charges field
+ * and replace with appropriate catalog specific fields.
+ */
+export class RatePlansBuilderGGG<P extends ProductKey> {
+	constructor(
+		private productRatePlanCharges: ZuoraProductRatePlanChargeIdMap,
+		private buildRatePlan: (
+			rp: RatePlanWithoutCharges,
+			chargesByKey: Map<
+				ProductRatePlanChargeKey<P, ProductRatePlanKey<P>>,
+				RatePlanCharge
+			>,
+		) => GuardianRatePlanMap<P>,
+		private buildRatePlanChargeEntry: (
+			s: RatePlanCharge,
+			c: ZuoraProductRatePlanCharge,
+		) => readonly [
+			ProductRatePlanChargeKey<P, ProductRatePlanKey<P>>,
+			RatePlanCharge,
+		],
+	) {}
+
+	buildGenericRatePlans(
+		zuoraSubscriptionRatePlans: readonly ZuoraRatePlanWithIndexedCharges[],
+	): Array<GuardianRatePlanMap<P>> {
+		return zuoraSubscriptionRatePlans.map(
+			(zuoraSubscriptionRatePlan: ZuoraRatePlanWithIndexedCharges) => {
+				const { ratePlanCharges, ...ratePlanWithoutCharges } =
+					zuoraSubscriptionRatePlan;
+
+				const chargesByKey: Map<
+					ProductRatePlanChargeKey<P, ProductRatePlanKey<P>>,
+					RatePlanCharge
+				> = this.buildGuardianRatePlanCharges(ratePlanCharges);
+
+				return this.buildRatePlan(
+					ratePlanWithoutCharges,
+					chargesByKey,
+				) satisfies GuardianRatePlanMap<P>;
+			},
+		);
+	}
+
+	private buildGuardianRatePlanCharges(
+		zuoraSubscriptionRatePlanCharges: IndexedZuoraSubscriptionRatePlanCharges,
+	): Map<ProductRatePlanChargeKey<P, ProductRatePlanKey<P>>, RatePlanCharge> {
+		return groupCollectByUniqueOrThrowMap(
+			objectJoinBijective(
+				this.productRatePlanCharges,
+				zuoraSubscriptionRatePlanCharges,
+			),
+			([zuoraProductRatePlanCharge, subCharge]: [
+				ZuoraProductRatePlanCharge,
+				RatePlanCharge,
+			]) => {
+				return this.buildRatePlanChargeEntry(
+					subCharge,
+					zuoraProductRatePlanCharge,
+				);
+			},
+			'duplicate rate plan charge keys',
+		);
+	}
 }

@@ -1,4 +1,4 @@
-import { joinAllLeft } from '@modules/objectFunctions';
+import { joinAllLeft } from '@modules/mapFunctions';
 import type {
 	ProductCatalog,
 	ProductKey,
@@ -23,7 +23,7 @@ import type {
 	ZuoraRatePlanWithIndexedCharges,
 } from './group/groupSubscriptionByZuoraCatalogIds';
 import { groupSubscriptionByIds } from './group/groupSubscriptionByZuoraCatalogIds';
-import type { GuardianRatePlan } from './reprocessRatePlans/guardianRatePlanBuilder';
+import type { GuardianRatePlanMap } from './reprocessRatePlans/guardianRatePlanBuilder';
 import { GuardianRatePlanBuilder } from './reprocessRatePlans/guardianRatePlanBuilder';
 import type { ZuoraRatePlan } from './reprocessRatePlans/zuoraRatePlanBuilder';
 import { ZuoraRatePlanBuilder } from './reprocessRatePlans/zuoraRatePlanBuilder';
@@ -32,7 +32,7 @@ import { ZuoraRatePlanBuilder } from './reprocessRatePlans/zuoraRatePlanBuilder'
  * This represents what extra info we attach to the subscription to make a "guardian" subscription.
  */
 type RatePlansWithCatalogData = {
-	ratePlans: GuardianRatePlan[];
+	ratePlans: GuardianRatePlanMap[];
 	productsNotInCatalog: ZuoraRatePlan[]; // slightly different type needed with zuora catalog attached
 };
 
@@ -190,7 +190,7 @@ export class GuardianSubscriptionParser {
 		productKey: P,
 		productRatePlanNode: ZuoraProductRatePlanNode,
 		subscriptionRatePlansForProductRatePlan: readonly ZuoraRatePlanWithIndexedCharges[],
-	): Array<GuardianRatePlan<P>> | undefined {
+	): Array<GuardianRatePlanMap<P>> | undefined {
 		const productRatePlanKey =
 			// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- insufficient type for zuoraCatalogToProductRatePlanKey
 			zuoraCatalogToProductRatePlanKey[
@@ -216,13 +216,13 @@ export class GuardianSubscriptionParser {
  * attaches a subscription rate plan id to a catalog id, and flattens out the
  * resulting lists
  */
-function joinFlatMap<S, C>(
-	subLookup: Record<string, S>,
-	catLookup: Record<string, C>,
+function joinFlatMap<K, S, C>(
+	subLookup: Map<K, S>,
+	catLookup: Map<K, C>,
 	mapFn: (sub: S, cat: C) => RatePlansWithCatalogData,
 ) {
 	return joinAllLeft(subLookup, catLookup)
-		.map(([sub, cat]: [S, C]) => mapFn(sub, cat))
+		.map(([sub, cat]: [S, C, K]) => mapFn(sub, cat))
 		.reduce((rp1, rp2) => ({
 			ratePlans: [...rp1.ratePlans, ...rp2.ratePlans],
 			productsNotInCatalog: [

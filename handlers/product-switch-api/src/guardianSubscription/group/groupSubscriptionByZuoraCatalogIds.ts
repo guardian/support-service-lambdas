@@ -1,20 +1,22 @@
-import {
-	groupBy,
-	groupByUniqueOrThrow,
-	mapValues,
-} from '@modules/arrayFunctions';
+import { groupByToMap } from '@modules/arrayFunctions';
+import { groupByUniqueOrThrowMap, mapValuesMap } from '@modules/mapFunctions';
 import { mapValue } from '@modules/objectFunctions';
 import type {
 	RatePlan,
 	RatePlanCharge,
 	ZuoraSubscription,
 } from '@modules/zuora/types';
+import type {
+	ProductId,
+	ProductRatePlanChargeId,
+	ProductRatePlanId,
+} from '@modules/zuora-catalog/zuoraCatalogSchema';
 
 export type RatePlanWithoutCharges = Omit<RatePlan, 'ratePlanCharges'>;
 export type SubscriptionWithoutRatePlans = Omit<ZuoraSubscription, 'ratePlans'>;
 
-export type IndexedZuoraSubscriptionRatePlanCharges = Record<
-	string, // product rate plan charge id
+export type IndexedZuoraSubscriptionRatePlanCharges = Map<
+	ProductRatePlanChargeId,
 	RatePlanCharge
 >;
 
@@ -22,12 +24,12 @@ export type ZuoraRatePlanWithIndexedCharges = RatePlanWithoutCharges & {
 	ratePlanCharges: IndexedZuoraSubscriptionRatePlanCharges;
 };
 
-export type IndexedZuoraSubscriptionRatePlans = Record<
-	string, // product rate plan id
+export type IndexedZuoraSubscriptionRatePlans = Map<
+	ProductRatePlanId,
 	readonly ZuoraRatePlanWithIndexedCharges[] // might have multiple of the same product, e.g. product switch and back again
 >;
-export type IndexedZuoraSubscriptionRatePlansByProduct = Record<
-	string, // product id
+export type IndexedZuoraSubscriptionRatePlansByProduct = Map<
+	ProductId,
 	IndexedZuoraSubscriptionRatePlans
 >;
 
@@ -57,12 +59,12 @@ export function groupSubscriptionByIds(
 	zuoraSubscription: ZuoraSubscription,
 ): ZuoraSubscriptionByCatalogIds {
 	const { ratePlans, ...subscriptionWithoutRatePlans } = zuoraSubscription;
-	const doubleGroupedRatePlans =
+	const productIdToProductRatePlanIdToRatePlans: IndexedZuoraSubscriptionRatePlansByProduct =
 		groupRatePlansToMatchProductCatalogStructure(ratePlans);
 
 	return {
 		...subscriptionWithoutRatePlans,
-		products: doubleGroupedRatePlans,
+		products: productIdToProductRatePlanIdToRatePlans,
 	};
 }
 
@@ -88,13 +90,13 @@ function groupRatePlansToMatchProductCatalogStructure(
  */
 function byProductAndRatePlanIds(
 	zuoraRatePlanWithChargesByPRPCId: ZuoraRatePlanWithIndexedCharges[],
-): Record<string, Record<string, ZuoraRatePlanWithIndexedCharges[]>> {
-	const ratePlansByProductId = groupBy(
+): Map<ProductId, Map<ProductRatePlanId, ZuoraRatePlanWithIndexedCharges[]>> {
+	const ratePlansByProductId = groupByToMap(
 		zuoraRatePlanWithChargesByPRPCId,
 		(ratePlan) => ratePlan.productId,
 	);
-	return mapValues(ratePlansByProductId, (productRatePlanMap) =>
-		groupBy(productRatePlanMap, (ratePlan) => ratePlan.productRatePlanId),
+	return mapValuesMap(ratePlansByProductId, (productRatePlanMap) =>
+		groupByToMap(productRatePlanMap, (ratePlan) => ratePlan.productRatePlanId),
 	);
 }
 
@@ -107,7 +109,7 @@ function byProductAndRatePlanIds(
  */
 function indexTheCharges(ratePlan: RatePlan): ZuoraRatePlanWithIndexedCharges {
 	return mapValue(ratePlan, 'ratePlanCharges', (ratePlanCharges) =>
-		groupByUniqueOrThrow(
+		groupByUniqueOrThrowMap(
 			ratePlanCharges,
 			(charge) => charge.productRatePlanChargeId,
 			'duplicate charges',

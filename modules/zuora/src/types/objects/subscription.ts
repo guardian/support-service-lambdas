@@ -1,4 +1,9 @@
 import { BillingPeriodValues } from '@modules/billingPeriod';
+import {
+	productIdSchema,
+	productRatePlanChargeIdSchema,
+	productRatePlanIdSchema,
+} from '@modules/zuora-catalog/zuoraCatalogSchema';
 import { z } from 'zod';
 
 const billingPeriodAlignmentValues = [
@@ -25,14 +30,14 @@ export const zuoraSubscriptionSchema = z.object({
 		z.object({
 			id: z.string(),
 			lastChangeType: z.optional(z.string()),
-			productId: z.string(),
+			productId: productIdSchema,
 			productName: z.string(),
-			productRatePlanId: z.string(),
+			productRatePlanId: productRatePlanIdSchema,
 			ratePlanName: z.string(),
 			ratePlanCharges: z.array(
 				z.object({
 					id: z.string(),
-					productRatePlanChargeId: z.string(),
+					productRatePlanChargeId: productRatePlanChargeIdSchema,
 					number: z.string(),
 					name: z.string(),
 					type: z.string(),

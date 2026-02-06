@@ -1,16 +1,22 @@
+import {
+	groupCollectByUniqueOrThrowMap,
+	objectJoinBijective,
+} from '@modules/mapFunctions';
 import type { RatePlanCharge } from '@modules/zuora/types';
 import type {
 	CatalogProduct,
 	ZuoraProductRatePlan,
 	ZuoraProductRatePlanCharge,
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import type { ZuoraProductRatePlanNode } from '../group/buildZuoraProductIdToKey';
 import type {
+	ZuoraProductRatePlanChargeIdMap,
+	ZuoraProductRatePlanNode,
+} from '../group/buildZuoraProductIdToKey';
+import type {
+	IndexedZuoraSubscriptionRatePlanCharges,
 	RatePlanWithoutCharges,
 	ZuoraRatePlanWithIndexedCharges,
 } from '../group/groupSubscriptionByZuoraCatalogIds';
-import type { GenericRatePlan } from './ratePlansBuilder';
-import { RatePlansBuilder } from './ratePlansBuilder';
 
 type ZuoraProductWithoutRatePlans = Omit<CatalogProduct, 'productRatePlans'>;
 type ZuoraProductRatePlanWithoutCharges = Omit<
@@ -18,6 +24,7 @@ type ZuoraProductRatePlanWithoutCharges = Omit<
 	'productRatePlanCharges'
 >;
 
+export type ZuoraChargesByName = Map<string, ZuoraRatePlanCharge>;
 /**
  * this is what we attach to the rate plan in place of zuora's basic rate plans array if it's a non-product-catalog one
  * e.g. Discounts or other non-standard products.
@@ -25,9 +32,9 @@ type ZuoraProductRatePlanWithoutCharges = Omit<
 type ZuoraCatalogValues = {
 	product: ZuoraProductWithoutRatePlans;
 	productRatePlan: ZuoraProductRatePlanWithoutCharges;
-	ratePlanCharges: Record<string, ZuoraRatePlanCharge>; // index by zuora charge name
+	ratePlanCharges: ZuoraChargesByName;
 };
-export type ZuoraRatePlan = GenericRatePlan<ZuoraCatalogValues>;
+export type ZuoraRatePlan = ZuoraCatalogValues & RatePlanWithoutCharges;
 /**
  * For non-product-catalog charges, we retain the full catalog info
  *
@@ -45,11 +52,7 @@ type ZuoraRatePlanCharge = RatePlanCharge & {
 export class ZuoraRatePlanBuilder {
 	private zuoraProductWithoutRatePlans: ZuoraProductWithoutRatePlans;
 	private zuoraProductRatePlanWithoutCharges: ZuoraProductRatePlanWithoutCharges;
-	private ratePlansBuilder: RatePlansBuilder<
-		ZuoraCatalogValues,
-		string,
-		ZuoraRatePlanCharge
-	>;
+	private ratePlansBuilder: RatePlansBuilderZZZ;
 
 	constructor(
 		product: CatalogProduct,
@@ -68,11 +71,12 @@ export class ZuoraRatePlanBuilder {
 		this.zuoraProductRatePlanWithoutCharges =
 			zuoraProductRatePlanWithoutCharges;
 
-		this.ratePlansBuilder = new RatePlansBuilder<
-			ZuoraCatalogValues,
-			string,
-			ZuoraRatePlanCharge
-		>(
+		this.ratePlansBuilder = new RatePlansBuilderZZZ(
+			// 	<
+			// 	ZuoraCatalogValues,
+			// 	string,
+			// 	ZuoraRatePlanCharge
+			// >
 			productRatePlanNode.productRatePlanCharges,
 			this.buildRatePlan.bind(this),
 			buildRatePlanChargeEntry,
@@ -89,14 +93,14 @@ export class ZuoraRatePlanBuilder {
 
 	private buildRatePlan(
 		ratePlanWithoutCharges: RatePlanWithoutCharges,
-		ratePlanCharges: Record<string, ZuoraRatePlanCharge>,
+		ratePlanCharges: ZuoraChargesByName,
 	): ZuoraRatePlan {
 		return {
 			...ratePlanWithoutCharges,
 			product: this.zuoraProductWithoutRatePlans,
 			productRatePlan: this.zuoraProductRatePlanWithoutCharges,
 			ratePlanCharges,
-		} satisfies GenericRatePlan<ZuoraCatalogValues>;
+		} satisfies ZuoraRatePlan;
 	}
 }
 
@@ -111,3 +115,62 @@ const buildRatePlanChargeEntry = (
 			productRatePlanCharge,
 		} satisfies ZuoraRatePlanCharge,
 	] as const;
+
+//FIXME flatten this class out
+/**
+ * this class handles reprocessing a rate plan and its charges to remove the standard charges field
+ * and replace with appropriate catalog specific fields.
+ */
+class RatePlansBuilderZZZ {
+	constructor(
+		private productRatePlanCharges: ZuoraProductRatePlanChargeIdMap,
+		private buildRatePlan: (
+			rp: RatePlanWithoutCharges,
+			chargesByKey: ZuoraChargesByName,
+		) => ZuoraRatePlan,
+		private buildRatePlanChargeEntry: (
+			s: RatePlanCharge,
+			c: ZuoraProductRatePlanCharge,
+		) => readonly [string /*name*/, ZuoraRatePlanCharge],
+	) {}
+
+	buildGenericRatePlans(
+		zuoraSubscriptionRatePlans: readonly ZuoraRatePlanWithIndexedCharges[],
+	): ZuoraRatePlan[] {
+		return zuoraSubscriptionRatePlans.map(
+			(zuoraSubscriptionRatePlan: ZuoraRatePlanWithIndexedCharges) => {
+				const { ratePlanCharges, ...ratePlanWithoutCharges } =
+					zuoraSubscriptionRatePlan;
+
+				const chargesByKey: ZuoraChargesByName =
+					this.buildGuardianRatePlanCharges(ratePlanCharges);
+
+				return this.buildRatePlan(
+					ratePlanWithoutCharges,
+					chargesByKey,
+				) satisfies ZuoraRatePlan;
+			},
+		);
+	}
+
+	private buildGuardianRatePlanCharges(
+		zuoraSubscriptionRatePlanCharges: IndexedZuoraSubscriptionRatePlanCharges,
+	): ZuoraChargesByName {
+		return groupCollectByUniqueOrThrowMap(
+			objectJoinBijective(
+				this.productRatePlanCharges,
+				zuoraSubscriptionRatePlanCharges,
+			),
+			([zuoraProductRatePlanCharge, subCharge]: [
+				ZuoraProductRatePlanCharge,
+				RatePlanCharge,
+			]) => {
+				return this.buildRatePlanChargeEntry(
+					subCharge,
+					zuoraProductRatePlanCharge,
+				);
+			},
+			'duplicate rate plan charge keys',
+		);
+	}
+}
