@@ -109,7 +109,7 @@ function indexTheCharges(ratePlan: RatePlan): ZuoraRatePlanWithIndexedCharges {
 	return mapValue(ratePlan, 'ratePlanCharges', (ratePlanCharges) =>
 		groupByUniqueOrThrow(
 			ratePlanCharges,
-			(v) => v.productRatePlanChargeId,
+			(charge) => charge.productRatePlanChargeId,
 			'duplicate charges',
 		),
 	);
