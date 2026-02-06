@@ -1,4 +1,4 @@
-import { groupCollectByUniqueId } from '@modules/arrayFunctions';
+import { groupCollectByUniqueOrThrow } from '@modules/arrayFunctions';
 import { objectJoinBijective } from '@modules/objectFunctions';
 import type { RatePlanCharge } from '@modules/zuora/types';
 import type { ZuoraProductRatePlanCharge } from '@modules/zuora-catalog/zuoraCatalogSchema';
@@ -60,7 +60,7 @@ export class RatePlansBuilder<
 	private buildGuardianRatePlanCharges(
 		zuoraSubscriptionRatePlanCharges: IndexedZuoraSubscriptionRatePlanCharges,
 	): Record<K, RPC> {
-		return groupCollectByUniqueId(
+		return groupCollectByUniqueOrThrow(
 			objectJoinBijective(
 				this.productRatePlanCharges,
 				zuoraSubscriptionRatePlanCharges,

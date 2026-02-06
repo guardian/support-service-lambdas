@@ -1,4 +1,8 @@
-import { groupBy, groupByUniqueId, mapValues } from '@modules/arrayFunctions';
+import {
+	groupBy,
+	groupByUniqueOrThrow,
+	mapValues,
+} from '@modules/arrayFunctions';
 import { mapValue } from '@modules/objectFunctions';
 import type {
 	RatePlan,
@@ -113,7 +117,7 @@ export class ZuoraSubscriptionIndexer {
 	 */
 	private indexTheCharges(ratePlan: RatePlan): IndexedZuoraRatePlanWithCharges {
 		return mapValue(ratePlan, 'ratePlanCharges', (ratePlanCharges) =>
-			groupByUniqueId(
+			groupByUniqueOrThrow(
 				ratePlanCharges,
 				this.indicies.getProductRatePlanChargeIndex,
 				'duplicate charges',
