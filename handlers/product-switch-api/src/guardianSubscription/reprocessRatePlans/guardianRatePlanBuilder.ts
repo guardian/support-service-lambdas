@@ -25,11 +25,18 @@ import type {
 	ZuoraRatePlanWithIndexedCharges,
 } from '../group/groupSubscriptionByZuoraCatalogIds';
 
+/**
+ * There is a similar type only one with the charges as a Record and the other
+ * as a Map.  This is because Record is more native and easier to use, but it
+ * doesn't provide any type safety on the keys.  So Map is used internally to
+ * ensure errors are not made, and Record is used in the user code for
+ * convenience.
+ */
 export type GuardianRatePlanMap<P extends ProductKey = ProductKey> =
 	GuardianCatalogValuesMap<P> & RatePlanWithoutCharges;
 
 export type GuardianRatePlan<P extends ProductKey = ProductKey> =
-	GuardianCatalogValuesR<P> & RatePlanWithoutCharges;
+	GuardianCatalogValuesRecord<P> & RatePlanWithoutCharges;
 
 /**
  * this converts the Map based charges (which are more type safe when processing)
@@ -57,8 +64,14 @@ export function convertChargesMapToRecord(
  * to narrow down the product key and rate plan key, we can access the charges
  * by key rather than filtering them.  Also the product and productRatePlan are
  * correctly typed for the product.
+ *
+ * There is a similar type only one with the charges as a Record and the other
+ * as a Map.  This is because Record is more native and easier to use, but it
+ * doesn't provide any type safety on the keys.  So Map is used internally to
+ * ensure errors are not made, and Record is used in the user code for
+ * convenience.
  */
-export type GuardianCatalogValuesMap<P extends ProductKey = ProductKey> = {
+type GuardianCatalogValuesMap<P extends ProductKey = ProductKey> = {
 	[K in P]: {
 		[RPK in ProductRatePlanKey<K>]: {
 			productKey: K;
@@ -77,6 +90,12 @@ export type GuardianCatalogValuesMap<P extends ProductKey = ProductKey> = {
  * to narrow down the product key and rate plan key, we can access the charges
  * by key rather than filtering them.  Also the product and productRatePlan are
  * correctly typed for the product.
+ *
+ * There is a similar type only one with the charges as a Record and the other
+ * as a Map.  This is because Record is more native and easier to use, but it
+ * doesn't provide any type safety on the keys.  So Map is used internally to
+ * ensure errors are not made, and Record is used in the user code for
+ * convenience.
  *
  * 	if (
  * 		ratePlan.productKey === 'SupporterPlus' &&
@@ -98,7 +117,7 @@ export type GuardianCatalogValuesMap<P extends ProductKey = ProductKey> = {
  * 	}
  *
  */
-export type GuardianCatalogValuesR<P extends ProductKey = ProductKey> = {
+type GuardianCatalogValuesRecord<P extends ProductKey = ProductKey> = {
 	[K in P]: {
 		[RPK in ProductRatePlanKey<K>]: {
 			productKey: K;
