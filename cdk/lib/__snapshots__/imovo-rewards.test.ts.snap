@@ -132,7 +132,7 @@ exports[`The Imovo rewards stack matches the snapshot 1`] = `
           },
           "S3Key": "support/CODE/imovo-rewards/imovo-rewards.zip",
         },
-        "Description": "A lambda that enables the addition of discounts to existing subscriptions",
+        "Description": "A lambda that handles Imovo reward voucher operations",
         "Environment": {
           "Variables": {
             "APP": "imovo-rewards",
@@ -901,7 +901,7 @@ exports[`The Imovo rewards stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "imovo-rewards returned a 5XX response. Search the logs below for "error" for more information. Impact: an eligible user may not have been offered a discount during the cancellation flow",
+        "AlarmDescription": "imovo-rewards returned a 5XX response. Search the logs below for "error" for more information. Impact: users may not receive their Imovo reward vouchers",
         "AlarmName": "imovo-rewards-PROD 5XX errors",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
@@ -1044,7 +1044,7 @@ exports[`The Imovo rewards stack matches the snapshot 2`] = `
           },
           "S3Key": "support/PROD/imovo-rewards/imovo-rewards.zip",
         },
-        "Description": "A lambda that enables the addition of discounts to existing subscriptions",
+        "Description": "A lambda that handles Imovo reward voucher operations",
         "Environment": {
           "Variables": {
             "APP": "imovo-rewards",

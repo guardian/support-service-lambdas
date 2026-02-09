@@ -9,12 +9,10 @@ export class ImovoRewards extends SrStack {
 
 		new SrApiLambda(this, 'Lambda', {
 			lambdaOverrides: {
-				description:
-					'A lambda that enables the addition of discounts to existing subscriptions',
+				description: 'A lambda that handles Imovo reward voucher operations',
 			},
 			monitoring: {
-				errorImpact:
-					'an eligible user may not have been offered a discount during the cancellation flow',
+				errorImpact: 'users may not receive their Imovo reward vouchers',
 			},
 		});
 	}
