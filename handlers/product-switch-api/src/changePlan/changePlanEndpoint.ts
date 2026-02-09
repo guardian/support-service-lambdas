@@ -116,7 +116,7 @@ export class ChangePlanEndpoint {
 				false,
 			);
 
-		return await this.doSwitchAction.switchToSupporterPlus(
+		return await this.doSwitchAction.switch(
 			this.body,
 			switchInformation,
 			orderRequest,

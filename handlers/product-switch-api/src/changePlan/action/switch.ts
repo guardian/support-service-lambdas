@@ -27,7 +27,7 @@ export class DoSwitchAction {
 		private stage: Stage,
 		private today: dayjs.Dayjs,
 	) {}
-	async switchToSupporterPlus(
+	async switch(
 		input: Pick<ProductSwitchRequestBody, 'csrUserId' | 'caseId'>,
 		switchInformation: SwitchInformation,
 		orderRequest: SwitchOrderRequestBuilder,
@@ -67,7 +67,7 @@ export class DoSwitchAction {
 			),
 		]);
 		return {
-			message: `Product move completed successfully with subscription number ${switchInformation.subscription.subscriptionNumber} and switch type recurring-contribution-to-supporter-plus`,
+			message: `Subscription ${switchInformation.subscription.subscriptionNumber} has successfully switched product`,
 		};
 	}
 

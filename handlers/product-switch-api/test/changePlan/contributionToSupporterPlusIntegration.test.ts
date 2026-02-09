@@ -457,9 +457,7 @@ describe('product-switching behaviour', () => {
 
 				const response = await testSwitch(testData, input);
 
-				expect(response.message).toContain(
-					'Product move completed successfully',
-				);
+				expect(response.message).toContain('has successfully switched product');
 			}
 
 			await testSwitchLocal('SupporterPlus', testData);
@@ -496,7 +494,7 @@ describe('product-switching behaviour', () => {
 
 			const response = await testSwitch(testData, input);
 
-			expect(response.message).toContain('Product move completed successfully');
+			expect(response.message).toContain('has successfully switched product');
 		},
 		1000 * 60,
 	);
@@ -518,7 +516,7 @@ describe('product-switching behaviour', () => {
 
 			const response = await testSwitch(testData, input);
 
-			expect(response.message).toContain('Product move completed successfully');
+			expect(response.message).toContain('has successfully switched product');
 		},
 		1000 * 60,
 	);

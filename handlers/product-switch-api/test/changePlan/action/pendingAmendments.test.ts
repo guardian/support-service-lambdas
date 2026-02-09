@@ -212,7 +212,7 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 			mockZuoraClient as unknown as ZuoraClient,
 			'CODE',
 			dayjs('2025-09-16'),
-		).switchToSupporterPlus(
+		).switch(
 			{ caseId: 'asdfCaseId', csrUserId: 'asdfCsrUserId' },
 			{
 				account: accountInformation,
@@ -222,7 +222,7 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 			orderRequest,
 		);
 
-		expect(result.message).toContain('Product move completed successfully');
+		expect(result.message).toContain('has successfully switched product');
 		expect(mockZuoraClient.post).toHaveBeenCalled();
 		const postCall = getOrderData();
 		expect(postCall).toEqual({
