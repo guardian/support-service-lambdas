@@ -1,10 +1,6 @@
-import { handlerWithStage } from '../src/indexScheduled';
-import dayjs from 'dayjs';
-import { loadConfig } from '@modules/aws/appConfig';
-import { ConfigSchema } from '../src/configSchema';
+import { runWithConfig } from '@modules/routing/lambdaHandler';
+import { handler } from '../src/indexScheduled';
 
-// to run this, get credentials for membership/trageting/mobile
-// the output will go to chat channel P&E/SR Alarms CODE
-loadConfig('CODE', 'support', 'alarms-handler', ConfigSchema)
-	.then((config) => handlerWithStage(dayjs(), 'CODE', config))
-	.then(console.log);
+// to run this, get credentials for membership/targeting/mobile
+// the output will go to chat channel P&E/SR/SRE
+runWithConfig(handler, undefined, 'alarms-handler');

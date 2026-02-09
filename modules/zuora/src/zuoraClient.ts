@@ -47,7 +47,7 @@ export class ZuoraClient extends RestClient {
 				let parsedBody: unknown;
 				try {
 					parsedBody = JSON.parse(e.responseBody);
-				} catch (parseError) {
+				} catch {
 					// we're not going to be able to extract anything useful from non-json
 					throw e;
 				}

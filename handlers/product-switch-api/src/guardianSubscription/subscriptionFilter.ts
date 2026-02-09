@@ -1,20 +1,18 @@
-import { mapValues, partitionByType } from '@modules/arrayFunctions';
-import {
-	mapValue,
-	objectKeys,
-	partitionObjectByValueType,
-} from '@modules/objectFunctions';
+import { partitionByType } from '@modules/arrayFunctions';
+import { mapValuesMap, partitionByValueType } from '@modules/mapFunctions';
 import { logger } from '@modules/routing/logger';
+import type { RatePlanCharge } from '@modules/zuora/types';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import type { RestRatePlanCharge } from './group/groupSubscriptionByZuoraCatalogIds';
-import type {
-	GenericRatePlan,
-	GuardianRatePlan,
-	GuardianSubscriptionMultiPlan,
-	ZuoraRatePlan,
-} from './guardianSubscriptionParser';
+import type { RatePlanWithoutCharges } from './group/groupSubscriptionByZuoraCatalogIds';
+import type { GuardianSubscriptionMultiPlan } from './guardianSubscriptionParser';
+import type { GuardianRatePlanMap } from './reprocessRatePlans/guardianRatePlanBuilder';
+import type { ZuoraRatePlan } from './reprocessRatePlans/zuoraRatePlanBuilder';
+
+type GenericRatePlan = RatePlanWithoutCharges & {
+	ratePlanCharges: Map<string, RatePlanCharge>;
+};
 
 /**
  * This removes irrelevant rate plans and charges from the subscription.
@@ -23,9 +21,11 @@ import type {
  */
 export class SubscriptionFilter {
 	constructor(
-		private ratePlanDiscardReason: (rp: GenericRatePlan) => string | undefined,
+		private ratePlanDiscardReason: (
+			rp: RatePlanWithoutCharges,
+		) => string | undefined,
 		private chargeDiscardReason: (
-			rpc: RestRatePlanCharge,
+			rpc: RatePlanCharge,
 			cancellationEffectiveDate: Dayjs | undefined,
 		) => string | undefined,
 	) {}
@@ -88,104 +88,116 @@ export class SubscriptionFilter {
 	filterSubscription(
 		highLevelSub: GuardianSubscriptionMultiPlan,
 	): GuardianSubscriptionMultiPlan {
-		let cancellationEffectiveDate: Dayjs | undefined;
-		switch (highLevelSub.status) {
-			case 'Active':
-				cancellationEffectiveDate = undefined;
-				break;
-			case 'Cancelled':
-				cancellationEffectiveDate = dayjs(highLevelSub.termEndDate);
-		}
-		const withFilteredRatePlans: GuardianSubscriptionMultiPlan = mapValue(
-			highLevelSub,
-			'ratePlans',
-			(ratePlans) =>
-				this.filterRatePlanses<GuardianRatePlan>(
-					ratePlans,
-					cancellationEffectiveDate,
-				),
+		const cancellationEffectiveDate =
+			highLevelSub.status === 'Cancelled'
+				? dayjs(highLevelSub.termEndDate)
+				: undefined;
+		const ratePlanFilter = new RatePlanFilter(
+			this.ratePlanDiscardReason,
+			(rpc) => this.chargeDiscardReason(rpc, cancellationEffectiveDate),
 		);
-		const withFilteredNonCatalogProducts: GuardianSubscriptionMultiPlan =
-			mapValue(withFilteredRatePlans, 'productsNotInCatalog', (ratePlans) =>
-				this.filterRatePlanses<ZuoraRatePlan>(
-					ratePlans,
-					cancellationEffectiveDate,
-				),
-			);
-		return withFilteredNonCatalogProducts;
+		const withFilteredRatePlans: GuardianSubscriptionMultiPlan = {
+			...highLevelSub,
+			ratePlans: ratePlanFilter.filterRatePlansAndLog<GuardianRatePlanMap>(
+				highLevelSub.ratePlans,
+			),
+		};
+		return {
+			...withFilteredRatePlans,
+			productsNotInCatalog: ratePlanFilter.filterRatePlansAndLog<ZuoraRatePlan>(
+				withFilteredRatePlans.productsNotInCatalog,
+			),
+		};
 	}
+}
 
-	private filterRatePlanses<RP extends GenericRatePlan>(
+class RatePlanFilter {
+	constructor(
+		private ratePlanDiscardReason: (
+			rp: RatePlanWithoutCharges,
+		) => string | undefined,
+		private chargeDiscardReason: (rpc: RatePlanCharge) => string | undefined,
+	) {}
+
+	filterRatePlansAndLog<RP extends GenericRatePlan>(
 		guardianSubRatePlans: RP[],
-		cancellationEffectiveDate: Dayjs | undefined,
 	): RP[] {
-		const { discarded, ratePlans } = this.filterRatePlanList(
-			guardianSubRatePlans,
-			cancellationEffectiveDate,
-		);
+		const { discarded, ratePlans } =
+			this.filterRatePlans<RP>(guardianSubRatePlans);
 		if (discarded.length > 0) {
 			logger.log(`discarded rateplans:`, discarded);
 		} // could be spammy?
 		if (ratePlans.length > 0) {
 			logger.log(
 				`retained rateplans:`,
-				ratePlans.map((rp) => rp.id),
+				ratePlans.map((rp: RP) => rp.id),
 			);
 		} // could be very spammy?
 		return ratePlans;
 	}
 
-	private filterRatePlanList<RP extends GenericRatePlan>(
-		guardianSubRatePlans: RP[],
-		cancellationEffectiveDate: Dayjs | undefined,
+	/**
+	 * takes a list of rate plans and returns both the successful rate plans and the reasons others were removed
+	 */
+	filterRatePlans<RP extends GenericRatePlan>(
+		unfilteredRatePlans: RP[],
 	): {
 		discarded: string[];
 		ratePlans: RP[];
 	} {
-		const [discarded, ratePlans] = partitionByType(
-			guardianSubRatePlans.map((rp: RP) => {
-				const maybeDiscardWholePlan = this.ratePlanDiscardReason(rp);
-				if (maybeDiscardWholePlan !== undefined) {
-					return `${rp.id}: ${maybeDiscardWholePlan}`;
-				}
-
-				const { errors, filteredCharges } = this.filterCharges(
-					rp.ratePlanCharges,
-					cancellationEffectiveDate,
-				);
-
-				const maybeAllChargesDiscarded =
-					objectKeys(filteredCharges).length === 0
-						? `${rp.id}: all charges discarded: ` + JSON.stringify(errors)
-						: undefined;
-				if (maybeAllChargesDiscarded !== undefined) {
-					return maybeAllChargesDiscarded;
-				}
-				return { ...rp, ratePlanCharges: filteredCharges };
+		const [discarded, filteredRatePlans] = partitionByType(
+			unfilteredRatePlans.map((rp: RP) => {
+				return this.filterRatePlan<RP>(rp);
 			}),
-			(o) => typeof o === 'string',
+			(errorOrRP): errorOrRP is string => typeof errorOrRP === 'string',
 		);
-		return { discarded, ratePlans };
+		return { discarded, ratePlans: filteredRatePlans };
 	}
 
-	private filterCharges(
-		charges: Record<string, RestRatePlanCharge>,
-		cancellationEffectiveDate: Dayjs | undefined,
+	/**
+	 * takes a single rate plan and returns either  the rate plan with its charges filtered, or the reason the rateplan
+	 * was dropped
+	 */
+	private filterRatePlan<RP extends GenericRatePlan>(ratePlan: RP) {
+		const maybeDiscardRatePlanReason = this.ratePlanDiscardReason(ratePlan);
+		if (maybeDiscardRatePlanReason !== undefined) {
+			return `${ratePlan.id}: ${maybeDiscardRatePlanReason}`;
+		}
+
+		const { errors, filteredCharges } = this.filterCharges(
+			ratePlan.ratePlanCharges,
+		);
+
+		const maybeAllChargesDiscarded =
+			filteredCharges.size === 0
+				? `${ratePlan.id}: all charges discarded: ` + JSON.stringify(errors)
+				: undefined;
+		if (maybeAllChargesDiscarded !== undefined) {
+			return maybeAllChargesDiscarded;
+		}
+		return { ...ratePlan, ratePlanCharges: filteredCharges };
+	}
+
+	/**
+	 * Return the list of charges that passed the filter, along with the reason why the rest were filtered out, if any.
+	 *
+	 * keys are either string (name of charge in zuora) or ProductRatePlanChargeKey<P, RPK>
+	 */
+	//
+	private filterCharges<K extends string>(
+		unfilteredCharges: Map<K, RatePlanCharge>,
 	): {
-		errors: Record<string, string>;
-		filteredCharges: Record<string, RestRatePlanCharge>;
+		errors: Map<K, string>;
+		filteredCharges: Map<K, RatePlanCharge>;
 	} {
-		const [errors, filteredCharges] = partitionObjectByValueType(
-			mapValues(charges, (rpc: RestRatePlanCharge) => {
-				const chargeDiscardReason1 = this.chargeDiscardReason(
-					rpc,
-					cancellationEffectiveDate,
-				);
-				return chargeDiscardReason1 !== undefined
-					? `${rpc.id}: ${chargeDiscardReason1}`
+		const [errors, filteredCharges] = partitionByValueType(
+			mapValuesMap(unfilteredCharges, (rpc: RatePlanCharge) => {
+				const maybeDiscardChargeReason = this.chargeDiscardReason(rpc);
+				return maybeDiscardChargeReason !== undefined
+					? `${rpc.id}: ${maybeDiscardChargeReason}`
 					: rpc;
 			}),
-			(o) => typeof o === 'string',
+			(errorOrRPC): errorOrRPC is string => typeof errorOrRPC === 'string',
 		);
 		return { errors, filteredCharges };
 	}

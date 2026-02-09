@@ -1,20 +1,16 @@
 import { getSingleOrThrow } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import type { ProductKey } from '@modules/product-catalog/productCatalog';
-import type {
-	IndexedZuoraRatePlanWithCharges,
-	RestSubscription,
-} from './group/groupSubscriptionByZuoraCatalogIds';
-import type {
-	GuardianRatePlan,
-	GuardianSubscriptionMultiPlan,
-	ZuoraRatePlan,
-} from './guardianSubscriptionParser';
+import type { SubscriptionWithoutRatePlans } from './group/groupSubscriptionByZuoraCatalogIds';
+import type { GuardianSubscriptionMultiPlan } from './guardianSubscriptionParser';
+import type { GuardianRatePlan } from './reprocessRatePlans/guardianRatePlanBuilder';
+import { convertChargesMapToRecord } from './reprocessRatePlans/guardianRatePlanBuilder';
+import type { ZuoraRatePlan } from './reprocessRatePlans/zuoraRatePlanBuilder';
 
 export type GuardianSubscription<P extends ProductKey = ProductKey> = {
 	ratePlan: GuardianRatePlan<P>;
-	discountRatePlans: IndexedZuoraRatePlanWithCharges[];
-} & RestSubscription;
+	discountRatePlans: ZuoraRatePlan[];
+} & SubscriptionWithoutRatePlans;
 
 /**
  * this takes a subscription and effectively does a "flatten.getSingle" on it to reduce it down to a single (required) rate plan.
@@ -23,13 +19,13 @@ export type GuardianSubscription<P extends ProductKey = ProductKey> = {
  * This is useful because in the guardian, all subscriptions have at most one active rateplan, plus maybe a discount
  */
 export function getSinglePlanFlattenedSubscriptionOrThrow(
-	groupedGuardianSubscription: GuardianSubscriptionMultiPlan,
+	guardianSubscriptionMultiPlan: GuardianSubscriptionMultiPlan,
 ): GuardianSubscription {
 	const {
 		ratePlans,
 		productsNotInCatalog,
-		...restGroupedGuardianSubscription
-	} = groupedGuardianSubscription;
+		...guardianSubscriptionWithoutRatePlans
+	} = guardianSubscriptionMultiPlan;
 
 	const ratePlan = getSingleOrThrow(
 		ratePlans,
@@ -44,8 +40,8 @@ export function getSinglePlanFlattenedSubscriptionOrThrow(
 	);
 
 	return {
-		...restGroupedGuardianSubscription,
-		ratePlan,
+		...guardianSubscriptionWithoutRatePlans,
+		ratePlan: convertChargesMapToRecord(ratePlan),
 		discountRatePlans,
 	} satisfies GuardianSubscription;
 }

@@ -26,6 +26,19 @@ export const groupBy = <T, I extends string>(
 	}, {});
 };
 
+export const groupByToMap = <T, I extends string>(
+    array: readonly T[],
+    fn: (item: T) => I,
+): Map<I, T[]> => {
+    return array.reduce<Map<I, T[]>>((acc, item) => {
+        const key = fn(item);
+        const group = acc.get(key) ?? [];
+        group.push(item);
+        acc.set(key, group);
+        return acc;
+    }, new Map<I, T[]>());
+};
+
 /**
  * groupMap creates an object where its keys are the result of the group function, and the values are the result
  * of the map function
@@ -57,7 +70,7 @@ export const groupMap = <T, R>(
  */
 export const groupCollect = <T, R, K extends string>(
 	array: readonly T[],
-	toMaybeEntry: (item: T) => [K, R] | undefined,
+	toMaybeEntry: (item: T) => readonly [K, R] | undefined,
 ): Record<K, R[]> => {
 	return array.reduce<Record<K, R[]>>(
 		(acc, item) => {
@@ -235,16 +248,6 @@ export const difference = <T>(a: T[], b: T[]) => {
 	return [onlyInA, onlyInB] as const;
 };
 
-export function getNonEmptyOrThrow<T>(
-	array: T[],
-	errorMessage: string,
-): [T, ...T[]] {
-	if (array[0] === undefined) {
-		throw new Error(errorMessage);
-	}
-	return [array[0], ...array.slice(1)];
-}
-
 /**
  * this does a groupBy and then extracts a single item from each group.
  *
@@ -254,12 +257,12 @@ export function getNonEmptyOrThrow<T>(
  * @param by
  * @param msg
  */
-export function groupByUniqueId<T, K extends string>(
+export function groupByUniqueOrThrow<T, K extends string>(
 	ratePlanCharges: T[],
 	by: (t: T) => K,
 	msg: string,
 ): Record<K, T> {
-	return groupCollectByUniqueId(ratePlanCharges, (a) => [by(a), a], msg);
+	return groupCollectByUniqueOrThrow(ratePlanCharges, (a) => [by(a), a], msg);
 }
 
 /**
@@ -270,9 +273,9 @@ export function groupByUniqueId<T, K extends string>(
  * @param map
  * @param msg
  */
-export function groupCollectByUniqueId<T, R, K extends string>(
+export function groupCollectByUniqueOrThrow<T, R, K extends string>(
 	ratePlanCharges: T[],
-	by: (t: T) => [K, R] | undefined,
+	by: (t: T) => readonly [K, R] | undefined,
 	msg: string,
 ): Record<K, R> {
 	return mapValues(groupCollect(ratePlanCharges, by), (arr) =>

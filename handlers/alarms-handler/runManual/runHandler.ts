@@ -1,11 +1,9 @@
-import { handlerWithStage } from '../src/index';
 import type { SQSEvent } from 'aws-lambda';
-import { buildCloudwatch } from '../src/cloudwatch';
-import { loadConfig } from '@modules/aws/appConfig';
-import { ConfigSchema } from '../src/configSchema';
+import { runWithConfig } from '../../../modules/routing/src/lambdaHandler';
+import { handler } from '../src';
 
 // to run this, get credentials for membership
-// the output will go to chat channel P&E/SR Alarms CODE
+// the output will go to chat channel P&E/SR/SRE
 export const handlerTestEvent: SQSEvent = {
 	Records: [
 		{
@@ -26,12 +24,4 @@ export const handlerTestEvent: SQSEvent = {
 	],
 } as SQSEvent;
 
-loadConfig('CODE', 'support', 'alarms-handler', ConfigSchema)
-	.then((config) => {
-		return handlerWithStage(
-			handlerTestEvent,
-			config.webhookUrls,
-			buildCloudwatch(config.accounts).getTags,
-		);
-	})
-	.then(console.log);
+runWithConfig(handler, handlerTestEvent, 'alarms-handler');

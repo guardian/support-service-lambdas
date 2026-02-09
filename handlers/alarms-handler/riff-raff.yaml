@@ -23,5 +23,6 @@ deployments:
       functionNames:
         - alarms-handler-
         - alarms-handler-scheduled-
+        - alarms-handler-summary-
     dependencies:
       - alarms-handler-cloudformation

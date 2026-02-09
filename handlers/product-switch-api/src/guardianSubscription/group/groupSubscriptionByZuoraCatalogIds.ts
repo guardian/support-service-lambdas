@@ -1,120 +1,118 @@
-import { groupBy, groupByUniqueId, mapValues } from '@modules/arrayFunctions';
-import { mapValue } from '@modules/objectFunctions';
+import { groupByToMap } from '@modules/arrayFunctions';
+import { groupByUniqueOrThrowMap, mapValuesMap } from '@modules/mapFunctions';
 import type {
 	RatePlan,
 	RatePlanCharge,
 	ZuoraSubscription,
 } from '@modules/zuora/types';
+import type {
+	ProductId,
+	ProductRatePlanChargeId,
+	ProductRatePlanId,
+} from '@modules/zuora-catalog/zuoraCatalogSchema';
 
-export type RestRatePlan = Omit<RatePlan, 'ratePlanCharges'>;
-export type RestSubscription = Omit<ZuoraSubscription, 'ratePlans'>;
-export type RestRatePlanCharge = RatePlanCharge;
+export type RatePlanWithoutCharges = Omit<RatePlan, 'ratePlanCharges'>;
+export type SubscriptionWithoutRatePlans = Omit<ZuoraSubscription, 'ratePlans'>;
 
-export type IndexedZuoraSubscriptionRatePlanCharges = Record<
-	string, // product rate plan charge id/name
-	RestRatePlanCharge
+export type IndexedZuoraSubscriptionRatePlanCharges = Map<
+	ProductRatePlanChargeId,
+	RatePlanCharge
 >;
 
-export type IndexedZuoraRatePlanWithCharges = RestRatePlan & {
+export type ZuoraRatePlanWithIndexedCharges = RatePlanWithoutCharges & {
 	ratePlanCharges: IndexedZuoraSubscriptionRatePlanCharges;
 };
 
-export type IndexedZuoraSubscriptionRatePlans = Record<
-	string, // product rate plan id/name
-	readonly IndexedZuoraRatePlanWithCharges[] // might have multiple of the same product, e.g. product switch and back again
+export type IndexedZuoraSubscriptionRatePlans = Map<
+	ProductRatePlanId,
+	readonly ZuoraRatePlanWithIndexedCharges[] // might have multiple of the same product, e.g. product switch and back again
 >;
-export type IndexedZuoraSubscriptionRatePlansByProduct = Record<
-	string, // product id/name
+export type IndexedZuoraSubscriptionRatePlansByProduct = Map<
+	ProductId,
 	IndexedZuoraSubscriptionRatePlans
 >;
 
-export type ZuoraSubscriptionByCatalogIds = RestSubscription & {
+export type ZuoraSubscriptionByCatalogIds = SubscriptionWithoutRatePlans & {
 	products: IndexedZuoraSubscriptionRatePlansByProduct;
 };
 
-type Indicies = {
-	getProductIndex: (rp: RatePlan) => string;
-	getProductRatePlanIndex: (rp: RatePlan) => string;
-	getProductRatePlanChargeIndex: (rpc: RatePlanCharge) => string;
-};
-
 /**
- * This is similar to buildZuoraProductIdToKey only it works on the subscription instead of the catalog.
+ * This is similar to buildZuoraProductIdToKey only it works on the
+ * subscription instead of the catalog.
  *
- * This rejigs a normal zuora subscription to index everything off the product*Ids or names as required.
+ * This rejigs a normal zuora subscription to index everything off the
+ * product*Ids or names as required.
  *
- * In the case of product*Id makes it easier to connect a subscription with the catalog
+ * In the case of product*Id makes it easier to connect a subscription with the
+ * catalog
  *
- * In the case of names, it makes non-catalog things like Discounts more usable.
+ * In the case of names, it makes non-catalog things like Discounts more
+ * usable.
  *
- * Note that if a sub has multiple of the same product and rateplan, the list will have multiple entries
- * which can be filtered down later.
+ * Note that if a sub has multiple of the same product and rateplan, the list
+ * will have multiple entries which can be filtered down later.
  *
  * @param zuoraSubscription
- * @private
  */
-export class ZuoraSubscriptionIndexer {
-	private constructor(private indicies: Indicies) {}
+export function groupSubscriptionByIds(
+	zuoraSubscription: ZuoraSubscription,
+): ZuoraSubscriptionByCatalogIds {
+	const { ratePlans, ...subscriptionWithoutRatePlans } = zuoraSubscription;
+	const productIdToProductRatePlanIdToRatePlans: IndexedZuoraSubscriptionRatePlansByProduct =
+		groupRatePlansToMatchProductCatalogStructure(ratePlans);
 
-	static byProductIds = new ZuoraSubscriptionIndexer({
-		getProductIndex: (rp: RatePlan) => rp.productId,
+	return {
+		...subscriptionWithoutRatePlans,
+		products: productIdToProductRatePlanIdToRatePlans,
+	};
+}
 
-		getProductRatePlanIndex: (rp: RatePlan) => rp.productRatePlanId,
+/**
+ * this groups the rate plans by the product ids at all three levels
+ *
+ * @param ratePlans
+ */
+function groupRatePlansToMatchProductCatalogStructure(
+	ratePlans: RatePlan[],
+): IndexedZuoraSubscriptionRatePlansByProduct {
+	const ratePlanWithIndexedCharges: ZuoraRatePlanWithIndexedCharges[] =
+		ratePlans.map(indexTheCharges);
+	return byProductAndRatePlanIds(ratePlanWithIndexedCharges);
+}
 
-		getProductRatePlanChargeIndex: (rpc: RatePlanCharge) =>
-			rpc.productRatePlanChargeId,
-	});
+/**
+ * group rate plans into a tree, first by the product id and then product rate plan id
+ *
+ * This makes the structure match the product-catalog.
+ *
+ * @param zuoraRatePlanWithChargesByPRPCId
+ */
+function byProductAndRatePlanIds(
+	zuoraRatePlanWithChargesByPRPCId: ZuoraRatePlanWithIndexedCharges[],
+): Map<ProductId, Map<ProductRatePlanId, ZuoraRatePlanWithIndexedCharges[]>> {
+	const ratePlansByProductId = groupByToMap(
+		zuoraRatePlanWithChargesByPRPCId,
+		(ratePlan) => ratePlan.productId,
+	);
+	return mapValuesMap(ratePlansByProductId, (productRatePlanMap) =>
+		groupByToMap(productRatePlanMap, (ratePlan) => ratePlan.productRatePlanId),
+	);
+}
 
-	groupSubscription(
-		zuoraSubscription: ZuoraSubscription,
-	): ZuoraSubscriptionByCatalogIds {
-		const { ratePlans, ...restSubscription } = zuoraSubscription;
-		const doubleGroupedRatePlans = this.groupRatePlans(ratePlans);
-
-		return {
-			...restSubscription,
-			products: doubleGroupedRatePlans,
-		};
-	}
-
-	groupRatePlans(
-		ratePlans: ZuoraSubscription['ratePlans'],
-	): IndexedZuoraSubscriptionRatePlansByProduct {
-		const doubleGroupedRatePlans: IndexedZuoraSubscriptionRatePlansByProduct =
-			mapValues(this.byProductAndRatePlan(ratePlans), (x) =>
-				mapValues(x, (rps) => rps.map((rp) => this.indexTheCharges(rp))),
-			);
-		return doubleGroupedRatePlans;
-	}
-
-	/**
-	 * group rate plans into a tree, first by the product id and then product rate plan id
-	 *
-	 * @param zuoraRatePlanWithChargesByPRPCId
-	 */
-	private byProductAndRatePlan(
-		zuoraRatePlanWithChargesByPRPCId: RatePlan[], //IndexedZuoraRatePlanWithCharges[],
-	): Record<string, Record<string, RatePlan[]>> {
-		const ratePlansById: Record<string, RatePlan[]> = groupBy(
-			zuoraRatePlanWithChargesByPRPCId,
-			this.indicies.getProductIndex,
-		);
-		return mapValues(ratePlansById, (productRatePlanMap) =>
-			groupBy(productRatePlanMap, this.indicies.getProductRatePlanIndex),
-		);
-	}
-
-	/**
-	 * replace the ratePlanCharges list with ones that are keyed by PRPC id
-	 * @param ratePlan
-	 */
-	private indexTheCharges(ratePlan: RatePlan): IndexedZuoraRatePlanWithCharges {
-		return mapValue(ratePlan, 'ratePlanCharges', (ratePlanCharges) =>
-			groupByUniqueId(
-				ratePlanCharges,
-				this.indicies.getProductRatePlanChargeIndex,
-				'duplicate charges',
-			),
-		);
-	}
+/**
+ * replace the ratePlanCharges list with ones that are keyed by PRPC id
+ *
+ * This makes the structure match the product-catalog.
+ *
+ * @param ratePlan
+ */
+function indexTheCharges(ratePlan: RatePlan): ZuoraRatePlanWithIndexedCharges {
+	return {
+		...ratePlan,
+		ratePlanCharges: groupByUniqueOrThrowMap(
+			ratePlan.ratePlanCharges,
+			(charge) => charge.productRatePlanChargeId,
+			'duplicate charges',
+		),
+	};
 }

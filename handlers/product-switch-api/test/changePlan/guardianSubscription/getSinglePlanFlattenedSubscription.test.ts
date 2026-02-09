@@ -1,6 +1,7 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { logger } from '@modules/routing/logger';
 import { zuoraSubscriptionSchema } from '@modules/zuora/types';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 import type { GuardianSubscription } from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
@@ -17,7 +18,7 @@ const subscriptionFixture = zuoraSubscriptionSchema.parse(subscriptionJson);
 const alreadySwitchedFixture =
 	zuoraSubscriptionSchema.parse(alreadySwitchedJson);
 const guardianSubscriptionParser = new GuardianSubscriptionParser(
-	zuoraCatalogFixture,
+	zuoraCatalogSchema.parse(zuoraCatalogFixture),
 	productCatalog,
 );
 

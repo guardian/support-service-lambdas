@@ -1,4 +1,4 @@
-import type { GuardianRatePlan } from '../../../src/guardianSubscription/guardianSubscriptionParser';
+import type { GuardianRatePlan } from '../../../src/guardianSubscription/reprocessRatePlans/guardianRatePlanBuilder.ts';
 
 // @ts-expect-error -- this is to ensure type narrowing isn't broken
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- this is to ensure type narrowing isn't broken
