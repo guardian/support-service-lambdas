@@ -2,7 +2,6 @@ import {
 	groupCollectByUniqueOrThrowMap,
 	objectJoinBijective,
 } from '@modules/mapFunctions';
-import { mapValue } from '@modules/objectFunctions';
 import type { RatePlanCharge } from '@modules/zuora/types';
 import type {
 	CatalogProduct,
@@ -89,10 +88,9 @@ export class ZuoraRatePlanBuilder {
 		zuoraSubscriptionRatePlan: ZuoraRatePlanWithIndexedCharges,
 	): ZuoraRatePlan {
 		return {
-			...mapValue(
-				zuoraSubscriptionRatePlan,
-				'ratePlanCharges',
-				(ratePlanCharges) => this.buildZuoraRatePlanCharges(ratePlanCharges),
+			...zuoraSubscriptionRatePlan,
+			ratePlanCharges: this.buildZuoraRatePlanCharges(
+				zuoraSubscriptionRatePlan.ratePlanCharges,
 			),
 			product: this.zuoraProductWithoutRatePlans,
 			productRatePlan: this.zuoraProductRatePlanWithoutCharges,

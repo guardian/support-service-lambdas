@@ -1,6 +1,5 @@
 import { partitionByType } from '@modules/arrayFunctions';
 import { mapValuesMap, partitionByValueType } from '@modules/mapFunctions';
-import { mapValue } from '@modules/objectFunctions';
 import { logger } from '@modules/routing/logger';
 import type { RatePlanCharge } from '@modules/zuora/types';
 import { zuoraDateFormat } from '@modules/zuora/utils';
@@ -97,18 +96,18 @@ export class SubscriptionFilter {
 			this.ratePlanDiscardReason,
 			(rpc) => this.chargeDiscardReason(rpc, cancellationEffectiveDate),
 		);
-		const withFilteredRatePlans: GuardianSubscriptionMultiPlan = mapValue(
-			highLevelSub,
-			'ratePlans',
-			(ratePlans) =>
-				ratePlanFilter.filterRatePlansAndLog<GuardianRatePlanMap>(ratePlans),
-		);
-		return mapValue(
-			withFilteredRatePlans,
-			'productsNotInCatalog',
-			(ratePlans) =>
-				ratePlanFilter.filterRatePlansAndLog<ZuoraRatePlan>(ratePlans),
-		);
+		const withFilteredRatePlans: GuardianSubscriptionMultiPlan = {
+			...highLevelSub,
+			ratePlans: ratePlanFilter.filterRatePlansAndLog<GuardianRatePlanMap>(
+				highLevelSub.ratePlans,
+			),
+		};
+		return {
+			...withFilteredRatePlans,
+			productsNotInCatalog: ratePlanFilter.filterRatePlansAndLog<ZuoraRatePlan>(
+				withFilteredRatePlans.productsNotInCatalog,
+			),
+		};
 	}
 }
 

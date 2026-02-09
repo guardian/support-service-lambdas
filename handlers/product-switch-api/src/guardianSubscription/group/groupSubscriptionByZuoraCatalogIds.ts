@@ -1,6 +1,5 @@
 import { groupByToMap } from '@modules/arrayFunctions';
 import { groupByUniqueOrThrowMap, mapValuesMap } from '@modules/mapFunctions';
-import { mapValue } from '@modules/objectFunctions';
 import type {
 	RatePlan,
 	RatePlanCharge,
@@ -108,11 +107,12 @@ function byProductAndRatePlanIds(
  * @param ratePlan
  */
 function indexTheCharges(ratePlan: RatePlan): ZuoraRatePlanWithIndexedCharges {
-	return mapValue(ratePlan, 'ratePlanCharges', (ratePlanCharges) =>
-		groupByUniqueOrThrowMap(
-			ratePlanCharges,
+	return {
+		...ratePlan,
+		ratePlanCharges: groupByUniqueOrThrowMap(
+			ratePlan.ratePlanCharges,
 			(charge) => charge.productRatePlanChargeId,
 			'duplicate charges',
 		),
-	);
+	};
 }

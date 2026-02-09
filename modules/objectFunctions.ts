@@ -36,7 +36,7 @@ export function objectFromEntries<K extends string, V>(
 type NonUndefined<T> = T extends undefined ? never : T;
 
 export function objectEntries<T extends object>(
-	theMappings: T | {},
+	theMappings: T,
 ): Array<
 	NonUndefined<
 		{
@@ -67,27 +67,4 @@ export function objectInnerJoin<K extends string, VA, VB>(
 	return lKeys.flatMap((key) =>
 		key in r ? [[l[key], r[key], key] as const] : [],
 	);
-}
-
-type ReplaceProperty<T, K extends keyof T, V> = {
-	[P in keyof T]: P extends K ? V : T[P];
-};
-
-/**
- * This does a mapValue on a specific named property, useful if we want to replace
- * just e.g. the ratePlans and keep everything else the same.
- *
- * @param obj
- * @param propertyName
- * @param mapFn
- */
-export function mapValue<T, K extends keyof T, V>(
-	obj: T,
-	propertyName: K,
-	mapFn: (value: T[K]) => V,
-): ReplaceProperty<T, K, V> {
-	return {
-		...obj,
-		[propertyName]: mapFn(obj[propertyName]),
-	} as ReplaceProperty<T, K, V>;
 }

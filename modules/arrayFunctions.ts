@@ -170,25 +170,6 @@ export const getSingleOrThrow = <T>(
 	return array[0];
 };
 
-/**
- * returns the first value or undefined, but throws if there are multiple
- *
- * @param array
- * @param error
- */
-export const getMaybeSingleOrThrow = <T>(
-	array: T[],
-	error: (msg: string) => Error,
-): T | undefined => {
-	if (array.length > 1) {
-		throw error('Array had more than one matching element');
-	}
-	if (array.length === 0 || !array[0]) {
-		return undefined;
-	}
-	return array[0];
-};
-
 export const findDuplicates = <T>(array: T[]) =>
 	array.filter((item, index) => array.indexOf(item) !== index);
 
@@ -247,16 +228,6 @@ export const difference = <T>(a: T[], b: T[]) => {
 	const onlyInB = [...setB].filter((x) => !setA.has(x));
 	return [onlyInA, onlyInB] as const;
 };
-
-export function getNonEmptyOrThrow<T>(
-	array: T[],
-	errorMessage: string,
-): [T, ...T[]] {
-	if (array[0] === undefined) {
-		throw new Error(errorMessage);
-	}
-	return [array[0], ...array.slice(1)];
-}
 
 /**
  * this does a groupBy and then extracts a single item from each group.

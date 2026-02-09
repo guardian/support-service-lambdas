@@ -3,7 +3,7 @@ import {
 	objectJoinBijective,
 } from '@modules/mapFunctions';
 import { getIfDefined } from '@modules/nullAndUndefined';
-import { mapValue, objectFromEntries } from '@modules/objectFunctions';
+import { objectFromEntries } from '@modules/objectFunctions';
 import type {
 	Product,
 	ProductKey,
@@ -46,15 +46,15 @@ export type GuardianRatePlan<P extends ProductKey = ProductKey> =
 export function convertChargesMapToRecord(
 	ratePlan: GuardianRatePlanMap,
 ): GuardianRatePlan {
-	return mapValue(
-		ratePlan,
-		'ratePlanCharges',
-		(c) =>
-			objectFromEntries([...c.entries()]) satisfies Record<
-				ProductRatePlanChargeKey<ProductKey, ProductRatePlanKey<ProductKey>>,
-				RatePlanCharge
-			>,
-	);
+	return {
+		...ratePlan,
+		ratePlanCharges: objectFromEntries([
+			...ratePlan.ratePlanCharges.entries(),
+		]) satisfies Record<
+			ProductRatePlanChargeKey<ProductKey, ProductRatePlanKey<ProductKey>>,
+			RatePlanCharge
+		>,
+	};
 }
 
 /**
@@ -199,10 +199,9 @@ export class GuardianRatePlanBuilder<
 		zuoraSubscriptionRatePlan: ZuoraRatePlanWithIndexedCharges,
 	): GuardianRatePlanMap<P> {
 		return {
-			...mapValue(
-				zuoraSubscriptionRatePlan,
-				'ratePlanCharges',
-				(ratePlanCharges) => this.buildGuardianRatePlanCharges(ratePlanCharges),
+			...zuoraSubscriptionRatePlan,
+			ratePlanCharges: this.buildGuardianRatePlanCharges(
+				zuoraSubscriptionRatePlan.ratePlanCharges,
 			),
 			productKey: this.productKey,
 			product: this.productWithoutRatePlans,

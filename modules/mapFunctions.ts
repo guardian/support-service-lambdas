@@ -171,7 +171,7 @@ export const partitionByValueType = <K, V, U extends V>(
 		if (fn(value, key)) {
 			pass.set(key, value);
 		} else {
-			// eslint-disable-next-line @typescript-eslint/consistent-type-assertions - ok in utility function
+			// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- ok in utility function
 			fail.set(key, value as Exclude<V, U>);
 		}
 	});
