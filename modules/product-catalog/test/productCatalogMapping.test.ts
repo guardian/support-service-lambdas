@@ -60,8 +60,14 @@ test('We can find product details for a Guardian Patron', () => {
 const zuoraProductExistsInCatalog = (stage: Stage) => {
 	const [zuoraCatalog, productCatalog] =
 		stage === 'CODE'
-			? [new ZuoraCatalogHelper(codeZuoraCatalog), codeCatalogHelper]
-			: [new ZuoraCatalogHelper(prodZuoraCatalog), prodCatalogHelper];
+			? [
+					new ZuoraCatalogHelper(zuoraCatalogSchema.parse(codeZuoraCatalog)),
+					codeCatalogHelper,
+				]
+			: [
+					new ZuoraCatalogHelper(zuoraCatalogSchema.parse(prodZuoraCatalog)),
+					prodCatalogHelper,
+				];
 	const allProductDetails =
 		productCatalog.getAllProductDetailsForBillingSystem('zuora');
 
