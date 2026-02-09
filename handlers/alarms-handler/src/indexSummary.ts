@@ -164,15 +164,7 @@ export async function getChatMessages(
 
 	return objectEntries(teamToAlarmNameAndCount).map(([team, alarms]) => {
 		const teamTotal = alarms.reduce((sum, alarm) => sum + alarm.count, 0);
-		const alarmsList = alarms
-			.sort((a, b) => b.count - a.count)
-			.map((alarm) => {
-				const alarmUrl =
-					'https://console.aws.amazon.com/cloudwatch/home?region=eu-west-1#alarmsV2:alarm/' +
-					encodeURIComponent(alarm.alarmName).replaceAll('.', '%2E');
-
-				return { ...alarm, alarmUrl };
-			});
+		const alarmsList = alarms.sort((a, b) => b.count - a.count);
 		const payload = buildCloudWatchSummaryMessage(teamTotal, alarmsList);
 		return {
 			team,
