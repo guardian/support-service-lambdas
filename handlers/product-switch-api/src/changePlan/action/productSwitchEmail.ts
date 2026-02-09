@@ -3,7 +3,6 @@ import { DataExtensionNames, sendEmail } from '@modules/email/email';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { getCurrencyInfo } from '@modules/internationalisation/currency';
 import type { Stage } from '@modules/stage';
-import { getIfDefined } from '@modules/nullAndUndefined';
 import dayjs from 'dayjs';
 import type { SwitchInformation } from '../prepare/switchInformation';
 

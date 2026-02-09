@@ -1,4 +1,4 @@
-import { groupByUniqueId } from '@modules/arrayFunctions';
+import { groupByUniqueOrThrow } from '@modules/arrayFunctions';
 import { getIfDefined, mapOption } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import type { PreviewOrderRequest } from '@modules/zuora/orders/orderRequests';
@@ -73,7 +73,7 @@ export const previewResponseFromZuoraResponse = (
 	chargedThroughDate?: Dayjs,
 ): PreviewResponse => {
 	const itemsById: Record<string, ZuoraPreviewResponseInvoiceItem> =
-		groupByUniqueId(
+		groupByUniqueOrThrow(
 			invoice.invoiceItems,
 			(item) => item.productRatePlanChargeId,
 			'duplicate productRatePlanChargeId in the same invoice',

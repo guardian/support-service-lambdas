@@ -62,45 +62,9 @@ export function objectEntries<T extends object>(
 export function objectInnerJoin<K extends string, VA, VB>(
 	l: Record<K, VA>,
 	r: Record<K, VB>,
-): Array<[VA, VB, K]> {
-	const lKeys = objectKeys(l);
-	return lKeys.flatMap((key) =>
-		key in r ? [[l[key], r[key], key] as const] : [],
-	);
-}
-
-/**
- * joins two objects by their keys, throwing away any entries that don't exist in both
- * @param l
- * @param r
- */
-export function objectInnerJoin<K extends string, VA, VB>(
-	l: Record<K, VA>,
-	r: Record<K, VB>,
 ): Array<[VA, VB]> {
 	const lKeys = objectKeys(l);
 	return lKeys.flatMap((key) => (key in r ? [[l[key], r[key]] as const] : []));
-}
-
-/**
- * joins two objects by their keys, throwing if there isn't an exact match
- * @param l
- * @param r
- */
-export function objectJoinBijective<K extends string, VA, VB>(
-	l: Record<K, VA>,
-	r: Record<K, VB>,
-): Array<[VA, VB]> {
-	const lKeys = objectKeys(l);
-	const [onlyInL, onlyInR] = difference(lKeys as K[], objectKeys(r) as K[]);
-
-	if (onlyInL.length + onlyInR.length !== 0) {
-		throw new Error(
-			`Keys do not match between records: onlyInL: ${onlyInL} onlyInR: ${onlyInR}`,
-		);
-	}
-
-	return lKeys.map((key) => [l[key], r[key]] as const);
 }
 
 /**
@@ -121,30 +85,3 @@ export function mapValue<T, K extends keyof T, V>(
 		[propertyName]: mapFn(obj[propertyName]),
 	};
 }
-
-/**
- * this goes through the object, applying the function to each value.  If the result is true, the key and value go into the first object
- * otherwise they goes into the second object.
- *
- * @param obj
- * @param fn
- */
-export const partitionObjectByValueType = <
-	T extends object,
-	U extends T[keyof T],
->(
-	obj: T,
-	fn: (v: T[keyof T], k: keyof T) => v is U,
-): [Record<string, U>, Record<string, Exclude<T[keyof T], U>>] => {
-	const pass: Record<string, U> = {};
-	const fail: Record<string, Exclude<T[keyof T], U>> = {};
-	for (const key in obj) {
-		const value = obj[key];
-		if (fn(value, key)) {
-			pass[key] = value;
-		} else {
-			fail[key] = value as Exclude<T[keyof T], U>;
-		}
-	}
-	return [pass, fail];
-};

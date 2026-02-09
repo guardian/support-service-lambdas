@@ -1,10 +1,10 @@
-import type { IndexedZuoraRatePlanWithCharges } from '../../guardianSubscription/group/groupSubscriptionByZuoraCatalogIds';
-
 // TODO use central eligibility checker pattern
+import type { ZuoraRatePlan } from '../../guardianSubscription/reprocessRatePlans/zuoraRatePlanBuilder';
+
 export function isEligibleForSwitch(
 	subscriptionStatus: string,
 	totalInvoiceBalance: number,
-	discountRatePlans: IndexedZuoraRatePlanWithCharges[],
+	discountRatePlans: ZuoraRatePlan[],
 ): boolean {
 	const hasNonEndedDiscount: boolean = discountRatePlans.length > 0;
 	return (

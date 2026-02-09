@@ -1,11 +1,14 @@
 import { ValidationError } from '@modules/errors';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import zuoraCatalogFixture from '../../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 import type { SwitchActionData } from '../../../src/changePlan/prepare/targetInformation';
 import { annualContribHalfPriceSupporterPlusForOneYear } from '../../../src/changePlan/switchDefinition/discounts';
 import { supporterPlusTargetInformation } from '../../../src/changePlan/switchDefinition/supporterPlusTargetInformation';
 
-const productCatalog = generateProductCatalog(zuoraCatalogFixture);
+const productCatalog = generateProductCatalog(
+	zuoraCatalogSchema.parse(zuoraCatalogFixture),
+);
 
 const annualSupporterPlusRatePlan =
 	productCatalog.SupporterPlus.ratePlans.Annual;

@@ -39,6 +39,16 @@ export function isNonEmpty<T>(arr: T[]): arr is [T, ...T[]] {
 	return arr.length > 0;
 }
 
+export function getNonEmptyOrThrow<T>(
+	array: T[],
+	errorMessage: string,
+): [T, ...T[]] {
+	if (!isNonEmpty(array)) {
+		throw new Error(errorMessage);
+	}
+	return [array[0], ...array.slice(1)];
+}
+
 export const mapOption = <T, O>(
 	value: T | undefined,
 	fn: (value: T) => O,

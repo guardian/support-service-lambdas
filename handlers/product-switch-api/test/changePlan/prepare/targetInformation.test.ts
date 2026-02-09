@@ -4,6 +4,7 @@ import {
 	type ZuoraSubscription,
 	zuoraSubscriptionSchema,
 } from '@modules/zuora/types';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 import { getTargetInformation } from '../../../src/changePlan/prepare/targetInformation';
@@ -17,9 +18,11 @@ import subscriptionJson from '../../fixtures/subscription.json';
 const referenceDate = dayjs('2024-05-10');
 const subscriptionFixture: ZuoraSubscription =
 	zuoraSubscriptionSchema.parse(subscriptionJson);
-const productCatalog = generateProductCatalog(zuoraCatalogFixture);
+const productCatalog = generateProductCatalog(
+	zuoraCatalogSchema.parse(zuoraCatalogFixture),
+);
 const guardianSubscriptionParser = new GuardianSubscriptionParser(
-	zuoraCatalogFixture,
+	zuoraCatalogSchema.parse(zuoraCatalogFixture),
 	productCatalog,
 );
 const productCatalogHelper = new ProductCatalogHelper(productCatalog);

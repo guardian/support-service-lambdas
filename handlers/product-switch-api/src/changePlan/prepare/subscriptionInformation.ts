@@ -2,17 +2,19 @@ import type { SafeForDistinct } from '@modules/arrayFunctions';
 import {
 	distinct,
 	getMaybeSingleOrThrow,
-	getNonEmptyOrThrow,
 	sumNumbers,
 } from '@modules/arrayFunctions';
-import { getIfDefined, mapOption } from '@modules/nullAndUndefined';
+import {
+	getIfDefined,
+	getNonEmptyOrThrow,
+	mapOption,
+} from '@modules/nullAndUndefined';
 import { objectValues } from '@modules/objectFunctions';
 import type { RatePlanCharge } from '@modules/zuora/types';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import type { GuardianSubscription } from '../../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
-import type { RestRatePlanCharge } from '../../guardianSubscription/group/groupSubscriptionByZuoraCatalogIds';
-import type { GuardianRatePlan } from '../../guardianSubscription/guardianSubscriptionParser';
+import type { GuardianRatePlan } from '../../guardianSubscription/reprocessRatePlans/guardianRatePlanBuilder';
 import type { ValidSwitchableRatePlanKey } from './switchCatalogHelper';
 import { asSwitchableRatePlanKey } from './switchCatalogHelper';
 
@@ -29,18 +31,16 @@ export type SubscriptionInformation = {
 	chargeIds: [string, ...string[]]; // filter invoice refund items
 };
 
-function getSubscriptionTotalChargeAmount(
-	ratePlanCharges: RestRatePlanCharge[],
-) {
+function getSubscriptionTotalChargeAmount(ratePlanCharges: RatePlanCharge[]) {
 	return sumNumbers(
-		ratePlanCharges.map((c: RestRatePlanCharge) =>
+		ratePlanCharges.map((c: RatePlanCharge) =>
 			getIfDefined(c.price, 'non priced charge on the rate plan (discount?)'),
 		),
 	);
 }
 
 function getDistinctChargeValue<T extends SafeForDistinct>(
-	ratePlanCharges: RestRatePlanCharge[],
+	ratePlanCharges: RatePlanCharge[],
 	getValue: (value: RatePlanCharge) => T,
 ): T | undefined {
 	const values = ratePlanCharges.map(getValue);
@@ -58,7 +58,7 @@ function getDistinctChargeValue<T extends SafeForDistinct>(
 	return value;
 }
 
-function getChargedThroughDate(ratePlanCharges: RestRatePlanCharge[]) {
+function getChargedThroughDate(ratePlanCharges: RatePlanCharge[]) {
 	return mapOption(
 		getDistinctChargeValue(ratePlanCharges, (ratePlanCharge: RatePlanCharge) =>
 			ratePlanCharge.chargedThroughDate?.getTime(),

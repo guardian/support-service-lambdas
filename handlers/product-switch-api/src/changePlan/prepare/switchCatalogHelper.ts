@@ -1,9 +1,5 @@
-import {
-	distinct,
-	getNonEmptyOrThrow,
-	isInList,
-} from '@modules/arrayFunctions';
-import { getIfDefined } from '@modules/nullAndUndefined';
+import { distinct, isInList } from '@modules/arrayFunctions';
+import { getIfDefined, getNonEmptyOrThrow } from '@modules/nullAndUndefined';
 import { objectKeys, objectValues } from '@modules/objectFunctions';
 import type {
 	Normalize,

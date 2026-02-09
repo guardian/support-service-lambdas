@@ -5,6 +5,7 @@ import {
 	zuoraSubscriptionSchema,
 } from '@modules/zuora/types';
 import { zuoraDateFormat } from '@modules/zuora/utils';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 import { getSubscriptionInformation } from '../../../src/changePlan/prepare/subscriptionInformation';
@@ -14,9 +15,11 @@ import { SubscriptionFilter } from '../../../src/guardianSubscription/subscripti
 import alreadySwitchedJson from '../../fixtures/already-switched-subscription.json';
 import subscriptionJson from '../../fixtures/subscription.json';
 
-const productCatalog = generateProductCatalog(zuoraCatalogFixture);
+const productCatalog = generateProductCatalog(
+	zuoraCatalogSchema.parse(zuoraCatalogFixture),
+);
 const guardianSubscriptionParser = new GuardianSubscriptionParser(
-	zuoraCatalogFixture,
+	zuoraCatalogSchema.parse(zuoraCatalogFixture),
 	productCatalog,
 );
 export function loadSubscription(

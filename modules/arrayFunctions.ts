@@ -27,16 +27,16 @@ export const groupBy = <T, I extends string>(
 };
 
 export const groupByToMap = <T, I extends string>(
-    array: readonly T[],
-    fn: (item: T) => I,
+	array: readonly T[],
+	fn: (item: T) => I,
 ): Map<I, T[]> => {
-    return array.reduce<Map<I, T[]>>((acc, item) => {
-        const key = fn(item);
-        const group = acc.get(key) ?? [];
-        group.push(item);
-        acc.set(key, group);
-        return acc;
-    }, new Map<I, T[]>());
+	return array.reduce<Map<I, T[]>>((acc, item) => {
+		const key = fn(item);
+		const group = acc.get(key) ?? [];
+		group.push(item);
+		acc.set(key, group);
+		return acc;
+	}, new Map<I, T[]>());
 };
 
 /**
