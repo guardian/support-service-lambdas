@@ -1,5 +1,6 @@
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
 import {
 	digitalSubscriptionBenefits,
@@ -11,7 +12,9 @@ import {
 } from '@modules/product-benefits/userBenefits';
 import codeZuoraCatalog from '../../zuora-catalog/test/fixtures/catalog-code.json';
 
-const codeProductCatalog = generateProductCatalog(codeZuoraCatalog);
+const codeProductCatalog = generateProductCatalog(
+	zuoraCatalogSchema.parse(codeZuoraCatalog),
+);
 const codeCatalogHelper = new ProductCatalogHelper(codeProductCatalog);
 
 describe('getUserProductsFromSupporterProductDataItems', () => {

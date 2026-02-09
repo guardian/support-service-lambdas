@@ -11,6 +11,7 @@ import { generateProductCatalog } from '@modules/product-catalog/generateProduct
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 import { getPromotion } from '@modules/promotions/v2/getPromotion';
 import type { Promo } from '@modules/promotions/v2/schema';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
 import { z } from 'zod';
 import type { CreateSubscriptionInputFields } from '@modules/zuora/createSubscription/createSubscription';
@@ -29,7 +30,7 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import code from '../../zuora-catalog/test/fixtures/catalog-code.json';
 
 describe('createSubscription integration', () => {
-	const productCatalog = generateProductCatalog(code);
+	const productCatalog = generateProductCatalog(zuoraCatalogSchema.parse(code));
 	const currency: IsoCurrency = 'GBP';
 	const contact = {
 		firstName: 'John',
