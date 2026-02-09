@@ -87,6 +87,7 @@ describe('Handler', () => {
 			'1234',
 		);
 		const expectedText = {
+			text: 'DISCOUNT-API-CODE Discount-api 5XX response',
 			cardsV2: [
 				{
 					card: {
@@ -164,6 +165,7 @@ describe('Handler', () => {
 			'1234',
 		);
 		const expectedText = {
+			text: 'DISCOUNT-API-CODE Discount-api 5XX response',
 			cardsV2: [
 				{
 					card: {
@@ -241,6 +243,7 @@ describe('Handler', () => {
 			'1234',
 		);
 		const expectedText = {
+			text: 'DISCOUNT-API-CODE Discount-api 5XX response',
 			cardsV2: [
 				{
 					card: {
