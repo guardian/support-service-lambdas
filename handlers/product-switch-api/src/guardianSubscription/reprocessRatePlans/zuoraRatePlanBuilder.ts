@@ -59,13 +59,11 @@ export class ZuoraRatePlanBuilder {
 		product: CatalogProduct,
 		productRatePlanNode: ZuoraProductRatePlanNode,
 	) {
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- throw away children
 		const { productRatePlans: _discard1, ...zuoraProductWithoutRatePlans } =
 			product;
 		this.zuoraProductWithoutRatePlans = zuoraProductWithoutRatePlans;
 
 		const {
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars -- throw away children
 			productRatePlanCharges: _discard2,
 			...zuoraProductRatePlanWithoutCharges
 		} = productRatePlanNode.zuoraProductRatePlan;

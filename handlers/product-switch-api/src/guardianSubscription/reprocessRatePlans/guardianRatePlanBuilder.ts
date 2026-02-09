@@ -151,14 +151,12 @@ export class GuardianRatePlanBuilder<
 	 */
 	private getProductAndRatePlanData(productKey: P, productRatePlanKey: PRP) {
 		const product: Product<P> = this.productCatalog[productKey];
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- just discarded an omitted variable
 		const { ratePlans: _unused1, ...productWithoutRatePlans } = product;
 		const productRatePlan = this.productCatalogHelper.getProductRatePlan(
 			productKey,
 			productRatePlanKey,
 		);
 
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- discard an omitted variable
 		const { charges: _unused2, ...productRatePlanWithoutCharges } =
 			productRatePlan;
 		return { productWithoutRatePlans, productRatePlanWithoutCharges };
