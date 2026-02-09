@@ -160,7 +160,7 @@ export function objectJoinBijective<K extends string, VA, VB>(
  * @param obj
  * @param fn
  */
-export const partitionMapByValueType = <K, V, U extends V>(
+export const partitionByValueType = <K, V, U extends V>(
 	obj: Map<K, V>,
 	fn: (v: V, k: K) => v is U,
 ): [Map<K, U>, Map<K, Exclude<V, U>>] => {

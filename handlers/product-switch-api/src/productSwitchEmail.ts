@@ -54,7 +54,7 @@ export const sendThankYouEmail = async (
 	const { subscriptionNumber, currency, billingPeriod } =
 		switchInformation.subscription;
 
-	const billingPeriodMap: Record<string, number> = {
+	const billingPeriodMap: Partial<Record<BillingPeriod, number>> = {
 		Month: 1,
 		Annual: 12,
 	};
