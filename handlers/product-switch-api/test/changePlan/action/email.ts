@@ -1,4 +1,5 @@
 import type { EmailMessageWithUserId } from '@modules/email/email';
+import { DataExtensionNames } from '@modules/email/email';
 import dayjs from 'dayjs';
 import { buildEmailMessage } from '../../../src/changePlan/action/productSwitchEmail';
 
@@ -6,6 +7,7 @@ test('Email message body is correct', () => {
 	const emailAddress = 'test@thegulocal.com';
 	const dateOfFirstPayment = dayjs('2024-04-16');
 	const emailMessage: EmailMessageWithUserId = buildEmailMessage(
+		DataExtensionNames.recurringContributionToSupporterPlusSwitch,
 		{
 			first: {
 				date: dateOfFirstPayment,
@@ -22,6 +24,7 @@ test('Email message body is correct', () => {
 		'GBP',
 		10,
 		'Month',
+		'BankTransfer',
 		'A-S123456',
 		'123456789',
 	);

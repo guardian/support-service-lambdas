@@ -28,6 +28,7 @@ export type EmailPayload = {
 };
 export const DataExtensionNames = {
 	recurringContributionToSupporterPlusSwitch: 'SV_RCtoSP_Switch',
+	supporterPlusToDigitalPlusSwitch: 'SV_SPtoDP_SwitchConfirmation',
 	subscriptionCancelledEmail: 'subscription-cancelled-email',
 	updateSupporterPlusAmount: 'payment-amount-changed-email',
 	cancellationDiscountConfirmation: 'cancellation-discount-confirmation-email',

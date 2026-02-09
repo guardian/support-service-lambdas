@@ -3,7 +3,11 @@
  * Tests the candidate selection logic and edge cases without external API calls.
  */
 import type { IsoCurrency } from '@modules/internationalisation/currency';
-import type { RatePlanCharge, ZuoraSubscription } from '@modules/zuora/types';
+import type {
+	RatePlanCharge,
+	ZuoraAccount,
+	ZuoraSubscription,
+} from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type {
 	ProductId,
@@ -42,9 +46,8 @@ function makeAccount(overrides?: {
 	totalInvoiceBalance?: number;
 	creditBalance?: number;
 	currency?: IsoCurrency;
-}) {
+}): ZuoraAccount {
 	return {
-		success: true,
 		basicInfo: {
 			id: 'basic-info-id',
 			identityId: 'identity-123',
@@ -52,6 +55,7 @@ function makeAccount(overrides?: {
 		billingAndPayment: {
 			currency: overrides?.currency ?? 'GBP',
 			defaultPaymentMethodId: 'payment-method-123',
+			paymentGateway: 'Stripe PaymentIntents GNM Membership',
 		},
 		billToContact: {
 			firstName: 'Test',

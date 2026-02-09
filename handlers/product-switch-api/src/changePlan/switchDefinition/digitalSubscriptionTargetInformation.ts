@@ -1,3 +1,4 @@
+import { DataExtensionNames } from '@modules/email/email';
 import { ValidationError } from '@modules/errors';
 import type { ProductRatePlan } from '@modules/product-catalog/productCatalog';
 import type {
@@ -40,5 +41,6 @@ export function digitalSubscriptionTargetInformation(
 		contributionCharge: undefined,
 		subscriptionChargeId: productRatePlan.charges.Subscription.id,
 		discount: undefined,
+		dataExtensionName: DataExtensionNames.supporterPlusToDigitalPlusSwitch,
 	} satisfies TargetInformation);
 }

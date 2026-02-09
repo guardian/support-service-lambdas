@@ -1,9 +1,12 @@
+import { DataExtensionNames } from '@modules/email/email';
 import type { SubscriptionInformation } from '../src/changePlan/prepare/subscriptionInformation';
 import type { TargetInformation } from '../src/changePlan/prepare/targetInformation';
 import { createSQSMessageBody } from '../src/salesforceTracking';
 
 test('salesforce tracking data is serialised to the queue correctly', () => {
 	const targetInformation: TargetInformation = {
+		dataExtensionName:
+			DataExtensionNames.recurringContributionToSupporterPlusSwitch,
 		actualTotalPrice: 45.5,
 		contributionCharge: {
 			id: '',

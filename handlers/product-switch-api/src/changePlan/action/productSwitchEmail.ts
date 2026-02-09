@@ -1,14 +1,19 @@
-import type { EmailMessageWithUserId } from '@modules/email/email';
-import { DataExtensionNames, sendEmail } from '@modules/email/email';
+import type {
+	DataExtensionName,
+	EmailMessageWithUserId,
+} from '@modules/email/email';
+import { sendEmail } from '@modules/email/email';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { getCurrencyInfo } from '@modules/internationalisation/currency';
 import type { Stage } from '@modules/stage';
 import dayjs from 'dayjs';
+import type { PaymentMethodType } from '../prepare/accountInformation';
 import type { SwitchInformation } from '../prepare/switchInformation';
 
 type Payment = { date: dayjs.Dayjs; amount: number };
 
 export const buildEmailMessage = (
+	dataExtensionName: DataExtensionName,
 	payments: { first: Payment; next: Payment },
 	emailAddress: string,
 	firstName: string,
@@ -16,9 +21,10 @@ export const buildEmailMessage = (
 	currency: IsoCurrency,
 	productPrice: number,
 	frequency: string,
+	paymentMethodType: PaymentMethodType,
 	subscriptionNumber: string,
 	identityId: string,
-) => {
+): EmailMessageWithUserId => {
 	const { first, next } = payments;
 	return {
 		To: {
@@ -34,14 +40,20 @@ export const buildEmailMessage = (
 					next_payment_amount: next.amount.toFixed(2),
 					date_of_next_payment: next.date.format('DD MMMM YYYY'),
 					payment_frequency: frequency,
+					payment_method: emailPaymentMethodTypes[paymentMethodType],
 					subscription_id: subscriptionNumber,
 				},
 			},
 		},
-		DataExtensionName:
-			DataExtensionNames.recurringContributionToSupporterPlusSwitch,
+		DataExtensionName: dataExtensionName,
 		IdentityUserId: identityId,
 	};
+};
+
+const emailPaymentMethodTypes: Record<PaymentMethodType, string> = {
+	BankTransfer: 'Direct Debit',
+	CreditCardReferenceTransaction: 'Credit/Debit Card',
+	PayPal: 'PayPal',
 };
 
 export const sendThankYouEmail = async (
@@ -49,8 +61,14 @@ export const sendThankYouEmail = async (
 	firstPaymentAmount: number,
 	switchInformation: SwitchInformation,
 ) => {
-	const { emailAddress, firstName, lastName, identityId, currency } =
-		switchInformation.account;
+	const {
+		emailAddress,
+		firstName,
+		lastName,
+		identityId,
+		currency,
+		paymentMethodType,
+	} = switchInformation.account;
 	const { subscriptionNumber, productRatePlanKey } =
 		switchInformation.subscription;
 
@@ -62,6 +80,7 @@ export const sendThankYouEmail = async (
 	)[productRatePlanKey];
 
 	const emailMessage: EmailMessageWithUserId = buildEmailMessage(
+		switchInformation.target.dataExtensionName,
 		{
 			first: {
 				date: dayjs(),
@@ -78,6 +97,7 @@ export const sendThankYouEmail = async (
 		currency,
 		switchInformation.target.actualTotalPrice,
 		frequency,
+		paymentMethodType,
 		subscriptionNumber,
 		identityId,
 	);

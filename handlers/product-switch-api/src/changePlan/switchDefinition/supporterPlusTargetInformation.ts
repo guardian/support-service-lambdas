@@ -1,3 +1,4 @@
+import { DataExtensionNames } from '@modules/email/email';
 import { ValidationError } from '@modules/errors';
 import type { ProductRatePlan } from '@modules/product-catalog/productCatalog';
 import type {
@@ -70,5 +71,7 @@ export function supporterPlusTargetInformation(
 		},
 		subscriptionChargeId: productRatePlan.charges.Subscription.id,
 		discount,
+		dataExtensionName:
+			DataExtensionNames.recurringContributionToSupporterPlusSwitch,
 	} satisfies TargetInformation);
 }

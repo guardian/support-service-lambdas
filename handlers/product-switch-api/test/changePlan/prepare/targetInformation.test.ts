@@ -1,3 +1,4 @@
+import { DataExtensionNames } from '@modules/email/email';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import {
@@ -7,6 +8,7 @@ import {
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
+import type { TargetInformation } from '../../../src/changePlan/prepare/targetInformation';
 import { getTargetInformation } from '../../../src/changePlan/prepare/targetInformation';
 import { annualContribHalfPriceSupporterPlusForOneYear } from '../../../src/changePlan/switchDefinition/discounts';
 import type { GuardianSubscription } from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
@@ -71,7 +73,9 @@ describe('getTargetInformation', () => {
 				contributionAmount: expectedActualTotalPrice - expectedBasePrice,
 			},
 			discount: undefined,
-		});
+			dataExtensionName:
+				DataExtensionNames.recurringContributionToSupporterPlusSwitch,
+		} satisfies TargetInformation);
 	});
 
 	test('applies the supporter plus annual discount during save flows when eligible', async () => {

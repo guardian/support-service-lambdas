@@ -1,3 +1,4 @@
+import { DataExtensionNames } from '@modules/email/email';
 import dayjs from 'dayjs';
 import type { SwitchInformation } from '../src/changePlan/prepare/switchInformation';
 import { supporterRatePlanItemFromSwitchInformation } from '../src/supporterProductData';
@@ -11,6 +12,7 @@ const getSwitchInformation = (): SwitchInformation => ({
 		lastName: 'lastName',
 		defaultPaymentMethodId: 'defaultPaymentMethodId',
 		currency: 'GBP',
+		paymentMethodType: 'BankTransfer',
 	},
 	subscription: {
 		subscriptionNumber: 'subscriptionNumber',
@@ -28,6 +30,8 @@ const getSwitchInformation = (): SwitchInformation => ({
 		subscriptionChargeId: 'subscriptionChargeId',
 		actualTotalPrice: 1,
 		ratePlanName: 'Supporter Plus V2 - Monthly',
+		dataExtensionName:
+			DataExtensionNames.recurringContributionToSupporterPlusSwitch,
 	},
 });
 

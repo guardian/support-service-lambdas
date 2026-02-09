@@ -2,6 +2,7 @@
  * @group integration
  */
 
+import { DataExtensionNames } from '@modules/email/email';
 import { sendToSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
 import dayjs from 'dayjs';
 import type { SwitchInformation } from '../src/changePlan/prepare/switchInformation';
@@ -19,6 +20,7 @@ test('supporter product data', async () => {
 			lastName: 'lastName',
 			defaultPaymentMethodId: 'defaultPaymentMethodId',
 			currency: 'GBP',
+			paymentMethodType: 'BankTransfer',
 		},
 		subscription: {
 			subscriptionNumber: 'A-S1234567',
@@ -36,6 +38,8 @@ test('supporter product data', async () => {
 			subscriptionChargeId: 'subscriptionChargeId',
 			actualTotalPrice: 10,
 			ratePlanName: 'Supporter Plus V2 - Monthly',
+			dataExtensionName:
+				DataExtensionNames.recurringContributionToSupporterPlusSwitch,
 		},
 	};
 

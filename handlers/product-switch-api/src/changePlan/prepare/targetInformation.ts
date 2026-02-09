@@ -1,3 +1,4 @@
+import type { DataExtensionName } from '@modules/email/email';
 import { type IsoCurrency } from '@modules/internationalisation/currency';
 import type {
 	GuardianCatalogKeys,
@@ -21,6 +22,7 @@ export type TargetInformation = {
 	actualTotalPrice: number; // email, sf tracking
 	productRatePlanId: string; // order, supporter product data
 	ratePlanName: string; // supporter product data
+	dataExtensionName: DataExtensionName; // email
 	subscriptionChargeId: string; // adjust invoice, build response // used to find the price and service end date (next payment date) from the preview invoice, also to find and adjust out any charge less than 0.50
 	contributionCharge?: TargetContribution; // order // used to find the price from the preview invoice as above, also to do the chargeOverrides in the order to set the additional amount to take
 	discount?: Discount; // order (product rate plan id), return to client

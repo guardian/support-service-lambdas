@@ -31,7 +31,7 @@ export const contributionSubscribeBody = (
 			CreditCardExpirationYear: 2029,
 			CreditCardType: 'Visa',
 			Type: 'CreditCardReferenceTransaction',
-			PaymentGateway: 'Stripe Gateway 1',
+			PaymentGateway: 'Stripe PaymentIntents GNM Membership',
 		},
 	};
 	const billingPeriod = additionOptions?.billingPeriod ?? 'Annual';
