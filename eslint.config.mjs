@@ -21,4 +21,14 @@ export default [
 			'@typescript-eslint/consistent-type-assertions': 'off',
 		},
 	},
+	{
+		rules: {
+			'@typescript-eslint/no-unused-vars': [
+				'error',
+				{
+					ignoreRestSiblings: true,
+				},
+			],
+		},
+	},
 ];
