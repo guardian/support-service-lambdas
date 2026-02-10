@@ -58,10 +58,18 @@ function getDistinctChargeValue<T extends SafeForDistinct>(
 	return value;
 }
 
-function getChargedThroughDate(ratePlanCharges: RatePlanCharge[]) {
+/**
+ * the charged through date is a good way of knowing when the next payment will be taken, if
+ * it's a new charge then look at the start date.
+ *
+ * @param ratePlanCharges
+ */
+function getNextPaymentDate(ratePlanCharges: RatePlanCharge[]) {
 	return mapOption(
 		getDistinctChargeValue(ratePlanCharges, (ratePlanCharge: RatePlanCharge) =>
-			ratePlanCharge.chargedThroughDate?.getTime(),
+			(
+				ratePlanCharge.chargedThroughDate ?? ratePlanCharge.effectiveStartDate
+			).getTime(),
 		),
 		(e) => dayjs(new Date(e)),
 	);
@@ -91,7 +99,7 @@ export function getSubscriptionInformation(
 		),
 		productRatePlanKey,
 		termStartDate: subscription.termStartDate,
-		chargedThroughDate: getChargedThroughDate(
+		chargedThroughDate: getNextPaymentDate(
 			objectValues(ratePlan.ratePlanCharges),
 		),
 		productRatePlanId: ratePlan.productRatePlanId,

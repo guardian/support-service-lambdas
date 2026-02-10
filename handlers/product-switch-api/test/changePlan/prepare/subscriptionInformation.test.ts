@@ -7,24 +7,34 @@ import {
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
-import zuoraCatalogFixture from '../../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
+import zuoraCatalogFixtureCode from '../../../../../modules/zuora-catalog/test/fixtures/catalog-code.json';
+import zuoraCatalogFixtureProd from '../../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 import { getSubscriptionInformation } from '../../../src/changePlan/prepare/subscriptionInformation';
 import { getSinglePlanFlattenedSubscriptionOrThrow } from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import { GuardianSubscriptionParser } from '../../../src/guardianSubscription/guardianSubscriptionParser';
 import { SubscriptionFilter } from '../../../src/guardianSubscription/subscriptionFilter';
 import alreadySwitchedJson from '../../fixtures/already-switched-subscription.json';
+import pendingAmountChange from '../../fixtures/pendingAmountChange.json';
 import subscriptionJson from '../../fixtures/subscription.json';
 
-const productCatalog = generateProductCatalog(
-	zuoraCatalogSchema.parse(zuoraCatalogFixture),
+const productCatalogProd = generateProductCatalog(
+	zuoraCatalogSchema.parse(zuoraCatalogFixtureProd),
 );
-const guardianSubscriptionParser = new GuardianSubscriptionParser(
-	zuoraCatalogSchema.parse(zuoraCatalogFixture),
-	productCatalog,
+const guardianSubscriptionParserProd = new GuardianSubscriptionParser(
+	zuoraCatalogSchema.parse(zuoraCatalogFixtureProd),
+	productCatalogProd,
+);
+const productCatalogCode = generateProductCatalog(
+	zuoraCatalogSchema.parse(zuoraCatalogFixtureCode),
+);
+const guardianSubscriptionParserCode = new GuardianSubscriptionParser(
+	zuoraCatalogSchema.parse(zuoraCatalogFixtureCode),
+	productCatalogCode,
 );
 export function loadSubscription(
 	subscriptionData: unknown,
 	referenceDate: dayjs.Dayjs,
+	guardianSubscriptionParser: GuardianSubscriptionParser = guardianSubscriptionParserProd,
 ) {
 	const subscriptionFixture: ZuoraSubscription =
 		zuoraSubscriptionSchema.parse(subscriptionData);
@@ -64,7 +74,8 @@ describe('getSubscriptionInformation', () => {
 			chargedThroughDate: '2025-05-09',
 			productRatePlanId: subscription.ratePlan.productRatePlanId,
 			chargeIds: [
-				productCatalog.Contribution.ratePlans.Annual.charges.Contribution.id,
+				productCatalogProd.Contribution.ratePlans.Annual.charges.Contribution
+					.id,
 			],
 		});
 	});
@@ -92,8 +103,42 @@ describe('getSubscriptionInformation', () => {
 			chargedThroughDate: '2024-07-06', // it ignores the removed contribution charge
 			productRatePlanId: subscription.ratePlan.productRatePlanId,
 			chargeIds: [
-				productCatalog.SupporterPlus.ratePlans.Monthly.charges.Contribution.id,
-				productCatalog.SupporterPlus.ratePlans.Monthly.charges.Subscription.id,
+				productCatalogProd.SupporterPlus.ratePlans.Monthly.charges.Contribution
+					.id,
+				productCatalogProd.SupporterPlus.ratePlans.Monthly.charges.Subscription
+					.id,
+			],
+		});
+	});
+
+	test("gets the charged through date correctly where there's a pending amount change", () => {
+		const { subscriptionFixture, subscription } = loadSubscription(
+			pendingAmountChange,
+			dayjs('2026-02-10'),
+			guardianSubscriptionParserCode,
+		);
+
+		const subscriptionInformation = getSubscriptionInformation(subscription);
+
+		expect(
+			mapValue(subscriptionInformation, 'chargedThroughDate', (d) =>
+				d === undefined ? undefined : zuoraDateFormat(d),
+			),
+		).toStrictEqual({
+			accountNumber: subscriptionFixture.accountNumber,
+			subscriptionNumber: subscriptionFixture.subscriptionNumber,
+			previousProductName: subscription.ratePlan.productName,
+			previousRatePlanName: subscription.ratePlan.ratePlanName,
+			previousAmount: 17, // AUD
+			productRatePlanKey: subscription.ratePlan.productRatePlanKey,
+			termStartDate: subscription.termStartDate,
+			chargedThroughDate: '2026-03-10', // it uses the effective start date of the contribution charge
+			productRatePlanId: subscription.ratePlan.productRatePlanId,
+			chargeIds: [
+				productCatalogCode.SupporterPlus.ratePlans.Monthly.charges.Contribution
+					.id,
+				productCatalogCode.SupporterPlus.ratePlans.Monthly.charges.Subscription
+					.id,
 			],
 		});
 	});
