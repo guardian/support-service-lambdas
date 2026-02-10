@@ -45,7 +45,7 @@ jobs:
       fail-fast: false
       matrix:
         subproject:
-          - imovo-rewards
+          - imovo-voucher-api
           - promotions-lambdas
           - user-benefits
           - press-reader-entitlements

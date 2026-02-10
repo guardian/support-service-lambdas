@@ -3,9 +3,9 @@ import { SrApiLambda } from './cdk/SrApiLambda';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
 
-export class ImovoRewards extends SrStack {
+export class ImovoVoucherApi extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
-		super(scope, { stage, app: 'imovo-rewards' });
+		super(scope, { stage, app: 'imovo-voucher-api' });
 
 		new SrApiLambda(this, 'Lambda', {
 			lambdaOverrides: {

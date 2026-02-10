@@ -193,7 +193,7 @@ importers:
         specifier: ^8.10.147
         version: 8.10.158
 
-  handlers/imovo-rewards:
+  handlers/imovo-voucher-api:
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147

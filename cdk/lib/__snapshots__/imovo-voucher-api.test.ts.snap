@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`The Imovo rewards stack matches the snapshot 1`] = `
+exports[`The Imovo voucher API stack matches the snapshot 1`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
@@ -61,7 +61,7 @@ exports[`The Imovo rewards stack matches the snapshot 1`] = `
     "DNSRecord": {
       "Properties": {
         "HostedZoneId": "Z3KO35ELNWZMSX",
-        "Name": "imovo-rewards-code.support.guardianapis.com",
+        "Name": "imovo-voucher-api-code.support.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -77,7 +77,7 @@ exports[`The Imovo rewards stack matches the snapshot 1`] = `
     },
     "DomainName": {
       "Properties": {
-        "DomainName": "imovo-rewards-code.support.guardianapis.com",
+        "DomainName": "imovo-voucher-api-code.support.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -98,7 +98,7 @@ exports[`The Imovo rewards stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "imovo-rewards",
+            "Value": "imovo-voucher-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -130,18 +130,18 @@ exports[`The Imovo rewards stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "support/CODE/imovo-rewards/imovo-rewards.zip",
+          "S3Key": "support/CODE/imovo-voucher-api/imovo-voucher-api.zip",
         },
         "Description": "A lambda that handles Imovo reward voucher operations",
         "Environment": {
           "Variables": {
-            "APP": "imovo-rewards",
+            "APP": "imovo-voucher-api",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
           },
         },
-        "FunctionName": "imovo-rewards-CODE",
+        "FunctionName": "imovo-voucher-api-CODE",
         "Handler": "index.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
@@ -157,7 +157,7 @@ exports[`The Imovo rewards stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "imovo-rewards",
+            "Value": "imovo-voucher-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -184,11 +184,11 @@ exports[`The Imovo rewards stack matches the snapshot 1`] = `
       "Properties": {
         "ApiKeySourceType": "HEADER",
         "Description": "API Gateway created by CDK",
-        "Name": "imovo-rewards-CODE",
+        "Name": "imovo-voucher-api-CODE",
         "Tags": [
           {
             "Key": "App",
-            "Value": "imovo-rewards",
+            "Value": "imovo-voucher-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -210,7 +210,7 @@ exports[`The Imovo rewards stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::RestApi",
     },
-    "LambdaRestApiANYApiPermissionTestimovorewardsCODELambdaRestApi163F5F5CANY14CD3828": {
+    "LambdaRestApiANYApiPermissionTestimovovoucherapiCODELambdaRestApi25BF258DANY8C967452": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -247,7 +247,7 @@ exports[`The Imovo rewards stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "LambdaRestApiANYApiPermissionimovorewardsCODELambdaRestApi163F5F5CANY90EBD675": {
+    "LambdaRestApiANYApiPermissionimovovoucherapiCODELambdaRestApi25BF258DANYCCEF64A5": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -351,7 +351,7 @@ exports[`The Imovo rewards stack matches the snapshot 1`] = `
     "LambdaRestApiApiKeyB5CCCA11": {
       "Properties": {
         "Enabled": true,
-        "Name": "imovo-rewards-key-CODE",
+        "Name": "imovo-voucher-api-key-CODE",
         "StageKeys": [
           {
             "RestApiId": {
@@ -365,7 +365,7 @@ exports[`The Imovo rewards stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "imovo-rewards",
+            "Value": "imovo-voucher-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -419,7 +419,7 @@ exports[`The Imovo rewards stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "imovo-rewards",
+            "Value": "imovo-voucher-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -442,7 +442,7 @@ exports[`The Imovo rewards stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "LambdaRestApiDeployment9531908931156f933a76746de3466a788659cf4a": {
+    "LambdaRestApiDeployment95319089510fc75709f25a8b1c7e4c94aa41ec3b": {
       "DependsOn": [
         "LambdaRestApiproxyANY486C4D1F",
         "LambdaRestApiproxy22103CFD",
@@ -462,7 +462,7 @@ exports[`The Imovo rewards stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "LambdaRestApiDeployment9531908931156f933a76746de3466a788659cf4a",
+          "Ref": "LambdaRestApiDeployment95319089510fc75709f25a8b1c7e4c94aa41ec3b",
         },
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",
@@ -471,7 +471,7 @@ exports[`The Imovo rewards stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "imovo-rewards",
+            "Value": "imovo-voucher-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -506,11 +506,11 @@ exports[`The Imovo rewards stack matches the snapshot 1`] = `
             "Throttle": {},
           },
         ],
-        "Description": "REST endpoints for imovo-rewards",
+        "Description": "REST endpoints for imovo-voucher-api",
         "Tags": [
           {
             "Key": "App",
-            "Value": "imovo-rewards",
+            "Value": "imovo-voucher-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -529,11 +529,11 @@ exports[`The Imovo rewards stack matches the snapshot 1`] = `
             "Value": "CODE",
           },
         ],
-        "UsagePlanName": "imovo-rewards-CODE",
+        "UsagePlanName": "imovo-voucher-api-CODE",
       },
       "Type": "AWS::ApiGateway::UsagePlan",
     },
-    "LambdaRestApiUsagePlanUsagePlanKeyResourceimovorewardsCODELambdaRestApiApiKey0A81E9BC51A262EA": {
+    "LambdaRestApiUsagePlanUsagePlanKeyResourceimovovoucherapiCODELambdaRestApiApiKeyBE23603B74FE5A34": {
       "Properties": {
         "KeyId": {
           "Ref": "LambdaRestApiApiKeyB5CCCA11",
@@ -601,7 +601,7 @@ exports[`The Imovo rewards stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::Method",
     },
-    "LambdaRestApiproxyANYApiPermissionTestimovorewardsCODELambdaRestApi163F5F5CANYproxy74D4CE42": {
+    "LambdaRestApiproxyANYApiPermissionTestimovovoucherapiCODELambdaRestApi25BF258DANYproxy7C38CE26": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -638,7 +638,7 @@ exports[`The Imovo rewards stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "LambdaRestApiproxyANYApiPermissionimovorewardsCODELambdaRestApi163F5F5CANYproxyB3D97A3F": {
+    "LambdaRestApiproxyANYApiPermissionimovovoucherapiCODELambdaRestApi25BF258DANYproxy7D025E73": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -710,7 +710,7 @@ exports[`The Imovo rewards stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "imovo-rewards",
+            "Value": "imovo-voucher-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -771,7 +771,7 @@ exports[`The Imovo rewards stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/support/CODE/imovo-rewards/imovo-rewards.zip",
+                      "/support/CODE/imovo-voucher-api/imovo-voucher-api.zip",
                     ],
                   ],
                 },
@@ -792,7 +792,7 @@ exports[`The Imovo rewards stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/support/imovo-rewards",
+                    ":parameter/CODE/support/imovo-voucher-api",
                   ],
                 ],
               },
@@ -815,7 +815,7 @@ exports[`The Imovo rewards stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/support/imovo-rewards/*",
+                    ":parameter/CODE/support/imovo-voucher-api/*",
                   ],
                 ],
               },
@@ -836,7 +836,7 @@ exports[`The Imovo rewards stack matches the snapshot 1`] = `
 }
 `;
 
-exports[`The Imovo rewards stack matches the snapshot 2`] = `
+exports[`The Imovo voucher API stack matches the snapshot 2`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
@@ -901,13 +901,13 @@ exports[`The Imovo rewards stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "imovo-rewards returned a 5XX response. Search the logs below for "error" for more information. Impact: users may not receive their Imovo reward vouchers",
-        "AlarmName": "imovo-rewards-PROD 5XX errors",
+        "AlarmDescription": "imovo-voucher-api returned a 5XX response. Search the logs below for "error" for more information. Impact: users may not receive their Imovo reward vouchers",
+        "AlarmName": "imovo-voucher-api-PROD 5XX errors",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
             "Name": "ApiName",
-            "Value": "imovo-rewards-PROD",
+            "Value": "imovo-voucher-api-PROD",
           },
         ],
         "EvaluationPeriods": 1,
@@ -918,7 +918,7 @@ exports[`The Imovo rewards stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "imovo-rewards",
+            "Value": "imovo-voucher-api",
           },
           {
             "Key": "DiagnosticLinks",
@@ -973,7 +973,7 @@ exports[`The Imovo rewards stack matches the snapshot 2`] = `
     "DNSRecord": {
       "Properties": {
         "HostedZoneId": "Z3KO35ELNWZMSX",
-        "Name": "imovo-rewards.support.guardianapis.com",
+        "Name": "imovo-voucher-api.support.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -989,7 +989,7 @@ exports[`The Imovo rewards stack matches the snapshot 2`] = `
     },
     "DomainName": {
       "Properties": {
-        "DomainName": "imovo-rewards.support.guardianapis.com",
+        "DomainName": "imovo-voucher-api.support.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -1010,7 +1010,7 @@ exports[`The Imovo rewards stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "imovo-rewards",
+            "Value": "imovo-voucher-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -1042,18 +1042,18 @@ exports[`The Imovo rewards stack matches the snapshot 2`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "support/PROD/imovo-rewards/imovo-rewards.zip",
+          "S3Key": "support/PROD/imovo-voucher-api/imovo-voucher-api.zip",
         },
         "Description": "A lambda that handles Imovo reward voucher operations",
         "Environment": {
           "Variables": {
-            "APP": "imovo-rewards",
+            "APP": "imovo-voucher-api",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",
           },
         },
-        "FunctionName": "imovo-rewards-PROD",
+        "FunctionName": "imovo-voucher-api-PROD",
         "Handler": "index.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
@@ -1069,7 +1069,7 @@ exports[`The Imovo rewards stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "imovo-rewards",
+            "Value": "imovo-voucher-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -1096,11 +1096,11 @@ exports[`The Imovo rewards stack matches the snapshot 2`] = `
       "Properties": {
         "ApiKeySourceType": "HEADER",
         "Description": "API Gateway created by CDK",
-        "Name": "imovo-rewards-PROD",
+        "Name": "imovo-voucher-api-PROD",
         "Tags": [
           {
             "Key": "App",
-            "Value": "imovo-rewards",
+            "Value": "imovo-voucher-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -1122,7 +1122,7 @@ exports[`The Imovo rewards stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::RestApi",
     },
-    "LambdaRestApiANYApiPermissionTestimovorewardsPRODLambdaRestApi3BC4E53AANY4A01903F": {
+    "LambdaRestApiANYApiPermissionTestimovovoucherapiPRODLambdaRestApiF262BEB8ANY54A1D5AF": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -1159,7 +1159,7 @@ exports[`The Imovo rewards stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "LambdaRestApiANYApiPermissionimovorewardsPRODLambdaRestApi3BC4E53AANY6A21E3FB": {
+    "LambdaRestApiANYApiPermissionimovovoucherapiPRODLambdaRestApiF262BEB8ANY48BF82B4": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -1263,7 +1263,7 @@ exports[`The Imovo rewards stack matches the snapshot 2`] = `
     "LambdaRestApiApiKeyB5CCCA11": {
       "Properties": {
         "Enabled": true,
-        "Name": "imovo-rewards-key-PROD",
+        "Name": "imovo-voucher-api-key-PROD",
         "StageKeys": [
           {
             "RestApiId": {
@@ -1277,7 +1277,7 @@ exports[`The Imovo rewards stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "imovo-rewards",
+            "Value": "imovo-voucher-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -1331,7 +1331,7 @@ exports[`The Imovo rewards stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "imovo-rewards",
+            "Value": "imovo-voucher-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -1354,7 +1354,7 @@ exports[`The Imovo rewards stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "LambdaRestApiDeployment95319089dcf3f232925fe78edba62e3d0859429c": {
+    "LambdaRestApiDeployment95319089f6203bb2753e56d62eb0073bec64d774": {
       "DependsOn": [
         "LambdaRestApiproxyANY486C4D1F",
         "LambdaRestApiproxy22103CFD",
@@ -1374,7 +1374,7 @@ exports[`The Imovo rewards stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "LambdaRestApiDeployment95319089dcf3f232925fe78edba62e3d0859429c",
+          "Ref": "LambdaRestApiDeployment95319089f6203bb2753e56d62eb0073bec64d774",
         },
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",
@@ -1383,7 +1383,7 @@ exports[`The Imovo rewards stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "imovo-rewards",
+            "Value": "imovo-voucher-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -1418,11 +1418,11 @@ exports[`The Imovo rewards stack matches the snapshot 2`] = `
             "Throttle": {},
           },
         ],
-        "Description": "REST endpoints for imovo-rewards",
+        "Description": "REST endpoints for imovo-voucher-api",
         "Tags": [
           {
             "Key": "App",
-            "Value": "imovo-rewards",
+            "Value": "imovo-voucher-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -1441,11 +1441,11 @@ exports[`The Imovo rewards stack matches the snapshot 2`] = `
             "Value": "PROD",
           },
         ],
-        "UsagePlanName": "imovo-rewards-PROD",
+        "UsagePlanName": "imovo-voucher-api-PROD",
       },
       "Type": "AWS::ApiGateway::UsagePlan",
     },
-    "LambdaRestApiUsagePlanUsagePlanKeyResourceimovorewardsPRODLambdaRestApiApiKeyAE03A5FB0AB9BC25": {
+    "LambdaRestApiUsagePlanUsagePlanKeyResourceimovovoucherapiPRODLambdaRestApiApiKeyA10ADBF1FD43105B": {
       "Properties": {
         "KeyId": {
           "Ref": "LambdaRestApiApiKeyB5CCCA11",
@@ -1513,7 +1513,7 @@ exports[`The Imovo rewards stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::Method",
     },
-    "LambdaRestApiproxyANYApiPermissionTestimovorewardsPRODLambdaRestApi3BC4E53AANYproxyFCD1107C": {
+    "LambdaRestApiproxyANYApiPermissionTestimovovoucherapiPRODLambdaRestApiF262BEB8ANYproxyDA137BB1": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -1550,7 +1550,7 @@ exports[`The Imovo rewards stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "LambdaRestApiproxyANYApiPermissionimovorewardsPRODLambdaRestApi3BC4E53AANYproxy85794814": {
+    "LambdaRestApiproxyANYApiPermissionimovovoucherapiPRODLambdaRestApiF262BEB8ANYproxy005DC145": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -1622,7 +1622,7 @@ exports[`The Imovo rewards stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "imovo-rewards",
+            "Value": "imovo-voucher-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -1683,7 +1683,7 @@ exports[`The Imovo rewards stack matches the snapshot 2`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/support/PROD/imovo-rewards/imovo-rewards.zip",
+                      "/support/PROD/imovo-voucher-api/imovo-voucher-api.zip",
                     ],
                   ],
                 },
@@ -1704,7 +1704,7 @@ exports[`The Imovo rewards stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/support/imovo-rewards",
+                    ":parameter/PROD/support/imovo-voucher-api",
                   ],
                 ],
               },
@@ -1727,7 +1727,7 @@ exports[`The Imovo rewards stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/support/imovo-rewards/*",
+                    ":parameter/PROD/support/imovo-voucher-api/*",
                   ],
                 ],
               },

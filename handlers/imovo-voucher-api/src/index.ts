@@ -6,7 +6,7 @@ export const handler = (): APIGatewayProxyResult => {
 	return {
 		statusCode: 200,
 		body: JSON.stringify({
-			message: 'Hello World from imovo-rewards!',
+			message: 'Hello World from imovo-voucher-api!',
 		}),
 	};
 };

@@ -13,7 +13,7 @@ import {
 import { DiscountApi } from '../lib/discount-api';
 import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
-import { ImovoRewards } from '../lib/imovo-rewards';
+import { ImovoVoucherApi } from '../lib/imovo-voucher-api';
 import { MetricPushApi } from '../lib/metric-push-api';
 import { MobilePurchasesToSupporterProductData } from '../lib/mobile-purchases-to-supporter-product-data';
 import { MParticleApi } from '../lib/mparticle-api';
@@ -138,7 +138,7 @@ new PromotionsLambdas(app, 'PROD', {
 });
 
 const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
-	ImovoRewards,
+	ImovoVoucherApi,
 	DiscountApi,
 	ProductSwitchApi,
 	UpdateSupporterPlusAmount,

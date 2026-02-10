@@ -94,8 +94,8 @@ const generateProductCatalog: HandlerDefinition = {
 	},
 };
 
-const imovoRewards: HandlerDefinition = {
-	name: 'imovo-rewards',
+const imovoVoucherApi: HandlerDefinition = {
+	name: 'imovo-voucher-api',
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 	},
@@ -559,7 +559,7 @@ export const build: BuildDefinition = {
 		discountApi,
 		discountExpiryNotifier,
 		generateProductCatalog,
-		imovoRewards,
+		imovoVoucherApi,
 		metricPushApi,
 		mobilePurchasesToSupporterProductData,
 		mparticleApi,
