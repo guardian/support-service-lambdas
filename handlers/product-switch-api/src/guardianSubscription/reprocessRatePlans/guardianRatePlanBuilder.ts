@@ -159,7 +159,7 @@ export class GuardianRatePlanBuilder<
 	) {
 		this.productCatalogHelper = new ProductCatalogHelper(this.productCatalog);
 		const { productWithoutRatePlans, productRatePlanWithoutCharges } =
-			this.getProductAndRatePlanData(productKey, productRatePlanKey);
+			this.getProductAndRatePlanData();
 		this.productWithoutRatePlans = productWithoutRatePlans;
 		this.productRatePlanWithoutCharges = productRatePlanWithoutCharges;
 	}
@@ -168,13 +168,14 @@ export class GuardianRatePlanBuilder<
 	 * extracts the product and rateplan from the product catalog so we can embed
 	 * them into the subscription rate plan
 	 */
-	private getProductAndRatePlanData(productKey: P, productRatePlanKey: PRP) {
-		const product: Product<P> = this.productCatalog[productKey];
+	private getProductAndRatePlanData() {
+		const product: Product<P> = this.productCatalog[this.productKey];
 		const { ratePlans: _unused1, ...productWithoutRatePlans } = product;
-		const productRatePlan = this.productCatalogHelper.getProductRatePlan(
-			productKey,
-			productRatePlanKey,
-		);
+		const productRatePlan: ProductRatePlan<P, PRP> =
+			this.productCatalogHelper.getProductRatePlan(
+				this.productKey,
+				this.productRatePlanKey,
+			);
 
 		const { charges: _unused2, ...productRatePlanWithoutCharges } =
 			productRatePlan;

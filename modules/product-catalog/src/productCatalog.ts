@@ -1,4 +1,5 @@
 import { isInList } from '@modules/arrayFunctions';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import { objectEntries, objectKeysNonEmpty } from '@modules/objectFunctions';
 import { z } from 'zod';
 import type { termTypeSchema } from '@modules/product-catalog/productCatalogSchema';
@@ -106,8 +107,9 @@ export function getCustomerFacingName(productKey: ProductKey): string {
 export type Product<P extends ProductKey> = ProductCatalog[P];
 
 // -------- Product Rate Plan --------
-export type ProductRatePlanKey<P extends ProductKey> =
-	keyof ProductCatalog[P]['ratePlans'] & string;
+export type ProductRatePlanKey<P extends ProductKey> = P extends unknown
+	? keyof ProductCatalog[P]['ratePlans'] & string
+	: never;
 export type ProductRatePlan<
 	P extends ProductKey,
 	PRP extends ProductRatePlanKey<P>,
@@ -131,14 +133,17 @@ export type ProductRatePlanChargeKey<
 
 export type TermType = z.infer<typeof termTypeSchema>;
 
-export type GuardianCatalogKeys<P extends ProductKey = ProductKey> = {
-	[K in P]: {
-		[RPK in ProductRatePlanKey<K>]: {
-			productKey: K;
-			productRatePlanKey: RPK;
-		};
-	}[ProductRatePlanKey<K>];
-}[P];
+export type GuardianCatalogKeys<
+	P extends ProductKey = ProductKey,
+	PRP extends ProductRatePlanKey<P> = ProductRatePlanKey<P>,
+> = P extends ProductKey
+	? {
+			[RPK in PRP & ProductRatePlanKey<P>]: {
+				productKey: P;
+				productRatePlanKey: RPK;
+			};
+		}[PRP & ProductRatePlanKey<P>]
+	: never;
 
 export class ProductCatalogHelper {
 	constructor(private catalogData: ProductCatalog) {}
@@ -185,24 +190,38 @@ export class ProductCatalogHelper {
 
 	/**
 	 * validates the rate plan key against the product and returns the combined object
+	 * or undefined
 	 */
-	validateOrThrow<P extends ProductKey>(
+	validate<P extends ProductKey>(
 		targetGuardianProductName: P,
 		productRatePlanKey: string,
-	): GuardianCatalogKeys<P> {
+	): GuardianCatalogKeys<P> | undefined {
 		const ratePlans = this.catalogData[targetGuardianProductName].ratePlans;
 		if (!this.hasRatePlan(productRatePlanKey, ratePlans)) {
-			throw new Error(
-				`Unsupported rate plan key: ${String(
-					productRatePlanKey,
-				)} for product ${targetGuardianProductName}`,
-			);
+			return undefined;
 		}
 
 		return {
 			productKey: targetGuardianProductName,
 			productRatePlanKey: productRatePlanKey as ProductRatePlanKey<P>,
 		} as GuardianCatalogKeys<P>;
+	}
+
+	/**
+	 * validates the rate plan key against the product and returns the combined object or
+	 * throws an error
+	 */
+	validateOrThrow<P extends ProductKey>(
+		targetGuardianProductName: P,
+		productRatePlanKey: string,
+	): GuardianCatalogKeys<P> {
+		return getIfDefined(
+			this.validate(targetGuardianProductName, productRatePlanKey),
+
+			`Unsupported rate plan key: ${String(
+				productRatePlanKey,
+			)} for product ${targetGuardianProductName}`,
+		);
 	}
 
 	private hasRatePlan<P extends ProductKey>(
