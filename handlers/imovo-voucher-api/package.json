@@ -12,11 +12,19 @@
     "cdk:test": "pnpm --filter cdk test imovo-voucher-api",
     "cdk:test-update": "pnpm --filter cdk test-update imovo-voucher-api",
     "update-lambda": "../../update-lambda.sh \"imovo-voucher-api\"",
-    "update-stack": "../../update-stack.sh \"imovo-voucher-api\""
+    "update-stack": "../../update-stack.sh \"imovo-voucher-api\"",
+    "run-local": "tsx src/runLocal.ts"
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
+  "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.940.0",
+    "@aws-sdk/client-dynamodb": "^3.940.0",
+    "@aws-sdk/util-dynamodb": "^3.940.0",
+    "zod": "catalog:"
+  },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.147"
+    "@types/aws-lambda": "^8.10.147",
+    "tsx": "^4.21.0"
   }
 }
