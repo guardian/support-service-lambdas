@@ -7,6 +7,7 @@ import { handler } from '../src';
 export const handlerTestEvent: SQSEvent = {
 	Records: [
 		{
+			messageId: 'testMessageId',
 			body: JSON.stringify({
 				Message: JSON.stringify({
 					AlarmArn:
