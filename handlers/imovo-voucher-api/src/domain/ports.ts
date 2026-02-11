@@ -7,3 +7,8 @@ export interface VoucherProvider {
 export interface VoucherRepository {
 	save(record: VoucherRecord): Promise<void>;
 }
+
+export interface Dependencies {
+	voucherProvider: VoucherProvider;
+	voucherRepository: VoucherRepository;
+}
