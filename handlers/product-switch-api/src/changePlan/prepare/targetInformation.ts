@@ -1,11 +1,11 @@
 import type { DataExtensionName } from '@modules/email/email';
+import type { GuardianRatePlan } from '@modules/guardian-subscription/reprocessRatePlans/guardianRatePlanBuilder';
 import { type IsoCurrency } from '@modules/internationalisation/currency';
 import type {
 	GuardianCatalogKeys,
 	ProductCatalogHelper,
 	ProductKey,
 } from '@modules/product-catalog/productCatalog';
-import type { GuardianRatePlan } from '../../guardianSubscription/reprocessRatePlans/guardianRatePlanBuilder';
 import type { ProductSwitchTargetBody, SwitchMode } from '../schemas';
 import type { Discount } from '../switchDefinition/discounts';
 import type {

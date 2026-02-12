@@ -1,4 +1,8 @@
 import { DataExtensionNames } from '@modules/email/email';
+import type { GuardianSubscription } from '@modules/guardian-subscription/getSinglePlanFlattenedSubscriptionOrThrow';
+import { getSinglePlanFlattenedSubscriptionOrThrow } from '@modules/guardian-subscription/getSinglePlanFlattenedSubscriptionOrThrow';
+import { GuardianSubscriptionParser } from '@modules/guardian-subscription/guardianSubscriptionParser';
+import { SubscriptionFilter } from '@modules/guardian-subscription/subscriptionFilter';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import {
@@ -11,10 +15,6 @@ import zuoraCatalogFixture from '../../../../../modules/zuora-catalog/test/fixtu
 import type { TargetInformation } from '../../../src/changePlan/prepare/targetInformation';
 import { getTargetInformation } from '../../../src/changePlan/prepare/targetInformation';
 import { annualContribHalfPriceSupporterPlusForOneYear } from '../../../src/changePlan/switchDefinition/discounts';
-import type { GuardianSubscription } from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
-import { getSinglePlanFlattenedSubscriptionOrThrow } from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
-import { GuardianSubscriptionParser } from '../../../src/guardianSubscription/guardianSubscriptionParser';
-import { SubscriptionFilter } from '../../../src/guardianSubscription/subscriptionFilter';
 import subscriptionJson from '../../fixtures/subscription.json';
 
 const referenceDate = dayjs('2024-05-10');

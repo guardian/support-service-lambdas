@@ -1,5 +1,5 @@
 // TODO use central eligibility checker pattern
-import type { ZuoraRatePlan } from '../../guardianSubscription/reprocessRatePlans/zuoraRatePlanBuilder';
+import type { ZuoraRatePlan } from '@modules/guardian-subscription/reprocessRatePlans/zuoraRatePlanBuilder';
 
 export function isEligibleForSwitch(
 	subscriptionStatus: string,

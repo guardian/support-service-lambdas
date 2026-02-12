@@ -4,6 +4,8 @@ import {
 	getMaybeSingleOrThrow,
 	sumNumbers,
 } from '@modules/arrayFunctions';
+import type { GuardianSubscription } from '@modules/guardian-subscription/getSinglePlanFlattenedSubscriptionOrThrow';
+import type { GuardianRatePlan } from '@modules/guardian-subscription/reprocessRatePlans/guardianRatePlanBuilder';
 import {
 	getIfDefined,
 	getNonEmptyOrThrow,
@@ -13,8 +15,6 @@ import { objectValues } from '@modules/objectFunctions';
 import type { RatePlanCharge } from '@modules/zuora/types';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import type { GuardianSubscription } from '../../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
-import type { GuardianRatePlan } from '../../guardianSubscription/reprocessRatePlans/guardianRatePlanBuilder';
 import type { ValidSwitchableRatePlanKey } from './switchCatalogHelper';
 import { asSwitchableRatePlanKey } from './switchCatalogHelper';
 

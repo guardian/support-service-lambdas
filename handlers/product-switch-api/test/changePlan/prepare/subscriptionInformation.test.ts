@@ -1,3 +1,6 @@
+import { getSinglePlanFlattenedSubscriptionOrThrow } from '@modules/guardian-subscription/getSinglePlanFlattenedSubscriptionOrThrow';
+import { GuardianSubscriptionParser } from '@modules/guardian-subscription/guardianSubscriptionParser';
+import { SubscriptionFilter } from '@modules/guardian-subscription/subscriptionFilter';
 import { mapValue } from '@modules/objectFunctions';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import {
@@ -12,9 +15,6 @@ import zuoraCatalogFixtureProd from '../../../../../modules/zuora-catalog/test/f
 import type { SubscriptionInformation } from '../../../src/changePlan/prepare/subscriptionInformation';
 import { getSubscriptionInformation } from '../../../src/changePlan/prepare/subscriptionInformation';
 import type { ValidSwitchableRatePlanKey } from '../../../src/changePlan/prepare/switchCatalogHelper';
-import { getSinglePlanFlattenedSubscriptionOrThrow } from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
-import { GuardianSubscriptionParser } from '../../../src/guardianSubscription/guardianSubscriptionParser';
-import { SubscriptionFilter } from '../../../src/guardianSubscription/subscriptionFilter';
 import alreadySwitchedJson from '../../fixtures/already-switched-subscription.json';
 import pendingAmountChange from '../../fixtures/pendingAmountChange.json';
 import subscriptionJson from '../../fixtures/subscription.json';

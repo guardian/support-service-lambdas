@@ -1,7 +1,7 @@
+import type { GuardianSubscription } from '@modules/guardian-subscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import { userHasGuardianEmail } from '@modules/product-benefits/userBenefits';
 import type { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import type { ZuoraAccount } from '@modules/zuora/types';
-import type { GuardianSubscription } from '../../guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import type { ProductSwitchTargetBody } from '../schemas';
 import type { AccountInformation } from './accountInformation';
 import { getAccountInformation } from './accountInformation';
