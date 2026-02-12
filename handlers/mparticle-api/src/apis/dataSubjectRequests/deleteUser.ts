@@ -9,12 +9,6 @@ import { deleteMParticleUser } from '../../services/mparticleDeletion';
 import type { DeletionResult } from '../../types/deletionMessage';
 
 /**
- * Sleep for a specified number of milliseconds
- */
-const sleep = (ms: number): Promise<void> =>
-	new Promise((resolve) => setTimeout(resolve, ms));
-
-/**
  * Process a user deletion request
  *
  * This function implements idempotent deletion logic:
@@ -23,6 +17,9 @@ const sleep = (ms: number): Promise<void> =>
  * 3. If both succeed: message removed from queue
  * 4. If either fails: throws to trigger SQS retry
  * 5. After maxReceiveCount retries, message moves to DLQ for investigation
+ *
+ * Note: The entire Lambda invocation is delayed by 10 seconds via SQS deliveryDelay
+ * to allow the Identity system to unsubscribe users from newsletters first.
  *
  * @param identityId - The identity ID (customerId) to delete
  * @param brazeId - Optional Braze ID for the user
@@ -48,13 +45,6 @@ export async function processUserDeletion(
 
 	let brazeResult: DeletionResult | null = null;
 	if (brazeId && brazeId.trim() !== '') {
-		// Wait 10 seconds before deleting from Braze to allow Identity system
-		// to unsubscribe user from newsletters first
-		logger.log(
-			`Waiting 10 seconds before Braze deletion for user ${identityId} to allow newsletter unsubscription`,
-		);
-		await sleep(10000);
-
 		brazeResult = await deleteBrazeUser(brazeClient, brazeId);
 	} else {
 		logger.log(

@@ -96,6 +96,13 @@ export class MParticleApi extends SrStack {
 			},
 		);
 
+		// Set delivery delay on the queue to delay both mParticle and Braze deletions by 10s
+		// This allows the Identity system to unsubscribe users from newsletters first
+		const cfnQueue = mmaUserDeletionLambda.inputQueue.node.defaultChild;
+		if (cfnQueue && 'delaySeconds' in cfnQueue) {
+			cfnQueue.delaySeconds = 10;
+		}
+
 		mmaUserDeletionLambda.inputQueue.addToResourcePolicy(
 			new PolicyStatement({
 				effect: Effect.ALLOW,

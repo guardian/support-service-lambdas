@@ -546,6 +546,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
     "Queue4A7E3555": {
       "DeletionPolicy": "Delete",
       "Properties": {
+        "DelaySeconds": 10,
         "QueueName": "mparticle-api-mma-user-deletion-queue-CODE",
         "RedrivePolicy": {
           "deadLetterTargetArn": {
@@ -2316,6 +2317,7 @@ DLQ: https://",
     "Queue4A7E3555": {
       "DeletionPolicy": "Delete",
       "Properties": {
+        "DelaySeconds": 10,
         "QueueName": "mparticle-api-mma-user-deletion-queue-PROD",
         "RedrivePolicy": {
           "deadLetterTargetArn": {
