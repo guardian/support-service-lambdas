@@ -31,7 +31,7 @@ export async function handleSqsEvent(
 			`Voucher received: code=${result.voucherCode}, expires=${result.expiryDate}`,
 		);
 
-		// TODO: Send confirmation email via Braze once DataExtensionName is configured in Braze
+		await deps.emailSender.sendVoucherConfirmation(result);
 
 		console.log(
 			`Successfully processed voucher request for identityId=${result.identityId}`,

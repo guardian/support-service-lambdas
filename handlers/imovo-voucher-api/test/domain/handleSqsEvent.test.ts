@@ -26,10 +26,13 @@ function buildSqsEvent(...bodies: unknown[]): SQSEvent {
 
 function buildFakeDeps(): Dependencies & {
 	savedRecords: VoucherRecord[];
+	emailedRecords: VoucherRecord[];
 } {
 	const savedRecords: VoucherRecord[] = [];
+	const emailedRecords: VoucherRecord[] = [];
 	return {
 		savedRecords,
+		emailedRecords,
 		voucherProvider: {
 			requestVoucher: () =>
 				Promise.resolve({
@@ -40,6 +43,12 @@ function buildFakeDeps(): Dependencies & {
 		voucherRepository: {
 			save: (record) => {
 				savedRecords.push(record);
+				return Promise.resolve();
+			},
+		},
+		emailSender: {
+			sendVoucherConfirmation: (record) => {
+				emailedRecords.push(record);
 				return Promise.resolve();
 			},
 		},
@@ -74,6 +83,21 @@ describe('handleSqsEvent', () => {
 		expect(deps.savedRecords).toHaveLength(2);
 		expect(deps.savedRecords[0]?.identityId).toBe('id-a');
 		expect(deps.savedRecords[1]?.identityId).toBe('id-b');
+	});
+
+	it('sends confirmation email after successful processing', async () => {
+		const event = buildSqsEvent({
+			email: 'user@example.com',
+			identityId: 'id-1',
+			voucherType: 'REWARD',
+		});
+		const deps = buildFakeDeps();
+
+		await handleSqsEvent(event, deps);
+
+		expect(deps.emailedRecords).toHaveLength(1);
+		expect(deps.emailedRecords[0]?.voucherCode).toBe('FAKE-CODE');
+		expect(deps.emailedRecords[0]?.identityId).toBe('id-1');
 	});
 
 	it('throws on invalid SQS message body', async () => {
