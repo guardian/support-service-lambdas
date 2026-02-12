@@ -1,7 +1,7 @@
 import { getSinglePlanFlattenedSubscriptionOrThrow } from '@modules/guardian-subscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import { GuardianSubscriptionParser } from '@modules/guardian-subscription/guardianSubscriptionParser';
 import { SubscriptionFilter } from '@modules/guardian-subscription/subscriptionFilter';
-import { mapValue } from '@modules/objectFunctions';
+import { mapOption } from '@modules/nullAndUndefined';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import {
 	type ZuoraSubscription,
@@ -61,11 +61,13 @@ describe('getSubscriptionInformation', () => {
 
 		const subscriptionInformation = getSubscriptionInformation(subscription);
 
-		expect(
-			mapValue(subscriptionInformation, 'chargedThroughDate', (d) =>
-				d === undefined ? undefined : zuoraDateFormat(d),
+		expect({
+			...subscriptionInformation,
+			chargedThroughDate: mapOption(
+				subscriptionInformation.chargedThroughDate,
+				zuoraDateFormat,
 			),
-		).toStrictEqual({
+		}).toStrictEqual({
 			accountNumber: subscriptionFixture.accountNumber,
 			subscriptionNumber: subscriptionFixture.subscriptionNumber,
 			previousProductName: subscription.ratePlan.productName,
@@ -94,11 +96,13 @@ describe('getSubscriptionInformation', () => {
 
 		const subscriptionInformation = getSubscriptionInformation(subscription);
 
-		expect(
-			mapValue(subscriptionInformation, 'chargedThroughDate', (d) =>
-				d === undefined ? undefined : zuoraDateFormat(d),
+		expect({
+			...subscriptionInformation,
+			chargedThroughDate: mapOption(
+				subscriptionInformation.chargedThroughDate,
+				zuoraDateFormat,
 			),
-		).toStrictEqual({
+		}).toStrictEqual({
 			accountNumber: subscriptionFixture.accountNumber,
 			subscriptionNumber: subscriptionFixture.subscriptionNumber,
 			previousProductName: subscription.ratePlan.productName,
@@ -130,11 +134,13 @@ describe('getSubscriptionInformation', () => {
 
 		const subscriptionInformation = getSubscriptionInformation(subscription);
 
-		expect(
-			mapValue(subscriptionInformation, 'chargedThroughDate', (d) =>
-				d === undefined ? undefined : zuoraDateFormat(d),
+		expect({
+			...subscriptionInformation,
+			chargedThroughDate: mapOption(
+				subscriptionInformation.chargedThroughDate,
+				zuoraDateFormat,
 			),
-		).toStrictEqual({
+		}).toStrictEqual({
 			accountNumber: subscriptionFixture.accountNumber,
 			subscriptionNumber: subscriptionFixture.subscriptionNumber,
 			previousProductName: subscription.ratePlan.productName,

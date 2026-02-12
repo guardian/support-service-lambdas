@@ -62,26 +62,9 @@ export function objectEntries<T extends object>(
 export function objectInnerJoin<K extends string, VA, VB>(
 	l: Record<K, VA>,
 	r: Record<K, VB>,
-): Array<[VA, VB]> {
+): Array<[VA, VB, K]> {
 	const lKeys = objectKeys(l);
-	return lKeys.flatMap((key) => (key in r ? [[l[key], r[key]] as const] : []));
-}
-
-/**
- * This does a mapValue on a specific named property, useful if we want to replace
- * just e.g. the ratePlans and keep everything else the same.
- *
- * @param obj
- * @param propertyName
- * @param mapFn
- */
-export function mapValue<T, K extends keyof T, V>(
-	obj: T,
-	propertyName: K,
-	mapFn: (value: T[K]) => V,
-): Omit<T, K> & Record<K, V> {
-	return {
-		...obj,
-		[propertyName]: mapFn(obj[propertyName]),
-	};
+	return lKeys.flatMap((key) =>
+		key in r ? [[l[key], r[key], key] as const] : [],
+	);
 }
