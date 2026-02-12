@@ -43,6 +43,7 @@ export const devDeps = separateDepRecords({
 	'@types/stripe': '^8.0.417',
 	'@types/aws-lambda': '^8.10.147',
 	'@types/jest': '^29.5.14',
+	'@smithy/types': '^4.9.8',
 	// dev - for running locally
 	tsx: '^4.21.0',
 	'tsconfig-paths': 'catalog:',

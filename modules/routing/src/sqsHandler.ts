@@ -21,18 +21,25 @@ export function handleSQSMessages<Services>(
 ) {
 	const recordHandlerWithLogging = logger.wrapFn(
 		recordHandler,
+		'FUNCTION',
+		({ args, paramNames }) => ({
+			args: [args[0]],
+			paramNames: [paramNames[0]],
+		}),
+		(nothing) => nothing,
+		(args) => args[0],
+		() => undefined,
 		undefined,
 		undefined,
 		0,
 		logger.getCallerInfo(),
+		(args) => args[0].messageId,
 	);
 
 	return async (event: SQSEvent, services: Services) => {
 		try {
 			for (const record of event.Records) {
-				logger.mutableAddContext(record.messageId);
 				await recordHandlerWithLogging(record, services);
-				logger.resetContext();
 			}
 		} catch (error) {
 			logger.error('Caught exception with message: ', error);

@@ -132,11 +132,17 @@ export function Router(
 		}
 	};
 
-	return logger.wrapRouter(
+	return logger.wrapFn(
 		httpRouter,
+		'HANDLER',
+		({ args }) => ({ args: [args[0]], paramNames: ['event'] }),
+		(result) => result,
+		(args) => ({ args: [args[0]], paramNames: ['event'] }),
+		(result) => result,
 		undefined,
 		undefined,
 		0,
 		logger.getCallerInfo(),
+		true,
 	);
 }

@@ -13,9 +13,11 @@
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
     "zod": "catalog:",
-    "dayjs": "^1.11.13"
+    "dayjs": "^1.11.13",
+    "@aws-sdk/client-s3": "^3.940.0"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.147"
+    "@types/aws-lambda": "^8.10.147",
+    "@smithy/types": "^4.9.8"
   }
 }

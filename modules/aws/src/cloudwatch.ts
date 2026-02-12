@@ -7,6 +7,7 @@ import {
 	CloudWatchClient,
 	PutMetricDataCommand,
 } from '@aws-sdk/client-cloudwatch';
+import { logger } from '@modules/routing/logger';
 
 export type Stage = 'CODE' | 'DEV' | 'PROD';
 export const metricNamespace = 'support-service-lambdas';
@@ -17,9 +18,11 @@ export async function putMetric(
 	dimensionsOverride?: Dimension[],
 	namespaceOverride?: string,
 ): Promise<void> {
-	const cloudwatch = new CloudWatchClient({
-		region: process.env.AWS_REGION ?? 'eu-west-1',
-	});
+	const cloudwatch = logger.wrapAwsClient(
+		new CloudWatchClient({
+			region: process.env.AWS_REGION ?? 'eu-west-1',
+		}),
+	);
 
 	const dimensions: Dimension[] = dimensionsOverride ?? [
 		{

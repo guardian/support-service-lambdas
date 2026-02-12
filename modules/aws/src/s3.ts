@@ -8,9 +8,10 @@ import {
 	S3Client,
 } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
+import { logger } from '@modules/routing/logger';
 import { awsConfig } from './config';
 
-const defaultClient = new S3Client(awsConfig);
+const defaultClient = logger.wrapAwsClient(new S3Client(awsConfig));
 
 export const uploadFileToS3 = async ({
 	bucketName,
