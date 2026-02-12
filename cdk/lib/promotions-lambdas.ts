@@ -59,6 +59,7 @@ export class PromotionsLambdas extends SrStack {
 				nameSuffix: 'salesforce-export',
 				lambdaOverrides: {
 					handler: 'handlers/salesforceExport.handler',
+					timeout: Duration.minutes(2),
 				},
 				rules: [
 					{
