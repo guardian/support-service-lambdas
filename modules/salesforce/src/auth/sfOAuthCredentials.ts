@@ -1,10 +1,9 @@
 import { getSecretValue } from '@modules/secrets-manager/getSecret';
 import type { SfConnectedAppAuth } from '@modules/salesforce/auth/auth';
-import type {
-	SecretNames} from '@modules/salesforce/secrets';
+import type { SecretNames } from '@modules/salesforce/secrets';
 import {
 	type ApiUserSecret,
-	type ConnectedAppSecret
+	type ConnectedAppSecret,
 } from '@modules/salesforce/secrets';
 
 export async function getSfOauthCredentials(
