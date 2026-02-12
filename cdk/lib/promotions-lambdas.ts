@@ -6,6 +6,7 @@ import {
 	TreatMissingData,
 } from 'aws-cdk-lib/aws-cloudwatch';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import { Schedule } from 'aws-cdk-lib/aws-events';
 import { StartingPosition } from 'aws-cdk-lib/aws-lambda';
 import {
 	DynamoEventSource,
@@ -14,6 +15,7 @@ import {
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { SrLambda } from './cdk/SrLambda';
 import { SrLambdaAlarm } from './cdk/SrLambdaAlarm';
+import { SrScheduledLambda } from './cdk/SrScheduledLambda';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
 
@@ -49,6 +51,31 @@ export class PromotionsLambdas extends SrStack {
 				handler: 'handlers/promoCodeView.handler',
 			},
 		});
+
+		const salesforceExportLambda = new SrScheduledLambda(
+			this,
+			'SalesforceExport',
+			{
+				nameSuffix: 'salesforce-export',
+				lambdaOverrides: {
+					handler: 'handlers/salesforceExport.handler',
+				},
+				rules: [
+					{
+						schedule: Schedule.cron({
+							weekDay: 'MON-SUN',
+							hour: '8',
+							minute: '0',
+						}),
+						description: 'promo codes salesforce export trigger',
+					},
+				],
+				monitoring: {
+					snsTopicName: `alarms-handler-topic-${this.stage}`,
+					errorImpact: 'New promo codes are not exported to Salesforce',
+				},
+			},
+		);
 
 		const oldPromoCampaignTable = dynamodb.Table.fromTableAttributes(
 			this,
@@ -153,6 +180,8 @@ export class PromotionsLambdas extends SrStack {
 		newPromoTable.grantStreamRead(promoCodeViewLambda);
 		newPromoCampaignTable.grantReadData(promoCodeViewLambda);
 		promoCodeViewTable.grantWriteData(promoCodeViewLambda);
+
+		promoCodeViewTable.grantReadData(salesforceExportLambda);
 
 		// Alarms for lambda failures
 		new SrLambdaAlarm(this, 'PromoCampaignSyncLambdaErrorAlarm', {

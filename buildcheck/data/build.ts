@@ -208,6 +208,7 @@ const promotionsLambdas: HandlerDefinition = {
 		'promotions-lambdas-promo-campaign-sync-',
 		'promotions-lambdas-promo-sync-',
 		'promotions-lambdas-promo-code-view-',
+		'promotions-lambdas-salesforce-export-',
 	],
 	entryPoints: ['src/handlers/*.ts'],
 	dependencies: {
