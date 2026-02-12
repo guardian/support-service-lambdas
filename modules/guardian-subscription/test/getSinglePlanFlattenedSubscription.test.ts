@@ -1,17 +1,21 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
+import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import { logger } from '@modules/routing/logger';
 import { zuoraSubscriptionSchema } from '@modules/zuora/types';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
-import zuoraCatalogFixture from '../../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
-import type { GuardianSubscription } from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
-import { getSinglePlanFlattenedSubscriptionOrThrow } from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
-import type { GuardianSubscriptionMultiPlan } from '../../../src/guardianSubscription/guardianSubscriptionParser';
-import { GuardianSubscriptionParser } from '../../../src/guardianSubscription/guardianSubscriptionParser';
-import { SubscriptionFilter } from '../../../src/guardianSubscription/subscriptionFilter';
-import alreadySwitchedJson from '../../fixtures/already-switched-subscription.json';
-import subscriptionJson from '../../fixtures/subscription.json';
-import { productCatalog } from '../../productCatalogFixture';
+import alreadySwitchedJson from '../../../handlers/product-switch-api/test/fixtures/already-switched-subscription.json';
+import subscriptionJson from '../../../handlers/product-switch-api/test/fixtures/subscription.json';
+import zuoraCatalogFixture from '../../zuora-catalog/test/fixtures/catalog-prod.json';
+import { getSinglePlanFlattenedSubscriptionOrThrow } from '../src/getSinglePlanFlattenedSubscriptionOrThrow';
+import type { GuardianSubscription } from '../src/getSinglePlanFlattenedSubscriptionOrThrow';
+import { GuardianSubscriptionParser } from '../src/guardianSubscriptionParser';
+import type { GuardianSubscriptionMultiPlan } from '../src/guardianSubscriptionParser';
+import { SubscriptionFilter } from '../src/subscriptionFilter';
+
+const productCatalog = generateProductCatalog(
+	zuoraCatalogSchema.parse(zuoraCatalogFixture),
+);
 
 const referenceDate = dayjs('2024-05-10');
 const subscriptionFixture = zuoraSubscriptionSchema.parse(subscriptionJson);

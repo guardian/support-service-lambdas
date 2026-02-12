@@ -314,12 +314,6 @@ importers:
         specifier: 'catalog:'
         version: 3.25.76
     devDependencies:
-      '@aws-sdk/client-cloudwatch-logs':
-        specifier: ^3.940.0
-        version: 3.940.0
-      '@aws-sdk/credential-providers':
-        specifier: ^3.940.0
-        version: 3.940.0
       '@types/aws-lambda':
         specifier: ^8.10.147
         version: 8.10.158
@@ -517,6 +511,19 @@ importers:
   modules/email:
     dependencies:
       '@aws-sdk/client-sqs':
+        specifier: ^3.940.0
+        version: 3.940.0
+
+  modules/guardian-subscription:
+    dependencies:
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.19
+    devDependencies:
+      '@aws-sdk/client-cloudwatch-logs':
+        specifier: ^3.940.0
+        version: 3.940.0
+      '@aws-sdk/credential-providers':
         specifier: ^3.940.0
         version: 3.940.0
 
