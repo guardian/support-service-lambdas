@@ -94,6 +94,13 @@ const generateProductCatalog: HandlerDefinition = {
 	},
 };
 
+const imovoVoucherApi: HandlerDefinition = {
+	name: 'imovo-voucher-api',
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
+};
+
 const metricPushApi: HandlerDefinition = {
 	name: 'metric-push-api',
 	jestClearMocks: true,
@@ -553,6 +560,7 @@ export const build: BuildDefinition = {
 		discountApi,
 		discountExpiryNotifier,
 		generateProductCatalog,
+		imovoVoucherApi,
 		metricPushApi,
 		mobilePurchasesToSupporterProductData,
 		mparticleApi,
