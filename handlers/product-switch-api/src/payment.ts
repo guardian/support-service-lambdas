@@ -19,7 +19,7 @@ export const adjustNonCollectedInvoice = async (
 	const supporterPlusInvoiceItem = getIfDefined(
 		invoiceItems.invoiceItems.find(
 			(invoiceItem) =>
-				subscriptionChargeId === invoiceItem.productRatePlanChargeId,
+				invoiceItem.productRatePlanChargeId === subscriptionChargeId,
 		),
 		`No supporter plus invoice item (id: ${subscriptionChargeId} ) found in the invoice ${invoiceId}`,
 	);
