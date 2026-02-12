@@ -199,8 +199,6 @@ const productSwitchApi: HandlerDefinition = {
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
-		...dep['@aws-sdk/client-cloudwatch-logs'],
-		...dep['@aws-sdk/credential-providers'],
 	},
 };
 
@@ -377,6 +375,15 @@ const moduleEmail: ModuleDefinition = {
 	name: 'email',
 	dependencies: {
 		...dep['@aws-sdk/client-sqs'],
+	},
+};
+
+const moduleGuardianSubscription: ModuleDefinition = {
+	name: 'guardian-subscription',
+	dependencies: { ...dep['dayjs'] },
+	devDependencies: {
+		...dep['@aws-sdk/client-cloudwatch-logs'],
+		...dep['@aws-sdk/credential-providers'],
 	},
 };
 
@@ -576,6 +583,7 @@ export const build: BuildDefinition = {
 		moduleAws,
 		moduleBigquery,
 		moduleEmail,
+		moduleGuardianSubscription,
 		moduleIdentity,
 		moduleInternationalisation,
 		moduleProductBenefits,

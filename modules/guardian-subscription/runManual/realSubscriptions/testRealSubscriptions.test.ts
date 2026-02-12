@@ -3,17 +3,21 @@
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import { logger } from '@modules/routing/logger';
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import { zuoraSubscriptionSchema } from '@modules/zuora/types';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
-import zuoraCatalogFixture from '../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
-import { getSinglePlanFlattenedSubscriptionOrThrow } from '../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
-import { GuardianSubscriptionParser } from '../../src/guardianSubscription/guardianSubscriptionParser';
-import { SubscriptionFilter } from '../../src/guardianSubscription/subscriptionFilter';
-import { productCatalog } from '../../test/productCatalogFixture';
+import zuoraCatalogFixture from '../../../zuora-catalog/test/fixtures/catalog-prod.json';
+import { getSinglePlanFlattenedSubscriptionOrThrow } from '../../src/getSinglePlanFlattenedSubscriptionOrThrow';
+import { GuardianSubscriptionParser } from '../../src/guardianSubscriptionParser';
+import { SubscriptionFilter } from '../../src/subscriptionFilter';
 import { subscriptionsDir } from './config';
+
+const productCatalog = generateProductCatalog(
+	zuoraCatalogSchema.parse(zuoraCatalogFixture),
+);
 
 test('processes all PROD subscription files successfully', () => {
 	const files = fs.readdirSync(subscriptionsDir);
