@@ -10,15 +10,15 @@ import type {
 import { switchCatalog } from '../switchDefinition/switchCatalog';
 import type { SwitchActionData, TargetInformation } from './targetInformation';
 
-export type SwitchTargetInformation<
+export interface SwitchTargetInformation<
 	P extends ProductKey,
 	RPK extends ProductRatePlanKey<P>,
-> = {
-	fromUserInformation: (
-		ratePlan: ProductRatePlan<P, RPK>,
+> {
+	fromUserInformation(
+		productRatePlan: ProductRatePlan<P, RPK>,
 		switchActionData: SwitchActionData,
-	) => Promise<TargetInformation>;
-};
+	): Promise<TargetInformation>;
+}
 
 type AvailableTargetRatePlans<P extends ProductKey> = {
 	[RPK in ProductRatePlanKey<P>]?: SwitchTargetInformation<P, RPK>;

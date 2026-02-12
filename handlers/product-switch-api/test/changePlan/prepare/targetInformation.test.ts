@@ -53,6 +53,7 @@ describe('getTargetInformation', () => {
 			'EUR',
 			previousAmount,
 			false,
+			false,
 			productCatalogHelper,
 		);
 
@@ -93,6 +94,7 @@ describe('getTargetInformation', () => {
 			'EUR',
 			discountEligiblePreviousAmount,
 			false,
+			false,
 			productCatalogHelper,
 		);
 
@@ -116,6 +118,7 @@ describe('getTargetInformation', () => {
 				subscription.ratePlan,
 				'EUR',
 				50,
+				false,
 				false,
 				productCatalogHelper,
 			),

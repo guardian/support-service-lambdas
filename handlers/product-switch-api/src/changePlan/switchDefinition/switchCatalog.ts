@@ -6,28 +6,24 @@ export const switchCatalog = {
 	Contribution: {
 		Annual: {
 			SupporterPlus: {
-				Annual: { fromUserInformation: supporterPlusTargetInformation },
+				Annual: supporterPlusTargetInformation,
 			},
 		},
 		Monthly: {
 			SupporterPlus: {
-				Monthly: { fromUserInformation: supporterPlusTargetInformation },
+				Monthly: supporterPlusTargetInformation,
 			},
 		},
 	},
 	SupporterPlus: {
 		Annual: {
 			DigitalSubscription: {
-				Annual: {
-					fromUserInformation: digitalSubscriptionTargetInformation,
-				},
+				Annual: digitalSubscriptionTargetInformation,
 			},
 		},
 		Monthly: {
 			DigitalSubscription: {
-				Monthly: {
-					fromUserInformation: digitalSubscriptionTargetInformation,
-				},
+				Monthly: digitalSubscriptionTargetInformation,
 			},
 		},
 	},

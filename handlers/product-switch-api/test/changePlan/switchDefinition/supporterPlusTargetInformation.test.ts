@@ -21,10 +21,11 @@ describe('getSupporterPlusTargetInformation', () => {
 			mode: 'switchToBasePrice',
 			currency: 'GBP',
 			previousAmount,
+			includesContribution: true,
 			isGuardianEmail: false,
 		};
 
-		const result = await supporterPlusTargetInformation(
+		const result = await supporterPlusTargetInformation.fromUserInformation(
 			annualSupporterPlusRatePlan,
 			switchActionData,
 		);
@@ -44,10 +45,11 @@ describe('getSupporterPlusTargetInformation', () => {
 			mode: 'switchToBasePrice',
 			currency: 'GBP',
 			previousAmount,
+			includesContribution: true,
 			isGuardianEmail: false,
 		};
 
-		const result = await supporterPlusTargetInformation(
+		const result = await supporterPlusTargetInformation.fromUserInformation(
 			annualSupporterPlusRatePlan,
 			switchActionData,
 		);
@@ -67,7 +69,7 @@ describe('getSupporterPlusTargetInformation', () => {
 			isGuardianEmail: false,
 		};
 
-		const result = await supporterPlusTargetInformation(
+		const result = await supporterPlusTargetInformation.fromUserInformation(
 			annualSupporterPlusRatePlan,
 			switchActionData,
 		);
@@ -88,7 +90,7 @@ describe('getSupporterPlusTargetInformation', () => {
 		};
 
 		expect(() =>
-			supporterPlusTargetInformation(
+			supporterPlusTargetInformation.fromUserInformation(
 				annualSupporterPlusRatePlan,
 				switchActionData,
 			),
@@ -104,10 +106,11 @@ describe('getSupporterPlusTargetInformation', () => {
 			mode: 'save',
 			currency: 'GBP',
 			previousAmount,
+			includesContribution: true,
 			isGuardianEmail: false,
 		};
 
-		const result = await supporterPlusTargetInformation(
+		const result = await supporterPlusTargetInformation.fromUserInformation(
 			annualSupporterPlusRatePlan,
 			switchActionData,
 		);
@@ -131,11 +134,12 @@ describe('getSupporterPlusTargetInformation', () => {
 			mode: 'save',
 			currency: 'GBP',
 			previousAmount,
+			includesContribution: true,
 			isGuardianEmail: false,
 		};
 
 		expect(() =>
-			supporterPlusTargetInformation(
+			supporterPlusTargetInformation.fromUserInformation(
 				annualSupporterPlusRatePlan,
 				switchActionData,
 			),
@@ -155,10 +159,11 @@ describe('getSupporterPlusTargetInformation', () => {
 			mode: 'switchToBasePrice',
 			currency: 'GBP',
 			previousAmount,
+			includesContribution: true,
 			isGuardianEmail: false,
 		};
 
-		const result = await supporterPlusTargetInformation(
+		const result = await supporterPlusTargetInformation.fromUserInformation(
 			annualSupporterPlusRatePlan,
 			switchActionData,
 		);

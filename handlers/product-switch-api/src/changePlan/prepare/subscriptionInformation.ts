@@ -24,6 +24,7 @@ export type SubscriptionInformation = {
 	previousProductName: string; // sf tracking
 	previousRatePlanName: string; //sf tracking
 	previousAmount: number; //sf tracking
+	includesContribution: boolean;
 	productRatePlanKey: ValidSwitchableRatePlanKey; // email
 	termStartDate: Date; // order
 	chargedThroughDate?: Dayjs; // refund check
@@ -88,6 +89,22 @@ export function getSubscriptionInformation(
 		),
 		'missing charges',
 	);
+	let includesContribution = false;
+	switch (ratePlan.productKey) {
+		case 'Contribution':
+			includesContribution = true;
+			break;
+		case 'SupporterPlus':
+			switch (ratePlan.productRatePlanKey) {
+				case 'Annual':
+				case 'Monthly':
+					includesContribution =
+						getIfDefined(
+							ratePlan.ratePlanCharges.Contribution.price,
+							'missing contribution price',
+						) > 0;
+			}
+	}
 
 	return {
 		accountNumber: subscription.accountNumber,
@@ -97,6 +114,7 @@ export function getSubscriptionInformation(
 		previousAmount: getSubscriptionTotalChargeAmount(
 			objectValues(ratePlan.ratePlanCharges),
 		),
+		includesContribution,
 		productRatePlanKey,
 		termStartDate: subscription.termStartDate,
 		chargedThroughDate: getNextPaymentDate(

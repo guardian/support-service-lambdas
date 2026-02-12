@@ -43,12 +43,13 @@ const { subscription } = loadSubscription(
 const account = zuoraAccountSchema.parse(accountJson);
 
 const getTestTargetInformation = async () =>
-	await supporterPlusTargetInformation(
+	await supporterPlusTargetInformation.fromUserInformation(
 		productCatalog.SupporterPlus.ratePlans.Annual,
 		{
 			mode: 'switchToBasePrice',
 			currency: 'GBP',
 			previousAmount: 10,
+			includesContribution: false,
 			isGuardianEmail: false,
 		},
 	);

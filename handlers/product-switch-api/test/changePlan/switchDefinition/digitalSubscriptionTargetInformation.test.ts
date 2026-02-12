@@ -13,20 +13,22 @@ const annualDigitalSubscriptionRatePlan =
 	productCatalog.DigitalSubscription.ratePlans.Annual;
 
 describe('digitalSubscriptionTargetInformation', () => {
-	test('returns target info when amount matches catalog price', async () => {
+	test("returns target info when amount doesn't inclide a contribution", async () => {
 		const catalogPrice = annualDigitalSubscriptionRatePlan.pricing.GBP;
 
 		const switchActionData: SwitchActionData = {
 			mode: 'switchToBasePrice',
 			currency: 'GBP',
 			previousAmount: catalogPrice,
+			includesContribution: false,
 			isGuardianEmail: true,
 		};
 
-		const result = await digitalSubscriptionTargetInformation(
-			annualDigitalSubscriptionRatePlan,
-			switchActionData,
-		);
+		const result =
+			await digitalSubscriptionTargetInformation.fromUserInformation(
+				annualDigitalSubscriptionRatePlan,
+				switchActionData,
+			);
 
 		expect(result.actualTotalPrice).toBe(catalogPrice);
 		expect(result.productRatePlanId).toBe(annualDigitalSubscriptionRatePlan.id);
@@ -40,25 +42,26 @@ describe('digitalSubscriptionTargetInformation', () => {
 		};
 
 		expect(() =>
-			digitalSubscriptionTargetInformation(
+			digitalSubscriptionTargetInformation.fromUserInformation(
 				annualDigitalSubscriptionRatePlan,
 				nonGuardianSwitchActionData,
 			),
 		).toThrow(ValidationError);
 	});
 
-	test('throws ValidationError when user-requested amount does not match catalog price', () => {
+	test('throws ValidationError when previous amount does include a contribution', () => {
 		const catalogPrice = annualDigitalSubscriptionRatePlan.pricing.GBP;
 
 		const switchActionData: SwitchActionData = {
 			mode: 'switchToBasePrice',
 			currency: 'GBP',
 			previousAmount: catalogPrice + 5,
+			includesContribution: true,
 			isGuardianEmail: true,
 		};
 
 		expect(() =>
-			digitalSubscriptionTargetInformation(
+			digitalSubscriptionTargetInformation.fromUserInformation(
 				annualDigitalSubscriptionRatePlan,
 				switchActionData,
 			),
@@ -72,13 +75,15 @@ describe('digitalSubscriptionTargetInformation', () => {
 			mode: 'switchToBasePrice',
 			currency: 'GBP',
 			previousAmount: catalogPrice,
+			includesContribution: false,
 			isGuardianEmail: true,
 		};
 
-		const result = await digitalSubscriptionTargetInformation(
-			annualDigitalSubscriptionRatePlan,
-			switchActionData,
-		);
+		const result =
+			await digitalSubscriptionTargetInformation.fromUserInformation(
+				annualDigitalSubscriptionRatePlan,
+				switchActionData,
+			);
 
 		expect(result.actualTotalPrice).toBe(catalogPrice);
 	});
@@ -90,11 +95,12 @@ describe('digitalSubscriptionTargetInformation', () => {
 			mode: 'save',
 			currency: 'GBP',
 			previousAmount: catalogPrice,
+			includesContribution: false,
 			isGuardianEmail: true,
 		};
 
 		expect(() =>
-			digitalSubscriptionTargetInformation(
+			digitalSubscriptionTargetInformation.fromUserInformation(
 				annualDigitalSubscriptionRatePlan,
 				switchActionData,
 			),
@@ -112,7 +118,7 @@ describe('digitalSubscriptionTargetInformation', () => {
 		};
 
 		expect(() =>
-			digitalSubscriptionTargetInformation(
+			digitalSubscriptionTargetInformation.fromUserInformation(
 				annualDigitalSubscriptionRatePlan,
 				switchActionData,
 			),

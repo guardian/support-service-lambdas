@@ -9,7 +9,9 @@ import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
 import zuoraCatalogFixtureCode from '../../../../../modules/zuora-catalog/test/fixtures/catalog-code.json';
 import zuoraCatalogFixtureProd from '../../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
+import type { SubscriptionInformation } from '../../../src/changePlan/prepare/subscriptionInformation';
 import { getSubscriptionInformation } from '../../../src/changePlan/prepare/subscriptionInformation';
+import type { ValidSwitchableRatePlanKey } from '../../../src/changePlan/prepare/switchCatalogHelper';
 import { getSinglePlanFlattenedSubscriptionOrThrow } from '../../../src/guardianSubscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import { GuardianSubscriptionParser } from '../../../src/guardianSubscription/guardianSubscriptionParser';
 import { SubscriptionFilter } from '../../../src/guardianSubscription/subscriptionFilter';
@@ -69,7 +71,9 @@ describe('getSubscriptionInformation', () => {
 			previousProductName: subscription.ratePlan.productName,
 			previousRatePlanName: subscription.ratePlan.ratePlanName,
 			previousAmount: 50, // EUR
-			productRatePlanKey: subscription.ratePlan.productRatePlanKey,
+			includesContribution: true,
+			productRatePlanKey: subscription.ratePlan
+				.productRatePlanKey as ValidSwitchableRatePlanKey,
 			termStartDate: subscription.termStartDate,
 			chargedThroughDate: '2025-05-09',
 			productRatePlanId: subscription.ratePlan.productRatePlanId,
@@ -77,6 +81,8 @@ describe('getSubscriptionInformation', () => {
 				productCatalogProd.Contribution.ratePlans.Annual.charges.Contribution
 					.id,
 			],
+		} satisfies Omit<SubscriptionInformation, 'chargedThroughDate'> & {
+			chargedThroughDate: string;
 		});
 	});
 
@@ -98,7 +104,9 @@ describe('getSubscriptionInformation', () => {
 			previousProductName: subscription.ratePlan.productName,
 			previousRatePlanName: subscription.ratePlan.ratePlanName,
 			previousAmount: 17, // AUD
-			productRatePlanKey: subscription.ratePlan.productRatePlanKey,
+			includesContribution: false,
+			productRatePlanKey: subscription.ratePlan
+				.productRatePlanKey as ValidSwitchableRatePlanKey,
 			termStartDate: subscription.termStartDate,
 			chargedThroughDate: '2024-07-06', // it ignores the removed contribution charge
 			productRatePlanId: subscription.ratePlan.productRatePlanId,
@@ -108,6 +116,8 @@ describe('getSubscriptionInformation', () => {
 				productCatalogProd.SupporterPlus.ratePlans.Monthly.charges.Subscription
 					.id,
 			],
+		} satisfies Omit<SubscriptionInformation, 'chargedThroughDate'> & {
+			chargedThroughDate: string;
 		});
 	});
 
@@ -130,7 +140,9 @@ describe('getSubscriptionInformation', () => {
 			previousProductName: subscription.ratePlan.productName,
 			previousRatePlanName: subscription.ratePlan.ratePlanName,
 			previousAmount: 17, // AUD
-			productRatePlanKey: subscription.ratePlan.productRatePlanKey,
+			includesContribution: true,
+			productRatePlanKey: subscription.ratePlan
+				.productRatePlanKey as ValidSwitchableRatePlanKey,
 			termStartDate: subscription.termStartDate,
 			chargedThroughDate: '2026-03-10', // it uses the effective start date of the contribution charge
 			productRatePlanId: subscription.ratePlan.productRatePlanId,
@@ -140,6 +152,8 @@ describe('getSubscriptionInformation', () => {
 				productCatalogCode.SupporterPlus.ratePlans.Monthly.charges.Subscription
 					.id,
 			],
+		} satisfies Omit<SubscriptionInformation, 'chargedThroughDate'> & {
+			chargedThroughDate: string;
 		});
 	});
 });

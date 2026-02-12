@@ -28,6 +28,7 @@ test('supporter product data', async () => {
 			previousProductName: 'previousProductName',
 			previousRatePlanName: 'previousRatePlanName',
 			previousAmount: 1,
+			includesContribution: true,
 			productRatePlanKey: 'Monthly',
 			termStartDate: new Date(),
 			productRatePlanId: 'contributionProductRatePlanId',

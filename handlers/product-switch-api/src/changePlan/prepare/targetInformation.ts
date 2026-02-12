@@ -4,9 +4,8 @@ import type {
 	GuardianCatalogKeys,
 	ProductCatalogHelper,
 	ProductKey,
-	ProductRatePlan,
-	ProductRatePlanKey,
 } from '@modules/product-catalog/productCatalog';
+import type { GuardianRatePlan } from '../../guardianSubscription/reprocessRatePlans/guardianRatePlanBuilder';
 import type { ProductSwitchTargetBody, SwitchMode } from '../schemas';
 import type { Discount } from '../switchDefinition/discounts';
 import type {
@@ -44,6 +43,7 @@ export type SwitchActionData = {
 	| {
 			mode: 'switchToBasePrice' | 'save';
 			previousAmount: number;
+			includesContribution: boolean;
 	  }
 	| {
 			mode: 'switchWithPriceOverride';
@@ -57,9 +57,10 @@ export type SwitchActionData = {
  */
 export const getTargetInformation = (
 	input: ProductSwitchTargetBody,
-	productCatalogKeys: GuardianCatalogKeys,
+	productCatalogKeys: GuardianRatePlan,
 	currency: IsoCurrency,
 	previousAmount: number,
+	includesContribution: boolean,
 	isGuardianEmail: boolean,
 	productCatalogHelper: ProductCatalogHelper,
 ): Promise<TargetInformation> => {
@@ -77,6 +78,7 @@ export const getTargetInformation = (
 				mode: input.mode,
 				currency,
 				previousAmount,
+				includesContribution,
 				isGuardianEmail,
 			};
 			break;
@@ -119,10 +121,7 @@ function getSwitchSpecificTargetInformationOrThrow<
 		`${sourceProductKeys.productKey} ${sourceProductKeys.productRatePlanKey}`,
 	);
 
-	const targetProductRatePlan: ProductRatePlan<
-		TP,
-		ProductRatePlanKey<TP>
-	> = productCatalogHelper.getProductRatePlan(
+	const targetProductRatePlan = productCatalogHelper.getProductRatePlan(
 		targetProductKeys.productKey,
 		targetProductKeys.productRatePlanKey,
 	);

@@ -32,6 +32,7 @@ export async function getSwitchInformation(
 		subscription.ratePlan,
 		accountInformation.currency,
 		subscriptionInformation.previousAmount,
+		subscriptionInformation.includesContribution,
 		userHasGuardianEmail(account.billToContact.workEmail) ||
 			account.billToContact.workEmail.endsWith('@thegulocal.com'),
 		productCatalogHelper,

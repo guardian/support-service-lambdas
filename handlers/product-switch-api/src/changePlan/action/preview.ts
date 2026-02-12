@@ -1,4 +1,5 @@
 import { groupByUniqueOrThrow } from '@modules/arrayFunctions';
+import { ValidationError } from '@modules/errors';
 import { getIfDefined, mapOption } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import type { PreviewOrderRequest } from '@modules/zuora/orders/orderRequests';
@@ -72,6 +73,12 @@ export const previewResponseFromZuoraResponse = (
 	sourceProductChargeIds: [string, ...string[]],
 	chargedThroughDate?: Dayjs,
 ): PreviewResponse => {
+	if (invoice.amount < 0) {
+		// perhaps they removed their contribution but have over paid, ideally we should notice this earlier
+		throw new ValidationError(
+			'payment today is less than zero, switch is not possible',
+		);
+	}
 	const itemsById: Record<string, ZuoraPreviewResponseInvoiceItem> =
 		groupByUniqueOrThrow(
 			invoice.invoiceItems,
