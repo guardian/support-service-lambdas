@@ -8,6 +8,7 @@ import { doCompositeCallout } from '@modules/salesforce/updateRecords';
 import { stageFromEnvironment } from '@modules/stage';
 import type { Handler } from 'aws-lambda';
 import { z } from 'zod';
+import { getSalesforceSecretNames } from '../salesforceSecretNames';
 import type { BillingAccountRecord } from './getBillingAccounts';
 import { BillingAccountRecordSchema } from './getBillingAccounts';
 
@@ -28,7 +29,7 @@ export const handler: Handler<
 		const billingAccountsToUpdate: BillingAccountRecord[] = parseResponse.data;
 
 		const stage = stageFromEnvironment();
-		const sfClient = await SfClient.create(stage);
+		const sfClient = await SfClient.create(getSalesforceSecretNames(stage));
 
 		const sfUpdateResponse = await updateSfBillingAccounts(
 			sfClient,
