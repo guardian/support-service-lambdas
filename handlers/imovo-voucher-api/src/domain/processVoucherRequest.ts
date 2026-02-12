@@ -13,8 +13,8 @@ export async function processVoucherRequest(
 		requestTimestamp: new Date().toISOString(),
 		email: message.email,
 		voucherType: message.voucherType,
-		voucherCode: voucher.VoucherCode,
-		expiryDate: voucher.ExpiryDate,
+		voucherCode: voucher.voucherCode,
+		expiryDate: voucher.expiryDate,
 		status: 'SUCCESS',
 	};
 

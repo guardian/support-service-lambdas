@@ -14,8 +14,9 @@ const testMessage: SqsMessage = {
 const fakeProvider: VoucherProvider = {
 	requestVoucher: () =>
 		Promise.resolve({
-			VoucherCode: 'TEST-CODE',
-			ExpiryDate: '2026-12-31',
+			voucherCode: 'TEST-CODE',
+			expiryDate: '2026-12-31',
+			successfulRequest: true,
 		}),
 };
 

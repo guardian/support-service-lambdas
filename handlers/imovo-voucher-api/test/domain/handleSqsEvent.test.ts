@@ -36,8 +36,9 @@ function buildFakeDeps(): Dependencies & {
 		voucherProvider: {
 			requestVoucher: () =>
 				Promise.resolve({
-					VoucherCode: 'FAKE-CODE',
-					ExpiryDate: '2026-12-31',
+					voucherCode: 'FAKE-CODE',
+					expiryDate: '2026-12-31',
+					successfulRequest: true,
 				}),
 		},
 		voucherRepository: {

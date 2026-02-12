@@ -10,9 +10,11 @@ const baseUrl = 'https://api.example.com';
 const stage = 'CODE';
 
 const validApiResponse = {
-	VoucherCode: 'VOUCHER-123',
-	ExpiryDate: '2026-12-31',
-	VoucherValue: '5.00',
+	voucherCode: 'VOUCHER-123',
+	expiryDate: '2026-12-31',
+	balance: 5.0,
+	message: 'Success',
+	successfulRequest: true,
 };
 
 beforeEach(() => {

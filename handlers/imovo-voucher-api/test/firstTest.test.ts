@@ -61,9 +61,11 @@ describe('SQS message schema', () => {
 describe('i-movo voucher response schema', () => {
 	it('parses a valid response with all fields', () => {
 		const response = {
-			VoucherCode: 'ABC-123',
-			ExpiryDate: '2026-12-31',
-			VoucherValue: '5.00',
+			voucherCode: 'ABC-123',
+			expiryDate: '2026-12-31',
+			balance: 5.0,
+			message: 'Success',
+			successfulRequest: true,
 		};
 
 		const result = imovoVoucherResponseSchema.safeParse(response);
@@ -73,33 +75,47 @@ describe('i-movo voucher response schema', () => {
 		}
 	});
 
-	it('parses a valid response without optional VoucherValue', () => {
+	it('parses a valid response without optional fields', () => {
 		const response = {
-			VoucherCode: 'ABC-123',
-			ExpiryDate: '2026-12-31',
+			voucherCode: 'ABC-123',
+			expiryDate: '2026-12-31',
+			successfulRequest: true,
 		};
 
 		const result = imovoVoucherResponseSchema.safeParse(response);
 		expect(result.success).toBe(true);
 		if (result.success) {
-			expect(result.data.VoucherCode).toBe('ABC-123');
-			expect(result.data.ExpiryDate).toBe('2026-12-31');
-			expect(result.data.VoucherValue).toBeUndefined();
+			expect(result.data.voucherCode).toBe('ABC-123');
+			expect(result.data.expiryDate).toBe('2026-12-31');
+			expect(result.data.balance).toBeUndefined();
+			expect(result.data.message).toBeUndefined();
 		}
 	});
 
-	it('rejects a response missing VoucherCode', () => {
+	it('rejects a response missing voucherCode', () => {
 		const response = {
-			ExpiryDate: '2026-12-31',
+			expiryDate: '2026-12-31',
+			successfulRequest: true,
 		};
 
 		const result = imovoVoucherResponseSchema.safeParse(response);
 		expect(result.success).toBe(false);
 	});
 
-	it('rejects a response missing ExpiryDate', () => {
+	it('rejects a response missing expiryDate', () => {
 		const response = {
-			VoucherCode: 'ABC-123',
+			voucherCode: 'ABC-123',
+			successfulRequest: true,
+		};
+
+		const result = imovoVoucherResponseSchema.safeParse(response);
+		expect(result.success).toBe(false);
+	});
+
+	it('rejects a response missing successfulRequest', () => {
+		const response = {
+			voucherCode: 'ABC-123',
+			expiryDate: '2026-12-31',
 		};
 
 		const result = imovoVoucherResponseSchema.safeParse(response);

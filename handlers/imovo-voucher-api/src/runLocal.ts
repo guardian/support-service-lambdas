@@ -29,9 +29,11 @@ if (!isLive) {
 			console.log(`[MOCK] Request body: ${body}`);
 			return new Response(
 				JSON.stringify({
-					VoucherCode: 'MOCK-VOUCHER-ABC123',
-					ExpiryDate: '2026-12-31T23:59:59Z',
-					VoucherValue: '5.00',
+					voucherCode: 'MOCK-VOUCHER-ABC123',
+					expiryDate: '2026-12-31T23:59:59Z',
+					balance: 5.0,
+					message: 'Success',
+					successfulRequest: true,
 				}),
 				{ status: 200, headers: { 'Content-Type': 'application/json' } },
 			);
