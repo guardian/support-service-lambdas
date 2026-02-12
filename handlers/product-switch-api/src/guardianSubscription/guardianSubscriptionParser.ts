@@ -1,9 +1,10 @@
 import { joinAllLeft } from '@modules/mapFunctions';
 import type {
+	GuardianCatalogKeys,
 	ProductCatalog,
 	ProductKey,
-	ProductRatePlanKey,
 } from '@modules/product-catalog/productCatalog';
+import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import {
 	zuoraCatalogToProductKey,
 	zuoraCatalogToProductRatePlanKey,
@@ -153,62 +154,52 @@ export class GuardianSubscriptionParser {
 		productRatePlanNode: ZuoraProductRatePlanNode,
 		product: CatalogProduct,
 	): RatePlansWithCatalogData {
-		const productKey = zuoraCatalogToProductKey[product.name];
-		if (productKey !== undefined) {
-			const maybeRatePlans = this.buildRatePlansWithCatalogDataForProductKey(
-				productKey,
+		const maybeGuardianKeys = this.getGuardianKeys(
+			product.name,
+			productRatePlanNode.zuoraProductRatePlan.name,
+		);
+
+		if (maybeGuardianKeys === undefined) {
+			// not in product catalog - attach to zuora catalog instead
+			const zuoraRatePlanBuilder = new ZuoraRatePlanBuilder(
+				product,
 				productRatePlanNode,
-				subscriptionRatePlansForProductRatePlan,
 			);
-			if (maybeRatePlans !== undefined) {
-				return {
-					ratePlans: maybeRatePlans,
-					productsNotInCatalog: [],
-				};
-			}
+			return {
+				ratePlans: [],
+				productsNotInCatalog: zuoraRatePlanBuilder.buildZuoraRatePlans(
+					subscriptionRatePlansForProductRatePlan,
+				),
+			};
 		}
-		// not in product catalog - attach to zuora catalog instead
-		const zuoraRatePlanBuilder = new ZuoraRatePlanBuilder(
-			product,
-			productRatePlanNode,
+
+		const guardianRatePlanBuilder = new GuardianRatePlanBuilder(
+			this.productCatalog,
+			productRatePlanNode.productRatePlanCharges,
+			maybeGuardianKeys.productKey,
+			maybeGuardianKeys.productRatePlanKey,
+		);
+		const ratePlans = guardianRatePlanBuilder.buildGuardianRatePlans(
+			subscriptionRatePlansForProductRatePlan,
 		);
 		return {
-			ratePlans: [],
-			productsNotInCatalog: zuoraRatePlanBuilder.buildZuoraRatePlans(
-				subscriptionRatePlansForProductRatePlan,
-			),
+			ratePlans,
+			productsNotInCatalog: [],
 		};
 	}
 
-	/**
-	 * given that the product is in the product-catalog, now check the rate plan is also in.
-	 *
-	 * If so then return it (so it will be added to the ratePlans), otherwise return undefined
-	 * (which will cause it to be added the productsNotInCatalog)
-	 */
-	private buildRatePlansWithCatalogDataForProductKey<P extends ProductKey>(
-		productKey: P,
-		productRatePlanNode: ZuoraProductRatePlanNode,
-		subscriptionRatePlansForProductRatePlan: readonly ZuoraRatePlanWithIndexedCharges[],
-	): Array<GuardianRatePlanMap<P>> | undefined {
-		const productRatePlanKey =
-			// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- insufficient type for zuoraCatalogToProductRatePlanKey
-			zuoraCatalogToProductRatePlanKey[
-				productRatePlanNode.zuoraProductRatePlan.name
-			] as ProductRatePlanKey<P> | undefined;
-
-		if (productRatePlanKey !== undefined) {
-			const guardianRatePlanBuilder = new GuardianRatePlanBuilder(
-				this.productCatalog,
-				productRatePlanNode.productRatePlanCharges,
-				productKey,
-				productRatePlanKey,
-			);
-			return guardianRatePlanBuilder.buildGuardianRatePlans(
-				subscriptionRatePlansForProductRatePlan,
-			);
-		}
-		return undefined;
+	private getGuardianKeys(
+		zuoraProductName: string,
+		zuoraProductRatePlanName: string,
+	): GuardianCatalogKeys | undefined {
+		const pch = new ProductCatalogHelper(this.productCatalog);
+		const productKey: ProductKey | undefined =
+			zuoraCatalogToProductKey[zuoraProductName];
+		const productRatePlanKey: string | undefined =
+			zuoraCatalogToProductRatePlanKey[zuoraProductRatePlanName];
+		return productKey !== undefined && productRatePlanKey !== undefined
+			? pch.validate(productKey, productRatePlanKey)
+			: undefined;
 	}
 }
 
