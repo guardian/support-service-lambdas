@@ -9,24 +9,20 @@ export function SQSHandler<ConfigType, Services>(
 	handler: (record: SQSRecord, services: Services) => Promise<void>,
 	buildServices: (handlerProps: HandlerEnv<ConfigType>) => Services,
 ) {
+	const callerInfo = logger.getCallerInfo();
 	return LambdaHandlerWithServices(
 		configSchema,
-		handleSQSMessages(handler),
+		handleSQSMessages(handler, callerInfo),
 		buildServices,
 	);
 }
 
 export function handleSQSMessages<Services>(
 	recordHandler: (record: SQSRecord, services: Services) => Promise<void>,
+	callerInfo: string,
 ) {
 	const recordHandlerWithLogging = logger.withContext(
-		logger.wrapFn(
-			recordHandler,
-			undefined,
-			undefined,
-			0,
-			logger.getCallerInfo(),
-		),
+		logger.wrapFn(recordHandler, undefined, undefined, 0, callerInfo),
 		([record]) => record.messageId,
 	);
 

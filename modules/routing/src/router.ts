@@ -91,6 +91,7 @@ function matchPath(
 export function Router(
 	routes: ReadonlyArray<Route<Record<string, string>, string | null>>,
 ) {
+	const callerInfo = logger.getCallerInfo();
 	const httpRouter = async (
 		event: APIGatewayProxyEvent,
 	): Promise<APIGatewayProxyResult> => {
@@ -133,7 +134,7 @@ export function Router(
 	};
 
 	return logger.withContext(
-		logger.wrapFn(httpRouter, undefined, undefined, 0, logger.getCallerInfo()),
+		logger.wrapFn(httpRouter, undefined, undefined, 0, callerInfo),
 		undefined,
 		true,
 	);
