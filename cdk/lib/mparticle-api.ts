@@ -41,7 +41,7 @@ export class MParticleApi extends SrStack {
 
 		const identityMmaSnsDeletionRequestTopicArn = new SrAppConfigKey(
 			this,
-			'IdentityMmaSnsDeletionRequestTopicArn',
+			'identityMmaSnsDeletionRequestTopicArn',
 		).valueAsString;
 
 		const sarS3BaseKey = 'mparticle-results/'; // this must be the same as used in the code

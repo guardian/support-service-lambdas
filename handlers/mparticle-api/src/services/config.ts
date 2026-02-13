@@ -19,7 +19,7 @@ export const ConfigSchema = z.object({
 			apiKey: z.string(),
 		})
 		.optional(),
-	IdentityMmaSnsDeletionRequestTopicArn: z.string().optional(),
+	identityMmaSnsDeletionRequestTopicArn: z.string().optional(),
 });
 export type AppConfig = z.infer<typeof ConfigSchema>;
 

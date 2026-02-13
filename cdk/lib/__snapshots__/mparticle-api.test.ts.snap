@@ -51,9 +51,9 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
       "Default": "/CODE/support/mparticle-api/sarResultsBucket",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
-    "appConfigIdentityMmaSnsDeletionRequestTopicArn": {
-      "Default": "/CODE/support/mparticle-api/IdentityMmaSnsDeletionRequestTopicArn",
-      "Description": "parameter to look up IdentityMmaSnsDeletionRequestTopicArn from SSM",
+    "appConfigidentityMmaSnsDeletionRequestTopicArn": {
+      "Default": "/CODE/support/mparticle-api/identityMmaSnsDeletionRequestTopicArn",
+      "Description": "parameter to look up identityMmaSnsDeletionRequestTopicArn from SSM",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
   },
@@ -593,7 +593,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
               "Condition": {
                 "ArnEquals": {
                   "aws:SourceArn": {
-                    "Ref": "appConfigIdentityMmaSnsDeletionRequestTopicArn",
+                    "Ref": "appConfigidentityMmaSnsDeletionRequestTopicArn",
                   },
                 },
               },
@@ -1470,9 +1470,9 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
       "Default": "/PROD/support/mparticle-api/sarResultsBucket",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
-    "appConfigIdentityMmaSnsDeletionRequestTopicArn": {
-      "Default": "/PROD/support/mparticle-api/IdentityMmaSnsDeletionRequestTopicArn",
-      "Description": "parameter to look up IdentityMmaSnsDeletionRequestTopicArn from SSM",
+    "appConfigidentityMmaSnsDeletionRequestTopicArn": {
+      "Default": "/PROD/support/mparticle-api/identityMmaSnsDeletionRequestTopicArn",
+      "Description": "parameter to look up identityMmaSnsDeletionRequestTopicArn from SSM",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
   },
@@ -2364,7 +2364,7 @@ DLQ: https://",
               "Condition": {
                 "ArnEquals": {
                   "aws:SourceArn": {
-                    "Ref": "appConfigIdentityMmaSnsDeletionRequestTopicArn",
+                    "Ref": "appConfigidentityMmaSnsDeletionRequestTopicArn",
                   },
                 },
               },
