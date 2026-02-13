@@ -22,7 +22,7 @@ export async function authenticateSalesforce(
 	console.log('authenticating with Salesforce...');
 
 	try {
-		const response = await fetch(`${authUrl}/services/oauth2/token`, {
+		const response = await fetch(authUrl, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
 			body: body.toString(),
