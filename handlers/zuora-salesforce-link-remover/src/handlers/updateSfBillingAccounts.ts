@@ -29,7 +29,9 @@ export const handler: Handler<
 		const billingAccountsToUpdate: BillingAccountRecord[] = parseResponse.data;
 
 		const stage = stageFromEnvironment();
-		const sfClient = await SfClient.create(getSalesforceSecretNames(stage));
+		const sfClient = await SfClient.createWithPasswordFlow(
+			getSalesforceSecretNames(stage),
+		);
 
 		const sfUpdateResponse = await updateSfBillingAccounts(
 			sfClient,
