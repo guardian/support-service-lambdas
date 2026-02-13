@@ -33,7 +33,7 @@ export async function handlerWithStage(
 
 		await Promise.all(
 			chatMessages.map(async (chatMessage) => {
-				console.log('sending one chat message to', chatMessage.webhookUrl);
+				logger.log('sending one chat message to', chatMessage.webhookUrl);
 				const response = await fetch(chatMessage.webhookUrl, {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },

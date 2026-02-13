@@ -49,7 +49,11 @@ export const handlerBaton: Handler<
 			isProd,
 			batonS3Writer,
 		);
-		return logger.wrapRouter(router.routeRequest, 'handlerBaton')(event);
+		return logger.withContext(
+			logger.wrapFn(router.routeRequest, 'handlerBaton'),
+			([event]) => `${event.requestType} ${event.action}`,
+			true,
+		)(event);
 	} catch (error) {
 		console.error('Baton handler error:', error);
 		throw error;
