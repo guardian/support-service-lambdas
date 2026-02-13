@@ -38,7 +38,6 @@ export type TargetContribution = {
 export type SwitchActionData = {
 	mode: SwitchMode;
 	currency: IsoCurrency;
-	isGuardianEmail: boolean;
 } & (
 	| {
 			mode: 'switchToBasePrice' | 'save';
@@ -61,7 +60,6 @@ export const getTargetInformation = (
 	currency: IsoCurrency,
 	previousAmount: number,
 	includesContribution: boolean,
-	isGuardianEmail: boolean,
 	productCatalogHelper: ProductCatalogHelper,
 ): Promise<TargetInformation> => {
 	const targetProductKeys: GuardianCatalogKeys<typeof input.targetProduct> =
@@ -79,7 +77,6 @@ export const getTargetInformation = (
 				currency,
 				previousAmount,
 				includesContribution,
-				isGuardianEmail,
 			};
 			break;
 		case 'switchWithPriceOverride':
@@ -87,7 +84,6 @@ export const getTargetInformation = (
 				mode: input.mode,
 				currency,
 				userRequestedAmount: input.newAmount,
-				isGuardianEmail,
 			};
 			break;
 	}

@@ -1,5 +1,4 @@
 import type { GuardianSubscription } from '@modules/guardian-subscription/getSinglePlanFlattenedSubscriptionOrThrow';
-import { userHasGuardianEmail } from '@modules/product-benefits/userBenefits';
 import type { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import type { ZuoraAccount } from '@modules/zuora/types';
 import type { ProductSwitchTargetBody } from '../schemas';
@@ -33,8 +32,6 @@ export async function getSwitchInformation(
 		accountInformation.currency,
 		subscriptionInformation.previousAmount,
 		subscriptionInformation.includesContribution,
-		userHasGuardianEmail(account.billToContact.workEmail) ||
-			account.billToContact.workEmail.endsWith('@thegulocal.com'),
 		productCatalogHelper,
 	);
 
