@@ -14,7 +14,7 @@
   "dependencies": {
     "@aws-sdk/client-cloudwatch": "^3.940.0",
     "@aws-sdk/client-lambda": "^3.940.0",
-    "@aws-sdk/client-s3": "^3.940.0",
+    "@aws-sdk/client-s3": "^3.984.0",
     "@aws-sdk/client-sqs": "^3.940.0",
     "@aws-sdk/client-ssm": "^3.940.0",
     "@aws-sdk/credential-provider-node": "^3.940.0",
