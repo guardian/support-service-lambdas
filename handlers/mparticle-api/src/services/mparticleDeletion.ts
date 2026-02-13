@@ -18,6 +18,8 @@ type BulkDeletionRequest = BulkDeletionRequestItem[];
 /**
  * mParticle Bulk Profile Deletion API Response Schema
  * The API returns 202 Accepted with no body on success
+ * This is critical: 202 means the deletion was queued by mParticle's system.
+ * Other 2xx responses would indicate unexpected behavior.
  * Use a function schema to handle empty responses
  */
 const BulkDeletionResponseSchema = (): void => undefined;
@@ -58,6 +60,20 @@ export async function deleteMParticleUser(
 		>('/userprofile/bulkdelete', requestBody, BulkDeletionResponseSchema);
 
 		if (response.success) {
+			// mParticle Bulk Deletion API must return exactly 202 Accepted
+			// 202 confirms the deletion was queued in their system
+			if (response.statusCode !== 202) {
+				logger.error(
+					`Unexpected status code from mParticle: ${response.statusCode} (expected 202)`,
+				);
+				return {
+					success: false,
+					error: new Error(
+						`mParticle returned ${response.statusCode} instead of 202 Accepted`,
+					),
+					retryable: true, // Unexpected status may be transient
+				};
+			}
 			logger.log(
 				`Successfully deleted user ${userId} from mParticle (202 Accepted)`,
 			);

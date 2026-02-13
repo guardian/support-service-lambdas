@@ -26,6 +26,7 @@ export type HttpResponse<T> =
 	| {
 			success: true;
 			data: T;
+			statusCode: number;
 	  }
 	| {
 			success: false;
@@ -83,10 +84,10 @@ export class RestRequestMaker {
 					throw new Error("response content-type wasn't JSON: " + contentType);
 				}
 				const data = schema.parse(JSON.parse(responseText));
-				return { success: true, data };
+				return { success: true, data, statusCode: response.status };
 			} else {
 				// schema is a function
-				return { success: true, data: schema(responseText, contentType) };
+				return { success: true, data: schema(responseText, contentType), statusCode: response.status };
 			}
 		} catch (cause) {
 			return {

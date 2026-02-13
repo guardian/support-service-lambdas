@@ -54,9 +54,10 @@ export async function processUserDeletion(
 
 	// If mParticle failed, throw to trigger SQS retry
 	// After maxReceiveCount retries, message will move to DLQ for investigation
+	// Note: Even non-retryable errors (4xx) are thrown to ensure DLQ visibility for compliance
 	if (!mParticleResult.success) {
 		logger.error(
-			`mParticle deletion failed for user ${identityId} - will retry`,
+			`mParticle deletion failed for user ${identityId} - will retry (retryable: ${mParticleResult.retryable})`,
 			mParticleResult.error,
 		);
 		throw mParticleResult.error;
@@ -64,9 +65,10 @@ export async function processUserDeletion(
 
 	// If Braze failed, throw to trigger SQS retry
 	// After maxReceiveCount retries, message will move to DLQ for investigation
+	// Note: Even non-retryable errors (4xx) are thrown to ensure DLQ visibility for compliance
 	if (brazeResult && !brazeResult.success) {
 		logger.error(
-			`Braze deletion failed for user ${identityId} - will retry`,
+			`Braze deletion failed for user ${identityId} - will retry (retryable: ${brazeResult.retryable})`,
 			brazeResult.error,
 		);
 		throw brazeResult.error;

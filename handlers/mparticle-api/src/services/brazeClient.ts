@@ -136,13 +136,20 @@ export async function deleteBrazeUser(
 				return { success: true };
 			}
 
-			// Determine if error is retryable
 			const retryable = isRetryableError(error);
 
-			logger.error(
-				`Failed to delete user ${userId} from Braze. Retryable: ${retryable}`,
-				error,
-			);
+			// Log rate limit errors distinctly for easy troubleshooting
+			if (error instanceof HttpError && error.statusCode === 429) {
+				logger.error(
+					`Braze rate limit (429) for user ${userId} - will retry after SQS visibilityTimeout`,
+					error,
+				);
+			} else {
+				logger.error(
+					`Failed to delete user ${userId} from Braze. Retryable: ${retryable}`,
+					error,
+				);
+			}
 
 			return {
 				success: false,
@@ -174,6 +181,11 @@ function isRetryableError(error: Error | HttpError): boolean {
 		// 5xx server errors are retryable
 		if (statusCode >= 500) {
 			return true;
+		}
+		// 429 Too Many Requests is NOT retryable - goes to DLQ for batch processing later
+		// Retrying immediately would overwhelm the rate-limited API
+		if (statusCode === 429) {
+			return false;
 		}
 		// 4xx client errors are not retryable
 		if (statusCode >= 400 && statusCode < 500) {

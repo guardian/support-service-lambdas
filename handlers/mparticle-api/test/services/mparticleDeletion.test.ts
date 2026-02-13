@@ -33,6 +33,7 @@ describe('deleteMParticleUser', () => {
 	it('should have a basic test', async () => {
 		mockPost.mockResolvedValue({
 			success: true,
+			statusCode: 202,
 		});
 
 		const result = await deleteMParticleUser(mockClient, userId);
