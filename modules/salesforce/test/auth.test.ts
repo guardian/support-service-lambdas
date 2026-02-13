@@ -15,7 +15,7 @@ describe('SfPasswordFlowTokenProvider', () => {
 	};
 
 	const tokenProvider = new SfPasswordFlowTokenProvider({
-		authUrl: 'https://login.salesforce.com',
+		authUrl: 'https://login.salesforce.com/services/oauth2/token',
 		username: 'mock_username',
 		password: 'mock_password',
 		token: 'mock_token',
@@ -98,7 +98,7 @@ describe('SfClientCredentialsTokenProvider', () => {
 	};
 
 	const tokenProvider = new SfClientCredentialsTokenProvider({
-		authUrl: 'https://login.salesforce.com',
+		authUrl: 'https://login.salesforce.com/services/oauth2/token',
 		sfConnectedAppAuth: {
 			clientId: 'mock_client_id',
 			clientSecret: 'mock_client_secret',
