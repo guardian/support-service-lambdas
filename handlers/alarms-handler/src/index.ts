@@ -107,7 +107,7 @@ export async function getChatMessages(
 
 	if (message) {
 		const teams = appToTeams(message.app);
-		console.log(`app ${message.app} is assigned to teams ${teams.join(', ')}`);
+		logger.log(`app ${message.app} is assigned to teams ${teams.join(', ')}`);
 		const webhookUrls = teams.map((team) => configuredWebhookUrls[team]);
 		return { webhookUrls, body: message.body };
 	} else {
@@ -143,7 +143,7 @@ const buildSnsPublishMessage = ({
 
 	const app = messageAttributes.app?.Value;
 
-	console.log(`SNS publish message from ${app}`);
+	logger.log(`SNS publish message from ${app}`);
 
 	return { app, body: { text: message } };
 };

@@ -16,11 +16,29 @@ function getWrappedFailFn(logger: Logger) {
 	return logger.wrapFn(failFn);
 }
 
+function getWithContextSum(
+	logger: Logger,
+	newContextFromArgs?: (args: [number, number]) => string,
+	topLevel?: boolean,
+) {
+	const addNumbers = async (a: number, b: number) => {
+		logger.log('TEST');
+		return Promise.resolve(a + b);
+	};
+	return logger.withContext(addNumbers, newContextFromArgs, topLevel);
+}
+
+function logAfter(logger: Logger) {
+	logger.log('AFTER');
+}
+
 // end of section that you shouldn't reformat
 
 const expectedCallerInfo = '[logger.test.ts:5::getMessage]';
 const expectedWrappedSum = '[logger.test.ts:10::getWrappedSum]';
 const expectedWrappedFailFn = '[logger.test.ts:16::getWrappedFailFn]';
+const expectedWithContextSum = '[logger.test.ts:25::addNumbers]';
+const expectedLogAfter = '[logger.test.ts:32::logAfter]';
 
 test('it should be a no-op if theres no context', () => {
 	const logger = new Logger([]);
@@ -41,6 +59,114 @@ test('it should add space separated context when you add multiple items', () => 
 	expect(getMessage(logger)).toEqual(
 		'A-S123 Contribution ' + expectedCallerInfo + ' msg',
 	);
+});
+
+test('it should reset the context', () => {
+	const logger = new Logger();
+	logger.mutableAddContext('A-S123');
+	logger.mutableAddContext('Contribution');
+	expect(getMessage(logger)).toEqual(
+		'A-S123 Contribution ' + expectedCallerInfo + ' msg',
+	);
+	logger.resetContext();
+	expect(getMessage(logger)).toEqual('' + expectedCallerInfo + ' msg');
+});
+
+test('it should drop the right things', () => {
+	const logger = new Logger();
+	logger.mutableAddContext('A-S123');
+	logger.mutableAddContext('Contribution');
+	logger.mutableAddContext('Cheese');
+	expect(getMessage(logger)).toEqual(
+		'A-S123 Contribution Cheese ' + expectedCallerInfo + ' msg',
+	);
+	logger.dropContext('Contribution');
+	expect(getMessage(logger)).toEqual('A-S123 ' + expectedCallerInfo + ' msg');
+});
+
+describe('withContext', () => {
+	let logs: string[];
+	let errors: string[];
+
+	let logger: Logger;
+
+	beforeEach(() => {
+		logs = [];
+		errors = [];
+		logger = new Logger(
+			[],
+			(message) => logs.push(message),
+			(message) => errors.push(message),
+		);
+	});
+
+	test("it doesn't affect the context", async () => {
+		logger.mutableAddContext('CTX');
+		const wrappedSum = getWithContextSum(logger);
+		const result = await wrappedSum(2, 3);
+		logAfter(logger);
+
+		expect(result).toBe(5);
+
+		const expectedLog = `CTX ${expectedWithContextSum} TEST`;
+		const expectedLogAfter1 = `CTX ${expectedLogAfter} AFTER`;
+
+		expect(logs[0]).toEqual(expectedLog);
+		expect(logs[1]).toEqual(expectedLogAfter1);
+		expect(logs).toEqual([expectedLog, expectedLogAfter1]);
+		expect(errors).toEqual([]);
+	});
+
+	test("it clears the context if it's a handler", async () => {
+		logger.mutableAddContext('CTX');
+		const wrappedSum = getWithContextSum(logger, undefined, true);
+		const result = await wrappedSum(2, 3);
+		logAfter(logger);
+
+		expect(result).toBe(5);
+
+		const expectedLog = `${expectedWithContextSum} TEST`;
+		const expectedLogAfter1 = `${expectedLogAfter} AFTER`;
+
+		expect(logs[0]).toEqual(expectedLog);
+		expect(logs[1]).toEqual(expectedLogAfter1);
+		expect(logs).toEqual([expectedLog, expectedLogAfter1]);
+		expect(errors).toEqual([]);
+	});
+
+	test('it adds the context and removes it', async () => {
+		logger.mutableAddContext('CTX');
+		const wrappedSum = getWithContextSum(logger, ([a, b]) => `${a}+${b}`);
+		const result = await wrappedSum(2, 3);
+		logAfter(logger);
+
+		expect(result).toBe(5);
+
+		const expectedLog = `CTX 2+3 ${expectedWithContextSum} TEST`;
+		const expectedLogAfter1 = `CTX ${expectedLogAfter} AFTER`;
+
+		expect(logs[0]).toEqual(expectedLog);
+		expect(logs[1]).toEqual(expectedLogAfter1);
+		expect(logs).toEqual([expectedLog, expectedLogAfter1]);
+		expect(errors).toEqual([]);
+	});
+
+	test('it clears pre-existing context and adds the context', async () => {
+		logger.mutableAddContext('CTX');
+		const wrappedSum = getWithContextSum(logger, ([a, b]) => `${a}+${b}`, true);
+		const result = await wrappedSum(2, 3);
+		logAfter(logger);
+
+		expect(result).toBe(5);
+
+		const expectedLog = `2+3 ${expectedWithContextSum} TEST`;
+		const expectedLogAfter1 = `${expectedLogAfter} AFTER`;
+
+		expect(logs[0]).toEqual(expectedLog);
+		expect(logs[1]).toEqual(expectedLogAfter1);
+		expect(logs).toEqual([expectedLog, expectedLogAfter1]);
+		expect(errors).toEqual([]);
+	});
 });
 
 describe('wrapFn', () => {

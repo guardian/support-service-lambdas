@@ -1,3 +1,4 @@
+import { logger } from '@modules/routing/logger';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 
@@ -38,7 +39,7 @@ export function buildDiagnosticLinks(
 				},
 			];
 		} else {
-			console.log('unknown DiagnosticLinks tag prefix', diagnosticUrlTemplate);
+			logger.log('unknown DiagnosticLinks tag prefix', diagnosticUrlTemplate);
 			return [];
 		}
 	});

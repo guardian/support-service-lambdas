@@ -4,6 +4,7 @@ import type { SQSEvent } from 'aws-lambda';
 export const handlerTestEvent: SQSEvent = {
 	Records: [
 		{
+			messageId: '2daffc65-9dad-4de5-9401-e76116591b6b',
 			body: JSON.stringify({
 				Message: JSON.stringify({
 					AlarmArn:

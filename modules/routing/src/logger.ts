@@ -1,4 +1,5 @@
 import * as console from 'node:console';
+import { mapOption } from '@modules/nullAndUndefined';
 import { ZodType } from 'zod';
 
 function extractParamNames(fnString: string) {
@@ -20,12 +21,24 @@ export class Logger {
 	) {}
 
 	public resetContext(): void {
-		this.logFn('logger: resetting context from ' + this.prefix.join(', '));
 		this.prefix = [];
 	}
 
+	public dropContext(value: string): void {
+		const index = this.prefix.indexOf(value);
+		if (index !== -1) {
+			this.prefix = this.prefix.slice(0, index);
+		} else {
+			this.logFn(
+				this.getMessage(
+					this.getCallerInfo(),
+					`dropContext: context value "${value}" not found`,
+				),
+			);
+		}
+	}
+
 	public mutableAddContext(value: string): void {
-		this.logFn('logger: adding context ' + value);
 		this.prefix.push(value);
 	}
 
@@ -207,35 +220,35 @@ export class Logger {
 	}
 
 	/**
-	 * This function wraps an existing function similar to wrapFn, but resets the logger context before each invocation.
+	 * This function wraps an existing function but resets the logger context before each invocation.
 	 * Useful for router functions where each request should start with a clean context.
 	 *
 	 * @param fn the function to wrap
-	 * @param functionName an optional free text string to identify the function called
-	 * @param fnAsString if you have to call .bind(this) on your function, pass in function.toString() here to retain parameter names
-	 * @param shortArgsNum when the function returns, one argument will be logged again for identification purposes, this overrides that
+	 * @param newContextFromArgs
+	 * @param topLevel if it's a top level handler it will reset the context
 	 */
-	wrapRouter<TArgs extends unknown[], TReturn>(
+	withContext<TArgs extends unknown[], TReturn>(
 		fn: AsyncFunction<TArgs, TReturn>,
-		functionName?: string | (() => string),
-		fnAsString?: string,
-		shortArgsNum?: number,
-		maybeCallerInfo?: string,
+		newContextFromArgs?: (args: TArgs) => string,
+		topLevel?: boolean,
 	): AsyncFunction<TArgs, TReturn> {
-		const callerInfo = maybeCallerInfo ?? this.getCallerInfo();
-		const wrappedFn = this.wrapFn(
-			fn,
-			functionName,
-			fnAsString,
-			shortArgsNum,
-			callerInfo,
-		);
-
 		return async (...args: TArgs): Promise<TReturn> => {
-			this.resetContext();
-			return wrappedFn(...args).then((result) => {
+			if (topLevel) {
 				this.resetContext();
-				return result;
+			}
+			const context = mapOption(newContextFromArgs, (newContextFromArgs) =>
+				newContextFromArgs(args),
+			);
+			if (context !== undefined) {
+				this.mutableAddContext(context);
+			}
+			return fn(...args).finally(() => {
+				if (context !== undefined) {
+					this.dropContext(context);
+				}
+				if (topLevel) {
+					this.resetContext();
+				}
 			});
 		};
 	}
