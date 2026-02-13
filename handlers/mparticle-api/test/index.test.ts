@@ -28,6 +28,7 @@ jest.mock('@modules/routing/logger', () => ({
 		log: jest.fn(),
 		error: jest.fn(),
 		getCallerInfo: jest.fn(() => 'index.test.ts'),
+		mutableAddContext: jest.fn(),
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-return -- Mock wrapper function
 		wrapFn: jest.fn((fn) => fn),
 	},

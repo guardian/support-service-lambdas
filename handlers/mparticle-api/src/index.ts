@@ -123,6 +123,9 @@ async function processSQSRecord(
 		JSON.parse(snsNotification.Message),
 	);
 
+	// Add userId to logger context for correlation
+	logger.mutableAddContext(body.userId);
+
 	await processUserDeletion(
 		body.userId,
 		body.brazeId,
