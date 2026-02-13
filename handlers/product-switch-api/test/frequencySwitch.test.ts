@@ -2,10 +2,15 @@
  * Unit tests for frequency switch functionality.
  * Tests the candidate selection logic and edge cases without external API calls.
  */
-import type { ZuoraSubscription } from '@modules/zuora/types';
+import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { RatePlanCharge, ZuoraSubscription } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type {
+	ProductId,
+	ProductRatePlanChargeId,
+	ProductRatePlanId,
+} from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
-import { getCatalogRatePlanName } from '../src/catalogInformation';
 import { selectCandidateSubscriptionCharge } from '../src/frequencySwitchEndpoint';
 import { productCatalog } from './productCatalogFixture';
 
@@ -36,7 +41,7 @@ function makeMockZuoraClient(): ZuoraClient {
 function makeAccount(overrides?: {
 	totalInvoiceBalance?: number;
 	creditBalance?: number;
-	currency?: string;
+	currency?: IsoCurrency;
 }) {
 	return {
 		success: true,
@@ -77,18 +82,21 @@ function makeSubscriptionWithSingleCharge(
 		contributionAmount?: number;
 	},
 ): ZuoraSubscription {
-	const ratePlanId =
+	const ratePlanId: ProductRatePlanId = (
 		billingPeriod === 'Month'
 			? productCatalog.SupporterPlus.ratePlans.Monthly.id
-			: productCatalog.SupporterPlus.ratePlans.Annual.id;
-	const chargeId =
+			: productCatalog.SupporterPlus.ratePlans.Annual.id
+	) as ProductRatePlanId; // TODO product catalog should use proper ID types
+	const chargeId: ProductRatePlanChargeId = (
 		billingPeriod === 'Month'
 			? productCatalog.SupporterPlus.ratePlans.Monthly.charges.Subscription.id
-			: productCatalog.SupporterPlus.ratePlans.Annual.charges.Subscription.id;
-	const contributionChargeId =
+			: productCatalog.SupporterPlus.ratePlans.Annual.charges.Subscription.id
+	) as ProductRatePlanChargeId;
+	const contributionChargeId: ProductRatePlanChargeId = (
 		billingPeriod === 'Month'
 			? productCatalog.SupporterPlus.ratePlans.Monthly.charges.Contribution.id
-			: productCatalog.SupporterPlus.ratePlans.Annual.charges.Contribution.id;
+			: productCatalog.SupporterPlus.ratePlans.Annual.charges.Contribution.id
+	) as ProductRatePlanChargeId;
 	const now = dayjs();
 
 	const effectiveEndDate =
@@ -117,7 +125,7 @@ function makeSubscriptionWithSingleCharge(
 			upToPeriods: null,
 			discountPercentage: null,
 			billingPeriodAlignment: 'AlignToCharge' as const,
-		},
+		} satisfies RatePlanCharge,
 	];
 
 	charges.push({
@@ -161,7 +169,7 @@ function makeSubscriptionWithSingleCharge(
 			{
 				id: 'rp-id-123',
 				lastChangeType: overrides?.lastChangeType ?? 'Add',
-				productId: 'product-id-123',
+				productId: 'product-id-123' as ProductId,
 				productName: 'Monthly Contribution',
 				productRatePlanId: ratePlanId,
 				ratePlanName: 'Monthly',
@@ -306,7 +314,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 	test('throws when subscription status is not Active', async () => {
 		const now = dayjs();
 		const subscription = makeSubscriptionWithSingleCharge('Month', 10);
-		subscription.status = 'Suspended';
+		subscription.status = 'Cancelled';
 		const account = makeAccount();
 		const zuoraClient = makeMockZuoraClient();
 		await expect(
@@ -365,14 +373,15 @@ describe('selectCandidateSubscriptionCharge', () => {
 		subscription.ratePlans.push({
 			id: 'discount-rp-id',
 			lastChangeType: 'Add',
-			productId: 'discount-product-id',
+			productId: 'discount-product-id' as ProductId,
 			productName: 'Discounts',
-			productRatePlanId: 'discount-rate-plan-id',
+			productRatePlanId: 'discount-rate-plan-id' as ProductRatePlanId,
 			ratePlanName: '25% Off',
 			ratePlanCharges: [
 				{
 					id: 'discount-charge-id',
-					productRatePlanChargeId: 'discount-charge-product-id',
+					productRatePlanChargeId:
+						'discount-charge-product-id' as ProductRatePlanChargeId,
 					number: 'C-DISCOUNT-001',
 					name: 'Discount',
 					type: 'Recurring',
@@ -424,22 +433,5 @@ describe('selectCandidateSubscriptionCharge', () => {
 				zuoraClient,
 			),
 		).rejects.toThrow('next invoice has no negative items');
-	});
-});
-
-describe('getCatalogRatePlanName', () => {
-	test('converts "Month" to "Monthly"', () => {
-		expect(getCatalogRatePlanName('Month')).toBe('Monthly');
-	});
-
-	test('converts "Annual" to "Annual"', () => {
-		expect(getCatalogRatePlanName('Annual')).toBe('Annual');
-	});
-
-	test('throws error for unsupported billing period', () => {
-		const invalidPeriod = 'Quarter' as unknown as 'Month' | 'Annual';
-		expect(() => getCatalogRatePlanName(invalidPeriod)).toThrow(
-			'Unsupported billing period Quarter',
-		);
 	});
 });

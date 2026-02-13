@@ -1,13 +1,18 @@
 import { findDuplicates } from '@modules/arrayFunctions';
 import type { Stage } from '@modules/stage';
 import { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import codeZuoraCatalog from '../../zuora-catalog/test/fixtures/catalog-code.json';
 import prodZuoraCatalog from '../../zuora-catalog/test/fixtures/catalog-prod.json';
 
-const codeProductCatalog = generateProductCatalog(codeZuoraCatalog);
-const prodProductCatalog = generateProductCatalog(prodZuoraCatalog);
+const codeProductCatalog = generateProductCatalog(
+	zuoraCatalogSchema.parse(codeZuoraCatalog),
+);
+const prodProductCatalog = generateProductCatalog(
+	zuoraCatalogSchema.parse(prodZuoraCatalog),
+);
 const codeCatalogHelper = new ProductCatalogHelper(codeProductCatalog);
 const prodCatalogHelper = new ProductCatalogHelper(prodProductCatalog);
 test('We can find a product rate plan from product details', () => {
@@ -55,8 +60,14 @@ test('We can find product details for a Guardian Patron', () => {
 const zuoraProductExistsInCatalog = (stage: Stage) => {
 	const [zuoraCatalog, productCatalog] =
 		stage === 'CODE'
-			? [new ZuoraCatalogHelper(codeZuoraCatalog), codeCatalogHelper]
-			: [new ZuoraCatalogHelper(prodZuoraCatalog), prodCatalogHelper];
+			? [
+					new ZuoraCatalogHelper(zuoraCatalogSchema.parse(codeZuoraCatalog)),
+					codeCatalogHelper,
+				]
+			: [
+					new ZuoraCatalogHelper(zuoraCatalogSchema.parse(prodZuoraCatalog)),
+					prodCatalogHelper,
+				];
 	const allProductDetails =
 		productCatalog.getAllProductDetailsForBillingSystem('zuora');
 

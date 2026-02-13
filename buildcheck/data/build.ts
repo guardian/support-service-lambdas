@@ -395,6 +395,15 @@ const moduleEmail: ModuleDefinition = {
 	},
 };
 
+const moduleGuardianSubscription: ModuleDefinition = {
+	name: 'guardian-subscription',
+	dependencies: { ...dep['dayjs'] },
+	devDependencies: {
+		...dep['@aws-sdk/client-cloudwatch-logs'],
+		...dep['@aws-sdk/credential-providers'],
+	},
+};
+
 const moduleIdentity: ModuleDefinition = {
 	name: 'identity',
 	dependencies: {
@@ -592,6 +601,7 @@ export const build: BuildDefinition = {
 		moduleAws,
 		moduleBigquery,
 		moduleEmail,
+		moduleGuardianSubscription,
 		moduleIdentity,
 		moduleInternationalisation,
 		moduleProductBenefits,

@@ -3,6 +3,7 @@ import type { EmailMessageWithUserId } from '@modules/email/email';
 import { DataExtensionNames, sendEmail } from '@modules/email/email';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { getCurrencyInfo } from '@modules/internationalisation/currency';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import dayjs from 'dayjs';
 import type { SwitchInformation } from './switchInformation';
 
@@ -53,11 +54,14 @@ export const sendThankYouEmail = async (
 	const { subscriptionNumber, currency, billingPeriod } =
 		switchInformation.subscription;
 
-	const billingPeriodMonths: number = {
+	const billingPeriodMap: Partial<Record<BillingPeriod, number>> = {
 		Month: 1,
-		Quarter: 3,
 		Annual: 12,
-	}[switchInformation.subscription.billingPeriod];
+	};
+	const billingPeriodMonths: number = getIfDefined(
+		billingPeriodMap[switchInformation.subscription.billingPeriod],
+		'unsupported billing period for switch',
+	);
 
 	const emailMessage: EmailMessageWithUserId = buildEmailMessage(
 		{

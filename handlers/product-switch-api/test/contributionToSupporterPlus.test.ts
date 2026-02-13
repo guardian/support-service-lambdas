@@ -12,6 +12,7 @@ import {
 	zuoraAccountSchema,
 	zuoraSubscriptionSchema,
 } from '@modules/zuora/types';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 import {
@@ -31,7 +32,7 @@ import subscriptionJson from './fixtures/subscription.json';
 import zuoraSubscriptionWithMonthlyContribution from './fixtures/zuora-subscription-with-monthly-contribution.json';
 
 export const getProductCatalogFromFixture = (): ProductCatalog =>
-	generateProductCatalog(zuoraCatalogFixture);
+	generateProductCatalog(zuoraCatalogSchema.parse(zuoraCatalogFixture));
 
 test('startNewTerm is only true when the termStartDate is before today', async () => {
 	const today = dayjs('2024-05-09T23:10:10.663+01:00');
