@@ -15,6 +15,9 @@ export class SfClient extends RestClient {
 		super(tokenProvider);
 	}
 
+	/**
+	 * @deprecated Use createWithClientCredentials instead, for grant_type: client_credentials
+	 */
 	static async createWithPasswordFlow(secretNames: SecretNames) {
 		const credentials = await getSfPasswordFlowCredentials(secretNames);
 		const tokenProvider = new SfPasswordFlowTokenProvider(credentials);
