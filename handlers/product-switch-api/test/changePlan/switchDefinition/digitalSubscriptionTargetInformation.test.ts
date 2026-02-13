@@ -13,7 +13,7 @@ const annualDigitalSubscriptionRatePlan =
 	productCatalog.DigitalSubscription.ratePlans.Annual;
 
 describe('digitalSubscriptionTargetInformation', () => {
-	test("returns target info when amount doesn't inclide a contribution", async () => {
+	test("returns target info when amount doesn't include a contribution", async () => {
 		const catalogPrice = annualDigitalSubscriptionRatePlan.pricing.GBP;
 
 		const switchActionData: SwitchActionData = {
