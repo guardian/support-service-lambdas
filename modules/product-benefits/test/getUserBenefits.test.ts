@@ -93,9 +93,9 @@ test('getUserBenefitsFromUserProducts', () => {
 	expect(getUserBenefitsFromUserProducts(['TierThree'])).toEqual(
 		digitalSubscriptionBenefits,
 	);
-	expect(getUserBenefitsFromUserProducts(['GuardianWeeklyDomestic'])).toEqual([
-		'hideSupportMessaging',
-	]);
+	expect(getUserBenefitsFromUserProducts(['GuardianWeeklyDomestic'])).toEqual(
+		digitalSubscriptionBenefits,
+	);
 	expect(getUserBenefitsFromUserProducts([])).toEqual([]);
 });
 
