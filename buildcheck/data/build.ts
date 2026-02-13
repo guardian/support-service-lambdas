@@ -94,6 +94,23 @@ const generateProductCatalog: HandlerDefinition = {
 	},
 };
 
+const imovoVoucherApi: HandlerDefinition = {
+	name: 'imovo-voucher-api',
+	dependencies: {
+		...dep['@aws-sdk/client-secrets-manager'],
+		...dep['@aws-sdk/client-dynamodb'],
+		...dep['@aws-sdk/util-dynamodb'],
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+		...devDeps['tsx'],
+	},
+	extraScripts: {
+		'run-local': 'tsx src/runLocal.ts',
+	},
+};
+
 const metricPushApi: HandlerDefinition = {
 	name: 'metric-push-api',
 	jestClearMocks: true,
@@ -561,6 +578,7 @@ export const build: BuildDefinition = {
 		discountApi,
 		discountExpiryNotifier,
 		generateProductCatalog,
+		imovoVoucherApi,
 		metricPushApi,
 		mobilePurchasesToSupporterProductData,
 		mparticleApi,

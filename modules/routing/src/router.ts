@@ -118,9 +118,8 @@ export function Router(
 			}
 			return NotFoundResponse;
 		} catch (error) {
-			console.log('Caught exception with message: ', error);
+			logger.log('Caught exception with message: ', error);
 			if (error instanceof ValidationError) {
-				console.log(`Validation failure: ${error.message}`);
 				return {
 					body: error.message,
 					statusCode: 400,

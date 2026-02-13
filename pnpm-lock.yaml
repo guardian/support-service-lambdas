@@ -193,6 +193,28 @@ importers:
         specifier: ^8.10.147
         version: 8.10.158
 
+  handlers/imovo-voucher-api:
+    dependencies:
+      '@aws-sdk/client-dynamodb':
+        specifier: ^3.940.0
+        version: 3.940.0
+      '@aws-sdk/client-secrets-manager':
+        specifier: ^3.940.0
+        version: 3.940.0
+      '@aws-sdk/util-dynamodb':
+        specifier: ^3.940.0
+        version: 3.940.0(@aws-sdk/client-dynamodb@3.940.0)
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.147
+        version: 8.10.158
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
+
   handlers/metric-push-api:
     devDependencies:
       '@types/aws-lambda':
