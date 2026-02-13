@@ -71,11 +71,6 @@ export class BrazeClient {
 			external_ids: [userId],
 		};
 
-		const fullUrl = `${this.rest.baseURL}/users/delete`;
-		logger.log(
-			`Braze DELETE request - URL: ${fullUrl}, userId: ${userId}, body: ${JSON.stringify(requestBody)}`,
-		);
-
 		try {
 			return await this.rest.makeRESTRequest(logger.getCallerInfo(1))(
 				'POST',
