@@ -207,10 +207,10 @@ describe('Logger.joinLines', () => {
 		const primitives = [42, 'hello', true, null, undefined];
 		const shortArray = [1, 2, 3];
 		const longArray = Array.from({ length: 30 }, (_, i) => i + 1);
-		const shortObject = { a: 1, b: 'x' };
+		const shortObject = { a: 1, b: '{"hello": "fish"}' };
 		const longObject = {
 			a: 1,
-			b: 'x',
+			b: '{"hello": "fish"}',
 			c: 'y',
 			d: 'z',
 			e: 'w',
@@ -280,10 +280,10 @@ describe('Logger.joinLines', () => {
   29,
   30
 ]\n` +
-				'{ a: 1, b: "x" }\n' +
+				'{ a: 1, b: "{\\"hello\\": \\"fish\\"}" }\n' +
 				`{
   a: 1,
-  b: "x",
+  b: "{\\"hello\\": \\"fish\\"}",
   c: "y",
   d: "z",
   e: "w",

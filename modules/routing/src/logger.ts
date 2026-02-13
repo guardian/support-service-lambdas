@@ -96,12 +96,15 @@ export class Logger {
 	private objectToPrettyString(object: unknown) {
 		try {
 			const jsonString = JSON.stringify(object)
-				.replace(/"([^"]+)":/g, ' $1: ') // Remove quotes around keys
+				.replace(/"([A-Za-z0-9]+)":/g, ' $1: ') // Remove quotes around keys
 				.replace(/}$/, ' }');
 			if (jsonString.length <= 80) {
 				return jsonString;
 			}
-			return JSON.stringify(object, null, 2).replace(/"([^"]+)":/g, '$1:');
+			return JSON.stringify(object, null, 2).replace(
+				/"([A-Za-z0-9]+)":/g,
+				'$1:',
+			);
 		} catch (e) {
 			console.error('caught error when trying to serialise log line', e);
 			return String(object);
