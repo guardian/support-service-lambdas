@@ -40,6 +40,7 @@ export const DataExtensionNames = {
 		'supporter-plus-annual-discount-confirmation-email',
 	discountExpiryNotificationEmail: 'discount-expiry-email',
 	stripeDisputeCancellation: 'stripe-dispute-cancellation',
+	imovoVoucherReward: 'imovo-voucher-reward',
 	supporterPlusFrequencySwitchConfirmation:
 		'SV_MonthlyToAnnualSwitchConfirmation',
 	day0Emails: {

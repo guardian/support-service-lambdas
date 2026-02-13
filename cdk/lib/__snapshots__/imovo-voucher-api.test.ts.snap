@@ -8,34 +8,6 @@ exports[`The Imovo voucher API stack matches the snapshot 1`] = `
     ],
     "gu:cdk:version": "TEST",
   },
-  "Outputs": {
-    "LambdaRestApiEndpoint7EDBC694": {
-      "Value": {
-        "Fn::Join": [
-          "",
-          [
-            "https://",
-            {
-              "Ref": "LambdaRestApi687C4D83",
-            },
-            ".execute-api.",
-            {
-              "Ref": "AWS::Region",
-            },
-            ".",
-            {
-              "Ref": "AWS::URLSuffix",
-            },
-            "/",
-            {
-              "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
-            },
-            "/",
-          ],
-        ],
-      },
-    },
-  },
   "Parameters": {
     "DistributionBucketName": {
       "Default": "/account/services/artifact.bucket",
@@ -44,57 +16,86 @@ exports[`The Imovo voucher API stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
-    "BasePathMapping": {
+    "AllowSQSSendMessagetoBrazeEmailsQueue57881AF5": {
       "Properties": {
-        "DomainName": {
-          "Ref": "DomainName",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:GetQueueUrl",
+                "sqs:SendMessage",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sqs:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":braze-emails-CODE",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
         },
-        "RestApiId": {
-          "Ref": "LambdaRestApi687C4D83",
-        },
-        "Stage": {
-          "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
-        },
-      },
-      "Type": "AWS::ApiGateway::BasePathMapping",
-    },
-    "DNSRecord": {
-      "Properties": {
-        "HostedZoneId": "Z3KO35ELNWZMSX",
-        "Name": "imovo-voucher-api-code.support.guardianapis.com",
-        "ResourceRecords": [
+        "PolicyName": "AllowSQSSendMessagetoBrazeEmailsQueue57881AF5",
+        "Roles": [
           {
-            "Fn::GetAtt": [
-              "DomainName",
-              "RegionalDomainName",
-            ],
+            "Ref": "LambdaServiceRoleA8ED4D3B",
           },
         ],
-        "TTL": "120",
-        "Type": "CNAME",
       },
-      "Type": "AWS::Route53::RecordSet",
+      "Type": "AWS::IAM::Policy",
     },
-    "DomainName": {
+    "AllowSecretsManagerimovoAPIkey2B8DE8A7": {
       "Properties": {
-        "DomainName": "imovo-voucher-api-code.support.guardianapis.com",
-        "EndpointConfiguration": {
-          "Types": [
-            "REGIONAL",
-          ],
-        },
-        "RegionalCertificateArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:aws:acm:eu-west-1:",
-              {
-                "Ref": "AWS::AccountId",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:CODE/imovo-voucher-api/api-key",
+                  ],
+                ],
               },
-              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
-            ],
+            },
           ],
+          "Version": "2012-10-17",
         },
+        "PolicyName": "AllowSecretsManagerimovoAPIkey2B8DE8A7",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "DLQ581697C4": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "imovo-voucher-api-dlq-CODE",
         "Tags": [
           {
             "Key": "App",
@@ -118,7 +119,8 @@ exports[`The Imovo voucher API stack matches the snapshot 1`] = `
           },
         ],
       },
-      "Type": "AWS::ApiGateway::DomainName",
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
     },
     "LambdaD247545B": {
       "DependsOn": [
@@ -132,13 +134,17 @@ exports[`The Imovo voucher API stack matches the snapshot 1`] = `
           },
           "S3Key": "support/CODE/imovo-voucher-api/imovo-voucher-api.zip",
         },
-        "Description": "A lambda that handles Imovo reward voucher operations",
+        "Description": "Processes voucher requests from SQS, calls i-movo API, and sends confirmation emails via Braze",
         "Environment": {
           "Variables": {
             "APP": "imovo-voucher-api",
+            "IMOVO_API_BASE_URL": "https://imovocoreapi.tstpaypoint.services",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
+            "VOUCHER_TABLE_NAME": {
+              "Ref": "VoucherTable1AB9F1C6",
+            },
           },
         },
         "FunctionName": "imovo-voucher-api-CODE",
@@ -176,508 +182,9 @@ exports[`The Imovo voucher API stack matches the snapshot 1`] = `
             "Value": "CODE",
           },
         ],
-        "Timeout": 300,
+        "Timeout": 30,
       },
       "Type": "AWS::Lambda::Function",
-    },
-    "LambdaRestApi687C4D83": {
-      "Properties": {
-        "ApiKeySourceType": "HEADER",
-        "Description": "API Gateway created by CDK",
-        "Name": "imovo-voucher-api-CODE",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "imovo-voucher-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::RestApi",
-    },
-    "LambdaRestApiANYApiPermissionTestimovovoucherapiCODELambdaRestApi25BF258DANY8C967452": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "LambdaD247545B",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "LambdaRestApi687C4D83",
-              },
-              "/test-invoke-stage/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "LambdaRestApiANYApiPermissionimovovoucherapiCODELambdaRestApi25BF258DANYCCEF64A5": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "LambdaD247545B",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "LambdaRestApi687C4D83",
-              },
-              "/",
-              {
-                "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
-              },
-              "/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "LambdaRestApiANYC3C9D364": {
-      "Properties": {
-        "ApiKeyRequired": true,
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "LambdaD247545B",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Fn::GetAtt": [
-            "LambdaRestApi687C4D83",
-            "RootResourceId",
-          ],
-        },
-        "RestApiId": {
-          "Ref": "LambdaRestApi687C4D83",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "LambdaRestApiAccount4E23441E": {
-      "DeletionPolicy": "Retain",
-      "DependsOn": [
-        "LambdaRestApi687C4D83",
-      ],
-      "Properties": {
-        "CloudWatchRoleArn": {
-          "Fn::GetAtt": [
-            "LambdaRestApiCloudWatchRole73082DF6",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::ApiGateway::Account",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "LambdaRestApiApiKeyB5CCCA11": {
-      "Properties": {
-        "Enabled": true,
-        "Name": "imovo-voucher-api-key-CODE",
-        "StageKeys": [
-          {
-            "RestApiId": {
-              "Ref": "LambdaRestApi687C4D83",
-            },
-            "StageName": {
-              "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
-            },
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "imovo-voucher-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::ApiKey",
-    },
-    "LambdaRestApiCloudWatchRole73082DF6": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "apigateway.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "imovo-voucher-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "LambdaRestApiDeployment95319089510fc75709f25a8b1c7e4c94aa41ec3b": {
-      "DependsOn": [
-        "LambdaRestApiproxyANY486C4D1F",
-        "LambdaRestApiproxy22103CFD",
-        "LambdaRestApiANYC3C9D364",
-      ],
-      "Properties": {
-        "Description": "API Gateway created by CDK",
-        "RestApiId": {
-          "Ref": "LambdaRestApi687C4D83",
-        },
-      },
-      "Type": "AWS::ApiGateway::Deployment",
-    },
-    "LambdaRestApiDeploymentStageCODECCF2AEE8": {
-      "DependsOn": [
-        "LambdaRestApiAccount4E23441E",
-      ],
-      "Properties": {
-        "DeploymentId": {
-          "Ref": "LambdaRestApiDeployment95319089510fc75709f25a8b1c7e4c94aa41ec3b",
-        },
-        "RestApiId": {
-          "Ref": "LambdaRestApi687C4D83",
-        },
-        "StageName": "CODE",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "imovo-voucher-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::Stage",
-    },
-    "LambdaRestApiUsagePlanD8F7DB8D": {
-      "Properties": {
-        "ApiStages": [
-          {
-            "ApiId": {
-              "Ref": "LambdaRestApi687C4D83",
-            },
-            "Stage": {
-              "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
-            },
-            "Throttle": {},
-          },
-        ],
-        "Description": "REST endpoints for imovo-voucher-api",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "imovo-voucher-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "UsagePlanName": "imovo-voucher-api-CODE",
-      },
-      "Type": "AWS::ApiGateway::UsagePlan",
-    },
-    "LambdaRestApiUsagePlanUsagePlanKeyResourceimovovoucherapiCODELambdaRestApiApiKeyBE23603B74FE5A34": {
-      "Properties": {
-        "KeyId": {
-          "Ref": "LambdaRestApiApiKeyB5CCCA11",
-        },
-        "KeyType": "API_KEY",
-        "UsagePlanId": {
-          "Ref": "LambdaRestApiUsagePlanD8F7DB8D",
-        },
-      },
-      "Type": "AWS::ApiGateway::UsagePlanKey",
-    },
-    "LambdaRestApiproxy22103CFD": {
-      "Properties": {
-        "ParentId": {
-          "Fn::GetAtt": [
-            "LambdaRestApi687C4D83",
-            "RootResourceId",
-          ],
-        },
-        "PathPart": "{proxy+}",
-        "RestApiId": {
-          "Ref": "LambdaRestApi687C4D83",
-        },
-      },
-      "Type": "AWS::ApiGateway::Resource",
-    },
-    "LambdaRestApiproxyANY486C4D1F": {
-      "Properties": {
-        "ApiKeyRequired": true,
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "LambdaD247545B",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Ref": "LambdaRestApiproxy22103CFD",
-        },
-        "RestApiId": {
-          "Ref": "LambdaRestApi687C4D83",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "LambdaRestApiproxyANYApiPermissionTestimovovoucherapiCODELambdaRestApi25BF258DANYproxy7C38CE26": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "LambdaD247545B",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "LambdaRestApi687C4D83",
-              },
-              "/test-invoke-stage/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "LambdaRestApiproxyANYApiPermissionimovovoucherapiCODELambdaRestApi25BF258DANYproxy7D025E73": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "LambdaD247545B",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "LambdaRestApi687C4D83",
-              },
-              "/",
-              {
-                "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
-              },
-              "/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
     },
     "LambdaServiceRoleA8ED4D3B": {
       "Properties": {
@@ -820,6 +327,43 @@ exports[`The Imovo voucher API stack matches the snapshot 1`] = `
                 ],
               },
             },
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "Queue4A7E3555",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "VoucherTable1AB9F1C6",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Ref": "AWS::NoValue",
+                },
+              ],
+            },
           ],
           "Version": "2012-10-17",
         },
@@ -831,6 +375,140 @@ exports[`The Imovo voucher API stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "LambdaSqsEventSourceimovovoucherapiCODEQueueF8AFE1FCC77DE7BF": {
+      "Properties": {
+        "BatchSize": 1,
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "Queue4A7E3555",
+            "Arn",
+          ],
+        },
+        "FunctionName": {
+          "Ref": "LambdaD247545B",
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "imovo-voucher-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "Queue4A7E3555": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "QueueName": "imovo-voucher-api-queue-CODE",
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "DLQ581697C4",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 3,
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "imovo-voucher-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "VisibilityTimeout": 60,
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "VoucherTable1AB9F1C6": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "identityId",
+            "AttributeType": "S",
+          },
+          {
+            "AttributeName": "requestTimestamp",
+            "AttributeType": "S",
+          },
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "KeySchema": [
+          {
+            "AttributeName": "identityId",
+            "KeyType": "HASH",
+          },
+          {
+            "AttributeName": "requestTimestamp",
+            "KeyType": "RANGE",
+          },
+        ],
+        "PointInTimeRecoverySpecification": {
+          "PointInTimeRecoveryEnabled": true,
+        },
+        "SSESpecification": {
+          "SSEEnabled": true,
+        },
+        "TableName": "imovo-voucher-api-vouchers-CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "imovo-voucher-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::DynamoDB::Table",
+      "UpdateReplacePolicy": "Delete",
     },
   },
 }
@@ -844,34 +522,6 @@ exports[`The Imovo voucher API stack matches the snapshot 2`] = `
     ],
     "gu:cdk:version": "TEST",
   },
-  "Outputs": {
-    "LambdaRestApiEndpoint7EDBC694": {
-      "Value": {
-        "Fn::Join": [
-          "",
-          [
-            "https://",
-            {
-              "Ref": "LambdaRestApi687C4D83",
-            },
-            ".execute-api.",
-            {
-              "Ref": "AWS::Region",
-            },
-            ".",
-            {
-              "Ref": "AWS::URLSuffix",
-            },
-            "/",
-            {
-              "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
-            },
-            "/",
-          ],
-        ],
-      },
-    },
-  },
   "Parameters": {
     "DistributionBucketName": {
       "Default": "/account/services/artifact.bucket",
@@ -880,7 +530,7 @@ exports[`The Imovo voucher API stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
-    "ApiGateway5XXAlarmCDK11905206": {
+    "Alarm7103F465": {
       "Properties": {
         "ActionsEnabled": true,
         "AlarmActions": [
@@ -901,18 +551,66 @@ exports[`The Imovo voucher API stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "imovo-voucher-api returned a 5XX response. Search the logs below for "error" for more information. Impact: users may not receive their Imovo reward vouchers",
-        "AlarmName": "imovo-voucher-api-PROD 5XX errors",
-        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "imovo-voucher-api could not process a message and it ended up on the DLQ. Search the logs below for "error" for more information. Impact: Users may not receive their i-movo reward vouchers. Check DLQ for failed messages.
+DLQ: https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/sqs/v2/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#/queues/https%3A%2F%2Fsqs.",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".amazonaws.com%2F",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              "%2F",
+              {
+                "Fn::GetAtt": [
+                  "DLQ581697C4",
+                  "QueueName",
+                ],
+              },
+            ],
+          ],
+        },
+        "AlarmName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Fn::GetAtt": [
+                  "DLQ581697C4",
+                  "QueueName",
+                ],
+              },
+              " has messages",
+            ],
+          ],
+        },
+        "ComparisonOperator": "GreaterThanThreshold",
         "Dimensions": [
           {
-            "Name": "ApiName",
-            "Value": "imovo-voucher-api-PROD",
+            "Name": "QueueName",
+            "Value": {
+              "Fn::GetAtt": [
+                "DLQ581697C4",
+                "QueueName",
+              ],
+            },
           },
         ],
         "EvaluationPeriods": 1,
-        "MetricName": "5XXError",
-        "Namespace": "AWS/ApiGateway",
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
         "Period": 60,
         "Statistic": "Sum",
         "Tags": [
@@ -951,62 +649,90 @@ exports[`The Imovo voucher API stack matches the snapshot 2`] = `
             "Value": "PROD",
           },
         ],
-        "Threshold": 1,
-        "TreatMissingData": "notBreaching",
+        "Threshold": 0,
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
-    "BasePathMapping": {
+    "AllowSQSSendMessagetoBrazeEmailsQueue57881AF5": {
       "Properties": {
-        "DomainName": {
-          "Ref": "DomainName",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:GetQueueUrl",
+                "sqs:SendMessage",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sqs:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":braze-emails-PROD",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
         },
-        "RestApiId": {
-          "Ref": "LambdaRestApi687C4D83",
-        },
-        "Stage": {
-          "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
-        },
-      },
-      "Type": "AWS::ApiGateway::BasePathMapping",
-    },
-    "DNSRecord": {
-      "Properties": {
-        "HostedZoneId": "Z3KO35ELNWZMSX",
-        "Name": "imovo-voucher-api.support.guardianapis.com",
-        "ResourceRecords": [
+        "PolicyName": "AllowSQSSendMessagetoBrazeEmailsQueue57881AF5",
+        "Roles": [
           {
-            "Fn::GetAtt": [
-              "DomainName",
-              "RegionalDomainName",
-            ],
+            "Ref": "LambdaServiceRoleA8ED4D3B",
           },
         ],
-        "TTL": "120",
-        "Type": "CNAME",
       },
-      "Type": "AWS::Route53::RecordSet",
+      "Type": "AWS::IAM::Policy",
     },
-    "DomainName": {
+    "AllowSecretsManagerimovoAPIkey2B8DE8A7": {
       "Properties": {
-        "DomainName": "imovo-voucher-api.support.guardianapis.com",
-        "EndpointConfiguration": {
-          "Types": [
-            "REGIONAL",
-          ],
-        },
-        "RegionalCertificateArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:aws:acm:eu-west-1:",
-              {
-                "Ref": "AWS::AccountId",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:PROD/imovo-voucher-api/api-key",
+                  ],
+                ],
               },
-              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
-            ],
+            },
           ],
+          "Version": "2012-10-17",
         },
+        "PolicyName": "AllowSecretsManagerimovoAPIkey2B8DE8A7",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "DLQ581697C4": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "imovo-voucher-api-dlq-PROD",
         "Tags": [
           {
             "Key": "App",
@@ -1030,7 +756,8 @@ exports[`The Imovo voucher API stack matches the snapshot 2`] = `
           },
         ],
       },
-      "Type": "AWS::ApiGateway::DomainName",
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
     },
     "LambdaD247545B": {
       "DependsOn": [
@@ -1044,13 +771,17 @@ exports[`The Imovo voucher API stack matches the snapshot 2`] = `
           },
           "S3Key": "support/PROD/imovo-voucher-api/imovo-voucher-api.zip",
         },
-        "Description": "A lambda that handles Imovo reward voucher operations",
+        "Description": "Processes voucher requests from SQS, calls i-movo API, and sends confirmation emails via Braze",
         "Environment": {
           "Variables": {
             "APP": "imovo-voucher-api",
+            "IMOVO_API_BASE_URL": "https://imovocoreapi.paypoint.services",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",
+            "VOUCHER_TABLE_NAME": {
+              "Ref": "VoucherTable1AB9F1C6",
+            },
           },
         },
         "FunctionName": "imovo-voucher-api-PROD",
@@ -1088,508 +819,9 @@ exports[`The Imovo voucher API stack matches the snapshot 2`] = `
             "Value": "PROD",
           },
         ],
-        "Timeout": 300,
+        "Timeout": 30,
       },
       "Type": "AWS::Lambda::Function",
-    },
-    "LambdaRestApi687C4D83": {
-      "Properties": {
-        "ApiKeySourceType": "HEADER",
-        "Description": "API Gateway created by CDK",
-        "Name": "imovo-voucher-api-PROD",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "imovo-voucher-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::RestApi",
-    },
-    "LambdaRestApiANYApiPermissionTestimovovoucherapiPRODLambdaRestApiF262BEB8ANY54A1D5AF": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "LambdaD247545B",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "LambdaRestApi687C4D83",
-              },
-              "/test-invoke-stage/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "LambdaRestApiANYApiPermissionimovovoucherapiPRODLambdaRestApiF262BEB8ANY48BF82B4": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "LambdaD247545B",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "LambdaRestApi687C4D83",
-              },
-              "/",
-              {
-                "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
-              },
-              "/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "LambdaRestApiANYC3C9D364": {
-      "Properties": {
-        "ApiKeyRequired": true,
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "LambdaD247545B",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Fn::GetAtt": [
-            "LambdaRestApi687C4D83",
-            "RootResourceId",
-          ],
-        },
-        "RestApiId": {
-          "Ref": "LambdaRestApi687C4D83",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "LambdaRestApiAccount4E23441E": {
-      "DeletionPolicy": "Retain",
-      "DependsOn": [
-        "LambdaRestApi687C4D83",
-      ],
-      "Properties": {
-        "CloudWatchRoleArn": {
-          "Fn::GetAtt": [
-            "LambdaRestApiCloudWatchRole73082DF6",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::ApiGateway::Account",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "LambdaRestApiApiKeyB5CCCA11": {
-      "Properties": {
-        "Enabled": true,
-        "Name": "imovo-voucher-api-key-PROD",
-        "StageKeys": [
-          {
-            "RestApiId": {
-              "Ref": "LambdaRestApi687C4D83",
-            },
-            "StageName": {
-              "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
-            },
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "imovo-voucher-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::ApiKey",
-    },
-    "LambdaRestApiCloudWatchRole73082DF6": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "apigateway.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "imovo-voucher-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "LambdaRestApiDeployment95319089f6203bb2753e56d62eb0073bec64d774": {
-      "DependsOn": [
-        "LambdaRestApiproxyANY486C4D1F",
-        "LambdaRestApiproxy22103CFD",
-        "LambdaRestApiANYC3C9D364",
-      ],
-      "Properties": {
-        "Description": "API Gateway created by CDK",
-        "RestApiId": {
-          "Ref": "LambdaRestApi687C4D83",
-        },
-      },
-      "Type": "AWS::ApiGateway::Deployment",
-    },
-    "LambdaRestApiDeploymentStagePROD95065FBD": {
-      "DependsOn": [
-        "LambdaRestApiAccount4E23441E",
-      ],
-      "Properties": {
-        "DeploymentId": {
-          "Ref": "LambdaRestApiDeployment95319089f6203bb2753e56d62eb0073bec64d774",
-        },
-        "RestApiId": {
-          "Ref": "LambdaRestApi687C4D83",
-        },
-        "StageName": "PROD",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "imovo-voucher-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::Stage",
-    },
-    "LambdaRestApiUsagePlanD8F7DB8D": {
-      "Properties": {
-        "ApiStages": [
-          {
-            "ApiId": {
-              "Ref": "LambdaRestApi687C4D83",
-            },
-            "Stage": {
-              "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
-            },
-            "Throttle": {},
-          },
-        ],
-        "Description": "REST endpoints for imovo-voucher-api",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "imovo-voucher-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "UsagePlanName": "imovo-voucher-api-PROD",
-      },
-      "Type": "AWS::ApiGateway::UsagePlan",
-    },
-    "LambdaRestApiUsagePlanUsagePlanKeyResourceimovovoucherapiPRODLambdaRestApiApiKeyA10ADBF1FD43105B": {
-      "Properties": {
-        "KeyId": {
-          "Ref": "LambdaRestApiApiKeyB5CCCA11",
-        },
-        "KeyType": "API_KEY",
-        "UsagePlanId": {
-          "Ref": "LambdaRestApiUsagePlanD8F7DB8D",
-        },
-      },
-      "Type": "AWS::ApiGateway::UsagePlanKey",
-    },
-    "LambdaRestApiproxy22103CFD": {
-      "Properties": {
-        "ParentId": {
-          "Fn::GetAtt": [
-            "LambdaRestApi687C4D83",
-            "RootResourceId",
-          ],
-        },
-        "PathPart": "{proxy+}",
-        "RestApiId": {
-          "Ref": "LambdaRestApi687C4D83",
-        },
-      },
-      "Type": "AWS::ApiGateway::Resource",
-    },
-    "LambdaRestApiproxyANY486C4D1F": {
-      "Properties": {
-        "ApiKeyRequired": true,
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "LambdaD247545B",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Ref": "LambdaRestApiproxy22103CFD",
-        },
-        "RestApiId": {
-          "Ref": "LambdaRestApi687C4D83",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "LambdaRestApiproxyANYApiPermissionTestimovovoucherapiPRODLambdaRestApiF262BEB8ANYproxyDA137BB1": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "LambdaD247545B",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "LambdaRestApi687C4D83",
-              },
-              "/test-invoke-stage/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "LambdaRestApiproxyANYApiPermissionimovovoucherapiPRODLambdaRestApiF262BEB8ANYproxy005DC145": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "LambdaD247545B",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "LambdaRestApi687C4D83",
-              },
-              "/",
-              {
-                "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
-              },
-              "/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
     },
     "LambdaServiceRoleA8ED4D3B": {
       "Properties": {
@@ -1732,6 +964,43 @@ exports[`The Imovo voucher API stack matches the snapshot 2`] = `
                 ],
               },
             },
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "Queue4A7E3555",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "VoucherTable1AB9F1C6",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Ref": "AWS::NoValue",
+                },
+              ],
+            },
           ],
           "Version": "2012-10-17",
         },
@@ -1743,6 +1012,140 @@ exports[`The Imovo voucher API stack matches the snapshot 2`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "LambdaSqsEventSourceimovovoucherapiPRODQueueE2E8C8762CEBAC97": {
+      "Properties": {
+        "BatchSize": 1,
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "Queue4A7E3555",
+            "Arn",
+          ],
+        },
+        "FunctionName": {
+          "Ref": "LambdaD247545B",
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "imovo-voucher-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "Queue4A7E3555": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "QueueName": "imovo-voucher-api-queue-PROD",
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "DLQ581697C4",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 3,
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "imovo-voucher-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "VisibilityTimeout": 60,
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "VoucherTable1AB9F1C6": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "identityId",
+            "AttributeType": "S",
+          },
+          {
+            "AttributeName": "requestTimestamp",
+            "AttributeType": "S",
+          },
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "KeySchema": [
+          {
+            "AttributeName": "identityId",
+            "KeyType": "HASH",
+          },
+          {
+            "AttributeName": "requestTimestamp",
+            "KeyType": "RANGE",
+          },
+        ],
+        "PointInTimeRecoverySpecification": {
+          "PointInTimeRecoveryEnabled": true,
+        },
+        "SSESpecification": {
+          "SSEEnabled": true,
+        },
+        "TableName": "imovo-voucher-api-vouchers-PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "imovo-voucher-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::DynamoDB::Table",
+      "UpdateReplacePolicy": "Retain",
     },
   },
 }
