@@ -39,6 +39,13 @@ export class InvalidTokenError extends Error {
 	}
 }
 
+export class SigningKeyNotFoundError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = 'SigningKeyNotFoundError';
+	}
+}
+
 const loadOktaConfig = (stage: Stage): OktaConfig => {
 	if (stage === 'PROD') {
 		return {
@@ -104,6 +111,14 @@ export class OktaTokenHelper {
 					err.message === 'Jwt cannot be parsed'
 				) {
 					throw new InvalidTokenError('Jwt cannot be parsed');
+				}
+				if (
+					err.name === 'JwtParseError' &&
+					err.message.startsWith('Error while resolving signing key for kid')
+				) {
+					throw new SigningKeyNotFoundError(
+						'Unable to find a signing key for the token',
+					);
 				}
 				if (
 					/claim 'scp' value.*does not include expected value .*/.test(
