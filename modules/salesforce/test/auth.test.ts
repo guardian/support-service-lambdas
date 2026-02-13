@@ -48,7 +48,9 @@ describe('SfPasswordFlowTokenProvider', () => {
 		const [url, options] = calls[0]!;
 		expect(url).toBe('https://login.salesforce.com/services/oauth2/token');
 		expect(options?.method).toBe('POST');
-		expect(options?.headers).toEqual({ 'Content-Type': 'application/x-www-form-urlencoded' });
+		expect(options?.headers).toEqual({
+			'Content-Type': 'application/x-www-form-urlencoded',
+		});
 
 		const body = options?.body as string;
 		expect(body).toContain('grant_type=password');
@@ -126,7 +128,9 @@ describe('SfClientCredentialsTokenProvider', () => {
 		const [url, options] = calls[0]!;
 		expect(url).toBe('https://login.salesforce.com/services/oauth2/token');
 		expect(options?.method).toBe('POST');
-		expect(options?.headers).toEqual({ 'Content-Type': 'application/x-www-form-urlencoded' });
+		expect(options?.headers).toEqual({
+			'Content-Type': 'application/x-www-form-urlencoded',
+		});
 
 		const body = options?.body as string;
 		expect(body).toContain('grant_type=client_credentials');

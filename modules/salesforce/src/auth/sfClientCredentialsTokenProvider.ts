@@ -1,8 +1,8 @@
-import {getSecretValue} from "@modules/secrets-manager/getSecret";
+import { getSecretValue } from '@modules/secrets-manager/getSecret';
 import type { Authorisation, BearerTokenProvider } from '@modules/zuora/auth';
-import type { SfConnectedAppAuth} from '@modules/salesforce/auth/auth';
-import {authenticateSalesforce} from '@modules/salesforce/auth/auth';
-import type {ConnectedAppSecret} from "@modules/salesforce/secrets";
+import type { SfConnectedAppAuth } from '@modules/salesforce/auth/auth';
+import { authenticateSalesforce } from '@modules/salesforce/auth/auth';
+import type { ConnectedAppSecret } from '@modules/salesforce/secrets';
 
 export type SfClientCredentials = {
 	authUrl: string;
@@ -34,15 +34,13 @@ export class SfClientCredentialsTokenProvider implements BearerTokenProvider {
 }
 
 export async function getSfClientCredentials(
-    secretName: string,
+	secretName: string,
 ): Promise<SfClientCredentials> {
-    const { authUrl, clientId, clientSecret } =
-        await getSecretValue<ConnectedAppSecret>(
-            secretName,
-        );
+	const { authUrl, clientId, clientSecret } =
+		await getSecretValue<ConnectedAppSecret>(secretName);
 
-    return {
-        authUrl,
-        sfConnectedAppAuth: { clientId, clientSecret },
-    };
+	return {
+		authUrl,
+		sfConnectedAppAuth: { clientId, clientSecret },
+	};
 }

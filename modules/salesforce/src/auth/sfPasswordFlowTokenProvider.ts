@@ -1,11 +1,12 @@
-import {getSecretValue} from "@modules/secrets-manager/getSecret";
-import type {Authorisation, BearerTokenProvider} from '@modules/zuora/auth';
+import { getSecretValue } from '@modules/secrets-manager/getSecret';
+import type { Authorisation, BearerTokenProvider } from '@modules/zuora/auth';
+import type { SfConnectedAppAuth } from '@modules/salesforce/auth/auth';
+import { authenticateSalesforce } from '@modules/salesforce/auth/auth';
 import type {
-	SfConnectedAppAuth} from '@modules/salesforce/auth/auth';
-import {
-	authenticateSalesforce
-} from '@modules/salesforce/auth/auth';
-import type {ApiUserSecret, ConnectedAppSecret, SecretNames} from "@modules/salesforce/secrets";
+	ApiUserSecret,
+	ConnectedAppSecret,
+	SecretNames,
+} from '@modules/salesforce/secrets';
 
 export type SfPasswordCredentials = {
 	authUrl: string;
@@ -44,15 +45,15 @@ export class SfPasswordFlowTokenProvider implements BearerTokenProvider {
 export async function getSfPasswordFlowCredentials(
 	secretNames: SecretNames,
 ): Promise<SfPasswordCredentials> {
-	const {authUrl, clientId, clientSecret} =
+	const { authUrl, clientId, clientSecret } =
 		await getSecretValue<ConnectedAppSecret>(
 			secretNames.connectedAppSecretName,
 		);
 
-	const {username, password, token} = await getSecretValue<ApiUserSecret>(
+	const { username, password, token } = await getSecretValue<ApiUserSecret>(
 		secretNames.apiUserSecretName,
 	);
 
-	const sfConnectedAppAuth: SfConnectedAppAuth = {clientId, clientSecret};
-	return {authUrl, username, password, token, sfConnectedAppAuth};
+	const sfConnectedAppAuth: SfConnectedAppAuth = { clientId, clientSecret };
+	return { authUrl, username, password, token, sfConnectedAppAuth };
 }
