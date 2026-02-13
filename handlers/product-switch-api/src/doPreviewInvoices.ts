@@ -29,7 +29,7 @@ export type ZuoraPreviewResponseInvoice = z.infer<
 >;
 export const zuoraPreviewResponseSchema = z.object({
 	previewResult: z.object({
-		invoices: z.array(zuoraPreviewResponseInvoiceSchema).nonempty(),
+		invoices: z.array(zuoraPreviewResponseInvoiceSchema),
 	}),
 });
 export type ZuoraPreviewResponse = z.infer<typeof zuoraPreviewResponseSchema>;
