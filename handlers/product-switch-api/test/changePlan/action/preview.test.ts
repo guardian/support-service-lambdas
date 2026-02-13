@@ -53,7 +53,7 @@ test('preview amounts are correct', () => {
 	expect(
 		previewResponseFromZuoraResponse(
 			'CODE',
-			invoice,
+			[invoice],
 			targetInformation as TargetInformation,
 			['2c92c0f85e2d19af015e3896e84d092e'],
 			dayjs('2024-07-06'),

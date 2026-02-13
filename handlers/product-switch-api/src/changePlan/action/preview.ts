@@ -1,4 +1,7 @@
-import { groupByUniqueOrThrow } from '@modules/arrayFunctions';
+import {
+	getSingleOrThrow,
+	groupByUniqueOrThrow,
+} from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import { getIfDefined, mapOption } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
@@ -68,11 +71,15 @@ export const getRefundAmountMinorUnits = (
 
 export const previewResponseFromZuoraResponse = (
 	stage: Stage,
-	invoice: ZuoraPreviewResponseInvoice,
+	invoices: ZuoraPreviewResponseInvoice[],
 	targetInformation: TargetInformation,
 	sourceProductChargeIds: [string, ...string[]],
 	chargedThroughDate?: Dayjs,
 ): PreviewResponse => {
+	const invoice = getSingleOrThrow(
+		invoices,
+		(msg) => new Error('preview should have one invoice: ' + msg),
+	);
 	if (invoice.amount < 0) {
 		// perhaps they removed their contribution but have over paid, ideally we should notice this earlier
 		throw new ValidationError(
@@ -168,7 +175,7 @@ export class DoPreviewAction {
 		);
 		return previewResponseFromZuoraResponse(
 			this.stage,
-			zuoraResponse.previewResult.invoices[0],
+			zuoraResponse.previewResult.invoices,
 			targetInformation,
 			subscriptionInformation.chargeIds,
 			subscriptionInformation.chargedThroughDate,
