@@ -87,7 +87,11 @@ export class RestRequestMaker {
 				return { success: true, data, statusCode: response.status };
 			} else {
 				// schema is a function
-				return { success: true, data: schema(responseText, contentType), statusCode: response.status };
+				return {
+					success: true,
+					data: schema(responseText, contentType),
+					statusCode: response.status,
+				};
 			}
 		} catch (cause) {
 			return {
