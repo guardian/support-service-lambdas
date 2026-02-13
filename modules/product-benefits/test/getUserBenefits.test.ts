@@ -107,9 +107,6 @@ test('getUserBenefitsFromUserProducts returns distinct benefits', () => {
 
 test('getUserBenefitsFromUserProducts returns the union of two benefit sets', () => {
 	expect(
-		getUserBenefitsFromUserProducts([
-			'GuardianAdLite',
-			'GuardianWeeklyDomestic',
-		]),
-	).toEqual(['allowRejectAll', 'hideSupportMessaging']);
+		getUserBenefitsFromUserProducts(['GuardianAdLite', 'SupporterMembership']),
+	).toEqual(['allowRejectAll', 'liveApp', 'feastApp', 'hideSupportMessaging']);
 });
