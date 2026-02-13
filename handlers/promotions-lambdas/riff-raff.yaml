@@ -24,5 +24,6 @@ deployments:
         - promotions-lambdas-promo-campaign-sync-
         - promotions-lambdas-promo-sync-
         - promotions-lambdas-promo-code-view-
+        - promotions-lambdas-salesforce-export-
     dependencies:
       - promotions-lambdas-cloudformation
