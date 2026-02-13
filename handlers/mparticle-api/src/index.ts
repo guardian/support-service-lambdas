@@ -79,9 +79,8 @@ export const handlerDeletion: Handler<SQSEvent, void> = async (
 		index,
 		messageId: record.messageId,
 		attributes: {
-			approximateReceiveCount:
-				record.attributes?.ApproximateReceiveCount,
-			sentTimestamp: record.attributes?.SentTimestamp,
+			approximateReceiveCount: record.attributes.ApproximateReceiveCount,
+			sentTimestamp: record.attributes.SentTimestamp,
 		},
 	}));
 	logger.log('Processing deletion messages', {
@@ -89,18 +88,11 @@ export const handlerDeletion: Handler<SQSEvent, void> = async (
 		records: recordSummaries,
 	});
 
-	const stage = getEnv('STAGE');
-	const config: AppConfig = await getAppConfig();
-	const mParticleClient = MParticleClient.createBulkDeletionClient(
-		config.workspace,
-		config.pod,
-	);
-	const brazeClient = new BrazeClient(config.braze.apiUrl, config.braze.apiKey);
-
-	// Determine mParticle environment based on AWS stage
-	// CODE uses development environment, PROD uses production environment
-	const mParticleEnvironment: 'production' | 'development' =
-		stage === 'PROD' ? 'production' : 'development';
+	const {
+		mParticleBulkDeletionClient: mParticleClient,
+		brazeClient,
+		mParticleEnvironment,
+	} = await services();
 
 	// there will only be a single record, sqs will retry the batch on error
 	for (const record of event.Records) {
@@ -118,7 +110,7 @@ export const handlerDeletion: Handler<SQSEvent, void> = async (
 async function processSQSRecord(
 	record: SQSRecord,
 	mParticleClient: MParticleClientType<BulkDeletionAPI>,
-	brazeClient: BrazeClient,
+	brazeClient: BrazeClient | undefined,
 	mParticleEnvironment: 'production' | 'development',
 ): Promise<void> {
 	logger.log(`Processing message ${record.messageId}`);
@@ -148,6 +140,8 @@ async function services() {
 	logger.log('Starting lambda');
 	const stage = getEnv('STAGE');
 	const config: AppConfig = await getAppConfig();
+	const mParticleEnvironment: 'production' | 'development' =
+		stage === 'PROD' ? 'production' : 'development';
 	return {
 		mParticleDataSubjectClient:
 			MParticleClient.createMParticleDataSubjectClient(config.workspace),
@@ -160,6 +154,10 @@ async function services() {
 			config.pod,
 		),
 		batonS3Writer: new BatonS3WriterImpl(config.sarResultsBucket, sarS3BaseKey),
+		brazeClient: config.braze
+			? new BrazeClient(config.braze.apiUrl, config.braze.apiKey)
+			: undefined,
+		mParticleEnvironment,
 		isProd: stage === 'PROD',
 	};
 }

@@ -31,7 +31,7 @@ export async function processUserDeletion(
 	identityId: string,
 	brazeId: string | undefined,
 	mParticleClient: MParticleClient<BulkDeletionAPI>,
-	brazeClient: BrazeClient,
+	brazeClient: BrazeClient | undefined,
 	mParticleEnvironment: 'production' | 'development' = 'production',
 ): Promise<void> {
 	logger.log(`Processing deletion for user ${identityId}`);
@@ -44,7 +44,7 @@ export async function processUserDeletion(
 	);
 
 	let brazeResult: DeletionResult | null = null;
-	if (brazeId && brazeId.trim() !== '') {
+	if (brazeId && brazeId.trim() !== '' && brazeClient) {
 		brazeResult = await deleteBrazeUser(brazeClient, brazeId);
 	} else {
 		logger.log(
