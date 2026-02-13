@@ -94,7 +94,7 @@ export const handlerDeletion: Handler<SQSEvent, void> = async (
 		mParticleEnvironment,
 	} = await services();
 
-	// there will only be a single record, sqs will retry the batch on error
+	// Process each record (batch size is 1, so this will be a single message)
 	for (const record of event.Records) {
 		await processSQSRecord(
 			record,

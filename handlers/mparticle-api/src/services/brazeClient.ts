@@ -10,20 +10,20 @@ import {
 /**
  * Braze User Delete API Request
  * API Documentation: https://www.braze.com/docs/api/endpoints/user_data/post_user_delete/
- * 
+ *
  * IMPORTANT - Naming clarification to avoid confusion:
- * 
+ *
  * The brazeId field from the SQS message contains Guardian's external identifier for
  * the user in Braze. This identifier has different names depending on the context:
- * 
- * - In the SQS message: called "brazeId" 
+ *
+ * - In the SQS message: called "brazeId"
  * - In Guardian datalake: called "External ID"
  * - In Braze terminology: called "User ID"
  * - In Braze API request: goes in the "external_ids" field
- * 
+ *
  * This is NOT Braze's internal-only identifier (which Braze calls "Braze ID" and would
  * be sent in the "braze_ids" field). That internal ID is only used within Braze's system.
- * 
+ *
  * Historical context: Originally the Identity service sent only the Identity ID in the
  * SNS message, and we had to look up the external ID from another service. This caused
  * issues when users were already deleted. The Identity team changed it so the SNS message
