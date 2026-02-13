@@ -23,7 +23,7 @@ const expectedWrappedSum = '[logger.test.ts:10::getWrappedSum]';
 const expectedWrappedFailFn = '[logger.test.ts:16::getWrappedFailFn]';
 
 test('it should be a no-op if theres no context', () => {
-	const logger = new Logger([]);
+	const logger = new Logger();
 	const actual = getMessage(logger);
 	expect(actual).toEqual(expectedCallerInfo + ' msg');
 });
@@ -53,7 +53,7 @@ describe('wrapFn', () => {
 		logs = [];
 		errors = [];
 		logger = new Logger(
-			[],
+			undefined,
 			(message) => logs.push(message),
 			(message) => errors.push(message),
 		);
@@ -65,11 +65,11 @@ describe('wrapFn', () => {
 
 		expect(result).toBe(5);
 
-		const expectedEntry = `${expectedWrappedSum} TRACE addNumbers ENTRY ARGS
+		const expectedEntry = `${expectedWrappedSum} TRACE FUNCTION addNumbers ENTRY ARGS
 a: 2
 b: 3`;
 
-		const expectedExit = `${expectedWrappedSum} TRACE addNumbers EXIT SHORT_ARGS
+		const expectedExit = `${expectedWrappedSum} TRACE FUNCTION addNumbers EXIT SHORT_ARGS
 a: 2
 RESULT
 5`;
@@ -83,15 +83,15 @@ RESULT
 	test('logs entry and exit with complex objects', async () => {
 		const fn = async (x: number[], y: object) =>
 			Promise.resolve({ ...y, arr: x });
-		const wrapped = logger.wrapFn(fn, undefined, undefined, 0);
+		const wrapped = logger.wrapFn(fn, 'FUNCTION', undefined, undefined, 0);
 		const result = await wrapped([2], { greeting: 'hi' });
 
 		expect(result).toEqual({ arr: [2], greeting: 'hi' });
 
-		const expectedEntry = `[stripped] TRACE fn ENTRY ARGS
+		const expectedEntry = `[stripped] TRACE FUNCTION fn ENTRY ARGS
 x: [2]
 y: { greeting: "hi" }`;
-		const expectedExit = `[stripped] TRACE fn EXIT
+		const expectedExit = `[stripped] TRACE FUNCTION fn EXIT
 RESULT
 { greeting: "hi", arr: [2] }`;
 
@@ -104,10 +104,10 @@ RESULT
 		const wrappedFailFn = getWrappedFailFn(logger);
 		await expect(wrappedFailFn(42)).rejects.toThrow('fail');
 
-		const expectedEntry = `${expectedWrappedFailFn} TRACE failFn ENTRY ARGS
+		const expectedEntry = `${expectedWrappedFailFn} TRACE FUNCTION failFn ENTRY ARGS
 x: 42`;
 
-		const expectedErrorStart = `${expectedWrappedFailFn} TRACE failFn ERROR SHORT_ARGS
+		const expectedErrorStart = `${expectedWrappedFailFn} TRACE FUNCTION failFn ERROR SHORT_ARGS
 x: 42
 ERROR
 Error: fail 42
@@ -122,12 +122,13 @@ Error: fail 42
 		};
 		const wrapped = logger.wrapFn(
 			customName.bind({}),
+			'FUNCTION',
 			'customName',
 			customName.toString(),
 		);
 		await wrapped('a', 1);
 
-		expect(logs[0]).toContain(`TRACE customName ENTRY ARGS
+		expect(logs[0]).toContain(`TRACE FUNCTION customName ENTRY ARGS
 foo: a
 bar: 1`);
 	});
@@ -135,10 +136,10 @@ bar: 1`);
 	test('shortArgsNum limits the number of args in exit log', async () => {
 		const fn = async (x: number, y: number, z: number) =>
 			Promise.resolve(x + y + z);
-		const wrapped = logger.wrapFn(fn, 'sum3', undefined, 2);
+		const wrapped = logger.wrapFn(fn, 'FUNCTION', 'sum3', undefined, 2);
 		await wrapped(1, 2, 3);
 
-		expect(logs[1]).toContain(`TRACE sum3 EXIT SHORT_ARGS
+		expect(logs[1]).toContain(`TRACE FUNCTION sum3 EXIT SHORT_ARGS
 x: 1
 y: 2
 RESULT
@@ -148,11 +149,11 @@ RESULT
 	test('shortArgsNum misses the args marker when there are no args needed', async () => {
 		const fn = async (x: number, y: number, z: number) =>
 			Promise.resolve(x + y + z);
-		const wrapped = logger.wrapFn(fn, 'sum3', undefined, 0);
+		const wrapped = logger.wrapFn(fn, 'FUNCTION', 'sum3', undefined, 0);
 		await wrapped(1, 2, 3);
 
 		// don't care about the file/function, but it shouldn't have SHORT_ARGS
-		expect(logs[1]).toMatch(new RegExp('\\[.+] TRACE sum3 EXIT'));
+		expect(logs[1]).toMatch(new RegExp('\\[.+] TRACE FUNCTION sum3 EXIT'));
 	});
 });
 

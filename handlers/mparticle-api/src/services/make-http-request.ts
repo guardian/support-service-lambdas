@@ -47,7 +47,8 @@ export class RestRequestMaker {
 	makeRESTRequest = (maybeCallerInfo?: string) =>
 		logger.wrapFn(
 			this.restRequestWithoutLogging.bind(this),
-			() => 'HTTP ' + this.baseURL,
+			'HTTP',
+			() => this.baseURL,
 			this.restRequestWithoutLogging.toString(),
 			2,
 			maybeCallerInfo,

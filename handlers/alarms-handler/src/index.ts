@@ -1,6 +1,9 @@
+import { getIfDefined } from '@modules/nullAndUndefined';
 import type { HandlerEnv } from '@modules/routing/lambdaHandler';
 import { logger } from '@modules/routing/logger';
 import { SQSHandler } from '@modules/routing/sqsHandler';
+import type { Authorisation } from '@modules/zuora/auth';
+import { RestClient } from '@modules/zuora/restClient';
 import type { SNSEventRecord, SQSRecord } from 'aws-lambda';
 import { z } from 'zod';
 import type { AppToTeams } from './alarmMappings';
@@ -34,6 +37,7 @@ export type CloudWatchAlarmMessage = z.infer<
 export type Services = {
 	webhookUrls: WebhookUrls;
 	getTags: (alarmArn: string, awsAccountId: string) => Promise<Tags>;
+	googleChatSendMessage: GoogleChatSendMessage;
 };
 
 // called by AWS
@@ -48,6 +52,7 @@ function buildServices({ config }: HandlerEnv<ConfigSchema>) {
 	return {
 		webhookUrls: config.webhookUrls,
 		getTags: buildCloudwatch(config.accounts).getTags,
+		googleChatSendMessage: new GoogleChatSendMessage(new GoogleChatClient()),
 	};
 }
 
@@ -63,16 +68,39 @@ export async function handlerWithStage(record: SQSRecord, services: Services) {
 	if (maybeChatMessages) {
 		await Promise.all(
 			maybeChatMessages.webhookUrls.map(async (webhookUrl) => {
-				logger.log('sending message to web hook', webhookUrl);
-				const response = await fetch(webhookUrl, {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify(maybeChatMessages.body),
-				});
-				logger.log('http response', response, await response.text());
-				return response;
+				await services.googleChatSendMessage.sendChatMessage(
+					webhookUrl,
+					maybeChatMessages.body,
+				);
 			}),
 		);
+	}
+}
+
+export class GoogleChatClient extends RestClient {
+	static baseUrl = 'https://chat.googleapis.com/v1';
+
+	constructor() {
+		super({
+			getAuthorisation(): Promise<Authorisation> {
+				return Promise.resolve({
+					baseUrl: GoogleChatClient.baseUrl,
+					authHeaders: {},
+				});
+			},
+		});
+	}
+}
+export class GoogleChatSendMessage {
+	constructor(private client: GoogleChatClient) {}
+	async sendChatMessage(webhookUrl: string, body: object) {
+		const relativePath = getIfDefined(
+			webhookUrl.startsWith(GoogleChatClient.baseUrl)
+				? webhookUrl.slice(GoogleChatClient.baseUrl.length)
+				: undefined,
+			`webhook url didn't start with ${GoogleChatClient.baseUrl}`,
+		);
+		await this.client.post(relativePath, JSON.stringify(body), z.any());
 	}
 }
 

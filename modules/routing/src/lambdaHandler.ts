@@ -53,21 +53,41 @@ export function LambdaHandlerWithServices<ConfigType, Services, E>(
 		return { stage, config: await loadConfig(stage, stack, app, configSchema) };
 	}, 'load config from SSM');
 
-	const handlerWithLogging = logger.wrapRouter(
-		handler,
-		undefined,
-		undefined,
-		0,
-		logger.getCallerInfo(),
-	);
-
 	const handlerProps: Lazy<Services> = lazyConfig.then((config) =>
 		buildServices({ now: () => dayjs(), ...config }),
 	);
 
-	return async (event: E) => {
-		return await handlerWithLogging(event, await handlerProps.get());
+	const lambdaHandler = async (event: E) => {
+		const getServices = handlerProps.get.bind(handlerProps);
+		return await handler(
+			event,
+			await logger.wrapFn(
+				getServices,
+				'COLD_START',
+				(nothing) => nothing,
+				(services) => services,
+				() => undefined, // could log env vars?
+				(services) => services,
+				handlerProps.get.name,
+				handlerProps.get.toString(),
+				0,
+			)(),
+		);
 	};
+
+	return logger.wrapFn(
+		lambdaHandler,
+		'HANDLER',
+		({ args }) => ({ args: [args[0]], paramNames: ['event'] }),
+		(result) => result,
+		(args) => args[0],
+		(result) => result,
+		undefined,
+		undefined,
+		0,
+		logger.getCallerInfo(),
+		true,
+	);
 }
 
 /**

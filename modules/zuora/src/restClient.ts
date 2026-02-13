@@ -96,7 +96,25 @@ export abstract class RestClient {
 	fetchWithLogging = (maybeCallerInfo?: string) =>
 		logger.wrapFn(
 			this.fetch.bind(this),
-			() => 'HTTP ' + this.constructor.name,
+			'HTTP',
+			({ args, paramNames }) => ({
+				args: [args[0], args[1], args[3], args[4]],
+				paramNames: [
+					paramNames[0],
+					paramNames[1],
+					paramNames[3],
+					paramNames[4],
+				],
+			}),
+			(result) => result,
+			(args) => ({
+				path: args[0],
+				method: args[1],
+				body: args[3],
+				headers: args[4],
+			}),
+			(result) => result,
+			() => this.constructor.name,
 			this.fetch.toString(),
 			2,
 			maybeCallerInfo,

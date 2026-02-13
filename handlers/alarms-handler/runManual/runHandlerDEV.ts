@@ -2,6 +2,8 @@ import { logger } from '@modules/routing/logger';
 import type { SQSEvent } from 'aws-lambda';
 import { getEnv } from '../../../modules/routing/src/lambdaHandler';
 import type { Services } from '../src';
+import { GoogleChatSendMessage } from '../src';
+import { GoogleChatClient } from '../src';
 import { handlerWithStage } from '../src';
 
 // to run this, get credentials for membership
@@ -44,6 +46,7 @@ const services: Services = {
 		ENGINE: testWebhook,
 		PUZZLES: testWebhook,
 	},
+	googleChatSendMessage: new GoogleChatSendMessage(new GoogleChatClient()),
 };
 
 handlerWithStage(handlerTestEvent.Records[0]!, services)

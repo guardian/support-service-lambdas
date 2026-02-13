@@ -51,12 +51,13 @@ export class BatonS3WriterImpl implements BatonS3Writer {
 	): Promise<string> => {
 		const s3Key = this.generateS3Key(reference);
 
-		await logger.wrapFn(streamToS3, undefined, undefined, 2)(
-			this.sarResultsBucket,
-			s3Key,
-			'application/zip',
-			stream,
-		);
+		await logger.wrapFn(
+			streamToS3,
+			undefined,
+			undefined,
+			undefined,
+			2,
+		)(this.sarResultsBucket, s3Key, 'application/zip', stream);
 		return `s3://${this.sarResultsBucket}/${s3Key}`;
 	};
 }
