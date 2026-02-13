@@ -23,9 +23,22 @@ export const billToContactSchema = z.object({
 	workEmail: z.string(),
 });
 
+const validPaymentGateways = [
+	'GoCardless - Observer - Tortoise Media',
+	'PayPal Complete Payments',
+	'Stripe Bank Transfer - GNM Membership',
+	'Stripe PaymentIntents GNM Membership AUS',
+	'PayPal - Observer - Tortoise Media',
+	'Stripe - Observer - Tortoise Media',
+	'PayPal Express',
+	'GoCardless',
+	'Stripe PaymentIntents GNM Membership',
+] as const;
+
 export const billingAndPaymentSchema = z.object({
 	currency: z.string(),
 	defaultPaymentMethodId: z.string(),
+	paymentGateway: z.enum(validPaymentGateways),
 });
 
 export const zuoraAccountSchema = z.object({
