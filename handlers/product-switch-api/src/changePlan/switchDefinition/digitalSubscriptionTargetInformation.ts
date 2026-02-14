@@ -18,10 +18,6 @@ export const digitalSubscriptionTargetInformation: SwitchTargetInformation<
 		>,
 		switchActionData: SwitchActionData,
 	): Promise<TargetInformation> => {
-		// to remove once this goes live
-		if (!switchActionData.isGuardianEmail) {
-			throw new ValidationError('this switch is only available internally');
-		}
 		if (switchActionData.mode === 'save') {
 			throw new ValidationError(
 				'you cannot currently get a discount on t2->3 switch',

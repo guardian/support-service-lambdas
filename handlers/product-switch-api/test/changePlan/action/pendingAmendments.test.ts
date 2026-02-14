@@ -50,7 +50,6 @@ const getTestTargetInformation = async () =>
 			currency: 'GBP',
 			previousAmount: 10,
 			includesContribution: false,
-			isGuardianEmail: false,
 		},
 	);
 

@@ -21,7 +21,6 @@ describe('digitalSubscriptionTargetInformation', () => {
 			currency: 'GBP',
 			previousAmount: catalogPrice,
 			includesContribution: false,
-			isGuardianEmail: true,
 		};
 
 		const result =
@@ -35,18 +34,6 @@ describe('digitalSubscriptionTargetInformation', () => {
 		expect(result.ratePlanName).toBe('Digital Pack Annual');
 		expect(result.contributionCharge).toBeUndefined();
 		expect(result.discount).toBeUndefined();
-
-		const nonGuardianSwitchActionData: SwitchActionData = {
-			...switchActionData,
-			isGuardianEmail: false,
-		};
-
-		expect(() =>
-			digitalSubscriptionTargetInformation.fromUserInformation(
-				annualDigitalSubscriptionRatePlan,
-				nonGuardianSwitchActionData,
-			),
-		).toThrow(ValidationError);
 	});
 
 	test('throws ValidationError when previous amount does include a contribution', () => {
@@ -57,7 +44,6 @@ describe('digitalSubscriptionTargetInformation', () => {
 			currency: 'GBP',
 			previousAmount: catalogPrice + 5,
 			includesContribution: true,
-			isGuardianEmail: true,
 		};
 
 		expect(() =>
@@ -76,7 +62,6 @@ describe('digitalSubscriptionTargetInformation', () => {
 			currency: 'GBP',
 			previousAmount: catalogPrice,
 			includesContribution: false,
-			isGuardianEmail: true,
 		};
 
 		const result =
@@ -96,7 +81,6 @@ describe('digitalSubscriptionTargetInformation', () => {
 			currency: 'GBP',
 			previousAmount: catalogPrice,
 			includesContribution: false,
-			isGuardianEmail: true,
 		};
 
 		expect(() =>
@@ -114,7 +98,6 @@ describe('digitalSubscriptionTargetInformation', () => {
 			mode: 'switchWithPriceOverride',
 			currency: 'GBP',
 			userRequestedAmount: catalogPrice,
-			isGuardianEmail: true,
 		};
 
 		expect(() =>
