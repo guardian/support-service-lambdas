@@ -4,7 +4,6 @@ export type SecretNames = {
 };
 
 export type ConnectedAppSecret = {
-	name: string;
 	authUrl: string;
 	clientId: string;
 	clientSecret: string;
