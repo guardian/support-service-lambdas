@@ -43,6 +43,7 @@ export const buildCloudWatchAlarmMessage = async (
 	return {
 		app: App,
 		body: {
+			text: alarmName,
 			cardsV2: [
 				{
 					cardId: 'cloudwatch-alarm',

@@ -1,6 +1,9 @@
-export function objectKeys<O extends object>(libs: O): Array<keyof O> {
+type DistributedKeyof<T> = T extends unknown ? keyof T : never;
+export function objectKeys<O extends object>(
+	libs: O,
+): Array<DistributedKeyof<O>> {
 	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- allowed in utility function - get back type lost by Object.keys
-	return Object.keys(libs) as Array<keyof O>;
+	return Object.keys(libs) as Array<DistributedKeyof<O>>;
 }
 
 export function objectKeysNonEmpty<
@@ -15,11 +18,12 @@ export function objectKeysNonEmpty<
 	return keys as [keyof O, ...Array<keyof O>];
 }
 
-export function objectValues<V, T extends Record<string, V>>(
+type DistributedValues<T> = T extends unknown ? T[keyof T] : never;
+export function objectValues<T extends object>(
 	libs: T,
-): Array<T[keyof T]> {
+): Array<NonUndefined<DistributedValues<T>>> {
 	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- allowed in utility function - get back type lost by Object.values
-	return Object.values(libs) as Array<T[keyof T]>;
+	return Object.values(libs) as Array<NonUndefined<DistributedValues<T>>>;
 }
 
 export function objectFromEntries<K extends string, V>(
@@ -29,10 +33,25 @@ export function objectFromEntries<K extends string, V>(
 	return Object.fromEntries(libs) as Record<K, V>;
 }
 
-export function objectEntries<K extends string, V>(
-	theMappings: Record<K, V> | Partial<Record<K, V>>,
-) {
-	return Object.entries(theMappings) as Array<[K, V]>;
+type NonUndefined<T> = T extends undefined ? never : T;
+
+export function objectEntries<T extends object>(
+	theMappings: T,
+): Array<
+	NonUndefined<
+		{
+			[K in keyof T]: [K, NonUndefined<T[K]>];
+		}[keyof T]
+	>
+> {
+	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- allowed in utility function - get back type lost by Object.entries
+	return Object.entries(theMappings) as Array<
+		NonUndefined<
+			{
+				[K in keyof T]: [K, NonUndefined<T[K]>];
+			}[keyof T]
+		>
+	>;
 }
 
 /**

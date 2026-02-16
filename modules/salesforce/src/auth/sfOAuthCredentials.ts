@@ -1,17 +1,14 @@
 import { getSecretValue } from '@modules/secrets-manager/getSecret';
-import type { Stage } from '@modules/stage';
 import type { SfConnectedAppAuth } from '@modules/salesforce/auth/auth';
+import type { SecretNames } from '@modules/salesforce/secrets';
 import {
 	type ApiUserSecret,
 	type ConnectedAppSecret,
-	getSalesforceSecretNames,
 } from '@modules/salesforce/secrets';
 
 export async function getSfOauthCredentials(
-	stage: Stage,
+	secretNames: SecretNames,
 ): Promise<SfCredentials> {
-	const secretNames = getSalesforceSecretNames(stage);
-
 	const { authUrl, clientId, clientSecret } =
 		await getSecretValue<ConnectedAppSecret>(
 			secretNames.connectedAppSecretName,

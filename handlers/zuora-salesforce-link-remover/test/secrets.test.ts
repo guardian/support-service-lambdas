@@ -1,4 +1,4 @@
-import { getSalesforceSecretNames } from '@modules/salesforce/secrets';
+import { getSalesforceSecretNames } from '../src/salesforceSecretNames';
 
 describe('getSalesforceSecretNames', () => {
 	beforeEach(() => {

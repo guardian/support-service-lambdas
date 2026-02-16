@@ -1,3 +1,4 @@
+import { CurrencyValues } from '@modules/internationalisation/currency';
 import { z } from 'zod';
 import { zuoraSubscriptionSchema } from './subscription';
 
@@ -13,7 +14,7 @@ export const zuoraAccountBasicInfoSchema = z
 
 export const metricsSchema = z.object({
 	totalInvoiceBalance: z.number(),
-	currency: z.string(),
+	currency: z.enum(CurrencyValues),
 	creditBalance: z.number(),
 });
 export const billToContactSchema = z.object({
@@ -22,9 +23,22 @@ export const billToContactSchema = z.object({
 	workEmail: z.string(),
 });
 
+const validPaymentGateways = [
+	'GoCardless - Observer - Tortoise Media',
+	'PayPal Complete Payments',
+	'Stripe Bank Transfer - GNM Membership',
+	'Stripe PaymentIntents GNM Membership AUS',
+	'PayPal - Observer - Tortoise Media',
+	'Stripe - Observer - Tortoise Media',
+	'PayPal Express',
+	'GoCardless',
+	'Stripe PaymentIntents GNM Membership',
+] as const;
+
 export const billingAndPaymentSchema = z.object({
 	currency: z.string(),
 	defaultPaymentMethodId: z.string(),
+	paymentGateway: z.enum(validPaymentGateways),
 });
 
 export const zuoraAccountSchema = z.object({

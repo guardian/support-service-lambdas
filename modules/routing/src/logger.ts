@@ -96,12 +96,15 @@ export class Logger {
 	private objectToPrettyString(object: unknown) {
 		try {
 			const jsonString = JSON.stringify(object)
-				.replace(/"([^"]+)":/g, ' $1: ') // Remove quotes around keys
+				.replace(/"([A-Za-z0-9]+)":/g, ' $1: ') // Remove quotes around keys
 				.replace(/}$/, ' }');
 			if (jsonString.length <= 80) {
 				return jsonString;
 			}
-			return JSON.stringify(object, null, 2).replace(/"([^"]+)":/g, '$1:');
+			return JSON.stringify(object, null, 2).replace(
+				/"([A-Za-z0-9]+)":/g,
+				'$1:',
+			);
 		} catch (e) {
 			console.error('caught error when trying to serialise log line', e);
 			return String(object);
@@ -235,6 +238,19 @@ export class Logger {
 				return result;
 			});
 		};
+	}
+
+	/**
+	 * handy for logging a value on the way past without having to extract a value into a const, log, then return.
+	 *
+	 * @param message
+	 * @param value the value to log and then return
+	 * @param map apply before logging if you need to extract a field or spread an iterator
+	 */
+	tap<T>(message: string, value: T, map: (t: T) => unknown = (t) => t) {
+		const callerInfo = this.getCallerInfo();
+		this.logFn(this.getMessage(callerInfo, message, map(value)));
+		return value;
 	}
 }
 
