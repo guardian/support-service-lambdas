@@ -29,13 +29,13 @@ const buildChangePlanOrderAction = (
 	orderDate: Dayjs,
 	productRatePlanId: string,
 	contributionCharge: TargetContribution | undefined,
-	sourceProductRatePlanId: string,
+	sourceRatePlanId: string,
 ): ChangePlanOrderAction => {
 	return {
 		type: 'ChangePlan',
 		triggerDates: singleTriggerDate(orderDate),
 		changePlan: {
-			productRatePlanId: sourceProductRatePlanId,
+			ratePlanId: sourceRatePlanId,
 			subType: 'Upgrade',
 			newProductRatePlan: {
 				productRatePlanId,
@@ -118,7 +118,7 @@ export class SwitchOrderRequestBuilder {
 							orderDate,
 							this.productRatePlanId,
 							this.contributionCharge,
-							this.subscriptionInformation.productRatePlanId,
+							this.subscriptionInformation.ratePlanId,
 						),
 						...discountOrderAction,
 						...maybeNewTermOrderActions,
