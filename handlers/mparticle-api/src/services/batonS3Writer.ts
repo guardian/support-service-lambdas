@@ -1,5 +1,6 @@
 import { streamToS3 } from '@modules/aws/s3';
 import { checkFileExistsInS3 } from '@modules/aws/s3FileExists';
+import { getCallerInfo } from '@modules/routing/getCallerInfo';
 import { logger } from '@modules/routing/logger';
 
 export interface BatonS3Writer {
@@ -51,12 +52,12 @@ export class BatonS3WriterImpl implements BatonS3Writer {
 	): Promise<string> => {
 		const s3Key = this.generateS3Key(reference);
 
-		await logger.wrapFn(streamToS3, undefined, undefined, 2)(
-			this.sarResultsBucket,
-			s3Key,
-			'application/zip',
-			stream,
-		);
+		await logger.wrapFn(
+			streamToS3,
+			undefined,
+			getCallerInfo(),
+			([bucket, key]) => `${bucket} ${key}`,
+		)(this.sarResultsBucket, s3Key, 'application/zip', stream);
 		return `s3://${this.sarResultsBucket}/${s3Key}`;
 	};
 }

@@ -1,4 +1,5 @@
 import { logger } from '@modules/routing/logger';
+import { prettyPrint } from '@modules/routing/prettyPrint';
 import type {
 	APIGatewayProxyEvent,
 	APIGatewayProxyResult,
@@ -50,7 +51,9 @@ export const handlerBaton: Handler<
 			batonS3Writer,
 		);
 		return logger.withContext(
-			logger.wrapFn(router.routeRequest, 'handlerBaton'),
+			logger.wrapFn(router.routeRequest, 'handlerBaton', undefined, ([event]) =>
+				prettyPrint(event),
+			),
 			([event]) => `${event.requestType} ${event.action}`,
 			true,
 		)(event);

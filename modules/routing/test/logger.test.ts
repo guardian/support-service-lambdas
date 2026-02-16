@@ -1,13 +1,17 @@
+import { getCallerInfo } from '@modules/routing/getCallerInfo';
 import { Logger } from '@modules/routing/logger';
+import { prettyPrint } from '@modules/routing/prettyPrint';
 
 // If you reformat this section of the file, you will need to update the expected line numbers
 function getMessage(logger: Logger) {
-	return (() => logger.getMessage(logger.getCallerInfo(), 'msg'))();
+	return (() => logger.getMessage(getCallerInfo(), 'msg'))();
 }
 
 function getWrappedSum(logger: Logger) {
 	const addNumbers = async (a: number, b: number) => Promise.resolve(a + b);
-	return logger.wrapFn(addNumbers);
+	return logger.wrapFn(addNumbers, undefined, undefined, undefined, (args) =>
+		args.join(','),
+	);
 }
 
 function getWrappedFailFn(logger: Logger) {
@@ -34,11 +38,11 @@ function logAfter(logger: Logger) {
 
 // end of section that you shouldn't reformat
 
-const expectedCallerInfo = '[logger.test.ts:5::getMessage]';
-const expectedWrappedSum = '[logger.test.ts:10::getWrappedSum]';
-const expectedWrappedFailFn = '[logger.test.ts:16::getWrappedFailFn]';
-const expectedWithContextSum = '[logger.test.ts:25::addNumbers]';
-const expectedLogAfter = '[logger.test.ts:32::logAfter]';
+const expectedCallerInfo = '[logger.test.ts:7::getMessage]';
+const expectedWrappedSum = '[logger.test.ts:12::getWrappedSum]';
+const expectedWrappedFailFn = '[logger.test.ts:20::getWrappedFailFn]';
+const expectedWithContextSum = '[logger.test.ts:29::addNumbers]';
+const expectedLogAfter = '[logger.test.ts:36::logAfter]';
 
 test('it should be a no-op if theres no context', () => {
 	const logger = new Logger([]);
@@ -171,7 +175,6 @@ describe('withContext', () => {
 
 describe('getCallerInfo', () => {
 	test('extracts the right line from the stack trace', () => {
-		const logger = new Logger();
 		const testStack = [
 			'Error: ',
 			'    at Object.<anonymous> (/Users/john_duffell/code/support-service-lambdas/handlers/alarms-handler/src/wrongone.ts:1:11)',
@@ -179,12 +182,11 @@ describe('getCallerInfo', () => {
 			'    at Object.<anonymous> (/Users/john_duffell/code/support-service-lambdas/handlers/alarms-handler/src/alarmMappings.ts:3:31)',
 			'    at Object.<anonymous> (/Users/john_duffell/code/support-service-lambdas/handlers/alarms-handler/src/toofar.ts:4:41)',
 		];
-		const actual = logger.getCallerInfo(undefined, testStack);
+		const actual = getCallerInfo(undefined, testStack);
 		expect(actual).toEqual('alarmMappings.ts:3::Object.<anonymous>');
 	});
 
 	test("gets more path parts if it's a generic file name", () => {
-		const logger = new Logger();
 		const testStack = [
 			'Error: ',
 			'    at Object.<anonymous> (/Users/john_duffell/code/support-service-lambdas/handlers/alarms-handler/src/wrongone.ts:1:11)',
@@ -192,7 +194,7 @@ describe('getCallerInfo', () => {
 			'    at Object.<anonymous> (/Users/john_duffell/code/support-service-lambdas/handlers/alarms-handler/src/index.ts:3:31)',
 			'    at Object.<anonymous> (/Users/john_duffell/code/support-service-lambdas/handlers/alarms-handler/src/toofar.ts:4:41)',
 		];
-		const actual = logger.getCallerInfo(undefined, testStack);
+		const actual = getCallerInfo(undefined, testStack);
 		expect(actual).toEqual('alarms-handler/src/index.ts:3::Object.<anonymous>');
 	});
 });
@@ -223,8 +225,8 @@ describe('wrapFn', () => {
 a: 2
 b: 3`;
 
-		const expectedExit = `${expectedWrappedSum} TRACE addNumbers EXIT SHORT_ARGS
-a: 2
+		const expectedExit = `${expectedWrappedSum} TRACE addNumbers EXIT
+2,3
 RESULT
 5`;
 
@@ -237,7 +239,7 @@ RESULT
 	test('logs entry and exit with complex objects', async () => {
 		const fn = async (x: number[], y: object) =>
 			Promise.resolve({ ...y, arr: x });
-		const wrapped = logger.wrapFn(fn, undefined, undefined, 0);
+		const wrapped = logger.wrapFn(fn);
 		const result = await wrapped([2], { greeting: 'hi' });
 
 		expect(result).toEqual({ arr: [2], greeting: 'hi' });
@@ -261,82 +263,39 @@ RESULT
 		const expectedEntry = `${expectedWrappedFailFn} TRACE failFn ENTRY ARGS
 x: 42`;
 
-		const expectedErrorStart = `${expectedWrappedFailFn} TRACE failFn ERROR SHORT_ARGS
-x: 42
+		const expectedErrorStart = `${expectedWrappedFailFn} TRACE failFn ERROR
 ERROR
 Error: fail 42
     at failFn `;
 		expect(logs[0]).toEqual(expectedEntry);
 		expect(errors[0]).toContain(expectedErrorStart);
 	});
-
-	test('uses parameter names from fnAsString if provided', async () => {
-		const customName = async function customName(foo: string, bar: number) {
-			return Promise.resolve(foo + bar);
-		};
-		const wrapped = logger.wrapFn(
-			customName.bind({}),
-			'customName',
-			customName.toString(),
-		);
-		await wrapped('a', 1);
-
-		expect(logs[0]).toContain(`TRACE customName ENTRY ARGS
-foo: a
-bar: 1`);
-	});
-
-	test('shortArgsNum limits the number of args in exit log', async () => {
-		const fn = async (x: number, y: number, z: number) =>
-			Promise.resolve(x + y + z);
-		const wrapped = logger.wrapFn(fn, 'sum3', undefined, 2);
-		await wrapped(1, 2, 3);
-
-		expect(logs[1]).toContain(`TRACE sum3 EXIT SHORT_ARGS
-x: 1
-y: 2
-RESULT
-6`);
-	});
-
-	test('shortArgsNum misses the args marker when there are no args needed', async () => {
-		const fn = async (x: number, y: number, z: number) =>
-			Promise.resolve(x + y + z);
-		const wrapped = logger.wrapFn(fn, 'sum3', undefined, 0);
-		await wrapped(1, 2, 3);
-
-		// don't care about the file/function, but it shouldn't have SHORT_ARGS
-		expect(logs[1]).toMatch(new RegExp('\\[.+] TRACE sum3 EXIT'));
-	});
 });
 
 describe('Logger.joinLines', () => {
 	test('should pretty print errors correctly', () => {
-		const logger = new Logger();
 		const error = () => new Error('Test error');
 
-		const actual = logger.prettyPrint(error());
+		const actual = prettyPrint(error());
 
 		expect(actual).toContain(`Error: Test error
     at error (`);
 	});
 
 	test('should pretty print strings correctly', () => {
-		const logger = new Logger();
 		const msg = 'msg';
 
-		const actual = logger.prettyPrint(msg);
+		const actual = prettyPrint(msg);
 
 		expect(actual).toEqual(`msg`);
 	});
 
 	test('should pretty print errors correctly', () => {
-		const logger = new Logger();
 		const error = new Error('Test error', {
 			cause: new MyError('another error'),
 		});
 
-		const actual = logger.prettyPrint(error);
+		const actual = prettyPrint(error);
 
 		const actualWithoutStackLines = actual
 			.split('\n')
@@ -357,7 +316,6 @@ describe('Logger.joinLines', () => {
 	}
 
 	test('should join primitive types, arrays, objects, and errors with compact or pretty JSON formatting without quotes around keys', () => {
-		const logger = new Logger();
 		const primitives = [42, 'hello', true, null, undefined];
 		const shortArray = [1, 2, 3];
 		const longArray = Array.from({ length: 30 }, (_, i) => i + 1);
@@ -396,7 +354,7 @@ describe('Logger.joinLines', () => {
 			longObject,
 			error,
 		]
-			.map(logger.prettyPrint)
+			.map(prettyPrint)
 			.join('\n');
 
 		expect(result).toBe(
