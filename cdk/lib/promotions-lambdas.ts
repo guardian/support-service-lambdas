@@ -64,16 +64,9 @@ export class PromotionsLambdas extends SrStack {
 					initialPolicy: [
 						new PolicyStatement({
 							actions: ['secretsmanager:GetSecretValue'],
-							resources:
-								this.stage === 'PROD'
-									? [
-											`arn:aws:secretsmanager:${this.region}:${this.account}:secret:PROD/Salesforce/ConnectedApp/BillingAccountRemover-WUdrKa`,
-											`arn:aws:secretsmanager:${this.region}:${this.account}:secret:PROD/Salesforce/User/BillingAccountRemoverAPIUser-UJ1SwZ`,
-										]
-									: [
-											`arn:aws:secretsmanager:${this.region}:${this.account}:secret:DEV/Salesforce/ConnectedApp/AwsConnectorSandbox-oO8Phf`,
-											`arn:aws:secretsmanager:${this.region}:${this.account}:secret:DEV/Salesforce/User/integrationapiuser-rvxxrG`,
-										],
+							resources: [
+								`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Salesforce/ConnectedApp/PromoSalesforceExport`,
+							],
 						}),
 					],
 				},
