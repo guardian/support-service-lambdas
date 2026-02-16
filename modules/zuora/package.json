@@ -13,7 +13,7 @@
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.940.0",
-    "@aws-sdk/client-secrets-manager": "^3.940.0",
+    "@aws-sdk/client-secrets-manager": "^3.984.0",
     "dayjs": "^1.11.13",
     "zod": "catalog:"
   }
