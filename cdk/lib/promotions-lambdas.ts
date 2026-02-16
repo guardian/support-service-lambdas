@@ -65,7 +65,7 @@ export class PromotionsLambdas extends SrStack {
 						new PolicyStatement({
 							actions: ['secretsmanager:GetSecretValue'],
 							resources: [
-								`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Salesforce/ConnectedApp/PromoSalesforceExport`,
+								`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Salesforce/ConnectedApp/PromoSalesforceExport-*`,
 							],
 						}),
 					],

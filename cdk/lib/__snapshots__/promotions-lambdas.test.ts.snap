@@ -1858,7 +1858,7 @@ exports[`The Promotions lambdas stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":secret:CODE/Salesforce/ConnectedApp/PromoSalesforceExport",
+                    ":secret:CODE/Salesforce/ConnectedApp/PromoSalesforceExport-*",
                   ],
                 ],
               },
@@ -3957,7 +3957,7 @@ exports[`The Promotions lambdas stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":secret:PROD/Salesforce/ConnectedApp/PromoSalesforceExport",
+                    ":secret:PROD/Salesforce/ConnectedApp/PromoSalesforceExport-*",
                   ],
                 ],
               },
