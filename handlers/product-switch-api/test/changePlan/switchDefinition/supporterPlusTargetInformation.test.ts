@@ -22,7 +22,6 @@ describe('getSupporterPlusTargetInformation', () => {
 			currency: 'GBP',
 			previousAmount,
 			includesContribution: true,
-			isGuardianEmail: false,
 		};
 
 		const result = await supporterPlusTargetInformation.fromUserInformation(
@@ -46,7 +45,6 @@ describe('getSupporterPlusTargetInformation', () => {
 			currency: 'GBP',
 			previousAmount,
 			includesContribution: true,
-			isGuardianEmail: false,
 		};
 
 		const result = await supporterPlusTargetInformation.fromUserInformation(
@@ -66,7 +64,6 @@ describe('getSupporterPlusTargetInformation', () => {
 			mode: 'switchWithPriceOverride',
 			currency: 'GBP',
 			userRequestedAmount,
-			isGuardianEmail: false,
 		};
 
 		const result = await supporterPlusTargetInformation.fromUserInformation(
@@ -86,7 +83,6 @@ describe('getSupporterPlusTargetInformation', () => {
 			mode: 'switchWithPriceOverride',
 			currency: 'GBP',
 			userRequestedAmount,
-			isGuardianEmail: false,
 		};
 
 		expect(() =>
@@ -107,7 +103,6 @@ describe('getSupporterPlusTargetInformation', () => {
 			currency: 'GBP',
 			previousAmount,
 			includesContribution: true,
-			isGuardianEmail: false,
 		};
 
 		const result = await supporterPlusTargetInformation.fromUserInformation(
@@ -135,7 +130,6 @@ describe('getSupporterPlusTargetInformation', () => {
 			currency: 'GBP',
 			previousAmount,
 			includesContribution: true,
-			isGuardianEmail: false,
 		};
 
 		expect(() =>
@@ -160,7 +154,6 @@ describe('getSupporterPlusTargetInformation', () => {
 			currency: 'GBP',
 			previousAmount,
 			includesContribution: true,
-			isGuardianEmail: false,
 		};
 
 		const result = await supporterPlusTargetInformation.fromUserInformation(
