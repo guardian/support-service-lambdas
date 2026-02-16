@@ -1,5 +1,6 @@
 import { groupMap } from '@modules/arrayFunctions';
 import { logger } from '@modules/routing/logger';
+import { prettyPrint } from '@modules/routing/prettyPrint';
 import type { z } from 'zod';
 
 export class HttpError extends Error {
@@ -48,9 +49,10 @@ export class RestRequestMaker {
 		logger.wrapFn(
 			this.restRequestWithoutLogging.bind(this),
 			() => 'HTTP ' + this.baseURL,
-			this.restRequestWithoutLogging.toString(),
-			2,
 			maybeCallerInfo,
+			([path, method, , body]) =>
+				[`${method} ${path}`, prettyPrint(body)].join('\n'),
+			([method, path]) => `${method} ${path}`,
 		);
 
 	private async restRequestWithoutLogging<REQ, RESP>(
