@@ -61,7 +61,7 @@ const testSubscriptionInformation: SubscriptionInformation = {
 	previousAmount: 0,
 	previousProductName: '',
 	previousRatePlanName: '',
-	productRatePlanId: '',
+	ratePlanId: '',
 	productRatePlanKey: 'Annual',
 	subscriptionNumber: 'A-S123456',
 	termStartDate: new Date(0),
