@@ -11,6 +11,7 @@ import {
 	ExpiredTokenError,
 	InvalidScopesError,
 	OktaTokenHelper,
+	SigningKeyNotFoundError,
 } from '../src/identity';
 import { buildProxyEvent } from './fixtures';
 
@@ -76,6 +77,19 @@ test('we throw an error if the token is expired', async () => {
 	await expect(
 		identityHelperWithNoRequiredScopes.getIdentityId(expiredAuthHeader),
 	).rejects.toThrow(ExpiredTokenError);
+});
+
+test('we throw an error if the token has the wrong issuer', async () => {
+	// To get a token with the wrong issuer, you can go to the logs for the PROD
+	// lambda and take a token from the 'Authorization' header of any request
+	// (you will need to remove the 'Bearer ' prefix from the start of the token).
+	// Because the token is from PROD, it will have a different issuer than the
+	// one expected in CODE, which will cause the test to throw an error.
+	const accessToken = '';
+
+	await expect(
+		identityHelperWithNoRequiredScopes.getIdentityId(accessToken),
+	).rejects.toThrow(SigningKeyNotFoundError);
 });
 
 const authenticator = new IdentityApiGatewayAuthenticator('CODE', []);

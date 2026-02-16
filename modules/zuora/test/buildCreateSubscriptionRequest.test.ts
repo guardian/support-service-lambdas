@@ -3,6 +3,7 @@ import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { AppliedPromotion, Promo } from '@modules/promotions/v2/schema';
 import type { Stage } from '@modules/stage';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
 import type { CreateSubscriptionOrderAction } from '@modules/zuora/orders/orderActions';
 import type {
@@ -24,7 +25,7 @@ jest.mock('../src/createSubscription/subscriptionDates', () => ({
 	})),
 }));
 
-const productCatalog = generateProductCatalog(code);
+const productCatalog = generateProductCatalog(zuoraCatalogSchema.parse(code));
 const promo1: Promo = {
 	name: 'Test Promo',
 	campaignCode: 'campaign',

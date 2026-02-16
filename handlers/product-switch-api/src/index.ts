@@ -5,10 +5,14 @@ import { stageFromEnvironment } from '@modules/stage';
 import type { Handler } from 'aws-lambda';
 import dayjs from 'dayjs';
 import { z } from 'zod';
+import { ChangePlanEndpoint } from './changePlan/changePlanEndpoint';
+import {
+	legacyContributionToSupporterPlusEndpoint,
+	legacyProductSwitchRequestSchema,
+} from './changePlan/legacyContributionToSupporterPlusEndpoint';
+import { productSwitchRequestSchema } from './changePlan/schemas';
 import { frequencySwitchHandler } from './frequencySwitchEndpoint';
 import { frequencySwitchRequestSchema } from './frequencySwitchSchemas';
-import { contributionToSupporterPlusEndpoint } from './productSwitchEndpoint';
-import { productSwitchRequestSchema } from './schemas';
 
 const stage = stageFromEnvironment();
 
@@ -26,14 +30,41 @@ export type PathParser = z.infer<typeof pathParserSchema>;
 // entry point from AWS lambda
 export const handler: Handler = Router([
 	{
+		// deprecated, use the generic one below
 		httpMethod: 'POST',
 		path: '/product-move/recurring-contribution-to-supporter-plus/{subscriptionNumber}',
+		handler: withParsers(
+			pathParserSchema,
+			legacyProductSwitchRequestSchema,
+			withMMAIdentityCheck(
+				stage,
+				legacyContributionToSupporterPlusEndpoint(stage, dayjs()),
+				(parsed) => parsed.path.subscriptionNumber,
+			),
+		),
+	},
+	{
+		httpMethod: 'POST',
+		path: '/subscriptions/{subscriptionNumber}/change-plan',
 		handler: withParsers(
 			pathParserSchema,
 			productSwitchRequestSchema,
 			withMMAIdentityCheck(
 				stage,
-				contributionToSupporterPlusEndpoint(stage, dayjs()),
+				ChangePlanEndpoint.handler(stage, dayjs()),
+				(parsed) => parsed.path.subscriptionNumber,
+			),
+		),
+	},
+	{
+		httpMethod: 'POST',
+		path: '/subscriptions/{subscriptionNumber}/change-plan/preview',
+		handler: withParsers(
+			pathParserSchema,
+			productSwitchRequestSchema,
+			withMMAIdentityCheck(
+				stage,
+				ChangePlanEndpoint.previewHandler(stage, dayjs()),
 				(parsed) => parsed.path.subscriptionNumber,
 			),
 		),

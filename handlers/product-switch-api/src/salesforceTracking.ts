@@ -1,7 +1,10 @@
 import { sendMessageToQueue } from '@modules/aws/sqs';
 import { prettyPrint } from '@modules/prettyPrint';
 import { logger } from '@modules/routing/logger';
-import type { SwitchInformation } from './switchInformation';
+import type { Stage } from '@modules/stage';
+import type { SubscriptionInformation } from './changePlan/prepare/subscriptionInformation';
+import type { TargetInformation } from './changePlan/prepare/targetInformation';
+import type { ProductSwitchRequestBody } from './changePlan/schemas';
 
 export type SalesforceTrackingInput = {
 	subscriptionName: string;
@@ -18,7 +21,9 @@ export type SalesforceTrackingInput = {
 };
 
 export function createSQSMessageBody(
-	switchInformation: SwitchInformation,
+	targetInformation: TargetInformation,
+	subscriptionInformation: SubscriptionInformation,
+	input: Pick<ProductSwitchRequestBody, 'csrUserId' | 'caseId'>,
 	paidAmount: number,
 	now: Date,
 ) {
@@ -27,35 +32,40 @@ export function createSQSMessageBody(
 		previousProductName,
 		previousRatePlanName,
 		previousAmount,
-	} = switchInformation.subscription;
+	} = subscriptionInformation;
 
 	const salesforceTrackingInput: SalesforceTrackingInput = {
 		subscriptionName: subscriptionNumber,
 		previousAmount,
-		newAmount: switchInformation.actualTotalPrice,
+		newAmount: targetInformation.actualTotalPrice,
 		previousProductName: previousProductName,
 		previousRatePlanName: previousRatePlanName,
 		newRatePlanName: 'Supporter Plus',
 		requestedDate: now.toISOString().substring(0, 10),
 		effectiveDate: now.toISOString().substring(0, 10),
 		paidAmount,
-		csrUserId: switchInformation.input.csrUserId,
-		caseId: switchInformation.input.caseId,
+		csrUserId: input.csrUserId,
+		caseId: input.caseId,
 	};
 	return JSON.stringify(salesforceTrackingInput);
 }
 
 export const sendSalesforceTracking = async (
+	stage: Stage,
+	input: Pick<ProductSwitchRequestBody, 'csrUserId' | 'caseId'>,
 	paidAmount: number,
-	switchInformation: SwitchInformation,
+	targetInformation: TargetInformation,
+	subscriptionInformation: SubscriptionInformation,
 ) => {
 	const messageBody = createSQSMessageBody(
-		switchInformation,
+		targetInformation,
+		subscriptionInformation,
+		input,
 		paidAmount,
 		new Date(),
 	);
 
-	const queueName = `product-switch-salesforce-tracking-${switchInformation.stage}`;
+	const queueName = `product-switch-salesforce-tracking-${stage}`;
 	logger.log(
 		`Sending Salesforce tracking message ${prettyPrint(
 			JSON.parse(messageBody),

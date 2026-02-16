@@ -1,5 +1,6 @@
 import type { App } from 'aws-cdk-lib';
 import {
+	AllowS3CatalogReadPolicy,
 	AllowSqsSendPolicy,
 	AllowZuoraOAuthSecretsPolicy,
 } from './cdk/policies';
@@ -34,6 +35,7 @@ export class ProductSwitchApi extends SrStack {
 				'supporter-product-data',
 				'product-switch-salesforce-tracking',
 			),
+			new AllowS3CatalogReadPolicy(this),
 		);
 	}
 }
