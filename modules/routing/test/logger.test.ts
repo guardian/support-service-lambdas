@@ -176,11 +176,11 @@ describe('getCallerInfo', () => {
 			'Error: ',
 			'    at Object.<anonymous> (/Users/john_duffell/code/support-service-lambdas/handlers/alarms-handler/src/wrongone.ts:1:11)',
 			'    at Object.<anonymous> (/Users/john_duffell/code/support-service-lambdas/handlers/alarms-handler/src/anotherwrong.ts:2:21)',
-			'    at Object.<anonymous> (/Users/john_duffell/code/support-service-lambdas/handlers/alarms-handler/src/index.ts:3:31)',
+			'    at Object.<anonymous> (/Users/john_duffell/code/support-service-lambdas/handlers/alarms-handler/src/alarmMappings.ts:3:31)',
 			'    at Object.<anonymous> (/Users/john_duffell/code/support-service-lambdas/handlers/alarms-handler/src/toofar.ts:4:41)',
 		];
 		const actual = logger.getCallerInfo(undefined, testStack);
-		expect(actual).toEqual('alarms-handler/src/index.ts:3::Object.<anonymous>');
+		expect(actual).toEqual('alarmMappings.ts:3::Object.<anonymous>');
 	});
 
 	test("gets more path parts if it's a generic file name", () => {
@@ -189,11 +189,11 @@ describe('getCallerInfo', () => {
 			'Error: ',
 			'    at Object.<anonymous> (/Users/john_duffell/code/support-service-lambdas/handlers/alarms-handler/src/wrongone.ts:1:11)',
 			'    at Object.<anonymous> (/Users/john_duffell/code/support-service-lambdas/handlers/alarms-handler/src/anotherwrong.ts:2:21)',
-			'    at Object.<anonymous> (/Users/john_duffell/code/support-service-lambdas/handlers/alarms-handler/src/alarmMappings.ts:3:31)',
+			'    at Object.<anonymous> (/Users/john_duffell/code/support-service-lambdas/handlers/alarms-handler/src/index.ts:3:31)',
 			'    at Object.<anonymous> (/Users/john_duffell/code/support-service-lambdas/handlers/alarms-handler/src/toofar.ts:4:41)',
 		];
 		const actual = logger.getCallerInfo(undefined, testStack);
-		expect(actual).toEqual('alarmMappings.ts:3::Object.<anonymous>');
+		expect(actual).toEqual('alarms-handler/src/index.ts:3::Object.<anonymous>');
 	});
 });
 
