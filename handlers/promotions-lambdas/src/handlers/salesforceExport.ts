@@ -173,7 +173,9 @@ export const handler = async (): Promise<string> => {
 	}
 
 	try {
-		const sfClient = await SfClient.create(stage);
+		const sfClient = await SfClient.createWithClientCredentials(
+			`${stage}/Salesforce/ConnectedApp/PromoSalesforceExport`,
+		);
 		const items = await fetchPromoCodes(stage);
 		const csvData = generateCSV(items);
 
