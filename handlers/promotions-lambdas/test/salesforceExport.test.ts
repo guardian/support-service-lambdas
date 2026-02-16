@@ -38,7 +38,7 @@ const mockSfClientDelete = jest.fn();
 
 jest.mock('@modules/salesforce/sfClient', () => ({
 	SfClient: {
-		create: (...args: unknown[]): Promise<SfClient> =>
+		createWithClientCredentials: (...args: unknown[]): Promise<SfClient> =>
 			mockSfClientCreate(...args) as Promise<SfClient>,
 	},
 }));
