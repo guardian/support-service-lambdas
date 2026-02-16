@@ -1,5 +1,6 @@
 import { groupMap } from '@modules/arrayFunctions';
 import { logger } from '@modules/routing/logger';
+import { prettyPrint } from '@modules/routing/prettyPrint';
 import type { z } from 'zod';
 
 export class HttpError extends Error {
@@ -49,7 +50,8 @@ export class RestRequestMaker {
 			this.restRequestWithoutLogging.bind(this),
 			() => 'HTTP ' + this.baseURL,
 			maybeCallerInfo,
-			([method, path]) => `${method} ${path}`,
+			([path, method, , body]) =>
+				[`${method} ${path}`, prettyPrint(body)].join('\n'),
 			([method, path]) => `${method} ${path}`,
 		);
 

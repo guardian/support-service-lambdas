@@ -1,5 +1,6 @@
 import { getCallerInfo } from '@modules/routing/getCallerInfo';
 import { logger } from '@modules/routing/logger';
+import { prettyPrint } from '@modules/routing/prettyPrint';
 import type z from 'zod';
 import type { BearerTokenProvider } from '@modules/zuora/auth';
 
@@ -95,7 +96,10 @@ export abstract class RestClient {
 			this.fetch.bind(this),
 			() => 'HTTP ' + this.constructor.name,
 			maybeCallerInfo,
-			([path, method]) => `${method} ${path}`,
+			([path, method, , body, headers]) =>
+				[`${method} ${path}`, prettyPrint(body), prettyPrint(headers)].join(
+					'\n',
+				),
 			([path, method]) => `${method} ${path}`,
 		);
 
