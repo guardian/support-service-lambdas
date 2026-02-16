@@ -12,6 +12,17 @@ function extractParamNames(fnString: string) {
 	return paramNames;
 }
 
+/**
+ * Returns a slice from the right up to and including the first element matching the predicate.
+ */
+export function takeRightUntil<T>(
+	arr: T[],
+	predicate: (item: T) => boolean,
+): T[] {
+	const idx = arr.length - 1 - arr.slice().reverse().findIndex(predicate);
+	return idx >= 0 ? arr.slice(idx) : [];
+}
+
 export class Logger {
 	constructor(
 		private prefix: string[] = [],
@@ -44,29 +55,37 @@ export class Logger {
 
 	// look at the stack to work out the caller's details
 	// be careful about refactoring things that call this as by design it's not referentially transparent
-	public getCallerInfo(extraFrames: number = 0): string {
-		const err = new Error();
-		const stack = err.stack?.split('\n');
+	public getCallerInfo(
+		extraFrames: number = 0,
+		stack: string[] | undefined = new Error().stack?.split('\n'),
+	): string {
 		// [0] Error, [1] at getCallerInfo, [2] at caller (internal to logger), then [3] actual code
 		const callerLine = stack?.[3 + extraFrames] ?? '';
 		const match =
 			callerLine.match(
-				/at\s+([^\s]+)\s+\[as\s+[^\]]+\]\s+\(([^:]+:\d+):\d+\)/,
+				/at\s+([^\s]+)\s+\[as\s+[^\]]+\]\s+\(([^:]+):(\d+):\d+\)/,
 			) ??
-			callerLine.match(/at\s+([^\s]+)\s+\(([^:]+:\d+):\d+\)/) ??
-			callerLine.match(/at\s+([^\s]+)\s+\((.*:\d+):\d+\)/) ??
-			callerLine.match(/at\s+(.*:\d+):\d+/);
+			callerLine.match(/at\s+([^\s]+)\s+\(([^:]+):(\d+):\d+\)/) ??
+			callerLine.match(/at\s+([^\s]+)\s+\((.*):(\d+):\d+\)/) ??
+			callerLine.match(/at\s+(.*):(\d+):\d+/);
 		if (match) {
 			const functionName = match[1]?.trim();
 			let filename = match[2]?.trim();
+			const lineNumber = match[3]?.trim();
 
 			// only take the leaf name (for compactness)
 			if (filename?.includes('/')) {
-				const lastIndex = filename.lastIndexOf('/');
-				filename = filename.substring(lastIndex + '/'.length);
+				const pathParts = filename.split('/');
+				const commonNames = ['index.ts', 'src'];
+				filename = takeRightUntil(
+					pathParts,
+					(part) => !commonNames.includes(part),
+				).join('/');
 			}
 
-			return filename + (functionName ? '::' + functionName : '');
+			return (
+				filename + ':' + lineNumber + (functionName ? '::' + functionName : '')
+			);
 		}
 		return '';
 	}

@@ -26,7 +26,8 @@ export function LambdaHandler<ConfigType, E>(
 	configSchema: z.ZodType<ConfigType, z.ZodTypeDef, unknown>,
 	handler: (event: E, env: HandlerEnv<ConfigType>) => Promise<void>,
 ) {
-	return LambdaHandlerWithServices(configSchema, handler, (p) => p);
+	const callerInfo = logger.getCallerInfo();
+	return LambdaHandlerWithServices(configSchema, handler, (p) => p, callerInfo);
 }
 
 /**
@@ -38,12 +39,14 @@ export function LambdaHandler<ConfigType, E>(
  * @param configSchema schema for the SSM config for this lambda
  * @param handler
  * @param buildServices build anything you want to be created on cold start only, it will be passed into your handler
+ * @param callerInfo file/line number of the lambda handler
  * @constructor
  */
 export function LambdaHandlerWithServices<ConfigType, Services, E>(
 	configSchema: z.ZodType<ConfigType, z.ZodTypeDef, unknown>,
 	handler: (event: E, services: Services) => Promise<void>,
 	buildServices: (handlerProps: HandlerEnv<ConfigType>) => Services,
+	callerInfo: string = logger.getCallerInfo(),
 ) {
 	// only load config on a cold start, don't load if this file is referenced in tests
 	const lazyConfig = new Lazy(async () => {
@@ -54,7 +57,7 @@ export function LambdaHandlerWithServices<ConfigType, Services, E>(
 	}, 'load config from SSM');
 
 	const handlerWithLogging = logger.withContext(
-		logger.wrapFn(handler, undefined, undefined, 0, logger.getCallerInfo()),
+		logger.wrapFn(handler, undefined, undefined, 0, callerInfo),
 		undefined,
 		true,
 	);
