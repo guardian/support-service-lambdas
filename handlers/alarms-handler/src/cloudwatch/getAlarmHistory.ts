@@ -36,7 +36,7 @@ export async function getAlarmHistory(
 
 	return await Promise.all(
 		Object.entries(cloudwatchClients).map(async ([accountName, client]) => {
-			console.log('fetching alarm history for account ' + accountName);
+			logger.log('fetching alarm history for account ' + accountName);
 			const alarmHistoryItems = await getAlarmHistoryForClient(
 				client,
 				startDate,

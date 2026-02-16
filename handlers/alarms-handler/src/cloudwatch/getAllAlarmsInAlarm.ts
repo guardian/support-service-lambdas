@@ -7,6 +7,7 @@ import { flatten } from '@modules/arrayFunctions';
 import { fetchAllPages } from '@modules/aws/fetchAllPages';
 import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
+import { logger } from '@modules/routing/logger';
 import type { Tags } from './getTags';
 import { getTags } from './getTags';
 
@@ -17,7 +18,7 @@ export async function getAllAlarmsInAlarm(
 ): Promise<AlarmWithTags[]> {
 	return Promise.all(
 		Object.entries(cloudwatchClients).map(async ([accountName, client]) => {
-			console.log('checking account ' + accountName);
+			logger.log('checking account ' + accountName);
 			return await getAlarmsInAlarmForClient(client);
 		}),
 	).then(flatten);

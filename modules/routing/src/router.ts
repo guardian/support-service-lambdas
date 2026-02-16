@@ -132,11 +132,9 @@ export function Router(
 		}
 	};
 
-	return logger.wrapRouter(
-		httpRouter,
+	return logger.withContext(
+		logger.wrapFn(httpRouter, undefined, undefined, 0, logger.getCallerInfo()),
 		undefined,
-		undefined,
-		0,
-		logger.getCallerInfo(),
+		true,
 	);
 }

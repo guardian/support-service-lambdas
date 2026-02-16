@@ -53,12 +53,10 @@ export function LambdaHandlerWithServices<ConfigType, Services, E>(
 		return { stage, config: await loadConfig(stage, stack, app, configSchema) };
 	}, 'load config from SSM');
 
-	const handlerWithLogging = logger.wrapRouter(
-		handler,
+	const handlerWithLogging = logger.withContext(
+		logger.wrapFn(handler, undefined, undefined, 0, logger.getCallerInfo()),
 		undefined,
-		undefined,
-		0,
-		logger.getCallerInfo(),
+		true,
 	);
 
 	const handlerProps: Lazy<Services> = lazyConfig.then((config) =>
