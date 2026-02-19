@@ -136,7 +136,7 @@ export abstract class RestClient {
 		}
 
 		try {
-			const json: unknown = JSON.parse(result.responseBody);
+			const json: unknown = responseBody ? JSON.parse(responseBody) : {};
 			return schema.parse(json);
 		} catch (e) {
 			throw new RestClientError('parsing failure', result, e);
