@@ -11,7 +11,7 @@ export const dep = separateDepRecords({
 	// parsers
 	zod: 'catalog:',
 	'csv-parse': '^5.6.0',
-	'fast-xml-parser': '^4.5.0',
+	'fast-xml-parser': '^5.3.5',
 	// signature validation
 	'@peculiar/x509': '^1.12.3',
 	'@okta/jwt-verifier': '^4.0.1',
