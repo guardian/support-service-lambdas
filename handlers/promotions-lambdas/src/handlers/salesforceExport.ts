@@ -23,12 +23,24 @@ async function fetchPromoCodes(stage: Stage): Promise<PromoCodeViewItem[]> {
 		new ScanCommand({ TableName: tableName }),
 	);
 
-	const items = (response.Items ?? []).map((item) =>
-		promoCodeViewSchema.parse(unmarshall(item)),
-	);
+	const validItems: PromoCodeViewItem[] = [];
+	let invalidCount = 0;
 
-	logger.log(`Retrieved ${items.length} promo code views`);
-	return items;
+	for (const item of response.Items ?? []) {
+		const unmarshalled = unmarshall(item);
+		const result = promoCodeViewSchema.safeParse(unmarshalled);
+
+		if (result.success) {
+			validItems.push(result.data);
+		} else {
+			invalidCount++;
+		}
+	}
+
+	logger.log(
+		`Retrieved ${validItems.length} valid promo code views, dropped ${invalidCount} invalid items`,
+	);
+	return validItems;
 }
 
 export function generateCSV(items: PromoCodeViewItem[]): string {
