@@ -222,8 +222,6 @@ const productSwitchApi: HandlerDefinition = {
 const promotionsLambdas: HandlerDefinition = {
 	name: 'promotions-lambdas',
 	functionNames: [
-		'promotions-lambdas-promo-campaign-sync-',
-		'promotions-lambdas-promo-sync-',
 		'promotions-lambdas-promo-code-view-',
 		'promotions-lambdas-salesforce-export-',
 	],
