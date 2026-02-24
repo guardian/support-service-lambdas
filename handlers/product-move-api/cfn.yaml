@@ -290,7 +290,7 @@ Resources:
       Tags:
         - Key: DiagnosticLinks
           Value:
-            Fn::Sub: sqs:product-switch-salesforce-tracking-${Stage}
+            Fn::Sub: lambda:product-switch-salesforce-tracking-${Stage}
 
   NoSalesforceTrackingAlarm:
     Type: AWS::CloudWatch::Alarm
