@@ -11,15 +11,8 @@ export interface EventsAPI {
 	readonly clientType: 'eventsApi';
 }
 
-export interface BulkDeletionAPI {
-	readonly clientType: 'bulkDeletion';
-}
-
 export interface MParticleClient<
-	T extends DataSubjectAPI | EventsAPI | BulkDeletionAPI =
-		| DataSubjectAPI
-		| EventsAPI
-		| BulkDeletionAPI,
+	T extends DataSubjectAPI | EventsAPI = DataSubjectAPI | EventsAPI,
 > {
 	readonly clientType: T['clientType'];
 	readonly baseURL: string;
@@ -58,25 +51,10 @@ export const MParticleClient = {
 			'eventsApi',
 		);
 	},
-
-	createBulkDeletionClient(
-		config: AppConfig['workspace'],
-		pod: string,
-	): MParticleClient<BulkDeletionAPI> {
-		return new MParticleClientImpl<BulkDeletionAPI>(
-			`https://s2s.${pod}.mparticle.com`,
-			config.key,
-			config.secret,
-			'bulkDeletion',
-		);
-	},
 };
 
 export class MParticleClientImpl<
-	T extends DataSubjectAPI | EventsAPI | BulkDeletionAPI =
-		| DataSubjectAPI
-		| EventsAPI
-		| BulkDeletionAPI,
+	T extends DataSubjectAPI | EventsAPI = DataSubjectAPI | EventsAPI,
 > implements MParticleClient<T>
 {
 	readonly clientType: T['clientType'];
@@ -89,7 +67,13 @@ export class MParticleClientImpl<
 		clientType: T['clientType'],
 	) {
 		this.clientType = clientType;
-		// TODO:delete comment - Basic auth per workspace
+		/**
+		 * Authentication
+		 * The DSR API is secured via basic authentication. Credentials are issued at the level of an mParticle workspace.
+		 * You can obtain credentials for your workspace from the Workspace Settings screen. Note that this authentication
+		 * is for a single workspace and scopes the DSR to this workspace only.
+		 * https://docs.mparticle.com/developers/apis/dsr-api/v3/#authentication
+		 */
 		const authHeader = `Basic ${Buffer.from(`${key}:${secret}`).toString('base64')}`;
 		this.rest = new RestRequestMaker(
 			baseURL,
