@@ -16,7 +16,6 @@ import type {
 	ZuoraSwitchResponseWithIds,
 } from '../schemas';
 import { zuoraSwitchResponseWithIdsSchema } from '../schemas';
-import { removePendingUpdateAmendments } from './amendments';
 import { sendThankYouEmail } from './productSwitchEmail';
 
 export type SwitchResponse = { message: string };
@@ -32,13 +31,6 @@ export class DoSwitchAction {
 		switchInformation: SwitchInformation,
 		orderRequest: SwitchOrderRequestBuilder,
 	): Promise<SwitchResponse> {
-		//If the sub has a pending amount change amendment, we need to remove it
-		await removePendingUpdateAmendments(
-			this.zuoraClient,
-			switchInformation.subscription.subscriptionNumber,
-			this.today,
-		);
-
 		const invoiceId = await this.doSwitch(orderRequest.build(this.today));
 
 		const paidAmount = await takePaymentOrAdjustInvoice(
