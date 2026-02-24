@@ -19,10 +19,7 @@ import type {
 	OrderRequest,
 	PreviewOrderRequest,
 } from '@modules/zuora/orders/orderRequests';
-import {
-	executeOrderRequest,
-	previewOrderRequest,
-} from '@modules/zuora/orders/orderRequests';
+import { executeOrderRequest } from '@modules/zuora/orders/orderRequests';
 import type { ZuoraAccount } from '@modules/zuora/types';
 import type {
 	RatePlan,
@@ -33,6 +30,9 @@ import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { EligibilityChecker } from '../../discount-api/src/eligibilityChecker';
+import { zuoraSwitchResponseSchema } from './changePlan/schemas';
+import type { ZuoraPreviewResponse } from './doPreviewInvoices';
+import { doPreviewInvoices } from './doPreviewInvoices';
 import { sendFrequencySwitchConfirmationEmail } from './frequencySwitchEmail';
 import type {
 	FrequencySwitchErrorResponse,
@@ -40,11 +40,6 @@ import type {
 	FrequencySwitchRequestBody,
 	FrequencySwitchSuccessResponse,
 } from './frequencySwitchSchemas';
-import type { ZuoraPreviewResponse } from './schemas';
-import {
-	zuoraPreviewResponseSchema,
-	zuoraSwitchResponseSchema,
-} from './schemas';
 
 /**
  * Validation requirements for frequency switch eligibility.
@@ -325,10 +320,9 @@ export async function previewFrequencySwitch(
 		...baseOrderRequest,
 	};
 
-	const zuoraPreview: ZuoraPreviewResponse = await previewOrderRequest(
+	const zuoraPreview: ZuoraPreviewResponse = await doPreviewInvoices(
 		zuoraClient,
 		orderRequest,
-		zuoraPreviewResponseSchema,
 	);
 
 	logger.log('Orders preview returned successful response', zuoraPreview);

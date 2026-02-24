@@ -29,7 +29,7 @@ describe('cancelSubscriptionService', () => {
 	const mockZuoraClient = {} as ZuoraClient;
 
 	const createMockSubscription = (
-		status: string,
+		status: 'Active' | 'Cancelled',
 		subscriptionNumber = 'SUB-12345',
 	): ZuoraSubscription => ({
 		id: 'sub_123',
@@ -103,38 +103,6 @@ describe('cancelSubscriptionService', () => {
 		expect(result).toBe(false);
 		expect(mockLogger.log).toHaveBeenCalledWith(
 			'Subscription already inactive (Cancelled), skipping cancellation',
-		);
-		expect(cancelSubscription).not.toHaveBeenCalled();
-	});
-
-	it('should skip cancellation for inactive subscription (Expired)', async () => {
-		const mockSubscription = createMockSubscription('Expired');
-
-		const result = await cancelSubscriptionService(
-			mockLogger,
-			mockZuoraClient,
-			mockSubscription,
-		);
-
-		expect(result).toBe(false);
-		expect(mockLogger.log).toHaveBeenCalledWith(
-			'Subscription already inactive (Expired), skipping cancellation',
-		);
-		expect(cancelSubscription).not.toHaveBeenCalled();
-	});
-
-	it('should skip cancellation for inactive subscription (Suspended)', async () => {
-		const mockSubscription = createMockSubscription('Suspended');
-
-		const result = await cancelSubscriptionService(
-			mockLogger,
-			mockZuoraClient,
-			mockSubscription,
-		);
-
-		expect(result).toBe(false);
-		expect(mockLogger.log).toHaveBeenCalledWith(
-			'Subscription already inactive (Suspended), skipping cancellation',
 		);
 		expect(cancelSubscription).not.toHaveBeenCalled();
 	});

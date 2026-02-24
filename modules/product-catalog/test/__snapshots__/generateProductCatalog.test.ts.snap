@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`code Generated product billing period types match snapshot 1`] = `
+exports[`generateProductCatalog function code Generated product billing period types match snapshot 1`] = `
 "
 // ---------- This file is auto-generated. Do not edit manually. -------------
 
@@ -13,7 +13,7 @@ import type { ProductKey } from '@modules/product-catalog/productCatalog';
 	"
 `;
 
-exports[`code Generated product catalog matches snapshot 1`] = `
+exports[`generateProductCatalog function code Generated product catalog matches snapshot 1`] = `
 {
   "Contribution": {
     "active": true,
@@ -242,6 +242,28 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
+      "AnnualPlus": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "DigitalPack": {
+            "id": "42b45774e8304680a459307ca1761f82",
+          },
+          "GuardianWeekly": {
+            "id": "71a10c626869c3262f1c33d510290010",
+          },
+        },
+        "id": "71a10c626869c3262f1c33d50fd3000f",
+        "pricing": {
+          "AUD": 533,
+          "CAD": 437,
+          "EUR": 353,
+          "GBP": 203,
+          "NZD": 665,
+          "USD": 365,
+        },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Discount": {
         "billingPeriod": "Month",
         "charges": {
@@ -269,6 +291,28 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 16.5,
           "NZD": 55,
           "USD": 30,
+        },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
+      "MonthlyPlus": {
+        "billingPeriod": "Month",
+        "charges": {
+          "DigitalPack": {
+            "id": "dbf41ba6d90c4765a35701bfbc9947e8",
+          },
+          "GuardianWeekly": {
+            "id": "71a1889a11e9c3262efc33d4d35d003e",
+          },
+        },
+        "id": "71a1889a11e9c3262efc33d4d2e6003d",
+        "pricing": {
+          "AUD": 49,
+          "CAD": 41,
+          "EUR": 34,
+          "GBP": 21.5,
+          "NZD": 60,
+          "USD": 35,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -307,6 +351,28 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 49.5,
           "NZD": 165,
           "USD": 90,
+        },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
+      "QuarterlyPlus": {
+        "billingPeriod": "Quarter",
+        "charges": {
+          "DigitalPack": {
+            "id": "d5b95b38c03340eda78117b2023d1da0",
+          },
+          "GuardianWeekly": {
+            "id": "71a1b1d5ae19c3274a6c33d4e9420001",
+          },
+        },
+        "id": "71a1b1d5ae19c3274a6c33d4e8c80000",
+        "pricing": {
+          "AUD": 137,
+          "CAD": 113,
+          "EUR": 92,
+          "GBP": 54.5,
+          "NZD": 170,
+          "USD": 95,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -353,6 +419,24 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
+      "AnnualPlus": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "DigitalPack": {
+            "id": "637052f29f944602b5a6f6b04087938a",
+          },
+          "GuardianWeekly": {
+            "id": "71a10c626ff9c22b079c24523a09000a",
+          },
+        },
+        "id": "71a10c626ff9c22b079c245239af0009",
+        "pricing": {
+          "GBP": 339,
+          "USD": 435,
+        },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Discount": {
         "billingPeriod": "Month",
         "charges": {
@@ -376,6 +460,24 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 28,
           "USD": 36,
+        },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
+      "MonthlyPlus": {
+        "billingPeriod": "Month",
+        "charges": {
+          "DigitalPack": {
+            "id": "78fba989a3fa4f1d9c4cf49a0a8400b3",
+          },
+          "GuardianWeekly": {
+            "id": "71a17af0e0e9c22c33ec241bf6d6005c",
+          },
+        },
+        "id": "71a17af0e0e9c22c33ec241bf657005b",
+        "pricing": {
+          "GBP": 31,
+          "USD": 39,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -406,6 +508,24 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 83.9,
           "USD": 108,
+        },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
+      "QuarterlyPlus": {
+        "billingPeriod": "Quarter",
+        "charges": {
+          "DigitalPack": {
+            "id": "6e1824b50339435697e2a755e6bc04bd",
+          },
+          "GuardianWeekly": {
+            "id": "71a10c6268a9c22b079c2452f53c0138",
+          },
+        },
+        "id": "71a10c6268a9c22b079c2452f51f0137",
+        "pricing": {
+          "GBP": 86.9,
+          "USD": 111,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -1976,23 +2096,23 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "billingPeriod": "Annual",
         "charges": {
           "GuardianWeekly": {
-            "id": "8ad097b491daf9180191e0cd5953180d",
+            "id": "71a1889a1569c2d805ec2e67c4cd0056",
           },
           "NewspaperArchive": {
-            "id": "8ad081dd91e5368e0191eb3af3e200aa",
+            "id": "71a1889a1569c2d805ec2e67c54a0064",
           },
           "SupporterPlus": {
-            "id": "8ad097b491daf9180191e0cd59a11815",
+            "id": "71a1889a1569c2d805ec2e67c50c005d",
           },
         },
-        "id": "8ad097b491daf9180191e0cd58e5180b",
+        "id": "71a1889a1569c2d805ec2e67c45b0055",
         "pricing": {
-          "AUD": 704,
-          "CAD": 570,
-          "EUR": 462,
-          "GBP": 324,
-          "NZD": 824,
-          "USD": 534,
+          "AUD": 62,
+          "CAD": 50,
+          "EUR": 40.5,
+          "GBP": 29,
+          "NZD": 72,
+          "USD": 47,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -2066,19 +2186,19 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "billingPeriod": "Annual",
         "charges": {
           "GuardianWeekly": {
-            "id": "8ad097b491daf9180191e0cdf3791860",
+            "id": "71a17af0ed59c2d908ac2e73ebeb0147",
           },
           "NewspaperArchive": {
-            "id": "8ad081dd91e5368e0191eb34500c7e6a",
+            "id": "71a17af0ed59c2d908ac2e73eca20155",
           },
           "SupporterPlus": {
-            "id": "8ad097b491daf9180191e0cdf3c71868",
+            "id": "71a17af0ed59c2d908ac2e73ec4a014e",
           },
         },
-        "id": "8ad097b491daf9180191e0cdf34e185e",
+        "id": "71a17af0ed59c2d908ac2e73eb810146",
         "pricing": {
-          "GBP": 441.6,
-          "USD": 570,
+          "GBP": 29,
+          "USD": 47,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -2105,19 +2225,19 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "billingPeriod": "Month",
         "charges": {
           "GuardianWeekly": {
-            "id": "8ad097b491daf9180191e0cdba95183e",
+            "id": "71a1b1d5a299c2d908cc2e67bc330071",
           },
           "NewspaperArchive": {
-            "id": "8ad097b491e54f780191eb37685b63c9",
+            "id": "71a1b1d5a299c2d908cc2e67bcdf007f",
           },
           "SupporterPlus": {
-            "id": "8ad097b491daf9180191e0cdbae31846",
+            "id": "71a1b1d5a299c2d908cc2e67bc8f0078",
           },
         },
-        "id": "8ad097b491daf9180191e0cdba5f183c",
+        "id": "71a1b1d5a299c2d908cc2e67bb7b0070",
         "pricing": {
-          "GBP": 38.8,
-          "USD": 50,
+          "GBP": 29,
+          "USD": 47,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -2127,7 +2247,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
 }
 `;
 
-exports[`prod Generated product billing types match snapshot 1`] = `
+exports[`generateProductCatalog function prod Generated product billing types match snapshot 1`] = `
 "
 // ---------- This file is auto-generated. Do not edit manually. -------------
 
@@ -2140,7 +2260,7 @@ import type { ProductKey } from '@modules/product-catalog/productCatalog';
 	"
 `;
 
-exports[`prod Generated product catalog matches snapshot 1`] = `
+exports[`generateProductCatalog function prod Generated product catalog matches snapshot 1`] = `
 {
   "Contribution": {
     "active": true,
@@ -2369,6 +2489,28 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
+      "AnnualPlus": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "DigitalPack": {
+            "id": "8a1281679c2f45e3019c33e3fe014203",
+          },
+          "GuardianWeekly": {
+            "id": "8a1288599c2f45d4019c33de062c6806",
+          },
+        },
+        "id": "8a1288599c2f45d4019c33de05fd6804",
+        "pricing": {
+          "AUD": 533,
+          "CAD": 437,
+          "EUR": 353,
+          "GBP": 203,
+          "NZD": 665,
+          "USD": 365,
+        },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Discount": {
         "billingPeriod": "Month",
         "charges": {
@@ -2396,6 +2538,28 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 16.5,
           "NZD": 55,
           "USD": 30,
+        },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
+      "MonthlyPlus": {
+        "billingPeriod": "Month",
+        "charges": {
+          "DigitalPack": {
+            "id": "8a1288599c2f45d4019c33dfec8b6b5b",
+          },
+          "GuardianWeekly": {
+            "id": "8a129dff9c2f5e67019c33de28ff1236",
+          },
+        },
+        "id": "8a129dff9c2f5e67019c33de28dc1234",
+        "pricing": {
+          "AUD": 49,
+          "CAD": 41,
+          "EUR": 34,
+          "GBP": 21.5,
+          "NZD": 60,
+          "USD": 35,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -2434,6 +2598,28 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 49.5,
           "NZD": 165,
           "USD": 90,
+        },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
+      "QuarterlyPlus": {
+        "billingPeriod": "Quarter",
+        "charges": {
+          "DigitalPack": {
+            "id": "8a128e579c2f45da019c33e1dbe42439",
+          },
+          "GuardianWeekly": {
+            "id": "8a129dff9c2f5e67019c33de1a70120a",
+          },
+        },
+        "id": "8a129dff9c2f5e67019c33de1a2b1208",
+        "pricing": {
+          "AUD": 137,
+          "CAD": 113,
+          "EUR": 92,
+          "GBP": 54.5,
+          "NZD": 170,
+          "USD": 95,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -2480,6 +2666,24 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
+      "AnnualPlus": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "DigitalPack": {
+            "id": "8a1286eb9bf8fee6019c2928478b4fea",
+          },
+          "GuardianWeekly": {
+            "id": "8a1296cc9bf9167b019c2925e638697e",
+          },
+        },
+        "id": "8a1296cc9bf9167b019c2925e5f1697c",
+        "pricing": {
+          "GBP": 396,
+          "USD": 492,
+        },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Discount": {
         "billingPeriod": "Month",
         "charges": {
@@ -2503,6 +2707,24 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 28,
           "USD": 36,
+        },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
+      "MonthlyPlus": {
+        "billingPeriod": "Month",
+        "charges": {
+          "DigitalPack": {
+            "id": "8a1288599bf8fee3019c292b539e3704",
+          },
+          "GuardianWeekly": {
+            "id": "8a1295179bf91686019c2923c22b487c",
+          },
+        },
+        "id": "8a1295179bf91686019c2923c1d2487a",
+        "pricing": {
+          "GBP": 33,
+          "USD": 41,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -2533,6 +2755,24 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 83.9,
           "USD": 108,
+        },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
+      "QuarterlyPlus": {
+        "billingPeriod": "Quarter",
+        "charges": {
+          "DigitalPack": {
+            "id": "8a129dff9bf9167c019c292a2ef265bd",
+          },
+          "GuardianWeekly": {
+            "id": "8a1286eb9bf8fee6019c2924e3f24554",
+          },
+        },
+        "id": "8a1286eb9bf8fee6019c2924e3c84552",
+        "pricing": {
+          "GBP": 98.9,
+          "USD": 123,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -2906,7 +3146,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0ff5af9b657015b0fea5b653f81",
         "pricing": {
-          "GBP": 20.99,
+          "GBP": 23,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -2923,7 +3163,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0fd560d13880156136b8e490f8b",
         "pricing": {
-          "GBP": 20.99,
+          "GBP": 23,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -3338,7 +3578,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0fe5af9a6b9015b0fe1ecc0116c",
         "pricing": {
-          "GBP": 15.99,
+          "GBP": 18,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -3355,7 +3595,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0fe56fe33ff0157040d4b824168",
         "pricing": {
-          "GBP": 15.99,
+          "GBP": 18,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -3757,7 +3997,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a00870ec598001710740d0d83017",
         "pricing": {
-          "GBP": 15.99,
+          "GBP": 18,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -3774,7 +4014,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a00870ec598001710740cf9e3004",
         "pricing": {
-          "GBP": 15.99,
+          "GBP": 18,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",

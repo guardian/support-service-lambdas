@@ -6,7 +6,7 @@ import sbtassembly.PathList
 
 object Dependencies {
 
-  val awsSdkVersion = "2.40.17"
+  val awsSdkVersion = "2.41.21"
 
   val circeVersion = "0.14.13"
   val sttpVersion = "3.11.0"
@@ -15,7 +15,7 @@ object Dependencies {
   val catsEffectVersion = "2.5.5"
 
   val logging: Seq[ModuleID] = Seq(
-    "ch.qos.logback" % "logback-classic" % "1.5.26",
+    "ch.qos.logback" % "logback-classic" % "1.5.32",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
   )
 
@@ -41,8 +41,8 @@ object Dependencies {
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.3.0"
 
   // GCP
-  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.57.2"
-  val grpcNettyOverride = "io.grpc" % "grpc-netty-shaded" % "1.78.0"
+  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.59.0"
+  val grpcNettyOverride = "io.grpc" % "grpc-netty-shaded" % "1.79.0"
 
   // Cats
   val catsCore = "org.typelevel" %% "cats-core" % catsVersion
@@ -76,7 +76,7 @@ object Dependencies {
   val http4sCore = "org.http4s" %% "http4s-core" % http4sVersion
 
   // Guardian
-  val simpleConfig = "com.gu" %% "simple-configuration-ssm" % "6.1.0"
+  val simpleConfig = "com.gu" %% "simple-configuration-ssm" % "9.1.0"
   val supportInternationalisation =
     "com.gu" %% "support-internationalisation" % "0.16"
 

@@ -1,3 +1,8 @@
+import type {
+	ProductId,
+	ProductRatePlanChargeId,
+	ProductRatePlanId,
+} from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
 import { ZuoraError } from '@modules/zuora/errors/zuoraError';
 import {
@@ -272,14 +277,16 @@ describe('subscription', () => {
 						ratePlans: [
 							{
 								id: '8ad0887183a3024f0183a899d0464b43',
-								productId: '2c92c0f955c3cf0f0155c5d9ddc53bc3',
+								productId: '2c92c0f955c3cf0f0155c5d9ddc53bc3' as ProductId,
 								productName: 'Newspaper Delivery',
-								productRatePlanId: '2c92c0f955c3cf0f0155c5d9e2493c43',
+								productRatePlanId:
+									'2c92c0f955c3cf0f0155c5d9e2493c43' as ProductRatePlanId,
 								ratePlanName: 'Everyday',
 								ratePlanCharges: [
 									{
 										id: '8ad0887183a3024f0183a899d0504b52',
-										productRatePlanChargeId: '2c92c0f955c3cf0f0155c5d9e4993c75',
+										productRatePlanChargeId:
+											'2c92c0f955c3cf0f0155c5d9e4993c75' as ProductRatePlanChargeId,
 										number: 'C-00715453',
 										name: 'Sunday',
 										type: 'Recurring',

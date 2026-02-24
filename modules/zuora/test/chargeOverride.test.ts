@@ -1,11 +1,12 @@
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import { getChargeOverride } from '@modules/zuora/createSubscription/chargeOverride';
 import prod from '../../zuora-catalog/test/fixtures/catalog-prod.json';
 import { deliveryContact } from './fixtures/createSubscriptionFixtures';
 
 describe('getChargeOverride', () => {
-	const productCatalog = generateProductCatalog(prod);
+	const productCatalog = generateProductCatalog(zuoraCatalogSchema.parse(prod));
 	const chargeOverrideShouldBeUndefinedForProduct = (
 		productPurchase: ProductPurchase,
 	) => {

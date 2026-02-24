@@ -31,8 +31,12 @@ export interface BuildDefinition {
 
 const alarmsHandler: HandlerDefinition = {
 	name: 'alarms-handler',
-	functionNames: ['alarms-handler-', 'alarms-handler-scheduled-'],
-	entryPoints: ['src/index.ts', 'src/indexScheduled.ts'],
+	functionNames: [
+		'alarms-handler-',
+		'alarms-handler-scheduled-',
+		'alarms-handler-summary-',
+	],
+	entryPoints: ['src/index.ts', 'src/indexScheduled.ts', 'src/indexSummary.ts'],
 	dependencies: {
 		...dep['@aws-sdk/client-cloudwatch'],
 		...dep['@aws-sdk/credential-providers'],
@@ -87,6 +91,23 @@ const generateProductCatalog: HandlerDefinition = {
 	devDependencies: {
 		...dep['@aws-sdk/client-s3'],
 		...devDeps['@types/aws-lambda'],
+	},
+};
+
+const imovoVoucherApi: HandlerDefinition = {
+	name: 'imovo-voucher-api',
+	dependencies: {
+		...dep['@aws-sdk/client-secrets-manager'],
+		...dep['@aws-sdk/client-dynamodb'],
+		...dep['@aws-sdk/util-dynamodb'],
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+		...devDeps['tsx'],
+	},
+	extraScripts: {
+		'run-local': 'tsx src/runLocal.ts',
 	},
 };
 
@@ -205,9 +226,8 @@ const productSwitchApi: HandlerDefinition = {
 const promotionsLambdas: HandlerDefinition = {
 	name: 'promotions-lambdas',
 	functionNames: [
-		'promotions-lambdas-promo-campaign-sync-',
-		'promotions-lambdas-promo-sync-',
 		'promotions-lambdas-promo-code-view-',
+		'promotions-lambdas-salesforce-export-',
 	],
 	entryPoints: ['src/handlers/*.ts'],
 	dependencies: {
@@ -378,6 +398,15 @@ const moduleEmail: ModuleDefinition = {
 	},
 };
 
+const moduleGuardianSubscription: ModuleDefinition = {
+	name: 'guardian-subscription',
+	dependencies: { ...dep['dayjs'] },
+	devDependencies: {
+		...dep['@aws-sdk/client-cloudwatch-logs'],
+		...dep['@aws-sdk/credential-providers'],
+	},
+};
+
 const moduleIdentity: ModuleDefinition = {
 	name: 'identity',
 	dependencies: {
@@ -415,8 +444,7 @@ const moduleProductCatalog: ModuleDefinition = {
 		...devDeps['typescript'],
 	},
 	extraScripts: {
-		generateFiles:
-			'tsx -r tsconfig-paths/register --project ../../tsconfig.json src/generateSchemaCommand.ts',
+		generateFiles: 'tsx src/generateSchemaCommand.ts',
 		validateSchema:
 			'prettier --write src/productCatalogSchema.ts && pnpm run sortSchemaKeys',
 		sortSchemaKeys:
@@ -431,8 +459,7 @@ const moduleProductCatalog: ModuleDefinition = {
 			'for i in {1..2}; do eslint --fix src/productPurchaseSchema.ts; done',
 		validateSchemas:
 			'pnpm run validateSchema && pnpm run validateBillingPeriods && pnpm run validateProductPurchaseSchema',
-		buildGeneratedFiles:
-			'tsc --noEmit --skipLibCheck --project tsconfig-for-generated-files.json',
+		buildGeneratedFiles: 'tsc --noEmit --skipLibCheck',
 		generateSchema:
 			'pnpm run generateFiles && pnpm run validateSchemas && pnpm run buildGeneratedFiles',
 		updateSnapshots: 'jest -u --group=-integration',
@@ -452,6 +479,7 @@ const moduleRouting: ModuleDefinition = {
 	name: 'routing',
 	dependencies: {
 		...dep['zod'],
+		...dep['dayjs'],
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
@@ -553,6 +581,7 @@ export const build: BuildDefinition = {
 		discountApi,
 		discountExpiryNotifier,
 		generateProductCatalog,
+		imovoVoucherApi,
 		metricPushApi,
 		mobilePurchasesToSupporterProductData,
 		mparticleApi,
@@ -575,6 +604,7 @@ export const build: BuildDefinition = {
 		moduleAws,
 		moduleBigquery,
 		moduleEmail,
+		moduleGuardianSubscription,
 		moduleIdentity,
 		moduleInternationalisation,
 		moduleProductBenefits,

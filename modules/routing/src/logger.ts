@@ -1,4 +1,5 @@
 import * as console from 'node:console';
+import { mapOption } from '@modules/nullAndUndefined';
 import { ZodType } from 'zod';
 
 function extractParamNames(fnString: string) {
@@ -11,6 +12,17 @@ function extractParamNames(fnString: string) {
 	return paramNames;
 }
 
+/**
+ * Returns a slice from the right up to and including the first element matching the predicate.
+ */
+export function takeRightUntil<T>(
+	arr: T[],
+	predicate: (item: T) => boolean,
+): T[] {
+	const idx = arr.length - 1 - arr.slice().reverse().findIndex(predicate);
+	return idx >= 0 ? arr.slice(idx) : [];
+}
+
 export class Logger {
 	constructor(
 		private prefix: string[] = [],
@@ -20,40 +32,60 @@ export class Logger {
 	) {}
 
 	public resetContext(): void {
-		this.logFn('logger: resetting context from ' + this.prefix.join(', '));
 		this.prefix = [];
 	}
 
+	public dropContext(value: string): void {
+		const index = this.prefix.indexOf(value);
+		if (index !== -1) {
+			this.prefix = this.prefix.slice(0, index);
+		} else {
+			this.logFn(
+				this.getMessage(
+					this.getCallerInfo(),
+					`dropContext: context value "${value}" not found`,
+				),
+			);
+		}
+	}
+
 	public mutableAddContext(value: string): void {
-		this.logFn('logger: adding context ' + value);
 		this.prefix.push(value);
 	}
 
 	// look at the stack to work out the caller's details
 	// be careful about refactoring things that call this as by design it's not referentially transparent
-	public getCallerInfo(extraFrames: number = 0): string {
-		const err = new Error();
-		const stack = err.stack?.split('\n');
+	public getCallerInfo(
+		extraFrames: number = 0,
+		stack: string[] | undefined = new Error().stack?.split('\n'),
+	): string {
 		// [0] Error, [1] at getCallerInfo, [2] at caller (internal to logger), then [3] actual code
 		const callerLine = stack?.[3 + extraFrames] ?? '';
 		const match =
 			callerLine.match(
-				/at\s+([^\s]+)\s+\[as\s+[^\]]+\]\s+\(([^:]+:\d+):\d+\)/,
+				/at\s+([^\s]+)\s+\[as\s+[^\]]+\]\s+\(([^:]+):(\d+):\d+\)/,
 			) ??
-			callerLine.match(/at\s+([^\s]+)\s+\(([^:]+:\d+):\d+\)/) ??
-			callerLine.match(/at\s+([^\s]+)\s+\((.*:\d+):\d+\)/) ??
-			callerLine.match(/at\s+(.*:\d+):\d+/);
+			callerLine.match(/at\s+([^\s]+)\s+\(([^:]+):(\d+):\d+\)/) ??
+			callerLine.match(/at\s+([^\s]+)\s+\((.*):(\d+):\d+\)/) ??
+			callerLine.match(/at\s+(.*):(\d+):\d+/);
 		if (match) {
 			const functionName = match[1]?.trim();
 			let filename = match[2]?.trim();
+			const lineNumber = match[3]?.trim();
 
 			// only take the leaf name (for compactness)
 			if (filename?.includes('/')) {
-				const lastIndex = filename.lastIndexOf('/');
-				filename = filename.substring(lastIndex + '/'.length);
+				const pathParts = filename.split('/');
+				const commonNames = ['index.ts', 'src'];
+				filename = takeRightUntil(
+					pathParts,
+					(part) => !commonNames.includes(part),
+				).join('/');
 			}
 
-			return filename + (functionName ? '::' + functionName : '');
+			return (
+				filename + ':' + lineNumber + (functionName ? '::' + functionName : '')
+			);
 		}
 		return '';
 	}
@@ -96,12 +128,15 @@ export class Logger {
 	private objectToPrettyString(object: unknown) {
 		try {
 			const jsonString = JSON.stringify(object)
-				.replace(/"([^"]+)":/g, ' $1: ') // Remove quotes around keys
+				.replace(/"([A-Za-z0-9]+)":/g, ' $1: ') // Remove quotes around keys
 				.replace(/}$/, ' }');
 			if (jsonString.length <= 80) {
 				return jsonString;
 			}
-			return JSON.stringify(object, null, 2).replace(/"([^"]+)":/g, '$1:');
+			return JSON.stringify(object, null, 2).replace(
+				/"([A-Za-z0-9]+)":/g,
+				'$1:',
+			);
 		} catch (e) {
 			console.error('caught error when trying to serialise log line', e);
 			return String(object);
@@ -204,37 +239,50 @@ export class Logger {
 	}
 
 	/**
-	 * This function wraps an existing function similar to wrapFn, but resets the logger context before each invocation.
+	 * This function wraps an existing function but resets the logger context before each invocation.
 	 * Useful for router functions where each request should start with a clean context.
 	 *
 	 * @param fn the function to wrap
-	 * @param functionName an optional free text string to identify the function called
-	 * @param fnAsString if you have to call .bind(this) on your function, pass in function.toString() here to retain parameter names
-	 * @param shortArgsNum when the function returns, one argument will be logged again for identification purposes, this overrides that
+	 * @param newContextFromArgs
+	 * @param topLevel if it's a top level handler it will reset the context
 	 */
-	wrapRouter<TArgs extends unknown[], TReturn>(
+	withContext<TArgs extends unknown[], TReturn>(
 		fn: AsyncFunction<TArgs, TReturn>,
-		functionName?: string | (() => string),
-		fnAsString?: string,
-		shortArgsNum?: number,
-		maybeCallerInfo?: string,
+		newContextFromArgs?: (args: TArgs) => string,
+		topLevel?: boolean,
 	): AsyncFunction<TArgs, TReturn> {
-		const callerInfo = maybeCallerInfo ?? this.getCallerInfo();
-		const wrappedFn = this.wrapFn(
-			fn,
-			functionName,
-			fnAsString,
-			shortArgsNum,
-			callerInfo,
-		);
-
 		return async (...args: TArgs): Promise<TReturn> => {
-			this.resetContext();
-			return wrappedFn(...args).then((result) => {
+			if (topLevel) {
 				this.resetContext();
-				return result;
+			}
+			const context = mapOption(newContextFromArgs, (newContextFromArgs) =>
+				newContextFromArgs(args),
+			);
+			if (context !== undefined) {
+				this.mutableAddContext(context);
+			}
+			return fn(...args).finally(() => {
+				if (context !== undefined) {
+					this.dropContext(context);
+				}
+				if (topLevel) {
+					this.resetContext();
+				}
 			});
 		};
+	}
+
+	/**
+	 * handy for logging a value on the way past without having to extract a value into a const, log, then return.
+	 *
+	 * @param message
+	 * @param value the value to log and then return
+	 * @param map apply before logging if you need to extract a field or spread an iterator
+	 */
+	tap<T>(message: string, value: T, map: (t: T) => unknown = (t) => t) {
+		const callerInfo = this.getCallerInfo();
+		this.logFn(this.getMessage(callerInfo, message, map(value)));
+		return value;
 	}
 }
 

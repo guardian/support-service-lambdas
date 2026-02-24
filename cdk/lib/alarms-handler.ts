@@ -59,6 +59,7 @@ export class AlarmsHandler extends SrStack {
 			mobileAccountRoleArn.valueAsString,
 			targetingAccountRoleArn.valueAsString,
 		);
+		const describeAlarmsPolicy = buildDescribeAlarmsPolicy(this);
 
 		const triggeredLambda = new SrSqsLambda(this, 'TriggeredLambda', {
 			monitoring: {
@@ -99,9 +100,6 @@ export class AlarmsHandler extends SrStack {
 					description: 'notify about alarms in Alarm state every morning',
 				},
 			],
-			lambdaOverrides: {
-				handler: 'indexScheduled.handler',
-			},
 			monitoring: {
 				snsTopicName: backupEmailTopic.topicName, // we don't send to our own topic to avoid a loop
 				errorImpact:
@@ -109,10 +107,28 @@ export class AlarmsHandler extends SrStack {
 			},
 		});
 
-		scheduledLambda.addPolicies(
-			describeAlarmsPolicy(this),
-			alarmTagFetchingPolicy,
-		);
+		scheduledLambda.addPolicies(describeAlarmsPolicy, alarmTagFetchingPolicy);
+
+		const summaryLambda = new SrScheduledLambda(this, 'SummaryLambda', {
+			nameSuffix: 'summary',
+			rules: [
+				{
+					schedule: Schedule.cron({
+						weekDay: 'FRI',
+						hour: '10',
+						minute: '0',
+					}),
+					description: 'share a weekly alarm summary',
+				},
+			],
+			monitoring: {
+				snsTopicName: backupEmailTopic.topicName, // we don't send to our own topic to avoid a loop
+				errorImpact:
+					'weekly alarm summary will not be sent to the team chat channels',
+			},
+		});
+
+		summaryLambda.addPolicies(describeAlarmsPolicy, alarmTagFetchingPolicy);
 	}
 }
 
@@ -135,11 +151,14 @@ function buildAlarmTagFetchingPolicy(
 	});
 }
 
-function describeAlarmsPolicy(scope: SrStack) {
+function buildDescribeAlarmsPolicy(scope: SrStack) {
 	return new Policy(scope, `ScheduledCloudwatchPolicy`, {
 		statements: [
 			new PolicyStatement({
-				actions: ['cloudwatch:DescribeAlarms'],
+				actions: [
+					'cloudwatch:DescribeAlarms',
+					'cloudwatch:DescribeAlarmHistory',
+				],
 				resources: ['*'],
 			}),
 		],

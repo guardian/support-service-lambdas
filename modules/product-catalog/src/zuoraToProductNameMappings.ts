@@ -40,7 +40,7 @@ export const activeProducts = [
 	'Contribution',
 ];
 
-const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
+export const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
 	'Annual Contribution': 'Annual',
 	'Monthly Contribution': 'Monthly',
 	// Digital Pack rate plans
@@ -88,6 +88,12 @@ const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
 	'GW Oct 18 - Quarterly - Domestic': 'Quarterly',
 	'GW GIFT Oct 18 - 1 Year - Domestic': 'OneYearGift',
 	'GW GIFT Oct 18 - 3 Month - Domestic': 'ThreeMonthGift',
+	'GW + Digital - Annual - ROW': 'AnnualPlus',
+	'GW + Digital - Monthly - ROW': 'MonthlyPlus',
+	'GW + Digital - Quarterly - ROW': 'QuarterlyPlus',
+	'GW + Digital - Annual - Domestic': 'AnnualPlus',
+	'GW + Digital - Monthly - Domestic': 'MonthlyPlus',
+	'GW + Digital - Quarterly - Domestic': 'QuarterlyPlus',
 	// Old GW rate plans
 	'Guardian Weekly Annual': 'Annual',
 	'Guardian Weekly Quarterly': 'Quarterly',
@@ -125,7 +131,7 @@ const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
 	Percentage: 'Discount',
 } as const;
 
-const zuoraCatalogToProductRatePlanChargeKey: Record<string, string> = {
+export const zuoraCatalogToProductRatePlanChargeKey: Record<string, string> = {
 	'Digital Pack Monthly': 'Subscription',
 	'Digital Pack Annual': 'Subscription',
 	'Digital Pack Quarterly': 'Subscription',
@@ -150,6 +156,12 @@ const zuoraCatalogToProductRatePlanChargeKey: Record<string, string> = {
 	'GW Oct 18 - First 6 issues - Domestic': 'Subscription',
 	'GW GIFT Oct 18 - 1 Year - Domestic': 'Subscription',
 	'GW GIFT Oct 18 - 3 Month - Domestic': 'Subscription',
+	'GW - Annual - ROW': 'GuardianWeekly',
+	'GW - Monthly - ROW': 'GuardianWeekly',
+	'GW - Quarterly - ROW': 'GuardianWeekly',
+	'GW - Annual - Domestic': 'GuardianWeekly',
+	'GW - Monthly - Domestic': 'GuardianWeekly',
+	'GW - Quarterly - Domestic': 'GuardianWeekly',
 	// Old GW rate plan charges
 	'Zone A Annual': 'Subscription',
 	'Zone A Quarterly': 'Subscription',

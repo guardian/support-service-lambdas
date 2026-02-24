@@ -45,15 +45,17 @@ export interface ContributionTestAdditionalOptions {
 	price?: number;
 	billingCountry?: 'United Kingdom' | 'Germany' | 'United States'; // https://knowledgecenter.zuora.com/Quick_References/Country%2C_State%2C_and_Province_Codes/A_Manage_countries_and_regions#View_countries_or_regions (countries are defined in Zuora config)
 	paymentMethod?: 'directDebit' | 'visaCard';
+	termLength?: number;
 }
 
 export const createContribution = async (
 	zuoraClient: ZuoraClient,
 	additionOptions?: ContributionTestAdditionalOptions,
+	startDate: dayjs.Dayjs = dayjs(),
 ): Promise<string> => {
 	const subscribeResponse = await subscribe(
 		zuoraClient,
-		contributionSubscribeBody(dayjs(), additionOptions),
+		contributionSubscribeBody(startDate, additionOptions),
 	);
 	return getIfDefined(
 		subscribeResponse[0]?.SubscriptionNumber,

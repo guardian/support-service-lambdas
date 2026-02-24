@@ -27,6 +27,10 @@ type DefaultProps = ReturnType<typeof getLambdaDefaultProps>;
 type GuLambdaOverrides = Omit<GuFunctionProps, keyof DefaultProps> &
 	Partial<DefaultProps>;
 
+function initCap(s: string) {
+	return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 function getLambdaDefaultProps(
 	scope: Identity,
 	nameSuffix: string | undefined,
@@ -38,7 +42,9 @@ function getLambdaDefaultProps(
 		app: scope.app,
 		functionName: getNameWithStage(scope, nameSuffix),
 		fileName: `${scope.app}.zip`,
-		handler: 'index.handler',
+		handler: nameSuffix
+			? `index${initCap(nameSuffix)}.handler`
+			: 'index.handler',
 		runtime: nodeVersion,
 		loggingFormat: LoggingFormat.TEXT,
 		memorySize: 1024,

@@ -28,6 +28,7 @@ export type EmailPayload = {
 };
 export const DataExtensionNames = {
 	recurringContributionToSupporterPlusSwitch: 'SV_RCtoSP_Switch',
+	supporterPlusToDigitalPlusSwitch: 'SV_SPtoDP_SwitchConfirmation',
 	subscriptionCancelledEmail: 'subscription-cancelled-email',
 	updateSupporterPlusAmount: 'payment-amount-changed-email',
 	cancellationDiscountConfirmation: 'cancellation-discount-confirmation-email',
@@ -40,6 +41,7 @@ export const DataExtensionNames = {
 		'supporter-plus-annual-discount-confirmation-email',
 	discountExpiryNotificationEmail: 'discount-expiry-email',
 	stripeDisputeCancellation: 'stripe-dispute-cancellation',
+	imovoVoucherReward: 'imovo-voucher-reward',
 	supporterPlusFrequencySwitchConfirmation:
 		'SV_MonthlyToAnnualSwitchConfirmation',
 	day0Emails: {

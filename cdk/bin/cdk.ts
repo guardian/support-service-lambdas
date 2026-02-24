@@ -13,6 +13,7 @@ import {
 import { DiscountApi } from '../lib/discount-api';
 import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
+import { ImovoVoucherApi } from '../lib/imovo-voucher-api';
 import { MetricPushApi } from '../lib/metric-push-api';
 import { MobilePurchasesToSupporterProductData } from '../lib/mobile-purchases-to-supporter-product-data';
 import { MParticleApi } from '../lib/mparticle-api';
@@ -126,17 +127,14 @@ new SingleContributionSalesforceWrites(
 );
 
 new PromotionsLambdas(app, 'CODE', {
-	oldPromoCampaignStreamLabel: '2025-12-17T11:57:50.933',
-	oldPromoStreamLabel: '2023-04-28T14:57:20.201',
 	newPromoStreamLabel: '2026-01-05T11:33:36.603',
 });
 new PromotionsLambdas(app, 'PROD', {
-	oldPromoCampaignStreamLabel: '2025-12-17T11:57:59.560',
-	oldPromoStreamLabel: '2016-06-01T13:26:09.654',
 	newPromoStreamLabel: '2026-01-05T11:50:46.239',
 });
 
 const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
+	ImovoVoucherApi,
 	DiscountApi,
 	ProductSwitchApi,
 	UpdateSupporterPlusAmount,

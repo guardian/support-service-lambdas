@@ -2,6 +2,7 @@ import { ValidationError } from '@modules/errors';
 import type { Stage } from '@modules/stage';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import type { IdentityUserDetails } from '@modules/identity/identity';
+import { SigningKeyNotFoundError } from '@modules/identity/identity';
 import {
 	ExpiredTokenError,
 	InvalidScopesError,
@@ -51,53 +52,73 @@ export class IdentityApiGatewayAuthenticator {
 				userDetails,
 			};
 		} catch (error) {
-			console.log('Caught exception with message: ', error);
-			if (error instanceof ExpiredTokenError) {
-				return {
-					type: 'failure',
-					response: {
-						body: 'Token has expired',
-						statusCode: 401,
-					},
-				};
-			}
-			if (error instanceof InvalidTokenError) {
-				return {
-					type: 'failure',
-					response: {
-						body: 'Token is invalid',
-						statusCode: 401,
-					},
-				};
-			}
-			if (error instanceof InvalidScopesError) {
-				return {
-					type: 'failure',
-					response: {
-						body: 'Token does not have the required scopes',
-						statusCode: 403,
-					},
-				};
-			}
-			if (error instanceof ValidationError) {
-				return {
-					type: 'failure',
-					response: {
-						body: error.message,
-						statusCode: 403,
-					},
-				};
-			}
-			return {
-				type: 'failure',
-				response: {
-					body: 'Internal server error',
-					statusCode: 500,
-				},
-			};
+			return buildErrorResponse(error);
 		}
 	}
 }
+
+export const buildErrorResponse = (error: unknown): AuthenticationResult => {
+	// This function should return the following HTTP responses:
+	// - 401 Unauthorized when authentication fails or is
+	// missing (i.e., we don't know who you are, or your credentials are bad)
+	// - 403 Forbidden when the user is successfully authenticated but not
+	// authorized to perform the action.
+	// - 500 Internal Server Error for any other errors
+
+	console.log('Caught exception with message: ', error);
+	if (error instanceof ExpiredTokenError) {
+		return {
+			type: 'failure',
+			response: {
+				body: 'Token has expired',
+				statusCode: 401,
+			},
+		};
+	}
+	if (error instanceof InvalidTokenError) {
+		return {
+			type: 'failure',
+			response: {
+				body: 'Token is invalid',
+				statusCode: 401,
+			},
+		};
+	}
+	if (error instanceof SigningKeyNotFoundError) {
+		return {
+			type: 'failure',
+			response: {
+				body: 'Unable to find a signing key for the token',
+				statusCode: 401,
+			},
+		};
+	}
+	if (error instanceof InvalidScopesError) {
+		return {
+			type: 'failure',
+			response: {
+				body: 'Token does not have the required scopes',
+				statusCode: 403,
+			},
+		};
+	}
+	if (error instanceof ValidationError) {
+		return {
+			type: 'failure',
+			response: {
+				body: error.message,
+				statusCode: 403,
+			},
+		};
+	}
+	return {
+		type: 'failure',
+		response: {
+			body: 'Internal server error',
+			statusCode: 500,
+		},
+	};
+};
 
 export const buildAuthenticate = (
 	stage: Stage,

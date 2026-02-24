@@ -251,6 +251,28 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
+			AnnualPlus: z.object({
+				billingPeriod: z.literal('Annual'),
+				charges: z.object({
+					DigitalPack: z.object({
+						id: z.string(),
+					}),
+					GuardianWeekly: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({
+					AUD: z.number(),
+					CAD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					NZD: z.number(),
+					USD: z.number(),
+				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
 			Discount: z.object({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
@@ -267,6 +289,28 @@ export const productCatalogSchema = z.object({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({
+					AUD: z.number(),
+					CAD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					NZD: z.number(),
+					USD: z.number(),
+				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
+			MonthlyPlus: z.object({
+				billingPeriod: z.literal('Month'),
+				charges: z.object({
+					DigitalPack: z.object({
+						id: z.string(),
+					}),
+					GuardianWeekly: z.object({
 						id: z.string(),
 					}),
 				}),
@@ -305,6 +349,28 @@ export const productCatalogSchema = z.object({
 				billingPeriod: z.literal('Quarter'),
 				charges: z.object({
 					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({
+					AUD: z.number(),
+					CAD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					NZD: z.number(),
+					USD: z.number(),
+				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
+			QuarterlyPlus: z.object({
+				billingPeriod: z.literal('Quarter'),
+				charges: z.object({
+					DigitalPack: z.object({
+						id: z.string(),
+					}),
+					GuardianWeekly: z.object({
 						id: z.string(),
 					}),
 				}),
@@ -359,6 +425,21 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
+			AnnualPlus: z.object({
+				billingPeriod: z.literal('Annual'),
+				charges: z.object({
+					DigitalPack: z.object({
+						id: z.string(),
+					}),
+					GuardianWeekly: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({ GBP: z.number(), USD: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
 			Discount: z.object({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
@@ -383,6 +464,21 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
+			MonthlyPlus: z.object({
+				billingPeriod: z.literal('Month'),
+				charges: z.object({
+					DigitalPack: z.object({
+						id: z.string(),
+					}),
+					GuardianWeekly: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({ GBP: z.number(), USD: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
 			OneYearGift: z.object({
 				billingPeriod: z.literal('Annual'),
 				charges: z.object({
@@ -399,6 +495,21 @@ export const productCatalogSchema = z.object({
 				billingPeriod: z.literal('Quarter'),
 				charges: z.object({
 					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({ GBP: z.number(), USD: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
+			QuarterlyPlus: z.object({
+				billingPeriod: z.literal('Quarter'),
+				charges: z.object({
+					DigitalPack: z.object({
+						id: z.string(),
+					}),
+					GuardianWeekly: z.object({
 						id: z.string(),
 					}),
 				}),

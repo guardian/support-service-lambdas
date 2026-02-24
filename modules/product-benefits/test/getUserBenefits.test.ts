@@ -1,5 +1,6 @@
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
 import {
 	digitalSubscriptionBenefits,
@@ -11,7 +12,9 @@ import {
 } from '@modules/product-benefits/userBenefits';
 import codeZuoraCatalog from '../../zuora-catalog/test/fixtures/catalog-code.json';
 
-const codeProductCatalog = generateProductCatalog(codeZuoraCatalog);
+const codeProductCatalog = generateProductCatalog(
+	zuoraCatalogSchema.parse(codeZuoraCatalog),
+);
 const codeCatalogHelper = new ProductCatalogHelper(codeProductCatalog);
 
 describe('getUserProductsFromSupporterProductDataItems', () => {
@@ -93,9 +96,9 @@ test('getUserBenefitsFromUserProducts', () => {
 	expect(getUserBenefitsFromUserProducts(['TierThree'])).toEqual(
 		digitalSubscriptionBenefits,
 	);
-	expect(getUserBenefitsFromUserProducts(['GuardianWeeklyDomestic'])).toEqual([
-		'hideSupportMessaging',
-	]);
+	expect(getUserBenefitsFromUserProducts(['GuardianWeeklyDomestic'])).toEqual(
+		digitalSubscriptionBenefits,
+	);
 	expect(getUserBenefitsFromUserProducts([])).toEqual([]);
 });
 
@@ -107,9 +110,6 @@ test('getUserBenefitsFromUserProducts returns distinct benefits', () => {
 
 test('getUserBenefitsFromUserProducts returns the union of two benefit sets', () => {
 	expect(
-		getUserBenefitsFromUserProducts([
-			'GuardianAdLite',
-			'GuardianWeeklyDomestic',
-		]),
-	).toEqual(['allowRejectAll', 'hideSupportMessaging']);
+		getUserBenefitsFromUserProducts(['GuardianAdLite', 'SupporterMembership']),
+	).toEqual(['allowRejectAll', 'liveApp', 'feastApp', 'hideSupportMessaging']);
 });

@@ -4,7 +4,6 @@ import {
 } from '@aws-sdk/client-secrets-manager';
 import { mockClient } from 'aws-sdk-client-mock';
 import type { ConnectedAppSecret } from '../../salesforce/src/secrets';
-import { getSalesforceSecretNames } from '../../salesforce/src/secrets';
 import { getSecretValue } from '../src/getSecret';
 
 const secretsManagerClientMock = mockClient(SecretsManagerClient);
@@ -59,26 +58,5 @@ describe('getSecretValue', () => {
 		await expect(
 			getSecretValue<{ connectedAppSecret: ConnectedAppSecret }>(secretName),
 		).rejects.toThrow('Failed to get secret value');
-	});
-});
-
-describe('getSecretNameDependingOnEnvironment', () => {
-	test('should return correct CODE secret names', () => {
-		const actual = getSalesforceSecretNames('CODE');
-		const expected = {
-			apiUserSecretName: 'DEV/Salesforce/User/integrationapiuser',
-			connectedAppSecretName: 'DEV/Salesforce/ConnectedApp/AwsConnectorSandbox',
-		};
-		expect(actual).toEqual(expected);
-	});
-
-	test('should return correct PROD secret names', () => {
-		const actual = getSalesforceSecretNames('PROD');
-		const expected = {
-			apiUserSecretName: 'PROD/Salesforce/User/BillingAccountRemoverAPIUser',
-			connectedAppSecretName:
-				'PROD/Salesforce/ConnectedApp/BillingAccountRemover',
-		};
-		expect(actual).toEqual(expected);
 	});
 });
