@@ -9,7 +9,7 @@ export default (pkg: HandlerDefinition) => {
 		build:
 			'esbuild --bundle --platform=node --target=node20 --outdir=target/ ' +
 			entryPoints +
-			' --sourcemap',
+			` --sourcemap --source-root=/support-service-lambdas/handlers/${pkg.name}/target/`,
 		package: `pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr ${pkg.name}.zip ./*.js.map ./*.js`,
 		'cdk:test': 'pnpm --filter cdk test ' + pkg.name,
 		'cdk:test-update': 'pnpm --filter cdk test-update ' + pkg.name,
