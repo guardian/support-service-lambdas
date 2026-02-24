@@ -10,7 +10,7 @@ import {
 	ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
-import { SrAppConfigKey } from './cdk/SrAppConfigKey';
+// import { SrAppConfigKey } from './cdk/SrAppConfigKey'; // Commented out for initial deployment - will be needed when SNS subscription is enabled
 import { SrLambda } from './cdk/SrLambda';
 import { SrLambdaAlarm } from './cdk/SrLambdaAlarm';
 import { SrRestDomain } from './cdk/SrRestDomain';
@@ -39,10 +39,10 @@ export class MParticleApi extends SrStack {
 			`/${this.stage}/${this.stack}/${app}/sarResultsBucket`,
 		).stringValue;
 
-		const identityMmaSnsDeletionRequestTopicArn = new SrAppConfigKey(
-			this,
-			'identityMmaSnsDeletionRequestTopicArn',
-		).valueAsString;
+		// const identityMmaSnsDeletionRequestTopicArn = new SrAppConfigKey(
+		// 	this,
+		// 	'IdentityMmaSnsDeletionRequestTopicArn',
+		// ).valueAsString;
 
 		const sarS3BaseKey = 'mparticle-results/'; // this must be the same as used in the code
 
@@ -96,13 +96,6 @@ export class MParticleApi extends SrStack {
 			},
 		);
 
-		// Set delivery delay on the queue to delay both mParticle and Braze deletions by 10s
-		// This allows the Identity system to unsubscribe users from newsletters first
-		const cfnQueue = mmaUserDeletionLambda.inputQueue.node.defaultChild;
-		if (cfnQueue && 'delaySeconds' in cfnQueue) {
-			cfnQueue.delaySeconds = 10;
-		}
-
 		mmaUserDeletionLambda.inputQueue.addToResourcePolicy(
 			new PolicyStatement({
 				effect: Effect.ALLOW,
@@ -111,7 +104,8 @@ export class MParticleApi extends SrStack {
 				resources: [mmaUserDeletionLambda.inputQueue.queueArn],
 				conditions: {
 					ArnEquals: {
-						'aws:SourceArn': identityMmaSnsDeletionRequestTopicArn,
+						//'aws:SourceArn': identityMmaSnsDeletionRequestTopicArn, --- This will be uncommented when testing is complete ---
+						'aws:SourceArn': 'AAAAAAAAAAAA',
 					},
 				},
 			}),

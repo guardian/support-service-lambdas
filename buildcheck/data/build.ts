@@ -140,11 +140,7 @@ const mobilePurchasesToSupporterProductData: HandlerDefinition = {
 
 const mparticleApi: HandlerDefinition = {
 	name: 'mparticle-api',
-	functionNames: [
-		'mparticle-api-http-',
-		'mparticle-api-baton-',
-		'mparticle-api-mma-user-deletion-',
-	],
+	functionNames: ['mparticle-api-http-', 'mparticle-api-baton-'],
 	testTimeoutSeconds: 15,
 	extraScripts: {
 		'check-config': 'tsx runManual/runLoadConfig.ts',
