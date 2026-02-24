@@ -24,7 +24,7 @@ test('salesforce tracking data is serialised to the queue correctly', () => {
 		includesContribution: true,
 		previousProductName: 'Contributor',
 		previousRatePlanName: 'Monthly Contribution',
-		productRatePlanId: '',
+		ratePlanId: '',
 		productRatePlanKey: 'Monthly',
 		subscriptionNumber: 'A-S0123',
 		termStartDate: new Date(),
