@@ -1,4 +1,5 @@
 import { distinct, isInList } from '@modules/arrayFunctions';
+import { ValidationError } from '@modules/errors';
 import { getIfDefined, getNonEmptyOrThrow } from '@modules/nullAndUndefined';
 import { objectKeys, objectValues } from '@modules/objectFunctions';
 import type {
@@ -120,7 +121,9 @@ export function asSwitchableRatePlanKey(
 	productRatePlanKey: string,
 ): ValidSwitchableRatePlanKey {
 	if (!isValidSwitchableRatePlanKey(productRatePlanKey)) {
-		throw new Error(`unsupported rate plan key ${productRatePlanKey}`);
+		throw new ValidationError(
+			`non switchable rate plan key ${productRatePlanKey}`,
+		);
 	}
 	return productRatePlanKey;
 }
