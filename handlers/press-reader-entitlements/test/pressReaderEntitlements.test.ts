@@ -4,7 +4,7 @@ import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
 import codeZuoraCatalog from '../../../modules/zuora-catalog/test/fixtures/catalog-code.json';
 import { getLatestValidSubscription } from '../src/supporterProductData';
-import { Member } from '../src/xmlBuilder';
+import type { Member } from '../src/xmlBuilder';
 import { buildXml } from '../src/xmlBuilder';
 
 describe('xmlBuilder', () => {
