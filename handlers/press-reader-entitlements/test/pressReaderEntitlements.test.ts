@@ -46,7 +46,7 @@ describe('xmlBuilder', () => {
 						},
 					},
 				],
-			}
+			},
 		};
 
 		const result = buildXml(member);
@@ -66,7 +66,7 @@ describe('xmlBuilder', () => {
 			member: {
 				userID: '123456',
 				products: [],
-			}
+			},
 		};
 
 		const result = buildXml(member);

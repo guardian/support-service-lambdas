@@ -89,16 +89,16 @@ function createMember(
 			userID: userId,
 			products: latestSubscription
 				? [
-					{
-						product: {
-							productID: 'the-guardian',
-							enddate: zuoraDateFormat(latestSubscription.termEndDate),
-							startdate: zuoraDateFormat(
-								latestSubscription.contractEffectiveDate,
-							),
+						{
+							product: {
+								productID: 'the-guardian',
+								enddate: zuoraDateFormat(latestSubscription.termEndDate),
+								startdate: zuoraDateFormat(
+									latestSubscription.contractEffectiveDate,
+								),
+							},
 						},
-					},
-				]
+					]
 				: [],
 		},
 	};
