@@ -1,3 +1,4 @@
+import { logger } from '@modules/routing/logger';
 import type { Context, SQSEvent } from 'aws-lambda';
 import { processUserDeletion } from '../src/apis/dataSubjectRequests/deleteUser';
 import { handlerDeletion } from '../src/index';
@@ -281,6 +282,48 @@ describe('handlerDeletion', () => {
 			expect.anything(),
 			expect.anything(),
 			'development',
+		);
+	});
+
+	it('should log SubscribeURL and not process deletion for SNS SubscriptionConfirmation message', async () => {
+		const subscribeUrl =
+			'https://sns.eu-west-1.amazonaws.com/?Action=ConfirmSubscription&TopicArn=arn:aws:sns:eu-west-1:123456789:test-topic&Token=abc123';
+		const event: SQSEvent = {
+			Records: [
+				{
+					messageId: 'confirm-message-1',
+					receiptHandle: 'confirm-receipt-1',
+					body: JSON.stringify({
+						Type: 'SubscriptionConfirmation',
+						SubscribeURL: subscribeUrl,
+						TopicArn: 'arn:aws:sns:eu-west-1:123456789:test-topic',
+						Token: 'abc123',
+					}),
+					attributes: {
+						ApproximateReceiveCount: '1',
+						SentTimestamp: '1234567890',
+						SenderId: 'test-sender',
+						ApproximateFirstReceiveTimestamp: '1234567890',
+					},
+					messageAttributes: {},
+					md5OfBody: 'test-md5',
+					eventSource: 'aws:sqs',
+					eventSourceARN: 'arn:aws:sqs:eu-west-1:123456789:test-queue',
+					awsRegion: 'eu-west-1',
+				},
+			],
+		};
+
+		await handlerDeletion(event, mockContext, mockCallback);
+
+		// Should not attempt to process any deletion
+		expect(mockProcessUserDeletion).not.toHaveBeenCalled();
+
+		// Should log the SubscribeURL so it can be found in CloudWatch
+		// eslint-disable-next-line @typescript-eslint/unbound-method -- logger is fully mocked via jest.fn(), `this` binding is irrelevant
+		expect(logger.log).toHaveBeenCalledWith(
+			expect.stringContaining('SubscriptionConfirmation'),
+			expect.objectContaining({ subscribeUrl }),
 		);
 	});
 });

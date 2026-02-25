@@ -21,7 +21,7 @@ import type {
 } from './services/mparticleClient';
 import {
 	DeletionRequestBodySchema,
-	SnsNotificationSchema,
+	SnsMessageSchema,
 } from './types/deletionMessage';
 
 export const handlerHttp: Handler<
@@ -119,13 +119,21 @@ async function processSQSRecord(
 ): Promise<void> {
 	logger.log(`Processing message ${record.messageId}`);
 
-	// Parse the SNS notification envelope
-	const snsNotification = SnsNotificationSchema.parse(JSON.parse(record.body));
+	// Parse the SNS message — could be a Notification or a SubscriptionConfirmation
+	const snsMessage = SnsMessageSchema.parse(JSON.parse(record.body));
+
+	if (snsMessage.Type === 'SubscriptionConfirmation') {
+		// SNS sends this when the Identity team first subscribes our queue to their topic.
+		// Log the URL clearly so it can be found in CloudWatch and clicked to confirm.
+		logger.log(
+			'SNS SubscriptionConfirmation received — visit the SubscribeURL to confirm the subscription',
+			{ subscribeUrl: snsMessage.SubscribeURL, topicArn: snsMessage.TopicArn },
+		);
+		return;
+	}
 
 	// Parse the actual deletion request from the Message field
-	const body = DeletionRequestBodySchema.parse(
-		JSON.parse(snsNotification.Message),
-	);
+	const body = DeletionRequestBodySchema.parse(JSON.parse(snsMessage.Message));
 
 	// Add userId to logger context for correlation
 	logger.mutableAddContext(body.userId);

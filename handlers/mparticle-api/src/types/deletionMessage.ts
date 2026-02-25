@@ -9,6 +9,25 @@ export const SnsNotificationSchema = z.object({
 });
 
 /**
+ * Schema for SNS subscription confirmation message.
+ * Sent by SNS when a new subscription is created — must be confirmed by visiting SubscribeURL.
+ */
+export const SnsSubscriptionConfirmationSchema = z.object({
+	Type: z.literal('SubscriptionConfirmation'),
+	SubscribeURL: z.string(),
+	TopicArn: z.string(),
+	Token: z.string().optional(),
+});
+
+/**
+ * Discriminated union covering all SNS message types this lambda handles.
+ */
+export const SnsMessageSchema = z.discriminatedUnion('Type', [
+	SnsNotificationSchema,
+	SnsSubscriptionConfirmationSchema,
+]);
+
+/**
  * Schema for the deletion request message body that comes from the Identity service
  */
 export const DeletionRequestBodySchema = z.object({
