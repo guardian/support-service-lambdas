@@ -85,9 +85,10 @@ function createMember(
 		| undefined,
 ): Member {
 	return {
-		userID: userId,
-		products: latestSubscription
-			? [
+		member: {
+			userID: userId,
+			products: latestSubscription
+				? [
 					{
 						product: {
 							productID: 'the-guardian',
@@ -98,6 +99,7 @@ function createMember(
 						},
 					},
 				]
-			: [],
+				: [],
+		},
 	};
 }

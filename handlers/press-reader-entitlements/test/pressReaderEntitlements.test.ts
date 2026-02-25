@@ -4,45 +4,49 @@ import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
 import codeZuoraCatalog from '../../../modules/zuora-catalog/test/fixtures/catalog-code.json';
 import { getLatestValidSubscription } from '../src/supporterProductData';
-import type { Member } from '../src/xmlBuilder';
+import { Member } from '../src/xmlBuilder';
 import { buildXml } from '../src/xmlBuilder';
 
 describe('xmlBuilder', () => {
 	it('creates Member schema xml with products', () => {
 		const expectedXml = `<?xml version="1.0" encoding="utf-8"?>
-<userID>123456</userID>
-<products>
-  <product>
-    <productID>123</productID>
-    <startdate>2022-01-01</startdate>
-    <enddate>2022-12-31</enddate>
-  </product>
-  <product>
-    <productID>456</productID>
-    <startdate>2022-01-01</startdate>
-    <enddate>2022-12-31</enddate>
-  </product>
-</products>
+<member>
+  <userID>123456</userID>
+  <products>
+    <product>
+      <productID>123</productID>
+      <startdate>2022-01-01</startdate>
+      <enddate>2022-12-31</enddate>
+    </product>
+    <product>
+      <productID>456</productID>
+      <startdate>2022-01-01</startdate>
+      <enddate>2022-12-31</enddate>
+    </product>
+  </products>
+</member>
 `;
 
 		const member: Member = {
-			userID: '123456',
-			products: [
-				{
-					product: {
-						productID: '123',
-						startdate: '2022-01-01',
-						enddate: '2022-12-31',
+			member: {
+				userID: '123456',
+				products: [
+					{
+						product: {
+							productID: '123',
+							startdate: '2022-01-01',
+							enddate: '2022-12-31',
+						},
 					},
-				},
-				{
-					product: {
-						productID: '456',
-						startdate: '2022-01-01',
-						enddate: '2022-12-31',
+					{
+						product: {
+							productID: '456',
+							startdate: '2022-01-01',
+							enddate: '2022-12-31',
+						},
 					},
-				},
-			],
+				],
+			}
 		};
 
 		const result = buildXml(member);
@@ -52,13 +56,17 @@ describe('xmlBuilder', () => {
 
 	it('creates creates Member schema xml with no products', () => {
 		const expectedXml = `<?xml version="1.0" encoding="utf-8"?>
-<userID>123456</userID>
-<products></products>
+<member>
+  <userID>123456</userID>
+  <products></products>
+</member>
 `;
 
 		const member: Member = {
-			userID: '123456',
-			products: [],
+			member: {
+				userID: '123456',
+				products: [],
+			}
 		};
 
 		const result = buildXml(member);
