@@ -82,6 +82,18 @@ object SupportedProduct {
           "GW Oct 18 - Monthly - Domestic",
           List(SupportedRatePlanCharge("GW Oct 18 - Monthly - Domestic", DayOfWeek.FRIDAY)),
         ),
+        SupportedRatePlan(
+          "GW + Digital - Monthly - Domestic",
+          List(SupportedRatePlanCharge("GW - Monthly - Domestic", DayOfWeek.FRIDAY)),
+        ),
+        SupportedRatePlan(
+          "GW + Digital - Quarterly - Domestic",
+          List(SupportedRatePlanCharge("GW - Quarterly - Domestic", DayOfWeek.FRIDAY)),
+        ),
+        SupportedRatePlan(
+          "GW + Digital - Annual - Domestic",
+          List(SupportedRatePlanCharge("GW - Annual - Domestic", DayOfWeek.FRIDAY)),
+        ),
       ),
     ),
     SupportedProduct(
@@ -122,6 +134,18 @@ object SupportedProduct {
         SupportedRatePlan(
           "GW Oct 18 - Monthly - ROW",
           List(SupportedRatePlanCharge("GW Oct 18 - Monthly - ROW", DayOfWeek.FRIDAY)),
+        ),
+        SupportedRatePlan(
+          "GW + Digital - Monthly - ROW",
+          List(SupportedRatePlanCharge("GW - Monthly - ROW", DayOfWeek.FRIDAY)),
+        ),
+        SupportedRatePlan(
+          "GW + Digital - Quarterly - ROW",
+          List(SupportedRatePlanCharge("GW - Quarterly - ROW", DayOfWeek.FRIDAY)),
+        ),
+        SupportedRatePlan(
+          "GW + Digital - Annual - ROW",
+          List(SupportedRatePlanCharge("GW - Annual - ROW", DayOfWeek.FRIDAY)),
         ),
       ),
     ),

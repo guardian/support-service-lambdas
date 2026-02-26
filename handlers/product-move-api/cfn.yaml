@@ -265,28 +265,27 @@ Resources:
         - arm64
 
 
-  SalesforceTrackingLambdaErrorsAlarm:
+  SalesforceTrackingQueueOldestMessageAgeAlarm:
     Type: AWS::CloudWatch::Alarm
     Condition: IsProd
     DependsOn:
-      - SalesforceTrackingLambda
+      - SalesforceTrackingQueue
     Properties:
       AlarmActions:
         - Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-${Stage}
       AlarmName:
-        Fn::Sub: ${Stage} Salesforce tracking of a product switch has failed
-      AlarmDescription: Impact - tracking of product switches is not going to salesforce/bigquery/braze
+        Fn::Sub: ${Stage} Salesforce tracking queue has an unprocessed message for over 2 hours
+      AlarmDescription: Impact - salesforce/bigquery/braze may be missing product switch events
       ComparisonOperator: GreaterThanOrEqualToThreshold
+      Namespace: AWS/SQS
+      MetricName: ApproximateAgeOfOldestMessage
       Dimensions:
-        - Name: FunctionName
-          Value:
-            Fn::Sub: product-switch-salesforce-tracking-${Stage}
-      EvaluationPeriods: 1
-      MetricName: Errors
-      Namespace: AWS/Lambda
+        - Name: QueueName
+          Value: !GetAtt SalesforceTrackingQueue.QueueName
+      Statistic: Maximum
       Period: 60
-      Statistic: Sum
-      Threshold: 1
+      EvaluationPeriods: 1
+      Threshold: 7200 # 2 hours, in seconds
       TreatMissingData: notBreaching
       Tags:
         - Key: DiagnosticLinks

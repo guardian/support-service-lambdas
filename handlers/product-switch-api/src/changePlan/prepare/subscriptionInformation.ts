@@ -28,7 +28,7 @@ export type SubscriptionInformation = {
 	productRatePlanKey: ValidSwitchableRatePlanKey; // email
 	termStartDate: Date; // order
 	chargedThroughDate?: Dayjs; // refund check
-	productRatePlanId: string; // order
+	ratePlanId: string; // order
 	chargeIds: [string, ...string[]]; // filter invoice refund items
 };
 
@@ -120,7 +120,7 @@ export function getSubscriptionInformation(
 		chargedThroughDate: getNextPaymentDate(
 			objectValues(ratePlan.ratePlanCharges),
 		),
-		productRatePlanId: ratePlan.productRatePlanId,
+		ratePlanId: ratePlan.id,
 		chargeIds,
 	} satisfies SubscriptionInformation;
 }

@@ -15,7 +15,7 @@ object Dependencies {
   val catsEffectVersion = "2.5.5"
 
   val logging: Seq[ModuleID] = Seq(
-    "ch.qos.logback" % "logback-classic" % "1.5.29",
+    "ch.qos.logback" % "logback-classic" % "1.5.32",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
   )
 
@@ -41,7 +41,7 @@ object Dependencies {
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.3.0"
 
   // GCP
-  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.58.0"
+  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.59.0"
   val grpcNettyOverride = "io.grpc" % "grpc-netty-shaded" % "1.79.0"
 
   // Cats
@@ -76,7 +76,7 @@ object Dependencies {
   val http4sCore = "org.http4s" %% "http4s-core" % http4sVersion
 
   // Guardian
-  val simpleConfig = "com.gu" %% "simple-configuration-ssm" % "6.1.0"
+  val simpleConfig = "com.gu" %% "simple-configuration-ssm" % "9.1.0"
   val supportInternationalisation =
     "com.gu" %% "support-internationalisation" % "0.16"
 
