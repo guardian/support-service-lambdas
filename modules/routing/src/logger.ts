@@ -94,7 +94,7 @@ export class Logger {
 			const shortPrettyArgs =
 				logOnEntryAndExit === undefined
 					? ''
-					: '\nSHORT_ARGS: ' + logOnEntryAndExit;
+					: ' SHORT_ARGS\n' + logOnEntryAndExit;
 
 			this.logEntry(callerInfo, prefix, prettyArgs);
 

@@ -229,8 +229,8 @@ describe('wrapFn', () => {
 		const expectedEntry = `${expectedWrappedSum} TRACE addNumbers ENTRY ARGS
 2,3`;
 
-		const expectedExit = `${expectedWrappedSum} TRACE addNumbers EXIT
-SHORT_ARGS: 2,3
+		const expectedExit = `${expectedWrappedSum} TRACE addNumbers EXIT SHORT_ARGS
+2,3
 RESULT
 5`;
 
@@ -269,8 +269,8 @@ RESULT
 		const expectedEntry = `${expectedWrappedFailFn} TRACE failFn ENTRY ARGS
 42`;
 
-		const expectedErrorStart = `${expectedWrappedFailFn} TRACE failFn ERROR
-SHORT_ARGS: 42
+		const expectedErrorStart = `${expectedWrappedFailFn} TRACE failFn ERROR SHORT_ARGS
+42
 ERROR
 Error: fail 42
     at failFn `;
