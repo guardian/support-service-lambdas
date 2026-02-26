@@ -113,6 +113,20 @@ exports[`The zuora-auto-cancel stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "BasePathMapping": {
+      "Properties": {
+        "DomainName": {
+          "Ref": "DomainName",
+        },
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+        "Stage": {
+          "Ref": "RestApiDeploymentStageprod3855DE66",
+        },
+      },
+      "Type": "AWS::ApiGateway::BasePathMapping",
+    },
     "DLQ581697C4": {
       "DeletionPolicy": "Delete",
       "Properties": {
@@ -143,6 +157,68 @@ exports[`The zuora-auto-cancel stack matches the snapshot 1`] = `
       },
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
+    },
+    "DNSRecord": {
+      "Properties": {
+        "HostedZoneId": "Z3KO35ELNWZMSX",
+        "Name": "zuora-auto-cancel-code.support.guardianapis.com",
+        "ResourceRecords": [
+          {
+            "Fn::GetAtt": [
+              "DomainName",
+              "RegionalDomainName",
+            ],
+          },
+        ],
+        "TTL": "120",
+        "Type": "CNAME",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "DomainName": {
+      "Properties": {
+        "DomainName": "zuora-auto-cancel-code.support.guardianapis.com",
+        "EndpointConfiguration": {
+          "Types": [
+            "REGIONAL",
+          ],
+        },
+        "RegionalCertificateArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:acm:eu-west-1:",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
+            ],
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "zuora-auto-cancel",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::DomainName",
     },
     "LambdaD247545B": {
       "DependsOn": [
@@ -1085,6 +1161,20 @@ DLQ: https://",
       },
       "Type": "AWS::IAM::Policy",
     },
+    "BasePathMapping": {
+      "Properties": {
+        "DomainName": {
+          "Ref": "DomainName",
+        },
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+        "Stage": {
+          "Ref": "RestApiDeploymentStageprod3855DE66",
+        },
+      },
+      "Type": "AWS::ApiGateway::BasePathMapping",
+    },
     "DLQ581697C4": {
       "DeletionPolicy": "Delete",
       "Properties": {
@@ -1115,6 +1205,68 @@ DLQ: https://",
       },
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
+    },
+    "DNSRecord": {
+      "Properties": {
+        "HostedZoneId": "Z3KO35ELNWZMSX",
+        "Name": "zuora-auto-cancel.support.guardianapis.com",
+        "ResourceRecords": [
+          {
+            "Fn::GetAtt": [
+              "DomainName",
+              "RegionalDomainName",
+            ],
+          },
+        ],
+        "TTL": "120",
+        "Type": "CNAME",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "DomainName": {
+      "Properties": {
+        "DomainName": "zuora-auto-cancel.support.guardianapis.com",
+        "EndpointConfiguration": {
+          "Types": [
+            "REGIONAL",
+          ],
+        },
+        "RegionalCertificateArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:acm:eu-west-1:",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
+            ],
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "zuora-auto-cancel",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::DomainName",
     },
     "LambdaD247545B": {
       "DependsOn": [
