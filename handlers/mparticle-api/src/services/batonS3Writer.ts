@@ -56,7 +56,9 @@ export class BatonS3WriterImpl implements BatonS3Writer {
 			streamToS3,
 			undefined,
 			getCallerInfo(),
-			([bucket, key]) => `${bucket} ${key}`,
+			([bucket, key]) => ({
+				logOnEntryAndExit: `${bucket} ${key}`,
+			}),
 		)(this.sarResultsBucket, s3Key, 'application/zip', stream);
 		return `s3://${this.sarResultsBucket}/${s3Key}`;
 	};

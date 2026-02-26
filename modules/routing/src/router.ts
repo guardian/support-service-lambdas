@@ -4,7 +4,6 @@ import { objectEntries } from '@modules/objectFunctions';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { getCallerInfo } from '@modules/routing/getCallerInfo';
 import { logger } from '@modules/routing/logger';
-import { prettyPrint } from '@modules/routing/prettyPrint';
 
 export type HttpMethod =
 	| 'GET'
@@ -150,19 +149,20 @@ export function Router(
 					body,
 					headers,
 				},
-			]) =>
-				prettyPrint({
-					httpMethod,
-					path,
-					pathParameters,
-					body,
-					queryStringParameters,
-					headers: objectEntries(headers).filter(
-						([key]) =>
-							!key.startsWith('CloudFront-') && !key.startsWith('X-Amz-'),
-					),
-				}),
-			([{ httpMethod, path }]) => `${httpMethod} ${path}`,
+			]) => ({
+				logOnEntryAndExit: `${httpMethod} ${path}`,
+				logOnEntryOnly: [
+					{
+						pathParameters,
+						body,
+						queryStringParameters,
+						headers: objectEntries(headers).filter(
+							([key]) =>
+								!key.startsWith('CloudFront-') && !key.startsWith('X-Amz-'),
+						),
+					},
+				],
+			}),
 		),
 		undefined,
 		true,

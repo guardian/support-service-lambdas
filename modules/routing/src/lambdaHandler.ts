@@ -6,7 +6,6 @@ import dayjs from 'dayjs';
 import type { z } from 'zod';
 import { getCallerInfo } from '@modules/routing/getCallerInfo';
 import { logger } from '@modules/routing/logger';
-import { prettyPrint } from '@modules/routing/prettyPrint';
 
 export type HandlerEnv<ConfigType> = {
 	now: () => dayjs.Dayjs;
@@ -29,11 +28,17 @@ export function LambdaHandler<ConfigType, E>(
 	handler: (event: E, env: HandlerEnv<ConfigType>) => Promise<void>,
 ) {
 	const callerInfo = getCallerInfo();
+	const handlerWithEntryExitLogging = logger.wrapFn(
+		handler,
+		undefined,
+		callerInfo,
+		([event]) => ({
+			logOnEntryOnly: [event],
+		}),
+	);
 	return LambdaHandlerWithServices(
 		configSchema,
-		logger.wrapFn(handler, undefined, callerInfo, ([event]) =>
-			prettyPrint(event),
-		),
+		handlerWithEntryExitLogging,
 		(servicesAndConfig) => servicesAndConfig,
 	);
 }

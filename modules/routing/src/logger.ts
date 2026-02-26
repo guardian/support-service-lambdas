@@ -1,41 +1,7 @@
 import * as console from 'node:console';
 import { mapOption } from '@modules/nullAndUndefined';
-import { ZodType } from 'zod';
 import { getCallerInfo } from '@modules/routing/getCallerInfo';
 import { prettyPrint } from '@modules/routing/prettyPrint';
-
-function extractParamNames(fnString: string) {
-	const paramMatch = fnString.match(/\(([^)]*)\)/);
-	const paramNames = paramMatch?.[1]
-		? paramMatch[1]
-				.split(',')
-				.map(
-					(param, idx) => param.trim().split(/[=\s]/)[0]?.trim() ?? `arg${idx}`,
-				)
-		: [];
-	return paramNames;
-}
-
-function getPrettyArgs<TArgs extends unknown[]>(
-	paramNames: Array<string | undefined>,
-	args: TArgs,
-) {
-	return args.map((arg, index) => {
-		const paramName = paramNames[index] ?? `arg${index}`;
-		const value =
-			arg instanceof ZodType ? '(ZodType not expanded)' : prettyPrint(arg);
-		return `${paramName}: ${value}`;
-	});
-}
-
-function namedParams<TArgs extends unknown[], TReturn>(
-	fn: (...args: TArgs) => Promise<TReturn>,
-) {
-	const paramNames = extractParamNames(fn.toString());
-	const argsToLoggable = (args: TArgs) =>
-		getPrettyArgs(paramNames, args).join('\n');
-	return argsToLoggable;
-}
 
 export class Logger {
 	constructor(
@@ -100,29 +66,35 @@ export class Logger {
 	 * @param fn the function to wrap
 	 * @param functionName an optional free text string to identify the function called
 	 * @param callerInfo
-	 * @param argsToLogString
-	 * @param responsePrefix
-	 * @param responseToLogString
+	 * @param argsToLoggable
 	 */
 	wrapFn<TArgs extends unknown[], TReturn>(
 		fn: AsyncFunction<TArgs, TReturn>,
 		functionName: string | (() => string) = fn.name,
 		callerInfo: string = getCallerInfo(),
-		argsToLogString: (args: TArgs) => string = namedParams(fn),
-		responsePrefix: (args: TArgs) => string | undefined = () => undefined,
-		responseToLogString: (result: TReturn) => string = (result) =>
-			prettyPrint(result),
+		argsToLoggable: (args: TArgs) => {
+			logOnEntryAndExit?: string;
+			logOnEntryOnly?: unknown[];
+		},
 	): AsyncFunction<TArgs, TReturn> {
 		const prefix =
 			'TRACE ' +
 			(typeof functionName === 'function' ? functionName() : functionName) +
 			' ';
-		return async (...args: TArgs): Promise<TReturn> => {
-			const loggableArgs = argsToLogString(args);
-			const prettyArgs = ' ARGS\n' + loggableArgs;
 
-			const shortArgs = responsePrefix(args);
-			const shortPrettyArgs = shortArgs !== undefined ? '\n' + shortArgs : '';
+		return async (...args: TArgs): Promise<TReturn> => {
+			const { logOnEntryAndExit, logOnEntryOnly } = argsToLoggable(args);
+
+			const prettyArgsArray = [
+				...(logOnEntryAndExit ? [logOnEntryAndExit] : []),
+				...(logOnEntryOnly ?? []),
+			].map(prettyPrint);
+
+			const prettyArgs = ' ARGS\n' + prettyArgsArray.join('\n');
+			const shortPrettyArgs =
+				logOnEntryAndExit === undefined
+					? ''
+					: '\nSHORT_ARGS: ' + logOnEntryAndExit;
 
 			this.logEntry(callerInfo, prefix, prettyArgs);
 
@@ -130,12 +102,7 @@ export class Logger {
 				// actually call the function
 				const result = await fn(...args);
 
-				this.logExit(
-					responseToLogString(result),
-					prefix,
-					shortPrettyArgs,
-					callerInfo,
-				);
+				this.logExit(result, prefix, shortPrettyArgs, callerInfo);
 
 				return result;
 			} catch (error) {
@@ -157,13 +124,13 @@ export class Logger {
 		this.errorFn(this.addPrefixes(callerInfo, errorMessage));
 	}
 
-	private logExit(
-		message: string,
+	private logExit<TReturn>(
+		result: TReturn,
 		prefix: string,
 		shortPrettyArgs: string,
 		callerInfo: string,
 	) {
-		const prettyResult = '\nRESULT\n' + message;
+		const prettyResult = '\nRESULT\n' + prettyPrint(result);
 		const exitMessage = `${prefix}EXIT${shortPrettyArgs}${prettyResult}`;
 		this.logFn(this.addPrefixes(callerInfo, exitMessage));
 	}

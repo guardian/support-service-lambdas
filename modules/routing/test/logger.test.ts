@@ -9,15 +9,20 @@ function getMessage(logger: Logger) {
 
 function getWrappedSum(logger: Logger) {
 	const addNumbers = async (a: number, b: number) => Promise.resolve(a + b);
-	return logger.wrapFn(addNumbers, undefined, undefined, undefined, (args) =>
-		args.join(','),
+	return logger.wrapFn(
+		addNumbers,
+		undefined,
+		undefined,
+		(args: [number, number]) => ({ logOnEntryAndExit: args.join(',') }),
 	);
 }
 
 function getWrappedFailFn(logger: Logger) {
 	const failFn: (x: number) => Promise<void> = async (x: number) =>
 		Promise.reject(new Error('fail ' + x));
-	return logger.wrapFn(failFn);
+	return logger.wrapFn(failFn, undefined, undefined, (args) => ({
+		logOnEntryAndExit: args.join(','),
+	}));
 }
 
 function getWithContextSum(
@@ -40,9 +45,9 @@ function logAfter(logger: Logger) {
 
 const expectedCallerInfo = '[logger.test.ts:7::getMessage]';
 const expectedWrappedSum = '[logger.test.ts:12::getWrappedSum]';
-const expectedWrappedFailFn = '[logger.test.ts:20::getWrappedFailFn]';
-const expectedWithContextSum = '[logger.test.ts:29::addNumbers]';
-const expectedLogAfter = '[logger.test.ts:36::logAfter]';
+const expectedWrappedFailFn = '[logger.test.ts:23::getWrappedFailFn]';
+const expectedWithContextSum = '[logger.test.ts:34::addNumbers]';
+const expectedLogAfter = '[logger.test.ts:41::logAfter]';
 
 test('it should be a no-op if theres no context', () => {
 	const logger = new Logger([]);
@@ -222,11 +227,10 @@ describe('wrapFn', () => {
 		expect(result).toBe(5);
 
 		const expectedEntry = `${expectedWrappedSum} TRACE addNumbers ENTRY ARGS
-a: 2
-b: 3`;
+2,3`;
 
 		const expectedExit = `${expectedWrappedSum} TRACE addNumbers EXIT
-2,3
+SHORT_ARGS: 2,3
 RESULT
 5`;
 
@@ -239,14 +243,16 @@ RESULT
 	test('logs entry and exit with complex objects', async () => {
 		const fn = async (x: number[], y: object) =>
 			Promise.resolve({ ...y, arr: x });
-		const wrapped = logger.wrapFn(fn);
+		const wrapped = logger.wrapFn(fn, undefined, undefined, (args) => ({
+			logOnEntryOnly: args,
+		}));
 		const result = await wrapped([2], { greeting: 'hi' });
 
 		expect(result).toEqual({ arr: [2], greeting: 'hi' });
 
 		const expectedEntry = `[stripped] TRACE fn ENTRY ARGS
-x: [2]
-y: { greeting: "hi" }`;
+[2]
+{ greeting: "hi" }`;
 		const expectedExit = `[stripped] TRACE fn EXIT
 RESULT
 { greeting: "hi", arr: [2] }`;
@@ -261,9 +267,10 @@ RESULT
 		await expect(wrappedFailFn(42)).rejects.toThrow('fail');
 
 		const expectedEntry = `${expectedWrappedFailFn} TRACE failFn ENTRY ARGS
-x: 42`;
+42`;
 
 		const expectedErrorStart = `${expectedWrappedFailFn} TRACE failFn ERROR
+SHORT_ARGS: 42
 ERROR
 Error: fail 42
     at failFn `;
