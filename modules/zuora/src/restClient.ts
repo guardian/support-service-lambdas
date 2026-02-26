@@ -97,7 +97,10 @@ export abstract class RestClient {
 			maybeCallerInfo,
 			([path, method, , body, headers]) => ({
 				logOnEntryAndExit: `${method} ${path}`,
-				logOnEntryOnly: [body, headers],
+				logOnEntryOnly:
+					body !== undefined || headers !== undefined
+						? [{ body, headers }]
+						: undefined,
 			}),
 		);
 
