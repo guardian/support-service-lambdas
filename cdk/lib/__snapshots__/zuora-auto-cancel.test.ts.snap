@@ -160,8 +160,8 @@ exports[`The zuora-auto-cancel stack matches the snapshot 1`] = `
     },
     "DNSRecord": {
       "Properties": {
-        "HostedZoneId": "Z3KO35ELNWZMSX",
-        "Name": "zuora-auto-cancel-code.support.guardianapis.com",
+        "HostedZoneId": "Z1E4V12LQGXFEC",
+        "Name": "zuora-auto-cancel-code.membership.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -177,7 +177,7 @@ exports[`The zuora-auto-cancel stack matches the snapshot 1`] = `
     },
     "DomainName": {
       "Properties": {
-        "DomainName": "zuora-auto-cancel-code.support.guardianapis.com",
+        "DomainName": "zuora-auto-cancel-code.membership.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -191,7 +191,7 @@ exports[`The zuora-auto-cancel stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
+              ":certificate/c1efc564-9ff8-4a03-be48-d1990a3d79d2",
             ],
           ],
         },
@@ -233,14 +233,14 @@ exports[`The zuora-auto-cancel stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "support/CODE/zuora-auto-cancel/zuora-callout-apis.jar",
+          "S3Key": "membership/CODE/zuora-auto-cancel/zuora-callout-apis.jar",
         },
         "Description": "Processes auto-cancellation requests from SQS queue (rate-limited)",
         "Environment": {
           "Variables": {
             "APP": "zuora-auto-cancel",
             "NODE_OPTIONS": "--enable-source-maps",
-            "STACK": "support",
+            "STACK": "membership",
             "STAGE": "CODE",
             "Stage": "CODE",
           },
@@ -376,7 +376,7 @@ exports[`The zuora-auto-cancel stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/support/CODE/zuora-auto-cancel/zuora-callout-apis.jar",
+                      "/membership/CODE/zuora-auto-cancel/zuora-callout-apis.jar",
                     ],
                   ],
                 },
@@ -397,7 +397,7 @@ exports[`The zuora-auto-cancel stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/support/zuora-auto-cancel",
+                    ":parameter/CODE/membership/zuora-auto-cancel",
                   ],
                 ],
               },
@@ -420,7 +420,7 @@ exports[`The zuora-auto-cancel stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/support/zuora-auto-cancel/*",
+                    ":parameter/CODE/membership/zuora-auto-cancel/*",
                   ],
                 ],
               },
@@ -561,7 +561,7 @@ exports[`The zuora-auto-cancel stack matches the snapshot 1`] = `
     },
     "RestApi0C43BF4B": {
       "Properties": {
-        "Name": "support-CODE-zuora-auto-cancel",
+        "Name": "membership-CODE-zuora-auto-cancel",
         "Tags": [
           {
             "Key": "App",
@@ -658,7 +658,7 @@ exports[`The zuora-auto-cancel stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC503f7440d0e5e326a16d25243975fab5902": {
+    "RestApiDeployment180EC5037238e3894818f06849e2c780a403817f": {
       "DependsOn": [
         "RestApiPOSTEF2EB351",
       ],
@@ -676,7 +676,7 @@ exports[`The zuora-auto-cancel stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC503f7440d0e5e326a16d25243975fab5902",
+          "Ref": "RestApiDeployment180EC5037238e3894818f06849e2c780a403817f",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -1052,12 +1052,12 @@ DLQ: https://",
           },
         ],
         "AlarmDescription": "zuora-auto-cancel returned a 5XX response. Search the logs below for "error" for more information. Impact: Zuora auto-cancellations are not being processed. Subscriptions with failed payments may not be cancelled.",
-        "AlarmName": "support-PROD-zuora-auto-cancel 5XX errors",
+        "AlarmName": "membership-PROD-zuora-auto-cancel 5XX errors",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
             "Name": "ApiName",
-            "Value": "support-PROD-zuora-auto-cancel",
+            "Value": "membership-PROD-zuora-auto-cancel",
           },
         ],
         "EvaluationPeriods": 1,
@@ -1208,8 +1208,8 @@ DLQ: https://",
     },
     "DNSRecord": {
       "Properties": {
-        "HostedZoneId": "Z3KO35ELNWZMSX",
-        "Name": "zuora-auto-cancel.support.guardianapis.com",
+        "HostedZoneId": "Z1E4V12LQGXFEC",
+        "Name": "zuora-auto-cancel.membership.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -1225,7 +1225,7 @@ DLQ: https://",
     },
     "DomainName": {
       "Properties": {
-        "DomainName": "zuora-auto-cancel.support.guardianapis.com",
+        "DomainName": "zuora-auto-cancel.membership.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -1239,7 +1239,7 @@ DLQ: https://",
               {
                 "Ref": "AWS::AccountId",
               },
-              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
+              ":certificate/c1efc564-9ff8-4a03-be48-d1990a3d79d2",
             ],
           ],
         },
@@ -1281,14 +1281,14 @@ DLQ: https://",
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "support/PROD/zuora-auto-cancel/zuora-callout-apis.jar",
+          "S3Key": "membership/PROD/zuora-auto-cancel/zuora-callout-apis.jar",
         },
         "Description": "Processes auto-cancellation requests from SQS queue (rate-limited)",
         "Environment": {
           "Variables": {
             "APP": "zuora-auto-cancel",
             "NODE_OPTIONS": "--enable-source-maps",
-            "STACK": "support",
+            "STACK": "membership",
             "STAGE": "PROD",
             "Stage": "PROD",
           },
@@ -1424,7 +1424,7 @@ DLQ: https://",
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/support/PROD/zuora-auto-cancel/zuora-callout-apis.jar",
+                      "/membership/PROD/zuora-auto-cancel/zuora-callout-apis.jar",
                     ],
                   ],
                 },
@@ -1445,7 +1445,7 @@ DLQ: https://",
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/support/zuora-auto-cancel",
+                    ":parameter/PROD/membership/zuora-auto-cancel",
                   ],
                 ],
               },
@@ -1468,7 +1468,7 @@ DLQ: https://",
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/support/zuora-auto-cancel/*",
+                    ":parameter/PROD/membership/zuora-auto-cancel/*",
                   ],
                 ],
               },
@@ -1609,7 +1609,7 @@ DLQ: https://",
     },
     "RestApi0C43BF4B": {
       "Properties": {
-        "Name": "support-PROD-zuora-auto-cancel",
+        "Name": "membership-PROD-zuora-auto-cancel",
         "Tags": [
           {
             "Key": "App",
@@ -1706,7 +1706,7 @@ DLQ: https://",
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC50335fdd4d348b9bef9ad1294271ca25996": {
+    "RestApiDeployment180EC503f3c62d9b9d1a9e177364de44f4818c3f": {
       "DependsOn": [
         "RestApiPOSTEF2EB351",
       ],
@@ -1724,7 +1724,7 @@ DLQ: https://",
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC50335fdd4d348b9bef9ad1294271ca25996",
+          "Ref": "RestApiDeployment180EC503f3c62d9b9d1a9e177364de44f4818c3f",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
