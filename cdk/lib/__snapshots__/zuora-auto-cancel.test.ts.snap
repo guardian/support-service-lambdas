@@ -1,0 +1,1760 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`The zuora-auto-cancel stack matches the snapshot 1`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [
+      "GuDistributionBucketParameter",
+    ],
+    "gu:cdk:version": "TEST",
+  },
+  "Outputs": {
+    "RestApiEndpoint0551178A": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "RestApi0C43BF4B",
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region",
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "RestApiDeploymentStageprod3855DE66",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "DistributionBucketName": {
+      "Default": "/account/services/artifact.bucket",
+      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "ApiGatewayToSqsRole04C1917A": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "zuora-auto-cancel",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "ApiGatewayToSqsRoleDefaultPolicyB06A361D": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "Queue4A7E3555",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "ApiGatewayToSqsRoleDefaultPolicyB06A361D",
+        "Roles": [
+          {
+            "Ref": "ApiGatewayToSqsRole04C1917A",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "DLQ581697C4": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "zuora-auto-cancel-sqs-dlq-CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "zuora-auto-cancel",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "LambdaD247545B": {
+      "DependsOn": [
+        "LambdaServiceRoleDefaultPolicyDAE46E21",
+        "LambdaServiceRoleA8ED4D3B",
+      ],
+      "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/CODE/zuora-auto-cancel/zuora-callout-apis.jar",
+        },
+        "Description": "Processes auto-cancellation requests from SQS queue (rate-limited)",
+        "Environment": {
+          "Variables": {
+            "APP": "zuora-auto-cancel",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
+            "STAGE": "CODE",
+            "Stage": "CODE",
+          },
+        },
+        "FunctionName": "zuora-auto-cancel-sqs-CODE",
+        "Handler": "com.gu.autoCancel.AutoCancelSqsHandler::handleRequest",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1536,
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaServiceRoleA8ED4D3B",
+            "Arn",
+          ],
+        },
+        "Runtime": "java21",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "zuora-auto-cancel",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "LambdaServiceRoleA8ED4D3B": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "zuora-auto-cancel",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "LambdaServiceRoleDefaultPolicyDAE46E21": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/CODE/zuora-auto-cancel/zuora-callout-apis.jar",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/zuora-auto-cancel",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/zuora-auto-cancel/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "Queue4A7E3555",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "LambdaServiceRoleDefaultPolicyDAE46E21",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "LambdaSqsEventSourcezuoraautocancelCODEQueue1D5FC3C8E2BD4EA2": {
+      "Properties": {
+        "BatchSize": 1,
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "Queue4A7E3555",
+            "Arn",
+          ],
+        },
+        "FunctionName": {
+          "Ref": "LambdaD247545B",
+        },
+        "ScalingConfig": {
+          "MaximumConcurrency": 5,
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "zuora-auto-cancel",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "Queue4A7E3555": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "QueueName": "zuora-auto-cancel-sqs-queue-CODE",
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "DLQ581697C4",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 3,
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "zuora-auto-cancel",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "VisibilityTimeout": 360,
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "ReadPrivateCredentialsB593C891": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/zuoraRest-CODE.*.json",
+                "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/trustedApi-CODE.*.json",
+                "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/exactTarget-CODE.*.json",
+                "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/stripe-CODE.*.json",
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "ReadPrivateCredentialsB593C891",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "RestApi0C43BF4B": {
+      "Properties": {
+        "Name": "support-CODE-zuora-auto-cancel",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "zuora-auto-cancel",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "RestApiAccount7C83CF5A": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "RestApi0C43BF4B",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "RestApiCloudWatchRoleE3ED6605",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "RestApiCloudWatchRoleE3ED6605": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "zuora-auto-cancel",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "RestApiDeployment180EC503f7440d0e5e326a16d25243975fab5902": {
+      "DependsOn": [
+        "RestApiPOSTEF2EB351",
+      ],
+      "Properties": {
+        "Description": "Automatically created by the RestApi construct",
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "RestApiDeploymentStageprod3855DE66": {
+      "DependsOn": [
+        "RestApiAccount7C83CF5A",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "RestApiDeployment180EC503f7440d0e5e326a16d25243975fab5902",
+        },
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+        "StageName": "prod",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "zuora-auto-cancel",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "RestApiPOSTEF2EB351": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "POST",
+        "Integration": {
+          "Credentials": {
+            "Fn::GetAtt": [
+              "ApiGatewayToSqsRole04C1917A",
+              "Arn",
+            ],
+          },
+          "IntegrationHttpMethod": "POST",
+          "IntegrationResponses": [
+            {
+              "ResponseTemplates": {
+                "application/json": "{ "status": "accepted" }",
+              },
+              "SelectionPattern": "2\\d{2}",
+              "StatusCode": "200",
+            },
+            {
+              "ResponseTemplates": {
+                "application/json": "{ "message": "Internal Server Error - could not queue message" }",
+              },
+              "StatusCode": "500",
+            },
+          ],
+          "RequestParameters": {
+            "integration.request.header.Content-Type": "'application/x-www-form-urlencoded'",
+          },
+          "RequestTemplates": {
+            "application/json": "#set($json = "{")
+#set($json = $json + """pathParameters"":{")
+#set($allHeaders = $input.params().path)
+#foreach($header in $allHeaders.keySet())
+#set($json = $json + """$header"":""$util.escapeJavaScript($allHeaders.get($header)).replaceAll(""\\\\'"",""'"")""")
+#if($foreach.hasNext)
+#set($json = $json + ",")
+#end
+#end
+#set($json = $json + "},")
+#set($json = $json + """headers"":{")
+#set($allHeaders = $input.params().header)
+#foreach($header in $allHeaders.keySet())
+#set($json = $json + """$header"":""$util.escapeJavaScript($allHeaders.get($header)).replaceAll(""\\\\'"",""'"")""")
+#if($foreach.hasNext)
+#set($json = $json + ",")
+#end
+#end
+#set($json = $json + "},")
+#set($json = $json + """queryStringParameters"":{")
+#set($allHeaders = $input.params().querystring)
+#foreach($header in $allHeaders.keySet())
+#set($json = $json + """$header"":""$util.escapeJavaScript($allHeaders.get($header)).replaceAll(""\\\\'"",""'"")""")
+#if($foreach.hasNext)
+#set($json = $json + ",")
+#end
+#end
+#set($json = $json + "},")
+#set($json = $json + """body"":""$util.escapeJavaScript($input.body).replaceAll(""\\\\'"",""'"")"",")
+#set($json = $json + """httpMethod"":""$util.escapeJavaScript($context.httpMethod).replaceAll(""\\\\'"",""'"")"",")
+#set($json = $json + """path"":""$util.escapeJavaScript($context.path).replaceAll(""\\\\'"",""'"")"",")
+#set($json = $json + """mappingSource"": ""SrCDK""}")
+Action=SendMessage&MessageBody=$util.urlEncode($json)",
+          },
+          "Type": "AWS",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":sqs:path/",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                "/",
+                {
+                  "Fn::GetAtt": [
+                    "Queue4A7E3555",
+                    "QueueName",
+                  ],
+                },
+              ],
+            ],
+          },
+        },
+        "MethodResponses": [
+          {
+            "StatusCode": "200",
+          },
+          {
+            "StatusCode": "500",
+          },
+        ],
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "RestApi0C43BF4B",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "SQSSendToEmailQueue83F1EE1E": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueUrl",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sqs:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":braze-emails-CODE",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SQSSendToEmailQueue83F1EE1E",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+  },
+}
+`;
+
+exports[`The zuora-auto-cancel stack matches the snapshot 2`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [
+      "GuDistributionBucketParameter",
+    ],
+    "gu:cdk:version": "TEST",
+  },
+  "Outputs": {
+    "RestApiEndpoint0551178A": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "RestApi0C43BF4B",
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region",
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "RestApiDeploymentStageprod3855DE66",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "DistributionBucketName": {
+      "Default": "/account/services/artifact.bucket",
+      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "Alarm7103F465": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "zuora-auto-cancel could not process a message and it ended up on the DLQ. Search the logs below for "error" for more information. Impact: Zuora auto-cancellations are not being processed. Subscriptions with failed payments may not be cancelled.
+DLQ: https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/sqs/v2/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#/queues/https%3A%2F%2Fsqs.",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".amazonaws.com%2F",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              "%2F",
+              {
+                "Fn::GetAtt": [
+                  "DLQ581697C4",
+                  "QueueName",
+                ],
+              },
+            ],
+          ],
+        },
+        "AlarmName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Fn::GetAtt": [
+                  "DLQ581697C4",
+                  "QueueName",
+                ],
+              },
+              " has messages",
+            ],
+          ],
+        },
+        "ComparisonOperator": "GreaterThanThreshold",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::GetAtt": [
+                "DLQ581697C4",
+                "QueueName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "zuora-auto-cancel",
+          },
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "LambdaD247545B",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 0,
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "ApiGateway5XXAlarmCDK11905206": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "zuora-auto-cancel returned a 5XX response. Search the logs below for "error" for more information. Impact: Zuora auto-cancellations are not being processed. Subscriptions with failed payments may not be cancelled.",
+        "AlarmName": "support-PROD-zuora-auto-cancel 5XX errors",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "ApiName",
+            "Value": "support-PROD-zuora-auto-cancel",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "5XXError",
+        "Namespace": "AWS/ApiGateway",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "zuora-auto-cancel",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "ApiGatewayToSqsRole04C1917A": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "zuora-auto-cancel",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "ApiGatewayToSqsRoleDefaultPolicyB06A361D": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "Queue4A7E3555",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "ApiGatewayToSqsRoleDefaultPolicyB06A361D",
+        "Roles": [
+          {
+            "Ref": "ApiGatewayToSqsRole04C1917A",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "DLQ581697C4": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "zuora-auto-cancel-sqs-dlq-PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "zuora-auto-cancel",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "LambdaD247545B": {
+      "DependsOn": [
+        "LambdaServiceRoleDefaultPolicyDAE46E21",
+        "LambdaServiceRoleA8ED4D3B",
+      ],
+      "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/PROD/zuora-auto-cancel/zuora-callout-apis.jar",
+        },
+        "Description": "Processes auto-cancellation requests from SQS queue (rate-limited)",
+        "Environment": {
+          "Variables": {
+            "APP": "zuora-auto-cancel",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
+            "STAGE": "PROD",
+            "Stage": "PROD",
+          },
+        },
+        "FunctionName": "zuora-auto-cancel-sqs-PROD",
+        "Handler": "com.gu.autoCancel.AutoCancelSqsHandler::handleRequest",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1536,
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaServiceRoleA8ED4D3B",
+            "Arn",
+          ],
+        },
+        "Runtime": "java21",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "zuora-auto-cancel",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "LambdaServiceRoleA8ED4D3B": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "zuora-auto-cancel",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "LambdaServiceRoleDefaultPolicyDAE46E21": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/PROD/zuora-auto-cancel/zuora-callout-apis.jar",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/zuora-auto-cancel",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/zuora-auto-cancel/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "Queue4A7E3555",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "LambdaServiceRoleDefaultPolicyDAE46E21",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "LambdaSqsEventSourcezuoraautocancelPRODQueue356A7EC5D3E23904": {
+      "Properties": {
+        "BatchSize": 1,
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "Queue4A7E3555",
+            "Arn",
+          ],
+        },
+        "FunctionName": {
+          "Ref": "LambdaD247545B",
+        },
+        "ScalingConfig": {
+          "MaximumConcurrency": 5,
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "zuora-auto-cancel",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "Queue4A7E3555": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "QueueName": "zuora-auto-cancel-sqs-queue-PROD",
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "DLQ581697C4",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 3,
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "zuora-auto-cancel",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "VisibilityTimeout": 360,
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "ReadPrivateCredentialsB593C891": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/PROD/zuoraRest-PROD.*.json",
+                "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/PROD/trustedApi-PROD.*.json",
+                "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/PROD/exactTarget-PROD.*.json",
+                "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/PROD/stripe-PROD.*.json",
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "ReadPrivateCredentialsB593C891",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "RestApi0C43BF4B": {
+      "Properties": {
+        "Name": "support-PROD-zuora-auto-cancel",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "zuora-auto-cancel",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "RestApiAccount7C83CF5A": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "RestApi0C43BF4B",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "RestApiCloudWatchRoleE3ED6605",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "RestApiCloudWatchRoleE3ED6605": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "zuora-auto-cancel",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "RestApiDeployment180EC50335fdd4d348b9bef9ad1294271ca25996": {
+      "DependsOn": [
+        "RestApiPOSTEF2EB351",
+      ],
+      "Properties": {
+        "Description": "Automatically created by the RestApi construct",
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "RestApiDeploymentStageprod3855DE66": {
+      "DependsOn": [
+        "RestApiAccount7C83CF5A",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "RestApiDeployment180EC50335fdd4d348b9bef9ad1294271ca25996",
+        },
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+        "StageName": "prod",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "zuora-auto-cancel",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "RestApiPOSTEF2EB351": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "POST",
+        "Integration": {
+          "Credentials": {
+            "Fn::GetAtt": [
+              "ApiGatewayToSqsRole04C1917A",
+              "Arn",
+            ],
+          },
+          "IntegrationHttpMethod": "POST",
+          "IntegrationResponses": [
+            {
+              "ResponseTemplates": {
+                "application/json": "{ "status": "accepted" }",
+              },
+              "SelectionPattern": "2\\d{2}",
+              "StatusCode": "200",
+            },
+            {
+              "ResponseTemplates": {
+                "application/json": "{ "message": "Internal Server Error - could not queue message" }",
+              },
+              "StatusCode": "500",
+            },
+          ],
+          "RequestParameters": {
+            "integration.request.header.Content-Type": "'application/x-www-form-urlencoded'",
+          },
+          "RequestTemplates": {
+            "application/json": "#set($json = "{")
+#set($json = $json + """pathParameters"":{")
+#set($allHeaders = $input.params().path)
+#foreach($header in $allHeaders.keySet())
+#set($json = $json + """$header"":""$util.escapeJavaScript($allHeaders.get($header)).replaceAll(""\\\\'"",""'"")""")
+#if($foreach.hasNext)
+#set($json = $json + ",")
+#end
+#end
+#set($json = $json + "},")
+#set($json = $json + """headers"":{")
+#set($allHeaders = $input.params().header)
+#foreach($header in $allHeaders.keySet())
+#set($json = $json + """$header"":""$util.escapeJavaScript($allHeaders.get($header)).replaceAll(""\\\\'"",""'"")""")
+#if($foreach.hasNext)
+#set($json = $json + ",")
+#end
+#end
+#set($json = $json + "},")
+#set($json = $json + """queryStringParameters"":{")
+#set($allHeaders = $input.params().querystring)
+#foreach($header in $allHeaders.keySet())
+#set($json = $json + """$header"":""$util.escapeJavaScript($allHeaders.get($header)).replaceAll(""\\\\'"",""'"")""")
+#if($foreach.hasNext)
+#set($json = $json + ",")
+#end
+#end
+#set($json = $json + "},")
+#set($json = $json + """body"":""$util.escapeJavaScript($input.body).replaceAll(""\\\\'"",""'"")"",")
+#set($json = $json + """httpMethod"":""$util.escapeJavaScript($context.httpMethod).replaceAll(""\\\\'"",""'"")"",")
+#set($json = $json + """path"":""$util.escapeJavaScript($context.path).replaceAll(""\\\\'"",""'"")"",")
+#set($json = $json + """mappingSource"": ""SrCDK""}")
+Action=SendMessage&MessageBody=$util.urlEncode($json)",
+          },
+          "Type": "AWS",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":sqs:path/",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                "/",
+                {
+                  "Fn::GetAtt": [
+                    "Queue4A7E3555",
+                    "QueueName",
+                  ],
+                },
+              ],
+            ],
+          },
+        },
+        "MethodResponses": [
+          {
+            "StatusCode": "200",
+          },
+          {
+            "StatusCode": "500",
+          },
+        ],
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "RestApi0C43BF4B",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "SQSSendToEmailQueue83F1EE1E": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueUrl",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sqs:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":braze-emails-PROD",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SQSSendToEmailQueue83F1EE1E",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+  },
+}
+`;
