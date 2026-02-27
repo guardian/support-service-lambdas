@@ -40,6 +40,7 @@ export function LambdaHandler<ConfigType, E>(
 		configSchema,
 		handlerWithEntryExitLogging,
 		(servicesAndConfig) => servicesAndConfig,
+		callerInfo,
 	);
 }
 
@@ -58,23 +59,33 @@ export function LambdaHandlerWithServices<ConfigType, Services, E>(
 	configSchema: z.ZodType<ConfigType, z.ZodTypeDef, unknown>,
 	handler: (event: E, services: Services) => Promise<void>,
 	buildServices: (handlerProps: HandlerEnv<ConfigType>) => Services,
+	callerInfo: string,
 ) {
-	// only load config on a cold start, don't load if this file is referenced in tests
-	const lazyConfig = new Lazy(async () => {
+	// only expect env vars on a cold start, don't load if this file is referenced in tests
+	const lazyEnv = new Lazy(() => {
 		const stage = getEnv('STAGE');
 		const stack = getEnv('STACK');
 		const app = getEnv('APP');
-		return { stage, config: await loadConfig(stage, stack, app, configSchema) };
+		return Promise.resolve({ stage, stack, app });
 	}, 'load config from SSM');
+
+	const handlerProps: Lazy<Services> = lazyEnv.then(
+		logger.wrapFn(
+			async ({ stage, stack, app }) => {
+				const config = await loadConfig(stage, stack, app, configSchema);
+				const handlerProps = { now: () => dayjs(), stage, config };
+				return buildServices(handlerProps);
+			},
+			'lambdaColdStart',
+			callerInfo,
+			(args) => ({ logOnEntryOnly: args }),
+		),
+	);
 
 	const handlerWithContextClearance = logger.withContext(
 		handler,
 		undefined,
 		true,
-	);
-
-	const handlerProps: Lazy<Services> = lazyConfig.then((config) =>
-		buildServices({ now: () => dayjs(), ...config }),
 	);
 
 	return async (event: E) => {
