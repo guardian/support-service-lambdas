@@ -1,20 +1,30 @@
 import * as console from 'node:console';
 import { mapOption } from '@modules/nullAndUndefined';
-import type {
-	BuildHandler,
-	BuildHandlerArguments,
-	BuildHandlerOutput,
-	HandlerExecutionContext,
-	MetadataBearer,
-	MiddlewareStack,
-} from '@smithy/types';
 import { getCallerInfo } from '@modules/routing/getCallerInfo';
 import { prettyPrint } from '@modules/routing/prettyPrint';
+import { requestLogger } from '@modules/routing/requestLogger';
+
+type LoggableInput = {
+	logOnEntryAndExit?: string;
+	logOnEntryOnly?: unknown[];
+	/**
+	 * if this is set, the function input and output are stored as a new regression test
+	 */
+	regressionTestInput?: unknown;
+	/**
+	 * if this is set, the function input and output are stored as cold start data
+	 */
+	regressionTestColdStartEnv?: unknown;
+	/**
+	 * if this is set, the function input and output are stored as request data
+	 */
+	regressionTestRequestKey?: string;
+};
 
 export class Logger {
-	constructor(
-		private prefix: string[] = [],
+	private prefix: string[] = [];
 
+	constructor(
 		private logFn = (message: string) => console.log(message),
 		private errorFn = (message: string) => console.error(message),
 	) {}
@@ -81,10 +91,7 @@ export class Logger {
 		fn: AsyncFunction<TArgs, TReturn>,
 		functionName: string | (() => string) = fn.name,
 		callerInfo: string = getCallerInfo(),
-		argsToLoggable: (args: TArgs) => {
-			logOnEntryAndExit?: string;
-			logOnEntryOnly?: unknown[];
-		},
+		argsToLoggable: (args: TArgs) => LoggableInput,
 		responseToLoggable: (result: TReturn) => unknown = (result) => result,
 	): AsyncFunction<TArgs, TReturn> {
 		const prefix =
@@ -93,7 +100,13 @@ export class Logger {
 			' ';
 
 		return async (...args: TArgs): Promise<TReturn> => {
-			const { logOnEntryAndExit, logOnEntryOnly } = argsToLoggable(args);
+			const {
+				logOnEntryAndExit,
+				logOnEntryOnly,
+				regressionTestInput,
+				regressionTestColdStartEnv,
+				regressionTestRequestKey,
+			} = argsToLoggable(args);
 
 			const prettyArgsArray = [
 				...(logOnEntryAndExit ? [logOnEntryAndExit] : []),
@@ -107,7 +120,11 @@ export class Logger {
 					: ' SHORT_ARGS\n' + logOnEntryAndExit;
 
 			this.logEntry(callerInfo, prefix, prettyArgs);
-
+			if (regressionTestInput !== undefined) {
+				requestLogger?.setRequest();
+			} else if (regressionTestColdStartEnv !== undefined) {
+				requestLogger?.setColdStart(true, regressionTestColdStartEnv);
+			}
 			try {
 				// actually call the function
 				const result = await fn(...args);
@@ -118,12 +135,24 @@ export class Logger {
 					shortPrettyArgs,
 					callerInfo,
 				);
+				if (regressionTestInput !== undefined) {
+					await requestLogger?.setResponse(regressionTestInput, result);
+				} else if (regressionTestRequestKey !== undefined) {
+					requestLogger?.addOutgoingCall(regressionTestRequestKey, result);
+				}
 
 				return result;
 			} catch (error) {
 				this.logError(error, prefix, shortPrettyArgs, callerInfo);
+				if (regressionTestInput !== undefined) {
+					await requestLogger?.setResponse(regressionTestInput, error);
+				}
 
 				throw error;
+			} finally {
+				if (regressionTestColdStartEnv !== undefined) {
+					requestLogger?.setColdStart(false);
+				}
 			}
 		};
 	}
@@ -186,46 +215,6 @@ export class Logger {
 				}
 			});
 		};
-	}
-
-	wrapAwsClient<
-		Input extends object,
-		Output extends MetadataBearer,
-		T extends { middlewareStack: MiddlewareStack<Input, Output> },
-	>(client: T, callerInfo: string = getCallerInfo()): T {
-		client.middlewareStack.add(
-			<Input extends object, Output extends MetadataBearer>(
-				next: BuildHandler<Input, Output>,
-				context: HandlerExecutionContext,
-			): BuildHandler<Input, Output> => {
-				const wrapAws = async (
-					args: BuildHandlerArguments<Input>,
-				): Promise<BuildHandlerOutput<Output>> => {
-					const result = await next(args);
-
-					const { output } = result;
-
-					return {
-						output,
-						response: {},
-					};
-				};
-				return this.wrapFn(
-					wrapAws,
-					'AWS ' + context.clientName + ' ' + context.commandName,
-					callerInfo,
-					(args) => ({ logOnEntryOnly: [args[0].input] }),
-					(result) => result.output.$metadata.httpStatusCode,
-				);
-			},
-			{
-				name: 'logRequest',
-				step: 'build',
-				priority: 'high',
-			},
-		);
-
-		return client;
 	}
 
 	/**

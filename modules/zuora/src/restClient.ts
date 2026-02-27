@@ -101,6 +101,7 @@ export abstract class RestClient {
 					body !== undefined || headers !== undefined
 						? [{ body, headers }]
 						: undefined,
+				regressionTestRequestKey: `HTTP ${this.constructor.name} ${method} ${path}`,
 			}),
 		);
 

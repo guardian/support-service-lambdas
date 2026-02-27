@@ -26,6 +26,7 @@ export function handleSQSMessages<Services>(
 	const recordHandlerWithLogging = logger.withContext(
 		logger.wrapFn(recordHandler, undefined, callerInfo, ([event]) => ({
 			logOnEntryOnly: [event],
+			regressionTestInput: event,
 		})),
 		([record]) => record.messageId,
 	);

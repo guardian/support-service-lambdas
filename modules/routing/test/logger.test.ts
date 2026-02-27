@@ -50,7 +50,7 @@ const expectedWithContextSum = '[logger.test.ts:34::addNumbers]';
 const expectedLogAfter = '[logger.test.ts:41::logAfter]';
 
 test('it should be a no-op if theres no context', () => {
-	const logger = new Logger([]);
+	const logger = new Logger();
 	const actual = getMessage(logger);
 	expect(actual).toEqual(expectedCallerInfo + ' msg');
 });
@@ -103,7 +103,6 @@ describe('withContext', () => {
 		logs = [];
 		errors = [];
 		logger = new Logger(
-			[],
 			(message) => logs.push(message),
 			(message) => errors.push(message),
 		);
@@ -214,7 +213,6 @@ describe('wrapFn', () => {
 		logs = [];
 		errors = [];
 		logger = new Logger(
-			[],
 			(message) => logs.push(message),
 			(message) => errors.push(message),
 		);

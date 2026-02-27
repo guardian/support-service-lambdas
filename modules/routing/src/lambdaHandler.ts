@@ -34,6 +34,7 @@ export function LambdaHandler<ConfigType, E>(
 		callerInfo,
 		([event]) => ({
 			logOnEntryOnly: [event],
+			regressionTestInput: event,
 		}),
 	);
 	return LambdaHandlerWithServices(
@@ -78,7 +79,7 @@ export function LambdaHandlerWithServices<ConfigType, Services, E>(
 			},
 			'lambdaColdStart',
 			callerInfo,
-			(args) => ({ logOnEntryOnly: args }),
+			(args) => ({ logOnEntryOnly: args, regressionTestColdStartEnv: args }),
 		),
 	);
 
