@@ -15,6 +15,7 @@ export function SQSHandler<ConfigType, Services>(
 		configSchema,
 		handleSQSMessages(handler, callerInfo),
 		buildServices,
+		callerInfo,
 	);
 }
 
