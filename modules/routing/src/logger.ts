@@ -1,20 +1,17 @@
 import * as console from 'node:console';
 import { mapOption } from '@modules/nullAndUndefined';
-import type {
-	BuildHandler,
-	BuildHandlerArguments,
-	BuildHandlerOutput,
-	HandlerExecutionContext,
-	MetadataBearer,
-	MiddlewareStack,
-} from '@smithy/types';
 import { getCallerInfo } from '@modules/routing/getCallerInfo';
 import { prettyPrint } from '@modules/routing/prettyPrint';
 
-export class Logger {
-	constructor(
-		private prefix: string[] = [],
+type LoggableInput = {
+	logOnEntryAndExit?: string;
+	logOnEntryOnly?: unknown[];
+};
 
+export class Logger {
+	private prefix: string[] = [];
+
+	constructor(
 		private logFn = (message: string) => console.log(message),
 		private errorFn = (message: string) => console.error(message),
 	) {}
@@ -81,10 +78,7 @@ export class Logger {
 		fn: AsyncFunction<TArgs, TReturn>,
 		functionName: string | (() => string) = fn.name,
 		callerInfo: string = getCallerInfo(),
-		argsToLoggable: (args: TArgs) => {
-			logOnEntryAndExit?: string;
-			logOnEntryOnly?: unknown[];
-		},
+		argsToLoggable: (args: TArgs) => LoggableInput,
 		responseToLoggable: (result: TReturn) => unknown = (result) => result,
 	): AsyncFunction<TArgs, TReturn> {
 		const prefix =
@@ -186,46 +180,6 @@ export class Logger {
 				}
 			});
 		};
-	}
-
-	wrapAwsClient<
-		Input extends object,
-		Output extends MetadataBearer,
-		T extends { middlewareStack: MiddlewareStack<Input, Output> },
-	>(client: T, callerInfo: string = getCallerInfo()): T {
-		client.middlewareStack.add(
-			<Input extends object, Output extends MetadataBearer>(
-				next: BuildHandler<Input, Output>,
-				context: HandlerExecutionContext,
-			): BuildHandler<Input, Output> => {
-				const wrapAws = async (
-					args: BuildHandlerArguments<Input>,
-				): Promise<BuildHandlerOutput<Output>> => {
-					const result = await next(args);
-
-					const { output } = result;
-
-					return {
-						output,
-						response: {},
-					};
-				};
-				return this.wrapFn(
-					wrapAws,
-					'AWS ' + context.clientName + ' ' + context.commandName,
-					callerInfo,
-					(args) => ({ logOnEntryOnly: [args[0].input] }),
-					(result) => result.output.$metadata.httpStatusCode,
-				);
-			},
-			{
-				name: 'logRequest',
-				step: 'build',
-				priority: 'high',
-			},
-		);
-
-		return client;
 	}
 
 	/**
