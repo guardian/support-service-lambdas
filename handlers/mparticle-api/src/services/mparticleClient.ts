@@ -1,4 +1,4 @@
-import { logger } from '@modules/routing/logger';
+import { getCallerInfo } from '@modules/routing/getCallerInfo';
 import type { AppConfig } from './config';
 import type { HttpResponse, Schema } from './make-http-request';
 import { RestRequestMaker } from './make-http-request';
@@ -104,7 +104,7 @@ export class MParticleClientImpl<
 		path: string,
 		schema: Schema<RESP>,
 	): Promise<HttpResponse<RESP>> {
-		return await this.rest.makeRESTRequest(logger.getCallerInfo(1))(
+		return await this.rest.makeRESTRequest(getCallerInfo(1))(
 			'GET',
 			path,
 			schema,
@@ -116,7 +116,7 @@ export class MParticleClientImpl<
 		body: REQ,
 		schema: Schema<RESP>,
 	): Promise<HttpResponse<RESP>> {
-		return await this.rest.makeRESTRequest(logger.getCallerInfo(1))(
+		return await this.rest.makeRESTRequest(getCallerInfo(1))(
 			'POST',
 			path,
 			schema,

@@ -49,9 +49,11 @@ export class RestRequestMaker {
 		logger.wrapFn(
 			this.restRequestWithoutLogging.bind(this),
 			() => 'HTTP ' + this.baseURL,
-			this.restRequestWithoutLogging.toString(),
-			2,
 			maybeCallerInfo,
+			([path, method, , body]) => ({
+				logOnEntryAndExit: `${method} ${path}`,
+				logOnEntryOnly: [body],
+			}),
 		);
 
 	private async restRequestWithoutLogging<REQ, RESP>(

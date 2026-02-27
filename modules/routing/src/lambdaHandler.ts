@@ -4,6 +4,7 @@ import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import dayjs from 'dayjs';
 import type { z } from 'zod';
+import { getCallerInfo } from '@modules/routing/getCallerInfo';
 import { logger } from '@modules/routing/logger';
 
 export type HandlerEnv<ConfigType> = {
@@ -26,8 +27,20 @@ export function LambdaHandler<ConfigType, E>(
 	configSchema: z.ZodType<ConfigType, z.ZodTypeDef, unknown>,
 	handler: (event: E, env: HandlerEnv<ConfigType>) => Promise<void>,
 ) {
-	const callerInfo = logger.getCallerInfo();
-	return LambdaHandlerWithServices(configSchema, handler, (p) => p, callerInfo);
+	const callerInfo = getCallerInfo();
+	const handlerWithEntryExitLogging = logger.wrapFn(
+		handler,
+		undefined,
+		callerInfo,
+		([event]) => ({
+			logOnEntryOnly: [event],
+		}),
+	);
+	return LambdaHandlerWithServices(
+		configSchema,
+		handlerWithEntryExitLogging,
+		(servicesAndConfig) => servicesAndConfig,
+	);
 }
 
 /**
@@ -39,14 +52,12 @@ export function LambdaHandler<ConfigType, E>(
  * @param configSchema schema for the SSM config for this lambda
  * @param handler
  * @param buildServices build anything you want to be created on cold start only, it will be passed into your handler
- * @param callerInfo file/line number of the lambda handler
  * @constructor
  */
 export function LambdaHandlerWithServices<ConfigType, Services, E>(
 	configSchema: z.ZodType<ConfigType, z.ZodTypeDef, unknown>,
 	handler: (event: E, services: Services) => Promise<void>,
 	buildServices: (handlerProps: HandlerEnv<ConfigType>) => Services,
-	callerInfo: string = logger.getCallerInfo(),
 ) {
 	// only load config on a cold start, don't load if this file is referenced in tests
 	const lazyConfig = new Lazy(async () => {
@@ -56,8 +67,8 @@ export function LambdaHandlerWithServices<ConfigType, Services, E>(
 		return { stage, config: await loadConfig(stage, stack, app, configSchema) };
 	}, 'load config from SSM');
 
-	const handlerWithLogging = logger.withContext(
-		logger.wrapFn(handler, undefined, undefined, 0, callerInfo),
+	const handlerWithContextClearance = logger.withContext(
+		handler,
 		undefined,
 		true,
 	);
@@ -67,7 +78,7 @@ export function LambdaHandlerWithServices<ConfigType, Services, E>(
 	);
 
 	return async (event: E) => {
-		return await handlerWithLogging(event, await handlerProps.get());
+		return await handlerWithContextClearance(event, await handlerProps.get());
 	};
 }
 

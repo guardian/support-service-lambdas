@@ -62,7 +62,14 @@ export const handlerBaton: Handler<
 			batonS3Writer,
 		);
 		return logger.withContext(
-			logger.wrapFn(router.routeRequest, 'handlerBaton'),
+			logger.wrapFn(
+				router.routeRequest,
+				'handlerBaton',
+				undefined,
+				([event]) => ({
+					logOnEntryOnly: [event],
+				}),
+			),
 			([event]) => `${event.requestType} ${event.action}`,
 			true,
 		)(event);
