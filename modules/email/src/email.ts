@@ -51,6 +51,7 @@ export const DataExtensionNames = {
 		digitalSubscription: 'digipack', // SV_DP_WelcomeDay0v2 (PROD), SV_DP_WelcomeDay0 (CODE)
 		guardianAdLite: 'guardian-ad-lite', // SV_CorP_WelcomeDay0
 		guardianWeekly: 'guardian-weekly', // SV_GW_WelcomeDay0
+		guardianWeeklyPlus: 'guardian-weekly-plus', // SV_GW_WelcomeDay0v2
 		homeDelivery: 'paper-delivery', // SV_HD_WelcomeDay0
 		homeDeliveryObserver: 'sunday-paper-delivery', // SV_HD_ObserverWelcomeDay0
 		subscriptionCard: 'paper-subscription-card', // SV_SC_WelcomeDay0
