@@ -53,7 +53,6 @@ export function LambdaHandler<ConfigType, E>(
  * @param configSchema schema for the SSM config for this lambda
  * @param handler
  * @param buildServices build anything you want to be created on cold start only, it will be passed into your handler
- * @param callerInfo file/line number of the lambda handler
  * @constructor
  */
 export function LambdaHandlerWithServices<ConfigType, Services, E>(

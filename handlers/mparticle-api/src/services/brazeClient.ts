@@ -1,3 +1,4 @@
+import { getCallerInfo } from '@modules/routing/getCallerInfo';
 import { logger } from '@modules/routing/logger';
 import { z } from 'zod';
 import type { DeletionResult } from '../types/deletionMessage';
@@ -72,7 +73,7 @@ export class BrazeClient {
 		};
 
 		try {
-			return await this.rest.makeRESTRequest(logger.getCallerInfo(1))(
+			return await this.rest.makeRESTRequest(getCallerInfo(1))(
 				'POST',
 				'/users/delete',
 				BrazeDeleteResponseSchema,
