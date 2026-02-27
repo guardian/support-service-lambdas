@@ -2,23 +2,10 @@ import * as console from 'node:console';
 import { mapOption } from '@modules/nullAndUndefined';
 import { getCallerInfo } from '@modules/routing/getCallerInfo';
 import { prettyPrint } from '@modules/routing/prettyPrint';
-import { requestLogger } from '@modules/routing/requestLogger';
 
-type LoggableInput = {
+export type LoggableInput = {
 	logOnEntryAndExit?: string;
 	logOnEntryOnly?: unknown[];
-	/**
-	 * if this is set, the function input and output are stored as a new regression test
-	 */
-	regressionTestInput?: unknown;
-	/**
-	 * if this is set, the function input and output are stored as cold start data
-	 */
-	regressionTestColdStartEnv?: unknown;
-	/**
-	 * if this is set, the function input and output are stored as request data
-	 */
-	regressionTestRequestKey?: string;
 };
 
 export class Logger {
@@ -100,13 +87,7 @@ export class Logger {
 			' ';
 
 		return async (...args: TArgs): Promise<TReturn> => {
-			const {
-				logOnEntryAndExit,
-				logOnEntryOnly,
-				regressionTestInput,
-				regressionTestColdStartEnv,
-				regressionTestRequestKey,
-			} = argsToLoggable(args);
+			const { logOnEntryAndExit, logOnEntryOnly } = argsToLoggable(args);
 
 			const prettyArgsArray = [
 				...(logOnEntryAndExit ? [logOnEntryAndExit] : []),
@@ -120,11 +101,7 @@ export class Logger {
 					: ' SHORT_ARGS\n' + logOnEntryAndExit;
 
 			this.logEntry(callerInfo, prefix, prettyArgs);
-			if (regressionTestInput !== undefined) {
-				requestLogger?.setRequest();
-			} else if (regressionTestColdStartEnv !== undefined) {
-				requestLogger?.setColdStart(true, regressionTestColdStartEnv);
-			}
+
 			try {
 				// actually call the function
 				const result = await fn(...args);
@@ -135,24 +112,12 @@ export class Logger {
 					shortPrettyArgs,
 					callerInfo,
 				);
-				if (regressionTestInput !== undefined) {
-					await requestLogger?.setResponse(regressionTestInput, result);
-				} else if (regressionTestRequestKey !== undefined) {
-					requestLogger?.addOutgoingCall(regressionTestRequestKey, result);
-				}
 
 				return result;
 			} catch (error) {
 				this.logError(error, prefix, shortPrettyArgs, callerInfo);
-				if (regressionTestInput !== undefined) {
-					await requestLogger?.setResponse(regressionTestInput, error);
-				}
 
 				throw error;
-			} finally {
-				if (regressionTestColdStartEnv !== undefined) {
-					requestLogger?.setColdStart(false);
-				}
 			}
 		};
 	}

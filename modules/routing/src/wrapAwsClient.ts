@@ -6,7 +6,7 @@ import type {
 	MiddlewareStack,
 } from '@smithy/types';
 import { getCallerInfo } from '@modules/routing/getCallerInfo';
-import { logger } from '@modules/routing/logger';
+import { wrapFn } from '@modules/routing/wrapFn';
 
 export function wrapAwsClient<
 	Input extends object,
@@ -26,12 +26,13 @@ export function wrapAwsClient<
 			};
 
 			return async (inputs) => {
-				const output = await logger.wrapFn(
+				const output = await wrapFn(
 					wrapAws,
 					'AWS ' + context.clientName + ' ' + context.commandName,
 					callerInfo,
 					(args_1) => ({
 						logOnEntryOnly: [args_1[0].input],
+						type: 'outgoingRequest',
 						regressionTestRequestKey:
 							'AWS ' +
 							context.clientName +
