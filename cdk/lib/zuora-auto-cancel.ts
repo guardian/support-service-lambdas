@@ -34,6 +34,7 @@ export class ZuoraAutoCancel extends SrStack {
 				timeout: Duration.minutes(5),
 				environment: {
 					Stage: this.stage,
+					EmailQueueName: `braze-emails-${this.stage}`,
 				},
 			},
 		});

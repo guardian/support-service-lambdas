@@ -11,7 +11,7 @@
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr mparticle-api.zip ./*.js.map ./*.js",
     "cdk:test": "pnpm --filter cdk test mparticle-api",
     "cdk:test-update": "pnpm --filter cdk test-update mparticle-api",
-    "update-lambda": "../../update-lambda.sh \"mparticle-api\" mparticle-api-http- mparticle-api-baton-",
+    "update-lambda": "../../update-lambda.sh \"mparticle-api\" mparticle-api-http- mparticle-api-baton- mparticle-api-mma-user-deletion-",
     "update-stack": "../../update-stack.sh \"mparticle-api\"",
     "check-config": "tsx runManual/runLoadConfig.ts"
   },
