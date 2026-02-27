@@ -18,7 +18,7 @@ export function wrapAwsClient<
 			next: BuildHandler<Input, Output>,
 			context: HandlerExecutionContext,
 		): BuildHandler<Input, Output> => {
-			const wrapAws = async (
+			const extractAwsOutput = async (
 				args: BuildHandlerArguments<Input>,
 			): Promise<Output> => {
 				const result = await next(args);
@@ -27,22 +27,17 @@ export function wrapAwsClient<
 
 			return async (inputs) => {
 				const output = await wrapFn(
-					wrapAws,
+					extractAwsOutput,
 					'AWS ' + context.clientName + ' ' + context.commandName,
 					callerInfo,
-					(args_1) => ({
-						logOnEntryOnly: [args_1[0].input],
+					(args) => ({
+						logOnEntryOnly: [args[0].input],
 						type: 'outgoingRequest',
-						regressionTestRequestKey:
-							'AWS ' +
-							context.clientName +
-							' ' +
-							context.commandName +
-							' ' +
-							JSON.stringify(args_1[0].input),
+						regressionTestRequestKey: `AWS ${context.clientName} ${context.commandName} ${JSON.stringify(args[0].input)}`,
 					}),
 					(output) => output.$metadata.httpStatusCode,
 				)(inputs);
+
 				return { response: {}, output };
 			};
 		},

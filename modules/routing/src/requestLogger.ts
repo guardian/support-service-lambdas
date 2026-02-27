@@ -4,136 +4,122 @@ import type { Stage } from '@modules/stage';
 import { stageSchema } from '@modules/stage';
 import { z } from 'zod';
 import type { AsyncFunction } from '@modules/routing/logger';
+import { logger } from '@modules/routing/logger';
 
 export class RequestLogger {
-	constructor(private stage: Stage | 'DEV') {
-		log(`starting requestLogger in ${stage} mode`);
-	}
+	constructor(private stage: Stage | 'DEV') {}
 
-	private coldStartFetch: LogRecord[] = [];
-	private coldStart = false;
-	private coldStartEnv: unknown = undefined;
-	private outgoingFetch: LogRecord[] | undefined;
+	private coldStartInput: unknown = undefined;
+	private coldStartFetches: LogRecord[] = [];
+	private inColdStart = false;
+
+	private outgoingFetches: LogRecord[] | undefined;
 
 	/**
 	 * set cold start mode to true to record any initialisation requests e.g. config/catalog loading.
 	 *
 	 * These requests will be retained and stored with every test record.
 	 *
-	 * @param isColdStart
+	 * @param fn
 	 * @param coldStartEnv
 	 */
-	setColdStart = (isColdStart: boolean, coldStartEnv?: unknown) => {
-		if (isColdStart) {
-			if (this.coldStartEnv !== undefined) {
+	wrapColdStart<TArgs extends unknown[], TReturn>(
+		fn: AsyncFunction<TArgs, TReturn>,
+		coldStartEnv: unknown,
+	): AsyncFunction<TArgs, TReturn> {
+		return async (...args: TArgs): Promise<TReturn> => {
+			this.inColdStart = true;
+			if (this.coldStartInput !== undefined) {
 				console.error(
 					new Error('multiple cold starts - test may not be recorded properly'),
 				);
 			}
-			this.coldStartEnv = coldStartEnv;
-		}
-		this.coldStart = isColdStart;
-	};
-
-	wrapColdStart<TArgs extends unknown[], TReturn>(
-		fn: AsyncFunction<TArgs, TReturn>,
-		regressionTestColdStartEnv: unknown,
-	): AsyncFunction<TArgs, TReturn> {
-		return async (...args: TArgs): Promise<TReturn> => {
-			this.setColdStart(true, regressionTestColdStartEnv);
+			this.coldStartInput = coldStartEnv;
 			try {
 				// actually call the function
 				return await fn(...args);
 			} finally {
-				this.setColdStart(false);
+				this.inColdStart = false;
 			}
-		};
-	}
-
-	wrapOutgoingCall<TArgs extends unknown[], TReturn>(
-		fn: AsyncFunction<TArgs, TReturn>,
-		regressionTestRequestKey: string,
-	): AsyncFunction<TArgs, TReturn> {
-		return async (...args: TArgs): Promise<TReturn> => {
-			// actually call the function
-			const result = await fn(...args);
-			this.addOutgoingCall(regressionTestRequestKey, result);
-			return result;
 		};
 	}
 
 	wrapInvocation<TArgs extends unknown[], TReturn>(
 		fn: AsyncFunction<TArgs, TReturn>,
-		regressionTestInput: unknown,
-		// functionName: string | (() => string) = fn.name,
-		// callerInfo: string = getCallerInfo(),
-		// argsToLoggable: (args: TArgs) => LoggableInput,
-		// responseToLoggable: (result: TReturn) => unknown = (result) => result,
+		input: unknown,
 	): AsyncFunction<TArgs, TReturn> {
 		return async (...args: TArgs): Promise<TReturn> => {
 			this.setRequest();
 			try {
 				// actually call the function
 				const result = await fn(...args);
-				await this.setResponse(regressionTestInput, result);
+				await this.setResponse(input, result);
 				return result;
 			} catch (error) {
-				await this.setResponse(regressionTestInput, error);
+				await this.setResponse(input, error);
 				throw error;
 			}
 		};
 	}
 
 	private setRequest = () => {
-		log(`starting request`);
-		if (this.outgoingFetch) {
-			log('Error: request is already set');
+		logger.log(`starting request`);
+		if (this.outgoingFetches) {
+			logger.log('warning: request is already set');
 		}
-		this.outgoingFetch = [];
+		this.outgoingFetches = [];
 	};
 
 	private setResponse = async (request: unknown, response: unknown) => {
-		log(`finishing request`);
-		if (this.outgoingFetch === undefined) {
+		logger.log(`finishing request`);
+		if (this.outgoingFetches === undefined) {
 			return Promise.reject(new Error('no request has been logged'));
 		}
 		const group: GroupType = {
 			request,
 			response,
-			outgoingFetch: this.outgoingFetch,
-			coldStartFetch: this.coldStartFetch, // cold start must be attached to every invocation
-			coldStartEnv: this.coldStartEnv,
+			outgoingFetch: this.outgoingFetches,
+			coldStartFetch: this.coldStartFetches, // cold start must be attached to every invocation
+			coldStartEnv: this.coldStartInput,
 		};
-		this.outgoingFetch = undefined;
+		this.outgoingFetches = undefined;
 
 		const key = `${this.stage}/alarms-handler/${new Date().getTime()}.json`;
 
-		await write(key, group).then(log).catch(console.error);
+		await writeGroupToS3(key, group)
+			.then(logger.log.bind(logger))
+			.catch(console.error);
 	};
 
-	addOutgoingCall = (requestKey: string, response: unknown) => {
+	wrapOutgoingCall<TArgs extends unknown[], TReturn>(
+		fn: AsyncFunction<TArgs, TReturn>,
+		requestKey: string,
+	): AsyncFunction<TArgs, TReturn> {
+		return async (...args: TArgs): Promise<TReturn> => {
+			// actually call the function
+			const response = await fn(...args);
+			// TODO when needed - catch and store exceptions
+			this.addOutgoingCall(requestKey, response);
+			return response;
+		};
+	}
+
+	private addOutgoingCall = (requestKey: string, response: unknown) => {
 		const fetchRecord: LogRecord = {
 			requestKey,
 			response,
 		};
-		(this.coldStart ? this.coldStartFetch : this.outgoingFetch)?.push(
+		(this.inColdStart ? this.coldStartFetches : this.outgoingFetches)?.push(
 			fetchRecord,
 		);
 	};
 }
 
-/**
- * we have to use an internal logger rather than the normal one, to avoid a circular dependency
- */
-function log(message: unknown) {
-	console.log(`requestLogger:`, message);
-}
-
 const bucket = 'gu-reader-revenue-logs'; // expires after 14 days
 
-async function write(key: string, group: GroupType) {
-	log('\n\nwriting request logs to S3:');
-	log(
+async function writeGroupToS3(key: string, group: GroupType) {
+	logger.log('\n\nwriting request logs to S3:');
+	logger.log(
 		`https://eu-west-1.console.aws.amazon.com/s3/object/${bucket}?region=eu-west-1&prefix=${key}`,
 	);
 
@@ -164,11 +150,9 @@ const groupSchema = z.object({
 function buildRequestLogger() {
 	try {
 		const parsedStage = stageSchema.safeParse(process.env.STAGE);
-		log(`buildSingletonLogger in stage ${parsedStage.data}`);
-		const requestLogger = parsedStage.success
+		return parsedStage.success
 			? new RequestLogger(parsedStage.data)
 			: undefined;
-		return requestLogger;
 	} catch {
 		return undefined; // mainly because tests don't mock stageSchema properly
 	}
