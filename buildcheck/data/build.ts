@@ -483,6 +483,7 @@ const moduleRouting: ModuleDefinition = {
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
+		...devDeps['@smithy/types'],
 	},
 };
 
