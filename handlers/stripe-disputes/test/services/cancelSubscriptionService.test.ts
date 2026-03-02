@@ -216,6 +216,26 @@ describe('cancelSubscriptionService', () => {
 			);
 		});
 
+		it('should not throw when getAccount fails', async () => {
+			const mockSubscription = createMockSubscription('Active');
+			(getAccount as jest.Mock).mockRejectedValue(
+				new Error('Zod validation failed'),
+			);
+
+			const result = await cancelSubscriptionService(
+				mockLogger,
+				mockZuoraClient,
+				mockSubscription,
+			);
+
+			expect(result.cancelled).toBe(true);
+			expect(sendEmail).not.toHaveBeenCalled();
+			expect(mockLogger.error).toHaveBeenCalledWith(
+				'Failed to send dispute cancellation email:',
+				expect.any(Error),
+			);
+		});
+
 		it('should not send email for inactive subscriptions', async () => {
 			const mockSubscription = createMockSubscription('Cancelled');
 

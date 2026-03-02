@@ -61,23 +61,20 @@ export async function cancelSubscriptionService(
 		// Don't throw - the cancellation succeeded even if the update failed
 	}
 
-	// Get account details to retrieve customer email
-	const account = await getAccount(zuoraClient, subscription.accountNumber);
+	// Send cancellation email - non-critical, should not block the flow
+	try {
+		const account = await getAccount(zuoraClient, subscription.accountNumber);
+		const customerEmail = account.billToContact.workEmail;
 
-	const customerEmail = account.billToContact.workEmail;
+		if (!customerEmail) {
+			logger.error(
+				`No email address found for subscription ${subscription.subscriptionNumber}`,
+			);
+		} else {
+			logger.log(
+				`Sending dispute cancellation email to customer: ${customerEmail}`,
+			);
 
-	if (!customerEmail) {
-		logger.error(
-			`No email address found for subscription ${subscription.subscriptionNumber}`,
-		);
-		return { cancelled: true, negativeInvoiceId };
-	} else {
-		// Send email notification to customer
-		logger.log(
-			`Sending dispute cancellation email to customer: ${customerEmail}`,
-		);
-
-		try {
 			const emailMessage: EmailMessageWithIdentityUserId = {
 				To: {
 					Address: customerEmail,
@@ -98,10 +95,9 @@ export async function cancelSubscriptionService(
 			);
 
 			logger.log('Dispute cancellation email sent successfully');
-		} catch (emailError) {
-			logger.error('Failed to send dispute cancellation email:', emailError);
-			// Don't throw - we still want to return true since cancellation succeeded
 		}
+	} catch (emailError) {
+		logger.error('Failed to send dispute cancellation email:', emailError);
 	}
 
 	return { cancelled: true, negativeInvoiceId };
