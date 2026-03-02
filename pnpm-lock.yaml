@@ -13,8 +13,8 @@ catalogs:
       specifier: ^5.6.3
       version: 5.9.2
     zod:
-      specifier: ^3.23.8
-      version: 3.25.76
+      specifier: ^4.3.6
+      version: 4.3.6
 
 overrides:
   typescript-eslint: ^8.46.2
@@ -67,13 +67,13 @@ importers:
         version: 3.6.2
       ts-jest:
         specifier: ^29.3.2
-        version: 29.4.5(@babel/core@7.28.3)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@29.7.0(@babel/core@7.28.3))(esbuild@0.25.12)(jest-util@30.2.0)(jest@29.7.0(@types/node@22.19.1)(ts-node@10.9.2(@types/node@22.19.1)(typescript@5.9.2)))(typescript@5.9.2)
+        version: 29.4.5(@babel/core@7.28.4)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@29.7.0(@babel/core@7.28.4))(esbuild@0.25.12)(jest-util@30.2.0)(jest@29.7.0(@types/node@22.19.1)(ts-node@10.9.2(@types/node@22.19.1)(typescript@5.9.2)))(typescript@5.9.2)
       typescript:
         specifier: 'catalog:'
         version: 5.9.2
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.3.6
 
   buildcheck:
     dependencies:
@@ -134,7 +134,7 @@ importers:
         version: 3.995.0
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.3.6
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -150,7 +150,7 @@ importers:
         version: 1.11.19
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.3.6
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -175,7 +175,7 @@ importers:
         version: 9.15.1
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.3.6
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -206,7 +206,7 @@ importers:
         version: 3.995.0(@aws-sdk/client-dynamodb@3.995.0)
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.3.6
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -231,7 +231,7 @@ importers:
         version: 1.11.19
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.3.6
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -253,7 +253,7 @@ importers:
         version: 1.14.2
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.3.6
     devDependencies:
       '@aws-sdk/client-s3':
         specifier: ^3.940.0
@@ -284,7 +284,7 @@ importers:
         version: 9.15.1
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.3.6
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -318,7 +318,7 @@ importers:
         version: 5.3.6
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.3.6
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -334,7 +334,7 @@ importers:
         version: 1.11.19
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.3.6
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -400,7 +400,7 @@ importers:
         version: 18.5.0(@types/node@24.10.1)
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.3.6
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -419,7 +419,7 @@ importers:
         version: 3.995.0
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.3.6
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -438,7 +438,7 @@ importers:
         version: 1.11.19
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.3.6
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -466,7 +466,7 @@ importers:
         version: 3.995.0
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.3.6
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -500,7 +500,7 @@ importers:
         version: 3.995.0(@aws-sdk/client-s3@3.995.0)
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.3.6
 
   modules/bigquery:
     dependencies:
@@ -518,7 +518,7 @@ importers:
         version: 9.15.1
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.3.6
     devDependencies:
       '@types/jest':
         specifier: ^29.5.14
@@ -528,7 +528,7 @@ importers:
         version: 29.7.0(@types/node@24.10.1)(ts-node@10.9.2(@types/node@24.10.1)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.3.2
-        version: 29.4.5(@babel/core@7.28.4)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@29.7.0(@babel/core@7.28.4))(esbuild@0.25.12)(jest-util@30.2.0)(jest@29.7.0(@types/node@24.10.1)(ts-node@10.9.2(@types/node@24.10.1)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.5(@babel/core@7.28.3)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@29.7.0(@babel/core@7.28.3))(esbuild@0.25.12)(jest-util@30.2.0)(jest@29.7.0(@types/node@24.10.1)(ts-node@10.9.2(@types/node@24.10.1)(typescript@5.9.3)))(typescript@5.9.3)
 
   modules/email:
     dependencies:
@@ -556,7 +556,7 @@ importers:
         version: 4.0.2
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.3.6
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -566,7 +566,7 @@ importers:
     dependencies:
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.3.6
 
   modules/product-benefits:
     dependencies:
@@ -575,7 +575,7 @@ importers:
         version: 1.11.19
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.3.6
 
   modules/product-catalog:
     devDependencies:
@@ -593,7 +593,7 @@ importers:
         version: 5.9.2
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.3.6
 
   modules/promotions:
     dependencies:
@@ -605,7 +605,7 @@ importers:
         version: 3.995.0(@aws-sdk/client-dynamodb@3.995.0)
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.3.6
 
   modules/routing:
     dependencies:
@@ -614,7 +614,7 @@ importers:
         version: 1.11.19
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.3.6
     devDependencies:
       '@smithy/types':
         specifier: ^4.9.8
@@ -627,7 +627,7 @@ importers:
     dependencies:
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.3.6
     devDependencies:
       '@types/jest':
         specifier: ^29.5.14
@@ -661,13 +661,13 @@ importers:
         version: 1.11.19
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.3.6
 
   modules/sync-supporter-product-data:
     dependencies:
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.3.6
     devDependencies:
       '@aws-sdk/client-sqs':
         specifier: ^3.940.0
@@ -704,7 +704,7 @@ importers:
         version: 1.11.19
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.3.6
 
   modules/zuora-catalog:
     dependencies:
@@ -713,7 +713,7 @@ importers:
         version: 3.995.0
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.3.6
 
 packages:
 
@@ -3247,7 +3247,7 @@ packages:
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
-    deprecated: Glob versions prior to v9 are no longer supported
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   globals@14.0.0:
     resolution: {integrity: sha512-oahGvuMGQlPw/ivIYBjVSrWAfWLBeku5tpPE2fOPLi+WHffIWbuh2tCjhyQhTBPMf5E9jDEH4FOmTYgYwbKwtQ==}
@@ -4904,8 +4904,8 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  zod@3.25.76:
-    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+  zod@4.3.6:
+    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
 
 snapshots:
 
@@ -10972,7 +10972,28 @@ snapshots:
 
   ts-dedent@2.2.0: {}
 
-  ts-jest@29.4.5(@babel/core@7.28.3)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@29.7.0(@babel/core@7.28.3))(esbuild@0.25.12)(jest-util@30.2.0)(jest@29.7.0(@types/node@22.19.1)(ts-node@10.9.2(@types/node@22.19.1)(typescript@5.9.2)))(typescript@5.9.2):
+  ts-jest@29.4.5(@babel/core@7.28.3)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@29.7.0(@babel/core@7.28.3))(esbuild@0.25.12)(jest-util@30.2.0)(jest@29.7.0(@types/node@24.10.1)(ts-node@10.9.2(@types/node@24.10.1)(typescript@5.9.3)))(typescript@5.9.3):
+    dependencies:
+      bs-logger: 0.2.6
+      fast-json-stable-stringify: 2.1.0
+      handlebars: 4.7.8
+      jest: 29.7.0(@types/node@24.10.1)(ts-node@10.9.2(@types/node@24.10.1)(typescript@5.9.3))
+      json5: 2.2.3
+      lodash.memoize: 4.1.2
+      make-error: 1.3.6
+      semver: 7.7.3
+      type-fest: 4.41.0
+      typescript: 5.9.3
+      yargs-parser: 21.1.1
+    optionalDependencies:
+      '@babel/core': 7.28.3
+      '@jest/transform': 30.2.0
+      '@jest/types': 30.2.0
+      babel-jest: 29.7.0(@babel/core@7.28.3)
+      esbuild: 0.25.12
+      jest-util: 30.2.0
+
+  ts-jest@29.4.5(@babel/core@7.28.4)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@29.7.0(@babel/core@7.28.4))(esbuild@0.25.12)(jest-util@30.2.0)(jest@29.7.0(@types/node@22.19.1)(ts-node@10.9.2(@types/node@22.19.1)(typescript@5.9.2)))(typescript@5.9.2):
     dependencies:
       bs-logger: 0.2.6
       fast-json-stable-stringify: 2.1.0
@@ -10986,10 +11007,10 @@ snapshots:
       typescript: 5.9.2
       yargs-parser: 21.1.1
     optionalDependencies:
-      '@babel/core': 7.28.3
+      '@babel/core': 7.28.4
       '@jest/transform': 30.2.0
       '@jest/types': 30.2.0
-      babel-jest: 29.7.0(@babel/core@7.28.3)
+      babel-jest: 29.7.0(@babel/core@7.28.4)
       esbuild: 0.25.12
       jest-util: 30.2.0
 
@@ -11332,4 +11353,4 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  zod@3.25.76: {}
+  zod@4.3.6: {}
