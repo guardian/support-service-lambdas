@@ -239,6 +239,7 @@ exports[`The zuora-auto-cancel stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "zuora-auto-cancel",
+            "EmailQueueName": "braze-emails-CODE",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "membership",
             "STAGE": "CODE",
@@ -1287,6 +1288,7 @@ DLQ: https://",
         "Environment": {
           "Variables": {
             "APP": "zuora-auto-cancel",
+            "EmailQueueName": "braze-emails-PROD",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "membership",
             "STAGE": "PROD",
