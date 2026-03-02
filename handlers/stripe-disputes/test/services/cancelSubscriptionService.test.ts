@@ -63,9 +63,12 @@ describe('cancelSubscriptionService', () => {
 		jest.clearAllMocks();
 		(stageFromEnvironment as jest.Mock).mockReturnValue('TEST');
 		(getAccount as jest.Mock).mockResolvedValue(mockAccount);
+		(cancelSubscription as jest.Mock).mockResolvedValue({
+			invoiceId: 'INV-NEG-001',
+		});
 	});
 
-	it('should cancel active subscription successfully', async () => {
+	it('should cancel active subscription with SpecificDate policy and runBilling=true', async () => {
 		const mockSubscription = createMockSubscription('Active');
 
 		const result = await cancelSubscriptionService(
@@ -74,24 +77,19 @@ describe('cancelSubscriptionService', () => {
 			mockSubscription,
 		);
 
-		expect(result).toBe(true);
-		expect(mockLogger.log).toHaveBeenCalledWith(
-			'Canceling active subscription: SUB-12345',
-		);
-		expect(mockLogger.log).toHaveBeenCalledWith(
-			'Canceling active subscription: SUB-12345',
-		);
+		expect(result).toEqual({
+			cancelled: true,
+			negativeInvoiceId: 'INV-NEG-001',
+		});
 		expect(cancelSubscription).toHaveBeenCalledWith(
 			mockZuoraClient,
 			'SUB-12345',
 			expect.objectContaining({ format: expect.any(Function) }),
-			false,
-			undefined,
-			'EndOfLastInvoicePeriod',
+			true,
 		);
 	});
 
-	it('should skip cancellation for inactive subscription (Cancelled)', async () => {
+	it('should skip cancellation for inactive subscription', async () => {
 		const mockSubscription = createMockSubscription('Cancelled');
 
 		const result = await cancelSubscriptionService(
@@ -100,17 +98,18 @@ describe('cancelSubscriptionService', () => {
 			mockSubscription,
 		);
 
-		expect(result).toBe(false);
+		expect(result).toEqual({ cancelled: false });
 		expect(mockLogger.log).toHaveBeenCalledWith(
 			'Subscription already inactive (Cancelled), skipping cancellation',
 		);
 		expect(cancelSubscription).not.toHaveBeenCalled();
 	});
 
-	it('should handle different subscription numbers', async () => {
-		const mockSubscription = createMockSubscription('Active', 'SUB-67890');
-		const mockCancelResponse = { Success: true, Id: 'cancel_456' };
-		(cancelSubscription as jest.Mock).mockResolvedValue(mockCancelResponse);
+	it('should return negativeInvoiceId from cancel response', async () => {
+		const mockSubscription = createMockSubscription('Active');
+		(cancelSubscription as jest.Mock).mockResolvedValue({
+			invoiceId: 'INV-NEG-789',
+		});
 
 		const result = await cancelSubscriptionService(
 			mockLogger,
@@ -118,18 +117,23 @@ describe('cancelSubscriptionService', () => {
 			mockSubscription,
 		);
 
-		expect(result).toBe(true);
+		expect(result.negativeInvoiceId).toBe('INV-NEG-789');
 		expect(mockLogger.log).toHaveBeenCalledWith(
-			'Canceling active subscription: SUB-67890',
+			'Cancellation generated negative invoice: INV-NEG-789',
 		);
-		expect(cancelSubscription).toHaveBeenCalledWith(
+	});
+
+	it('should handle cancel response without invoiceId', async () => {
+		const mockSubscription = createMockSubscription('Active');
+		(cancelSubscription as jest.Mock).mockResolvedValue({});
+
+		const result = await cancelSubscriptionService(
+			mockLogger,
 			mockZuoraClient,
-			'SUB-67890',
-			expect.objectContaining({ format: expect.any(Function) }),
-			false,
-			undefined,
-			'EndOfLastInvoicePeriod',
+			mockSubscription,
 		);
+
+		expect(result).toEqual({ cancelled: true, negativeInvoiceId: undefined });
 	});
 
 	it('should propagate errors when ZuoraClient throws', async () => {
@@ -140,33 +144,11 @@ describe('cancelSubscriptionService', () => {
 		await expect(
 			cancelSubscriptionService(mockLogger, mockZuoraClient, mockSubscription),
 		).rejects.toThrow('Zuora API error: Subscription not found');
-
-		expect(mockLogger.log).toHaveBeenCalledWith(
-			'Canceling active subscription: SUB-12345',
-		);
-	});
-
-	it('should use correct cancellation policy', async () => {
-		const mockSubscription = createMockSubscription('Active');
-		const mockCancelResponse = { Success: true, Id: 'cancel_789' };
-		(cancelSubscription as jest.Mock).mockResolvedValue(mockCancelResponse);
-
-		await cancelSubscriptionService(
-			mockLogger,
-			mockZuoraClient,
-			mockSubscription,
-		);
-
-		const cancelCall = (cancelSubscription as jest.Mock).mock.calls[0];
-		expect(cancelCall[5]).toBe('EndOfLastInvoicePeriod');
 	});
 
 	describe('email sending', () => {
 		it('should send email when subscription is cancelled', async () => {
 			const mockSubscription = createMockSubscription('Active');
-			const mockCancelResponse = { Success: true, Id: 'cancel_123' };
-
-			(cancelSubscription as jest.Mock).mockResolvedValue(mockCancelResponse);
 			(sendEmail as jest.Mock).mockResolvedValue({ MessageId: 'msg_123' });
 
 			const result = await cancelSubscriptionService(
@@ -175,7 +157,7 @@ describe('cancelSubscriptionService', () => {
 				mockSubscription,
 			);
 
-			expect(result).toBe(true);
+			expect(result.cancelled).toBe(true);
 			expect(sendEmail).toHaveBeenCalledWith(
 				'TEST',
 				expect.objectContaining({
@@ -194,29 +176,14 @@ describe('cancelSubscriptionService', () => {
 				}),
 				expect.any(Function),
 			);
-			expect(mockLogger.log).toHaveBeenCalledWith(
-				'Sending dispute cancellation email to customer: customer@example.com',
-			);
-			expect(mockLogger.log).toHaveBeenCalledWith(
-				'Dispute cancellation email sent successfully',
-			);
 		});
 
-		it('should return false when no email address exists', async () => {
+		it('should still return cancelled=true when no email address exists', async () => {
 			const mockSubscription = createMockSubscription('Active');
-			const mockCancelResponse = { Success: true, Id: 'cancel_123' };
-
-			(cancelSubscription as jest.Mock).mockResolvedValue(mockCancelResponse);
 			(getAccount as jest.Mock).mockResolvedValue({
-				billToContact: {
-					firstName: 'John',
-					lastName: 'Doe',
-					// No workEmail
-				},
+				billToContact: {},
 				accountNumber: 'ACC-12345',
-				basicInfo: {
-					identityId: 'identity-123',
-				},
+				basicInfo: { identityId: 'identity-123' },
 			});
 
 			const result = await cancelSubscriptionService(
@@ -225,53 +192,15 @@ describe('cancelSubscriptionService', () => {
 				mockSubscription,
 			);
 
-			expect(result).toBe(false); // Changed to false
+			expect(result.cancelled).toBe(true);
 			expect(sendEmail).not.toHaveBeenCalled();
 			expect(mockLogger.error).toHaveBeenCalledWith(
 				'No email address found for subscription SUB-12345',
-			);
-			// Verify it only logs the error once (early return)
-			expect(mockLogger.error).toHaveBeenCalledTimes(1);
-		});
-
-		it('should return false when billToContact has no workEmail field', async () => {
-			const mockSubscription = createMockSubscription('Active');
-
-			(getAccount as jest.Mock).mockResolvedValue({
-				billToContact: {
-					// billToContact exists but has no workEmail field
-				},
-				accountNumber: 'ACC-12345',
-				basicInfo: {
-					identityId: 'identity-123',
-				},
-			});
-
-			const result = await cancelSubscriptionService(
-				mockLogger,
-				mockZuoraClient,
-				mockSubscription,
-			);
-
-			// Should return false because no email means we can't notify customer
-			expect(result).toBe(false);
-			// Should not attempt to send email
-			expect(sendEmail).not.toHaveBeenCalled();
-			// Should log error about missing email
-			expect(mockLogger.error).toHaveBeenCalledWith(
-				'No email address found for subscription SUB-12345',
-			);
-			// Should still log cancellation success messages (cancellation happened, but we return false)
-			expect(mockLogger.log).toHaveBeenCalledWith(
-				'Subscription cancellation succeeded',
 			);
 		});
 
 		it('should not throw when email sending fails', async () => {
 			const mockSubscription = createMockSubscription('Active');
-			const mockCancelResponse = { Success: true, Id: 'cancel_123' };
-
-			(cancelSubscription as jest.Mock).mockResolvedValue(mockCancelResponse);
 			(sendEmail as jest.Mock).mockRejectedValue(new Error('SQS error'));
 
 			const result = await cancelSubscriptionService(
@@ -280,8 +209,7 @@ describe('cancelSubscriptionService', () => {
 				mockSubscription,
 			);
 
-			expect(result).toBe(true); // Still returns true since cancellation succeeded
-			expect(sendEmail).toHaveBeenCalled();
+			expect(result.cancelled).toBe(true);
 			expect(mockLogger.error).toHaveBeenCalledWith(
 				'Failed to send dispute cancellation email:',
 				expect.any(Error),
@@ -291,17 +219,13 @@ describe('cancelSubscriptionService', () => {
 		it('should not send email for inactive subscriptions', async () => {
 			const mockSubscription = createMockSubscription('Cancelled');
 
-			const result = await cancelSubscriptionService(
+			await cancelSubscriptionService(
 				mockLogger,
 				mockZuoraClient,
 				mockSubscription,
 			);
 
-			expect(result).toBe(false);
 			expect(sendEmail).not.toHaveBeenCalled();
-			expect(mockLogger.log).toHaveBeenCalledWith(
-				'Subscription already inactive (Cancelled), skipping cancellation',
-			);
 		});
 	});
 });

@@ -113,6 +113,26 @@ describe('writeOffInvoiceService', () => {
 		);
 	});
 
+	it('should use custom comment when provided', async () => {
+		const mockResponse = { Success: true, Id: 'writeoff_custom' };
+		(writeOffInvoice as jest.Mock).mockResolvedValue(mockResponse);
+
+		const result = await writeOffInvoiceService(
+			mockLogger,
+			mockZuoraClient,
+			'INV-NEG-001',
+			'du_test456',
+			'Negative invoice write-off due to Stripe dispute cancellation',
+		);
+
+		expect(result).toBe(true);
+		expect(writeOffInvoice).toHaveBeenCalledWith(
+			mockZuoraClient,
+			'INV-NEG-001',
+			'Negative invoice write-off due to Stripe dispute cancellation',
+		);
+	});
+
 	it('should handle invoice IDs with special characters', async () => {
 		const mockResponse = { Success: true, Id: 'writeoff_789' };
 		(writeOffInvoice as jest.Mock).mockResolvedValue(mockResponse);
