@@ -26,6 +26,7 @@ export type HttpResponse<T> =
 	| {
 			success: true;
 			data: T;
+			statusCode: number;
 	  }
 	| {
 			success: false;
@@ -48,9 +49,11 @@ export class RestRequestMaker {
 		logger.wrapFn(
 			this.restRequestWithoutLogging.bind(this),
 			() => 'HTTP ' + this.baseURL,
-			this.restRequestWithoutLogging.toString(),
-			2,
 			maybeCallerInfo,
+			([path, method, , body]) => ({
+				logOnEntryAndExit: `${method} ${path}`,
+				logOnEntryOnly: [body],
+			}),
 		);
 
 	private async restRequestWithoutLogging<REQ, RESP>(
@@ -83,10 +86,14 @@ export class RestRequestMaker {
 					throw new Error("response content-type wasn't JSON: " + contentType);
 				}
 				const data = schema.parse(JSON.parse(responseText));
-				return { success: true, data };
+				return { success: true, data, statusCode: response.status };
 			} else {
 				// schema is a function
-				return { success: true, data: schema(responseText, contentType) };
+				return {
+					success: true,
+					data: schema(responseText, contentType),
+					statusCode: response.status,
+				};
 			}
 		} catch (cause) {
 			return {

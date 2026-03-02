@@ -51,6 +51,11 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
       "Default": "/CODE/support/mparticle-api/sarResultsBucket",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
+    "appConfigidentityMmaSnsDeletionRequestTopicArn": {
+      "Default": "/CODE/support/mparticle-api/identityMmaSnsDeletionRequestTopicArn",
+      "Description": "parameter to look up identityMmaSnsDeletionRequestTopicArn from SSM",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
   },
   "Resources": {
     "BatonInvokeRoleF250FA62": {
@@ -541,6 +546,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
     "Queue4A7E3555": {
       "DeletionPolicy": "Delete",
       "Properties": {
+        "DelaySeconds": 10,
         "QueueName": "mparticle-api-mma-user-deletion-queue-CODE",
         "RedrivePolicy": {
           "deadLetterTargetArn": {
@@ -586,7 +592,9 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
               "Action": "sqs:SendMessage",
               "Condition": {
                 "ArnEquals": {
-                  "aws:SourceArn": "AAAAAAAAAAAA",
+                  "aws:SourceArn": {
+                    "Ref": "appConfigidentityMmaSnsDeletionRequestTopicArn",
+                  },
                 },
               },
               "Effect": "Allow",
@@ -1462,6 +1470,11 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
       "Default": "/PROD/support/mparticle-api/sarResultsBucket",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
+    "appConfigidentityMmaSnsDeletionRequestTopicArn": {
+      "Default": "/PROD/support/mparticle-api/identityMmaSnsDeletionRequestTopicArn",
+      "Description": "parameter to look up identityMmaSnsDeletionRequestTopicArn from SSM",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
   },
   "Resources": {
     "Alarm7103F465": {
@@ -2304,6 +2317,7 @@ DLQ: https://",
     "Queue4A7E3555": {
       "DeletionPolicy": "Delete",
       "Properties": {
+        "DelaySeconds": 10,
         "QueueName": "mparticle-api-mma-user-deletion-queue-PROD",
         "RedrivePolicy": {
           "deadLetterTargetArn": {
@@ -2349,7 +2363,9 @@ DLQ: https://",
               "Action": "sqs:SendMessage",
               "Condition": {
                 "ArnEquals": {
-                  "aws:SourceArn": "AAAAAAAAAAAA",
+                  "aws:SourceArn": {
+                    "Ref": "appConfigidentityMmaSnsDeletionRequestTopicArn",
+                  },
                 },
               },
               "Effect": "Allow",

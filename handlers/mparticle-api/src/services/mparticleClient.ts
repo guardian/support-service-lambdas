@@ -1,4 +1,4 @@
-import { logger } from '@modules/routing/logger';
+import { getCallerInfo } from '@modules/routing/getCallerInfo';
 import type { AppConfig } from './config';
 import type { HttpResponse, Schema } from './make-http-request';
 import { RestRequestMaker } from './make-http-request';
@@ -11,8 +11,15 @@ export interface EventsAPI {
 	readonly clientType: 'eventsApi';
 }
 
+export interface BulkDeletionAPI {
+	readonly clientType: 'bulkDeletion';
+}
+
 export interface MParticleClient<
-	T extends DataSubjectAPI | EventsAPI = DataSubjectAPI | EventsAPI,
+	T extends DataSubjectAPI | EventsAPI | BulkDeletionAPI =
+		| DataSubjectAPI
+		| EventsAPI
+		| BulkDeletionAPI,
 > {
 	readonly clientType: T['clientType'];
 	readonly baseURL: string;
@@ -51,10 +58,25 @@ export const MParticleClient = {
 			'eventsApi',
 		);
 	},
+
+	createBulkDeletionClient(
+		config: AppConfig['workspace'],
+		pod: string,
+	): MParticleClient<BulkDeletionAPI> {
+		return new MParticleClientImpl<BulkDeletionAPI>(
+			`https://s2s.${pod}.mparticle.com`,
+			config.key,
+			config.secret,
+			'bulkDeletion',
+		);
+	},
 };
 
 export class MParticleClientImpl<
-	T extends DataSubjectAPI | EventsAPI = DataSubjectAPI | EventsAPI,
+	T extends DataSubjectAPI | EventsAPI | BulkDeletionAPI =
+		| DataSubjectAPI
+		| EventsAPI
+		| BulkDeletionAPI,
 > implements MParticleClient<T>
 {
 	readonly clientType: T['clientType'];
@@ -67,13 +89,7 @@ export class MParticleClientImpl<
 		clientType: T['clientType'],
 	) {
 		this.clientType = clientType;
-		/**
-		 * Authentication
-		 * The DSR API is secured via basic authentication. Credentials are issued at the level of an mParticle workspace.
-		 * You can obtain credentials for your workspace from the Workspace Settings screen. Note that this authentication
-		 * is for a single workspace and scopes the DSR to this workspace only.
-		 * https://docs.mparticle.com/developers/apis/dsr-api/v3/#authentication
-		 */
+		// TODO:delete comment - Basic auth per workspace
 		const authHeader = `Basic ${Buffer.from(`${key}:${secret}`).toString('base64')}`;
 		this.rest = new RestRequestMaker(
 			baseURL,
@@ -88,7 +104,7 @@ export class MParticleClientImpl<
 		path: string,
 		schema: Schema<RESP>,
 	): Promise<HttpResponse<RESP>> {
-		return await this.rest.makeRESTRequest(logger.getCallerInfo(1))(
+		return await this.rest.makeRESTRequest(getCallerInfo(1))(
 			'GET',
 			path,
 			schema,
@@ -100,7 +116,7 @@ export class MParticleClientImpl<
 		body: REQ,
 		schema: Schema<RESP>,
 	): Promise<HttpResponse<RESP>> {
-		return await this.rest.makeRESTRequest(logger.getCallerInfo(1))(
+		return await this.rest.makeRESTRequest(getCallerInfo(1))(
 			'POST',
 			path,
 			schema,

@@ -1,27 +1,15 @@
 import * as console from 'node:console';
 import { mapOption } from '@modules/nullAndUndefined';
-import { ZodType } from 'zod';
-
-function extractParamNames(fnString: string) {
-	const paramMatch = fnString.match(/\(([^)]*)\)/);
-	const paramNames = paramMatch?.[1]
-		? paramMatch[1]
-				.split(',')
-				.map((param) => param.trim().split(/[=\s]/)[0]?.trim())
-		: [];
-	return paramNames;
-}
-
-/**
- * Returns a slice from the right up to and including the first element matching the predicate.
- */
-export function takeRightUntil<T>(
-	arr: T[],
-	predicate: (item: T) => boolean,
-): T[] {
-	const idx = arr.length - 1 - arr.slice().reverse().findIndex(predicate);
-	return idx >= 0 ? arr.slice(idx) : [];
-}
+import type {
+	BuildHandler,
+	BuildHandlerArguments,
+	BuildHandlerOutput,
+	HandlerExecutionContext,
+	MetadataBearer,
+	MiddlewareStack,
+} from '@smithy/types';
+import { getCallerInfo } from '@modules/routing/getCallerInfo';
+import { prettyPrint } from '@modules/routing/prettyPrint';
 
 export class Logger {
 	constructor(
@@ -42,7 +30,7 @@ export class Logger {
 		} else {
 			this.logFn(
 				this.getMessage(
-					this.getCallerInfo(),
+					getCallerInfo(),
 					`dropContext: context value "${value}" not found`,
 				),
 			);
@@ -53,94 +41,21 @@ export class Logger {
 		this.prefix.push(value);
 	}
 
-	// look at the stack to work out the caller's details
-	// be careful about refactoring things that call this as by design it's not referentially transparent
-	public getCallerInfo(
-		extraFrames: number = 0,
-		stack: string[] | undefined = new Error().stack?.split('\n'),
-	): string {
-		// [0] Error, [1] at getCallerInfo, [2] at caller (internal to logger), then [3] actual code
-		const callerLine = stack?.[3 + extraFrames] ?? '';
-		const match =
-			callerLine.match(
-				/at\s+([^\s]+)\s+\[as\s+[^\]]+\]\s+\(([^:]+):(\d+):\d+\)/,
-			) ??
-			callerLine.match(/at\s+([^\s]+)\s+\(([^:]+):(\d+):\d+\)/) ??
-			callerLine.match(/at\s+([^\s]+)\s+\((.*):(\d+):\d+\)/) ??
-			callerLine.match(/at\s+(.*):(\d+):\d+/);
-		if (match) {
-			const functionName = match[1]?.trim();
-			let filename = match[2]?.trim();
-			const lineNumber = match[3]?.trim();
-
-			// only take the leaf name (for compactness)
-			if (filename?.includes('/')) {
-				const pathParts = filename.split('/');
-				const commonNames = ['index.ts', 'src'];
-				filename = takeRightUntil(
-					pathParts,
-					(part) => !commonNames.includes(part),
-				).join('/');
-			}
-
-			return (
-				filename + ':' + lineNumber + (functionName ? '::' + functionName : '')
-			);
-		}
-		return '';
-	}
-
 	/* eslint-disable @typescript-eslint/no-explicit-any -- this has to match console.log */
 	/* eslint-disable @typescript-eslint/no-unsafe-argument -- this has to match console.log */
 	public log(message: any, ...optionalParams: any[]): void {
-		const callerInfo = this.getCallerInfo();
+		const callerInfo = getCallerInfo();
 		this.logFn(this.getMessage(callerInfo, message, ...optionalParams));
 	}
 
 	public error(message?: any, ...optionalParams: any[]): void {
-		const callerInfo = this.getCallerInfo();
+		const callerInfo = getCallerInfo();
 		this.errorFn(this.getMessage(callerInfo, message, ...optionalParams));
 	}
 
 	getMessage(callerInfo: string, ...messages: any[]): string {
-		const message = messages.map(this.prettyPrint).join('\n');
+		const message = messages.map(prettyPrint).join('\n');
 		return this.addPrefixes(callerInfo, message);
-	}
-
-	prettyPrint = (value: any): string => {
-		if (value === null || value === undefined) {
-			return String(value);
-		}
-		if (value instanceof Error) {
-			return (
-				(value.stack ?? '') +
-				'\n' +
-				this.objectToPrettyString(value) +
-				(value.cause ? '\nCaused by: ' + this.prettyPrint(value.cause) : '')
-			);
-		}
-		if (typeof value === 'object' || Array.isArray(value)) {
-			return this.objectToPrettyString(value);
-		}
-		return String(value);
-	};
-
-	private objectToPrettyString(object: unknown) {
-		try {
-			const jsonString = JSON.stringify(object)
-				.replace(/"([A-Za-z0-9]+)":/g, ' $1: ') // Remove quotes around keys
-				.replace(/}$/, ' }');
-			if (jsonString.length <= 80) {
-				return jsonString;
-			}
-			return JSON.stringify(object, null, 2).replace(
-				/"([A-Za-z0-9]+)":/g,
-				'$1:',
-			);
-		} catch (e) {
-			console.error('caught error when trying to serialise log line', e);
-			return String(object);
-		}
 	}
 
 	/* eslint-enable @typescript-eslint/no-explicit-any */
@@ -153,33 +68,43 @@ export class Logger {
 	/**
 	 * This function wraps an existing function and logs entry and exit together with the values passed in and returned
 	 *
+	 * Some functions have a lot passed in/returned that is not useful in the logs - you can
+	 * pass in two functions to filter these down more reasonably.
+	 *
 	 * @param fn the function to wrap
 	 * @param functionName an optional free text string to identify the function called
-	 * @param fnAsString if you have to call .bind(this) on your function, pass in function.toString() here to retain parameter names
-	 * @param shortArgsNum when the function returns, one argument will be logged again for identification purposes, this overrides that
-	 * @param maybeCallerInfo
+	 * @param callerInfo
+	 * @param argsToLoggable
+	 * @param responseToLoggable
 	 */
 	wrapFn<TArgs extends unknown[], TReturn>(
 		fn: AsyncFunction<TArgs, TReturn>,
 		functionName: string | (() => string) = fn.name,
-		fnString: string = fn.toString(), // fn.toString() needed for args on a bound function
-		shortArgsNum: number = 1,
-		callerInfo: string = this.getCallerInfo(),
+		callerInfo: string = getCallerInfo(),
+		argsToLoggable: (args: TArgs) => {
+			logOnEntryAndExit?: string;
+			logOnEntryOnly?: unknown[];
+		},
+		responseToLoggable: (result: TReturn) => unknown = (result) => result,
 	): AsyncFunction<TArgs, TReturn> {
 		const prefix =
 			'TRACE ' +
 			(typeof functionName === 'function' ? functionName() : functionName) +
 			' ';
-		const paramNames = extractParamNames(fnString);
 
 		return async (...args: TArgs): Promise<TReturn> => {
-			const prettyArgsArray = this.getPrettyArgs(paramNames, args);
+			const { logOnEntryAndExit, logOnEntryOnly } = argsToLoggable(args);
+
+			const prettyArgsArray = [
+				...(logOnEntryAndExit ? [logOnEntryAndExit] : []),
+				...(logOnEntryOnly ?? []),
+			].map(prettyPrint);
 
 			const prettyArgs = ' ARGS\n' + prettyArgsArray.join('\n');
 			const shortPrettyArgs =
-				shortArgsNum === 0
+				logOnEntryAndExit === undefined
 					? ''
-					: ' SHORT_ARGS\n' + prettyArgsArray.slice(0, shortArgsNum).join('\n');
+					: ' SHORT_ARGS\n' + logOnEntryAndExit;
 
 			this.logEntry(callerInfo, prefix, prettyArgs);
 
@@ -187,7 +112,12 @@ export class Logger {
 				// actually call the function
 				const result = await fn(...args);
 
-				this.logExit(result, prefix, shortPrettyArgs, callerInfo);
+				this.logExit(
+					responseToLoggable(result),
+					prefix,
+					shortPrettyArgs,
+					callerInfo,
+				);
 
 				return result;
 			} catch (error) {
@@ -204,38 +134,24 @@ export class Logger {
 		shortPrettyArgs: string,
 		callerInfo: string,
 	) {
-		const prettyError = '\nERROR\n' + this.prettyPrint(error);
+		const prettyError = '\nERROR\n' + prettyPrint(error);
 		const errorMessage = `${prefix}ERROR${shortPrettyArgs}${prettyError}`;
 		this.errorFn(this.addPrefixes(callerInfo, errorMessage));
 	}
 
-	private logExit<TReturn>(
-		result: TReturn,
+	private logExit(
+		result: unknown,
 		prefix: string,
 		shortPrettyArgs: string,
 		callerInfo: string,
 	) {
-		const prettyResult = '\nRESULT\n' + this.prettyPrint(result);
+		const prettyResult = '\nRESULT\n' + prettyPrint(result);
 		const exitMessage = `${prefix}EXIT${shortPrettyArgs}${prettyResult}`;
 		this.logFn(this.addPrefixes(callerInfo, exitMessage));
 	}
 
 	private logEntry(callerInfo: string, prefix: string, prettyArgs: string) {
 		this.logFn(this.addPrefixes(callerInfo, `${prefix}ENTRY${prettyArgs}`));
-	}
-
-	private getPrettyArgs<TArgs extends unknown[]>(
-		paramNames: Array<string | undefined>,
-		args: TArgs,
-	) {
-		return args.map((arg, index) => {
-			const paramName = paramNames[index] ?? `arg${index}`;
-			const value =
-				arg instanceof ZodType
-					? '(ZodType not expanded)'
-					: this.prettyPrint(arg);
-			return `${paramName}: ${value}`;
-		});
 	}
 
 	/**
@@ -272,6 +188,46 @@ export class Logger {
 		};
 	}
 
+	wrapAwsClient<
+		Input extends object,
+		Output extends MetadataBearer,
+		T extends { middlewareStack: MiddlewareStack<Input, Output> },
+	>(client: T, callerInfo: string = getCallerInfo()): T {
+		client.middlewareStack.add(
+			<Input extends object, Output extends MetadataBearer>(
+				next: BuildHandler<Input, Output>,
+				context: HandlerExecutionContext,
+			): BuildHandler<Input, Output> => {
+				const wrapAws = async (
+					args: BuildHandlerArguments<Input>,
+				): Promise<BuildHandlerOutput<Output>> => {
+					const result = await next(args);
+
+					const { output } = result;
+
+					return {
+						output,
+						response: {},
+					};
+				};
+				return this.wrapFn(
+					wrapAws,
+					'AWS ' + context.clientName + ' ' + context.commandName,
+					callerInfo,
+					(args) => ({ logOnEntryOnly: [args[0].input] }),
+					(result) => result.output.$metadata.httpStatusCode,
+				);
+			},
+			{
+				name: 'logRequest',
+				step: 'build',
+				priority: 'high',
+			},
+		);
+
+		return client;
+	}
+
 	/**
 	 * handy for logging a value on the way past without having to extract a value into a const, log, then return.
 	 *
@@ -280,7 +236,7 @@ export class Logger {
 	 * @param map apply before logging if you need to extract a field or spread an iterator
 	 */
 	tap<T>(message: string, value: T, map: (t: T) => unknown = (t) => t) {
-		const callerInfo = this.getCallerInfo();
+		const callerInfo = getCallerInfo();
 		this.logFn(this.getMessage(callerInfo, message, map(value)));
 		return value;
 	}

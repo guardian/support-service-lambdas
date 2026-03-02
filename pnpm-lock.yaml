@@ -616,6 +616,9 @@ importers:
         specifier: 'catalog:'
         version: 3.25.76
     devDependencies:
+      '@smithy/types':
+        specifier: ^4.9.8
+        version: 4.12.0
       '@types/aws-lambda':
         specifier: ^8.10.147
         version: 8.10.158
