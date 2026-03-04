@@ -67,7 +67,7 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 		jest.clearAllMocks();
 	});
 
-	test('preview=true doesnt preview term changes as zuora wont allow it', async () => {
+	test('preview=true sends the order to zuora', async () => {
 		mockZuoraClient.post.mockResolvedValueOnce({
 			previewResult: {
 				invoices: [
@@ -109,7 +109,6 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 				switchInformation.contributionCharge,
 				switchInformation.discount?.productRatePlanId['CODE'],
 				subscriptionInformation,
-				true,
 			);
 
 		const result = await new DoPreviewAction(
@@ -129,12 +128,9 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 			url: '/v1/orders/preview',
 			orderTypes: ['ChangePlan'],
 		});
-		// redundant assertions just for clarity - T&C is used here to shorten the term - however there may be future dated amendments
-		expect(postCall.orderTypes).not.toContain('TermsAndConditions');
-		expect(postCall.orderTypes).not.toContain('RenewSubscription');
 	});
 
-	test('preview=false deletes the amendments and does include the term changes', async () => {
+	test('preview=false deletes the amendments', async () => {
 		// return a pending amendment on first call, then undefined
 		let getCallCount = 0;
 		mockZuoraClient.get.mockImplementation(() => {
@@ -203,7 +199,6 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 				targetInformation.contributionCharge,
 				targetInformation.discount?.productRatePlanId['CODE'],
 				subscriptionInformation,
-				false,
 			);
 
 		const accountInformation = getAccountInformation(account);
@@ -227,7 +222,7 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 		const postCall = getOrderData();
 		expect(postCall).toEqual({
 			url: 'v1/orders?returnIds=true',
-			orderTypes: ['ChangePlan', 'TermsAndConditions', 'RenewSubscription'],
+			orderTypes: ['ChangePlan'],
 		});
 		// might be worth checking that it actually removed the pending amendments - need to mock the getLatestAmendment call
 	});
