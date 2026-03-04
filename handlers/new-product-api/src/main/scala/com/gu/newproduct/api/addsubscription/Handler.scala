@@ -17,10 +17,10 @@ import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora._
 import com.gu.newproduct.api.productcatalog.PlanId.{
-  GuardianWeeklyDomesticMonthly,
-  GuardianWeeklyDomesticQuarterly,
-  GuardianWeeklyROWMonthly,
-  GuardianWeeklyROWQuarterly,
+  GuardianWeeklyPlusDomesticMonthly,
+  GuardianWeeklyPlusDomesticQuarterly,
+  GuardianWeeklyPlusROWMonthly,
+  GuardianWeeklyPlusROWQuarterly,
 }
 import com.gu.newproduct.api.productcatalog._
 import com.gu.paperround.client.{GetAgents, PaperRoundConfig, PaperRoundRestRequestMaker}
@@ -74,8 +74,8 @@ class handleRequest(
       case _: VoucherPlanId => addPaperSub
       case _: HomeDeliveryPlanId => addPaperSub
       case _: DigipackPlanId => addDigipackSub
-      case _: GuardianWeeklyDomestic => addGuardianWeeklyDomesticSub
-      case _: GuardianWeeklyRow => addGuardianWeeklyROWSub
+      case _: GuardianWeeklyPlusDomestic => addGuardianWeeklyDomesticSub
+      case _: GuardianWeeklyPlusRow => addGuardianWeeklyROWSub
       case _: DigitalVoucherPlanId => addPaperSub
       case _: NationalDeliveryPlanId => addPaperSub
       case _: TierThreePlanId => addTierThree

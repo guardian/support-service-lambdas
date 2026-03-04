@@ -185,13 +185,13 @@ object WireModel {
 
       val guardianWeeklyDomestic = WireProduct(
         label = "Guardian Weekly - Domestic",
-        plans = PlanId.enabledGuardianWeeklyDomesticPlans.map(wirePlanForPlanId),
+        plans = PlanId.enabledGuardianWeeklyPlusDomesticPlans.map(wirePlanForPlanId),
         enabledForDeliveryCountries = Some(GuardianWeeklyAddressValidator.domesticCountries.map(_.name)),
       )
 
       val guardianWeeklyROW = WireProduct(
         label = "Guardian Weekly - ROW",
-        plans = PlanId.enabledGuardianWeeklyROWPlans.map(wirePlanForPlanId),
+        plans = PlanId.enabledGuardianWeeklyPlusROWPlans.map(wirePlanForPlanId),
         enabledForDeliveryCountries = Some(CountryGroup.RestOfTheWorld.countries.map(_.name)),
       )
 
