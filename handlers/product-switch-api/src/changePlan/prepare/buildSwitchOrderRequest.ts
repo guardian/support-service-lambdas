@@ -57,25 +57,6 @@ const buildChangePlanOrderAction = (
 	};
 };
 
-function buildNewTermOrderActions(orderDate: dayjs.Dayjs): OrderAction[] {
-	return [
-		{
-			type: 'TermsAndConditions',
-			triggerDates: singleTriggerDate(orderDate),
-			termsAndConditions: {
-				lastTerm: {
-					termType: 'TERMED',
-					endDate: zuoraDateFormat(orderDate),
-				},
-			},
-		},
-		{
-			type: 'RenewSubscription',
-			triggerDates: singleTriggerDate(orderDate),
-		},
-	];
-}
-
 export function shouldStartNewTerm(termStartDate: Date, today: dayjs.Dayjs) {
 	const termStartDate1 = dayjs(termStartDate).startOf('day');
 	const startOfToday = today.startOf('day');
@@ -89,18 +70,10 @@ export class SwitchOrderRequestBuilder {
 		private contributionCharge: TargetContribution | undefined,
 		private discountProductRatePlanId: string | undefined,
 		private subscriptionInformation: SubscriptionInformation,
-		private preview: boolean,
 	) {}
 
 	build(orderDate: dayjs.Dayjs): OrderRequest {
-		const { accountNumber, subscriptionNumber, termStartDate } =
-			this.subscriptionInformation;
-
-		// don't preview term update, because future dated amendments might prevent it
-		const maybeNewTermOrderActions: OrderAction[] =
-			shouldStartNewTerm(termStartDate, orderDate) && !this.preview
-				? buildNewTermOrderActions(orderDate)
-				: [];
+		const { accountNumber, subscriptionNumber } = this.subscriptionInformation;
 
 		const discountOrderAction = this.discountProductRatePlanId
 			? buildAddDiscountOrderAction(this.discountProductRatePlanId, orderDate)
@@ -121,7 +94,6 @@ export class SwitchOrderRequestBuilder {
 							this.subscriptionInformation.ratePlanId,
 						),
 						...discountOrderAction,
-						...maybeNewTermOrderActions,
 					],
 				},
 			],

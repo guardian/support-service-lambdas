@@ -27,7 +27,6 @@ test('salesforce tracking data is serialised to the queue correctly', () => {
 		ratePlanId: '',
 		productRatePlanKey: 'Monthly',
 		subscriptionNumber: 'A-S0123',
-		termStartDate: new Date(),
 	};
 	const expected = {
 		subscriptionName: 'A-S0123',
