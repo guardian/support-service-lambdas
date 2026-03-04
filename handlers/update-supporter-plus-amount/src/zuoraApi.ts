@@ -13,14 +13,12 @@ export const doUpdate = async ({
 	...rest
 }: {
 	zuoraClient: ZuoraClient;
-	shouldExtendTerm: boolean;
 	subscriptionNumber: string;
 	accountNumber: string;
 	applyFromDate: Dayjs;
 	ratePlanId: string;
 	chargeNumber: string;
 	contributionAmount: number;
-	isBrokenSub: boolean;
 }) => {
 	const orderRequest = buildUpdateAmountRequestBody({
 		subscriptionNumber,
@@ -57,6 +55,39 @@ const updateAmount = (
 	},
 });
 
+export const buildUpdateAmountRequestBody = ({
+	applyFromDate,
+	subscriptionNumber,
+	accountNumber,
+	ratePlanId,
+	chargeNumber,
+	contributionAmount,
+}: {
+	applyFromDate: Dayjs;
+	subscriptionNumber: string;
+	accountNumber: string;
+	ratePlanId: string;
+	chargeNumber: string;
+	contributionAmount: number;
+}): OrderRequest => ({
+	orderDate: zuoraDateFormat(applyFromDate),
+	existingAccountNumber: accountNumber,
+	description: 'Update supporter plus contribution amount',
+	subscriptions: [
+		{
+			subscriptionNumber,
+			orderActions: [
+				updateAmount(
+					applyFromDate,
+					ratePlanId,
+					chargeNumber,
+					contributionAmount,
+				),
+			],
+		},
+	],
+});
+
 const changeTermEnd = (applyFromDate: Dayjs): OrderAction => ({
 	type: 'TermsAndConditions',
 	triggerDates: singleTriggerDate(applyFromDate),
@@ -73,41 +104,62 @@ const termRenewal = (applyFromDate: Dayjs): OrderAction => ({
 	triggerDates: singleTriggerDate(applyFromDate),
 });
 
-export const buildUpdateAmountRequestBody = ({
-	applyFromDate,
+export const doEnsureTerm = async ({
+	zuoraClient,
 	subscriptionNumber,
 	accountNumber,
-	ratePlanId,
-	chargeNumber,
-	contributionAmount,
+	...rest
+}: {
+	zuoraClient: ZuoraClient;
+	shouldExtendTerm: boolean;
+	subscriptionNumber: string;
+	accountNumber: string;
+	today: Dayjs;
+	isBrokenSub: boolean;
+}) => {
+	const orderRequest = buildTermRenewalRequestBody({
+		subscriptionNumber,
+		accountNumber,
+		...rest,
+	});
+	if (orderRequest !== undefined) {
+		await zuoraClient.post(
+			'/v1/orders',
+			JSON.stringify(orderRequest),
+			voidSchema,
+		);
+	}
+};
+
+export const buildTermRenewalRequestBody = ({
+	today,
+	subscriptionNumber,
+	accountNumber,
 	shouldExtendTerm,
 	isBrokenSub,
 }: {
-	applyFromDate: Dayjs;
+	today: Dayjs;
 	subscriptionNumber: string;
 	accountNumber: string;
-	ratePlanId: string;
-	chargeNumber: string;
-	contributionAmount: number;
 	shouldExtendTerm: boolean;
 	isBrokenSub: boolean;
-}): OrderRequest => ({
-	orderDate: zuoraDateFormat(applyFromDate),
-	existingAccountNumber: accountNumber,
-	description: 'Update supporter plus contribution amount',
-	subscriptions: [
-		{
-			subscriptionNumber,
-			orderActions: [
-				updateAmount(
-					applyFromDate,
-					ratePlanId,
-					chargeNumber,
-					contributionAmount,
-				),
-				...(isBrokenSub ? [changeTermEnd(applyFromDate)] : []),
-				...(shouldExtendTerm ? [termRenewal(applyFromDate)] : []),
-			],
-		},
-	],
-});
+}): OrderRequest | undefined => {
+	const orderActions = [
+		...(isBrokenSub ? [changeTermEnd(today)] : []),
+		...(shouldExtendTerm ? [termRenewal(today)] : []),
+	];
+	if (orderActions.length == 0) {
+		return undefined;
+	}
+	return {
+		orderDate: zuoraDateFormat(today),
+		existingAccountNumber: accountNumber,
+		description: 'Extend term to allow future dated amount update',
+		subscriptions: [
+			{
+				subscriptionNumber,
+				orderActions,
+			},
+		],
+	};
+};
