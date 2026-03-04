@@ -1,5 +1,5 @@
 stacks:
-  - support
+  - membership
 regions:
   - eu-west-1
 allowedStages:
@@ -25,7 +25,6 @@ deployments:
       templateStagePaths:
         CODE: zuora-auto-cancel-CODE.template.json
         PROD: zuora-auto-cancel-PROD.template.json
-      cloudFormationStackByTags: false
       createStackIfAbsent: true
     dependencies:
       - zuora-auto-cancel-upload
