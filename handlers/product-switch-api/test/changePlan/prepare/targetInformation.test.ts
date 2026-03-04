@@ -1,4 +1,5 @@
 import { DataExtensionNames } from '@modules/email/email';
+import { ValidationError } from '@modules/errors';
 import type { GuardianSubscription } from '@modules/guardian-subscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import { getSinglePlanFlattenedSubscriptionOrThrow } from '@modules/guardian-subscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import { GuardianSubscriptionParser } from '@modules/guardian-subscription/guardianSubscriptionParser';
@@ -119,6 +120,6 @@ describe('getTargetInformation', () => {
 				false,
 				productCatalogHelper,
 			),
-		).toThrow(ReferenceError);
+		).toThrow(ValidationError);
 	});
 });
