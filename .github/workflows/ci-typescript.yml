@@ -67,6 +67,7 @@ jobs:
           - write-off-unpaid-invoices
           - mparticle-api
           - mobile-purchases-to-supporter-product-data
+          # MARKER new-lambda: github-action
     runs-on: ubuntu-latest
     permissions:
       id-token: write

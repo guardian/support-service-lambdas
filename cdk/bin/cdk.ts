@@ -148,6 +148,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	MobilePurchasesToSupporterProductData,
 	StripeDisputes,
 	ZuoraAutoCancel,
+	// MARKER new-lambda: cdk-bin
 ];
 
 // generate all stacks for all stages
