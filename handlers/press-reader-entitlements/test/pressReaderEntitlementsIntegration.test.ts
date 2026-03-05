@@ -38,18 +38,16 @@ describe('Press Reader Entitlements Integration Tests', () => {
 
 	test('getMemberDetails', async () => {
 		const expected = {
-			member: {
-				userID: 'c20da7c7-4f72-44fb-b719-78879bfab70d',
-				products: [
-					{
-						product: {
-							productID: 'the-guardian',
-							enddate: '2099-01-01',
-							startdate: '1821-05-05',
-						},
+			userID: 'c20da7c7-4f72-44fb-b719-78879bfab70d',
+			products: [
+				{
+					product: {
+						productID: 'the-guardian',
+						enddate: '2099-01-01',
+						startdate: '1821-05-05',
 					},
-				],
-			},
+				},
+			],
 		};
 		const memberDetails = await getMemberDetails(
 			'CODE',

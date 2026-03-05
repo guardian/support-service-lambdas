@@ -9,10 +9,8 @@ type Product = {
 };
 
 export type Member = {
-	member: {
-		userID: string;
-		products: Product[];
-	};
+	userID: string;
+	products: Product[];
 };
 
 export function buildXml(member: Member) {
