@@ -1,13 +1,12 @@
 import type {
 	BuildHandler,
 	BuildHandlerArguments,
-	BuildHandlerOutput,
 	HandlerExecutionContext,
 	MetadataBearer,
 	MiddlewareStack,
 } from '@smithy/types';
 import { getCallerInfo } from '@modules/routing/getCallerInfo';
-import { logger } from '@modules/routing/logger';
+import { wrapFn } from '@modules/routing/wrapFn';
 
 export function wrapAwsClient<
 	Input extends object,
@@ -19,25 +18,28 @@ export function wrapAwsClient<
 			next: BuildHandler<Input, Output>,
 			context: HandlerExecutionContext,
 		): BuildHandler<Input, Output> => {
-			const wrapAws = async (
+			const extractAwsOutput = async (
 				args: BuildHandlerArguments<Input>,
-			): Promise<BuildHandlerOutput<Output>> => {
+			): Promise<Output> => {
 				const result = await next(args);
-
-				const { output } = result;
-
-				return {
-					output,
-					response: {},
-				};
+				return result.output;
 			};
-			return logger.wrapFn(
-				wrapAws,
-				'AWS ' + context.clientName + ' ' + context.commandName,
-				callerInfo,
-				(args) => ({ logOnEntryOnly: [args[0].input] }),
-				(result) => result.output.$metadata.httpStatusCode,
-			);
+
+			return async (inputs) => {
+				const output = await wrapFn(
+					extractAwsOutput,
+					'AWS ' + context.clientName + ' ' + context.commandName,
+					callerInfo,
+					(args) => ({
+						logOnEntryOnly: [args[0].input],
+						type: 'outgoingRequest',
+						regressionTestRequestKey: `AWS ${context.clientName} ${context.commandName} ${JSON.stringify(args[0].input)}`,
+					}),
+					(output) => output.$metadata.httpStatusCode,
+				)(inputs);
+
+				return { response: {}, output };
+			};
 		},
 		{
 			name: 'logRequest',

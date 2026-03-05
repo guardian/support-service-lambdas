@@ -2,6 +2,7 @@ import type { GuStack } from '@guardian/cdk/lib/constructs/core';
 import {
 	GuAllowPolicy,
 	GuGetS3ObjectsPolicy,
+	GuPutS3ObjectsPolicy,
 } from '@guardian/cdk/lib/constructs/iam';
 import { Fn } from 'aws-cdk-lib';
 import type { Policy } from 'aws-cdk-lib/aws-iam';
@@ -89,6 +90,15 @@ export class AllowSupporterProductDataQueryPolicy extends GuAllowPolicy {
 					`supporter-product-data-tables-${scope.stage}-SupporterProductDataTable`,
 				),
 			],
+		});
+	}
+}
+
+export class AllowS3RegressionLogsWritePolicy extends GuPutS3ObjectsPolicy {
+	constructor(scope: GuStack) {
+		super(scope, 'S3 Regression Logs Write Policy', {
+			bucketName: 'gu-reader-revenue-logs',
+			paths: [`${scope.stage}/${scope.app}/*`],
 		});
 	}
 }

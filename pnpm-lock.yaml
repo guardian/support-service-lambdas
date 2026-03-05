@@ -609,6 +609,9 @@ importers:
 
   modules/routing:
     dependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.940.0
+        version: 3.995.0
       dayjs:
         specifier: ^1.11.13
         version: 1.11.19
