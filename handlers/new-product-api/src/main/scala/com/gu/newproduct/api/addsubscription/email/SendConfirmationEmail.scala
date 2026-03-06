@@ -55,8 +55,8 @@ object SendConfirmationEmail extends Logging {
       case _: ContributionPlanId => "regular-contribution-thank-you"
       case HomeDeliverySunday => "sunday-paper-delivery" // SV_HD_ObserverWelcomeDay0 for Sunday-only rate plans
       case _: HomeDeliveryPlanId => "paper-delivery"
-      case _: GuardianWeeklyDomestic => "guardian-weekly"
-      case _: GuardianWeeklyRow => "guardian-weekly"
+      case _: GuardianWeeklyPlusDomestic => "guardian-weekly-plus"
+      case _: GuardianWeeklyPlusRow => "guardian-weekly-plus"
       case _: NationalDeliveryPlanId => "paper-national-delivery"
       case _: TierThreePlanId => "tier-three"
     },
