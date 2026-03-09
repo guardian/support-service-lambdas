@@ -39,7 +39,8 @@ export const isRefundExpected = (
 	currentDate: Dayjs,
 ): boolean => {
 	return (
-		chargedThroughDate !== undefined && !currentDate.isSame(chargedThroughDate)
+		chargedThroughDate !== undefined &&
+		!currentDate.isSame(chargedThroughDate, 'day')
 	);
 };
 
