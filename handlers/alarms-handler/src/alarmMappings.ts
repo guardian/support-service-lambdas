@@ -64,6 +64,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'product-move-api',
 		'workflow',
 		'consent-autolapse',
+		'mparticle-api',
 	],
 	SRE: ['alarms-handler', 'gchat-test-app'],
 	PORTFOLIO: [
