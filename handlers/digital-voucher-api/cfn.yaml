@@ -11,10 +11,12 @@ Parameters:
         Default: CODE
     VpcId:
         Description: VPC where the lambda is being created
-        Type: String
+        Type: AWS::SSM::Parameter::Value<String>
+        Default: /account/vpc/membership/id
     VpcSubnets:
         Description: Subnets to use in VPC
-        Type: CommaDelimitedList
+        Type: AWS::SSM::Parameter::Value<List<String>>
+        Default: /account/vpc/membership/subnets/private
 
 Conditions:
   IsProd: !Equals [ !Ref Stage, PROD ]
