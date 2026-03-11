@@ -294,6 +294,8 @@ importers:
         specifier: ^2.7.4
         version: 2.7.4
 
+  handlers/newsletter-acquisition: {}
+
   handlers/observer-data-export:
     dependencies:
       '@types/aws-lambda':

@@ -1,0 +1,15 @@
+stacks:
+  - support
+regions:
+  - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  newsletter-acquisition-cloudformation:
+    type: cloud-formation
+    app: newsletter-acquisition
+    parameters:
+      templateStagePaths:
+        CODE: newsletter-acquisition-CODE.template.json
+        PROD: newsletter-acquisition-PROD.template.json
