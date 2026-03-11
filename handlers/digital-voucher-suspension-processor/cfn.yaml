@@ -12,6 +12,12 @@ Parameters:
       - PROD
       - CODE
     Default: CODE
+  VpcId:
+    Description: VPC where the lambda is being created
+    Type: String
+  VpcSubnets:
+    Description: Subnets to use in VPC
+    Type: CommaDelimitedList
 
 Mappings:
 
@@ -29,6 +35,12 @@ Conditions:
   IsProd: !Equals [!Ref "Stage", "PROD"]
 
 Resources:
+
+  LambdaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub Security group for the digital-voucher-suspension-processor-${Stage} lambda
+      VpcId: !Ref VpcId
 
   SuspensionLambdaRole:
     Type: AWS::IAM::Role
@@ -60,6 +72,15 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/digital-voucher-suspension-processor-${Stage}:log-stream:*
+        - PolicyName: EC2Policy
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:CreateNetworkInterface
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:DeleteNetworkInterface
+                Resource: "*"
         - PolicyName: ReadFromSecretsManagerPolicy
           PolicyDocument:
             Statement:
@@ -97,6 +118,10 @@ Resources:
             !Sub
             - '{{resolve:ssm:/${Stage}/membership/support-service-lambdas-shared-imovo/imovoBaseUrl:${Version}}}'
             - Version: !FindInMap [StageMap, !Ref Stage, ImovoUrlVersion]
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref LambdaSecurityGroup
+        SubnetIds: !Ref VpcSubnets
       Role:
         Fn::GetAtt:
           - SuspensionLambdaRole

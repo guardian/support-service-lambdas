@@ -2,12 +2,24 @@ Parameters:
   Stage:
     Type: String
     Description: Stage
+  VpcId:
+    Description: VPC where the lambda is being created
+    Type: String
+  VpcSubnets:
+    Description: Subnets to use in VPC
+    Type: CommaDelimitedList
 Conditions:
   IsProd:
     Fn::Equals:
       - Ref: Stage
       - PROD
 Resources:
+  LambdaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub Security group for the digital-voucher-cancellation-processor-${Stage} lambda
+      VpcId: !Ref VpcId
+
   DigitalVoucherCancellationProcessorFnRole9BC677A8:
     Type: AWS::IAM::Role
     Properties:
@@ -86,6 +98,12 @@ Resources:
                   - :log-group:/aws/lambda/digital-voucher-cancellation-processor-
                   - Ref: Stage
                   - :*
+          - Action:
+              - ec2:CreateNetworkInterface
+              - ec2:DescribeNetworkInterfaces
+              - ec2:DeleteNetworkInterface
+            Effect: Allow
+            Resource: "*"
         Version: "2012-10-17"
       PolicyName: DigitalVoucherCancellationProcessorFnRoleDefaultPolicy0592FCB9
       Roles:
@@ -128,6 +146,11 @@ Resources:
         - Key: Stack
           Value: membership
       Timeout: 300
+      VpcConfig:
+        SecurityGroupIds:
+          - Ref: LambdaSecurityGroup
+        SubnetIds:
+          Ref: VpcSubnets
       Architectures:
         - arm64
     DependsOn:
