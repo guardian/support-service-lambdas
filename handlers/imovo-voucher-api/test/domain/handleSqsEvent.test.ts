@@ -101,6 +101,29 @@ describe('handleSqsEvent', () => {
 		expect(deps.emailedRecords[0]?.identityId).toBe('id-1');
 	});
 
+	it('processes a message wrapped in an SNS envelope', async () => {
+		const snsWrappedBody = {
+			Type: 'Notification',
+			MessageId: 'sns-msg-1',
+			TopicArn: 'arn:aws:sns:eu-west-1:942464564246:PrintPromoTopic',
+			Message: JSON.stringify({
+				email: 'sns-user@example.com',
+				identityId: 'id-sns',
+				voucherType: 'registration-reward',
+			}),
+			Timestamp: '2026-01-01T00:00:00.000Z',
+		};
+		const event = buildSqsEvent(snsWrappedBody);
+		const deps = buildFakeDeps();
+
+		await handleSqsEvent(event, deps);
+
+		expect(deps.savedRecords).toHaveLength(1);
+		expect(deps.savedRecords[0]?.identityId).toBe('id-sns');
+		expect(deps.savedRecords[0]?.voucherCode).toBe('FAKE-CODE');
+		expect(deps.emailedRecords).toHaveLength(1);
+	});
+
 	it('throws on invalid SQS message body', async () => {
 		const event = buildSqsEvent({ email: 'not-valid' });
 		const deps = buildFakeDeps();

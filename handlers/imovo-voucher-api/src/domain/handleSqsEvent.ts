@@ -1,7 +1,27 @@
 import type { SQSEvent } from 'aws-lambda';
+import { z } from 'zod';
 import type { Dependencies } from './ports';
 import { processVoucherRequest } from './processVoucherRequest';
 import { sqsMessageSchema } from './schemas';
+
+const snsEnvelopeSchema = z.object({
+	Type: z.literal('Notification'),
+	Message: z.string(),
+});
+
+/**
+ * When a message arrives via SNS → SQS, the SQS body is an SNS envelope
+ * containing a `Message` field with the actual payload as a JSON string.
+ * For direct SQS messages, the body is the payload itself.
+ */
+function extractMessageBody(sqsBody: string): unknown {
+	const body: unknown = JSON.parse(sqsBody);
+	const envelope = snsEnvelopeSchema.safeParse(body);
+	if (envelope.success) {
+		return JSON.parse(envelope.data.Message);
+	}
+	return body;
+}
 
 export async function handleSqsEvent(
 	event: SQSEvent,
@@ -12,7 +32,7 @@ export async function handleSqsEvent(
 	for (const record of event.Records) {
 		console.log(`Processing SQS record: ${record.messageId}`);
 
-		const parsed = sqsMessageSchema.safeParse(JSON.parse(record.body));
+		const parsed = sqsMessageSchema.safeParse(extractMessageBody(record.body));
 
 		if (!parsed.success) {
 			console.error(

@@ -7,6 +7,7 @@ import {
 	TableEncryption,
 } from 'aws-cdk-lib/aws-dynamodb';
 import { SecurityGroup, Vpc } from 'aws-cdk-lib/aws-ec2';
+import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { AllowGetSecretValuePolicy, AllowSqsSendPolicy } from './cdk/policies';
 import { SrSqsLambda } from './cdk/SrSqsLambda';
 import type { SrStageNames } from './cdk/SrStack';
@@ -16,6 +17,8 @@ const imovoApiBaseUrl: Record<SrStageNames, string> = {
 	CODE: 'https://imovocoreapi.tstpaypoint.services',
 	PROD: 'https://imovocoreapi.paypoint.services',
 };
+
+const identityAccountId = '942464564246';
 
 export class ImovoVoucherApi extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
@@ -79,11 +82,25 @@ export class ImovoVoucherApi extends SrStack {
 
 		voucherTable.grantWriteData(lambda);
 
+		lambda.inputQueue.addToResourcePolicy(
+			new PolicyStatement({
+				effect: Effect.ALLOW,
+				principals: [new ServicePrincipal('sns.amazonaws.com')],
+				actions: ['sqs:SendMessage'],
+				resources: [lambda.inputQueue.queueArn],
+				conditions: {
+					ArnEquals: {
+						'aws:SourceArn': `arn:aws:sns:${this.region}:${identityAccountId}:identity-identity-gateway-${stage}-PrintPromoTopic`,
+					},
+				},
+			}),
+		);
+
 		lambda.addPolicies(
 			new AllowGetSecretValuePolicy(
 				this,
 				'Allow Secrets Manager i-movo API key',
-				'imovo-voucher-api/api-key',
+				'imovo-voucher-api/api-key-*',
 			),
 			AllowSqsSendPolicy.createWithId(
 				this,
