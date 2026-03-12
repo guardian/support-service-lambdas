@@ -5,6 +5,10 @@ export const BillingPeriodValues = [
 	'Quarter',
 	'Annual',
 	'OneTime',
+	'Specific_Weeks',
+	'Semi_Annual',
+	'Week',
+	'Specific_Months',
 ] as const;
 export type BillingPeriod = (typeof BillingPeriodValues)[number];
 export const isBillingPeriod = (
