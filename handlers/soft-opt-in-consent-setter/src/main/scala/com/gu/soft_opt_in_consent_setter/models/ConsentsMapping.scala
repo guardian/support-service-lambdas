@@ -89,6 +89,7 @@ object ConsentsMapping {
     "Guardian Weekly" -> Set(
       yourSupportOnboarding,
       guardianWeeklyNewsletter,
+      supporterNewsletter,
     ),
     "Digital Pack" -> Set(
       yourSupportOnboarding,
