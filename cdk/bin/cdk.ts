@@ -20,6 +20,7 @@ import { MParticleApi } from '../lib/mparticle-api';
 import { NegativeInvoicesProcessor } from '../lib/negative-invoices-processor';
 import type { NewProductApiProps } from '../lib/new-product-api';
 import { NewProductApi } from '../lib/new-product-api';
+import { NewSubscriptionApi } from '../lib/new-subscription-api';
 import { NewsletterAcquisition } from '../lib/newsletter-acquisition';
 import { ObserverDataExport } from '../lib/observer-data-export';
 import { PressReaderEntitlements } from '../lib/press-reader-entitlements';
@@ -149,6 +150,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	MobilePurchasesToSupporterProductData,
 	StripeDisputes,
 	ZuoraAutoCancel,
+	NewSubscriptionApi,
 	// MARKER new-lambda: cdk-bin
 ];
 
