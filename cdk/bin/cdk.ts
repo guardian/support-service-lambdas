@@ -288,11 +288,11 @@ new NewsletterAcquisition(app, 'newsletter-acquisition-CODE', {
 	stack: 'support',
 	stage: 'CODE',
 	identitySnsTopicArn:
-		'arn:aws:sns:eu-west-1:942464564246:newsletter-acquisition-CODE',
+		'arn:aws:sns:eu-west-1:942464564246:identity-identity-gateway-CODE-PrintPromoTopic',
 });
 new NewsletterAcquisition(app, 'newsletter-acquisition-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 	identitySnsTopicArn:
-		'arn:aws:sns:eu-west-1:942464564246:newsletter-acquisition-PROD',
+		'arn:aws:sns:eu-west-1:942464564246:identity-identity-gateway-PROD-PrintPromoTopic',
 });
