@@ -140,14 +140,20 @@ function buildPaymentMethodPayload(
 	if (bankTransfer) {
 		return {
 			type: bankTransfer.type,
-			bankTransferType: bankTransfer.bankTransferType,
-			IBAN: bankTransfer.IBAN,
 			accountNumber: bankTransfer.accountNumber,
 			bankCode: bankTransfer.bankCode,
-			branchCode: bankTransfer.branchCode,
-			identityNumber: bankTransfer.identityNumber,
 			accountHolderInfo: bankTransfer.accountHolderInfo,
-			mandateInfo: bankTransfer.mandateInfo,
+			mandateInfo: {
+				mitProfileAction: bankTransfer.mandateInfo.mitProfileAction,
+				mitProfileType: bankTransfer.mandateInfo.mitProfileType,
+				mitConsentAgreementSrc: bankTransfer.mandateInfo.mitConsentAgreementSrc,
+				mitConsentAgreementRef: bankTransfer.mandateInfo.mitConsentAgreementRef,
+				mitTransactionId: bankTransfer.mandateInfo.mitTransactionId,
+				mitProfileAgreedOn: bankTransfer.mandateInfo.mitProfileAgreedOn,
+				mandateStatus: bankTransfer.mandateInfo.mandateStatus,
+				mandateReason: bankTransfer.mandateInfo.mandateReason,
+				mandateId: bankTransfer.mandateInfo.mandateId,
+			},
 		};
 	}
 

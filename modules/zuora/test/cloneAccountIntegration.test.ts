@@ -13,7 +13,9 @@ import type {
 import { cloneAccountSchema } from '@modules/zuora/types';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 
-// System-generated basicInfo fields that will differ between source and clone
+// System-generated or platform-normalised basicInfo fields that will differ between source and clone.
+// - status: cloned account is always 'Active' regardless of source status
+// - Scrubbed__c: Zuora normalises null boolean custom fields to false on account creation
 const BASIC_INFO_EXCLUDE = new Set([
 	'id',
 	'accountNumber',
@@ -24,6 +26,8 @@ const BASIC_INFO_EXCLUDE = new Set([
 	'parentId',
 	'profileId',
 	'profileNumber',
+	'status',
+	'Scrubbed__c',
 ]);
 
 // System-generated contact fields that will differ between source and clone
@@ -92,6 +96,8 @@ function comparablePaymentMethod(
 				creditCardType: pm['creditCardType'],
 			};
 		case 'PayPal':
+		case 'PayPalEC':
+		case 'PayPalNativeEC':
 			return { type: pm['type'], BAID: pm['BAID'], email: pm['email'] };
 		case 'BankTransfer':
 			return {
@@ -114,7 +120,6 @@ async function fetchCloneAccountData(
 }
 
 describe('cloneAccount integration', () => {
-	const sourceAccountId = '8ad08863990ec4e2019918cb4e3569d4';
 	let clonedAccountNumber: string | undefined;
 
 	afterEach(async () => {
@@ -125,62 +130,76 @@ describe('cloneAccount integration', () => {
 		}
 	});
 
-	test('clones a Zuora account, creating a new account with identical data', async () => {
-		const zuoraClient = await ZuoraClient.create('CODE');
+	// Note: CreditCard (raw, non-tokenised) accounts cannot be tested here because Zuora only
+	// returns masked card numbers (e.g. '************4242') and these cannot be used to create
+	// a new payment method. Only tokenised payment methods (CCRT, PayPal) can be cloned.
+	// BankTransfer accounts also cannot be tested because Zuora returns masked account/sort-code
+	// values which are rejected by the create account API.
+	test.each([
+		['2c92c0f87568d97201756b1578960694', 'CreditCardReferenceTransaction'],
+		['2c92c0f875d488d70175d6a29ead032c', 'PayPal'],
+	])(
+		'clones account %s with %s payment method',
+		async (sourceAccountId) => {
+			const zuoraClient = await ZuoraClient.create('CODE');
 
-		const sourceAccount = await fetchCloneAccountData(
-			zuoraClient,
-			sourceAccountId,
-		);
-		const sourcePaymentMethods = await getPaymentMethods(
-			zuoraClient,
-			sourceAccount.basicInfo.id,
-		);
-
-		clonedAccountNumber = await cloneAccount(zuoraClient, sourceAccountId);
-
-		expect(clonedAccountNumber).toBeDefined();
-		expect(clonedAccountNumber).not.toBe(sourceAccount.basicInfo.accountNumber);
-
-		const clonedAccount = await fetchCloneAccountData(
-			zuoraClient,
-			clonedAccountNumber,
-		);
-		const clonedPaymentMethods = await getPaymentMethods(
-			zuoraClient,
-			clonedAccount.basicInfo.id,
-		);
-
-		// basicInfo: all non-system fields should match (name, notes, crmId, batch, salesRep, custom fields)
-		expect(comparableBasicInfo(clonedAccount.basicInfo)).toEqual(
-			comparableBasicInfo(sourceAccount.basicInfo),
-		);
-
-		// billingAndPayment: all fields except defaultPaymentMethodId (new PM is created)
-		const { defaultPaymentMethodId: _srcPmId, ...sourceBilling } =
-			sourceAccount.billingAndPayment;
-		const { defaultPaymentMethodId: _clonePmId, ...clonedBilling } =
-			clonedAccount.billingAndPayment;
-		expect(clonedBilling).toEqual(sourceBilling);
-
-		// billToContact: all non-system fields should match
-		expect(comparableContact(clonedAccount.billToContact)).toEqual(
-			comparableContact(sourceAccount.billToContact),
-		);
-
-		// soldToContact: all non-system fields should match when present
-		if (sourceAccount.soldToContact) {
-			expect(clonedAccount.soldToContact).toBeDefined();
-			expect(comparableContact(clonedAccount.soldToContact!)).toEqual(
-				comparableContact(sourceAccount.soldToContact),
+			const sourceAccount = await fetchCloneAccountData(
+				zuoraClient,
+				sourceAccountId,
 			);
-		}
+			const sourcePaymentMethods = await getPaymentMethods(
+				zuoraClient,
+				sourceAccount.basicInfo.id,
+			);
 
-		// Default payment method: key identifying fields should match
-		const sourceDefaultPm = findDefaultPaymentMethod(sourcePaymentMethods);
-		const clonedDefaultPm = findDefaultPaymentMethod(clonedPaymentMethods);
-		expect(comparablePaymentMethod(clonedDefaultPm)).toEqual(
-			comparablePaymentMethod(sourceDefaultPm),
-		);
-	});
+			clonedAccountNumber = await cloneAccount(zuoraClient, sourceAccountId);
+
+			expect(clonedAccountNumber).toBeDefined();
+			expect(clonedAccountNumber).not.toBe(
+				sourceAccount.basicInfo.accountNumber,
+			);
+
+			const clonedAccount = await fetchCloneAccountData(
+				zuoraClient,
+				clonedAccountNumber,
+			);
+			const clonedPaymentMethods = await getPaymentMethods(
+				zuoraClient,
+				clonedAccount.basicInfo.id,
+			);
+
+			// basicInfo: all non-system fields should match (name, notes, crmId, batch, salesRep, custom fields)
+			expect(comparableBasicInfo(clonedAccount.basicInfo)).toEqual(
+				comparableBasicInfo(sourceAccount.basicInfo),
+			);
+
+			// billingAndPayment: all fields except defaultPaymentMethodId (new PM is created)
+			const { defaultPaymentMethodId: _srcPmId, ...sourceBilling } =
+				sourceAccount.billingAndPayment;
+			const { defaultPaymentMethodId: _clonePmId, ...clonedBilling } =
+				clonedAccount.billingAndPayment;
+			expect(clonedBilling).toEqual(sourceBilling);
+
+			// billToContact: all non-system fields should match
+			expect(comparableContact(clonedAccount.billToContact)).toEqual(
+				comparableContact(sourceAccount.billToContact),
+			);
+
+			// soldToContact: all non-system fields should match when present
+			if (sourceAccount.soldToContact) {
+				expect(clonedAccount.soldToContact).toBeDefined();
+				expect(comparableContact(clonedAccount.soldToContact!)).toEqual(
+					comparableContact(sourceAccount.soldToContact),
+				);
+			}
+
+			// Default payment method: key identifying fields should match
+			const sourceDefaultPm = findDefaultPaymentMethod(sourcePaymentMethods);
+			const clonedDefaultPm = findDefaultPaymentMethod(clonedPaymentMethods);
+			expect(comparablePaymentMethod(clonedDefaultPm)).toEqual(
+				comparablePaymentMethod(sourceDefaultPm),
+			);
+		},
+		120000,
+	);
 });

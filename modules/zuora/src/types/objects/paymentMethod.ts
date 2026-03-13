@@ -19,7 +19,7 @@ export const BasePaymentMethodSchema = z.object({
 	lastTransactionStatus: z.string().nullable(),
 	maxConsecutivePaymentFailures: z.number().nullable(),
 	numConsecutiveFailures: z.number(),
-	paymentRetryWindow: z.string().nullable(),
+	paymentRetryWindow: z.union([z.string(), z.number()]).nullable(),
 	totalNumberOfProcessedPayments: z.number(),
 	totalNumberOfErrorPayments: z.number(),
 	createdDate: z.string(),
@@ -116,7 +116,7 @@ export type BankTransferPaymentMethod = z.infer<
 // Main payment method response schema
 export const DefaultPaymentMethodResponseSchema = z.object({
 	defaultPaymentMethodId: z.string(),
-	paymentGateway: z.string(),
+	paymentGateway: z.string().nullable(),
 	creditcard: z.array(CreditCardPaymentMethodSchema).optional(),
 	creditcardreferencetransaction: z
 		.array(CreditCardReferenceTransactionSchema)
