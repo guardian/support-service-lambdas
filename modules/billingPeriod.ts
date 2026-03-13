@@ -13,6 +13,7 @@ export const BillingPeriodValues = [
 	'Subscription_Term',
 	'Week',
 	'Specific_Weeks',
+	'OneTime',
 ] as const;
 export type BillingPeriod = (typeof BillingPeriodValues)[number];
 export const isBillingPeriod = (
