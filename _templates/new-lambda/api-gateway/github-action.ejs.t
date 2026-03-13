@@ -3,7 +3,7 @@
 
 inject: true
 to: .github/workflows/ci-typescript.yml
-after: subproject
+before: "# MARKER new-lambda: github-action"
 skip_if: <%= lambdaName %>
 ---
           - <%= lambdaName %>

@@ -7,5 +7,5 @@ object ConsentsCalculatorTestData {
     Set("your_support_onboarding", "similar_guardian_products", "supporter_newsletter")
   val newspaperMapping =
     Set("your_support_onboarding", "similar_guardian_products", "subscriber_preview", "supporter_newsletter")
-  val guWeeklyMapping = Set("your_support_onboarding", "guardian_weekly_newsletter")
+  val guWeeklyMapping = Set("your_support_onboarding", "guardian_weekly_newsletter", "supporter_newsletter")
 }

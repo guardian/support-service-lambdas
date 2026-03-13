@@ -146,7 +146,7 @@ export const buildTermRenewalRequestBody = ({
 }): OrderRequest | undefined => {
 	const orderActions = [
 		...(isBrokenSub ? [changeTermEnd(today)] : []),
-		...(shouldExtendTerm ? [termRenewal(today)] : []),
+		...(isBrokenSub || shouldExtendTerm ? [termRenewal(today)] : []),
 	];
 	if (orderActions.length == 0) {
 		return undefined;

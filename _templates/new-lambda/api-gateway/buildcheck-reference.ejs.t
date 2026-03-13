@@ -1,7 +1,7 @@
 ---
 inject: true
 to: buildcheck/data/build.ts
-after: "export const build: HandlerDefinition\\[\\] = \\["
+before: "// MARKER new-lambda: buildcheck-reference"
 skip_if: "\\s+<%= h.changeCase.camel(lambdaName) %>,"
 ---
 	<%= h.changeCase.camel(lambdaName) %>,

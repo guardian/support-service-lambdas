@@ -356,6 +356,8 @@ const zuoraSalesforceLinkRemover: HandlerDefinition = {
 	},
 };
 
+// MARKER new-lambda: buildcheck-const
+
 const srcOnly = {
 	lint: "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts'",
 	test: 'jest --group=-integration --passWithNoTests',
@@ -599,6 +601,7 @@ export const build: BuildDefinition = {
 		userBenefits,
 		writeOffUnpaidInvoices,
 		zuoraSalesforceLinkRemover,
+		// MARKER new-lambda: buildcheck-reference
 	],
 
 	modules: [

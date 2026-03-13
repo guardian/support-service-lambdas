@@ -183,8 +183,59 @@ exports[`The Imovo voucher API stack matches the snapshot 1`] = `
           },
         ],
         "Timeout": 30,
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {
+              "Fn::GetAtt": [
+                "LambdaSecurityGroup0BD9FC99",
+                "GroupId",
+              ],
+            },
+          ],
+          "SubnetIds": [
+            "subnet-cb91ae8d",
+            "subnet-a7b74ac2",
+            "subnet-179e8063",
+          ],
+        },
       },
       "Type": "AWS::Lambda::Function",
+    },
+    "LambdaSecurityGroup0BD9FC99": {
+      "Properties": {
+        "GroupDescription": "Security group for imovo-voucher-api-CODE lambda",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1",
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "imovo-voucher-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "VpcId": "vpc-e6e00183",
+      },
+      "Type": "AWS::EC2::SecurityGroup",
     },
     "LambdaServiceRoleA8ED4D3B": {
       "Properties": {
@@ -210,6 +261,18 @@ exports[`The Imovo voucher API stack matches the snapshot 1`] = `
                   "Ref": "AWS::Partition",
                 },
                 ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole",
               ],
             ],
           },
@@ -820,8 +883,59 @@ DLQ: https://",
           },
         ],
         "Timeout": 30,
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {
+              "Fn::GetAtt": [
+                "LambdaSecurityGroup0BD9FC99",
+                "GroupId",
+              ],
+            },
+          ],
+          "SubnetIds": [
+            "subnet-cb91ae8d",
+            "subnet-a7b74ac2",
+            "subnet-179e8063",
+          ],
+        },
       },
       "Type": "AWS::Lambda::Function",
+    },
+    "LambdaSecurityGroup0BD9FC99": {
+      "Properties": {
+        "GroupDescription": "Security group for imovo-voucher-api-PROD lambda",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1",
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "imovo-voucher-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "VpcId": "vpc-e6e00183",
+      },
+      "Type": "AWS::EC2::SecurityGroup",
     },
     "LambdaServiceRoleA8ED4D3B": {
       "Properties": {
@@ -847,6 +961,18 @@ DLQ: https://",
                   "Ref": "AWS::Partition",
                 },
                 ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole",
               ],
             ],
           },
