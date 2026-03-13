@@ -277,18 +277,19 @@ describe('cloneAccount', () => {
 		const postBody = parsePostBody();
 		expect(postBody.paymentMethod).toEqual({
 			type: 'BankTransfer',
-			bankTransferType: 'Bacs',
-			IBAN: 'GB29 NWBK 6016 1331 9268 19',
 			accountNumber: '31926819',
 			bankCode: '601613',
-			branchCode: null,
-			identityNumber: null,
 			accountHolderInfo: { accountHolderName: 'John Smith', email: null },
 			mandateInfo: {
 				mandateId: 'M-123',
 				mandateStatus: 'Active',
 				mandateReason: null,
-				existingMandateStatus: 'Existing',
+				mitProfileAction: undefined,
+				mitProfileType: undefined,
+				mitConsentAgreementSrc: undefined,
+				mitConsentAgreementRef: undefined,
+				mitTransactionId: undefined,
+				mitProfileAgreedOn: undefined,
 			},
 		});
 	});
