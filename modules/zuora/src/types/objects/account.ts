@@ -107,7 +107,7 @@ export const cloneBillingAndPaymentSchema = z.object({
 	billCycleDay: z.number(),
 	currency: z.string(),
 	paymentTerm: z.string().nullish(),
-	paymentGateway: z.string(),
+	paymentGateway: z.string().nullable(),
 	defaultPaymentMethodId: z.string(),
 	invoiceDeliveryPrefsEmail: z.boolean().nullish(),
 	invoiceDeliveryPrefsPrint: z.boolean().nullish(),
