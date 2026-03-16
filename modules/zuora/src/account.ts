@@ -1,4 +1,8 @@
+import { z } from 'zod';
+import type { GoCardlessClient } from './goCardlessClient';
+import { getCustomerBankAccount, getMandate } from './mandate';
 import { getPaymentMethods } from './paymentMethod';
+import { doQuery } from './query';
 import type { ZuoraAccount } from './types';
 import {
 	type CloneAccountData,
@@ -93,9 +97,34 @@ function extractCustomFieldsFromBasicInfo(
 	);
 }
 
-function buildPaymentMethodPayload(
+const paymentMethodTokenSchema = z.object({
+	records: z
+		.array(
+			z.object({
+				Id: z.string(),
+				TokenId: z.string().nullable().optional(),
+			}),
+		)
+		.optional(),
+});
+
+async function getBankTransferTokenId(
+	zuoraClient: ZuoraClient,
+	paymentMethodId: string,
+): Promise<string | null> {
+	const result = await doQuery(
+		zuoraClient,
+		`SELECT Id, TokenId FROM PaymentMethod WHERE Id = '${paymentMethodId}'`,
+		paymentMethodTokenSchema,
+	);
+	return result.records?.[0]?.TokenId ?? null;
+}
+
+async function buildPaymentMethodPayload(
+	zuoraClient: ZuoraClient,
 	paymentMethods: DefaultPaymentMethodResponse,
-): Record<string, unknown> | undefined {
+	goCardlessClient?: GoCardlessClient,
+): Promise<Record<string, unknown> | undefined> {
 	const { defaultPaymentMethodId } = paymentMethods;
 
 	const creditCard = paymentMethods.creditcard?.find(
@@ -138,22 +167,53 @@ function buildPaymentMethodPayload(
 		(pm) => pm.id === defaultPaymentMethodId,
 	);
 	if (bankTransfer) {
+		if (!goCardlessClient) {
+			throw new Error(
+				'GoCardless client required to clone BankTransfer payment method',
+			);
+		}
+		// The GoCardless mandate ID is stored in Zuora but not exposed via the
+		// payment methods REST API - it must be retrieved via ZOQL query.
+		const goCardlessMandateId = await getBankTransferTokenId(
+			zuoraClient,
+			bankTransfer.id,
+		);
+		if (!goCardlessMandateId) {
+			throw new Error(
+				`No GoCardless mandate ID found for BankTransfer payment method ${bankTransfer.id}`,
+			);
+		}
+		// Retrieve the customer bank account from GoCardless to get the IBAN,
+		// from which we extract the sort code and account number needed to create
+		// the new payment method. Zuora's REST API only returns a masked account
+		// number so GoCardless is the only source of the full bank details.
+		// Note: GoCardless sandbox does not return IBAN; this code path works in
+		// production where GoCardless returns the IBAN for UK Bacs accounts.
+		const existingMandate = await getMandate(
+			goCardlessClient,
+			goCardlessMandateId,
+		);
+		const bankAccount = await getCustomerBankAccount(
+			goCardlessClient,
+			existingMandate.links.customer_bank_account,
+		);
+		if (!bankAccount.iban) {
+			throw new Error(
+				`GoCardless bank account ${existingMandate.links.customer_bank_account} does not have an IBAN. ` +
+					`This may indicate a GoCardless sandbox limitation; in production, UK Bacs accounts always include an IBAN.`,
+			);
+		}
+		// UK IBAN format: GB(2) + check(2) + bank_code(4) + sort_code(6) + account_number(8) = 22 chars
+		const accountNumber = bankAccount.iban.replace(/\s/g, '').slice(14, 22);
+		// When Zuora creates a BankTransfer PM with type "Bacs" via the GoCardless
+		// payment gateway, it calls GoCardless internally to create a new mandate
+		// for the bank account. This produces a fresh direct debit authorisation
+		// in the customer's name for the new subscription.
 		return {
-			type: bankTransfer.type,
-			accountNumber: bankTransfer.accountNumber,
+			type: 'Bacs',
 			bankCode: bankTransfer.bankCode,
+			accountNumber,
 			accountHolderInfo: bankTransfer.accountHolderInfo,
-			mandateInfo: {
-				mitProfileAction: bankTransfer.mandateInfo.mitProfileAction,
-				mitProfileType: bankTransfer.mandateInfo.mitProfileType,
-				mitConsentAgreementSrc: bankTransfer.mandateInfo.mitConsentAgreementSrc,
-				mitConsentAgreementRef: bankTransfer.mandateInfo.mitConsentAgreementRef,
-				mitTransactionId: bankTransfer.mandateInfo.mitTransactionId,
-				mitProfileAgreedOn: bankTransfer.mandateInfo.mitProfileAgreedOn,
-				mandateStatus: bankTransfer.mandateInfo.mandateStatus,
-				mandateReason: bankTransfer.mandateInfo.mandateReason,
-				mandateId: bankTransfer.mandateInfo.mandateId,
-			},
 		};
 	}
 
@@ -163,6 +223,7 @@ function buildPaymentMethodPayload(
 export const cloneAccount = async (
 	zuoraClient: ZuoraClient,
 	accountNumber: string,
+	goCardlessClient?: GoCardlessClient,
 ): Promise<string> => {
 	const accountData = await fetchAccountForClone(zuoraClient, accountNumber);
 
@@ -171,7 +232,11 @@ export const cloneAccount = async (
 		accountData.basicInfo.id,
 	);
 
-	const paymentMethodPayload = buildPaymentMethodPayload(paymentMethods);
+	const paymentMethodPayload = await buildPaymentMethodPayload(
+		zuoraClient,
+		paymentMethods,
+		goCardlessClient,
+	);
 
 	if (!paymentMethodPayload) {
 		throw new Error(
