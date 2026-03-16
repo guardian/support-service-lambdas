@@ -132,9 +132,8 @@ describe('cloneAccount integration', () => {
 
 	// Note: CreditCard (raw, non-tokenised) accounts cannot be tested here because Zuora only
 	// returns masked card numbers (e.g. '************4242') and these cannot be used to create
-	// a new payment method. Only tokenised payment methods (CCRT, PayPal) can be cloned.
-	// BankTransfer accounts also cannot be tested because Zuora returns masked account/sort-code
-	// values which are rejected by the create account API.
+	// a new payment method. Only tokenised payment methods (CCRT, PayPal, BankTransfer via
+	// GoCardless) can be cloned.
 	test.each([
 		['2c92c0f87568d97201756b1578960694', 'CreditCardReferenceTransaction'],
 		['2c92c0f875d488d70175d6a29ead032c', 'PayPal'],
@@ -201,5 +200,17 @@ describe('cloneAccount integration', () => {
 			);
 		},
 		120000,
+	);
+
+	// BankTransfer cloning requires GoCardless to return the IBAN for the customer bank account
+	// so that the sort code and account number can be extracted and used to create the new Zuora PM.
+	// GoCardless returns the IBAN for UK Bacs accounts in production, but the GoCardless sandbox
+	// does not return IBAN for test bank accounts, making end-to-end integration testing impossible
+	// in CODE. The production code path is verified by unit tests in account.test.ts.
+	//
+	// To enable this integration test, a CODE test account would be needed whose associated
+	// GoCardless customer bank account returns an IBAN (e.g. via a production-like GoCardless setup).
+	test.todo(
+		'clones BankTransfer account via GoCardless bank details from IBAN [requires GoCardless IBAN in CODE]',
 	);
 });
