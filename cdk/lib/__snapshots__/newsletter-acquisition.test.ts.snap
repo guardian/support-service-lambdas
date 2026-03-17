@@ -78,7 +78,7 @@ exports[`The NewsletterAcquisition stack matches the snapshot 1`] = `
               "Action": "sqs:SendMessage",
               "Condition": {
                 "ArnEquals": {
-                  "aws:SourceArn": "arn:aws:sns:eu-west-1:942464564246:identity-identity-gateway-CODE-PrintPromoTopic",
+                  "aws:SourceArn": "arn:aws:sns:eu-west-1:942464564246:identity-identity-api-public-CODE-NewsletterAcquisitionTopic",
                 },
               },
               "Effect": "Allow",
@@ -117,7 +117,7 @@ exports[`The NewsletterAcquisition stack matches the snapshot 1`] = `
         "Protocol": "sqs",
         "RawMessageDelivery": true,
         "Region": "eu-west-1",
-        "TopicArn": "arn:aws:sns:eu-west-1:942464564246:identity-identity-gateway-CODE-PrintPromoTopic",
+        "TopicArn": "arn:aws:sns:eu-west-1:942464564246:identity-identity-api-public-CODE-NewsletterAcquisitionTopic",
       },
       "Type": "AWS::SNS::Subscription",
     },
@@ -203,7 +203,7 @@ exports[`The NewsletterAcquisition stack matches the snapshot 2`] = `
               "Action": "sqs:SendMessage",
               "Condition": {
                 "ArnEquals": {
-                  "aws:SourceArn": "arn:aws:sns:eu-west-1:942464564246:identity-identity-gateway-PROD-PrintPromoTopic",
+                  "aws:SourceArn": "arn:aws:sns:eu-west-1:942464564246:identity-identity-api-public-PROD-NewsletterAcquisitionTopic",
                 },
               },
               "Effect": "Allow",
@@ -242,7 +242,7 @@ exports[`The NewsletterAcquisition stack matches the snapshot 2`] = `
         "Protocol": "sqs",
         "RawMessageDelivery": true,
         "Region": "eu-west-1",
-        "TopicArn": "arn:aws:sns:eu-west-1:942464564246:identity-identity-gateway-PROD-PrintPromoTopic",
+        "TopicArn": "arn:aws:sns:eu-west-1:942464564246:identity-identity-api-public-PROD-NewsletterAcquisitionTopic",
       },
       "Type": "AWS::SNS::Subscription",
     },

@@ -12,7 +12,7 @@ describe('The NewsletterAcquisition stack', () => {
 				stack: 'support',
 				stage: 'CODE',
 				identitySnsTopicArn:
-					'arn:aws:sns:eu-west-1:942464564246:identity-identity-gateway-CODE-PrintPromoTopic',
+					'arn:aws:sns:eu-west-1:942464564246:identity-identity-api-public-CODE-NewsletterAcquisitionTopic',
 			},
 		);
 		const prodStack = new NewsletterAcquisition(
@@ -22,7 +22,7 @@ describe('The NewsletterAcquisition stack', () => {
 				stack: 'support',
 				stage: 'PROD',
 				identitySnsTopicArn:
-					'arn:aws:sns:eu-west-1:942464564246:identity-identity-gateway-PROD-PrintPromoTopic',
+					'arn:aws:sns:eu-west-1:942464564246:identity-identity-api-public-PROD-NewsletterAcquisitionTopic',
 			},
 		);
 		expect(Template.fromStack(codeStack).toJSON()).toMatchSnapshot();
