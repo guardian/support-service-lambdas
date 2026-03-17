@@ -3,7 +3,7 @@ import { mapOption } from '@modules/nullAndUndefined';
 import { getCallerInfo } from '@modules/routing/getCallerInfo';
 import { prettyPrint } from '@modules/routing/prettyPrint';
 
-type LoggableInput = {
+export type LoggableInput = {
 	logOnEntryAndExit?: string;
 	logOnEntryOnly?: unknown[];
 };
