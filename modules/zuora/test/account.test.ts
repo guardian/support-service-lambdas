@@ -1,5 +1,4 @@
 import { cloneAccount } from '@modules/zuora/account';
-import type { GoCardlessClient } from '@modules/zuora/goCardlessClient';
 import {
 	cloneAccountSchema,
 	createAccountResponseSchema,
@@ -21,15 +20,6 @@ const buildMockZuoraClient = (
 		delete: jest.fn(),
 		fetch: jest.fn(),
 	}) as unknown as jest.Mocked<ZuoraClient>;
-
-const buildMockGoCardlessClient = (
-	mockGcGet: jest.Mock,
-	mockGcPost: jest.Mock,
-): jest.Mocked<GoCardlessClient> =>
-	({
-		get: mockGcGet,
-		post: mockGcPost,
-	}) as unknown as jest.Mocked<GoCardlessClient>;
 
 const baseAccountData = {
 	basicInfo: {
@@ -258,7 +248,7 @@ describe('cloneAccount', () => {
 		});
 	});
 
-	it('clones BankTransfer payment method via GoCardless bank details from IBAN', async () => {
+	it('clones BankTransfer payment method using existing mandate', async () => {
 		const bankTransfer = {
 			id: 'pm-default-id',
 			type: 'BankTransfer',
@@ -280,7 +270,7 @@ describe('cloneAccount', () => {
 			...basePaymentMethodsData,
 			banktransfer: [bankTransfer],
 		});
-		// ZOQL query for TokenId returns the GoCardless mandate ID
+		// ZOQL query for TokenId returns the GoCardless mandate reference
 		mockPost
 			.mockResolvedValueOnce({
 				records: [{ Id: 'pm-default-id', TokenId: 'MD000EXISTING123' }],
@@ -291,90 +281,19 @@ describe('cloneAccount', () => {
 				accountNumber: 'A00001235',
 			});
 
-		// getMandate returns the mandate with customer_bank_account ID
-		// getCustomerBankAccount returns bank account details including IBAN
-		const mockGcGet = jest
-			.fn()
-			.mockResolvedValueOnce({
-				mandates: {
-					id: 'MD000EXISTING123',
-					reference: 'REF-OLD-456',
-					scheme: 'bacs',
-					links: { customer_bank_account: 'BA000BANKACCT789' },
-				},
-			})
-			.mockResolvedValueOnce({
-				customer_bank_accounts: {
-					id: 'BA000BANKACCT789',
-					account_holder_name: 'John Smith',
-					account_number_ending: '11',
-					country_code: 'GB',
-					currency: 'GBP',
-					// UK IBAN: sort_code (6 chars at pos 8) = 200000, account_number (8 chars at pos 14) = 55779911
-					iban: 'GB60BARC20000055779911',
-				},
-			});
-		const mockGcPost = jest.fn();
-		const mockGoCardlessClient = buildMockGoCardlessClient(
-			mockGcGet,
-			mockGcPost,
-		);
+		await cloneAccount(mockZuoraClient, 'A00001234');
 
-		await cloneAccount(mockZuoraClient, 'A00001234', mockGoCardlessClient);
-
-		// Verify GoCardless was called to get the existing mandate
-		expect(mockGcGet).toHaveBeenNthCalledWith(
-			1,
-			'/mandates/MD000EXISTING123',
-			expect.anything(),
-		);
-		// Verify GoCardless was called to get the customer bank account
-		expect(mockGcGet).toHaveBeenNthCalledWith(
-			2,
-			'/customer_bank_accounts/BA000BANKACCT789',
-			expect.anything(),
-		);
-		// Verify no new mandate was pre-created in GoCardless (Zuora handles this internally)
-		expect(mockGcPost).not.toHaveBeenCalled();
-
-		// Verify the Zuora account is created with Bacs bank details
+		// GoCardless is not called — Zuora links to the existing mandate directly
 		const postBody = parsePostBody(1); // First POST is the ZOQL query; second is create account
 		expect(postBody.paymentMethod).toEqual({
 			type: 'Bacs',
-			bankCode: '200000',
-			accountNumber: '55779911',
-			accountHolderInfo: { accountHolderName: 'John Smith', email: null },
-		});
-	});
-
-	it('throws if GoCardless client is not provided for BankTransfer', async () => {
-		const bankTransfer = {
-			id: 'pm-default-id',
-			type: 'BankTransfer',
-			isDefault: true,
 			bankTransferType: 'DirectDebitUK',
-			IBAN: '****9911',
-			accountNumber: '****9911',
+			tokenId: 'MD000EXISTING123',
+			existingMandate: 'Yes',
 			bankCode: '200000',
-			branchCode: null,
-			identityNumber: null,
+			accountNumber: '****9911',
 			accountHolderInfo: { accountHolderName: 'John Smith', email: null },
-			mandateInfo: {
-				mandateId: null,
-				mandateStatus: null,
-				mandateReason: null,
-			},
-		};
-		mockGet.mockResolvedValueOnce(baseAccountData).mockResolvedValueOnce({
-			...basePaymentMethodsData,
-			banktransfer: [bankTransfer],
 		});
-
-		await expect(
-			cloneAccount(mockZuoraClient, 'A00001234'),
-		).rejects.toThrow(
-			'GoCardless client required to clone BankTransfer payment method',
-		);
 	});
 
 	it('copies billToContact and soldToContact fields', async () => {

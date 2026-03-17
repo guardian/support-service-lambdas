@@ -28,7 +28,7 @@ import type {
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
-const createSubscriptionResponseSchema = z.object({
+export const createSubscriptionResponseSchema = z.object({
 	orderNumber: z.string(),
 	accountNumber: z.string(),
 	subscriptionNumbers: z.array(z.string()),
