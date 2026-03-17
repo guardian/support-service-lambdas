@@ -54,7 +54,7 @@ export const withBodyParser =
 
 export const withPathParser =
 	<E, TPath, TBody>(
-		pathParser: z.Schema<TPath>,
+		pathParser: z.ZodType<TPath, z.ZodTypeDef, unknown>,
 		handler: Handler<E, TPath, TBody>,
 	): Handler<E, unknown, TBody> =>
 	async (event: E, path: unknown, body: TBody) => {
@@ -71,7 +71,7 @@ export const withPathParser =
 		return await handler(event, parsedPath.data, body);
 	};
 export const withParsers = <E, TPath, TBody>(
-	path: z.Schema<TPath>,
+	path: z.ZodType<TPath, z.ZodTypeDef, unknown>,
 	body: z.Schema<TBody>,
 	handler: Handler<E, TPath, TBody>,
 ): Handler<E, Record<string, string>, string | null> =>

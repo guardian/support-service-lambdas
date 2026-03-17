@@ -3,8 +3,10 @@ import { withParsers } from '@modules/routing/withParsers';
 import type { BatonS3Writer } from '../services/batonS3Writer';
 import type {
 	DataSubjectAPI,
+	EventsAPI,
 	MParticleClient,
 } from '../services/mparticleClient';
+import { ConsentsUpdateHandler } from './http/consentsUpdateHandler';
 import {
 	dataSubjectRequestCallbackHandler,
 	dataSubjectRequestCallbackParser,
@@ -13,6 +15,8 @@ import {
 export const httpRouter = (
 	mParticleDataSubjectClient: MParticleClient<DataSubjectAPI>,
 	batonS3Writer: BatonS3Writer,
+	mParticleClient: MParticleClient<EventsAPI>,
+	getNow: () => Date,
 ) =>
 	Router([
 		{
@@ -26,5 +30,10 @@ export const httpRouter = (
 					batonS3Writer,
 				),
 			),
+		},
+		{
+			httpMethod: 'PATCH',
+			path: '/consents/{browserId}',
+			handler: ConsentsUpdateHandler.handler(mParticleClient, getNow),
 		},
 	]);
