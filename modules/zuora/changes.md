@@ -1,60 +1,99 @@
-# createSubscriptionForExistingAccount
+# cloneAccountWithSubscription
 
 ## Overview
 
-Adds a new `createSubscriptionForExistingAccount` function to the `zuora` module. This function creates a new subscription on an **already-existing** Zuora account via the Orders API (`POST /v1/orders`), as opposed to `createSubscription` which creates a new account and subscription together.
+Replaces the previous `cloneAccount` function (which used `POST /v1/accounts`) with a new `cloneAccountWithSubscription` function that creates a cloned account **and** an initial subscription in a single Zuora Orders API (`POST /v1/orders`) request.
 
-The primary use case is adding a second (or subsequent) product subscription to an account that was originally created through a different flow.
+The primary use case is creating a new account that shares the payment method of an existing account — for example when a customer switches product and needs a new billing account but should not be asked to re-enter payment details.
+
+## How it works
+
+The function accepts a `sourceAccountNumber` (the account to clone) and a `productPurchase` (the product and rate plan for the new subscription). It then:
+
+1. Fetches account details from the source account — contacts, billing settings, Salesforce/identity IDs, payment gateway
+2. Fetches payment method details and constructs a payment method payload that references the existing payment token (Stripe CCRT tokenId/secondTokenId, or PayPal BAID)
+3. For delivery products, pulls `deliveryContact` and `deliveryInstructions` from the source account's `soldToContact` — callers only need to provide `firstDeliveryDate` (and `deliveryAgent` for NationalDelivery)
+4. Submits a single Orders API request using `newAccount` (not `existingAccountNumber`), creating both the account and the subscription atomically
+
+## Input
+
+```typescript
+type CloneAccountWithSubscriptionInput = {
+  sourceAccountNumber: string;          // Account key or internal ID of the account to clone
+  productPurchase: CloneAccountProductPurchase; // Product + rate plan; delivery-specific fields
+                                               // (deliveryContact, deliveryInstructions) are
+                                               // sourced from the account, not the caller
+  createdRequestId?: string;            // Idempotency key
+  appliedPromotion?: AppliedPromotion;
+  runBilling?: boolean;                 // defaults to true
+  collectPayment?: boolean;             // defaults to true
+};
+```
+
+`CloneAccountProductPurchase` is a distributive omit of `deliveryContact` and `deliveryInstructions` from the `ProductPurchase` union, so TypeScript enforces that callers do not provide those fields.
+
+## What is copied from the source account
+
+- Account name, `crmId`, `sfContactId__c`, `IdentityId__c`, `batch`, `salesRep`, `autoPay`
+- `billToContact` (full address)
+- `soldToContact` (including `SpecialDeliveryInstructions__c`) — used as the delivery contact for delivery products
+- `currency`, `paymentGateway`
+- Default payment method token reference (CreditCardReferenceTransaction or PayPal)
 
 ## Files changed
 
-### `modules/zuora/src/createSubscription/createSubscriptionForExistingAccount.ts` (new)
+### `modules/zuora/src/createSubscription/cloneAccountWithSubscription.ts` (new)
 
-The main implementation. Accepts:
+Main implementation. Contains:
+- `cloneAccountWithSubscription` — the exported function
+- `CloneAccountWithSubscriptionInput` / `CloneAccountProductPurchase` — exported input types
+- `buildPaymentMethodPayload` — reads the source account's default payment method and builds the Orders API payment payload (CreditCardReferenceTransaction or PayPal; BankTransfer throws)
+- Zod schemas (`sourceAccountSchema`, `sourceContactSchema`, etc.) for parsing only the fields needed from the source account — system fields are automatically excluded by Zod's strict parsing
+- `toOrdersApiContact` — maps `zipCode` (returned by `GET /v1/accounts`) to `postalCode` (required by the Orders API)
 
-- `accountNumber` — the Zuora account key (human-readable like `A00081977`, or the internal hex ID — the function resolves the canonical account number via a `GET /v1/accounts/{accountNumber}` lookup before submitting the order)
-- `productPurchase` — the product and rate plan to subscribe to, following the existing `ProductPurchase` schema
-- `createdRequestId` — optional idempotency key, forwarded as the `idempotency-key` request header
-- `appliedPromotion` — optional promotion to apply (sets `InitialPromotionCode__c` and `PromotionCode__c` custom fields and adds the discount rate plan override)
-- `runBilling` / `collectPayment` — optional booleans, both default to `true`
+### `modules/zuora/src/account.ts` (modified)
 
-The function:
-1. Fetches `basicInfo.accountNumber` and `billingAndPayment.currency` from the existing account (zod-parsed to ensure type safety)
-2. Resolves the product rate plan and any charge override from the product catalog
-3. Builds a `CreateSubscription` order action using the shared `buildCreateSubscriptionOrderAction` helper
-4. Submits the order via `executeOrderRequest` using `existingAccountNumber` (the Orders API variant for existing accounts)
-5. Sets subscription custom fields: `LastPlanAddedDate__c`, `ReaderType__c: Direct`, and optionally `InitialPromotionCode__c` / `PromotionCode__c`
-
-### `modules/zuora/src/createSubscription/createSubscription.ts` (modified)
-
-Changed `const createSubscriptionResponseSchema` to `export const createSubscriptionResponseSchema` so it can be reused in the new file without duplication.
+Removed `cloneAccount` and all associated helpers (`buildPaymentMethodPayload`, stripping helpers). Only `getAccount`, `deleteAccount`, and `updateAccount` remain.
 
 ### `modules/zuora/src/index.ts` (modified)
 
-Added `export * from './createSubscription/createSubscriptionForExistingAccount'` to expose the new function and its input type from the module's public API.
+Exports `cloneAccountWithSubscription` (and its input types) in place of the removed `cloneAccount`.
 
-### `modules/zuora/test/createSubscriptionForExistingAccount.test.ts` (new)
+### `modules/zuora/src/createSubscription/createSubscription.ts` (modified)
 
-Unit tests (5 cases) covering:
+`createSubscriptionResponseSchema` changed from `const` to `export const` so it can be reused in `cloneAccountWithSubscription.ts`.
 
-- Correct `GET /v1/accounts/{accountNumber}` lookup and use of the returned human-readable account number in the Orders API payload
+### `modules/zuora/test/cloneAccountWithSubscription.test.ts` (new)
+
+Unit tests covering:
+- Orders API called with `newAccount` (not `existingAccountNumber`)
+- `crmId`, `sfContactId__c`, `IdentityId__c` copied from source account
+- `zipCode` → `postalCode` mapping on `billToContact`
+- `soldToContact` (with delivery instructions) set from source account's `soldToContact`
+- BankTransfer payment method throws with a descriptive error
 - `createdRequestId` forwarded as `idempotency-key` header
-- No idempotency header when `createdRequestId` is omitted
-- Promotion custom fields (`InitialPromotionCode__c`, `PromotionCode__c`) set when `appliedPromotion` is provided
-- `processingOptions` (`runBilling`, `collectPayment`) passed through correctly
+- Promotion custom fields set correctly
 
-### `modules/zuora/test/createSubscriptionForExistingAccountIntegration.test.ts` (new)
+### `modules/zuora/test/cloneAccountWithSubscriptionIntegration.test.ts` (new)
 
-Integration test against the CODE Zuora environment (`@group integration`). The test:
+Integration tests against the CODE Zuora environment (`@group integration`). Tests CCRT and PayPal account cloning with cleanup (`deleteAccount` in `afterEach`). BankTransfer tests assert that the function throws.
 
-1. Creates a fresh account with a `GoCardless` / `DirectDebit` payment method and an initial `GuardianAdLite Monthly` subscription (using `createSubscription`) — this avoids any dependency on pre-existing test accounts that may be stale or inactive
-2. Calls `createSubscriptionForExistingAccount` with the returned account number to add a second `GuardianAdLite Monthly` subscription
-3. Asserts the response `accountNumber` matches and exactly one new subscription number is returned
+## Limitations
 
-Both orders use `runBilling: false, collectPayment: false` to avoid triggering payment processing in CODE.
+### BankTransfer (GoCardless)
 
-## Key design notes
+Cloning accounts with a BankTransfer (GoCardless) default payment method is not supported. GoCardless mandates are tied to a specific GoCardless customer record. When the Orders API creates a new Zuora account it also creates a new GoCardless customer, so the existing mandate cannot be reused — passing `mandateInfo.mandateId` in the `newAccount.paymentMethod` payload results in a `Mandate not found` error from GoCardless when billing is attempted.
 
-- **Orders API `existingAccountNumber` requires the human-readable account number** (e.g. `A01108073`), not the internal hex ID (e.g. `2c92c0f8...`). The function always resolves this via the account GET, so callers can pass either format.
-- All helpers (`getProductRatePlan`, `getChargeOverride`, `getSubscriptionDates`, `buildCreateSubscriptionOrderAction`, `executeOrderRequest`, `getPromotionInputFields`) are shared with `createSubscription.ts` — no new logic was introduced.
-- All inputs and outputs are zod-validated, consistent with the existing patterns in this module.
+To support GoCardless account cloning, Zuora would need to expose a way to associate an existing GoCardless customer (and its mandate) with a newly-created account, which is not currently possible via the Orders API `newAccount` payload.
+
+## How to test
+
+Unit tests:
+```
+pnpm test --testPathPattern=cloneAccountWithSubscription
+```
+
+Integration tests (requires CODE credentials):
+```
+NODE_OPTIONS=--experimental-vm-modules pnpm it-test --testPathPattern=cloneAccountWithSubscriptionIntegration
+```

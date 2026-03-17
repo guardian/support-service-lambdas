@@ -5,7 +5,7 @@ export * from './types';
 export * from './utils';
 export * from './account';
 export * from './billingPreview';
-export * from './createSubscription/createSubscriptionForExistingAccount';
+export * from './createSubscription/cloneAccountWithSubscription';
 export * from './creditBalanceAdjustment';
 export * from './discount';
 export * from './invoice';
