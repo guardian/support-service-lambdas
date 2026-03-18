@@ -43,6 +43,11 @@ export function getLatestValidSubscription(
 		'TierThree',
 		'GuardianPatron',
 		'PatronMembership',
+		'GuardianWeeklyRestOfWorld',
+		'GuardianWeeklyDomestic',
+		'GuardianWeeklyZoneA',
+		'GuardianWeeklyZoneB',
+		'GuardianWeeklyZoneC',
 	] as const;
 
 	const productCatalogHelper = new ProductCatalogHelper(productCatalog);
