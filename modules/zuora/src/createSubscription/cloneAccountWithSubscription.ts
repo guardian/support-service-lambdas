@@ -8,7 +8,10 @@ import { z } from 'zod';
 import { updateAccount } from '../account';
 import { generateBillingDocuments } from '../invoice';
 import { buildCreateSubscriptionOrderAction } from '../orders/orderActions';
-import { createBankTransferPaymentMethod, getPaymentMethods } from '../paymentMethod';
+import {
+	createBankTransferPaymentMethod,
+	getPaymentMethods,
+} from '../paymentMethod';
 import type { DefaultPaymentMethodResponse } from '../types';
 import { zuoraDateFormat } from '../utils';
 import type { ZuoraClient } from '../zuoraClient';
@@ -41,6 +44,8 @@ function buildPaymentMethodPayload(
 		};
 	}
 
+	// The tokenId/secondTokenId (Stripe payment method reference) is preserved and accepted
+	// by the Orders API, so CCRT accounts can be cloned without any special handling.
 	const creditCardReferenceTransaction =
 		paymentMethods.creditcardreferencetransaction?.find(
 			(pm) => pm.id === defaultPaymentMethodId,
@@ -62,15 +67,6 @@ function buildPaymentMethodPayload(
 			BAID: paypal.BAID,
 			email: paypal.email,
 		};
-	}
-
-	const bankTransfer = paymentMethods.banktransfer?.find(
-		(pm) => pm.id === defaultPaymentMethodId,
-	);
-	if (bankTransfer) {
-		// BankTransfer is handled via a separate two-step flow after account creation;
-		// returning undefined here signals to the caller to use that path instead.
-		return undefined;
 	}
 
 	return undefined;
@@ -193,12 +189,15 @@ export const cloneAccountWithSubscription = async (
 	);
 
 	const { defaultPaymentMethodId } = paymentMethods;
-	const pendingBankTransfer = paymentMethods.banktransfer?.find(
+	// Bank Transfer payment methods need to be handled differently from tokenised payment methods (credit card and paypal)
+	const paymentMethodIsBankTransfer = paymentMethods.banktransfer?.find(
 		(pm) => pm.id === defaultPaymentMethodId,
 	);
-	const paymentMethodPayload = buildPaymentMethodPayload(paymentMethods);
+	const paymentMethodPayload = paymentMethodIsBankTransfer
+		? undefined
+		: buildPaymentMethodPayload(paymentMethods);
 
-	if (!pendingBankTransfer && !paymentMethodPayload) {
+	if (!paymentMethodIsBankTransfer && !paymentMethodPayload) {
 		throw new Error(
 			`Could not find default payment method ${paymentMethods.defaultPaymentMethodId} for account ${sourceAccountNumber}`,
 		);
@@ -297,7 +296,7 @@ export const cloneAccountWithSubscription = async (
 			CreatedRequestId__c: createdRequestId ?? '',
 		},
 		billCycleDay: 0,
-		autoPay: pendingBankTransfer
+		autoPay: paymentMethodIsBankTransfer
 			? false
 			: (sourceAccount.billingAndPayment.autoPay ?? true),
 		paymentGateway: sourceAccount.billingAndPayment.paymentGateway,
@@ -320,8 +319,10 @@ export const cloneAccountWithSubscription = async (
 			},
 		],
 		processingOptions: {
-			runBilling: pendingBankTransfer ? false : (runBilling ?? true),
-			collectPayment: pendingBankTransfer ? false : (collectPayment ?? true),
+			runBilling: paymentMethodIsBankTransfer ? false : (runBilling ?? true),
+			collectPayment: paymentMethodIsBankTransfer
+				? false
+				: (collectPayment ?? true),
 		},
 	};
 
@@ -337,7 +338,7 @@ export const cloneAccountWithSubscription = async (
 		headers,
 	);
 
-	if (pendingBankTransfer) {
+	if (paymentMethodIsBankTransfer) {
 		// Two-step approach for GoCardless: account is created without a payment
 		// method, then the payment method is attached separately. This avoids the
 		// Orders API creating a new GoCardless customer (which would break mandate
@@ -346,7 +347,7 @@ export const cloneAccountWithSubscription = async (
 		const newPaymentMethodId = await createBankTransferPaymentMethod(
 			zuoraClient,
 			orderResponse.accountNumber,
-			pendingBankTransfer,
+			paymentMethodIsBankTransfer,
 		);
 		await updateAccount(zuoraClient, orderResponse.accountNumber, {
 			defaultPaymentMethodId: newPaymentMethodId,

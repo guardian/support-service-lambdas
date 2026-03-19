@@ -4,87 +4,28 @@
  * @group integration
  */
 
+import { SupportRegionId } from '@modules/internationalisation/countryGroup';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
+import { getPromotion } from '@modules/promotions/v2/getPromotion';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
+import { z } from 'zod';
 import { deleteAccount } from '@modules/zuora/account';
 import { cloneAccountWithSubscription } from '@modules/zuora/createSubscription/cloneAccountWithSubscription';
+import { getSubscription } from '@modules/zuora/subscription';
+import { zuoraSubscriptionSchema } from '@modules/zuora/types/objects/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import code from '../../zuora-catalog/test/fixtures/catalog-code.json';
 
-describe('run cloneAccountWithSubscription', () => {
-	test('clone CreditCardReferenceTransaction', async () => {
-		const sourceAccountId = '2c92c0f87568d97201756b1578960694'; // CreditCardReferenceTransaction account in CODE
-		const productCatalog = generateProductCatalog(
-			zuoraCatalogSchema.parse(code),
-		);
-		const zuoraClient = await ZuoraClient.create('CODE');
-		const requestId = `IT-cloneAccountWithSubscription-${sourceAccountId.slice(-8)}-${Date.now()}`;
-
-		const response = await cloneAccountWithSubscription(
-			zuoraClient,
-			productCatalog,
-			{
-				sourceAccountNumber: sourceAccountId,
-				productPurchase: {
-					product: 'SupporterPlus',
-					ratePlan: 'Monthly',
-					amount: 12,
-				},
-				createdRequestId: requestId,
-			},
-			undefined,
-		);
-
-		expect(response.accountNumber).toBeDefined();
-		expect(response.accountNumber).not.toBe('');
-		expect(response.subscriptionNumbers.length).toBe(1);
-	}, 120000);
-	// BankTransfer (GoCardless): two-step approach — create account without PM, then attach PM via POST /v1/payment-methods.
-	test('clones a BankTransfer (GoCardless) account', async () => {
-		const productCatalog = generateProductCatalog(
-			zuoraCatalogSchema.parse(code),
-		);
-		const zuoraClient = await ZuoraClient.create('CODE');
-		const requestId = `IT-cloneAccountWithSubscription-BankTransfer-${Date.now()}`;
-
-		const response = await cloneAccountWithSubscription(
-			zuoraClient,
-			productCatalog,
-			{
-				sourceAccountNumber: '2c92c0f8757974d3017594cbffa00536',
-				productPurchase: {
-					product: 'SupporterPlus',
-					ratePlan: 'Monthly',
-					amount: 12,
-				},
-				createdRequestId: requestId,
-			},
-			undefined,
-		);
-
-		expect(response.accountNumber).toBeDefined();
-		expect(response.accountNumber).not.toBe('');
-		expect(response.subscriptionNumbers.length).toBe(1);
-	}, 120000);
-});
-
 describe('cloneAccountWithSubscription integration', () => {
 	const productCatalog = generateProductCatalog(zuoraCatalogSchema.parse(code));
-	let clonedAccountNumber: string | undefined;
+	let zuoraClient: ZuoraClient;
 
-	afterEach(async () => {
-		if (clonedAccountNumber !== undefined) {
-			const zuoraClient = await ZuoraClient.create('CODE');
-			await deleteAccount(zuoraClient, clonedAccountNumber);
-			clonedAccountNumber = undefined;
-		}
+	beforeAll(async () => {
+		zuoraClient = await ZuoraClient.create('CODE');
 	});
 
-	// CreditCardReferenceTransaction accounts can be cloned because the tokenId/secondTokenId
-	// (Stripe payment method reference) is preserved and accepted by the Orders API.
-	test('clones account 2c92c0f87568d97201756b1578960694 (CreditCardReferenceTransaction) and creates a GuardianAdLite subscription', async () => {
+	test('clones a CreditCardReferenceTransaction account and creates a GuardianAdLite subscription', async () => {
 		const sourceAccountId = '2c92c0f87568d97201756b1578960694';
-		const zuoraClient = await ZuoraClient.create('CODE');
 		const requestId = `IT-cloneAccountWithSubscription-${sourceAccountId.slice(-8)}-${Date.now()}`;
 
 		const response = await cloneAccountWithSubscription(
@@ -100,17 +41,15 @@ describe('cloneAccountWithSubscription integration', () => {
 			undefined,
 		);
 
-		clonedAccountNumber = response.accountNumber;
-
-		expect(response.accountNumber).toBeDefined();
-		expect(response.accountNumber).not.toBe('');
+		expect(response.accountNumber).toMatch(/^A\d+$/);
 		expect(response.subscriptionNumbers.length).toBe(1);
+
+		await deleteAccount(zuoraClient, response.accountNumber);
 	}, 120000);
 
-	// PayPal account uses USD, so we use DigitalSubscription Monthly which supports USD.
-	test('clones account 2c92c0f875d488d70175d6a29ead032c (PayPal) and creates a DigitalSubscription', async () => {
+	test('clones a PayPal account and creates a DigitalSubscription', async () => {
 		const sourceAccountId = '2c92c0f875d488d70175d6a29ead032c';
-		const zuoraClient = await ZuoraClient.create('CODE');
+		// PayPal account uses USD, so we use DigitalSubscription Monthly which supports USD.
 		const requestId = `IT-cloneAccountWithSubscription-${sourceAccountId.slice(-8)}-${Date.now()}`;
 
 		const response = await cloneAccountWithSubscription(
@@ -129,16 +68,13 @@ describe('cloneAccountWithSubscription integration', () => {
 			undefined,
 		);
 
-		clonedAccountNumber = response.accountNumber;
-
-		expect(response.accountNumber).toBeDefined();
-		expect(response.accountNumber).not.toBe('');
+		expect(response.accountNumber).toMatch(/^A\d+$/);
 		expect(response.subscriptionNumbers.length).toBe(1);
+
+		await deleteAccount(zuoraClient, response.accountNumber);
 	}, 120000);
 
-	// BankTransfer (GoCardless): two-step approach — create account without PM, then attach PM via POST /v1/payment-methods.
 	test('clones a BankTransfer (GoCardless) account', async () => {
-		const zuoraClient = await ZuoraClient.create('CODE');
 		const requestId = `IT-cloneAccountWithSubscription-BankTransfer-${Date.now()}`;
 
 		const response = await cloneAccountWithSubscription(
@@ -158,10 +94,55 @@ describe('cloneAccountWithSubscription integration', () => {
 			undefined,
 		);
 
-		clonedAccountNumber = response.accountNumber;
-
-		expect(response.accountNumber).toBeDefined();
-		expect(response.accountNumber).not.toBe('');
+		expect(response.accountNumber).toMatch(/^A\d+$/);
 		expect(response.subscriptionNumbers.length).toBe(1);
+
+		await deleteAccount(zuoraClient, response.accountNumber);
+	}, 120000);
+
+	test('clones an account and applies a promo code to the new subscription', async () => {
+		const sourceAccountId = '2c92c0f87568d97201756b1578960694'; // CreditCardReferenceTransaction account in CODE
+		const promoCode = 'E2E_TEST_SPLUS_MONTHLY';
+		const promotion = await getPromotion(promoCode, 'CODE');
+		const requestId = `IT-cloneAccountWithSubscription-promo-${sourceAccountId.slice(-8)}-${Date.now()}`;
+
+		const response = await cloneAccountWithSubscription(
+			zuoraClient,
+			productCatalog,
+			{
+				sourceAccountNumber: sourceAccountId,
+				productPurchase: {
+					product: 'SupporterPlus',
+					ratePlan: 'Monthly',
+					amount: 12,
+				},
+				createdRequestId: requestId,
+				appliedPromotion: {
+					promoCode,
+					supportRegionId: SupportRegionId.UK,
+				},
+				runBilling: false,
+				collectPayment: false,
+			},
+			promotion,
+		);
+
+		expect(response.subscriptionNumbers.length).toBe(1);
+
+		const subscriptionWithPromotionSchema = zuoraSubscriptionSchema.extend({
+			InitialPromotionCode__c: z.string().nullable(),
+			PromotionCode__c: z.string().nullable(),
+		});
+		const subscription = await getSubscription(
+			zuoraClient,
+			response.subscriptionNumbers[0]!,
+			subscriptionWithPromotionSchema,
+		);
+
+		expect(subscription.ratePlans.length).toEqual(2); // product rate plan + discount rate plan
+		expect(subscription.InitialPromotionCode__c).toEqual(promoCode);
+		expect(subscription.PromotionCode__c).toEqual(promoCode);
+
+		await deleteAccount(zuoraClient, response.accountNumber);
 	}, 120000);
 });
