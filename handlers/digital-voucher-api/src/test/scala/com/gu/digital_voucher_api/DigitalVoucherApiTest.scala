@@ -1,6 +1,6 @@
 package com.gu.digital_voucher_api
 
-import cats.effect.{ContextShift, IO}
+import cats.effect.IO
 import com.gu.DevIdentity
 import com.gu.imovo.ImovoStub._
 import com.gu.imovo._
