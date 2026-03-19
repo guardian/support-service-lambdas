@@ -129,13 +129,18 @@ function toOrdersApiContact(
 
 // ---------- Input type ----------
 
-// DistributiveOmit removes deliveryContact and deliveryInstructions from delivery product
-// variants of ProductPurchase — those fields are sourced from the existing account, not
-// provided by the caller.
+// DistributiveOmit applies Omit to each member of a union type individually.
+// Standard Omit<T, K> on a union type T only works on keys shared by ALL members.
+// If T = A | B, and A has unique keys, Omit<T, ...> will result in a type that
+// loses those unique keys. DistributiveOmit preserves the union structure:
+// DistributiveOmit<A | B, K> = Omit<A, K> | Omit<B, K>
 type DistributiveOmit<T, K extends PropertyKey> = T extends unknown
 	? Omit<T, K>
 	: never;
 
+// Remove deliveryContact and deliveryInstructions from delivery product
+// variants of ProductPurchase — those fields are sourced from the existing account, not
+// provided by the caller.
 export type CloneAccountProductPurchase = DistributiveOmit<
 	ProductPurchase,
 	'deliveryContact' | 'deliveryInstructions'
@@ -148,23 +153,24 @@ export type CloneAccountWithSubscriptionInput = {
 	appliedPromotion?: AppliedPromotion;
 	runBilling?: boolean;
 	collectPayment?: boolean;
+	acquisitionCase?: string;
+	acquisitionSource?: string;
+	createdByCSR?: string;
 };
 
 // ---------- Main function ----------
 
-/**
- * Creates a new Zuora account (cloned from an existing one) together with a new subscription,
- * in a single Orders API request.
- *
- * Account details (contacts, billing info, payment method, Salesforce/identity IDs) are copied
- * from the source account. For delivery products, deliveryContact and deliveryInstructions are
- * taken from the source account's soldToContact; the caller only needs to supply firstDeliveryDate
- * (and deliveryAgent for NationalDelivery).
- *
- * Note: BankTransfer (GoCardless) uses a two-step flow — account is created without
- * a payment method, then the mandate is attached via POST /v1/payment-methods and set
- * as the default. Billing is triggered separately via billing-documents/generate.
- */
+// Creates a new Zuora account (cloned from an existing one) together with a new subscription,
+// in a single Orders API request.
+//
+// Account details (contacts, billing info, payment method, Salesforce/identity IDs) are copied
+// from the source account. For delivery products, deliveryContact and deliveryInstructions are
+// taken from the source account's soldToContact; the caller only needs to supply firstDeliveryDate
+// (and deliveryAgent for NationalDelivery).
+//
+// Note: BankTransfer (GoCardless) uses a two-step flow — account is created without
+// a payment method, then the mandate is attached via POST /v1/payment-methods and set
+// as the default. Billing is triggered separately via billing-documents/generate.
 export const cloneAccountWithSubscription = async (
 	zuoraClient: ZuoraClient,
 	productCatalog: ProductCatalog,
@@ -175,6 +181,9 @@ export const cloneAccountWithSubscription = async (
 		appliedPromotion,
 		runBilling,
 		collectPayment,
+		acquisitionCase,
+		acquisitionSource,
+		createdByCSR,
 	}: CloneAccountWithSubscriptionInput,
 	promotion: Promo | undefined,
 ): Promise<CreateSubscriptionResponse> => {
@@ -284,6 +293,9 @@ export const cloneAccountWithSubscription = async (
 		InitialPromotionCode__c: appliedPromotion?.promoCode,
 		PromotionCode__c: appliedPromotion?.promoCode,
 		CreatedRequestId__c: createdRequestId,
+		AcquisitionCase__c: acquisitionCase,
+		AcquisitionSource__c: acquisitionSource,
+		CreatedByCSR__c: createdByCSR,
 	};
 
 	const newAccount = {
