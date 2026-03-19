@@ -4,21 +4,32 @@ import type { Dependencies } from './ports';
 import { processVoucherRequest } from './processVoucherRequest';
 import { sqsMessageSchema } from './schemas';
 
-const snsEnvelopeSchema = z.object({
+const snsNotificationSchema = z.object({
 	Type: z.literal('Notification'),
 	Message: z.string(),
 });
 
+const snsNonMessageTypes = z.object({
+	Type: z.enum(['SubscriptionConfirmation', 'UnsubscribeConfirmation']),
+});
+
 /**
- * When a message arrives via SNS → SQS, the SQS body is an SNS envelope
- * containing a `Message` field with the actual payload as a JSON string.
- * For direct SQS messages, the body is the payload itself.
+ * When a message arrives via SNS → SQS, the SQS body is an SNS envelope.
+ * - Type "Notification": contains a `Message` field with the actual payload.
+ * - Type "SubscriptionConfirmation"/"UnsubscribeConfirmation": SNS lifecycle
+ *   messages that should be skipped.
+ * - Otherwise: the body is a direct SQS message (no envelope).
+ *
+ * Returns the extracted message body, or `null` if the message should be skipped.
  */
 function extractMessageBody(sqsBody: string): unknown {
 	const body: unknown = JSON.parse(sqsBody);
-	const envelope = snsEnvelopeSchema.safeParse(body);
-	if (envelope.success) {
-		return JSON.parse(envelope.data.Message);
+	const notification = snsNotificationSchema.safeParse(body);
+	if (notification.success) {
+		return JSON.parse(notification.data.Message);
+	}
+	if (snsNonMessageTypes.safeParse(body).success) {
+		return null;
 	}
 	return body;
 }
@@ -32,7 +43,13 @@ export async function handleSqsEvent(
 	for (const record of event.Records) {
 		console.log(`Processing SQS record: ${record.messageId}`);
 
-		const parsed = sqsMessageSchema.safeParse(extractMessageBody(record.body));
+		const messageBody = extractMessageBody(record.body);
+		if (messageBody === null) {
+			console.log(`Skipping SNS lifecycle message: ${record.messageId}`);
+			continue;
+		}
+
+		const parsed = sqsMessageSchema.safeParse(messageBody);
 
 		if (!parsed.success) {
 			console.error(

@@ -101,6 +101,26 @@ describe('handleSqsEvent', () => {
 		expect(deps.emailedRecords[0]?.identityId).toBe('id-1');
 	});
 
+	it('skips SNS SubscriptionConfirmation messages', async () => {
+		const subscriptionConfirmation = {
+			Type: 'SubscriptionConfirmation',
+			MessageId: 'sns-confirm-1',
+			TopicArn: 'arn:aws:sns:eu-west-1:942464564246:PrintPromoTopic',
+			Message: 'You have chosen to subscribe to the topic...',
+			SubscribeURL:
+				'https://sns.eu-west-1.amazonaws.com/?Action=ConfirmSubscription...',
+			Token: 'some-token',
+			Timestamp: '2026-01-01T00:00:00.000Z',
+		};
+		const event = buildSqsEvent(subscriptionConfirmation);
+		const deps = buildFakeDeps();
+
+		await handleSqsEvent(event, deps);
+
+		expect(deps.savedRecords).toHaveLength(0);
+		expect(deps.emailedRecords).toHaveLength(0);
+	});
+
 	it('processes a message wrapped in an SNS envelope', async () => {
 		const snsWrappedBody = {
 			Type: 'Notification',
