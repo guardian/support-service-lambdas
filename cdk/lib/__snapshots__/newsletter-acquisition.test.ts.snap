@@ -1,0 +1,251 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`The NewsletterAcquisition stack matches the snapshot 1`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [],
+    "gu:cdk:version": "TEST",
+  },
+  "Resources": {
+    "DeadLetterQueue9F481546": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "newsletter-acquisition-dlq-CODE",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "Queue4A7E3555": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "newsletter-acquisition-queue-CODE",
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "DeadLetterQueue9F481546",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 3,
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "QueuePolicy25439813": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": "arn:aws:sns:eu-west-1:942464564246:identity-identity-api-public-CODE-NewsletterAcquisitionTopic",
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "sns.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "Queue4A7E3555",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "Queue4A7E3555",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
+    "QueuenewsletteracquisitionCODEIdentityNewsletterTopicB4575405119403A2": {
+      "DependsOn": [
+        "QueuePolicy25439813",
+      ],
+      "Properties": {
+        "Endpoint": {
+          "Fn::GetAtt": [
+            "Queue4A7E3555",
+            "Arn",
+          ],
+        },
+        "Protocol": "sqs",
+        "RawMessageDelivery": true,
+        "Region": "eu-west-1",
+        "TopicArn": "arn:aws:sns:eu-west-1:942464564246:identity-identity-api-public-CODE-NewsletterAcquisitionTopic",
+      },
+      "Type": "AWS::SNS::Subscription",
+    },
+  },
+}
+`;
+
+exports[`The NewsletterAcquisition stack matches the snapshot 2`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [],
+    "gu:cdk:version": "TEST",
+  },
+  "Resources": {
+    "DeadLetterQueue9F481546": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "newsletter-acquisition-dlq-PROD",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "Queue4A7E3555": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "newsletter-acquisition-queue-PROD",
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "DeadLetterQueue9F481546",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 3,
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "QueuePolicy25439813": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": "arn:aws:sns:eu-west-1:942464564246:identity-identity-api-public-PROD-NewsletterAcquisitionTopic",
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "sns.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "Queue4A7E3555",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "Queue4A7E3555",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
+    "QueuenewsletteracquisitionPRODIdentityNewsletterTopic59C38DD30CE31175": {
+      "DependsOn": [
+        "QueuePolicy25439813",
+      ],
+      "Properties": {
+        "Endpoint": {
+          "Fn::GetAtt": [
+            "Queue4A7E3555",
+            "Arn",
+          ],
+        },
+        "Protocol": "sqs",
+        "RawMessageDelivery": true,
+        "Region": "eu-west-1",
+        "TopicArn": "arn:aws:sns:eu-west-1:942464564246:identity-identity-api-public-PROD-NewsletterAcquisitionTopic",
+      },
+      "Type": "AWS::SNS::Subscription",
+    },
+  },
+}
+`;
