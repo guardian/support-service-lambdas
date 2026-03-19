@@ -5,8 +5,10 @@ import { productPurchaseSchema } from '@modules/product-catalog/productPurchaseS
 import type { AppliedPromotion, Promo } from '@modules/promotions/v2/schema';
 import dayjs from 'dayjs';
 import { z } from 'zod';
+import { updateAccount } from '../account';
+import { generateBillingDocuments } from '../invoice';
 import { buildCreateSubscriptionOrderAction } from '../orders/orderActions';
-import { getPaymentMethods } from '../paymentMethod';
+import { createBankTransferPaymentMethod, getPaymentMethods } from '../paymentMethod';
 import type { DefaultPaymentMethodResponse } from '../types';
 import { zuoraDateFormat } from '../utils';
 import type { ZuoraClient } from '../zuoraClient';
@@ -19,8 +21,6 @@ import {
 import { getProductRatePlan } from './getProductRatePlan';
 import { ReaderType } from './readerType';
 import { getSubscriptionDates } from './subscriptionDates';
-
-// ---------- Payment method helpers (moved from account.ts) ----------
 
 function buildPaymentMethodPayload(
 	paymentMethods: DefaultPaymentMethodResponse,
@@ -41,14 +41,15 @@ function buildPaymentMethodPayload(
 		};
 	}
 
-	const ccRefTx = paymentMethods.creditcardreferencetransaction?.find(
-		(pm) => pm.id === defaultPaymentMethodId,
-	);
-	if (ccRefTx) {
+	const creditCardReferenceTransaction =
+		paymentMethods.creditcardreferencetransaction?.find(
+			(pm) => pm.id === defaultPaymentMethodId,
+		);
+	if (creditCardReferenceTransaction) {
 		return {
-			type: ccRefTx.type,
-			tokenId: ccRefTx.tokenId,
-			secondTokenId: ccRefTx.secondTokenId,
+			type: creditCardReferenceTransaction.type,
+			tokenId: creditCardReferenceTransaction.tokenId,
+			secondTokenId: creditCardReferenceTransaction.secondTokenId,
 		};
 	}
 
@@ -67,17 +68,7 @@ function buildPaymentMethodPayload(
 		(pm) => pm.id === defaultPaymentMethodId,
 	);
 	if (bankTransfer) {
-		// GoCardless mandates are tied to the original GoCardless customer record.
-		// When the Orders API creates a new Zuora account it also creates a new
-		// GoCardless customer, so the existing mandate cannot be reused — GoCardless
-		// will respond with "Mandate not found" when billing is attempted. There is
-		// no way to associate an existing GoCardless mandate with a brand-new account
-		// via the Orders API newAccount payload.
-		throw new Error(
-			`BankTransfer (GoCardless) payment method cloning is not supported. ` +
-				`GoCardless mandates are customer-scoped and cannot be transferred to ` +
-				`a new account. Mandate reference: ${bankTransfer.mandateInfo.mandateId ?? 'unknown'}.`,
-		);
+		return undefined;
 	}
 
 	return undefined;
@@ -199,9 +190,13 @@ export const cloneAccountWithSubscription = async (
 		sourceAccount.basicInfo.id,
 	);
 
+	const { defaultPaymentMethodId } = paymentMethods;
+	const pendingBankTransfer = paymentMethods.banktransfer?.find(
+		(pm) => pm.id === defaultPaymentMethodId,
+	);
 	const paymentMethodPayload = buildPaymentMethodPayload(paymentMethods);
 
-	if (!paymentMethodPayload) {
+	if (!pendingBankTransfer && !paymentMethodPayload) {
 		throw new Error(
 			`Could not find default payment method ${paymentMethods.defaultPaymentMethodId} for account ${sourceAccountNumber}`,
 		);
@@ -300,7 +295,9 @@ export const cloneAccountWithSubscription = async (
 			CreatedRequestId__c: createdRequestId ?? '',
 		},
 		billCycleDay: 0,
-		autoPay: sourceAccount.billingAndPayment.autoPay ?? true,
+		autoPay: pendingBankTransfer
+			? false
+			: (sourceAccount.billingAndPayment.autoPay ?? true),
 		paymentGateway: sourceAccount.billingAndPayment.paymentGateway,
 		paymentMethod: paymentMethodPayload,
 		billToContact: toOrdersApiContact(sourceAccount.billToContact),
@@ -321,8 +318,8 @@ export const cloneAccountWithSubscription = async (
 			},
 		],
 		processingOptions: {
-			runBilling: runBilling ?? true,
-			collectPayment: collectPayment ?? true,
+			runBilling: pendingBankTransfer ? false : (runBilling ?? true),
+			collectPayment: pendingBankTransfer ? false : (collectPayment ?? true),
 		},
 	};
 
@@ -331,10 +328,40 @@ export const cloneAccountWithSubscription = async (
 	const headers = createdRequestId
 		? { 'idempotency-key': createdRequestId }
 		: undefined;
-	return zuoraClient.post(
+	const orderResponse: CreateSubscriptionResponse = await zuoraClient.post(
 		'/v1/orders',
 		JSON.stringify(orderRequest),
 		createSubscriptionResponseSchema,
 		headers,
 	);
+
+	if (pendingBankTransfer) {
+		// Two-step approach for GoCardless: account is created without a payment
+		// method, then the payment method is attached separately. This avoids the
+		// Orders API creating a new GoCardless customer (which would break mandate
+		// lookup), and instead relies on POST /v1/payment-methods to associate the
+		// existing mandate with the new account.
+		const newPaymentMethodId = await createBankTransferPaymentMethod(
+			zuoraClient,
+			orderResponse.accountNumber,
+			pendingBankTransfer,
+		);
+		await updateAccount(zuoraClient, orderResponse.accountNumber, {
+			defaultPaymentMethodId: newPaymentMethodId,
+			autoPay: sourceAccount.billingAndPayment.autoPay ?? true,
+		});
+		if (runBilling ?? true) {
+			// Generates the invoice for the new subscription charges.
+			// Payment will be collected by Zuora's autoPay mechanism (autoPay: true
+			// is set on the account), which submits the GoCardless payment request
+			// as Direct Debit is inherently asynchronous (BACS settle in 3+ days).
+			await generateBillingDocuments(
+				zuoraClient,
+				orderResponse.accountNumber,
+				dayjs(),
+			);
+		}
+	}
+
+	return orderResponse;
 };

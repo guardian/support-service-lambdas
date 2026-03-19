@@ -39,28 +39,32 @@ describe('run cloneAccountWithSubscription', () => {
 		expect(response.accountNumber).not.toBe('');
 		expect(response.subscriptionNumbers.length).toBe(1);
 	}, 120000);
-	// BankTransfer (GoCardless) mandates are customer-scoped and cannot be transferred to a new account.
-	test('throws for BankTransfer (GoCardless) account', async () => {
+	// BankTransfer (GoCardless): two-step approach — create account without PM, then attach PM via POST /v1/payment-methods.
+	test('clones a BankTransfer (GoCardless) account', async () => {
 		const productCatalog = generateProductCatalog(
 			zuoraCatalogSchema.parse(code),
 		);
 		const zuoraClient = await ZuoraClient.create('CODE');
+		const requestId = `IT-cloneAccountWithSubscription-BankTransfer-${Date.now()}`;
 
-		await expect(
-			cloneAccountWithSubscription(
-				zuoraClient,
-				productCatalog,
-				{
-					sourceAccountNumber: '2c92c0f8757974d3017594cbffa00536',
-					productPurchase: {
-						product: 'SupporterPlus',
-						ratePlan: 'Monthly',
-						amount: 12,
-					},
+		const response = await cloneAccountWithSubscription(
+			zuoraClient,
+			productCatalog,
+			{
+				sourceAccountNumber: '2c92c0f8757974d3017594cbffa00536',
+				productPurchase: {
+					product: 'SupporterPlus',
+					ratePlan: 'Monthly',
+					amount: 12,
 				},
-				undefined,
-			),
-		).rejects.toThrow(/BankTransfer \(GoCardless\)/);
+				createdRequestId: requestId,
+			},
+			undefined,
+		);
+
+		expect(response.accountNumber).toBeDefined();
+		expect(response.accountNumber).not.toBe('');
+		expect(response.subscriptionNumbers.length).toBe(1);
 	}, 120000);
 });
 
@@ -132,24 +136,32 @@ describe('cloneAccountWithSubscription integration', () => {
 		expect(response.subscriptionNumbers.length).toBe(1);
 	}, 120000);
 
-	// BankTransfer (GoCardless) mandates are customer-scoped and cannot be transferred to a new account.
-	test('throws for BankTransfer (GoCardless) account', async () => {
+	// BankTransfer (GoCardless): two-step approach — create account without PM, then attach PM via POST /v1/payment-methods.
+	test('clones a BankTransfer (GoCardless) account', async () => {
 		const zuoraClient = await ZuoraClient.create('CODE');
+		const requestId = `IT-cloneAccountWithSubscription-BankTransfer-${Date.now()}`;
 
-		await expect(
-			cloneAccountWithSubscription(
-				zuoraClient,
-				productCatalog,
-				{
-					sourceAccountNumber: '2c92c0f8757974d3017594cbffa00536',
-					productPurchase: {
-						product: 'SupporterPlus',
-						ratePlan: 'Monthly',
-						amount: 12,
-					},
+		const response = await cloneAccountWithSubscription(
+			zuoraClient,
+			productCatalog,
+			{
+				sourceAccountNumber: '2c92c0f8757974d3017594cbffa00536',
+				productPurchase: {
+					product: 'SupporterPlus',
+					ratePlan: 'Monthly',
+					amount: 12,
 				},
-				undefined,
-			),
-		).rejects.toThrow(/BankTransfer \(GoCardless\)/);
+				createdRequestId: requestId,
+				runBilling: true,
+				collectPayment: true,
+			},
+			undefined,
+		);
+
+		clonedAccountNumber = response.accountNumber;
+
+		expect(response.accountNumber).toBeDefined();
+		expect(response.accountNumber).not.toBe('');
+		expect(response.subscriptionNumbers.length).toBe(1);
 	}, 120000);
 });
