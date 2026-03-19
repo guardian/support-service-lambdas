@@ -38,7 +38,7 @@ type CloneAccountWithSubscriptionInput = {
 - `billToContact` (full address)
 - `soldToContact` (including `SpecialDeliveryInstructions__c`) — used as the delivery contact for delivery products
 - `currency`, `paymentGateway`
-- Default payment method token reference (CreditCardReferenceTransaction or PayPal)
+- Default payment method token reference (CreditCardReferenceTransaction, PayPal, or BankTransfer/GoCardless mandate)
 
 ## Files changed
 
@@ -47,7 +47,7 @@ type CloneAccountWithSubscriptionInput = {
 Main implementation. Contains:
 - `cloneAccountWithSubscription` — the exported function
 - `CloneAccountWithSubscriptionInput` / `CloneAccountProductPurchase` — exported input types
-- `buildPaymentMethodPayload` — reads the source account's default payment method and builds the Orders API payment payload (CreditCardReferenceTransaction or PayPal; BankTransfer throws)
+- `buildPaymentMethodPayload` — reads the source account's default payment method and builds the Orders API payment payload (CreditCardReferenceTransaction or PayPal). BankTransfer uses a separate two-step approach (see below).
 - Zod schemas (`sourceAccountSchema`, `sourceContactSchema`, etc.) for parsing only the fields needed from the source account — system fields are automatically excluded by Zod's strict parsing
 - `toOrdersApiContact` — maps `zipCode` (returned by `GET /v1/accounts`) to `postalCode` (required by the Orders API)
 
@@ -70,21 +70,25 @@ Unit tests covering:
 - `crmId`, `sfContactId__c`, `IdentityId__c` copied from source account
 - `zipCode` → `postalCode` mapping on `billToContact`
 - `soldToContact` (with delivery instructions) set from source account's `soldToContact`
-- BankTransfer payment method throws with a descriptive error
+- BankTransfer (GoCardless) two-step flow verified
 - `createdRequestId` forwarded as `idempotency-key` header
 - Promotion custom fields set correctly
 
 ### `modules/zuora/test/cloneAccountWithSubscriptionIntegration.test.ts` (new)
 
-Integration tests against the CODE Zuora environment (`@group integration`). Tests CCRT and PayPal account cloning with cleanup (`deleteAccount` in `afterEach`). BankTransfer tests assert that the function throws.
+Integration tests against the CODE Zuora environment (`@group integration`). Tests CCRT, PayPal, and BankTransfer (GoCardless) account cloning with cleanup (`deleteAccount` in `afterEach`).
 
-## Limitations
+## Implementation notes
 
 ### BankTransfer (GoCardless)
 
-Cloning accounts with a BankTransfer (GoCardless) default payment method is not supported. GoCardless mandates are tied to a specific GoCardless customer record. When the Orders API creates a new Zuora account it also creates a new GoCardless customer, so the existing mandate cannot be reused — passing `mandateInfo.mandateId` in the `newAccount.paymentMethod` payload results in a `Mandate not found` error from GoCardless when billing is attempted.
+Cloning BankTransfer accounts uses a two-step approach because passing `mandateInfo.mandateId` in the Orders API `newAccount.paymentMethod` payload fails — the Orders API creates a new GoCardless customer for each new account, and GoCardless mandates are tied to the original customer, causing a `Mandate not found` error when billing is attempted.
 
-To support GoCardless account cloning, Zuora would need to expose a way to associate an existing GoCardless customer (and its mandate) with a newly-created account, which is not currently possible via the Orders API `newAccount` payload.
+Instead:
+1. The Orders API creates the new account and subscription without a payment method (`autoPay: false`, `runBilling: false`).
+2. `POST /v1/payment-methods` attaches the existing mandate to the already-created account (no new GoCardless customer is created in this path).
+3. `PUT /v1/accounts/{id}` sets the new payment method as default and restores `autoPay: true`.
+4. If `runBilling: true`, `POST /v1/accounts/{id}/billing-documents/generate` with `autoPost: true` generates, posts, and triggers payment collection for the new invoice.
 
 ## How to test
 
