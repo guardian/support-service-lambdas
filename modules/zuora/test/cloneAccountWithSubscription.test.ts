@@ -9,11 +9,12 @@ import code from '../../zuora-catalog/test/fixtures/catalog-code.json';
 const buildMockZuoraClient = (
 	mockGet: jest.Mock,
 	mockPost: jest.Mock,
+	mockPut?: jest.Mock,
 ): jest.Mocked<ZuoraClient> =>
 	({
 		get: mockGet,
 		post: mockPost,
-		put: jest.fn(),
+		put: mockPut ?? jest.fn(),
 		delete: jest.fn(),
 		fetch: jest.fn(),
 	}) as unknown as jest.Mocked<ZuoraClient>;
@@ -294,25 +295,66 @@ describe('cloneAccountWithSubscription', () => {
 		);
 	});
 
-	it('throws for BankTransfer (GoCardless) payment methods', async () => {
+	it('uses two-step flow for BankTransfer: creates account without PM, then attaches PM and sets as default', async () => {
 		const mockGet = jest
 			.fn()
 			.mockResolvedValueOnce(baseSourceAccount)
 			.mockResolvedValueOnce(bankTransferPaymentMethods);
-		const mockPost = jest.fn();
-		const client = buildMockZuoraClient(mockGet, mockPost);
+		const mockPost = jest
+			.fn()
+			.mockResolvedValueOnce(orderResponse) // POST /v1/orders
+			.mockResolvedValueOnce({ id: 'new-pm-id' }) // POST /v1/payment-methods
+			.mockResolvedValueOnce({}); // POST billing-documents/generate
+		const mockPut = jest.fn().mockResolvedValueOnce(undefined);
+		const client = buildMockZuoraClient(mockGet, mockPost, mockPut);
 
-		await expect(
-			cloneAccountWithSubscription(
-				client,
-				productCatalog,
-				{
-					sourceAccountNumber: 'A00001234',
-					productPurchase: { product: 'GuardianAdLite', ratePlan: 'Monthly' },
-				},
-				undefined,
-			),
-		).rejects.toThrow(/BankTransfer \(GoCardless\)/);
+		const result = await cloneAccountWithSubscription(
+			client,
+			productCatalog,
+			{
+				sourceAccountNumber: 'A00001234',
+				productPurchase: { product: 'GuardianAdLite', ratePlan: 'Monthly' },
+			},
+			undefined,
+		);
+
+		// Step 1: Orders API called without paymentMethod, with autoPay:false and runBilling:false
+		const [ordersPath, ordersBody] = mockPost.mock.calls[0] as [string, string];
+		expect(ordersPath).toBe('/v1/orders');
+		const ordersRequest = JSON.parse(ordersBody) as {
+			newAccount: { paymentMethod?: unknown; autoPay: boolean };
+			processingOptions: { runBilling: boolean; collectPayment: boolean };
+		};
+		expect(ordersRequest.newAccount.paymentMethod).toBeUndefined();
+		expect(ordersRequest.newAccount.autoPay).toBe(false);
+		expect(ordersRequest.processingOptions.runBilling).toBe(false);
+		expect(ordersRequest.processingOptions.collectPayment).toBe(false);
+
+		// Step 2: POST /v1/payment-methods called with BankTransfer details
+		const [pmPath, pmBody] = mockPost.mock.calls[1] as [string, string];
+		expect(pmPath).toBe('/v1/payment-methods');
+		const pm = JSON.parse(pmBody) as Record<string, unknown>;
+		expect(pm.accountKey).toBe('A00099999');
+		expect(pm.type).toBe('Bacs');
+		expect((pm.mandateInfo as Record<string, string>).mandateId).toBe(
+			'GC-MANDATE-001',
+		);
+
+		// Step 3: PUT /v1/accounts called to set default PM and restore autoPay
+		const [putPath, putBody] = mockPut.mock.calls[0] as [string, string];
+		expect(putPath).toBe('/v1/accounts/A00099999');
+		const putPayload = JSON.parse(putBody) as Record<string, unknown>;
+		expect(putPayload.defaultPaymentMethodId).toBe('new-pm-id');
+		expect(putPayload.autoPay).toBe(true);
+
+		// Step 4: billing-documents/generate called (runBilling defaults to true)
+		const [billPath, billBody] = mockPost.mock.calls[2] as [string, string];
+		expect(billPath).toBe('/v1/accounts/A00099999/billing-documents/generate');
+		const billPayload = JSON.parse(billBody) as Record<string, unknown>;
+		expect(billPayload.targetDate).toBeDefined();
+		expect(billPayload.effectiveDate).toBeDefined();
+
+		expect(result.accountNumber).toBe('A00099999');
 	});
 
 	it('passes createdRequestId as idempotency key', async () => {
