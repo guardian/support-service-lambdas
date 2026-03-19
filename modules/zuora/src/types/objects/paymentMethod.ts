@@ -59,7 +59,7 @@ const MandateInfoSchema = z.object({
 });
 
 // Credit card payment method
-export const CreditCardPaymentMethodSchema = BasePaymentMethodSchema.extend({
+const CreditCardPaymentMethodSchema = BasePaymentMethodSchema.extend({
 	cardNumber: z.string(),
 	expirationMonth: z.number(),
 	expirationYear: z.number(),
@@ -70,27 +70,26 @@ export const CreditCardPaymentMethodSchema = BasePaymentMethodSchema.extend({
 });
 
 // Credit card reference transaction payment method
-export const CreditCardReferenceTransactionSchema =
-	BasePaymentMethodSchema.extend({
-		tokenId: z.string(),
-		secondTokenId: z.string(),
-		mandateInfo: MandateInfoSchema,
-		cardNumber: z.string().nullable(),
-		expirationMonth: z.number().nullable(),
-		expirationYear: z.number().nullable(),
-		creditCardType: z.string().nullable(),
-		accountHolderInfo: AccountHolderInfoSchema,
-		identityNumber: z.string().nullable(),
-	});
+const CreditCardReferenceTransactionSchema = BasePaymentMethodSchema.extend({
+	tokenId: z.string(),
+	secondTokenId: z.string(),
+	mandateInfo: MandateInfoSchema,
+	cardNumber: z.string().nullable(),
+	expirationMonth: z.number().nullable(),
+	expirationYear: z.number().nullable(),
+	creditCardType: z.string().nullable(),
+	accountHolderInfo: AccountHolderInfoSchema,
+	identityNumber: z.string().nullable(),
+});
 
 // PayPal payment method
-export const PayPalPaymentMethodSchema = BasePaymentMethodSchema.extend({
+const PayPalPaymentMethodSchema = BasePaymentMethodSchema.extend({
 	BAID: z.string(),
 	email: z.string(),
 });
 
 // Bank transfer payment method
-export const BankTransferPaymentMethodSchema = BasePaymentMethodSchema.extend({
+const BankTransferPaymentMethodSchema = BasePaymentMethodSchema.extend({
 	bankTransferType: z.string(),
 	IBAN: z.string(),
 	businessIdentificationCode: z.string().nullable(),
@@ -102,13 +101,6 @@ export const BankTransferPaymentMethodSchema = BasePaymentMethodSchema.extend({
 	mandateInfo: MandateInfoSchema,
 });
 
-export type CreditCardPaymentMethod = z.infer<
-	typeof CreditCardPaymentMethodSchema
->;
-export type CreditCardReferenceTransaction = z.infer<
-	typeof CreditCardReferenceTransactionSchema
->;
-export type PayPalPaymentMethod = z.infer<typeof PayPalPaymentMethodSchema>;
 export type BankTransferPaymentMethod = z.infer<
 	typeof BankTransferPaymentMethodSchema
 >;
