@@ -68,6 +68,8 @@ function buildPaymentMethodPayload(
 		(pm) => pm.id === defaultPaymentMethodId,
 	);
 	if (bankTransfer) {
+		// BankTransfer is handled via a separate two-step flow after account creation;
+		// returning undefined here signals to the caller to use that path instead.
 		return undefined;
 	}
 
@@ -88,7 +90,6 @@ const sourceContactSchema = z.object({
 	country: z.string().nullish(),
 	state: z.string().nullish(),
 	zipCode: z.string().nullish(),
-	// Delivery instructions are stored on soldToContact
 	SpecialDeliveryInstructions__c: z.string().nullish(),
 });
 
@@ -96,7 +97,6 @@ const sourceBasicInfoSchema = z.object({
 	id: z.string(),
 	name: z.string(),
 	crmId: z.string().nullish(),
-	// Salesforce/identity custom fields copied to the new account
 	sfContactId__c: z.string().nullish(),
 	IdentityId__c: z.string().nullish(),
 	batch: z.string().nullish(),
@@ -133,9 +133,9 @@ function toOrdersApiContact(
 
 // ---------- Input type ----------
 
-// Omit applied distributively across each member of the ProductPurchase union.
-// This removes deliveryContact and deliveryInstructions from delivery product variants
-// since those are sourced from the existing account, not provided by the caller.
+// DistributiveOmit removes deliveryContact and deliveryInstructions from delivery product
+// variants of ProductPurchase — those fields are sourced from the existing account, not
+// provided by the caller.
 type DistributiveOmit<T, K extends PropertyKey> = T extends unknown
 	? Omit<T, K>
 	: never;
@@ -165,7 +165,9 @@ export type CloneAccountWithSubscriptionInput = {
  * taken from the source account's soldToContact; the caller only needs to supply firstDeliveryDate
  * (and deliveryAgent for NationalDelivery).
  *
- * Note: BankTransfer (GoCardless) payment methods are not yet supported — see TODO above.
+ * Note: BankTransfer (GoCardless) uses a two-step flow — account is created without
+ * a payment method, then the mandate is attached via POST /v1/payment-methods and set
+ * as the default. Billing is triggered separately via billing-documents/generate.
  */
 export const cloneAccountWithSubscription = async (
 	zuoraClient: ZuoraClient,
@@ -324,7 +326,7 @@ export const cloneAccountWithSubscription = async (
 	};
 
 	// Post directly rather than via executeOrderRequest to avoid the generic NewAccount<T>
-	// type constraint — the account/payment data is sourced at runtime from the source account.
+	// type constraint — account/payment data is sourced at runtime from the source account.
 	const headers = createdRequestId
 		? { 'idempotency-key': createdRequestId }
 		: undefined;
@@ -351,10 +353,9 @@ export const cloneAccountWithSubscription = async (
 			autoPay: sourceAccount.billingAndPayment.autoPay ?? true,
 		});
 		if (runBilling ?? true) {
-			// Generates the invoice for the new subscription charges.
-			// Payment will be collected by Zuora's autoPay mechanism (autoPay: true
-			// is set on the account), which submits the GoCardless payment request
-			// as Direct Debit is inherently asynchronous (BACS settle in 3+ days).
+			// autoPost:true posts the invoice immediately and submits the GoCardless
+			// payment request. GoCardless / BACS settlement is asynchronous (3+ days),
+			// but the collection instruction is sent synchronously.
 			await generateBillingDocuments(
 				zuoraClient,
 				orderResponse.accountNumber,
