@@ -29,6 +29,9 @@ export const createBankTransferPaymentMethod = async (
 		type: bankTransfer.type,
 		bankCode: bankTransfer.bankCode,
 		accountNumber: bankTransfer.accountNumber,
+		// The account number returned by GET /v1/accounts/{id}/payment-methods is
+		// masked (e.g. ****9911). skipValidation bypasses format validation so
+		// Zuora accepts it; the mandate reference identifies the real bank account.
 		skipValidation: true,
 		accountHolderInfo: {
 			accountHolderName:
