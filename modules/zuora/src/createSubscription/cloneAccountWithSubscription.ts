@@ -152,13 +152,8 @@ export type CloneAccountWithSubscriptionInput = {
 };
 
 // Creates a new Zuora account (cloned from an existing one) together with a new subscription,
-// in a single Orders API request.
-//
-// Account details (contacts, billing info, payment method, Salesforce/identity IDs) are copied
-// from the source account. For delivery products, deliveryContact and deliveryInstructions are
-// taken from the source account's soldToContact; the caller only needs to supply firstDeliveryDate
-// (and deliveryAgent for NationalDelivery).
-//
+// in a single Orders API request. Account details (contacts, billing & delivery info, payment method,
+// Salesforce/identity IDs) are copied from the source account.
 // Note: BankTransfer (GoCardless) uses a two-step flow — account is created without
 // a payment method, then the mandate is attached via POST /v1/payment-methods and set
 // as the default. Billing is triggered separately via billing-documents/generate.
@@ -357,12 +352,9 @@ export const cloneAccountWithSubscription = async (
 		);
 		await updateAccount(zuoraClient, orderResponse.accountNumber, {
 			defaultPaymentMethodId: newPaymentMethodId,
-			autoPay: sourceAccount.billingAndPayment.autoPay ?? true,
+			autoPay: true,
 		});
 		if (runBilling ?? true) {
-			// autoPost:true posts the invoice immediately and submits the GoCardless
-			// payment request. GoCardless / BACS settlement is asynchronous (3+ days),
-			// but the collection instruction is sent synchronously.
 			await generateBillingDocuments(
 				zuoraClient,
 				orderResponse.accountNumber,
