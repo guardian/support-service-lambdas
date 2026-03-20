@@ -30,6 +30,19 @@ function buildPaymentMethodPayload(
 ): Record<string, unknown> | undefined {
 	const { defaultPaymentMethodId } = paymentMethods;
 
+	// CreditCard (plain, non-tokenised) is not supported for cloning: Zuora's API only
+	// returns a masked card number (e.g. ****1234) for PCI-DSS compliance, which cannot
+	// be used to create a new payment method. Use CreditCardReferenceTransaction (CCRT)
+	// instead, which relies on Stripe tokens (tokenId / secondTokenId) that are safe to copy.
+	if (
+		paymentMethods.creditcard?.find((pm) => pm.id === defaultPaymentMethodId)
+	) {
+		throw new Error(
+			`CreditCard payment method is not supported for cloning, ` +
+				`only CreditCardReferenceTransaction, PayPal, or BankTransfer.`,
+		);
+	}
+
 	const creditCardReferenceTransaction =
 		paymentMethods.creditcardreferencetransaction?.find(
 			(pm) => pm.id === defaultPaymentMethodId,
@@ -181,18 +194,6 @@ export const cloneAccountWithSubscription = async (
 	const paymentMethodIsBankTransfer = paymentMethods.banktransfer?.find(
 		(pm) => pm.id === defaultPaymentMethodId,
 	);
-
-	// Plain CreditCard (non-tokenised) cannot be cloned: Zuora only returns masked card
-	// numbers (e.g. ****1234) via the API for PCI-DSS compliance, so we have no valid
-	// card number to create a new payment method.
-	if (
-		paymentMethods.creditcard?.find((pm) => pm.id === defaultPaymentMethodId)
-	) {
-		throw new Error(
-			`Cannot clone account ${sourceAccountNumber}: CreditCard payment method is not supported, ` +
-				`only CreditCardReferenceTransaction, PayPal, or BankTransfer.`,
-		);
-	}
 
 	const paymentMethodPayload = paymentMethodIsBankTransfer
 		? undefined
