@@ -531,7 +531,7 @@ describe('cloneAccountWithSubscription', () => {
 				undefined,
 			),
 		).rejects.toThrow(
-			'Cannot clone account A00001234: CreditCard payment method is not supported,',
+			'CreditCard payment method is not supported for cloning,',
 		);
 	});
 
