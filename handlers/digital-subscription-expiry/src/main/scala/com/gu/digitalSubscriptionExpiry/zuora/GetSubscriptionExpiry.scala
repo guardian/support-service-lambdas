@@ -32,10 +32,13 @@ object GetSubscriptionExpiry {
 
   private val supporterPlusChargeNamePrefixes = List("SUPPORTER PLUS") // includes Tier Three
 
+  private val guardianWeeklyChargeNamePrefixes = List("GW") // Specifically not "Guardian Weekly..." as these are B2B
+
   private def chargeProvisionsDigitalAccess(chargeName: String) = {
     val upperCaseName = chargeName.toUpperCase
     digitalPlusChargeNamePrefixes.exists(upperCaseName.startsWith) ||
-    supporterPlusChargeNamePrefixes.exists(upperCaseName.startsWith)
+    supporterPlusChargeNamePrefixes.exists(upperCaseName.startsWith) ||
+    guardianWeeklyChargeNamePrefixes.exists(upperCaseName.startsWith)
   }
 
   private def getExpiryDateForValidSubscription(

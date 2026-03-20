@@ -160,6 +160,69 @@ class GetSubscriptionExpiryTest extends AnyFlatSpec {
     actualResponse shouldEqual expectedResponse
   }
 
+  it should "does not recognise B2B Guardian Weekly Zone X subs" in {
+
+    val charges = List(
+      RatePlanCharge("Guardian Weekly Annual", lastWeek, nextWeek)
+    )
+
+    val gwSub = SubscriptionResult(
+      id = SubscriptionId("subId"),
+      name = SubscriptionName("subName"),
+      accountId = AccountId("accountId"),
+      casActivationDate = None,
+      customerAcceptanceDate = lastWeek,
+      startDate = lastWeek,
+      endDate = subEndDate,
+      ratePlans = List(RatePlan("Guardian Weekly Zone A", charges)),
+    )
+
+    val actualResponse = GetSubscriptionExpiry(today)("123-sold", gwSub, accountSummary)
+    actualResponse shouldEqual notFoundResponse
+  }
+
+  it should "recognises B2C Guardian Weekly subs" in {
+
+    val charges = List(
+      RatePlanCharge("GW Oct 18 - Annual - Domestic", lastWeek, nextWeek)
+    )
+
+    val gwSub = SubscriptionResult(
+      id = SubscriptionId("subId"),
+      name = SubscriptionName("subName"),
+      accountId = AccountId("accountId"),
+      casActivationDate = None,
+      customerAcceptanceDate = lastWeek,
+      startDate = lastWeek,
+      endDate = subEndDate,
+      ratePlans = List(RatePlan("Guardian Weekly - Domestic", charges)),
+    )
+
+    val actualResponse = GetSubscriptionExpiry(today)("123-sold", gwSub, accountSummary)
+    actualResponse shouldEqual expectedResponse
+  }
+
+  it should "recognises B2C Guardian Weekly Gift subs" in {
+
+    val charges = List(
+      RatePlanCharge("GW GIFT Oct 18 - 1 Year - ROW", lastWeek, nextWeek)
+    )
+
+    val gwSub = SubscriptionResult(
+      id = SubscriptionId("subId"),
+      name = SubscriptionName("subName"),
+      accountId = AccountId("accountId"),
+      casActivationDate = None,
+      customerAcceptanceDate = lastWeek,
+      startDate = lastWeek,
+      endDate = subEndDate,
+      ratePlans = List(RatePlan("Guardian Weekly - ROW", charges)),
+    )
+
+    val actualResponse = GetSubscriptionExpiry(today)("123-sold", gwSub, accountSummary)
+    actualResponse shouldEqual expectedResponse
+  }
+
   it should "return not found for invalid password" in {
     val actualResponse = GetSubscriptionExpiry(today)("invalid password", digitalPack, accountSummary)
     actualResponse shouldEqual notFoundResponse
