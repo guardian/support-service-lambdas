@@ -24,6 +24,8 @@ export const updateAccount = async (
 	payload: {
 		crmId?: string;
 		sfContactId__c?: string;
+		defaultPaymentMethodId?: string;
+		autoPay?: boolean;
 	},
 ): Promise<void> => {
 	const path = `/v1/accounts/${accountNumber}`;

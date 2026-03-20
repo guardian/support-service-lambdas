@@ -19,7 +19,7 @@ export const BasePaymentMethodSchema = z.object({
 	lastTransactionStatus: z.string().nullable(),
 	maxConsecutivePaymentFailures: z.number().nullable(),
 	numConsecutiveFailures: z.number(),
-	paymentRetryWindow: z.string().nullable(),
+	paymentRetryWindow: z.union([z.string(), z.number()]).nullable(),
 	totalNumberOfProcessedPayments: z.number(),
 	totalNumberOfErrorPayments: z.number(),
 	createdDate: z.string(),
@@ -74,10 +74,10 @@ const CreditCardReferenceTransactionSchema = BasePaymentMethodSchema.extend({
 	tokenId: z.string(),
 	secondTokenId: z.string(),
 	mandateInfo: MandateInfoSchema,
-	cardNumber: z.string(),
-	expirationMonth: z.number(),
-	expirationYear: z.number(),
-	creditCardType: z.string(),
+	cardNumber: z.string().nullable(),
+	expirationMonth: z.number().nullable(),
+	expirationYear: z.number().nullable(),
+	creditCardType: z.string().nullable(),
 	accountHolderInfo: AccountHolderInfoSchema,
 	identityNumber: z.string().nullable(),
 });
@@ -101,10 +101,14 @@ const BankTransferPaymentMethodSchema = BasePaymentMethodSchema.extend({
 	mandateInfo: MandateInfoSchema,
 });
 
+export type BankTransferPaymentMethod = z.infer<
+	typeof BankTransferPaymentMethodSchema
+>;
+
 // Main payment method response schema
 export const DefaultPaymentMethodResponseSchema = z.object({
 	defaultPaymentMethodId: z.string(),
-	paymentGateway: z.string(),
+	paymentGateway: z.string().nullable(),
 	creditcard: z.array(CreditCardPaymentMethodSchema).optional(),
 	creditcardreferencetransaction: z
 		.array(CreditCardReferenceTransactionSchema)
@@ -112,3 +116,7 @@ export const DefaultPaymentMethodResponseSchema = z.object({
 	paypal: z.array(PayPalPaymentMethodSchema).optional(),
 	banktransfer: z.array(BankTransferPaymentMethodSchema).optional(),
 });
+
+export type DefaultPaymentMethodResponse = z.infer<
+	typeof DefaultPaymentMethodResponseSchema
+>;

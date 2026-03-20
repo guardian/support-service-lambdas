@@ -1,5 +1,6 @@
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
+import { z } from 'zod';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type {
 	GetInvoiceItemsResponse,
@@ -15,6 +16,26 @@ import {
 	voidSchema,
 } from './types';
 import { zuoraDateFormat } from './utils';
+
+const generateBillingDocumentsResponseSchema = z.object({
+	invoices: z.array(z.object({ id: z.string() })).optional(),
+});
+
+export const generateBillingDocuments = async (
+	zuoraClient: ZuoraClient,
+	accountNumber: string,
+	targetDate: Dayjs,
+): Promise<void> => {
+	await zuoraClient.post(
+		`/v1/accounts/${accountNumber}/billing-documents/generate`,
+		JSON.stringify({
+			targetDate: zuoraDateFormat(targetDate),
+			effectiveDate: zuoraDateFormat(targetDate),
+			autoPost: true,
+		}),
+		generateBillingDocumentsResponseSchema,
+	);
+};
 
 export const getInvoice = async (
 	zuoraClient: ZuoraClient,
