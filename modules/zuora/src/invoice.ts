@@ -17,11 +17,9 @@ import {
 } from './types';
 import { zuoraDateFormat } from './utils';
 
-const generateBillingDocumentsResponseSchema = z
-	.object({
-		invoices: z.array(z.object({ id: z.string() })).optional(),
-	})
-	.passthrough();
+const generateBillingDocumentsResponseSchema = z.object({
+	invoices: z.array(z.object({ id: z.string() })).optional(),
+});
 
 export const generateBillingDocuments = async (
 	zuoraClient: ZuoraClient,
