@@ -1,5 +1,4 @@
 /**
- * Integration tests for cloneAccountWithSubscription against the CODE Zuora environment.
  *
  * @group integration
  */
@@ -49,7 +48,6 @@ describe('cloneAccountWithSubscription integration', () => {
 
 	test('clones a PayPal account and creates a DigitalSubscription', async () => {
 		const sourceAccountId = '2c92c0f875d488d70175d6a29ead032c';
-		// PayPal account uses USD, so we use DigitalSubscription Monthly which supports USD.
 		const requestId = `IT-cloneAccountWithSubscription-${sourceAccountId.slice(-8)}-${Date.now()}`;
 
 		const response = await cloneAccountWithSubscription(
@@ -101,7 +99,7 @@ describe('cloneAccountWithSubscription integration', () => {
 	}, 120000);
 
 	test('clones an account and applies a promo code to the new subscription', async () => {
-		const sourceAccountId = '2c92c0f87568d97201756b1578960694'; // CreditCardReferenceTransaction account in CODE
+		const sourceAccountId = '2c92c0f87568d97201756b1578960694';
 		const promoCode = 'E2E_TEST_SPLUS_MONTHLY';
 		const promotion = await getPromotion(promoCode, 'CODE');
 		const requestId = `IT-cloneAccountWithSubscription-promo-${sourceAccountId.slice(-8)}-${Date.now()}`;
