@@ -98,6 +98,41 @@ const ccRefTxPaymentMethods = {
 	],
 };
 
+const paypalPaymentMethods = {
+	defaultPaymentMethodId: 'pm-pp-id',
+	paymentGateway: 'PayPal Express',
+	paypal: [
+		{
+			id: 'pm-pp-id',
+			type: 'PayPalNativeEC',
+			isDefault: true,
+			BAID: 'BAID-paypal-123',
+			email: 'john@example.com',
+			accountKey: 'account-hex-id-123',
+			paymentMethodNumber: null,
+			status: 'Active',
+			lastTransaction: null,
+			useDefaultRetryRule: true,
+			bankIdentificationNumber: null,
+			deviceSessionId: null,
+			existingMandate: null,
+			ipAddress: null,
+			lastFailedSaleTransactionDate: null,
+			lastTransactionDateTime: null,
+			lastTransactionStatus: null,
+			maxConsecutivePaymentFailures: null,
+			numConsecutiveFailures: 0,
+			paymentRetryWindow: null,
+			totalNumberOfProcessedPayments: 0,
+			totalNumberOfErrorPayments: 0,
+			createdDate: '2024-01-01',
+			updatedDate: '2024-01-01',
+			createdBy: 'user',
+			updatedBy: 'user',
+		},
+	],
+};
+
 const creditCardPaymentMethods = {
 	defaultPaymentMethodId: 'pm-cc-id',
 	paymentGateway: 'Stripe PaymentIntents GNM Membership',
@@ -497,6 +532,159 @@ describe('cloneAccountWithSubscription', () => {
 			),
 		).rejects.toThrow(
 			'Cannot clone account A00001234: CreditCard payment method is not supported,',
+		);
+	});
+
+	it('sends CCRT tokenId and secondTokenId as the payment method payload', async () => {
+		const mockGet = jest
+			.fn()
+			.mockResolvedValueOnce(baseSourceAccount)
+			.mockResolvedValueOnce(ccRefTxPaymentMethods);
+		const mockPost = jest.fn().mockResolvedValueOnce(orderResponse);
+		const client = buildMockZuoraClient(mockGet, mockPost);
+
+		await cloneAccountWithSubscription(
+			client,
+			productCatalog,
+			{
+				sourceAccountNumber: 'A00001234',
+				productPurchase: { product: 'GuardianAdLite', ratePlan: 'Monthly' },
+			},
+			undefined,
+		);
+
+		const [, body] = mockPost.mock.calls[0] as [string, string];
+		const parsed = JSON.parse(body) as {
+			newAccount: { paymentMethod: Record<string, unknown> };
+		};
+		expect(parsed.newAccount.paymentMethod.type).toBe(
+			'CreditCardReferenceTransaction',
+		);
+		expect(parsed.newAccount.paymentMethod.tokenId).toBe('tok_stripe_123');
+		expect(parsed.newAccount.paymentMethod.secondTokenId).toBe(
+			'cus_stripe_456',
+		);
+	});
+
+	it('sends PayPal BAID and email as the payment method payload', async () => {
+		const paypalSourceAccount = {
+			...baseSourceAccount,
+			billingAndPayment: {
+				...baseSourceAccount.billingAndPayment,
+				paymentGateway: 'PayPal Express',
+			},
+		};
+		const mockGet = jest
+			.fn()
+			.mockResolvedValueOnce(paypalSourceAccount)
+			.mockResolvedValueOnce(paypalPaymentMethods);
+		const mockPost = jest.fn().mockResolvedValueOnce(orderResponse);
+		const client = buildMockZuoraClient(mockGet, mockPost);
+
+		await cloneAccountWithSubscription(
+			client,
+			productCatalog,
+			{
+				sourceAccountNumber: 'A00001234',
+				productPurchase: { product: 'GuardianAdLite', ratePlan: 'Monthly' },
+			},
+			undefined,
+		);
+
+		const [, body] = mockPost.mock.calls[0] as [string, string];
+		const parsed = JSON.parse(body) as {
+			newAccount: { paymentMethod: Record<string, unknown> };
+		};
+		expect(parsed.newAccount.paymentMethod.type).toBe('PayPalNativeEC');
+		expect(parsed.newAccount.paymentMethod.BAID).toBe('BAID-paypal-123');
+		expect(parsed.newAccount.paymentMethod.email).toBe('john@example.com');
+	});
+
+	it('skips billing documents when runBilling is false for BankTransfer', async () => {
+		const mockGet = jest
+			.fn()
+			.mockResolvedValueOnce(baseSourceAccount)
+			.mockResolvedValueOnce(bankTransferPaymentMethods);
+		const mockPost = jest
+			.fn()
+			.mockResolvedValueOnce(orderResponse) // POST /v1/orders
+			.mockResolvedValueOnce({ id: 'new-pm-id' }); // POST /v1/payment-methods
+		const mockPut = jest.fn().mockResolvedValueOnce(undefined);
+		const client = buildMockZuoraClient(mockGet, mockPost, mockPut);
+
+		await cloneAccountWithSubscription(
+			client,
+			productCatalog,
+			{
+				sourceAccountNumber: 'A00001234',
+				productPurchase: { product: 'GuardianAdLite', ratePlan: 'Monthly' },
+				runBilling: false,
+			},
+			undefined,
+		);
+
+		const postPaths = (mockPost.mock.calls as Array<[string]>).map(([p]) => p);
+		expect(postPaths).not.toContain(
+			'/v1/accounts/A00099999/billing-documents/generate',
+		);
+	});
+
+	it('throws when the source account has no payment gateway', async () => {
+		const accountWithNoGateway = {
+			...baseSourceAccount,
+			billingAndPayment: {
+				...baseSourceAccount.billingAndPayment,
+				paymentGateway: null,
+			},
+		};
+		const mockGet = jest
+			.fn()
+			.mockResolvedValueOnce(accountWithNoGateway)
+			.mockResolvedValueOnce(ccRefTxPaymentMethods);
+		const client = buildMockZuoraClient(mockGet, jest.fn());
+
+		await expect(
+			cloneAccountWithSubscription(
+				client,
+				productCatalog,
+				{
+					sourceAccountNumber: 'A00001234',
+					productPurchase: { product: 'GuardianAdLite', ratePlan: 'Monthly' },
+				},
+				undefined,
+			),
+		).rejects.toThrow('No payment gateway found for account A00001234');
+	});
+
+	it('throws when the default payment method is not found among known types', async () => {
+		const unknownPmMethods = {
+			defaultPaymentMethodId: 'pm-unknown-id',
+			paymentGateway: 'Stripe PaymentIntents GNM Membership',
+			creditcardreferencetransaction: [
+				{
+					...ccRefTxPaymentMethods.creditcardreferencetransaction[0],
+					id: 'pm-different-id',
+				},
+			],
+		};
+		const mockGet = jest
+			.fn()
+			.mockResolvedValueOnce(baseSourceAccount)
+			.mockResolvedValueOnce(unknownPmMethods);
+		const client = buildMockZuoraClient(mockGet, jest.fn());
+
+		await expect(
+			cloneAccountWithSubscription(
+				client,
+				productCatalog,
+				{
+					sourceAccountNumber: 'A00001234',
+					productPurchase: { product: 'GuardianAdLite', ratePlan: 'Monthly' },
+				},
+				undefined,
+			),
+		).rejects.toThrow(
+			'Could not find default payment method pm-unknown-id for account A00001234',
 		);
 	});
 });
