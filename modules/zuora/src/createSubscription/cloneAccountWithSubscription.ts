@@ -188,13 +188,13 @@ export const cloneAccountWithSubscription = async (
 
 	// Plain CreditCard (non-tokenised) cannot be cloned: Zuora only returns masked card
 	// numbers (e.g. ****1234) via the API for PCI-DSS compliance, so we have no valid
-	// card number to pass to the Orders API. Accounts should use CreditCardReferenceTransaction
-	// (Stripe-tokenised), PayPal, or BankTransfer instead.
-	if (paymentMethods.creditcard?.find((pm) => pm.id === defaultPaymentMethodId)) {
+	// card number to create a new payment method.
+	if (
+		paymentMethods.creditcard?.find((pm) => pm.id === defaultPaymentMethodId)
+	) {
 		throw new Error(
-			`Cannot clone account ${sourceAccountNumber}: CreditCard payment method is not supported. ` +
-				`Zuora only exposes masked card numbers via the API (PCI-DSS compliance). ` +
-				`The account must use CreditCardReferenceTransaction, PayPal, or BankTransfer.`,
+			`Cannot clone account ${sourceAccountNumber}: CreditCard payment method is not supported, ` +
+				`only CreditCardReferenceTransaction, PayPal, or BankTransfer.`,
 		);
 	}
 
