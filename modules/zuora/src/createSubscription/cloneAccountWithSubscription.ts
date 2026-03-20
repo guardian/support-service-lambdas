@@ -25,10 +25,6 @@ import { getProductRatePlan } from './getProductRatePlan';
 import { ReaderType } from './readerType';
 import { getSubscriptionDates } from './subscriptionDates';
 
-// CreditCard (plain, non-tokenised) is not supported for cloning: Zuora's API only
-// returns a masked card number (e.g. ****1234) for PCI-DSS compliance, which cannot
-// be used to create a new payment method. Use CreditCardReferenceTransaction (CCRT)
-// instead, which relies on Stripe tokens (tokenId / secondTokenId) that are safe to copy.
 function buildPaymentMethodPayload(
 	paymentMethods: DefaultPaymentMethodResponse,
 ): Record<string, unknown> | undefined {
