@@ -32,8 +32,7 @@ function buildPaymentMethodPayload(
 
 	// CreditCard (plain, non-tokenised) is not supported for cloning: Zuora's API only
 	// returns a masked card number (e.g. ****1234) for PCI-DSS compliance, which cannot
-	// be used to create a new payment method. Use CreditCardReferenceTransaction (CCRT)
-	// instead, which relies on Stripe tokens (tokenId / secondTokenId) that are safe to copy.
+	// be used to create a new payment method.
 	if (
 		paymentMethods.creditcard?.find((pm) => pm.id === defaultPaymentMethodId)
 	) {
