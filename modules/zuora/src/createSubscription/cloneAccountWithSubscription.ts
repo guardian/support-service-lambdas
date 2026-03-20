@@ -25,24 +25,14 @@ import { getProductRatePlan } from './getProductRatePlan';
 import { ReaderType } from './readerType';
 import { getSubscriptionDates } from './subscriptionDates';
 
+// CreditCard (plain, non-tokenised) is not supported for cloning: Zuora's API only
+// returns a masked card number (e.g. ****1234) for PCI-DSS compliance, which cannot
+// be used to create a new payment method. Use CreditCardReferenceTransaction (CCRT)
+// instead, which relies on Stripe tokens (tokenId / secondTokenId) that are safe to copy.
 function buildPaymentMethodPayload(
 	paymentMethods: DefaultPaymentMethodResponse,
 ): Record<string, unknown> | undefined {
 	const { defaultPaymentMethodId } = paymentMethods;
-
-	const creditCard = paymentMethods.creditcard?.find(
-		(pm) => pm.id === defaultPaymentMethodId,
-	);
-	if (creditCard) {
-		return {
-			type: creditCard.type,
-			cardNumber: creditCard.cardNumber,
-			expirationMonth: creditCard.expirationMonth,
-			expirationYear: creditCard.expirationYear,
-			creditCardType: creditCard.creditCardType,
-			accountHolderInfo: creditCard.accountHolderInfo,
-		};
-	}
 
 	const creditCardReferenceTransaction =
 		paymentMethods.creditcardreferencetransaction?.find(
@@ -195,6 +185,19 @@ export const cloneAccountWithSubscription = async (
 	const paymentMethodIsBankTransfer = paymentMethods.banktransfer?.find(
 		(pm) => pm.id === defaultPaymentMethodId,
 	);
+
+	// Plain CreditCard (non-tokenised) cannot be cloned: Zuora only returns masked card
+	// numbers (e.g. ****1234) via the API for PCI-DSS compliance, so we have no valid
+	// card number to pass to the Orders API. Accounts should use CreditCardReferenceTransaction
+	// (Stripe-tokenised), PayPal, or BankTransfer instead.
+	if (paymentMethods.creditcard?.find((pm) => pm.id === defaultPaymentMethodId)) {
+		throw new Error(
+			`Cannot clone account ${sourceAccountNumber}: CreditCard payment method is not supported. ` +
+				`Zuora only exposes masked card numbers via the API (PCI-DSS compliance). ` +
+				`The account must use CreditCardReferenceTransaction, PayPal, or BankTransfer.`,
+		);
+	}
+
 	const paymentMethodPayload = paymentMethodIsBankTransfer
 		? undefined
 		: buildPaymentMethodPayload(paymentMethods);
