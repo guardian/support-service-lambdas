@@ -98,6 +98,50 @@ const ccRefTxPaymentMethods = {
 	],
 };
 
+const creditCardPaymentMethods = {
+	defaultPaymentMethodId: 'pm-cc-id',
+	paymentGateway: 'Stripe PaymentIntents GNM Membership',
+	creditcard: [
+		{
+			id: 'pm-cc-id',
+			type: 'CreditCard',
+			isDefault: true,
+			cardNumber: '****1234',
+			expirationMonth: 12,
+			expirationYear: 2030,
+			creditCardType: 'Visa',
+			accountKey: 'account-hex-id-123',
+			paymentMethodNumber: null,
+			status: 'Active',
+			lastTransaction: null,
+			useDefaultRetryRule: true,
+			bankIdentificationNumber: null,
+			deviceSessionId: null,
+			existingMandate: null,
+			ipAddress: null,
+			lastFailedSaleTransactionDate: null,
+			lastTransactionDateTime: null,
+			lastTransactionStatus: null,
+			maxConsecutivePaymentFailures: null,
+			numConsecutiveFailures: 0,
+			paymentRetryWindow: null,
+			totalNumberOfProcessedPayments: 0,
+			totalNumberOfErrorPayments: 0,
+			createdDate: '2024-01-01',
+			updatedDate: '2024-01-01',
+			createdBy: 'user',
+			updatedBy: 'user',
+			accountHolderInfo: { accountHolderName: 'John Doe' },
+			identityNumber: null,
+			mandateInfo: {
+				mandateStatus: null,
+				mandateReason: null,
+				mandateId: null,
+			},
+		},
+	],
+};
+
 const bankTransferPaymentMethods = {
 	defaultPaymentMethodId: 'pm-bt-id',
 	paymentGateway: 'GoCardless',
@@ -432,5 +476,27 @@ describe('cloneAccountWithSubscription', () => {
 		const customFields = parsed.subscriptions[0]?.customFields;
 		expect(customFields?.InitialPromotionCode__c).toBe('PROMO25');
 		expect(customFields?.PromotionCode__c).toBe('PROMO25');
+	});
+
+	it('throws for a CreditCard account because Zuora only exposes a masked card number', async () => {
+		const mockGet = jest
+			.fn()
+			.mockResolvedValueOnce(baseSourceAccount)
+			.mockResolvedValueOnce(creditCardPaymentMethods);
+		const client = buildMockZuoraClient(mockGet, jest.fn());
+
+		await expect(
+			cloneAccountWithSubscription(
+				client,
+				productCatalog,
+				{
+					sourceAccountNumber: 'A00001234',
+					productPurchase: { product: 'GuardianAdLite', ratePlan: 'Monthly' },
+				},
+				undefined,
+			),
+		).rejects.toThrow(
+			'Cannot clone account A00001234: CreditCard payment method is not supported,',
+		);
 	});
 });
