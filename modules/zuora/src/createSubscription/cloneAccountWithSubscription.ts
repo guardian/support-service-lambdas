@@ -44,8 +44,6 @@ function buildPaymentMethodPayload(
 		};
 	}
 
-	// The tokenId/secondTokenId (Stripe payment method reference) is preserved and accepted
-	// by the Orders API, so CCRT accounts can be cloned without any special handling.
 	const creditCardReferenceTransaction =
 		paymentMethods.creditcardreferencetransaction?.find(
 			(pm) => pm.id === defaultPaymentMethodId,
@@ -95,9 +93,6 @@ const sourceBasicInfoSchema = z.object({
 	crmId: z.string().nullish(),
 	sfContactId__c: z.string().nullish(),
 	IdentityId__c: z.string().nullish(),
-	batch: z.string().nullish(),
-	notes: z.string().nullish(),
-	salesRep: z.string().nullish(),
 });
 
 const sourceBillingAndPaymentSchema = z.object({
@@ -157,8 +152,6 @@ export type CloneAccountWithSubscriptionInput = {
 	acquisitionSource?: string;
 	createdByCSR?: string;
 };
-
-// ---------- Main function ----------
 
 // Creates a new Zuora account (cloned from an existing one) together with a new subscription,
 // in a single Orders API request.
@@ -339,7 +332,9 @@ export const cloneAccountWithSubscription = async (
 	};
 
 	// Post directly rather than via executeOrderRequest to avoid the generic NewAccount<T>
-	// type constraint — account/payment data is sourced at runtime from the source account.
+	// type constraint — payment data is sourced at runtime from the source account so we don't
+	// have a T to work with. Also the payment gateway we get from Zuora is less strongly typed
+	// than the one in our codebase
 	const headers = createdRequestId
 		? { 'idempotency-key': createdRequestId }
 		: undefined;
