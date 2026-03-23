@@ -99,10 +99,10 @@ Resources:
       Dimensions:
         - Name: FunctionName
           Value: !Ref DeliveryProblemCreditProcessor
-      EvaluationPeriods: 1
+      EvaluationPeriods: 65
       MetricName: Errors
       Namespace: AWS/Lambda
-      Period: 3600
+      Period: 60
       Statistic: Sum
       Threshold: 3
       TreatMissingData: ignore
