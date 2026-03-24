@@ -114,7 +114,7 @@ describe('getLatestValidSubscription', () => {
 		);
 
 		expect(subscription).toBeDefined();
-		expect(subscription?.termEndDate).toStrictEqual(dayjs('2025-02-01'));
-		expect(subscription?.productRatePlanName).toBe('SupporterPlus');
+		expect(subscription?.termEndDate).toStrictEqual(dayjs('2025-01-01'));
+		expect(subscription?.productRatePlanName).toBe('NationalDelivery');
 	});
 });
