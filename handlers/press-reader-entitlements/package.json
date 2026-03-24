@@ -21,7 +21,7 @@
     "@aws-sdk/client-ssm": "^3.940.0",
     "@aws-sdk/util-dynamodb": "^3.940.0",
     "dayjs": "^1.11.13",
-    "fast-xml-parser": "^5.5.8",
+    "fast-xml-parser": "^5.5.9",
     "zod": "catalog:"
   },
   "devDependencies": {
