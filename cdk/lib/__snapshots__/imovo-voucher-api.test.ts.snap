@@ -74,7 +74,7 @@ exports[`The Imovo voucher API stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":secret:CODE/imovo-voucher-api/api-key",
+                    ":secret:CODE/imovo-voucher-api/api-key-*",
                   ],
                 ],
               },
@@ -516,6 +516,50 @@ exports[`The Imovo voucher API stack matches the snapshot 1`] = `
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
     },
+    "QueuePolicy25439813": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:aws:sns:",
+                        {
+                          "Ref": "AWS::Region",
+                        },
+                        ":942464564246:identity-identity-gateway-CODE-PrintPromoTopic",
+                      ],
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "sns.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "Queue4A7E3555",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "Queue4A7E3555",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
     "VoucherTable1AB9F1C6": {
       "DeletionPolicy": "Delete",
       "Properties": {
@@ -774,7 +818,7 @@ DLQ: https://",
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":secret:PROD/imovo-voucher-api/api-key",
+                    ":secret:PROD/imovo-voucher-api/api-key-*",
                   ],
                 ],
               },
@@ -1215,6 +1259,50 @@ DLQ: https://",
       },
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
+    },
+    "QueuePolicy25439813": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:aws:sns:",
+                        {
+                          "Ref": "AWS::Region",
+                        },
+                        ":942464564246:identity-identity-gateway-PROD-PrintPromoTopic",
+                      ],
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "sns.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "Queue4A7E3555",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "Queue4A7E3555",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
     },
     "VoucherTable1AB9F1C6": {
       "DeletionPolicy": "Retain",

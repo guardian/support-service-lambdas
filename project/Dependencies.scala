@@ -52,7 +52,7 @@ object Dependencies {
   val circe = "io.circe" %% "circe-generic" % circeVersion
   val circeParser = "io.circe" %% "circe-parser" % circeVersion
   val circeConfig = "io.circe" %% "circe-config" % "0.10.1"
-  val playJson = "org.playframework" %% "play-json" % "3.0.4"
+  val playJson = "org.playframework" %% "play-json" % "3.0.6"
 
   // upickle here is a temporary redundancy of circe while we are migrating to it
   val upickle = "com.lihaoyi" %% "upickle" % "3.1.0"
@@ -101,7 +101,7 @@ object Dependencies {
   val scalaMock = "org.scalamock" %% "scalamock" % "7.3.2" % Test
   val mockito = "org.mockito" % "mockito-core" % "5.21.0" % Test
   // play-json still uses an old version of jackson-core which has a vulnerability - https://security.snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-7569538
-  val jacksonVersion = "2.17.3"
+  val jacksonVersion = "2.18.6"
 
   val jacksonDependencies: Seq[ModuleID] = Seq(
     "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,

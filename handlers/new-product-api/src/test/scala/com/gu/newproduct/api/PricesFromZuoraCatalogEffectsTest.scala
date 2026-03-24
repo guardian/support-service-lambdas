@@ -75,12 +75,12 @@ object ProductsData {
     DigitalVoucherSaturday,
   )
   val gw = Set(
-    GuardianWeeklyROWQuarterly,
-    GuardianWeeklyDomesticMonthly,
-    GuardianWeeklyROWMonthly,
-    GuardianWeeklyROWAnnual,
-    GuardianWeeklyDomesticQuarterly,
-    GuardianWeeklyDomesticAnnual,
+    GuardianWeeklyPlusROWQuarterly,
+    GuardianWeeklyPlusDomesticMonthly,
+    GuardianWeeklyPlusROWMonthly,
+    GuardianWeeklyPlusROWAnnual,
+    GuardianWeeklyPlusDomesticQuarterly,
+    GuardianWeeklyPlusDomesticAnnual,
   )
   val supporterPlus = Set(
     AnnualSupporterPlus,

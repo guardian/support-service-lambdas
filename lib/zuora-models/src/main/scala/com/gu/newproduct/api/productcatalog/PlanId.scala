@@ -9,8 +9,8 @@ sealed trait SupporterPlusPlanId
 sealed trait ContributionPlanId
 sealed trait HomeDeliveryPlanId
 sealed trait DigipackPlanId
-sealed trait GuardianWeeklyDomestic
-sealed trait GuardianWeeklyRow
+sealed trait GuardianWeeklyPlusDomestic
+sealed trait GuardianWeeklyPlusRow
 sealed trait TierThreePlanId
 sealed trait DigitalVoucherPlanId
 sealed trait NationalDeliveryPlanId
@@ -66,21 +66,25 @@ object PlanId {
 
   case object DigipackAnnual extends PlanId("digipack_annual") with DigipackPlanId
 
-  case object GuardianWeeklyDomesticMonthly
-      extends PlanId("guardian_weekly_domestic_monthly")
-      with GuardianWeeklyDomestic
+  case object GuardianWeeklyPlusDomesticMonthly
+      extends PlanId("guardian_weekly_plus_domestic_monthly")
+      with GuardianWeeklyPlusDomestic
 
-  case object GuardianWeeklyDomesticQuarterly
-      extends PlanId("guardian_weekly_domestic_quarterly")
-      with GuardianWeeklyDomestic
+  case object GuardianWeeklyPlusDomesticQuarterly
+      extends PlanId("guardian_weekly_plus_domestic_quarterly")
+      with GuardianWeeklyPlusDomestic
 
-  case object GuardianWeeklyDomesticAnnual extends PlanId("guardian_weekly_domestic_annual") with GuardianWeeklyDomestic
+  case object GuardianWeeklyPlusDomesticAnnual
+      extends PlanId("guardian_weekly_plus_domestic_annual")
+      with GuardianWeeklyPlusDomestic
 
-  case object GuardianWeeklyROWMonthly extends PlanId("guardian_weekly_row_monthly") with GuardianWeeklyRow
+  case object GuardianWeeklyPlusROWMonthly extends PlanId("guardian_weekly_plus_row_monthly") with GuardianWeeklyPlusRow
 
-  case object GuardianWeeklyROWQuarterly extends PlanId("guardian_weekly_row_quarterly") with GuardianWeeklyRow
+  case object GuardianWeeklyPlusROWQuarterly
+      extends PlanId("guardian_weekly_plus_row_quarterly")
+      with GuardianWeeklyPlusRow
 
-  case object GuardianWeeklyROWAnnual extends PlanId("guardian_weekly_row_annual") with GuardianWeeklyRow
+  case object GuardianWeeklyPlusROWAnnual extends PlanId("guardian_weekly_plus_row_annual") with GuardianWeeklyPlusRow
 
   case object TierThreeDomesticMonthly extends PlanId("tier_three_domestic_monthly") with TierThreePlanId
 
@@ -159,16 +163,16 @@ object PlanId {
     DigipackMonthly,
   )
 
-  val enabledGuardianWeeklyDomesticPlans = List(
-    GuardianWeeklyDomesticMonthly,
-    GuardianWeeklyDomesticQuarterly,
-    GuardianWeeklyDomesticAnnual,
+  val enabledGuardianWeeklyPlusDomesticPlans = List(
+    GuardianWeeklyPlusDomesticMonthly,
+    GuardianWeeklyPlusDomesticQuarterly,
+    GuardianWeeklyPlusDomesticAnnual,
   )
 
-  val enabledGuardianWeeklyROWPlans = List(
-    GuardianWeeklyROWMonthly,
-    GuardianWeeklyROWQuarterly,
-    GuardianWeeklyROWAnnual,
+  val enabledGuardianWeeklyPlusROWPlans = List(
+    GuardianWeeklyPlusROWMonthly,
+    GuardianWeeklyPlusROWQuarterly,
+    GuardianWeeklyPlusROWAnnual,
   )
 
   val enabledDigitalVoucherPlans = List(
@@ -201,7 +205,7 @@ object PlanId {
 
   val supportedPlans: List[PlanId] =
     enabledVoucherPlans ++ enabledSupporterPlusPlans ++ enabledContributionPlans ++ enabledHomeDeliveryPlans ++
-      enabledDigipackPlans ++ enabledGuardianWeeklyDomesticPlans ++ enabledGuardianWeeklyROWPlans ++
+      enabledDigipackPlans ++ enabledGuardianWeeklyPlusDomesticPlans ++ enabledGuardianWeeklyPlusROWPlans ++
       enabledDigitalVoucherPlans ++ enabledNationalDeliveryPlans ++ enabledTierThreePlans
 
   def fromName(name: String): Option[PlanId] = supportedPlans.find(_.name == name)
