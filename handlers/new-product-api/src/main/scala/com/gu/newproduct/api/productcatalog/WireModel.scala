@@ -207,12 +207,6 @@ object WireModel {
         enabledForDeliveryCountries = Some(List(Country.UK.name)),
       )
 
-      val tierThree = WireProduct(
-        label = "Digital + Print (Tier Three)",
-        plans = PlanId.enabledTierThreePlans.map(wirePlanForPlanId),
-        enabledForDeliveryCountries = Some(List(Country.UK.name)),
-      )
-
       val availableProductsAndPlans = {
         val unfiltered = List(
           contributionProduct,
@@ -222,7 +216,6 @@ object WireModel {
           nationalDelivery,
           digitalVoucher,
           voucherProduct,
-          tierThree,
           guardianWeeklyDomestic,
           guardianWeeklyROW,
         )

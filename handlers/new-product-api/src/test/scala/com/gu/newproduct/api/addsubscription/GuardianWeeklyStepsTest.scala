@@ -151,7 +151,6 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
       addDigipackSub = dummySteps,
       addGuardianWeeklyDomesticSub = stubAddVoucherSteps,
       addGuardianWeeklyROWSub = stubAddVoucherSteps,
-      addTierThree = dummySteps,
     )(
       ApiGatewayRequest(
         None,

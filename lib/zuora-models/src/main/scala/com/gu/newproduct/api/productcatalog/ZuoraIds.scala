@@ -173,20 +173,6 @@ object ZuoraIds {
     )
   }
 
-  case class TierThreeZuoraIds(
-      monthlyDomestic: ProductRatePlanId,
-      annualDomestic: ProductRatePlanId,
-      monthlyRestOfWorld: ProductRatePlanId,
-      annualRestOfWorld: ProductRatePlanId,
-  ) {
-    val byApiPlanId: Map[PlanId, ProductRatePlanId] = Map(
-      TierThreeDomesticMonthly -> monthlyDomestic,
-      TierThreeDomesticAnnual -> annualDomestic,
-      TierThreeROWMonthly -> monthlyRestOfWorld,
-      TierThreeROWAnnual -> annualRestOfWorld,
-    )
-  }
-
   case class ZuoraIds(
       supporterPlusZuoraIds: SupporterPlusZuoraIds,
       contributionsZuoraIds: ContributionsZuoraIds,
@@ -197,7 +183,6 @@ object ZuoraIds {
       guardianWeeklyPlusROW: GuardianWeeklyROWIds,
       digitalVoucher: DigitalVoucherZuoraIds,
       nationalDeliveryZuoraIds: NationalDeliveryZuoraIds,
-      tierThreeZuoraIds: TierThreeZuoraIds,
   ) {
     def apiIdToRateplanId: Map[PlanId, ProductRatePlanId] =
       (supporterPlusZuoraIds.planAndChargeByApiPlanId.view.mapValues(_.productRatePlanId) ++
@@ -208,8 +193,7 @@ object ZuoraIds {
         guardianWeeklyPlusDomestic.zuoraRatePlanIdByApiPlanId ++
         guardianWeeklyPlusROW.zuoraRatePlanIdByApiPlanId ++
         digitalVoucher.byApiPlanId ++
-        nationalDeliveryZuoraIds.byApiPlanId ++
-        tierThreeZuoraIds.byApiPlanId).toMap
+        nationalDeliveryZuoraIds.byApiPlanId).toMap
 
     val rateplanIdToApiId: Map[ProductRatePlanId, PlanId] = apiIdToRateplanId.map(_.swap)
 
@@ -314,12 +298,6 @@ object ZuoraIds {
           weekendPlus = ProductRatePlanId("8a1280be96d33dbf0196d487b55c1283"),
           sixDayPlus = ProductRatePlanId("8a12994696d3587b0196d484491e3beb"),
         ),
-        TierThreeZuoraIds(
-          monthlyDomestic = ProductRatePlanId("8a1299788ff2ec100190025fccc32bb1"),
-          annualDomestic = ProductRatePlanId("8a1288a38ff2af980190025b32591ccc"),
-          monthlyRestOfWorld = ProductRatePlanId("8a128ab18ff2af9301900255d77979ac"),
-          annualRestOfWorld = ProductRatePlanId("8a1299788ff2ec100190024d1e3b1a09"),
-        ),
       ),
       Stage("CODE") -> ZuoraIds(
         SupporterPlusZuoraIds(
@@ -410,12 +388,6 @@ object ZuoraIds {
           everydayPlus = ProductRatePlanId("71a116628be96ab11606b51ec6060555"),
           weekendPlus = ProductRatePlanId("71a1166283a96ab11606b50ebbb50381"),
           sixDayPlus = ProductRatePlanId("71a1383e2a796aafcb16b527842001ca"),
-        ),
-        TierThreeZuoraIds(
-          monthlyDomestic = ProductRatePlanId("8ad097b48ff26452019001cebac92376"),
-          annualDomestic = ProductRatePlanId("8ad081dd8ff24a9a019001d95e4e3574"),
-          monthlyRestOfWorld = ProductRatePlanId("8ad081dd8ff24a9a019001df2ce83657"),
-          annualRestOfWorld = ProductRatePlanId("8ad097b48ff26452019001e65bbf2ca8"),
         ),
       ),
     )
