@@ -1,7 +1,10 @@
 import type { ImovoVoucherResponse, VoucherRecord } from './schemas';
 
 export interface VoucherProvider {
-	requestVoucher(voucherType: string): Promise<ImovoVoucherResponse>;
+	requestVoucher(
+		campaignCode: string,
+		customerReference: string,
+	): Promise<ImovoVoucherResponse>;
 }
 
 export interface VoucherRepository {

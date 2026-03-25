@@ -65,7 +65,7 @@ describe('handleSqsEvent', () => {
 		});
 		const deps = buildFakeDeps();
 
-		await handleSqsEvent(event, deps);
+		await handleSqsEvent(event, deps, 'TEST-CAMPAIGN');
 
 		expect(deps.savedRecords).toHaveLength(1);
 		expect(deps.savedRecords[0]?.voucherCode).toBe('FAKE-CODE');
@@ -79,7 +79,7 @@ describe('handleSqsEvent', () => {
 		);
 		const deps = buildFakeDeps();
 
-		await handleSqsEvent(event, deps);
+		await handleSqsEvent(event, deps, 'TEST-CAMPAIGN');
 
 		expect(deps.savedRecords).toHaveLength(2);
 		expect(deps.savedRecords[0]?.identityId).toBe('id-a');
@@ -94,7 +94,7 @@ describe('handleSqsEvent', () => {
 		});
 		const deps = buildFakeDeps();
 
-		await handleSqsEvent(event, deps);
+		await handleSqsEvent(event, deps, 'TEST-CAMPAIGN');
 
 		expect(deps.emailedRecords).toHaveLength(1);
 		expect(deps.emailedRecords[0]?.voucherCode).toBe('FAKE-CODE');
@@ -115,7 +115,7 @@ describe('handleSqsEvent', () => {
 		const event = buildSqsEvent(subscriptionConfirmation);
 		const deps = buildFakeDeps();
 
-		await handleSqsEvent(event, deps);
+		await handleSqsEvent(event, deps, 'TEST-CAMPAIGN');
 
 		expect(deps.savedRecords).toHaveLength(0);
 		expect(deps.emailedRecords).toHaveLength(0);
@@ -136,7 +136,7 @@ describe('handleSqsEvent', () => {
 		const event = buildSqsEvent(snsWrappedBody);
 		const deps = buildFakeDeps();
 
-		await handleSqsEvent(event, deps);
+		await handleSqsEvent(event, deps, 'TEST-CAMPAIGN');
 
 		expect(deps.savedRecords).toHaveLength(1);
 		expect(deps.savedRecords[0]?.identityId).toBe('id-sns');
@@ -148,7 +148,7 @@ describe('handleSqsEvent', () => {
 		const event = buildSqsEvent({ email: 'not-valid' });
 		const deps = buildFakeDeps();
 
-		await expect(handleSqsEvent(event, deps)).rejects.toThrow(
+		await expect(handleSqsEvent(event, deps, 'TEST-CAMPAIGN')).rejects.toThrow(
 			'Invalid SQS message format',
 		);
 	});
@@ -164,7 +164,9 @@ describe('handleSqsEvent', () => {
 			requestVoucher: () => Promise.reject(new Error('provider down')),
 		};
 
-		await expect(handleSqsEvent(event, deps)).rejects.toThrow('provider down');
+		await expect(handleSqsEvent(event, deps, 'TEST-CAMPAIGN')).rejects.toThrow(
+			'provider down',
+		);
 		expect(deps.savedRecords).toHaveLength(0);
 	});
 });

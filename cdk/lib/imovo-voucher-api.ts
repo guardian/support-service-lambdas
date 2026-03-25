@@ -18,6 +18,11 @@ const imovoApiBaseUrl: Record<SrStageNames, string> = {
 	PROD: 'https://imovocoreapi.paypoint.services',
 };
 
+const imovoCampaignCode: Record<SrStageNames, string> = {
+	CODE: 'GSUBPROMO001',
+	PROD: 'GSUBPROMO001',
+};
+
 const identityAccountId = '942464564246';
 
 export class ImovoVoucherApi extends SrStack {
@@ -69,6 +74,7 @@ export class ImovoVoucherApi extends SrStack {
 				securityGroups: [securityGroup],
 				environment: {
 					IMOVO_API_BASE_URL: imovoApiBaseUrl[stage],
+					IMOVO_CAMPAIGN_CODE: imovoCampaignCode[stage],
 					VOUCHER_TABLE_NAME: voucherTable.tableName,
 				},
 			},

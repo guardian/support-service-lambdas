@@ -37,6 +37,7 @@ function extractMessageBody(sqsBody: string): unknown {
 export async function handleSqsEvent(
 	event: SQSEvent,
 	deps: Dependencies,
+	campaignCode: string,
 ): Promise<void> {
 	console.log(`Processing ${event.Records.length} SQS record(s)`);
 
@@ -60,6 +61,7 @@ export async function handleSqsEvent(
 
 		const result = await processVoucherRequest(
 			parsed.data,
+			campaignCode,
 			deps.voucherProvider,
 			deps.voucherRepository,
 		);
