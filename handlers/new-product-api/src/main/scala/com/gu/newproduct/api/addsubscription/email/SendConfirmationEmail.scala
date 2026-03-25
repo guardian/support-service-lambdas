@@ -58,7 +58,6 @@ object SendConfirmationEmail extends Logging {
       case _: GuardianWeeklyPlusDomestic => "guardian-weekly-plus"
       case _: GuardianWeeklyPlusRow => "guardian-weekly-plus"
       case _: NationalDeliveryPlanId => "paper-national-delivery"
-      case _: TierThreePlanId => "tier-three"
     },
   )
 }

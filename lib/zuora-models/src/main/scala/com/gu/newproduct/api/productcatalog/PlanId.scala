@@ -11,7 +11,6 @@ sealed trait HomeDeliveryPlanId
 sealed trait DigipackPlanId
 sealed trait GuardianWeeklyPlusDomestic
 sealed trait GuardianWeeklyPlusRow
-sealed trait TierThreePlanId
 sealed trait DigitalVoucherPlanId
 sealed trait NationalDeliveryPlanId
 
@@ -85,14 +84,6 @@ object PlanId {
       with GuardianWeeklyPlusRow
 
   case object GuardianWeeklyPlusROWAnnual extends PlanId("guardian_weekly_plus_row_annual") with GuardianWeeklyPlusRow
-
-  case object TierThreeDomesticMonthly extends PlanId("tier_three_domestic_monthly") with TierThreePlanId
-
-  case object TierThreeDomesticAnnual extends PlanId("tier_three_domestic_annual") with TierThreePlanId
-
-  case object TierThreeROWMonthly extends PlanId("tier_three_row_monthly") with TierThreePlanId
-
-  case object TierThreeROWAnnual extends PlanId("tier_three_row_annual") with TierThreePlanId
 
   case object DigitalVoucherWeekend extends PlanId("digital_voucher_weekend") with DigitalVoucherPlanId
 
@@ -196,17 +187,10 @@ object PlanId {
     NationalDeliveryWeekend,
   )
 
-  val enabledTierThreePlans = List(
-    TierThreeDomesticMonthly,
-    TierThreeDomesticAnnual,
-    TierThreeROWMonthly,
-    TierThreeROWAnnual,
-  )
-
   val supportedPlans: List[PlanId] =
     enabledVoucherPlans ++ enabledSupporterPlusPlans ++ enabledContributionPlans ++ enabledHomeDeliveryPlans ++
       enabledDigipackPlans ++ enabledGuardianWeeklyPlusDomesticPlans ++ enabledGuardianWeeklyPlusROWPlans ++
-      enabledDigitalVoucherPlans ++ enabledNationalDeliveryPlans ++ enabledTierThreePlans
+      enabledDigitalVoucherPlans ++ enabledNationalDeliveryPlans
 
   def fromName(name: String): Option[PlanId] = supportedPlans.find(_.name == name)
 }
