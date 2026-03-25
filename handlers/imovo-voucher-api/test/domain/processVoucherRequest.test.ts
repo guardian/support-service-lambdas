@@ -32,6 +32,7 @@ describe('processVoucherRequest', () => {
 
 		const result = await processVoucherRequest(
 			testMessage,
+			'TEST-CAMPAIGN',
 			fakeProvider,
 			fakeRepository,
 		);
@@ -56,7 +57,12 @@ describe('processVoucherRequest', () => {
 		};
 
 		await expect(
-			processVoucherRequest(testMessage, failingProvider, fakeRepository),
+			processVoucherRequest(
+				testMessage,
+				'TEST-CAMPAIGN',
+				failingProvider,
+				fakeRepository,
+			),
 		).rejects.toThrow('API unavailable');
 	});
 
@@ -66,7 +72,12 @@ describe('processVoucherRequest', () => {
 		};
 
 		await expect(
-			processVoucherRequest(testMessage, fakeProvider, failingRepository),
+			processVoucherRequest(
+				testMessage,
+				'TEST-CAMPAIGN',
+				fakeProvider,
+				failingRepository,
+			),
 		).rejects.toThrow('DynamoDB error');
 	});
 });

@@ -39,22 +39,20 @@ describe('ImovoVoucherProvider', () => {
 				stage,
 				baseUrl,
 			);
-			const result = await provider.requestVoucher('DIGITAL_REWARD');
+			const result = await provider.requestVoucher(
+				'CAMPAIGN',
+				'user@example.com',
+			);
 
 			expect(result).toEqual(validApiResponse);
 
 			expect(global.fetch).toHaveBeenCalledWith(
-				`${baseUrl}/VoucherRequest/Request`,
+				`${baseUrl}/VoucherRequest/Request?campaignCode=CAMPAIGN&customerReference=user%40example.com`,
 				expect.objectContaining({
 					method: 'POST',
 					headers: {
-						'Content-Type': 'application/json',
 						'X-API-KEY': 'test-api-key',
 					},
-					body: JSON.stringify({
-						VoucherType: 'DIGITAL_REWARD',
-						Quantity: 1,
-					}),
 				}),
 			);
 		});
@@ -76,8 +74,8 @@ describe('ImovoVoucherProvider', () => {
 				stage,
 				baseUrl,
 			);
-			await provider.requestVoucher('TYPE_A');
-			await provider.requestVoucher('TYPE_B');
+			await provider.requestVoucher('CAMPAIGN', 'a@example.com');
+			await provider.requestVoucher('CAMPAIGN', 'b@example.com');
 
 			expect(mockSend).toHaveBeenCalledTimes(1);
 			expect(global.fetch).toHaveBeenCalledTimes(2);
@@ -97,9 +95,9 @@ describe('ImovoVoucherProvider', () => {
 				baseUrl,
 			);
 
-			await expect(provider.requestVoucher('DIGITAL_REWARD')).rejects.toThrow(
-				'i-movo API error (401): Unauthorized',
-			);
+			await expect(
+				provider.requestVoucher('CAMPAIGN', 'user@example.com'),
+			).rejects.toThrow('i-movo API error (401): Unauthorized');
 		});
 
 		it('throws when the API response does not match the expected schema', async () => {
@@ -118,7 +116,9 @@ describe('ImovoVoucherProvider', () => {
 				baseUrl,
 			);
 
-			await expect(provider.requestVoucher('DIGITAL_REWARD')).rejects.toThrow();
+			await expect(
+				provider.requestVoucher('CAMPAIGN', 'user@example.com'),
+			).rejects.toThrow();
 		});
 	});
 
@@ -138,7 +138,7 @@ describe('ImovoVoucherProvider', () => {
 				'PROD',
 				baseUrl,
 			);
-			await provider.requestVoucher('DIGITAL_REWARD');
+			await provider.requestVoucher('CAMPAIGN', 'user@example.com');
 
 			expect(mockSend).toHaveBeenCalledWith(
 				expect.objectContaining({
@@ -160,9 +160,9 @@ describe('ImovoVoucherProvider', () => {
 				baseUrl,
 			);
 
-			await expect(provider.requestVoucher('DIGITAL_REWARD')).rejects.toThrow(
-				'i-movo API key secret is empty',
-			);
+			await expect(
+				provider.requestVoucher('CAMPAIGN', 'user@example.com'),
+			).rejects.toThrow('i-movo API key secret is empty');
 		});
 	});
 });
