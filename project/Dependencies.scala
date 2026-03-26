@@ -42,7 +42,7 @@ object Dependencies {
 
   // GCP
   val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.59.0"
-  val grpcNettyOverride = "io.grpc" % "grpc-netty-shaded" % "1.79.0"
+  val grpcNettyOverride = "io.grpc" % "grpc-netty-shaded" % "1.80.0"
 
   // Cats
   val catsCore = "org.typelevel" %% "cats-core" % catsVersion
