@@ -23,6 +23,11 @@ const imovoCampaignCode: Record<SrStageNames, string> = {
 	PROD: 'GSUBPROMO001',
 };
 
+const imovoVoucherBaseUrl: Record<SrStageNames, string> = {
+	CODE: 'https://digitalvouchers-uat-voucher.azurewebsites.net/voucher',
+	PROD: 'https://digitalvouchers-uat-voucher.azurewebsites.net/voucher',
+};
+
 const identityAccountId = '942464564246';
 
 export class ImovoVoucherApi extends SrStack {
@@ -75,6 +80,7 @@ export class ImovoVoucherApi extends SrStack {
 				environment: {
 					IMOVO_API_BASE_URL: imovoApiBaseUrl[stage],
 					IMOVO_CAMPAIGN_CODE: imovoCampaignCode[stage],
+					IMOVO_VOUCHER_BASE_URL: imovoVoucherBaseUrl[stage],
 					VOUCHER_TABLE_NAME: voucherTable.tableName,
 				},
 			},

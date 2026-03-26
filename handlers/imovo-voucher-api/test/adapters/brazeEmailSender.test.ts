@@ -16,9 +16,12 @@ const testRecord: VoucherRecord = {
 	email: 'test@example.com',
 	voucherType: 'DIGITAL_REWARD',
 	voucherCode: 'VOUCHER-ABC',
-	expiryDate: '2026-12-31',
+	expiryDate: '2026-12-31T17:25:43.3028253',
 	status: 'SUCCESS',
 };
+
+const testVoucherBaseUrl =
+	'https://digitalvouchers-uat-voucher.azurewebsites.net/voucher';
 
 beforeEach(() => {
 	mockSendEmail.mockClear();
@@ -26,7 +29,7 @@ beforeEach(() => {
 
 describe('BrazeEmailSender', () => {
 	it('sends a Braze email with the correct structure from a VoucherRecord', async () => {
-		const sender = new BrazeEmailSender('CODE');
+		const sender = new BrazeEmailSender('CODE', testVoucherBaseUrl);
 
 		await sender.sendVoucherConfirmation(testRecord);
 
@@ -39,7 +42,10 @@ describe('BrazeEmailSender', () => {
 				ContactAttributes: {
 					SubscriberAttributes: {
 						voucher_code: 'VOUCHER-ABC',
-						expiry_date: '2026-12-31',
+						voucher_url:
+							'https://digitalvouchers-uat-voucher.azurewebsites.net/voucher/VOUCHER-ABC/go',
+						expiry_date: '2026-12-31T17:25:43.3028253',
+						voucher_end_date: '31 December 2026',
 						voucher_type: 'DIGITAL_REWARD',
 					},
 				},
@@ -48,7 +54,7 @@ describe('BrazeEmailSender', () => {
 	});
 
 	it('passes the correct stage to sendEmail', async () => {
-		const sender = new BrazeEmailSender('PROD');
+		const sender = new BrazeEmailSender('PROD', testVoucherBaseUrl);
 
 		await sender.sendVoucherConfirmation(testRecord);
 
@@ -58,7 +64,7 @@ describe('BrazeEmailSender', () => {
 	it('propagates errors from sendEmail', async () => {
 		mockSendEmail.mockRejectedValueOnce(new Error('SQS queue error'));
 
-		const sender = new BrazeEmailSender('CODE');
+		const sender = new BrazeEmailSender('CODE', testVoucherBaseUrl);
 
 		await expect(sender.sendVoucherConfirmation(testRecord)).rejects.toThrow(
 			'SQS queue error',
