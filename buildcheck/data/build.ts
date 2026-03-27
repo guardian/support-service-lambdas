@@ -444,6 +444,31 @@ const userSubscriptionsApi: HandlerDefinition = {
 	},
 };
 
+const supporterProductDataTs: HandlerDefinition = {
+	name: 'supporter-product-data-ts',
+	functionNames: [
+		'-SupporterProductDataTSQueryZuora-',
+		'-SupporterProductDataTSFetchResults-',
+		'-SupporterProductDataTSAddToQueue-',
+		'-SupporterProductDataTSProcessItem-',
+	],
+	entryPoints: ['src/lambdas/*.ts'],
+	dependencies: {
+		...dep['@aws-sdk/client-cloudwatch'],
+		...dep['@aws-sdk/client-dynamodb'],
+		...dep['@aws-sdk/client-s3'],
+		...dep['@aws-sdk/client-sqs'],
+		...dep['@aws-sdk/client-ssm'],
+		...dep['@aws-sdk/client-secrets-manager'],
+		...dep['@aws-sdk/credential-provider-node'],
+		...dep.dayjs,
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
+};
+
 // MARKER new-lambda: buildcheck-const
 
 const moduleAws: ModuleDefinition = {
@@ -698,6 +723,7 @@ export const build: BuildDefinition = {
 		observerBenefitsApi,
 		contributionsOnlyCountriesApi,
 		userSubscriptionsApi,
+		supporterProductDataTs,
 		// MARKER new-lambda: buildcheck-reference
 	],
 
