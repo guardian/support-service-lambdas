@@ -19,10 +19,11 @@ deployments:
     parameters:
       fileName: supporter-product-data-ts.zip
       bucketSsmLookup: true
+      prefixStack: false
       functionNames:
-        - '-SupporterProductDataTSQueryZuora-'
-        - '-SupporterProductDataTSFetchResults-'
-        - '-SupporterProductDataTSAddToQueue-'
-        - '-SupporterProductDataTSProcessItem-'
+        - supporterProductDataTSQueryZuora-
+        - supporterProductDataTSFetchResults-
+        - supporterProductDataTSAddToQueue-
+        - supporterProductDataTSProcessItem-
     dependencies:
       - supporter-product-data-ts-cloudformation
