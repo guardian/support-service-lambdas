@@ -64,7 +64,6 @@ const testSubscriptionInformation: SubscriptionInformation = {
 	ratePlanId: '',
 	productRatePlanKey: 'Annual',
 	subscriptionNumber: 'A-S123456',
-	termStartDate: new Date(0),
 };
 
 const testTargetInformation: TargetInformation = {

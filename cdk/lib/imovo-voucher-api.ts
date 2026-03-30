@@ -6,6 +6,8 @@ import {
 	Table,
 	TableEncryption,
 } from 'aws-cdk-lib/aws-dynamodb';
+import { SecurityGroup, Vpc } from 'aws-cdk-lib/aws-ec2';
+import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { AllowGetSecretValuePolicy, AllowSqsSendPolicy } from './cdk/policies';
 import { SrSqsLambda } from './cdk/SrSqsLambda';
 import type { SrStageNames } from './cdk/SrStack';
@@ -16,9 +18,32 @@ const imovoApiBaseUrl: Record<SrStageNames, string> = {
 	PROD: 'https://imovocoreapi.paypoint.services',
 };
 
+const imovoCampaignCode: Record<SrStageNames, string> = {
+	CODE: 'GSUBPROMO001',
+	PROD: 'GSUBPROMO001',
+};
+
+const identityAccountId = '942464564246';
+
 export class ImovoVoucherApi extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
 		super(scope, { stage, app: 'imovo-voucher-api' });
+
+		const vpc = Vpc.fromVpcAttributes(this, 'MembershipVpc', {
+			vpcId: 'vpc-e6e00183',
+			availabilityZones: ['eu-west-1a', 'eu-west-1b', 'eu-west-1c'],
+			privateSubnetIds: [
+				'subnet-cb91ae8d',
+				'subnet-a7b74ac2',
+				'subnet-179e8063',
+			],
+		});
+
+		const securityGroup = new SecurityGroup(this, 'LambdaSecurityGroup', {
+			vpc,
+			description: `Security group for imovo-voucher-api-${this.stage} lambda`,
+			allowAllOutbound: true,
+		});
 
 		const voucherTable = new Table(this, 'VoucherTable', {
 			tableName: `imovo-voucher-api-vouchers-${this.stage}`,
@@ -44,8 +69,12 @@ export class ImovoVoucherApi extends SrStack {
 				description:
 					'Processes voucher requests from SQS, calls i-movo API, and sends confirmation emails via Braze',
 				timeout: Duration.seconds(30),
+				vpc,
+				vpcSubnets: { subnets: vpc.privateSubnets },
+				securityGroups: [securityGroup],
 				environment: {
 					IMOVO_API_BASE_URL: imovoApiBaseUrl[stage],
+					IMOVO_CAMPAIGN_CODE: imovoCampaignCode[stage],
 					VOUCHER_TABLE_NAME: voucherTable.tableName,
 				},
 			},
@@ -59,11 +88,25 @@ export class ImovoVoucherApi extends SrStack {
 
 		voucherTable.grantWriteData(lambda);
 
+		lambda.inputQueue.addToResourcePolicy(
+			new PolicyStatement({
+				effect: Effect.ALLOW,
+				principals: [new ServicePrincipal('sns.amazonaws.com')],
+				actions: ['sqs:SendMessage'],
+				resources: [lambda.inputQueue.queueArn],
+				conditions: {
+					ArnEquals: {
+						'aws:SourceArn': `arn:aws:sns:${this.region}:${identityAccountId}:identity-identity-gateway-${stage}-PrintPromoTopic`,
+					},
+				},
+			}),
+		);
+
 		lambda.addPolicies(
 			new AllowGetSecretValuePolicy(
 				this,
 				'Allow Secrets Manager i-movo API key',
-				'imovo-voucher-api/api-key',
+				'imovo-voucher-api/api-key-*',
 			),
 			AllowSqsSendPolicy.createWithId(
 				this,

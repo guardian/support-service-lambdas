@@ -33,5 +33,6 @@ function buildDependencies(): Dependencies {
 
 export const handler = async (event: SQSEvent): Promise<void> => {
 	const deps = buildDependencies();
-	await handleSqsEvent(event, deps);
+	const campaignCode = getEnvVar('IMOVO_CAMPAIGN_CODE');
+	await handleSqsEvent(event, deps, campaignCode);
 };

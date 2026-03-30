@@ -1,5 +1,8 @@
 import dayjs from 'dayjs';
-import { buildUpdateAmountRequestBody } from '../src/zuoraApi';
+import {
+	buildTermRenewalRequestBody,
+	buildUpdateAmountRequestBody,
+} from '../src/zuoraApi';
 
 describe('Supporter Plus Amount Update - term renewal variations', () => {
 	describe('Auto-renewed subscription scenarios', () => {
@@ -45,8 +48,6 @@ describe('Supporter Plus Amount Update - term renewal variations', () => {
 				ratePlanId: subscriptionData.ratePlans[0]!.id,
 				chargeNumber: subscriptionData.ratePlans[0]!.ratePlanCharges[0]!.number,
 				contributionAmount: 10.0,
-				shouldExtendTerm,
-				isBrokenSub: false,
 			});
 
 			// Verify the request structure
@@ -70,19 +71,16 @@ describe('Supporter Plus Amount Update - term renewal variations', () => {
 				dayjs(subscriptionData.termEndDate),
 			);
 
-			const orderRequest = buildUpdateAmountRequestBody({
-				applyFromDate,
+			const orderRequest = buildTermRenewalRequestBody({
+				today: dayjs('2026-03-04'),
 				subscriptionNumber: 'A-S00707842',
 				accountNumber: 'A00714188',
-				ratePlanId: 'test-rate-plan-id',
-				chargeNumber: 'C-12345678',
-				contributionAmount: 10.0,
 				shouldExtendTerm,
 				isBrokenSub: false,
 			});
 
-			expect(orderRequest.subscriptions[0]?.orderActions).toHaveLength(2);
-			expect(orderRequest.subscriptions[0]?.orderActions[1]?.type).toBe(
+			expect(orderRequest?.subscriptions[0]?.orderActions).toHaveLength(1);
+			expect(orderRequest?.subscriptions[0]?.orderActions[0]?.type).toBe(
 				'RenewSubscription',
 			);
 			expect(shouldExtendTerm).toBe(true);

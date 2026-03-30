@@ -74,7 +74,7 @@ exports[`The Imovo voucher API stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":secret:CODE/imovo-voucher-api/api-key",
+                    ":secret:CODE/imovo-voucher-api/api-key-*",
                   ],
                 ],
               },
@@ -139,6 +139,7 @@ exports[`The Imovo voucher API stack matches the snapshot 1`] = `
           "Variables": {
             "APP": "imovo-voucher-api",
             "IMOVO_API_BASE_URL": "https://imovocoreapi.tstpaypoint.services",
+            "IMOVO_CAMPAIGN_CODE": "GSUBPROMO001",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
@@ -183,8 +184,59 @@ exports[`The Imovo voucher API stack matches the snapshot 1`] = `
           },
         ],
         "Timeout": 30,
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {
+              "Fn::GetAtt": [
+                "LambdaSecurityGroup0BD9FC99",
+                "GroupId",
+              ],
+            },
+          ],
+          "SubnetIds": [
+            "subnet-cb91ae8d",
+            "subnet-a7b74ac2",
+            "subnet-179e8063",
+          ],
+        },
       },
       "Type": "AWS::Lambda::Function",
+    },
+    "LambdaSecurityGroup0BD9FC99": {
+      "Properties": {
+        "GroupDescription": "Security group for imovo-voucher-api-CODE lambda",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1",
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "imovo-voucher-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "VpcId": "vpc-e6e00183",
+      },
+      "Type": "AWS::EC2::SecurityGroup",
     },
     "LambdaServiceRoleA8ED4D3B": {
       "Properties": {
@@ -210,6 +262,18 @@ exports[`The Imovo voucher API stack matches the snapshot 1`] = `
                   "Ref": "AWS::Partition",
                 },
                 ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole",
               ],
             ],
           },
@@ -452,6 +516,50 @@ exports[`The Imovo voucher API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
+    },
+    "QueuePolicy25439813": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:aws:sns:",
+                        {
+                          "Ref": "AWS::Region",
+                        },
+                        ":942464564246:identity-identity-gateway-CODE-PrintPromoTopic",
+                      ],
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "sns.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "Queue4A7E3555",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "Queue4A7E3555",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
     },
     "VoucherTable1AB9F1C6": {
       "DeletionPolicy": "Delete",
@@ -711,7 +819,7 @@ DLQ: https://",
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":secret:PROD/imovo-voucher-api/api-key",
+                    ":secret:PROD/imovo-voucher-api/api-key-*",
                   ],
                 ],
               },
@@ -776,6 +884,7 @@ DLQ: https://",
           "Variables": {
             "APP": "imovo-voucher-api",
             "IMOVO_API_BASE_URL": "https://imovocoreapi.paypoint.services",
+            "IMOVO_CAMPAIGN_CODE": "GSUBPROMO001",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",
@@ -820,8 +929,59 @@ DLQ: https://",
           },
         ],
         "Timeout": 30,
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {
+              "Fn::GetAtt": [
+                "LambdaSecurityGroup0BD9FC99",
+                "GroupId",
+              ],
+            },
+          ],
+          "SubnetIds": [
+            "subnet-cb91ae8d",
+            "subnet-a7b74ac2",
+            "subnet-179e8063",
+          ],
+        },
       },
       "Type": "AWS::Lambda::Function",
+    },
+    "LambdaSecurityGroup0BD9FC99": {
+      "Properties": {
+        "GroupDescription": "Security group for imovo-voucher-api-PROD lambda",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1",
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "imovo-voucher-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "VpcId": "vpc-e6e00183",
+      },
+      "Type": "AWS::EC2::SecurityGroup",
     },
     "LambdaServiceRoleA8ED4D3B": {
       "Properties": {
@@ -847,6 +1007,18 @@ DLQ: https://",
                   "Ref": "AWS::Partition",
                 },
                 ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole",
               ],
             ],
           },
@@ -1089,6 +1261,50 @@ DLQ: https://",
       },
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
+    },
+    "QueuePolicy25439813": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:aws:sns:",
+                        {
+                          "Ref": "AWS::Region",
+                        },
+                        ":942464564246:identity-identity-gateway-PROD-PrintPromoTopic",
+                      ],
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "sns.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "Queue4A7E3555",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "Queue4A7E3555",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
     },
     "VoucherTable1AB9F1C6": {
       "DeletionPolicy": "Retain",
