@@ -68,6 +68,7 @@ jobs:
           - mparticle-api
           - mobile-purchases-to-supporter-product-data
           - newsletter-acquisition
+          - supporter-product-data-ts
           # MARKER new-lambda: github-action
     runs-on: ubuntu-latest
     permissions:

@@ -38,3 +38,7 @@ the high level calls should be implemented in separate files as per modules/zuor
 ### CDK
 
 Use SrCDK constructs from ./cdk/lib/cdk/ where possible.
+
+
+### Verification
+Always run build, fix-formatting and eslint with a fix flag as well as all relevant tests after making changes to Typescript code.

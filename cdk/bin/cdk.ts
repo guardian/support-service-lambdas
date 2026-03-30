@@ -36,6 +36,7 @@ import { SoftOptInConsentSetter } from '../lib/soft-opt-in-consent-setter';
 import { StripeDisputes } from '../lib/stripe-disputes';
 import type { StripeWebhookEndpointsProps } from '../lib/stripe-webhook-endpoints';
 import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
+import { SupporterProductDataTS } from '../lib/supporter-product-data-ts';
 import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
 import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
 import { UserBenefits } from '../lib/user-benefits';
@@ -157,6 +158,19 @@ stacks.forEach((Constructor) => {
 	stages.forEach((stage) => {
 		new Constructor(app, stage);
 	});
+});
+
+new SupporterProductDataTS(app, 'supporter-product-data-ts-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+	cloudFormationStackName: 'SupporterProductDataTS-CODE',
+	processItemMaxConcurrency: 30,
+});
+new SupporterProductDataTS(app, 'supporter-product-data-ts-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+	cloudFormationStackName: 'SupporterProductDataTS-PROD',
+	processItemMaxConcurrency: 50,
 });
 
 new SalesforceDisasterRecovery(app, 'salesforce-disaster-recovery-CODE', {

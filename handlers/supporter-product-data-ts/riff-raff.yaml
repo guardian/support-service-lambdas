@@ -1,0 +1,29 @@
+# MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/riff-raff.yaml.ts
+stacks:
+  - support
+regions:
+  - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  supporter-product-data-ts-cloudformation:
+    type: cloud-formation
+    app: supporter-product-data-ts
+    parameters:
+      templateStagePaths:
+        CODE: supporter-product-data-ts-CODE.template.json
+        PROD: supporter-product-data-ts-PROD.template.json
+  supporter-product-data-ts:
+    type: aws-lambda
+    parameters:
+      fileName: supporter-product-data-ts.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+        - supporterProductDataTSQueryZuora-
+        - supporterProductDataTSFetchResults-
+        - supporterProductDataTSAddToQueue-
+        - supporterProductDataTSProcessItem-
+    dependencies:
+      - supporter-product-data-ts-cloudformation

@@ -1,0 +1,33 @@
+{
+  "name": "supporter-product-data-ts",
+  "scripts": {
+    "test": "jest --group=-integration",
+    "it-test": "jest --group=integration",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
+    "check-formatting": "prettier --check \"**/*.ts\"",
+    "fix-formatting": "prettier --write \"**/*.ts\"",
+    "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/lambdas/*.ts --sourcemap --source-root=/support-service-lambdas/handlers/supporter-product-data-ts/target/",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr supporter-product-data-ts.zip ./*.js.map ./*.js",
+    "cdk:test": "pnpm --filter cdk test supporter-product-data-ts",
+    "cdk:test-update": "pnpm --filter cdk test-update supporter-product-data-ts",
+    "update-lambda": "../../update-lambda.sh \"supporter-product-data-ts\" supporterProductDataTSQueryZuora- supporterProductDataTSFetchResults- supporterProductDataTSAddToQueue- supporterProductDataTSProcessItem-",
+    "update-stack": "../../update-stack.sh \"supporter-product-data-ts\""
+  },
+  "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
+  "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
+  "dependencies": {
+    "@aws-sdk/client-cloudwatch": "^3.940.0",
+    "@aws-sdk/client-dynamodb": "^3.940.0",
+    "@aws-sdk/client-s3": "^3.940.0",
+    "@aws-sdk/client-sqs": "^3.940.0",
+    "@aws-sdk/client-ssm": "^3.940.0",
+    "@aws-sdk/client-secrets-manager": "^3.940.0",
+    "@aws-sdk/credential-provider-node": "^3.940.0",
+    "dayjs": "^1.11.13",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.147"
+  }
+}
