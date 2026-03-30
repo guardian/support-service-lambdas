@@ -41,8 +41,8 @@ object Dependencies {
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.3.0"
 
   // GCP
-  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.59.0"
-  val grpcNettyOverride = "io.grpc" % "grpc-netty-shaded" % "1.79.0"
+  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.61.0"
+  val grpcNettyOverride = "io.grpc" % "grpc-netty-shaded" % "1.80.0"
 
   // Cats
   val catsCore = "org.typelevel" %% "cats-core" % catsVersion
@@ -92,7 +92,7 @@ object Dependencies {
   val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.2.0"
   val commonsIO = "commons-io" % "commons-io" % "2.19.0"
   val jodaTime = "joda-time" % "joda-time" % "2.14.0"
-  val typesafeConfig = "com.typesafe" % "config" % "1.4.3"
+  val typesafeConfig = "com.typesafe" % "config" % "1.4.6"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest-should" % "0.9.0" % Test
