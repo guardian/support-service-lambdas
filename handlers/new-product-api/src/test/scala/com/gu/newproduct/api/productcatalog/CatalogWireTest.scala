@@ -62,32 +62,32 @@ class CatalogWireTest extends AnyFlatSpec with Matchers with ResourceLoader {
         Currency.GBP -> AmountMinorUnits(66666),
         Currency.USD -> AmountMinorUnits(66665),
       )
-    case GuardianWeeklyDomesticMonthly =>
+    case GuardianWeeklyPlusDomesticMonthly =>
       Map(
         Currency.GBP -> AmountMinorUnits(1111111),
         Currency.USD -> AmountMinorUnits(11111111),
       )
-    case GuardianWeeklyDomesticQuarterly =>
+    case GuardianWeeklyPlusDomesticQuarterly =>
       Map(
         Currency.GBP -> AmountMinorUnits(2222222),
         Currency.USD -> AmountMinorUnits(22222222),
       )
-    case GuardianWeeklyDomesticAnnual =>
+    case GuardianWeeklyPlusDomesticAnnual =>
       Map(
         Currency.GBP -> AmountMinorUnits(3333333),
         Currency.USD -> AmountMinorUnits(33333333),
       )
-    case GuardianWeeklyROWMonthly =>
+    case GuardianWeeklyPlusROWMonthly =>
       Map(
         Currency.GBP -> AmountMinorUnits(4444444),
         Currency.USD -> AmountMinorUnits(44444444),
       )
-    case GuardianWeeklyROWQuarterly =>
+    case GuardianWeeklyPlusROWQuarterly =>
       Map(
         Currency.GBP -> AmountMinorUnits(5555555),
         Currency.USD -> AmountMinorUnits(55555555),
       )
-    case GuardianWeeklyROWAnnual =>
+    case GuardianWeeklyPlusROWAnnual =>
       Map(
         Currency.GBP -> AmountMinorUnits(6666666),
         Currency.USD -> AmountMinorUnits(66666666),
@@ -107,10 +107,6 @@ class CatalogWireTest extends AnyFlatSpec with Matchers with ResourceLoader {
     case NationalDeliveryEverydayPlus => gbpPrice(7103)
     case NationalDeliverySixdayPlus => gbpPrice(7104)
     case NationalDeliveryWeekendPlus => gbpPrice(7105)
-    case TierThreeDomesticMonthly => gbpPrice(2700)
-    case TierThreeDomesticAnnual => gbpPrice(30000)
-    case TierThreeROWMonthly => gbpPrice(4800)
-    case TierThreeROWAnnual => gbpPrice(54600)
   }
 
   def stubGetFirstAvailableStartDate(productType: ProductType, daysOfWeek: List[DayOfWeek]) = {

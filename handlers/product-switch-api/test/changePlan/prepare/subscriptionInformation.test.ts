@@ -76,7 +76,6 @@ describe('getSubscriptionInformation', () => {
 			includesContribution: true,
 			productRatePlanKey: subscription.ratePlan
 				.productRatePlanKey as ValidSwitchableRatePlanKey,
-			termStartDate: subscription.termStartDate,
 			chargedThroughDate: '2025-05-09',
 			ratePlanId: subscription.ratePlan.id,
 			chargeIds: [
@@ -111,7 +110,6 @@ describe('getSubscriptionInformation', () => {
 			includesContribution: false,
 			productRatePlanKey: subscription.ratePlan
 				.productRatePlanKey as ValidSwitchableRatePlanKey,
-			termStartDate: subscription.termStartDate,
 			chargedThroughDate: '2024-07-06', // it ignores the removed contribution charge
 			ratePlanId: subscription.ratePlan.id,
 			chargeIds: [
@@ -149,7 +147,6 @@ describe('getSubscriptionInformation', () => {
 			includesContribution: true,
 			productRatePlanKey: subscription.ratePlan
 				.productRatePlanKey as ValidSwitchableRatePlanKey,
-			termStartDate: subscription.termStartDate,
 			chargedThroughDate: '2026-03-10', // it uses the effective start date of the contribution charge
 			ratePlanId: subscription.ratePlan.id,
 			chargeIds: [

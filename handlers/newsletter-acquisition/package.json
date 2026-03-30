@@ -1,0 +1,8 @@
+{
+	"name": "newsletter-acquisition",
+	"description": "SQS queue to receive newsletter acquisition data from Identity",
+	"scripts": {
+		"package": "mkdir target && touch target/newsletter-acquisition.zip"
+	},
+	"dependencies": {}
+}
