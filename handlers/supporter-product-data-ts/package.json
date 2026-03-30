@@ -11,7 +11,7 @@
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr supporter-product-data-ts.zip ./*.js.map ./*.js",
     "cdk:test": "pnpm --filter cdk test supporter-product-data-ts",
     "cdk:test-update": "pnpm --filter cdk test-update supporter-product-data-ts",
-    "update-lambda": "../../update-lambda.sh \"supporter-product-data-ts\" -SupporterProductDataTSQueryZuora- -SupporterProductDataTSFetchResults- -SupporterProductDataTSAddToQueue- -SupporterProductDataTSProcessItem-",
+    "update-lambda": "../../update-lambda.sh \"supporter-product-data-ts\" supporterProductDataTSQueryZuora- supporterProductDataTSFetchResults- supporterProductDataTSAddToQueue- supporterProductDataTSProcessItem-",
     "update-stack": "../../update-stack.sh \"supporter-product-data-ts\""
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",

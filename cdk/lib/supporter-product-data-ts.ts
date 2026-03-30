@@ -108,7 +108,7 @@ export class SupporterProductDataTS extends GuStack {
 		});
 
 		const queryZuora = new Function(this, 'QueryZuoraLambda', {
-			functionName: `support-SupporterProductDataTSQueryZuora-${this.stage}`,
+			functionName: `supporterProductDataTSQueryZuora-${this.stage}`,
 			runtime: Runtime.NODEJS_22_X,
 			handler: 'queryZuoraLambda.handler',
 			code: lambdaArtifact,
@@ -119,7 +119,7 @@ export class SupporterProductDataTS extends GuStack {
 		});
 
 		const fetchResults = new Function(this, 'FetchResultsLambda', {
-			functionName: `support-SupporterProductDataTSFetchResults-${this.stage}`,
+			functionName: `supporterProductDataTSFetchResults-${this.stage}`,
 			runtime: Runtime.NODEJS_22_X,
 			handler: 'fetchResultsLambda.handler',
 			code: lambdaArtifact,
@@ -138,7 +138,7 @@ export class SupporterProductDataTS extends GuStack {
 			this,
 			'AddSupporterRatePlanItemToQueueLambda',
 			{
-				functionName: `support-SupporterProductDataTSAddToQueue-${this.stage}`,
+				functionName: `supporterProductDataTSAddToQueue-${this.stage}`,
 				runtime: Runtime.NODEJS_22_X,
 				handler: 'addSupporterRatePlanItemToQueueLambda.handler',
 				code: lambdaArtifact,
@@ -153,7 +153,7 @@ export class SupporterProductDataTS extends GuStack {
 			this,
 			'ProcessSupporterRatePlanItemLambda',
 			{
-				functionName: `support-SupporterProductDataTSProcessItem-${this.stage}`,
+				functionName: `supporterProductDataTSProcessItem-${this.stage}`,
 				runtime: Runtime.NODEJS_22_X,
 				handler: 'processSupporterRatePlanItemLambda.handler',
 				code: lambdaArtifact,

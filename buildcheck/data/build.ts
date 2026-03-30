@@ -447,10 +447,10 @@ const userSubscriptionsApi: HandlerDefinition = {
 const supporterProductDataTs: HandlerDefinition = {
 	name: 'supporter-product-data-ts',
 	functionNames: [
-		'-SupporterProductDataTSQueryZuora-',
-		'-SupporterProductDataTSFetchResults-',
-		'-SupporterProductDataTSAddToQueue-',
-		'-SupporterProductDataTSProcessItem-',
+		'supporterProductDataTSQueryZuora-',
+		'supporterProductDataTSFetchResults-',
+		'supporterProductDataTSAddToQueue-',
+		'supporterProductDataTSProcessItem-',
 	],
 	entryPoints: ['src/lambdas/*.ts'],
 	dependencies: {
