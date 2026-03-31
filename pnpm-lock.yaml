@@ -294,7 +294,21 @@ importers:
         specifier: ^2.7.4
         version: 2.7.4
 
-  handlers/newsletter-acquisition: {}
+  handlers/newsletter-acquisition:
+    dependencies:
+      '@aws-sdk/client-dynamodb':
+        specifier: ^3.940.0
+        version: 3.995.0
+      '@aws-sdk/util-dynamodb':
+        specifier: ^3.940.0
+        version: 3.995.0(@aws-sdk/client-dynamodb@3.995.0)
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.147
+        version: 8.10.158
 
   handlers/observer-data-export:
     dependencies:
