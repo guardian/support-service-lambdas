@@ -6,6 +6,7 @@ export * from './utils';
 export * from './account';
 export * from './billingPreview';
 export * from './createSubscription/createSubscription';
+export * from './createSubscription/createSubscriptionWithExistingPaymentMethod';
 export * from './creditBalanceAdjustment';
 export * from './discount';
 export * from './invoice';
