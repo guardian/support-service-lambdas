@@ -2,7 +2,7 @@ import { SupportRegionId } from '@modules/internationalisation/countryGroup';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { Promo } from '@modules/promotions/v2/schema';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import { createSubscriptionWithExistingPaymentMethod } from '@modules/zuora/createSubscription/createSubscriptionWithExistingPaymentMethod';
+import { createSubscriptionWithExistingPaymentMethod } from '@modules/zuora/createSubscription/createSubscription';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import code from '../../zuora-catalog/test/fixtures/catalog-code.json';
 
@@ -23,6 +23,7 @@ const productCatalog = generateProductCatalog(zuoraCatalogSchema.parse(code));
 
 const baseInput = {
 	accountName: 'Test Account',
+	createdRequestId: 'test-request-id',
 	salesforceAccountId: 'sf-account-id',
 	salesforceContactId: 'sf-contact-id',
 	identityId: 'identity-id-123',
