@@ -298,6 +298,16 @@ importers:
         specifier: ^2.7.4
         version: 2.7.4
 
+  handlers/new-subscription-api:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.147
+        version: 8.10.158
+
   handlers/newsletter-acquisition:
     dependencies:
       '@aws-sdk/client-dynamodb':
