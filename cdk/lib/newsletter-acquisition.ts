@@ -56,7 +56,7 @@ export class NewsletterAcquisition extends GuStack {
 			partitionKey: { name: 'userId', type: AttributeType.STRING },
 			sortKey: { name: 'sortKey', type: AttributeType.STRING },
 			encryption: TableEncryption.AWS_MANAGED,
-			stream: StreamViewType.NEW_IMAGE,
+			stream: StreamViewType.NEW_AND_OLD_IMAGES,
 			removalPolicy:
 				this.stage === 'PROD' ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
 		});

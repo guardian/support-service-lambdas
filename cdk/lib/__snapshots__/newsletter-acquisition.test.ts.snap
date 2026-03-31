@@ -45,7 +45,7 @@ exports[`The NewsletterAcquisition stack matches the snapshot 1`] = `
           "SSEEnabled": true,
         },
         "StreamSpecification": {
-          "StreamViewType": "NEW_IMAGE",
+          "StreamViewType": "NEW_AND_OLD_IMAGES",
         },
         "TableName": "newsletter-acquisition-CODE",
         "Tags": [
@@ -524,7 +524,7 @@ exports[`The NewsletterAcquisition stack matches the snapshot 2`] = `
           "SSEEnabled": true,
         },
         "StreamSpecification": {
-          "StreamViewType": "NEW_IMAGE",
+          "StreamViewType": "NEW_AND_OLD_IMAGES",
         },
         "TableName": "newsletter-acquisition-PROD",
         "Tags": [
