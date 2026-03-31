@@ -10,7 +10,7 @@ import { getPromotion } from '@modules/promotions/v2/getPromotion';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import { z } from 'zod';
 import { deleteAccount } from '@modules/zuora/account';
-import { createSubscriptionWithExistingPaymentMethod } from '@modules/zuora/createSubscription/createSubscription';
+import { createSubscriptionWithExistingPaymentMethod } from '@modules/zuora/createSubscription/createSubscriptionWithExistingPaymentMethod';
 import { getPaymentMethods } from '@modules/zuora/paymentMethod';
 import { getSubscription } from '@modules/zuora/subscription';
 import { zuoraSubscriptionSchema } from '@modules/zuora/types/objects/subscription';
@@ -57,11 +57,15 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 		const sourceAccountNumber = '2c92c0f87568d97201756b1578960694';
 		const requestId = `IT-createSubExistingPM-CCRT-${sourceAccountNumber.slice(-8)}-${Date.now()}`;
 
-		const sourceAccount: z.infer<typeof sourceAccountSchema> = await zuoraClient.get(
-			`v1/accounts/${sourceAccountNumber}`,
-			sourceAccountSchema,
+		const sourceAccount: z.infer<typeof sourceAccountSchema> =
+			await zuoraClient.get(
+				`v1/accounts/${sourceAccountNumber}`,
+				sourceAccountSchema,
+			);
+		const paymentMethods = await getPaymentMethods(
+			zuoraClient,
+			sourceAccountNumber,
 		);
-		const paymentMethods = await getPaymentMethods(zuoraClient, sourceAccountNumber);
 
 		const response = await createSubscriptionWithExistingPaymentMethod(
 			zuoraClient,
@@ -95,18 +99,22 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 		expect(response.accountNumber).toMatch(/^A\d+$/);
 		expect(response.subscriptionNumbers.length).toBe(1);
 
-		await deleteAccount(zuoraClient, response.accountNumber);
+		//await deleteAccount(zuoraClient, response.accountNumber);
 	}, 120000);
 
 	test('creates a DigitalSubscription using an existing PayPal payment method', async () => {
 		const sourceAccountNumber = '2c92c0f875d488d70175d6a29ead032c';
 		const requestId = `IT-createSubExistingPM-PayPal-${sourceAccountNumber.slice(-8)}-${Date.now()}`;
 
-		const sourceAccount: z.infer<typeof sourceAccountSchema> = await zuoraClient.get(
-			`v1/accounts/${sourceAccountNumber}`,
-			sourceAccountSchema,
+		const sourceAccount: z.infer<typeof sourceAccountSchema> =
+			await zuoraClient.get(
+				`v1/accounts/${sourceAccountNumber}`,
+				sourceAccountSchema,
+			);
+		const paymentMethods = await getPaymentMethods(
+			zuoraClient,
+			sourceAccountNumber,
 		);
-		const paymentMethods = await getPaymentMethods(zuoraClient, sourceAccountNumber);
 
 		const response = await createSubscriptionWithExistingPaymentMethod(
 			zuoraClient,
@@ -130,7 +138,10 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 					country: sourceAccount.billToContact.country ?? '',
 					state: sourceAccount.billToContact.state,
 				},
-				productPurchase: { product: 'DigitalSubscription', ratePlan: 'Monthly' },
+				productPurchase: {
+					product: 'DigitalSubscription',
+					ratePlan: 'Monthly',
+				},
 				runBilling: false,
 				collectPayment: false,
 			},
@@ -147,11 +158,15 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 		const sourceAccountNumber = '2c92c0f8757974d3017594cbffa00536';
 		const requestId = `IT-createSubExistingPM-BankTransfer-${Date.now()}`;
 
-		const sourceAccount: z.infer<typeof sourceAccountSchema> = await zuoraClient.get(
-			`v1/accounts/${sourceAccountNumber}`,
-			sourceAccountSchema,
+		const sourceAccount: z.infer<typeof sourceAccountSchema> =
+			await zuoraClient.get(
+				`v1/accounts/${sourceAccountNumber}`,
+				sourceAccountSchema,
+			);
+		const paymentMethods = await getPaymentMethods(
+			zuoraClient,
+			sourceAccountNumber,
 		);
-		const paymentMethods = await getPaymentMethods(zuoraClient, sourceAccountNumber);
 
 		const response = await createSubscriptionWithExistingPaymentMethod(
 			zuoraClient,
@@ -198,11 +213,15 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 		const promotion = await getPromotion(promoCode, 'CODE');
 		const requestId = `IT-createSubExistingPM-promo-${sourceAccountNumber.slice(-8)}-${Date.now()}`;
 
-		const sourceAccount: z.infer<typeof sourceAccountSchema> = await zuoraClient.get(
-			`v1/accounts/${sourceAccountNumber}`,
-			sourceAccountSchema,
+		const sourceAccount: z.infer<typeof sourceAccountSchema> =
+			await zuoraClient.get(
+				`v1/accounts/${sourceAccountNumber}`,
+				sourceAccountSchema,
+			);
+		const paymentMethods = await getPaymentMethods(
+			zuoraClient,
+			sourceAccountNumber,
 		);
-		const paymentMethods = await getPaymentMethods(zuoraClient, sourceAccountNumber);
 
 		const response = await createSubscriptionWithExistingPaymentMethod(
 			zuoraClient,
