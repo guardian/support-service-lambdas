@@ -69,6 +69,7 @@ export class NewsletterAcquisition extends GuStack {
 			runtime: nodeVersion,
 			memorySize: 512,
 			timeout: Duration.seconds(30),
+			reservedConcurrentExecutions: 10,
 			environment: {
 				NODE_OPTIONS: '--enable-source-maps',
 				TABLE_NAME: table.tableName,

@@ -126,6 +126,7 @@ exports[`The NewsletterAcquisition stack matches the snapshot 1`] = `
           "LogFormat": "JSON",
         },
         "MemorySize": 512,
+        "ReservedConcurrentExecutions": 10,
         "Role": {
           "Fn::GetAtt": [
             "LambdaServiceRoleA8ED4D3B",
@@ -604,6 +605,7 @@ exports[`The NewsletterAcquisition stack matches the snapshot 2`] = `
           "LogFormat": "JSON",
         },
         "MemorySize": 512,
+        "ReservedConcurrentExecutions": 10,
         "Role": {
           "Fn::GetAtt": [
             "LambdaServiceRoleA8ED4D3B",
