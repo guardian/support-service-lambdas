@@ -15,4 +15,23 @@ describe('buildDynamoItem', () => {
 			timestamp: '2026-03-21T10:00:00.000Z',
 		});
 	});
+
+	it('preserves extra fields from the message', () => {
+		const result = buildDynamoItem({
+			userId: '115256905',
+			newsletterId: 'fighting-back',
+			timestamp: '2026-03-19T23:55:35.233Z',
+			browserId: 'idFromPV_HfFRtIE7poC_Yxsn8vSoNw',
+			refViewId: 'mmy4i9id6zhr6wmir4ve',
+		});
+
+		expect(result).toEqual({
+			userId: '115256905',
+			sortKey: '2026-03-19T23:55:35.233Z#fighting-back',
+			newsletterId: 'fighting-back',
+			timestamp: '2026-03-19T23:55:35.233Z',
+			browserId: 'idFromPV_HfFRtIE7poC_Yxsn8vSoNw',
+			refViewId: 'mmy4i9id6zhr6wmir4ve',
+		});
+	});
 });

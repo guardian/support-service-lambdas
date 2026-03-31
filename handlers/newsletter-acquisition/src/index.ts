@@ -3,20 +3,20 @@ import { marshall } from '@aws-sdk/util-dynamodb';
 import type { SQSEvent } from 'aws-lambda';
 import { z } from 'zod';
 
-const messageSchema = z.object({
-	userId: z.string(),
-	newsletterId: z.string(),
-	timestamp: z.string(),
-});
+const messageSchema = z
+	.object({
+		userId: z.string(),
+		newsletterId: z.string(),
+		timestamp: z.string(),
+	})
+	.passthrough();
 
 export type NewsletterAcquisition = z.infer<typeof messageSchema>;
 
 export function buildDynamoItem(message: NewsletterAcquisition) {
 	return {
-		userId: message.userId,
+		...message,
 		sortKey: `${message.timestamp}#${message.newsletterId}`,
-		newsletterId: message.newsletterId,
-		timestamp: message.timestamp,
 	};
 }
 
