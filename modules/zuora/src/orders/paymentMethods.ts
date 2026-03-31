@@ -71,3 +71,13 @@ export type PaymentGateway<T extends PaymentMethod> =
 	T['type'] extends keyof PaymentGatewayMap
 		? PaymentGatewayMap[T['type']]
 		: never;
+
+// Represents a Zuora payment method ID provided by the caller.
+// requiresCloning: false — the PM exists but is not yet attached to any account;
+//   it can be set as the default directly via updateAccount.
+// requiresCloning: true — the PM is attached to an existing account and must be
+//   cloned (re-created) on the new account before use.
+export type ExistingPaymentMethod = {
+	id: string;
+	requiresCloning: boolean;
+};
