@@ -11,8 +11,10 @@ import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import { z } from 'zod';
 import { deleteAccount } from '@modules/zuora/account';
 import { createSubscriptionWithExistingPaymentMethod } from '@modules/zuora/createSubscription/createSubscriptionWithExistingPaymentMethod';
+import type { PaymentMethodType } from '@modules/zuora/orders/paymentMethods';
 import { getPaymentMethods } from '@modules/zuora/paymentMethod';
 import { getSubscription } from '@modules/zuora/subscription';
+import type { DefaultPaymentMethodResponse } from '@modules/zuora/types/objects/paymentMethod';
 import { zuoraSubscriptionSchema } from '@modules/zuora/types/objects/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import code from '../../zuora-catalog/test/fixtures/catalog-code.json';
@@ -44,6 +46,27 @@ const sourceAccountSchema = z.object({
 	billToContact: sourceContactSchema,
 	soldToContact: sourceContactSchema.optional(),
 });
+
+export function getDefaultPaymentMethodType(
+	response: DefaultPaymentMethodResponse,
+): PaymentMethodType {
+	const id = response.defaultPaymentMethodId;
+	if (response.creditcardreferencetransaction?.some((pm) => pm.id === id)) {
+		return 'CreditCardReferenceTransaction';
+	}
+	if (response.paypal?.some((pm) => pm.id === id)) {
+		return 'PayPalNativeEC';
+	}
+	if (response.banktransfer?.some((pm) => pm.id === id)) {
+		return 'Bacs';
+	}
+	if (response.creditcard?.some((pm) => pm.id === id)) {
+		return 'CreditCard';
+	}
+	throw new Error(
+		`Default payment method ${id} not found in any payment method category`,
+	);
+}
 
 describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 	const productCatalog = generateProductCatalog(zuoraCatalogSchema.parse(code));
@@ -80,6 +103,7 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 				paymentGateway: sourceAccount.billingAndPayment.paymentGateway,
 				existingPaymentMethod: {
 					id: paymentMethods.defaultPaymentMethodId,
+					type: getDefaultPaymentMethodType(paymentMethods),
 					requiresCloning: true,
 				},
 				billToContact: {
@@ -129,6 +153,7 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 				paymentGateway: sourceAccount.billingAndPayment.paymentGateway,
 				existingPaymentMethod: {
 					id: paymentMethods.defaultPaymentMethodId,
+					type: getDefaultPaymentMethodType(paymentMethods),
 					requiresCloning: true,
 				},
 				billToContact: {
@@ -181,6 +206,7 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 				paymentGateway: sourceAccount.billingAndPayment.paymentGateway,
 				existingPaymentMethod: {
 					id: paymentMethods.defaultPaymentMethodId,
+					type: getDefaultPaymentMethodType(paymentMethods),
 					requiresCloning: true,
 				},
 				billToContact: {
@@ -236,6 +262,7 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 				paymentGateway: sourceAccount.billingAndPayment.paymentGateway,
 				existingPaymentMethod: {
 					id: paymentMethods.defaultPaymentMethodId,
+					type: getDefaultPaymentMethodType(paymentMethods),
 					requiresCloning: true,
 				},
 				billToContact: {
