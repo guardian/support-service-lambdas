@@ -2,7 +2,7 @@ import { SupportRegionId } from '@modules/internationalisation/countryGroup';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { Promo } from '@modules/promotions/v2/schema';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import { createSubscriptionWithExistingPaymentMethod } from '@modules/zuora/createSubscription/createSubscription';
+import { createSubscriptionWithExistingPaymentMethod } from '@modules/zuora/createSubscription/createSubscriptionWithExistingPaymentMethod';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import code from '../../zuora-catalog/test/fixtures/catalog-code.json';
 
