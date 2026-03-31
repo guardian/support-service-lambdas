@@ -45,6 +45,8 @@ export type PaymentMethod =
 	| PayPalCompletePaymentsWithPaymentToken
 	| PayPalCompletePaymentsWithBAID;
 
+export type PaymentMethodType = PaymentMethod['type'] | 'CreditCard';
+
 //Gateway names need to match to those set in Zuora
 //See: https://apisandbox.zuora.com/apps/NewGatewaySetting.do?method=list
 type StripePaymentGateway =
@@ -79,5 +81,6 @@ export type PaymentGateway<T extends PaymentMethod> =
 //   cloned (re-created) on the new account before use.
 export type ExistingPaymentMethod = {
 	id: string;
+	type: PaymentMethodType;
 	requiresCloning: boolean;
 };
