@@ -95,7 +95,7 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 				productCatalog,
 				{
 					...baseInput,
-					existingPaymentMethod: { id: 'pm-existing-id', requiresCloning: false },
+					existingPaymentMethod: { id: 'pm-existing-id', type: 'CreditCardReferenceTransaction' as const, requiresCloning: false },
 				},
 				undefined,
 			);
@@ -126,7 +126,7 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 				productCatalog,
 				{
 					...baseInput,
-					existingPaymentMethod: { id: 'pm-existing-id', requiresCloning: false },
+					existingPaymentMethod: { id: 'pm-existing-id', type: 'CreditCardReferenceTransaction' as const, requiresCloning: false },
 				},
 				undefined,
 			);
@@ -152,7 +152,7 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 				productCatalog,
 				{
 					...baseInput,
-					existingPaymentMethod: { id: 'pm-existing-id', requiresCloning: false },
+					existingPaymentMethod: { id: 'pm-existing-id', type: 'CreditCardReferenceTransaction' as const, requiresCloning: false },
 				},
 				undefined,
 			);
@@ -175,7 +175,7 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 				productCatalog,
 				{
 					...baseInput,
-					existingPaymentMethod: { id: 'pm-existing-id', requiresCloning: false },
+					existingPaymentMethod: { id: 'pm-existing-id', type: 'CreditCardReferenceTransaction' as const, requiresCloning: false },
 					runBilling: false,
 				},
 				undefined,
@@ -201,7 +201,7 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 				productCatalog,
 				{
 					...baseInput,
-					existingPaymentMethod: { id: 'pm-ccrt-id', requiresCloning: true },
+					existingPaymentMethod: { id: 'pm-ccrt-id', type: 'CreditCardReferenceTransaction' as const, requiresCloning: true },
 				},
 				undefined,
 			);
@@ -235,7 +235,7 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 				productCatalog,
 				{
 					...baseInput,
-					existingPaymentMethod: { id: 'pm-pp-id', requiresCloning: true },
+					existingPaymentMethod: { id: 'pm-pp-id', type: 'PayPalNativeEC' as const, requiresCloning: true },
 				},
 				undefined,
 			);
@@ -265,7 +265,7 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 				{
 					...baseInput,
 					paymentGateway: 'GoCardless',
-					existingPaymentMethod: { id: 'pm-bt-id', requiresCloning: true },
+					existingPaymentMethod: { id: 'pm-bt-id', type: 'Bacs' as const, requiresCloning: true },
 				},
 				undefined,
 			);
@@ -316,7 +316,7 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 					productCatalog,
 					{
 						...baseInput,
-						existingPaymentMethod: { id: 'pm-cc-id', requiresCloning: true },
+						existingPaymentMethod: { id: 'pm-cc-id', type: 'CreditCard' as const, requiresCloning: true },
 					},
 					undefined,
 				),
@@ -338,7 +338,7 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 					productCatalog,
 					{
 						...baseInput,
-						existingPaymentMethod: { id: 'pm-unknown-id', requiresCloning: true },
+						existingPaymentMethod: { id: 'pm-unknown-id', type: 'CreditCardReferenceTransaction' as const, requiresCloning: true },
 					},
 					undefined,
 				),
@@ -356,7 +356,7 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 				{
 					...baseInput,
 					createdRequestId: 'MY-IDEMPOTENCY-KEY',
-					existingPaymentMethod: { id: 'pm-ccrt-id', requiresCloning: true },
+					existingPaymentMethod: { id: 'pm-ccrt-id', type: 'CreditCardReferenceTransaction' as const, requiresCloning: true },
 				},
 				undefined,
 			);
@@ -396,7 +396,7 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 				{
 					...baseInput,
 					productPurchase: { product: 'DigitalSubscription', ratePlan: 'Monthly' },
-					existingPaymentMethod: { id: 'pm-ccrt-id', requiresCloning: true },
+					existingPaymentMethod: { id: 'pm-ccrt-id', type: 'CreditCardReferenceTransaction' as const, requiresCloning: true },
 				appliedPromotion: { promoCode: 'PROMO25', supportRegionId: SupportRegionId.UK },
 				},
 				promotion,
