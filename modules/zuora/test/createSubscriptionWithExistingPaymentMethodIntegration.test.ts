@@ -126,7 +126,7 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 		//await deleteAccount(zuoraClient, response.accountNumber);
 	}, 120000);
 
-	test('creates a DigitalSubscription using an existing PayPal payment method', async () => {
+	test('throws for an existing PayPal payment method because tokens cannot be reliably retrieved', async () => {
 		const sourceAccountNumber = '2c92c0f875d488d70175d6a29ead032c';
 		const requestId = `IT-createSubExistingPM-PayPal-${sourceAccountNumber.slice(-8)}-${Date.now()}`;
 
@@ -140,43 +140,40 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 			sourceAccountNumber,
 		);
 
-		const response = await createSubscriptionWithExistingPaymentMethod(
-			zuoraClient,
-			productCatalog,
-			{
-				accountName: sourceAccount.basicInfo.name,
-				createdRequestId: requestId,
-				salesforceAccountId: sourceAccount.basicInfo.crmId ?? '',
-				salesforceContactId: sourceAccount.basicInfo.sfContactId__c ?? '',
-				identityId: sourceAccount.basicInfo.IdentityId__c ?? '',
-				currency: sourceAccount.billingAndPayment.currency,
-				paymentGateway: sourceAccount.billingAndPayment.paymentGateway,
-				existingPaymentMethod: {
-					id: paymentMethods.defaultPaymentMethodId,
-					type: getDefaultPaymentMethodType(paymentMethods),
-					requiresCloning: true,
+		await expect(
+			createSubscriptionWithExistingPaymentMethod(
+				zuoraClient,
+				productCatalog,
+				{
+					accountName: sourceAccount.basicInfo.name,
+					createdRequestId: requestId,
+					salesforceAccountId: sourceAccount.basicInfo.crmId ?? '',
+					salesforceContactId: sourceAccount.basicInfo.sfContactId__c ?? '',
+					identityId: sourceAccount.basicInfo.IdentityId__c ?? '',
+					currency: sourceAccount.billingAndPayment.currency,
+					paymentGateway: sourceAccount.billingAndPayment.paymentGateway,
+					existingPaymentMethod: {
+						id: paymentMethods.defaultPaymentMethodId,
+						type: getDefaultPaymentMethodType(paymentMethods),
+						requiresCloning: true,
+					},
+					billToContact: {
+						firstName: sourceAccount.billToContact.firstName,
+						lastName: sourceAccount.billToContact.lastName,
+						workEmail: sourceAccount.billToContact.workEmail ?? '',
+						country: sourceAccount.billToContact.country ?? '',
+						state: sourceAccount.billToContact.state,
+					},
+					productPurchase: {
+						product: 'DigitalSubscription',
+						ratePlan: 'Monthly',
+					},
+					runBilling: false,
+					collectPayment: false,
 				},
-				billToContact: {
-					firstName: sourceAccount.billToContact.firstName,
-					lastName: sourceAccount.billToContact.lastName,
-					workEmail: sourceAccount.billToContact.workEmail ?? '',
-					country: sourceAccount.billToContact.country ?? '',
-					state: sourceAccount.billToContact.state,
-				},
-				productPurchase: {
-					product: 'DigitalSubscription',
-					ratePlan: 'Monthly',
-				},
-				runBilling: false,
-				collectPayment: false,
-			},
-			undefined,
-		);
-
-		expect(response.accountNumber).toMatch(/^A\d+$/);
-		expect(response.subscriptionNumbers.length).toBe(1);
-
-		await deleteAccount(zuoraClient, response.accountNumber);
+				undefined,
+			),
+		).rejects.toThrow('payment method is not supported for cloning');
 	}, 120000);
 
 	test('creates a SupporterPlus subscription using an existing BankTransfer (GoCardless) payment method', async () => {
