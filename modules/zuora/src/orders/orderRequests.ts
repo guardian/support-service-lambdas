@@ -17,17 +17,13 @@ export type PreviewOptions = {
 	specificPreviewThruDate: string;
 };
 
-type NewAccountOrderRequest<
-	T extends PaymentMethod | ClonedCreditCardReferenceTransaction,
-> = {
-	newAccount: NewAccount<T>;
+type NewAccountOrderRequest = {
+	newAccount: NewAccount<PaymentMethod | ClonedCreditCardReferenceTransaction>;
 };
 export type ExistingAccountOrderRequest = {
 	existingAccountNumber: string;
 };
-type AccountOrderRequest =
-	| NewAccountOrderRequest<PaymentMethod | ClonedCreditCardReferenceTransaction>
-	| ExistingAccountOrderRequest;
+type AccountOrderRequest = NewAccountOrderRequest | ExistingAccountOrderRequest;
 export type OrderRequest = AccountOrderRequest & {
 	orderDate: string;
 	description?: string;

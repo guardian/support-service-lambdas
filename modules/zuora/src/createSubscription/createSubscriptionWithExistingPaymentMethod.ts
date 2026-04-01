@@ -123,7 +123,7 @@ async function clonePaymentMethod(
 	} else {
 		throw new Error(
 			`Unsupported payment method type for cloning: ${zuoraPaymentMethod.type}. ` +
-				`Only CreditCardReferenceTransaction, PayPal, and BankTransfer are supported.`,
+				`Only CreditCardReferenceTransaction and BankTransfer are supported.`,
 		);
 	}
 }
