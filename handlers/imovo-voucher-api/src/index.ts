@@ -23,11 +23,12 @@ function buildDependencies(): Dependencies {
 	const stage = stageFromEnvironment();
 	const baseUrl = getEnvVar('IMOVO_API_BASE_URL');
 	const tableName = getEnvVar('VOUCHER_TABLE_NAME');
+	const voucherBaseUrl = getEnvVar('IMOVO_VOUCHER_BASE_URL');
 
 	return {
 		voucherProvider: new ImovoVoucherProvider(secretsClient, stage, baseUrl),
 		voucherRepository: new DynamoVoucherRepository(dynamoClient, tableName),
-		emailSender: new BrazeEmailSender(stage),
+		emailSender: new BrazeEmailSender(stage, voucherBaseUrl),
 	};
 }
 
