@@ -75,11 +75,11 @@ const createPaymentMethodResponseSchema = z.object({
 
 export const createBankTransferPaymentMethod = async (
 	zuoraClient: ZuoraClient,
-	accountKey: string,
+	accountKey: string | undefined,
 	bankTransfer: BankTransferCloneInput,
 ): Promise<string> => {
 	const body = JSON.stringify({
-		accountKey,
+		...(accountKey !== undefined && { accountKey }),
 		type: bankTransfer.type,
 		bankCode: bankTransfer.bankCode,
 		accountNumber: bankTransfer.accountNumber,
