@@ -5,15 +5,13 @@ import type { ZuoraClient } from './zuoraClient';
 // Minimal fields needed to clone a BankTransfer payment method onto a new account.
 // The full BankTransferPaymentMethod type is a structural subtype of this, so
 // callers passing either work correctly.
-export type BankTransferCloneInput = {
+type BankTransferCloneInput = {
 	type: string;
 	accountNumber: string;
 	bankCode: string;
-	accountHolderInfo: { accountHolderName: string | null };
+	accountHolderInfo: { accountHolderName: string };
 	mandateInfo: {
-		mandateId: string | null;
-		mandateReason: string | null;
-		mandateStatus: string | null;
+		mandateId: string;
 	};
 };
 
@@ -75,11 +73,9 @@ const createPaymentMethodResponseSchema = z.object({
 
 export const createBankTransferPaymentMethod = async (
 	zuoraClient: ZuoraClient,
-	accountKey: string | undefined,
 	bankTransfer: BankTransferCloneInput,
 ): Promise<string> => {
 	const body = JSON.stringify({
-		...(accountKey !== undefined && { accountKey }),
 		type: bankTransfer.type,
 		bankCode: bankTransfer.bankCode,
 		accountNumber: bankTransfer.accountNumber,
@@ -88,13 +84,10 @@ export const createBankTransferPaymentMethod = async (
 		// Zuora accepts it; the mandate reference identifies the real bank account.
 		skipValidation: true,
 		accountHolderInfo: {
-			accountHolderName:
-				bankTransfer.accountHolderInfo.accountHolderName ?? undefined,
+			accountHolderName: bankTransfer.accountHolderInfo.accountHolderName,
 		},
 		mandateInfo: {
 			mandateId: bankTransfer.mandateInfo.mandateId,
-			mandateReason: bankTransfer.mandateInfo.mandateReason ?? undefined,
-			mandateStatus: bankTransfer.mandateInfo.mandateStatus ?? undefined,
 		},
 	});
 	const response: { id: string } = await zuoraClient.post(

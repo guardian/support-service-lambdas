@@ -304,6 +304,29 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 			);
 		});
 
+		it.each([
+			['accountNumber', { ...bankTransferPaymentMethodById, accountNumber: undefined }],
+			['bankCode', { ...bankTransferPaymentMethodById, bankCode: undefined }],
+			['accountHolderInfo.accountHolderName', { ...bankTransferPaymentMethodById, accountHolderInfo: { accountHolderName: null } }],
+			['mandateInfo.mandateId', { ...bankTransferPaymentMethodById, mandateInfo: { mandateId: null } }],
+		])('throws a meaningful error when Bacs PM is missing %s', async (_field, pm) => {
+			const mockGet = jest.fn().mockResolvedValueOnce(pm);
+			const mockPost = jest.fn();
+			const client = buildMockZuoraClient(mockGet, mockPost);
+
+			await expect(
+				createSubscriptionWithExistingPaymentMethod(
+					client,
+					productCatalog,
+					{
+						...baseInput,
+						existingPaymentMethod: { id: 'pm-bt-id', type: 'Bacs' as const, requiresCloning: true },
+					},
+					undefined,
+				),
+			).rejects.toThrow(`Bacs payment method pm-bt-id is missing ${_field}`);
+		});
+
 		it('throws for unknown payment method type', async () => {
 			const mockGet = jest
 				.fn()
