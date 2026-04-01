@@ -225,7 +225,7 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 					},
 					undefined,
 				),
-			).rejects.toThrow('PayPal payment method is not supported for cloning');
+			).rejects.toThrow('payment method is not supported for cloning');
 		});
 
 		it('uses two-step flow for BankTransfer: creates orphan PM then assigns via hpmCreditCardPaymentMethodId', async () => {

@@ -1,7 +1,10 @@
 import type { z } from 'zod';
 import type { NewAccount } from '@modules/zuora/orders/newAccount';
 import type { OrderAction } from '@modules/zuora/orders/orderActions';
-import type { PaymentMethod } from '@modules/zuora/orders/paymentMethods';
+import type {
+	ClonedCreditCardReferenceTransaction,
+	PaymentMethod,
+} from '@modules/zuora/orders/paymentMethods';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 export type ProcessingOptions = {
@@ -14,14 +17,16 @@ export type PreviewOptions = {
 	specificPreviewThruDate: string;
 };
 
-type NewAccountOrderRequest<T extends PaymentMethod> = {
+type NewAccountOrderRequest<
+	T extends PaymentMethod | ClonedCreditCardReferenceTransaction,
+> = {
 	newAccount: NewAccount<T>;
 };
 export type ExistingAccountOrderRequest = {
 	existingAccountNumber: string;
 };
 type AccountOrderRequest =
-	| NewAccountOrderRequest<PaymentMethod>
+	| NewAccountOrderRequest<PaymentMethod | ClonedCreditCardReferenceTransaction>
 	| ExistingAccountOrderRequest;
 export type OrderRequest = AccountOrderRequest & {
 	orderDate: string;

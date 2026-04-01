@@ -49,6 +49,16 @@ export type PaymentMethod =
 
 export type PaymentMethodType = PaymentMethod['type'] | 'CreditCard';
 
+// A CreditCardReferenceTransaction with only the fields needed to clone it onto a new account.
+// Distinct from CreditCardReferenceTransaction, which includes card display fields (cardNumber,
+// expirationMonth, etc.) that are not available or needed during cloning.
+export type ClonedCreditCardReferenceTransaction = {
+	type: 'CreditCardReferenceTransaction';
+	tokenId: string;
+	secondTokenId: string;
+};
+
+
 //Gateway names need to match to those set in Zuora
 //See: https://apisandbox.zuora.com/apps/NewGatewaySetting.do?method=list
 const stripePaymentGatewaySchema = z.union([
@@ -81,10 +91,11 @@ type PaymentGatewayMap = {
 	PayPalCP: PayPalCompletePaymentsPaymentGateway;
 };
 
-export type PaymentGateway<T extends PaymentMethod> =
-	T['type'] extends keyof PaymentGatewayMap
-		? PaymentGatewayMap[T['type']]
-		: never;
+export type PaymentGateway<
+	T extends PaymentMethod | ClonedCreditCardReferenceTransaction,
+> = T['type'] extends keyof PaymentGatewayMap
+	? PaymentGatewayMap[T['type']]
+	: never;
 
 export const paymentGatewaySchema = z.union([
 	stripePaymentGatewaySchema,
@@ -94,22 +105,13 @@ export const paymentGatewaySchema = z.union([
 ]);
 
 // Schema for payment methods passed inline in the Orders API request body.
-// Only CCRT and PayPal types are used inline; Bacs is created as an orphan PM separately.
+// Only CreditCardReferenceTransaction is used inline; Bacs is created as an orphan PM separately.
+// PayPal payment methods are not supported for cloning.
 export const inlinePaymentMethodSchema = z.discriminatedUnion('type', [
 	z.object({
 		type: z.literal('CreditCardReferenceTransaction'),
 		tokenId: z.string(),
 		secondTokenId: z.string(),
-	}),
-	z.object({
-		type: z.literal('PayPalNativeEC'),
-		BAID: z.string(),
-		email: z.string(),
-	}),
-	z.object({
-		type: z.literal('PayPalCP'),
-		BAID: z.string(),
-		email: z.string(),
 	}),
 ]);
 
