@@ -29,16 +29,16 @@ export type CreateSubscriptionWithExistingPaymentMethodInput = Omit<
 	CreateSubscriptionInputFields<PaymentMethod>,
 	'paymentGateway' | 'paymentMethod'
 > & {
-	// Less strongly typed than PaymentGateway<T> — the PM type is not known at
+	// Less strongly typed than PaymentGateway<T> — the payment method type is not known at
 	// compile time when using an existing payment method ID.
 	paymentGateway: string;
 	existingPaymentMethod: ExistingPaymentMethod;
 };
 
 // Resolves the payment method to use when creating a new account.
-// - requiresCloning: false — returns the existing PM id directly.
-// - requiresCloning: true, Bacs — creates an orphan PM and returns its id.
-// - requiresCloning: true, CCRT/PayPal — returns the PM details to embed inline in the order.
+// - requiresCloning: false — returns the existing payment method id directly.
+// - requiresCloning: true, Bacs — creates an orphan payment method and returns its id.
+// - requiresCloning: true, CreditCardReferenceTransaction/PayPal — returns the payment method details to embed inline in the order.
 async function clonePaymentMethod(
 	zuoraClient: ZuoraClient,
 	existingPaymentMethod: ExistingPaymentMethod,
@@ -88,15 +88,15 @@ async function clonePaymentMethod(
 			);
 		}
 
-		// Create an orphan PM (no accountKey), then assign it via hpmCreditCardPaymentMethodId.
-		const pmIdForAccount = await createBankTransferPaymentMethod(zuoraClient, {
+		// Create an orphan payment method (no accountKey), then assign it via hpmCreditCardPaymentMethodId.
+		const paymentMethodIdForAccount = await createBankTransferPaymentMethod(zuoraClient, {
 			type: zuoraPaymentMethod.type,
 			accountNumber,
 			bankCode,
 			accountHolderInfo: { accountHolderName },
 			mandateInfo: { mandateId },
 		});
-		return { paymentMethodIdForAccount: pmIdForAccount };
+		return { paymentMethodIdForAccount };
 	} else if (zuoraPaymentMethod.type === 'CreditCardReferenceTransaction') {
 		if (!zuoraPaymentMethod.tokenId || !zuoraPaymentMethod.secondTokenId) {
 			throw new Error(
@@ -138,9 +138,9 @@ async function clonePaymentMethod(
 
 // Creates a new Zuora account and subscription using a pre-existing Zuora payment method ID.
 //
-// If requiresCloning is true, the PM lives on another account and must be re-created first:
-//   - Bacs: create an orphan PM (no accountKey), then use its ID as hpmCreditCardPaymentMethodId.
-//   - CCRT/PayPal: embed the PM details inline in newAccount.paymentMethod.
+// If requiresCloning is true, the payment method lives on another account and must be re-created first:
+//   - Bacs: create an orphan payment method (no accountKey), then use its ID as hpmCreditCardPaymentMethodId.
+//   - CreditCardReferenceTransaction/PayPal: embed the payment method details inline in newAccount.paymentMethod.
 //   - CreditCard: not supported (masked number cannot be re-used).
 // If requiresCloning is false, the existing PM id is used directly as hpmCreditCardPaymentMethodId.
 // All paths converge into a single orderRequest + zuoraClient.post call.
