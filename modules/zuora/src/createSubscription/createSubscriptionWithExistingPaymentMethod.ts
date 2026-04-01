@@ -9,9 +9,14 @@ import {
 	buildSubscriptionOrderAction,
 	createSubscriptionResponseSchema,
 } from '@modules/zuora/createSubscription/createSubscription';
+import { buildNewAccountObject } from '@modules/zuora/orders/newAccount';
 import type {
 	ExistingPaymentMethod,
 	PaymentMethod,
+} from '@modules/zuora/orders/paymentMethods';
+import {
+	inlinePaymentMethodSchema,
+	paymentGatewaySchema,
 } from '@modules/zuora/orders/paymentMethods';
 import {
 	createBankTransferPaymentMethod,
@@ -29,34 +34,6 @@ export type CreateSubscriptionWithExistingPaymentMethodInput = Omit<
 	paymentGateway: string;
 	existingPaymentMethod: ExistingPaymentMethod;
 };
-
-// Builds the new account object for the existing-payment-method path.
-// paymentMethod differs per case (inline CCRT/PayPal vs undefined).
-function buildExistingPaymentMethodNewAccount(
-	input: CreateSubscriptionWithExistingPaymentMethodInput,
-	paymentMethod?: Record<string, unknown>,
-) {
-	const { deliveryContact } = {
-		deliveryContact: undefined,
-		...input.productPurchase,
-	};
-	return {
-		name: input.accountName,
-		currency: input.currency,
-		crmId: input.salesforceAccountId,
-		customFields: {
-			sfContactId__c: input.salesforceContactId,
-			IdentityId__c: input.identityId,
-			CreatedRequestId__c: input.createdRequestId,
-		},
-		billCycleDay: 0 as const,
-		autoPay: true,
-		paymentGateway: input.paymentGateway,
-		paymentMethod,
-		billToContact: input.billToContact,
-		soldToContact: deliveryContact,
-	};
-}
 
 // Resolves the payment method to use when creating a new account.
 // - requiresCloning: false — returns the existing PM id directly.
@@ -209,9 +186,27 @@ export const createSubscriptionWithExistingPaymentMethod = async (
 	const { paymentMethodIdForAccount, inlinePaymentMethod } =
 		await clonePaymentMethod(zuoraClient, existingPaymentMethod);
 
+	const { deliveryContact } = {
+		deliveryContact: undefined,
+		...input.productPurchase,
+	};
+
 	const orderRequest = {
 		newAccount: {
-			...buildExistingPaymentMethodNewAccount(input, inlinePaymentMethod),
+			...buildNewAccountObject({
+				accountName: input.accountName,
+				createdRequestId: input.createdRequestId,
+				salesforceAccountId: input.salesforceAccountId,
+				salesforceContactId: input.salesforceContactId,
+				identityId: input.identityId,
+				currency: input.currency,
+				paymentGateway: paymentGatewaySchema.parse(input.paymentGateway),
+				paymentMethod: (inlinePaymentMethod !== undefined
+					? inlinePaymentMethodSchema.parse(inlinePaymentMethod)
+					: undefined) as PaymentMethod,
+				billToContact: input.billToContact,
+				soldToContact: deliveryContact,
+			}),
 			...(inlinePaymentMethod === undefined && {
 				hpmCreditCardPaymentMethodId: paymentMethodIdForAccount,
 			}),
