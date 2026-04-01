@@ -81,13 +81,10 @@ const creditCardPaymentMethodById = {
 
 describe('createSubscriptionWithExistingPaymentMethod', () => {
 	describe('requiresCloning: false', () => {
-		it('creates account via Orders API without paymentMethod, autoPay:false, runBilling:false', async () => {
+		it('creates account with hpmCreditCardPaymentMethodId, autoPay:true, runBilling+collectPayment in a single call', async () => {
 			const mockGet = jest.fn();
-			const mockPost = jest
-				.fn()
-				.mockResolvedValueOnce(orderResponse)
-				.mockResolvedValueOnce({}); // billing-documents/generate
-			const mockPut = jest.fn().mockResolvedValueOnce(undefined);
+			const mockPost = jest.fn().mockResolvedValueOnce(orderResponse);
+			const mockPut = jest.fn();
 			const client = buildMockZuoraClient(mockGet, mockPost, mockPut);
 
 			await createSubscriptionWithExistingPaymentMethod(
@@ -100,75 +97,62 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 				undefined,
 			);
 
+			expect(mockPost).toHaveBeenCalledTimes(1);
 			const [path, body] = mockPost.mock.calls[0] as [string, string];
 			expect(path).toBe('/v1/orders');
 			const parsed = JSON.parse(body) as {
-				newAccount: { paymentMethod?: unknown; autoPay: boolean };
+				newAccount: { hpmCreditCardPaymentMethodId?: string; paymentMethod?: unknown; autoPay: boolean };
 				processingOptions: { runBilling: boolean; collectPayment: boolean };
 			};
+			expect(parsed.newAccount.hpmCreditCardPaymentMethodId).toBe('pm-existing-id');
 			expect(parsed.newAccount.paymentMethod).toBeUndefined();
-			expect(parsed.newAccount.autoPay).toBe(false);
-			expect(parsed.processingOptions.runBilling).toBe(false);
-			expect(parsed.processingOptions.collectPayment).toBe(false);
+			expect(parsed.newAccount.autoPay).toBe(true);
+			expect(parsed.processingOptions.runBilling).toBe(true);
+			expect(parsed.processingOptions.collectPayment).toBe(true);
 		});
 
-		it('calls updateAccount with defaultPaymentMethodId and autoPay:true', async () => {
-			const mockGet = jest.fn();
-			const mockPost = jest
-				.fn()
-				.mockResolvedValueOnce(orderResponse)
-				.mockResolvedValueOnce({});
-			const mockPut = jest.fn().mockResolvedValueOnce(undefined);
-			const client = buildMockZuoraClient(mockGet, mockPost, mockPut);
-
-			await createSubscriptionWithExistingPaymentMethod(
-				client,
-				productCatalog,
-				{
-					...baseInput,
-					existingPaymentMethod: { id: 'pm-existing-id', type: 'CreditCardReferenceTransaction' as const, requiresCloning: false },
-				},
-				undefined,
-			);
-
-			const [putPath, putBody] = mockPut.mock.calls[0] as [string, string];
-			expect(putPath).toBe('/v1/accounts/A00099999');
-			const putPayload = JSON.parse(putBody) as Record<string, unknown>;
-			expect(putPayload.defaultPaymentMethodId).toBe('pm-existing-id');
-			expect(putPayload.autoPay).toBe(true);
-		});
-
-		it('calls generateBillingDocuments (runBilling defaults to true)', async () => {
-			const mockGet = jest.fn();
-			const mockPost = jest
-				.fn()
-				.mockResolvedValueOnce(orderResponse)
-				.mockResolvedValueOnce({});
-			const mockPut = jest.fn().mockResolvedValueOnce(undefined);
-			const client = buildMockZuoraClient(mockGet, mockPost, mockPut);
-
-			await createSubscriptionWithExistingPaymentMethod(
-				client,
-				productCatalog,
-				{
-					...baseInput,
-					existingPaymentMethod: { id: 'pm-existing-id', type: 'CreditCardReferenceTransaction' as const, requiresCloning: false },
-				},
-				undefined,
-			);
-
-			const [billPath, billBody] = mockPost.mock.calls[1] as [string, string];
-			expect(billPath).toBe('/v1/accounts/A00099999/billing-documents/generate');
-			const billPayload = JSON.parse(billBody) as Record<string, unknown>;
-			expect(billPayload.targetDate).toBeDefined();
-			expect(billPayload.effectiveDate).toBeDefined();
-		});
-
-		it('does not call generateBillingDocuments when runBilling is false', async () => {
+		it('does not call updateAccount', async () => {
 			const mockGet = jest.fn();
 			const mockPost = jest.fn().mockResolvedValueOnce(orderResponse);
-			const mockPut = jest.fn().mockResolvedValueOnce(undefined);
+			const mockPut = jest.fn();
 			const client = buildMockZuoraClient(mockGet, mockPost, mockPut);
+
+			await createSubscriptionWithExistingPaymentMethod(
+				client,
+				productCatalog,
+				{
+					...baseInput,
+					existingPaymentMethod: { id: 'pm-existing-id', type: 'CreditCardReferenceTransaction' as const, requiresCloning: false },
+				},
+				undefined,
+			);
+
+			expect(mockPut).not.toHaveBeenCalled();
+		});
+
+		it('does not call generateBillingDocuments separately', async () => {
+			const mockGet = jest.fn();
+			const mockPost = jest.fn().mockResolvedValueOnce(orderResponse);
+			const client = buildMockZuoraClient(mockGet, mockPost);
+
+			await createSubscriptionWithExistingPaymentMethod(
+				client,
+				productCatalog,
+				{
+					...baseInput,
+					existingPaymentMethod: { id: 'pm-existing-id', type: 'CreditCardReferenceTransaction' as const, requiresCloning: false },
+				},
+				undefined,
+			);
+
+			const postPaths = (mockPost.mock.calls as Array<[string, ...unknown[]]>).map(([p]) => p);
+			expect(postPaths).not.toContain('/v1/accounts/A00099999/billing-documents/generate');
+		});
+
+		it('sets runBilling:false and collectPayment:false in processingOptions when runBilling is false', async () => {
+			const mockGet = jest.fn();
+			const mockPost = jest.fn().mockResolvedValueOnce(orderResponse);
+			const client = buildMockZuoraClient(mockGet, mockPost);
 
 			await createSubscriptionWithExistingPaymentMethod(
 				client,
@@ -177,16 +161,17 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 					...baseInput,
 					existingPaymentMethod: { id: 'pm-existing-id', type: 'CreditCardReferenceTransaction' as const, requiresCloning: false },
 					runBilling: false,
+					collectPayment: false,
 				},
 				undefined,
 			);
 
-			const postPaths = (mockPost.mock.calls as Array<[string, ...unknown[]]>).map(
-				([p]) => p,
-			);
-			expect(postPaths).not.toContain(
-				'/v1/accounts/A00099999/billing-documents/generate',
-			);
+			const [, body] = mockPost.mock.calls[0] as [string, string];
+			const parsed = JSON.parse(body) as {
+				processingOptions: { runBilling: boolean; collectPayment: boolean };
+			};
+			expect(parsed.processingOptions.runBilling).toBe(false);
+			expect(parsed.processingOptions.collectPayment).toBe(false);
 		});
 	});
 
@@ -249,14 +234,13 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 			expect(parsed.newAccount.paymentMethod.email).toBe('john@example.com');
 		});
 
-		it('uses two-step flow for BankTransfer: clones PM, updates account, generates billing docs', async () => {
+		it('uses two-step flow for BankTransfer: creates orphan PM then assigns via hpmCreditCardPaymentMethodId', async () => {
 			const mockGet = jest.fn().mockResolvedValueOnce(bankTransferPaymentMethodById);
 			const mockPost = jest
 				.fn()
-				.mockResolvedValueOnce(orderResponse) // POST /v1/orders
-				.mockResolvedValueOnce({ id: 'new-pm-id' }) // POST /v1/payment-methods
-				.mockResolvedValueOnce({}); // POST billing-documents/generate
-			const mockPut = jest.fn().mockResolvedValueOnce(undefined);
+				.mockResolvedValueOnce({ id: 'new-pm-id' }) // POST /v1/payment-methods (orphan)
+				.mockResolvedValueOnce(orderResponse);       // POST /v1/orders
+			const mockPut = jest.fn();
 			const client = buildMockZuoraClient(mockGet, mockPost, mockPut);
 
 			const result = await createSubscriptionWithExistingPaymentMethod(
@@ -270,38 +254,33 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 				undefined,
 			);
 
-			// Step 1: Orders API without paymentMethod, autoPay:false
-			const [ordersPath, ordersBody] = mockPost.mock.calls[0] as [string, string];
-			expect(ordersPath).toBe('/v1/orders');
-			const ordersRequest = JSON.parse(ordersBody) as {
-				newAccount: { paymentMethod?: unknown; autoPay: boolean };
-				processingOptions: { runBilling: boolean; collectPayment: boolean };
-			};
-			expect(ordersRequest.newAccount.paymentMethod).toBeUndefined();
-			expect(ordersRequest.newAccount.autoPay).toBe(false);
-			expect(ordersRequest.processingOptions.runBilling).toBe(false);
-
-			// Step 2: POST /v1/payment-methods with BankTransfer details
-			const [pmPath, pmBody] = mockPost.mock.calls[1] as [string, string];
+			// Step 1: POST /v1/payment-methods with no accountKey (orphan PM)
+			const [pmPath, pmBody] = mockPost.mock.calls[0] as [string, string];
 			expect(pmPath).toBe('/v1/payment-methods');
 			const pm = JSON.parse(pmBody) as Record<string, unknown>;
-			expect(pm.accountKey).toBe('A00099999');
+			expect(pm.accountKey).toBeUndefined();
 			expect(pm.type).toBe('Bacs');
 			expect((pm.mandateInfo as Record<string, string>).mandateId).toBe(
 				'GC-MANDATE-001',
 			);
 
-			// Step 3: PUT /v1/accounts to set default PM and restore autoPay
-			const [putPath, putBody] = mockPut.mock.calls[0] as [string, string];
-			expect(putPath).toBe('/v1/accounts/A00099999');
-			const putPayload = JSON.parse(putBody) as Record<string, unknown>;
-			expect(putPayload.defaultPaymentMethodId).toBe('new-pm-id');
-			expect(putPayload.autoPay).toBe(true);
+			// Step 2: POST /v1/orders with hpmCreditCardPaymentMethodId, autoPay:true
+			const [ordersPath, ordersBody] = mockPost.mock.calls[1] as [string, string];
+			expect(ordersPath).toBe('/v1/orders');
+			const ordersRequest = JSON.parse(ordersBody) as {
+				newAccount: { hpmCreditCardPaymentMethodId: string; paymentMethod?: unknown; autoPay: boolean };
+				processingOptions: { runBilling: boolean; collectPayment: boolean };
+			};
+			expect(ordersRequest.newAccount.hpmCreditCardPaymentMethodId).toBe('new-pm-id');
+			expect(ordersRequest.newAccount.paymentMethod).toBeUndefined();
+			expect(ordersRequest.newAccount.autoPay).toBe(true);
+			expect(ordersRequest.processingOptions.runBilling).toBe(true);
+			expect(ordersRequest.processingOptions.collectPayment).toBe(true);
 
-			// Step 4: billing-documents/generate
-			const [billPath] = mockPost.mock.calls[2] as [string];
-			expect(billPath).toBe('/v1/accounts/A00099999/billing-documents/generate');
+			// No PUT (no separate updateAccount call)
+			expect(mockPut).not.toHaveBeenCalled();
 
+			expect(mockPost).toHaveBeenCalledTimes(2);
 			expect(result.accountNumber).toBe('A00099999');
 		});
 
