@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 export type CreditCardReferenceTransaction = {
 	type: 'CreditCardReferenceTransaction';
 	tokenId: string;
@@ -49,18 +51,28 @@ export type PaymentMethodType = PaymentMethod['type'] | 'CreditCard';
 
 //Gateway names need to match to those set in Zuora
 //See: https://apisandbox.zuora.com/apps/NewGatewaySetting.do?method=list
-type StripePaymentGateway =
-	| 'Stripe PaymentIntents GNM Membership'
-	| 'Stripe PaymentIntents GNM Membership AUS'
-	| 'Stripe - Observer - Tortoise Media';
+const stripePaymentGatewaySchema = z.union([
+	z.literal('Stripe PaymentIntents GNM Membership'),
+	z.literal('Stripe PaymentIntents GNM Membership AUS'),
+	z.literal('Stripe - Observer - Tortoise Media'),
+]);
+type StripePaymentGateway = z.infer<typeof stripePaymentGatewaySchema>;
 
-type PayPalPaymentGateway = 'PayPal Express';
+const payPalPaymentGatewaySchema = z.literal('PayPal Express');
+type PayPalPaymentGateway = z.infer<typeof payPalPaymentGatewaySchema>;
 
-type PayPalCompletePaymentsPaymentGateway = 'PayPal Complete Payments';
+const payPalCompletePaymentsPaymentGatewaySchema = z.literal(
+	'PayPal Complete Payments',
+);
+type PayPalCompletePaymentsPaymentGateway = z.infer<
+	typeof payPalCompletePaymentsPaymentGatewaySchema
+>;
 
-type GoCardlessPaymentGateway =
-	| 'GoCardless'
-	| 'GoCardless - Observer - Tortoise Media';
+const goCardlessPaymentGatewaySchema = z.union([
+	z.literal('GoCardless'),
+	z.literal('GoCardless - Observer - Tortoise Media'),
+]);
+type GoCardlessPaymentGateway = z.infer<typeof goCardlessPaymentGatewaySchema>;
 
 type PaymentGatewayMap = {
 	CreditCardReferenceTransaction: StripePaymentGateway;
@@ -73,6 +85,33 @@ export type PaymentGateway<T extends PaymentMethod> =
 	T['type'] extends keyof PaymentGatewayMap
 		? PaymentGatewayMap[T['type']]
 		: never;
+
+export const paymentGatewaySchema = z.union([
+	stripePaymentGatewaySchema,
+	payPalPaymentGatewaySchema,
+	payPalCompletePaymentsPaymentGatewaySchema,
+	goCardlessPaymentGatewaySchema,
+]);
+
+// Schema for payment methods passed inline in the Orders API request body.
+// Only CCRT and PayPal types are used inline; Bacs is created as an orphan PM separately.
+export const inlinePaymentMethodSchema = z.discriminatedUnion('type', [
+	z.object({
+		type: z.literal('CreditCardReferenceTransaction'),
+		tokenId: z.string(),
+		secondTokenId: z.string(),
+	}),
+	z.object({
+		type: z.literal('PayPalNativeEC'),
+		BAID: z.string(),
+		email: z.string(),
+	}),
+	z.object({
+		type: z.literal('PayPalCP'),
+		BAID: z.string(),
+		email: z.string(),
+	}),
+]);
 
 // Represents a Zuora payment method ID provided by the caller.
 // requiresCloning: false — the PM exists but is not yet attached to any account;
