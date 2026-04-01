@@ -210,28 +210,22 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 			expect(result.accountNumber).toBe('A00099999');
 		});
 
-		it('fetches PM by ID and embeds PayPal inline in Orders API', async () => {
+		it('throws for PayPal payment method', async () => {
 			const mockGet = jest.fn().mockResolvedValueOnce(paypalPaymentMethodById);
-			const mockPost = jest.fn().mockResolvedValueOnce(orderResponse);
+			const mockPost = jest.fn();
 			const client = buildMockZuoraClient(mockGet, mockPost);
 
-			await createSubscriptionWithExistingPaymentMethod(
-				client,
-				productCatalog,
-				{
-					...baseInput,
-					existingPaymentMethod: { id: 'pm-pp-id', type: 'PayPalNativeEC' as const, requiresCloning: true },
-				},
-				undefined,
-			);
-
-			const [, postBody] = mockPost.mock.calls[0] as [string, string];
-			const parsed = JSON.parse(postBody) as {
-				newAccount: { paymentMethod: Record<string, unknown> };
-			};
-			expect(parsed.newAccount.paymentMethod.type).toBe('PayPalNativeEC');
-			expect(parsed.newAccount.paymentMethod.BAID).toBe('BAID-paypal-123');
-			expect(parsed.newAccount.paymentMethod.email).toBe('john@example.com');
+			await expect(
+				createSubscriptionWithExistingPaymentMethod(
+					client,
+					productCatalog,
+					{
+						...baseInput,
+						existingPaymentMethod: { id: 'pm-pp-id', type: 'PayPalNativeEC' as const, requiresCloning: true },
+					},
+					undefined,
+				),
+			).rejects.toThrow('PayPal payment method is not supported for cloning');
 		});
 
 		it('uses two-step flow for BankTransfer: creates orphan PM then assigns via hpmCreditCardPaymentMethodId', async () => {
