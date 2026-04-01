@@ -1,5 +1,6 @@
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import type {
+	ClonedCreditCardReferenceTransaction,
 	PaymentGateway,
 	PaymentMethod,
 } from '@modules/zuora/orders/paymentMethods';
@@ -18,7 +19,9 @@ export type Contact = {
 	postalCode?: string;
 };
 
-export type NewAccount<T extends PaymentMethod> = {
+export type NewAccount<
+	T extends PaymentMethod | ClonedCreditCardReferenceTransaction,
+> = {
 	name: string;
 	currency: IsoCurrency;
 	crmId: string; // Salesforce accountId
@@ -31,13 +34,15 @@ export type NewAccount<T extends PaymentMethod> = {
 	billCycleDay: 0;
 	autoPay: boolean;
 	paymentGateway: PaymentGateway<T>; // Generic to make sure we will only accept payment gateways that match the payment method
-	paymentMethod: T;
+	paymentMethod?: T;
 	billToContact: Contact;
 	soldToContact?: Contact & { SpecialDeliveryInstructions__c?: string };
 };
 
 // Builder function to simplify the creation of a new account object.
-export function buildNewAccountObject<T extends PaymentMethod>({
+export function buildNewAccountObject<
+	T extends PaymentMethod | ClonedCreditCardReferenceTransaction,
+>({
 	accountName,
 	createdRequestId,
 	salesforceAccountId,
@@ -57,7 +62,7 @@ export function buildNewAccountObject<T extends PaymentMethod>({
 	identityId: string;
 	currency: IsoCurrency;
 	paymentGateway: PaymentGateway<T>;
-	paymentMethod: T;
+	paymentMethod?: T;
 	billToContact: Contact;
 	soldToContact?: Contact;
 	deliveryInstructions?: string;

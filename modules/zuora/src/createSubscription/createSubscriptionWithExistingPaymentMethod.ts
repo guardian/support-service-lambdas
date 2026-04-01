@@ -10,14 +10,13 @@ import {
 	createSubscriptionResponseSchema,
 } from '@modules/zuora/createSubscription/createSubscription';
 import { buildNewAccountObject } from '@modules/zuora/orders/newAccount';
+import { executeOrderRequest } from '@modules/zuora/orders/orderRequests';
 import type {
+	ClonedCreditCardReferenceTransaction,
 	ExistingPaymentMethod,
 	PaymentMethod,
 } from '@modules/zuora/orders/paymentMethods';
-import {
-	inlinePaymentMethodSchema,
-	paymentGatewaySchema,
-} from '@modules/zuora/orders/paymentMethods';
+import { paymentGatewaySchema } from '@modules/zuora/orders/paymentMethods';
 import {
 	createBankTransferPaymentMethod,
 	getPaymentMethodById,
@@ -45,7 +44,7 @@ async function clonePaymentMethod(
 	existingPaymentMethod: ExistingPaymentMethod,
 ): Promise<{
 	paymentMethodIdForAccount: string;
-	inlinePaymentMethod?: Record<string, string>;
+	inlinePaymentMethod?: ClonedCreditCardReferenceTransaction;
 }> {
 	if (!existingPaymentMethod.requiresCloning) {
 		return { paymentMethodIdForAccount: existingPaymentMethod.id };
@@ -174,8 +173,6 @@ export const createSubscriptionWithExistingPaymentMethod = async (
 		CreatedByCSR__c: createdByCSR,
 	};
 
-	const headers = { 'idempotency-key': createdRequestId };
-
 	const { paymentMethodIdForAccount, inlinePaymentMethod } =
 		await clonePaymentMethod(zuoraClient, existingPaymentMethod);
 
@@ -186,7 +183,9 @@ export const createSubscriptionWithExistingPaymentMethod = async (
 
 	const orderRequest = {
 		newAccount: {
-			...buildNewAccountObject({
+			...buildNewAccountObject<
+				PaymentMethod | ClonedCreditCardReferenceTransaction
+			>({
 				accountName: input.accountName,
 				createdRequestId: input.createdRequestId,
 				salesforceAccountId: input.salesforceAccountId,
@@ -194,9 +193,7 @@ export const createSubscriptionWithExistingPaymentMethod = async (
 				identityId: input.identityId,
 				currency: input.currency,
 				paymentGateway: paymentGatewaySchema.parse(input.paymentGateway),
-				paymentMethod: (inlinePaymentMethod !== undefined
-					? inlinePaymentMethodSchema.parse(inlinePaymentMethod)
-					: undefined) as PaymentMethod,
+				paymentMethod: inlinePaymentMethod,
 				billToContact: input.billToContact,
 				soldToContact: deliveryContact,
 			}),
@@ -215,10 +212,10 @@ export const createSubscriptionWithExistingPaymentMethod = async (
 		},
 	};
 
-	return zuoraClient.post(
-		'/v1/orders',
-		JSON.stringify(orderRequest),
+	return executeOrderRequest(
+		zuoraClient,
+		orderRequest,
 		createSubscriptionResponseSchema,
-		headers,
+		createdRequestId,
 	);
 };
