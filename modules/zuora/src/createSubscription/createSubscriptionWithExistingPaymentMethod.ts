@@ -14,7 +14,6 @@ import type {
 	PaymentMethod,
 } from '@modules/zuora/orders/paymentMethods';
 import {
-	type BankTransferCloneInput,
 	createBankTransferPaymentMethod,
 	getPaymentMethodById,
 } from '@modules/zuora/paymentMethod';
@@ -67,70 +66,94 @@ async function clonePaymentMethod(
 	zuoraClient: ZuoraClient,
 	existingPaymentMethod: ExistingPaymentMethod,
 ): Promise<{
-	pmIdForAccount: string;
+	paymentMethodIdForAccount: string;
 	inlinePaymentMethod?: Record<string, string>;
 }> {
 	if (!existingPaymentMethod.requiresCloning) {
-		return { pmIdForAccount: existingPaymentMethod.id };
+		return { paymentMethodIdForAccount: existingPaymentMethod.id };
 	}
 
-	const pm = await getPaymentMethodById(zuoraClient, existingPaymentMethod.id);
+	const zuoraPaymentMethod = await getPaymentMethodById(
+		zuoraClient,
+		existingPaymentMethod.id,
+	);
 
-	if (pm.type === 'CreditCard') {
+	if (zuoraPaymentMethod.type === 'CreditCard') {
 		// Zuora only returns a masked card number (e.g. ****1234) for PCI-DSS
 		// compliance — cannot be used to create a new payment method.
 		throw new Error(
 			`CreditCard payment method is not supported for cloning, ` +
 				`only CreditCardReferenceTransaction, PayPal, or BankTransfer.`,
 		);
-	} else if (pm.type === 'Bacs') {
-		const bankTransferPm: BankTransferCloneInput = {
-			type: pm.type,
-			accountNumber: pm.accountNumber ?? '',
-			bankCode: pm.bankCode ?? '',
-			accountHolderInfo: {
-				accountHolderName: pm.accountHolderInfo?.accountHolderName ?? null,
-			},
-			mandateInfo: {
-				mandateId: pm.mandateInfo?.mandateId ?? null,
-				mandateReason: pm.mandateInfo?.mandateReason ?? null,
-				mandateStatus: pm.mandateInfo?.mandateStatus ?? null,
-			},
-		};
+	} else if (zuoraPaymentMethod.type === 'Bacs') {
+		const { accountNumber, bankCode } = zuoraPaymentMethod;
+		const accountHolderName =
+			zuoraPaymentMethod.accountHolderInfo?.accountHolderName;
+		const mandateId = zuoraPaymentMethod.mandateInfo?.mandateId;
+		if (!accountNumber) {
+			throw new Error(
+				`Bacs payment method ${zuoraPaymentMethod.id} is missing accountNumber`,
+			);
+		}
+		if (!bankCode) {
+			throw new Error(
+				`Bacs payment method ${zuoraPaymentMethod.id} is missing bankCode`,
+			);
+		}
+		if (!accountHolderName) {
+			throw new Error(
+				`Bacs payment method ${zuoraPaymentMethod.id} is missing accountHolderInfo.accountHolderName`,
+			);
+		}
+		if (!mandateId) {
+			throw new Error(
+				`Bacs payment method ${zuoraPaymentMethod.id} is missing mandateInfo.mandateId`,
+			);
+		}
+
 		// Create an orphan PM (no accountKey), then assign it via hpmCreditCardPaymentMethodId.
-		const pmIdForAccount = await createBankTransferPaymentMethod(
-			zuoraClient,
-			undefined,
-			bankTransferPm,
-		);
-		return { pmIdForAccount };
-	} else if (pm.type === 'CreditCardReferenceTransaction') {
-		if (!pm.tokenId || !pm.secondTokenId) {
+		const pmIdForAccount = await createBankTransferPaymentMethod(zuoraClient, {
+			type: zuoraPaymentMethod.type,
+			accountNumber,
+			bankCode,
+			accountHolderInfo: { accountHolderName },
+			mandateInfo: { mandateId },
+		});
+		return { paymentMethodIdForAccount: pmIdForAccount };
+	} else if (zuoraPaymentMethod.type === 'CreditCardReferenceTransaction') {
+		if (!zuoraPaymentMethod.tokenId || !zuoraPaymentMethod.secondTokenId) {
 			throw new Error(
-				`CreditCardReferenceTransaction payment method ${pm.id} is missing tokenId or secondTokenId`,
+				`CreditCardReferenceTransaction payment method ${zuoraPaymentMethod.id} is missing tokenId or secondTokenId`,
 			);
 		}
 		return {
-			pmIdForAccount: pm.id,
+			paymentMethodIdForAccount: zuoraPaymentMethod.id,
 			inlinePaymentMethod: {
-				type: pm.type,
-				tokenId: pm.tokenId,
-				secondTokenId: pm.secondTokenId,
+				type: zuoraPaymentMethod.type,
+				tokenId: zuoraPaymentMethod.tokenId,
+				secondTokenId: zuoraPaymentMethod.secondTokenId,
 			},
 		};
-	} else if (pm.type === 'PayPalNativeEC' || pm.type === 'PayPalCP') {
-		if (!pm.BAID || !pm.email) {
+	} else if (
+		zuoraPaymentMethod.type === 'PayPalNativeEC' ||
+		zuoraPaymentMethod.type === 'PayPalCP'
+	) {
+		if (!zuoraPaymentMethod.BAID || !zuoraPaymentMethod.email) {
 			throw new Error(
-				`PayPal payment method ${pm.id} is missing BAID or email`,
+				`PayPal payment method ${zuoraPaymentMethod.id} is missing BAID or email`,
 			);
 		}
 		return {
-			pmIdForAccount: pm.id,
-			inlinePaymentMethod: { type: pm.type, BAID: pm.BAID, email: pm.email },
+			paymentMethodIdForAccount: zuoraPaymentMethod.id,
+			inlinePaymentMethod: {
+				type: zuoraPaymentMethod.type,
+				BAID: zuoraPaymentMethod.BAID,
+				email: zuoraPaymentMethod.email,
+			},
 		};
 	} else {
 		throw new Error(
-			`Unsupported payment method type for cloning: ${pm.type}. ` +
+			`Unsupported payment method type for cloning: ${zuoraPaymentMethod.type}. ` +
 				`Only CreditCardReferenceTransaction, PayPal, and BankTransfer are supported.`,
 		);
 	}
@@ -183,16 +206,14 @@ export const createSubscriptionWithExistingPaymentMethod = async (
 
 	const headers = { 'idempotency-key': createdRequestId };
 
-	const { pmIdForAccount, inlinePaymentMethod } = await clonePaymentMethod(
-		zuoraClient,
-		existingPaymentMethod,
-	);
+	const { paymentMethodIdForAccount, inlinePaymentMethod } =
+		await clonePaymentMethod(zuoraClient, existingPaymentMethod);
 
 	const orderRequest = {
 		newAccount: {
 			...buildExistingPaymentMethodNewAccount(input, inlinePaymentMethod),
 			...(inlinePaymentMethod === undefined && {
-				hpmCreditCardPaymentMethodId: pmIdForAccount,
+				hpmCreditCardPaymentMethodId: paymentMethodIdForAccount,
 			}),
 		},
 		orderDate: zuoraDateFormat(contractEffectiveDate),
