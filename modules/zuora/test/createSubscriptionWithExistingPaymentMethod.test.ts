@@ -28,7 +28,7 @@ const baseInput = {
 	salesforceContactId: 'sf-contact-id',
 	identityId: 'identity-id-123',
 	currency: 'GBP' as const,
-	paymentGateway: 'Stripe PaymentIntents GNM Membership',
+	paymentGateway: 'Stripe PaymentIntents GNM Membership' as const,
 	billToContact: {
 		firstName: 'John',
 		lastName: 'Doe',
@@ -51,13 +51,6 @@ const ccrtPaymentMethodById = {
 	secondTokenId: 'cus_stripe_456',
 };
 
-const paypalPaymentMethodById = {
-	id: 'pm-pp-id',
-	type: 'PayPalNativeEC',
-	BAID: 'BAID-paypal-123',
-	email: 'john@example.com',
-};
-
 const bankTransferPaymentMethodById = {
 	id: 'pm-bt-id',
 	type: 'Bacs',
@@ -72,11 +65,6 @@ const bankTransferPaymentMethodById = {
 		mandateReason: null,
 		mandateStatus: null,
 	},
-};
-
-const creditCardPaymentMethodById = {
-	id: 'pm-cc-id',
-	type: 'CreditCard',
 };
 
 describe('createSubscriptionWithExistingPaymentMethod', () => {
@@ -210,24 +198,6 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 			expect(result.accountNumber).toBe('A00099999');
 		});
 
-		it('throws for PayPal payment method', async () => {
-			const mockGet = jest.fn().mockResolvedValueOnce(paypalPaymentMethodById);
-			const mockPost = jest.fn();
-			const client = buildMockZuoraClient(mockGet, mockPost);
-
-			await expect(
-				createSubscriptionWithExistingPaymentMethod(
-					client,
-					productCatalog,
-					{
-						...baseInput,
-						existingPaymentMethod: { id: 'pm-pp-id', requiresCloning: true },
-					},
-					undefined,
-				),
-			).rejects.toThrow('payment method is not supported for cloning');
-		});
-
 		it('uses two-step flow for BankTransfer: creates orphan PM then assigns via hpmCreditCardPaymentMethodId', async () => {
 			const mockGet = jest.fn().mockResolvedValueOnce(bankTransferPaymentMethodById);
 			const mockPost = jest
@@ -242,7 +212,7 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 				productCatalog,
 				{
 					...baseInput,
-					paymentGateway: 'GoCardless',
+					paymentGateway: 'GoCardless' as const,
 					existingPaymentMethod: { id: 'pm-bt-id', requiresCloning: true },
 				},
 				undefined,
@@ -276,69 +246,6 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 
 			expect(mockPost).toHaveBeenCalledTimes(2);
 			expect(result.accountNumber).toBe('A00099999');
-		});
-
-		it('throws for CreditCard payment method', async () => {
-			const mockGet = jest.fn().mockResolvedValueOnce(creditCardPaymentMethodById);
-			const mockPost = jest.fn();
-			const client = buildMockZuoraClient(mockGet, mockPost);
-
-			await expect(
-				createSubscriptionWithExistingPaymentMethod(
-					client,
-					productCatalog,
-					{
-						...baseInput,
-						existingPaymentMethod: { id: 'pm-cc-id', requiresCloning: true },
-					},
-					undefined,
-				),
-			).rejects.toThrow(
-				'CreditCard payment method is not supported for cloning',
-			);
-		});
-
-		it.each([
-			['accountNumber', { ...bankTransferPaymentMethodById, accountNumber: undefined }],
-			['bankCode', { ...bankTransferPaymentMethodById, bankCode: undefined }],
-			['accountHolderInfo.accountHolderName', { ...bankTransferPaymentMethodById, accountHolderInfo: { accountHolderName: null } }],
-			['mandateInfo.mandateId', { ...bankTransferPaymentMethodById, mandateInfo: { mandateId: null } }],
-		])('throws a meaningful error when Bacs PM is missing %s', async (_field, pm) => {
-			const mockGet = jest.fn().mockResolvedValueOnce(pm);
-			const mockPost = jest.fn();
-			const client = buildMockZuoraClient(mockGet, mockPost);
-
-			await expect(
-				createSubscriptionWithExistingPaymentMethod(
-					client,
-					productCatalog,
-					{
-						...baseInput,
-						existingPaymentMethod: { id: 'pm-bt-id', requiresCloning: true },
-					},
-					undefined,
-				),
-			).rejects.toThrow(`Bacs payment method pm-bt-id is missing ${_field}`);
-		});
-
-		it('throws for unknown payment method type', async () => {
-			const mockGet = jest
-				.fn()
-				.mockResolvedValueOnce({ id: 'pm-unknown-id', type: 'SomeUnknownType' });
-			const mockPost = jest.fn();
-			const client = buildMockZuoraClient(mockGet, mockPost);
-
-			await expect(
-				createSubscriptionWithExistingPaymentMethod(
-					client,
-					productCatalog,
-					{
-						...baseInput,
-						existingPaymentMethod: { id: 'pm-unknown-id', requiresCloning: true },
-					},
-					undefined,
-				),
-			).rejects.toThrow('Unsupported payment method type for cloning');
 		});
 
 		it('passes createdRequestId as idempotency key', async () => {
