@@ -57,6 +57,8 @@ export type ClonedCreditCardReferenceTransaction = {
 	secondTokenId: string;
 };
 
+export type AnyPaymentMethod = PaymentMethod | ClonedCreditCardReferenceTransaction;
+
 //Gateway names need to match to those set in Zuora
 //See: https://apisandbox.zuora.com/apps/NewGatewaySetting.do?method=list
 const stripePaymentGatewaySchema = z.union([
