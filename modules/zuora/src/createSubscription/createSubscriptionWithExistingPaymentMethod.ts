@@ -12,6 +12,7 @@ import {
 import { buildNewAccountObject } from '@modules/zuora/orders/newAccount';
 import { executeOrderRequest } from '@modules/zuora/orders/orderRequests';
 import type {
+	AnyPaymentMethod,
 	ClonedCreditCardReferenceTransaction,
 	ExistingPaymentMethod,
 	PaymentMethod,
@@ -184,9 +185,7 @@ export const createSubscriptionWithExistingPaymentMethod = async (
 
 	const orderRequest = {
 		newAccount: {
-			...buildNewAccountObject<
-				PaymentMethod | ClonedCreditCardReferenceTransaction
-			>({
+			...buildNewAccountObject<AnyPaymentMethod>({
 				accountName: input.accountName,
 				createdRequestId: input.createdRequestId,
 				salesforceAccountId: input.salesforceAccountId,
