@@ -64,7 +64,7 @@ describe('clonePaymentMethod', () => {
 	});
 
 	describe('requiresCloning: true', () => {
-		it('returns inlinePaymentMethod for CreditCardReferenceTransaction', async () => {
+		it('returns ClonedCreditCardReferenceTransaction for CreditCardReferenceTransaction', async () => {
 			const mockGet = jest.fn().mockResolvedValueOnce(ccrtPaymentMethodById);
 			const client = buildMockZuoraClient(mockGet, jest.fn());
 
@@ -82,7 +82,7 @@ describe('clonePaymentMethod', () => {
 			});
 		});
 
-		it('creates an orphan BankTransfer PM and returns its id', async () => {
+		it('creates an orphan BankTransfer payment method and returns its id', async () => {
 			const mockGet = jest
 				.fn()
 				.mockResolvedValueOnce(bankTransferPaymentMethodById);
@@ -161,7 +161,7 @@ describe('clonePaymentMethod', () => {
 				},
 			],
 		])(
-			'throws a meaningful error when Bacs PM is missing %s',
+			'throws a meaningful error when Bacs payment method is missing %s',
 			async (_field, pm) => {
 				const mockGet = jest.fn().mockResolvedValueOnce(pm);
 				const client = buildMockZuoraClient(mockGet, jest.fn());
