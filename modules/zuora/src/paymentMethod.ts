@@ -5,7 +5,7 @@ import type { ZuoraClient } from './zuoraClient';
 // Minimal fields needed to clone a BankTransfer payment method onto a new account.
 // The full BankTransferPaymentMethod type is a structural subtype of this, so
 // callers passing either work correctly.
-type BankTransferCloneInput = {
+export type BankTransferCloneInput = {
 	type: string;
 	accountNumber: string;
 	bankCode: string;
