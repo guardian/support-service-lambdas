@@ -56,7 +56,9 @@ describe('clonePaymentMethod', () => {
 				requiresCloning: false,
 			});
 
-			expect(result).toEqual({ paymentMethodIdForAccount: 'pm-existing-id' });
+			expect(result).toEqual({
+				hpmCreditCardPaymentMethodId: 'pm-existing-id',
+			});
 			expect(mockGet).not.toHaveBeenCalled();
 		});
 	});
@@ -72,8 +74,7 @@ describe('clonePaymentMethod', () => {
 			});
 
 			expect(result).toEqual({
-				paymentMethodIdForAccount: 'pm-ccrt-id',
-				inlinePaymentMethod: {
+				paymentMethod: {
 					type: 'CreditCardReferenceTransaction',
 					tokenId: 'tok_stripe_123',
 					secondTokenId: 'cus_stripe_456',
@@ -82,7 +83,9 @@ describe('clonePaymentMethod', () => {
 		});
 
 		it('creates an orphan BankTransfer PM and returns its id', async () => {
-			const mockGet = jest.fn().mockResolvedValueOnce(bankTransferPaymentMethodById);
+			const mockGet = jest
+				.fn()
+				.mockResolvedValueOnce(bankTransferPaymentMethodById);
 			const mockPost = jest.fn().mockResolvedValueOnce({ id: 'new-pm-id' });
 			const client = buildMockZuoraClient(mockGet, mockPost);
 
@@ -91,7 +94,7 @@ describe('clonePaymentMethod', () => {
 				requiresCloning: true,
 			});
 
-			expect(result).toEqual({ paymentMethodIdForAccount: 'new-pm-id' });
+			expect(result).toEqual({ hpmCreditCardPaymentMethodId: 'new-pm-id' });
 			const [path, body] = mockPost.mock.calls[0] as [string, string];
 			expect(path).toBe('/v1/payment-methods');
 			const pm = JSON.parse(body) as Record<string, unknown>;
@@ -112,7 +115,9 @@ describe('clonePaymentMethod', () => {
 		});
 
 		it('throws for CreditCard payment method', async () => {
-			const mockGet = jest.fn().mockResolvedValueOnce(creditCardPaymentMethodById);
+			const mockGet = jest
+				.fn()
+				.mockResolvedValueOnce(creditCardPaymentMethodById);
 			const client = buildMockZuoraClient(mockGet, jest.fn());
 
 			await expect(
@@ -121,18 +126,25 @@ describe('clonePaymentMethod', () => {
 		});
 
 		it('throws for unknown payment method type', async () => {
-			const mockGet = jest
-				.fn()
-				.mockResolvedValueOnce({ id: 'pm-unknown-id', type: 'SomeUnknownType' });
+			const mockGet = jest.fn().mockResolvedValueOnce({
+				id: 'pm-unknown-id',
+				type: 'SomeUnknownType',
+			});
 			const client = buildMockZuoraClient(mockGet, jest.fn());
 
 			await expect(
-				clonePaymentMethod(client, { id: 'pm-unknown-id', requiresCloning: true }),
+				clonePaymentMethod(client, {
+					id: 'pm-unknown-id',
+					requiresCloning: true,
+				}),
 			).rejects.toThrow('Unsupported payment method type for cloning');
 		});
 
 		it.each([
-			['accountNumber', { ...bankTransferPaymentMethodById, accountNumber: undefined }],
+			[
+				'accountNumber',
+				{ ...bankTransferPaymentMethodById, accountNumber: undefined },
+			],
 			['bankCode', { ...bankTransferPaymentMethodById, bankCode: undefined }],
 			[
 				'accountHolderInfo.accountHolderName',
@@ -148,13 +160,16 @@ describe('clonePaymentMethod', () => {
 					mandateInfo: { mandateId: null },
 				},
 			],
-		])('throws a meaningful error when Bacs PM is missing %s', async (_field, pm) => {
-			const mockGet = jest.fn().mockResolvedValueOnce(pm);
-			const client = buildMockZuoraClient(mockGet, jest.fn());
+		])(
+			'throws a meaningful error when Bacs PM is missing %s',
+			async (_field, pm) => {
+				const mockGet = jest.fn().mockResolvedValueOnce(pm);
+				const client = buildMockZuoraClient(mockGet, jest.fn());
 
-			await expect(
-				clonePaymentMethod(client, { id: 'pm-bt-id', requiresCloning: true }),
-			).rejects.toThrow(`Bacs payment method pm-bt-id is missing ${_field}`);
-		});
+				await expect(
+					clonePaymentMethod(client, { id: 'pm-bt-id', requiresCloning: true }),
+				).rejects.toThrow(`Bacs payment method pm-bt-id is missing ${_field}`);
+			},
+		);
 	});
 });
