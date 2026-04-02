@@ -47,7 +47,6 @@ export type PaymentMethod =
 	| PayPalCompletePaymentsWithPaymentToken
 	| PayPalCompletePaymentsWithBAID;
 
-export type PaymentMethodType = PaymentMethod['type'] | 'CreditCard';
 
 // A CreditCardReferenceTransaction with only the fields needed to clone it onto a new account.
 // Distinct from CreditCardReferenceTransaction, which includes card display fields (cardNumber,
@@ -110,6 +109,5 @@ export const paymentGatewaySchema = z.union([
 //   cloned (re-created) on the new account before use.
 export type ExistingPaymentMethod = {
 	id: string;
-	type: PaymentMethodType;
 	requiresCloning: boolean;
 };
