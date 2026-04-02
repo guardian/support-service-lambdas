@@ -9,22 +9,19 @@ type BankTransferCloneInput = {
 	type: string;
 	accountNumber: string;
 	bankCode: string;
-	accountHolderInfo: { accountHolderName: string };
-	mandateInfo: {
-		mandateId: string;
-	};
+	accountHolderInfo: AccountHolderInfo;
+	mandateInfo: MandateInfo;
 };
 
-// Minimal schema capturing the fields needed to clone a payment method onto a new account.
 const accountHolderInfoSchema = z.object({
 	accountHolderName: z.string().nullable(),
 });
+type AccountHolderInfo = z.infer<typeof accountHolderInfoSchema>;
 
 const mandateInfoSchema = z.object({
 	mandateId: z.string().nullable(),
-	mandateReason: z.string().nullable(),
-	mandateStatus: z.string().nullable(),
 });
+type MandateInfo = z.infer<typeof mandateInfoSchema>;
 
 const paymentMethodByIdSchema = z.object({
 	id: z.string(),
@@ -32,9 +29,6 @@ const paymentMethodByIdSchema = z.object({
 	// CreditCardReferenceTransaction fields
 	tokenId: z.string().optional(),
 	secondTokenId: z.string().optional(),
-	// PayPal fields
-	BAID: z.string().optional(),
-	email: z.string().optional(),
 	// BankTransfer fields
 	bankTransferType: z.string().optional(),
 	accountNumber: z.string().optional(),
