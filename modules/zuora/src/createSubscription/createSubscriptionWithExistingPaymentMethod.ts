@@ -75,32 +75,30 @@ export const createSubscriptionWithExistingPaymentMethod = async (
 		CreatedByCSR__c: createdByCSR,
 	};
 
-	const { paymentMethodIdForAccount, inlinePaymentMethod } =
-		await clonePaymentMethod(zuoraClient, existingPaymentMethod);
+	const clonePaymentMethodResult = await clonePaymentMethod(
+		zuoraClient,
+		existingPaymentMethod,
+	);
 
 	const { deliveryContact } = {
 		deliveryContact: undefined,
 		...input.productPurchase,
 	};
 
+	const newAccount = buildNewAccountObject<AnyPaymentMethod>({
+		accountName: input.accountName,
+		createdRequestId: input.createdRequestId,
+		salesforceAccountId: input.salesforceAccountId,
+		salesforceContactId: input.salesforceContactId,
+		identityId: input.identityId,
+		currency: input.currency,
+		paymentGateway: input.paymentGateway,
+		billToContact: input.billToContact,
+		soldToContact: deliveryContact,
+	});
+
 	const orderRequest = {
-		newAccount: {
-			...buildNewAccountObject<AnyPaymentMethod>({
-				accountName: input.accountName,
-				createdRequestId: input.createdRequestId,
-				salesforceAccountId: input.salesforceAccountId,
-				salesforceContactId: input.salesforceContactId,
-				identityId: input.identityId,
-				currency: input.currency,
-				paymentGateway: input.paymentGateway,
-				paymentMethod: inlinePaymentMethod,
-				billToContact: input.billToContact,
-				soldToContact: deliveryContact,
-			}),
-			...(inlinePaymentMethod === undefined && {
-				hpmCreditCardPaymentMethodId: paymentMethodIdForAccount,
-			}),
-		},
+		newAccount: { ...newAccount, ...clonePaymentMethodResult },
 		orderDate: zuoraDateFormat(contractEffectiveDate),
 		description: 'Created by createSubscription.ts in support-service-lambdas',
 		subscriptions: [

@@ -16,8 +16,8 @@ export type ExistingPaymentMethod = {
 };
 
 export type ClonePaymentMethodResult = {
-	paymentMethodIdForAccount: string;
-	inlinePaymentMethod?: ClonedCreditCardReferenceTransaction;
+	hpmCreditCardPaymentMethodId?: string;
+	paymentMethod?: ClonedCreditCardReferenceTransaction;
 };
 
 // Resolves the payment method to use when creating a new account.
@@ -30,7 +30,7 @@ export async function clonePaymentMethod(
 	existingPaymentMethod: ExistingPaymentMethod,
 ): Promise<ClonePaymentMethodResult> {
 	if (!existingPaymentMethod.requiresCloning) {
-		return { paymentMethodIdForAccount: existingPaymentMethod.id };
+		return { hpmCreditCardPaymentMethodId: existingPaymentMethod.id };
 	}
 
 	const zuoraPaymentMethod = await getPaymentMethodById(
@@ -75,7 +75,7 @@ export async function clonePaymentMethod(
 				mandateInfo: { mandateId },
 			},
 		);
-		return { paymentMethodIdForAccount };
+		return { hpmCreditCardPaymentMethodId: paymentMethodIdForAccount };
 	} else if (zuoraPaymentMethod.type === 'CreditCardReferenceTransaction') {
 		if (!zuoraPaymentMethod.tokenId || !zuoraPaymentMethod.secondTokenId) {
 			throw new Error(
@@ -83,8 +83,7 @@ export async function clonePaymentMethod(
 			);
 		}
 		return {
-			paymentMethodIdForAccount: zuoraPaymentMethod.id,
-			inlinePaymentMethod: {
+			paymentMethod: {
 				type: zuoraPaymentMethod.type,
 				tokenId: zuoraPaymentMethod.tokenId,
 				secondTokenId: zuoraPaymentMethod.secondTokenId,
