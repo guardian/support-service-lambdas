@@ -1,8 +1,7 @@
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import type {
-	ClonedCreditCardReferenceTransaction,
+	AnyPaymentMethod,
 	PaymentGateway,
-	PaymentMethod,
 } from '@modules/zuora/orders/paymentMethods';
 
 // This file contains types for creating a new account via the Orders API.
@@ -20,7 +19,7 @@ export type Contact = {
 };
 
 export type NewAccount<
-	T extends PaymentMethod | ClonedCreditCardReferenceTransaction,
+	T extends AnyPaymentMethod,
 > = {
 	name: string;
 	currency: IsoCurrency;
@@ -41,7 +40,7 @@ export type NewAccount<
 
 // Builder function to simplify the creation of a new account object.
 export function buildNewAccountObject<
-	T extends PaymentMethod | ClonedCreditCardReferenceTransaction,
+	T extends AnyPaymentMethod,
 >({
 	accountName,
 	createdRequestId,
