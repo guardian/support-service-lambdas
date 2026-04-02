@@ -154,7 +154,9 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 				},
 				undefined,
 			),
-		).rejects.toThrow('payment method is not supported for cloning');
+		).rejects.toThrow(
+			'Unsupported payment method type for cloning: PayPalEC. Only CreditCardReferenceTransaction and BankTransfer are supported.',
+		);
 	}, 120000);
 
 	test('creates a SupporterPlus subscription using an existing BankTransfer (GoCardless) payment method', async () => {
