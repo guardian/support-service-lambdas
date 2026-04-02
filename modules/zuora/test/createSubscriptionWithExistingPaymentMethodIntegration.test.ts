@@ -11,6 +11,10 @@ import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import { z } from 'zod';
 import { deleteAccount } from '@modules/zuora/account';
 import { createSubscriptionWithExistingPaymentMethod } from '@modules/zuora/createSubscription/createSubscriptionWithExistingPaymentMethod';
+import type {
+	PaymentGateway,
+	PaymentMethod,
+} from '@modules/zuora/orders/paymentMethods';
 import { getPaymentMethods } from '@modules/zuora/paymentMethod';
 import { getSubscription } from '@modules/zuora/subscription';
 import { zuoraSubscriptionSchema } from '@modules/zuora/types/objects/subscription';
@@ -77,7 +81,8 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 				salesforceContactId: sourceAccount.basicInfo.sfContactId__c ?? '',
 				identityId: sourceAccount.basicInfo.IdentityId__c ?? '',
 				currency: sourceAccount.billingAndPayment.currency,
-				paymentGateway: sourceAccount.billingAndPayment.paymentGateway,
+				paymentGateway: sourceAccount.billingAndPayment
+					.paymentGateway as PaymentGateway<PaymentMethod>,
 				existingPaymentMethod: {
 					id: paymentMethods.defaultPaymentMethodId,
 					requiresCloning: true,
@@ -127,7 +132,8 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 					salesforceContactId: sourceAccount.basicInfo.sfContactId__c ?? '',
 					identityId: sourceAccount.basicInfo.IdentityId__c ?? '',
 					currency: sourceAccount.billingAndPayment.currency,
-					paymentGateway: sourceAccount.billingAndPayment.paymentGateway,
+					paymentGateway: sourceAccount.billingAndPayment
+						.paymentGateway as PaymentGateway<PaymentMethod>,
 					existingPaymentMethod: {
 						id: paymentMethods.defaultPaymentMethodId,
 						requiresCloning: true,
@@ -175,7 +181,8 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 				salesforceContactId: sourceAccount.basicInfo.sfContactId__c ?? '',
 				identityId: sourceAccount.basicInfo.IdentityId__c ?? '',
 				currency: sourceAccount.billingAndPayment.currency,
-				paymentGateway: sourceAccount.billingAndPayment.paymentGateway,
+				paymentGateway: sourceAccount.billingAndPayment
+					.paymentGateway as PaymentGateway<PaymentMethod>,
 				existingPaymentMethod: {
 					id: paymentMethods.defaultPaymentMethodId,
 					requiresCloning: true,
@@ -230,7 +237,8 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 				salesforceContactId: sourceAccount.basicInfo.sfContactId__c ?? '',
 				identityId: sourceAccount.basicInfo.IdentityId__c ?? '',
 				currency: sourceAccount.billingAndPayment.currency,
-				paymentGateway: sourceAccount.billingAndPayment.paymentGateway,
+				paymentGateway: sourceAccount.billingAndPayment
+					.paymentGateway as PaymentGateway<PaymentMethod>,
 				existingPaymentMethod: {
 					id: paymentMethods.defaultPaymentMethodId,
 					requiresCloning: true,

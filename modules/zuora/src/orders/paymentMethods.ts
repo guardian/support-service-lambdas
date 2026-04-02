@@ -80,7 +80,7 @@ type PaymentGatewayMap = {
 	PayPalCP: PayPalCompletePaymentsPaymentGateway;
 };
 
-export type PaymentGateway<T extends PaymentMethod> =
+export type PaymentGateway<T extends AnyPaymentMethod> =
 	T['type'] extends keyof PaymentGatewayMap
 		? PaymentGatewayMap[T['type']]
 		: never;
