@@ -4,20 +4,19 @@ import type {
 	CreateSubscriptionInputFields,
 	CreateSubscriptionResponse,
 } from '@modules/zuora/createSubscription/createSubscription';
-import { getReaderType } from '@modules/zuora/createSubscription/createSubscription';
 import {
 	buildSubscriptionOrderAction,
 	createSubscriptionResponseSchema,
+	getReaderType,
 } from '@modules/zuora/createSubscription/createSubscription';
 import { buildNewAccountObject } from '@modules/zuora/orders/newAccount';
 import { executeOrderRequest } from '@modules/zuora/orders/orderRequests';
 import type {
 	AnyPaymentMethod,
 	ClonedCreditCardReferenceTransaction,
-	ExistingPaymentMethod,
+	PaymentGateway,
 	PaymentMethod,
 } from '@modules/zuora/orders/paymentMethods';
-import { paymentGatewaySchema } from '@modules/zuora/orders/paymentMethods';
 import {
 	createBankTransferPaymentMethod,
 	getPaymentMethodById,
@@ -25,13 +24,21 @@ import {
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
+// Represents a Zuora payment method ID provided by the caller.
+// requiresCloning: false — the PM exists but is not yet attached to any account;
+//   it can be set as the default directly via updateAccount.
+// requiresCloning: true — the PM is attached to an existing account and must be
+//   cloned (re-created) on the new account before use.
+export type ExistingPaymentMethod = {
+	id: string;
+	requiresCloning: boolean;
+};
+
 export type CreateSubscriptionWithExistingPaymentMethodInput = Omit<
 	CreateSubscriptionInputFields<PaymentMethod>,
 	'paymentGateway' | 'paymentMethod'
 > & {
-	// Less strongly typed than PaymentGateway<T> — the payment method type is not known at
-	// compile time when using an existing payment method ID.
-	paymentGateway: string;
+	paymentGateway: PaymentGateway<PaymentMethod>;
 	existingPaymentMethod: ExistingPaymentMethod;
 };
 
@@ -56,20 +63,7 @@ async function clonePaymentMethod(
 		existingPaymentMethod.id,
 	);
 
-	if (
-		zuoraPaymentMethod.type === 'CreditCard' ||
-		zuoraPaymentMethod.type === 'PayPalNativeEC' ||
-		zuoraPaymentMethod.type === 'PayPalCP'
-	) {
-		// Zuora does not return a full card number for CreditCard payment methods
-		// or a vault token for PayPalCP payment methods so cloning is not supported.
-		// We could clone older PayPal payment methods of type PayPalNativeEC but
-		// the added complexity was not judged to be worth the effort
-		throw new Error(
-			`${zuoraPaymentMethod.type} payment method is not supported for cloning, ` +
-				`only CreditCardReferenceTransaction or BankTransfer.`,
-		);
-	} else if (zuoraPaymentMethod.type === 'Bacs') {
+	if (zuoraPaymentMethod.type === 'Bacs') {
 		const { accountNumber, bankCode } = zuoraPaymentMethod;
 		const accountHolderName =
 			zuoraPaymentMethod.accountHolderInfo?.accountHolderName;
@@ -122,6 +116,10 @@ async function clonePaymentMethod(
 			},
 		};
 	} else {
+		// Zuora does not return a full card number for CreditCard payment methods
+		// or a vault token for PayPalCP payment methods so cloning is not supported.
+		// We could clone older PayPal payment methods of type PayPalNativeEC but
+		// the added complexity was not judged to be worth the effort
 		throw new Error(
 			`Unsupported payment method type for cloning: ${zuoraPaymentMethod.type}. ` +
 				`Only CreditCardReferenceTransaction and BankTransfer are supported.`,
@@ -192,7 +190,7 @@ export const createSubscriptionWithExistingPaymentMethod = async (
 				salesforceContactId: input.salesforceContactId,
 				identityId: input.identityId,
 				currency: input.currency,
-				paymentGateway: paymentGatewaySchema.parse(input.paymentGateway),
+				paymentGateway: input.paymentGateway,
 				paymentMethod: inlinePaymentMethod,
 				billToContact: input.billToContact,
 				soldToContact: deliveryContact,
