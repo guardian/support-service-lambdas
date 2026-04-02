@@ -154,13 +154,14 @@ export const createSubscriptionWithExistingPaymentMethod = async (
 		giftRecipient,
 	} = input;
 
-	const { contractEffectiveDate, orderAction } = buildSubscriptionOrderAction(
-		productCatalog,
-		input.productPurchase,
-		input.currency,
-		appliedPromotion,
-		promotion,
-	);
+	const { contractEffectiveDate, createSubscriptionOrderAction } =
+		buildSubscriptionOrderAction(
+			productCatalog,
+			input.productPurchase,
+			input.currency,
+			appliedPromotion,
+			promotion,
+		);
 
 	const subscriptionCustomFields = {
 		ReaderType__c: getReaderType(giftRecipient, appliedPromotion),
@@ -204,7 +205,10 @@ export const createSubscriptionWithExistingPaymentMethod = async (
 		orderDate: zuoraDateFormat(contractEffectiveDate),
 		description: 'Created by createSubscription.ts in support-service-lambdas',
 		subscriptions: [
-			{ orderActions: [orderAction], customFields: subscriptionCustomFields },
+			{
+				orderActions: [createSubscriptionOrderAction],
+				customFields: subscriptionCustomFields,
+			},
 		],
 		processingOptions: {
 			runBilling: runBilling ?? true,

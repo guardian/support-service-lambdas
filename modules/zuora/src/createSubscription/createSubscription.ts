@@ -113,9 +113,7 @@ export function getReaderType(
 	return ReaderType.Direct;
 }
 
-// Shared pipeline: computes dates, charge override, product rate plan, promotions,
-// and the subscription order action. Used by createSubscription and
-// createSubscriptionWithExistingPaymentMethod.
+// Used by createSubscription and createSubscriptionWithExistingPaymentMethod.
 export function buildSubscriptionOrderAction(
 	productCatalog: ProductCatalog,
 	productPurchase: ProductPurchase,
@@ -125,7 +123,7 @@ export function buildSubscriptionOrderAction(
 ): {
 	contractEffectiveDate: Dayjs;
 	customerAcceptanceDate: Dayjs;
-	orderAction: CreateSubscriptionOrderAction;
+	createSubscriptionOrderAction: CreateSubscriptionOrderAction;
 } {
 	const { contractEffectiveDate, customerAcceptanceDate } =
 		getSubscriptionDates(dayjs(), productPurchase);
@@ -142,7 +140,7 @@ export function buildSubscriptionOrderAction(
 		productCatalog,
 		productPurchase.product,
 	);
-	const orderAction = buildCreateSubscriptionOrderAction({
+	const createSubscriptionOrderAction = buildCreateSubscriptionOrderAction({
 		productRatePlanId: productRatePlan.id,
 		contractEffectiveDate,
 		customerAcceptanceDate,
@@ -151,7 +149,11 @@ export function buildSubscriptionOrderAction(
 		termType: productRatePlan.termType,
 		termLengthInMonths: productRatePlan.termLengthInMonths,
 	});
-	return { contractEffectiveDate, customerAcceptanceDate, orderAction };
+	return {
+		contractEffectiveDate,
+		customerAcceptanceDate,
+		createSubscriptionOrderAction,
+	};
 }
 
 export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
@@ -182,45 +184,44 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 	};
 
 	const newAccount = buildNewAccountObject({
-		accountName,
-		createdRequestId,
-		salesforceAccountId,
-		salesforceContactId,
-		identityId,
-		currency,
-		paymentGateway,
-		paymentMethod,
-		billToContact,
+		accountName: accountName,
+		createdRequestId: createdRequestId,
+		salesforceAccountId: salesforceAccountId,
+		salesforceContactId: salesforceContactId,
+		identityId: identityId,
+		currency: currency,
+		paymentGateway: paymentGateway,
+		paymentMethod: paymentMethod,
+		billToContact: billToContact,
 		soldToContact: deliveryContact,
-		deliveryInstructions,
+		deliveryInstructions: deliveryInstructions,
 	});
 
-	const { contractEffectiveDate, orderAction } = buildSubscriptionOrderAction(
-		productCatalog,
-		productPurchase,
-		currency,
-		appliedPromotion,
-		promotion,
-	);
-
-	const readerType = getReaderType(giftRecipient, appliedPromotion);
+	const { contractEffectiveDate, createSubscriptionOrderAction } =
+		buildSubscriptionOrderAction(
+			productCatalog,
+			productPurchase,
+			currency,
+			appliedPromotion,
+			promotion,
+		);
 
 	const customFields = {
 		DeliveryAgent__c: deliveryAgent.toString(),
-		ReaderType__c: readerType,
+		ReaderType__c: getReaderType(giftRecipient, appliedPromotion),
 		LastPlanAddedDate__c: zuoraDateFormat(contractEffectiveDate),
 		InitialPromotionCode__c: appliedPromotion?.promoCode,
 		PromotionCode__c: appliedPromotion?.promoCode,
 		CreatedRequestId__c: createdRequestId,
 	};
 	return {
-		newAccount,
+		newAccount: newAccount,
 		orderDate: zuoraDateFormat(contractEffectiveDate),
 		description: `Created by createSubscription.ts in support-service-lambdas`,
 		subscriptions: [
 			{
-				orderActions: [orderAction],
-				customFields,
+				orderActions: [createSubscriptionOrderAction],
+				customFields: customFields,
 			},
 		],
 		processingOptions: {
@@ -229,7 +230,6 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		},
 	};
 }
-
 export const createSubscription = async <T extends PaymentMethod>(
 	zuoraClient: ZuoraClient,
 	productCatalog: ProductCatalog,
