@@ -85,19 +85,21 @@ function createMember(
 		| undefined,
 ): Member {
 	return {
-		userID: userId,
-		products: latestSubscription
-			? [
-					{
-						product: {
-							productID: 'the-guardian',
-							enddate: zuoraDateFormat(latestSubscription.termEndDate),
-							startdate: zuoraDateFormat(
-								latestSubscription.contractEffectiveDate,
-							),
+		member: {
+			userID: userId,
+			products: latestSubscription
+				? [
+						{
+							product: {
+								productID: 'the-guardian',
+								enddate: zuoraDateFormat(latestSubscription.termEndDate),
+								startdate: zuoraDateFormat(
+									latestSubscription.contractEffectiveDate,
+								),
+							},
 						},
-					},
-				]
-			: [],
+					]
+				: [],
+		},
 	};
 }
