@@ -1,0 +1,26 @@
+# MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/riff-raff.yaml.ts
+stacks:
+  - support
+regions:
+  - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  newsletter-acquisition-cloudformation:
+    type: cloud-formation
+    app: newsletter-acquisition
+    parameters:
+      templateStagePaths:
+        CODE: newsletter-acquisition-CODE.template.json
+        PROD: newsletter-acquisition-PROD.template.json
+  newsletter-acquisition:
+    type: aws-lambda
+    parameters:
+      fileName: newsletter-acquisition.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+        - newsletter-acquisition-
+    dependencies:
+      - newsletter-acquisition-cloudformation

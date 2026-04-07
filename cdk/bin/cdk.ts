@@ -20,6 +20,7 @@ import { MParticleApi } from '../lib/mparticle-api';
 import { NegativeInvoicesProcessor } from '../lib/negative-invoices-processor';
 import type { NewProductApiProps } from '../lib/new-product-api';
 import { NewProductApi } from '../lib/new-product-api';
+import { NewsletterAcquisition } from '../lib/newsletter-acquisition';
 import { ObserverDataExport } from '../lib/observer-data-export';
 import { PressReaderEntitlements } from '../lib/press-reader-entitlements';
 import { ProductSwitchApi } from '../lib/product-switch-api';
@@ -127,13 +128,9 @@ new SingleContributionSalesforceWrites(
 );
 
 new PromotionsLambdas(app, 'CODE', {
-	oldPromoCampaignStreamLabel: '2025-12-17T11:57:50.933',
-	oldPromoStreamLabel: '2023-04-28T14:57:20.201',
 	newPromoStreamLabel: '2026-01-05T11:33:36.603',
 });
 new PromotionsLambdas(app, 'PROD', {
-	oldPromoCampaignStreamLabel: '2025-12-17T11:57:59.560',
-	oldPromoStreamLabel: '2016-06-01T13:26:09.654',
 	newPromoStreamLabel: '2026-01-05T11:50:46.239',
 });
 
@@ -152,6 +149,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	MobilePurchasesToSupporterProductData,
 	StripeDisputes,
 	ZuoraAutoCancel,
+	// MARKER new-lambda: cdk-bin
 ];
 
 // generate all stacks for all stages
@@ -285,4 +283,16 @@ new SalesforceEventBus(app, 'salesforce-event-bus-CODE', {
 new SalesforceEventBus(app, 'salesforce-event-bus-PROD', {
 	stack: 'support',
 	stage: 'PROD',
+});
+new NewsletterAcquisition(app, 'newsletter-acquisition-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+	identitySnsTopicArn:
+		'arn:aws:sns:eu-west-1:942464564246:identity-identity-api-public-CODE-NewsletterAcquisitionTopic',
+});
+new NewsletterAcquisition(app, 'newsletter-acquisition-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+	identitySnsTopicArn:
+		'arn:aws:sns:eu-west-1:942464564246:identity-identity-api-public-PROD-NewsletterAcquisitionTopic',
 });

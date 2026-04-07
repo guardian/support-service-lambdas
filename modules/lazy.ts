@@ -31,7 +31,7 @@ export class Lazy<T> {
 		}));
 	}
 
-	public then<B>(f: (t: T) => B): Lazy<B> {
+	public then<B>(f: (t: T) => B | PromiseLike<B>): Lazy<B> {
 		return new Lazy(() => this.get().then(f), undefined);
 	}
 }

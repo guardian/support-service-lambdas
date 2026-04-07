@@ -40,7 +40,9 @@ export function createSQSMessageBody(
 		newAmount: targetInformation.actualTotalPrice,
 		previousProductName: previousProductName,
 		previousRatePlanName: previousRatePlanName,
-		newRatePlanName: 'Supporter Plus',
+		newRatePlanName: targetInformation.ratePlanName.startsWith('Supporter Plus')
+			? 'Supporter Plus' // legacy - used for mparticle
+			: targetInformation.ratePlanName,
 		requestedDate: now.toISOString().substring(0, 10),
 		effectiveDate: now.toISOString().substring(0, 10),
 		paidAmount,

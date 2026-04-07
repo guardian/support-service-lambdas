@@ -7,7 +7,7 @@
     "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
-    "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/index.ts --sourcemap",
+    "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/index.ts --sourcemap --source-root=/support-service-lambdas/handlers/press-reader-entitlements/target/",
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr press-reader-entitlements.zip ./*.js.map ./*.js",
     "cdk:test": "pnpm --filter cdk test press-reader-entitlements",
     "cdk:test-update": "pnpm --filter cdk test-update press-reader-entitlements",
@@ -21,7 +21,7 @@
     "@aws-sdk/client-ssm": "^3.940.0",
     "@aws-sdk/util-dynamodb": "^3.940.0",
     "dayjs": "^1.11.13",
-    "fast-xml-parser": "^5.3.5",
+    "fast-xml-parser": "^5.5.8",
     "zod": "catalog:"
   },
   "devDependencies": {

@@ -149,6 +149,56 @@ describe('salesforceExport handler', () => {
 			);
 		});
 
+		it('should drop invalid items and continue with valid ones', async () => {
+			const jobId = 'test-job-id';
+			mockSfClientPost.mockResolvedValueOnce({ id: jobId, state: 'Open' });
+			mockSfClientPut.mockResolvedValueOnce({});
+			mockSfClientPatch.mockResolvedValueOnce({ state: 'UploadComplete' });
+			mockSfClientGet.mockResolvedValueOnce({ state: 'JobComplete' });
+			mockSfClientDelete.mockResolvedValueOnce({});
+
+			mockSend.mockResolvedValueOnce({
+				Items: [
+					{
+						promo_code: { S: 'PROMO1' },
+						promotion_name: { S: 'Test' },
+						campaign_name: { S: 'Campaign' },
+						campaign_code: { S: 'CAMPAIGN1' },
+						channel_name: { S: 'Direct' },
+						product_family: { S: 'SupporterPlus' },
+						promotion_type: { S: 'percent_discount' },
+						discount_percent: { N: '10' },
+						discount_months: { N: '1' },
+					},
+					{
+						// Missing required fields - should be dropped
+						promo_code: { S: 'INVALID' },
+					},
+					{
+						promo_code: { S: 'PROMO2' },
+						promotion_name: { S: 'Test2' },
+						campaign_name: { S: 'Campaign2' },
+						campaign_code: { S: 'CAMPAIGN2' },
+						channel_name: { S: 'Partner' },
+						product_family: { S: 'Guardian Weekly' },
+						promotion_type: { S: 'free_trial' },
+						discount_percent: { N: '0' },
+						discount_months: { N: '2' },
+					},
+				],
+			});
+
+			await handler();
+
+			expect(mockLoggerLog).toHaveBeenCalledWith(
+				'Retrieved 2 valid promo code views, dropped 1 invalid items',
+			);
+			expect(mockSfClientPost).toHaveBeenCalledTimes(1);
+			expect(mockLoggerLog).toHaveBeenCalledWith(
+				'Successfully exported promo codes to Salesforce',
+			);
+		});
+
 		it('should poll until job completes', async () => {
 			const jobId = 'test-job-id';
 			mockSfClientPost.mockResolvedValueOnce({ id: jobId, state: 'Open' });

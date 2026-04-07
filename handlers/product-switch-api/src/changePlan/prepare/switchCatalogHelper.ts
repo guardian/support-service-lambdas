@@ -1,5 +1,6 @@
 import { distinct, isInList } from '@modules/arrayFunctions';
-import { getIfDefined, getNonEmptyOrThrow } from '@modules/nullAndUndefined';
+import { ValidationError } from '@modules/errors';
+import { getNonEmptyOrThrow } from '@modules/nullAndUndefined';
 import { objectKeys, objectValues } from '@modules/objectFunctions';
 import type {
 	Normalize,
@@ -43,17 +44,28 @@ export function getAvailableTargetProducts<
 	const widenedValidSwitches: SwitchCatalog = switchCatalog;
 	const maybeSwitchableRatePlans: SwitchableRatePlans<P> | undefined =
 		widenedValidSwitches[productKey];
-	const switchableRatePlans: SwitchableRatePlans<P> = getIfDefined(
-		maybeSwitchableRatePlans,
-		`couldn't find a switch from ${productKey}`,
-	);
+	const switchableRatePlans: SwitchableRatePlans<P> =
+		getIfDefinedOrValidationError(
+			maybeSwitchableRatePlans,
+			`couldn't find a switch from ${productKey}`,
+		);
 	const maybeAvailableTargetProducts: AvailableTargetProducts | undefined =
 		switchableRatePlans[productRatePlanKey];
-	return getIfDefined(
+	return getIfDefinedOrValidationError(
 		maybeAvailableTargetProducts,
 		`couldn't find a switch from ${productKey} for ${productRatePlanKey}`,
 	);
 }
+
+export const getIfDefinedOrValidationError = <T>(
+	value: T | undefined,
+	errorMessage: string,
+): T => {
+	if (value === undefined) {
+		throw new ValidationError(errorMessage);
+	}
+	return value;
+};
 
 export function getSwitchTargetInformation<
 	P extends ProductKey,
@@ -66,14 +78,15 @@ export function getSwitchTargetInformation<
 ): SwitchTargetInformation<P, PRP> {
 	const maybeAvailableTargetRatePlans: AvailableTargetRatePlans<P> | undefined =
 		switchesFrom[productKey];
-	const availableTargetRatePlans: AvailableTargetRatePlans<P> = getIfDefined(
-		maybeAvailableTargetRatePlans,
-		`couldn't find a switch from ${msg} to ${productKey}`,
-	);
+	const availableTargetRatePlans: AvailableTargetRatePlans<P> =
+		getIfDefinedOrValidationError(
+			maybeAvailableTargetRatePlans,
+			`couldn't find a switch from ${msg} to ${productKey}`,
+		);
 	const maybeSwitchTargetInformation:
 		| SwitchTargetInformation<P, PRP>
 		| undefined = availableTargetRatePlans[productRatePlanKey];
-	return getIfDefined(
+	return getIfDefinedOrValidationError(
 		maybeSwitchTargetInformation,
 		`couldn't find a switch from ${msg} ${productKey} to ${productRatePlanKey}`,
 	);
@@ -120,7 +133,9 @@ export function asSwitchableRatePlanKey(
 	productRatePlanKey: string,
 ): ValidSwitchableRatePlanKey {
 	if (!isValidSwitchableRatePlanKey(productRatePlanKey)) {
-		throw new Error(`unsupported rate plan key ${productRatePlanKey}`);
+		throw new ValidationError(
+			`non switchable rate plan key ${productRatePlanKey}`,
+		);
 	}
 	return productRatePlanKey;
 }

@@ -48,6 +48,16 @@ export type ZuoraUpperCaseSuccess = z.infer<typeof zuoraUpperCaseSuccessSchema>;
 
 export const voidSchema = z.any().transform<void>(() => undefined);
 
+export const cancelSubscriptionResponseSchema = z
+	.object({
+		invoiceId: z.string().optional(),
+	})
+	.passthrough();
+
+export type CancelSubscriptionResponse = z.infer<
+	typeof cancelSubscriptionResponseSchema
+>;
+
 export const createQueryResponseSchema = <T extends z.ZodRawShape>(
 	recordShape: T,
 ) => {

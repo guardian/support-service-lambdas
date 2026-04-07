@@ -1,5 +1,6 @@
 import { GetParametersByPathCommand, SSMClient } from '@aws-sdk/client-ssm';
 import { objectEntries } from '@modules/objectFunctions';
+import { wrapAwsClient } from '@modules/routing/wrapAwsClient';
 import type { z } from 'zod';
 import { groupMap, mapValues, partitionByType } from '../../arrayFunctions';
 import { awsConfig } from '../src/config';
@@ -29,7 +30,7 @@ export const loadConfig = async <O, I>(
 export type SSMKeyValuePairs = Array<Record<string, string>>;
 
 async function readAllRecursive(configRoot: string): Promise<SSMKeyValuePairs> {
-	const ssm = new SSMClient(awsConfig);
+	const ssm = wrapAwsClient(new SSMClient(awsConfig));
 	return fetchAllPages<Record<string, string>>(
 		'GetParametersByPathCommand',
 		async (token) => {

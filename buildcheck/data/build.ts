@@ -140,7 +140,11 @@ const mobilePurchasesToSupporterProductData: HandlerDefinition = {
 
 const mparticleApi: HandlerDefinition = {
 	name: 'mparticle-api',
-	functionNames: ['mparticle-api-http-', 'mparticle-api-baton-'],
+	functionNames: [
+		'mparticle-api-http-',
+		'mparticle-api-baton-',
+		'mparticle-api-mma-user-deletion-',
+	],
 	testTimeoutSeconds: 15,
 	extraScripts: {
 		'check-config': 'tsx runManual/runLoadConfig.ts',
@@ -222,8 +226,6 @@ const productSwitchApi: HandlerDefinition = {
 const promotionsLambdas: HandlerDefinition = {
 	name: 'promotions-lambdas',
 	functionNames: [
-		'promotions-lambdas-promo-campaign-sync-',
-		'promotions-lambdas-promo-sync-',
 		'promotions-lambdas-promo-code-view-',
 		'promotions-lambdas-salesforce-export-',
 	],
@@ -354,6 +356,20 @@ const zuoraSalesforceLinkRemover: HandlerDefinition = {
 	},
 };
 
+const newsletterAcquisition: HandlerDefinition = {
+	name: 'newsletter-acquisition',
+	dependencies: {
+		...dep['@aws-sdk/client-dynamodb'],
+		...dep['@aws-sdk/util-dynamodb'],
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
+};
+
+// MARKER new-lambda: buildcheck-const
+
 const srcOnly = {
 	lint: "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts'",
 	test: 'jest --group=-integration --passWithNoTests',
@@ -481,6 +497,7 @@ const moduleRouting: ModuleDefinition = {
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
+		...devDeps['@smithy/types'],
 	},
 };
 
@@ -584,6 +601,7 @@ export const build: BuildDefinition = {
 		mobilePurchasesToSupporterProductData,
 		mparticleApi,
 		negativeInvoicesProcessor,
+		newsletterAcquisition,
 		observerDataExport,
 		pressReaderEntitlements,
 		productSwitchApi,
@@ -596,6 +614,7 @@ export const build: BuildDefinition = {
 		userBenefits,
 		writeOffUnpaidInvoices,
 		zuoraSalesforceLinkRemover,
+		// MARKER new-lambda: buildcheck-reference
 	],
 
 	modules: [

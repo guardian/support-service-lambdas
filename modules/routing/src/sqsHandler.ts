@@ -1,5 +1,6 @@
 import type { SQSEvent, SQSRecord } from 'aws-lambda';
 import type { z } from 'zod';
+import { getCallerInfo } from '@modules/routing/getCallerInfo';
 import type { HandlerEnv } from '@modules/routing/lambdaHandler';
 import { LambdaHandlerWithServices } from '@modules/routing/lambdaHandler';
 import { logger } from '@modules/routing/logger';
@@ -9,11 +10,12 @@ export function SQSHandler<ConfigType, Services>(
 	handler: (record: SQSRecord, services: Services) => Promise<void>,
 	buildServices: (handlerProps: HandlerEnv<ConfigType>) => Services,
 ) {
-	const callerInfo = logger.getCallerInfo();
+	const callerInfo = getCallerInfo();
 	return LambdaHandlerWithServices(
 		configSchema,
 		handleSQSMessages(handler, callerInfo),
 		buildServices,
+		callerInfo,
 	);
 }
 
@@ -22,7 +24,9 @@ export function handleSQSMessages<Services>(
 	callerInfo: string,
 ) {
 	const recordHandlerWithLogging = logger.withContext(
-		logger.wrapFn(recordHandler, undefined, undefined, 0, callerInfo),
+		logger.wrapFn(recordHandler, undefined, callerInfo, ([event]) => ({
+			logOnEntryOnly: [event],
+		})),
 		([record]) => record.messageId,
 	);
 

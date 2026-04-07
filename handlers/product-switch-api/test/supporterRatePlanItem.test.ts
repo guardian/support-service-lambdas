@@ -22,8 +22,7 @@ const getSwitchInformation = (): SwitchInformation => ({
 		previousAmount: 1,
 		includesContribution: true,
 		productRatePlanKey: 'Monthly',
-		termStartDate: new Date(),
-		productRatePlanId: 'contributionProductRatePlanId',
+		ratePlanId: 'contributionRatePlanId',
 		chargeIds: ['chargeId'],
 	},
 	target: {

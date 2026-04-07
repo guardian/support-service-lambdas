@@ -11,7 +11,7 @@ export const dep = separateDepRecords({
 	// parsers
 	zod: 'catalog:',
 	'csv-parse': '^5.6.0',
-	'fast-xml-parser': '^5.3.5',
+	'fast-xml-parser': '^5.5.8',
 	// signature validation
 	'@peculiar/x509': '^1.12.3',
 	'@okta/jwt-verifier': '^4.0.1',
@@ -44,6 +44,7 @@ export const devDeps = separateDepRecords({
 	'@types/stripe': '^8.0.417',
 	'@types/aws-lambda': '^8.10.147',
 	'@types/jest': '^29.5.14',
+	'@smithy/types': '^4.9.8',
 	// dev - for running locally
 	tsx: '^4.21.0',
 	'tsconfig-paths': 'catalog:',

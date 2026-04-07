@@ -50,7 +50,9 @@ jest.mock('../../src/services/writeOffInvoiceService', () => ({
 }));
 
 jest.mock('../../src/services/cancelSubscriptionService', () => ({
-	cancelSubscriptionService: jest.fn(() => Promise.resolve(true)),
+	cancelSubscriptionService: jest.fn(() =>
+		Promise.resolve({ cancelled: true, negativeInvoiceId: 'INV-NEG-001' }),
+	),
 }));
 
 const mockLogger = {
@@ -93,188 +95,280 @@ describe('handleListenDisputeClosed', () => {
 		jest.clearAllMocks();
 	});
 
-	describe('comprehensive dispute processing', () => {
-		it('should process dispute closure with Zuora integration', async () => {
-			// Get mocked services
-			const mockGetSubscription = jest.mocked(
-				require('../../src/services/getSubscriptionService')
-					.getSubscriptionService,
-			);
-			const mockRejectPayment = jest.mocked(
-				require('../../src/services/rejectPaymentService').rejectPaymentService,
-			);
-			const mockWriteOffInvoice = jest.mocked(
-				require('../../src/services/writeOffInvoiceService')
-					.writeOffInvoiceService,
-			);
-			const mockCancelSubscription = jest.mocked(
-				require('../../src/services/cancelSubscriptionService')
-					.cancelSubscriptionService,
-			);
+	it('should process dispute closure in the correct order', async () => {
+		const mockCancelSubscription = jest.mocked(
+			require('../../src/services/cancelSubscriptionService')
+				.cancelSubscriptionService,
+		);
+		const mockRejectPayment = jest.mocked(
+			require('../../src/services/rejectPaymentService').rejectPaymentService,
+		);
+		const mockWriteOffInvoice = jest.mocked(
+			require('../../src/services/writeOffInvoiceService')
+				.writeOffInvoiceService,
+		);
 
-			const result = await handleListenDisputeClosed(
-				mockLogger,
-				mockWebhookData,
-				'du_test456',
-			);
-
-			expect(result).not.toBeNull();
-			expect(result!.success).toBe(true);
-
-			// Verify subscription retrieval
-			expect(mockGetSubscription).toHaveBeenCalledWith(
-				mockLogger,
-				mockZuoraClient,
-				'SUB-12345',
-			);
-
-			// Verify payment rejection service call
-			expect(mockRejectPayment).toHaveBeenCalledWith(
-				mockLogger,
-				mockZuoraClient,
-				'P-12345',
-			);
-
-			// Verify invoice write-off service call
-			expect(mockWriteOffInvoice).toHaveBeenCalledWith(
-				mockLogger,
-				mockZuoraClient,
-				'INV-12345',
-				'du_test456',
-			);
-
-			// Verify subscription cancellation
-			expect(mockCancelSubscription).toHaveBeenCalledWith(
-				mockLogger,
-				mockZuoraClient,
-				expect.objectContaining({
-					status: 'Active',
-					subscriptionNumber: 'SUB-12345',
-				}),
-			);
+		const callOrder: string[] = [];
+		mockCancelSubscription.mockImplementation(() => {
+			callOrder.push('cancel');
+			return Promise.resolve({
+				cancelled: true,
+				negativeInvoiceId: 'INV-NEG-001',
+			});
+		});
+		mockRejectPayment.mockImplementation(() => {
+			callOrder.push('reject');
+			return Promise.resolve(true);
+		});
+		mockWriteOffInvoice.mockImplementation(() => {
+			callOrder.push('writeOff');
+			return Promise.resolve(true);
 		});
 
-		it('should handle processing successfully', async () => {
-			const result = await handleListenDisputeClosed(
-				mockLogger,
-				mockWebhookData,
-				'du_test456',
-			);
+		await handleListenDisputeClosed(mockLogger, mockWebhookData, 'du_test456');
 
-			expect(result).toBeDefined();
-			expect(result).not.toBeNull();
-			expect(result!.success).toBe(true);
+		// New order: cancel -> reject -> writeOff (disputed) -> writeOff (negative)
+		expect(callOrder).toEqual(['cancel', 'reject', 'writeOff', 'writeOff']);
+	});
+
+	it('should process dispute closure with all Zuora operations', async () => {
+		const mockGetSubscription = jest.mocked(
+			require('../../src/services/getSubscriptionService')
+				.getSubscriptionService,
+		);
+		const mockRejectPayment = jest.mocked(
+			require('../../src/services/rejectPaymentService').rejectPaymentService,
+		);
+		const mockWriteOffInvoice = jest.mocked(
+			require('../../src/services/writeOffInvoiceService')
+				.writeOffInvoiceService,
+		);
+		const mockCancelSubscription = jest.mocked(
+			require('../../src/services/cancelSubscriptionService')
+				.cancelSubscriptionService,
+		);
+
+		const result = await handleListenDisputeClosed(
+			mockLogger,
+			mockWebhookData,
+			'du_test456',
+		);
+
+		expect(result).not.toBeNull();
+		expect(result!.success).toBe(true);
+
+		expect(mockGetSubscription).toHaveBeenCalledWith(
+			mockLogger,
+			mockZuoraClient,
+			'SUB-12345',
+		);
+
+		expect(mockCancelSubscription).toHaveBeenCalledWith(
+			mockLogger,
+			mockZuoraClient,
+			expect.objectContaining({
+				status: 'Active',
+				subscriptionNumber: 'SUB-12345',
+			}),
+		);
+
+		expect(mockRejectPayment).toHaveBeenCalledWith(
+			mockLogger,
+			mockZuoraClient,
+			'P-12345',
+		);
+
+		// Disputed invoice write-off
+		expect(mockWriteOffInvoice).toHaveBeenCalledWith(
+			mockLogger,
+			mockZuoraClient,
+			'INV-12345',
+			'du_test456',
+		);
+
+		// Negative invoice write-off (with custom comment)
+		expect(mockWriteOffInvoice).toHaveBeenCalledWith(
+			mockLogger,
+			mockZuoraClient,
+			'INV-NEG-001',
+			'du_test456',
+			'Negative invoice write-off due to Stripe dispute cancellation',
+		);
+	});
+
+	it('should skip negative invoice write-off when no negative invoice', async () => {
+		const mockCancelSubscription = jest.mocked(
+			require('../../src/services/cancelSubscriptionService')
+				.cancelSubscriptionService,
+		);
+		const mockWriteOffInvoice = jest.mocked(
+			require('../../src/services/writeOffInvoiceService')
+				.writeOffInvoiceService,
+		);
+
+		mockCancelSubscription.mockResolvedValueOnce({
+			cancelled: true,
+			negativeInvoiceId: undefined,
 		});
 
-		it('should throw error when Zuora operations fail', async () => {
-			const mockRejectPayment = jest.mocked(
-				require('../../src/services/rejectPaymentService').rejectPaymentService,
-			);
-			mockRejectPayment.mockRejectedValueOnce(
-				new Error('Failed to reject payment in Zuora'),
-			);
+		await handleListenDisputeClosed(mockLogger, mockWebhookData, 'du_test456');
 
-			await expect(
-				handleListenDisputeClosed(mockLogger, mockWebhookData, 'du_test456'),
-			).rejects.toThrow('Failed to reject payment in Zuora');
+		// Only one write-off call (disputed invoice), not two
+		expect(mockWriteOffInvoice).toHaveBeenCalledTimes(1);
+		expect(mockWriteOffInvoice).toHaveBeenCalledWith(
+			mockLogger,
+			mockZuoraClient,
+			'INV-12345',
+			'du_test456',
+		);
+	});
+
+	it('should not throw when negative invoice write-off fails', async () => {
+		const mockWriteOffInvoice = jest.mocked(
+			require('../../src/services/writeOffInvoiceService')
+				.writeOffInvoiceService,
+		);
+
+		let writeOffCallCount = 0;
+		mockWriteOffInvoice.mockImplementation(() => {
+			writeOffCallCount++;
+			if (writeOffCallCount === 2) {
+				return Promise.reject(new Error('Write-off failed'));
+			}
+			return Promise.resolve(true);
 		});
 
-		it('should skip Zuora operations when no subscription', async () => {
-			const mockGetSubscription = jest.mocked(
-				require('../../src/services/getSubscriptionService')
-					.getSubscriptionService,
-			);
-			const mockRejectPayment = jest.mocked(
-				require('../../src/services/rejectPaymentService').rejectPaymentService,
-			);
+		const result = await handleListenDisputeClosed(
+			mockLogger,
+			mockWebhookData,
+			'du_test456',
+		);
 
-			mockGetSubscription.mockResolvedValueOnce(null);
+		expect(result).not.toBeNull();
+		expect(result!.success).toBe(true);
+		expect(mockLogger.error).toHaveBeenCalledWith(
+			'Failed to write off negative invoice:',
+			expect.any(Error),
+		);
+	});
 
-			const result = await handleListenDisputeClosed(
-				mockLogger,
-				mockWebhookData,
-				'du_test456',
-			);
+	it('should throw error when reject payment fails with non-66000030 error', async () => {
+		const mockRejectPayment = jest.mocked(
+			require('../../src/services/rejectPaymentService').rejectPaymentService,
+		);
+		mockRejectPayment.mockRejectedValueOnce(
+			new Error('Failed to reject payment in Zuora'),
+		);
 
-			expect(result).not.toBeNull();
-			expect(result!.success).toBe(true);
-			expect(mockRejectPayment).not.toHaveBeenCalled();
-		});
+		await expect(
+			handleListenDisputeClosed(mockLogger, mockWebhookData, 'du_test456'),
+		).rejects.toThrow('Failed to reject payment in Zuora');
+	});
 
-		it('should skip processing SEPA disputes without payment_method_details', async () => {
-			const sepaWebhookData: ListenDisputeClosedRequestBody = {
-				...mockWebhookData,
-				data: {
-					object: {
-						...mockWebhookData.data.object,
-						payment_method_details: undefined as any,
-					},
+	it('should skip invoice write-off when payment already processed (error 66000030)', async () => {
+		const { ZuoraError } = require('@modules/zuora/errors');
+
+		const mockRejectPayment = jest.mocked(
+			require('../../src/services/rejectPaymentService').rejectPaymentService,
+		);
+		const mockWriteOffInvoice = jest.mocked(
+			require('../../src/services/writeOffInvoiceService')
+				.writeOffInvoiceService,
+		);
+		const mockCancelSubscription = jest.mocked(
+			require('../../src/services/cancelSubscriptionService')
+				.cancelSubscriptionService,
+		);
+
+		const zuoraError = new ZuoraError(
+			'Transaction already processed',
+			{ status: 200, responseBody: '', responseHeaders: {} },
+			[
+				{
+					code: '66000030',
+					message:
+						'Another transaction has already been entered for this transaction',
 				},
-			};
+			],
+		);
 
-			const mockGetSubscription = jest.mocked(
-				require('../../src/services/getSubscriptionService')
-					.getSubscriptionService,
-			);
+		mockRejectPayment.mockRejectedValueOnce(zuoraError);
 
-			const result = await handleListenDisputeClosed(
-				mockLogger,
-				sepaWebhookData,
-				'du_test456',
-			);
+		const result = await handleListenDisputeClosed(
+			mockLogger,
+			mockWebhookData,
+			'du_test456',
+		);
 
-			expect(result).toBeNull();
-			expect(mockLogger.log).toHaveBeenCalledWith(
-				'Skipping dispute du_test456 - no payment_method_details (likely SEPA payment)',
-			);
-			expect(mockGetSubscription).not.toHaveBeenCalled();
-		});
+		expect(result).not.toBeNull();
+		expect(result!.success).toBe(true);
+		expect(mockLogger.log).toHaveBeenCalledWith(
+			'Payment already processed (likely refunded before dispute). Skipping invoice write-off.',
+		);
+		// Disputed invoice should NOT be written off
+		expect(mockWriteOffInvoice).not.toHaveBeenCalledWith(
+			mockLogger,
+			mockZuoraClient,
+			'INV-12345',
+			'du_test456',
+		);
+		// Cancel should still have been called (before reject)
+		expect(mockCancelSubscription).toHaveBeenCalled();
+	});
 
-		it('should still cancel subscription even when payment rejection fails with already processed error', async () => {
-			const { ZuoraError } = require('@modules/zuora/errors');
+	it('should skip Zuora operations when no subscription', async () => {
+		const mockGetSubscription = jest.mocked(
+			require('../../src/services/getSubscriptionService')
+				.getSubscriptionService,
+		);
+		const mockRejectPayment = jest.mocked(
+			require('../../src/services/rejectPaymentService').rejectPaymentService,
+		);
+		const mockCancelSubscription = jest.mocked(
+			require('../../src/services/cancelSubscriptionService')
+				.cancelSubscriptionService,
+		);
 
-			const mockRejectPayment = jest.mocked(
-				require('../../src/services/rejectPaymentService').rejectPaymentService,
-			);
-			const mockWriteOffInvoice = jest.mocked(
-				require('../../src/services/writeOffInvoiceService')
-					.writeOffInvoiceService,
-			);
-			const mockCancelSubscription = jest.mocked(
-				require('../../src/services/cancelSubscriptionService')
-					.cancelSubscriptionService,
-			);
+		mockGetSubscription.mockResolvedValueOnce(null);
 
-			// Simulate Zuora error 66000030 (payment already processed/refunded)
-			const zuoraError = new ZuoraError(
-				'Transaction already processed',
-				{ status: 200, responseBody: '', responseHeaders: {} },
-				[
-					{
-						code: '66000030',
-						message:
-							'Another transaction has already been entered for this transaction',
-					},
-				],
-			);
+		const result = await handleListenDisputeClosed(
+			mockLogger,
+			mockWebhookData,
+			'du_test456',
+		);
 
-			mockRejectPayment.mockRejectedValueOnce(zuoraError);
+		expect(result).not.toBeNull();
+		expect(result!.success).toBe(true);
+		expect(mockRejectPayment).not.toHaveBeenCalled();
+		expect(mockCancelSubscription).not.toHaveBeenCalled();
+	});
 
-			const result = await handleListenDisputeClosed(
-				mockLogger,
-				mockWebhookData,
-				'du_test456',
-			);
+	it('should skip processing SEPA disputes without payment_method_details', async () => {
+		const sepaWebhookData: ListenDisputeClosedRequestBody = {
+			...mockWebhookData,
+			data: {
+				object: {
+					...mockWebhookData.data.object,
+					payment_method_details: undefined as any,
+				},
+			},
+		};
 
-			expect(result).not.toBeNull();
-			expect(result!.success).toBe(true);
-			expect(mockLogger.log).toHaveBeenCalledWith(
-				'Payment already processed (likely refunded before dispute). Skipping invoice write-off.',
-			);
-			// Should NOT try to write off invoice (would fail anyway)
-			expect(mockWriteOffInvoice).not.toHaveBeenCalled();
-			// Most important: subscription should still be cancelled
-			expect(mockCancelSubscription).toHaveBeenCalled();
-		});
+		const mockGetSubscription = jest.mocked(
+			require('../../src/services/getSubscriptionService')
+				.getSubscriptionService,
+		);
+
+		const result = await handleListenDisputeClosed(
+			mockLogger,
+			sepaWebhookData,
+			'du_test456',
+		);
+
+		expect(result).toBeNull();
+		expect(mockLogger.log).toHaveBeenCalledWith(
+			'Skipping dispute du_test456 - no payment_method_details (likely SEPA payment)',
+		);
+		expect(mockGetSubscription).not.toHaveBeenCalled();
 	});
 });

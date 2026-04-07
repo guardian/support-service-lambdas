@@ -1,6 +1,6 @@
 import { ValidationError } from '@modules/errors';
-import { getSinglePlanFlattenedSubscriptionOrThrow } from '@modules/guardian-subscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import type { GuardianSubscription } from '@modules/guardian-subscription/getSinglePlanFlattenedSubscriptionOrThrow';
+import { getSinglePlanFlattenedSubscriptionOrThrow } from '@modules/guardian-subscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import type { GuardianSubscriptionMultiPlan } from '@modules/guardian-subscription/guardianSubscriptionParser';
 import { GuardianSubscriptionParser } from '@modules/guardian-subscription/guardianSubscriptionParser';
 import { SubscriptionFilter } from '@modules/guardian-subscription/subscriptionFilter';
@@ -8,6 +8,7 @@ import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
+import { getSubscription } from '@modules/zuora/subscription';
 import type {
 	ZuoraAccount,
 	ZuoraSubscription,
@@ -16,6 +17,7 @@ import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import type dayjs from 'dayjs';
+import { removePendingUpdateAmendments } from './action/amendments';
 import { DoPreviewAction } from './action/preview';
 import { DoSwitchAction } from './action/switch';
 import { SwitchOrderRequestBuilder } from './prepare/buildSwitchOrderRequest';
@@ -31,8 +33,8 @@ export class ChangePlanEndpoint {
 		private stage: Stage,
 		private today: dayjs.Dayjs,
 		private body: ProductSwitchRequestBody,
-		zuoraClient: ZuoraClient,
-		private subscription: ZuoraSubscription,
+		private zuoraClient: ZuoraClient,
+		private originalSubscription: ZuoraSubscription,
 		private account: ZuoraAccount,
 	) {
 		this.doSwitchAction = new DoSwitchAction(zuoraClient, stage, today);
@@ -86,7 +88,9 @@ export class ChangePlanEndpoint {
 	}
 
 	async doPreview() {
-		const switchInformation = await this.gatherSwitchData();
+		const switchInformation = await this.gatherSwitchData(
+			this.originalSubscription,
+		);
 
 		const orderRequest: SwitchOrderRequestBuilder =
 			new SwitchOrderRequestBuilder(
@@ -94,7 +98,6 @@ export class ChangePlanEndpoint {
 				switchInformation.target.contributionCharge,
 				switchInformation.target.discount?.productRatePlanId[this.stage],
 				switchInformation.subscription,
-				true,
 			);
 
 		return await this.doPreviewAction.preview(
@@ -105,7 +108,19 @@ export class ChangePlanEndpoint {
 	}
 
 	async doSwitch() {
-		const switchInformation = await this.gatherSwitchData();
+		//If the sub has a pending amount change amendment, we need to remove it
+		await removePendingUpdateAmendments(
+			this.zuoraClient,
+			this.originalSubscription.subscriptionNumber,
+			this.today,
+		);
+
+		const updatedSubscription = await getSubscription(
+			this.zuoraClient,
+			this.originalSubscription.subscriptionNumber,
+		);
+
+		const switchInformation = await this.gatherSwitchData(updatedSubscription);
 
 		const orderRequest: SwitchOrderRequestBuilder =
 			new SwitchOrderRequestBuilder(
@@ -113,7 +128,6 @@ export class ChangePlanEndpoint {
 				switchInformation.target.contributionCharge,
 				switchInformation.target.discount?.productRatePlanId[this.stage],
 				switchInformation.subscription,
-				false,
 			);
 
 		return await this.doSwitchAction.switch(
@@ -123,7 +137,7 @@ export class ChangePlanEndpoint {
 		);
 	}
 
-	async gatherSwitchData() {
+	async gatherSwitchData(zuoraSubscription: ZuoraSubscription) {
 		logger.log('Loading the product catalog');
 		const productCatalog = await getProductCatalogFromApi(this.stage);
 		const productCatalogHelper = new ProductCatalogHelper(productCatalog);
@@ -136,7 +150,7 @@ export class ChangePlanEndpoint {
 			SubscriptionFilter.activeNonEndedSubscriptionFilter(this.today);
 
 		const guardianSubscriptionAllPlans: GuardianSubscriptionMultiPlan =
-			guardianSubscriptionParser.toGuardianSubscription(this.subscription);
+			guardianSubscriptionParser.toGuardianSubscription(zuoraSubscription);
 		const guardianSubscriptionCurrentPlans: GuardianSubscriptionMultiPlan =
 			activeCurrentSubscriptionFilter.filterSubscription(
 				guardianSubscriptionAllPlans,
