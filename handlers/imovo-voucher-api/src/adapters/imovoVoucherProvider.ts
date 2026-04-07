@@ -13,19 +13,21 @@ export class ImovoVoucherProvider implements VoucherProvider {
 		private readonly baseUrl: string,
 	) {}
 
-	async requestVoucher(voucherType: string): Promise<ImovoVoucherResponse> {
+	async requestVoucher(
+		campaignCode: string,
+		customerReference: string,
+	): Promise<ImovoVoucherResponse> {
 		const apiKey = await this.getApiKey();
 
-		const response = await fetch(`${this.baseUrl}/VoucherRequest/Request`, {
+		const url = new URL(`${this.baseUrl}/VoucherRequest/Request`);
+		url.searchParams.set('campaignCode', campaignCode);
+		url.searchParams.set('customerReference', customerReference);
+
+		const response = await fetch(url.toString(), {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'application/json',
 				'X-API-KEY': apiKey,
 			},
-			body: JSON.stringify({
-				VoucherType: voucherType,
-				Quantity: 1,
-			}),
 		});
 
 		if (!response.ok) {
@@ -34,7 +36,22 @@ export class ImovoVoucherProvider implements VoucherProvider {
 		}
 
 		const json: unknown = await response.json();
-		return imovoVoucherResponseSchema.parse(json);
+		console.log(`i-movo API response: ${JSON.stringify(json)}`);
+
+		const parsed = imovoVoucherResponseSchema.parse(json);
+
+		if (!parsed.successfulRequest) {
+			const errors = parsed.errorMessages?.join(', ') ?? 'unknown error';
+			throw new Error(`i-movo voucher request failed: ${errors}`);
+		}
+
+		if (!parsed.voucherCode || !parsed.expiryDate) {
+			throw new Error(
+				'i-movo response missing voucherCode or expiryDate despite successfulRequest=true',
+			);
+		}
+
+		return parsed;
 	}
 
 	private async getApiKey(): Promise<string> {
