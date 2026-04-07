@@ -98,7 +98,6 @@ export class ChangePlanEndpoint {
 				switchInformation.target.contributionCharge,
 				switchInformation.target.discount?.productRatePlanId[this.stage],
 				switchInformation.subscription,
-				true,
 			);
 
 		return await this.doPreviewAction.preview(
@@ -129,7 +128,6 @@ export class ChangePlanEndpoint {
 				switchInformation.target.contributionCharge,
 				switchInformation.target.discount?.productRatePlanId[this.stage],
 				switchInformation.subscription,
-				false,
 			);
 
 		return await this.doSwitchAction.switch(

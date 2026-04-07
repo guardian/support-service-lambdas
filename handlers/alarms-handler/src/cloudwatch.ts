@@ -2,7 +2,7 @@ import type { AlarmHistoryItem } from '@aws-sdk/client-cloudwatch';
 import { CloudWatchClient } from '@aws-sdk/client-cloudwatch';
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
 import { awsConfig, getAwsConfig, isRunningLocally } from '@modules/aws/config';
-import { logger } from '@modules/routing/logger';
+import { wrapAwsClient } from '@modules/routing/wrapAwsClient';
 import type { Dayjs } from 'dayjs';
 import { getAlarmHistory } from './cloudwatch/getAlarmHistory';
 import type { AlarmWithTags } from './cloudwatch/getAllAlarmsInAlarm';
@@ -22,7 +22,7 @@ const buildCrossAccountCloudwatchClient = (
 				credentials: fromTemporaryCredentials({ params: { RoleArn: roleArn } }),
 			};
 
-	return logger.wrapAwsClient(new CloudWatchClient(config));
+	return wrapAwsClient(new CloudWatchClient(config));
 };
 
 type CloudWatchClients = {
@@ -40,7 +40,7 @@ export type Cloudwatch = {
 export const buildCloudwatch = (config: Accounts) => {
 	const { MOBILE, TARGETING } = config;
 	const cloudwatchClients: CloudWatchClients = {
-		membership: logger.wrapAwsClient(new CloudWatchClient(awsConfig)),
+		membership: wrapAwsClient(new CloudWatchClient(awsConfig)),
 		mobile: buildCrossAccountCloudwatchClient(MOBILE.roleArn, 'mobile'),
 		targeting: buildCrossAccountCloudwatchClient(
 			TARGETING.roleArn,

@@ -356,6 +356,20 @@ const zuoraSalesforceLinkRemover: HandlerDefinition = {
 	},
 };
 
+const newsletterAcquisition: HandlerDefinition = {
+	name: 'newsletter-acquisition',
+	dependencies: {
+		...dep['@aws-sdk/client-dynamodb'],
+		...dep['@aws-sdk/util-dynamodb'],
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
+};
+
+// MARKER new-lambda: buildcheck-const
+
 const srcOnly = {
 	lint: "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts'",
 	test: 'jest --group=-integration --passWithNoTests',
@@ -587,6 +601,7 @@ export const build: BuildDefinition = {
 		mobilePurchasesToSupporterProductData,
 		mparticleApi,
 		negativeInvoicesProcessor,
+		newsletterAcquisition,
 		observerDataExport,
 		pressReaderEntitlements,
 		productSwitchApi,
@@ -599,6 +614,7 @@ export const build: BuildDefinition = {
 		userBenefits,
 		writeOffUnpaidInvoices,
 		zuoraSalesforceLinkRemover,
+		// MARKER new-lambda: buildcheck-reference
 	],
 
 	modules: [

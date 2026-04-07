@@ -9,6 +9,14 @@ Parameters:
             - PROD
             - CODE
         Default: CODE
+    VpcId:
+        Description: VPC where the lambda is being created
+        Type: AWS::SSM::Parameter::Value<String>
+        Default: /account/vpc/membership/id
+    VpcSubnets:
+        Description: Subnets to use in VPC
+        Type: AWS::SSM::Parameter::Value<List<String>>
+        Default: /account/vpc/membership/subnets/private
 
 Conditions:
   IsProd: !Equals [ !Ref Stage, PROD ]
@@ -21,6 +29,12 @@ Mappings:
             ApiName: digital-voucher-api-PROD
 
 Resources:
+    LambdaSecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupDescription: !Sub Security group for the digital-voucher-api-${Stage} lambda
+            VpcId: !Ref VpcId
+
     DigitalVoucherApiRole:
         Type: AWS::IAM::Role
         Properties:
@@ -44,6 +58,15 @@ Resources:
                             - logs:PutLogEvents
                             - lambda:InvokeFunction
                             Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/digital-voucher-api-${Stage}:log-stream:*"
+                - PolicyName: EC2Policy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - ec2:CreateNetworkInterface
+                            - ec2:DescribeNetworkInterfaces
+                            - ec2:DeleteNetworkInterface
+                            Resource: "*"
                 - PolicyName: ReadPrivateCredentials
                   PolicyDocument:
                       Statement:
@@ -101,6 +124,10 @@ Resources:
             MemorySize: 1536
             Runtime: java21
             Timeout: 300
+            VpcConfig:
+                SecurityGroupIds:
+                - !Ref LambdaSecurityGroup
+                SubnetIds: !Ref VpcSubnets
             Architectures:
               - arm64
         DependsOn:

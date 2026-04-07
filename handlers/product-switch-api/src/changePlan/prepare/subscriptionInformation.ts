@@ -26,7 +26,6 @@ export type SubscriptionInformation = {
 	previousAmount: number; //sf tracking
 	includesContribution: boolean;
 	productRatePlanKey: ValidSwitchableRatePlanKey; // email
-	termStartDate: Date; // order
 	chargedThroughDate?: Dayjs; // refund check
 	ratePlanId: string; // order
 	chargeIds: [string, ...string[]]; // filter invoice refund items
@@ -116,7 +115,6 @@ export function getSubscriptionInformation(
 		),
 		includesContribution,
 		productRatePlanKey,
-		termStartDate: subscription.termStartDate,
 		chargedThroughDate: getNextPaymentDate(
 			objectValues(ratePlan.ratePlanCharges),
 		),

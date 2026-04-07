@@ -9,10 +9,11 @@ export const sqsMessageSchema = z.object({
 export type SqsMessage = z.infer<typeof sqsMessageSchema>;
 
 export const imovoVoucherResponseSchema = z.object({
-	voucherCode: z.string(),
-	expiryDate: z.string(),
+	voucherCode: z.string().optional(),
+	expiryDate: z.string().optional(),
 	balance: z.number().optional(),
 	message: z.string().optional(),
+	errorMessages: z.array(z.string()).optional(),
 	successfulRequest: z.boolean(),
 });
 

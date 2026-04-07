@@ -101,6 +101,10 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
     |  {
     |    "id" : "guardian_weekly_newsletter",
     |    "consented" : true
+    |  },
+    |  {
+    |    "id" : "supporter_newsletter",
+    |    "consented" : true
     |  }
     |]""".stripMargin)
   }
@@ -115,6 +119,10 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
     |  {
     |    "id" : "guardian_weekly_newsletter",
     |    "consented" : false
+    |  },
+    |  {
+    |    "id" : "supporter_newsletter",
+    |    "consented" : false
     |  }
     |]""".stripMargin)
   }
@@ -128,10 +136,6 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
     ) shouldBe Right("""[
         |  {
         |    "id" : "similar_guardian_products",
-        |    "consented" : false
-        |  },
-        |  {
-        |    "id" : "supporter_newsletter",
         |    "consented" : false
         |  },
         |  {
@@ -168,10 +172,6 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
         |  },
         |  {
         |    "id" : "subscriber_preview",
-        |    "consented" : true
-        |  },
-        |  {
-        |    "id" : "supporter_newsletter",
         |    "consented" : true
         |  }
         |]""".stripMargin)

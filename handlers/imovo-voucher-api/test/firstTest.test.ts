@@ -92,24 +92,21 @@ describe('i-movo voucher response schema', () => {
 		}
 	});
 
-	it('rejects a response missing voucherCode', () => {
+	it('accepts a failed response without voucherCode/expiryDate', () => {
 		const response = {
-			expiryDate: '2026-12-31',
-			successfulRequest: true,
+			successfulRequest: false,
+			errorMessages: [
+				'Unable to create voucher: the campaign code submitted does not exist',
+			],
 		};
 
 		const result = imovoVoucherResponseSchema.safeParse(response);
-		expect(result.success).toBe(false);
-	});
-
-	it('rejects a response missing expiryDate', () => {
-		const response = {
-			voucherCode: 'ABC-123',
-			successfulRequest: true,
-		};
-
-		const result = imovoVoucherResponseSchema.safeParse(response);
-		expect(result.success).toBe(false);
+		expect(result.success).toBe(true);
+		if (result.success) {
+			expect(result.data.voucherCode).toBeUndefined();
+			expect(result.data.expiryDate).toBeUndefined();
+			expect(result.data.errorMessages).toHaveLength(1);
+		}
 	});
 
 	it('rejects a response missing successfulRequest', () => {
