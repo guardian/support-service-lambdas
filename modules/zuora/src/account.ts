@@ -5,6 +5,33 @@ import {
 	PaymentGateway,
 	PaymentMethod,
 } from '@modules/zuora/orders/paymentMethods';
+import { z } from 'zod';
+
+const minimalSchema = z.object({
+	basicInfo: z.object({
+		id: z.string(),
+	}),
+});
+
+type MinimalAccountResponse = z.infer<typeof minimalSchema>;
+
+/**
+ * Retrieve a Zuora account ID (a UUID) from an account number (eg. A0123456).
+ * Some APIs will only work with a full ID.
+ * @param zuoraClient
+ * @param accountNumber
+ */
+export const retrieveAccountIdFromAccountNumber = async (
+	zuoraClient: ZuoraClient,
+	accountNumber: string,
+): Promise<string> => {
+	const path = `v1/accounts/${accountNumber}`;
+	const account: MinimalAccountResponse = await zuoraClient.get(
+		path,
+		minimalSchema,
+	);
+	return account.basicInfo.id;
+};
 
 export const getAccount = async (
 	zuoraClient: ZuoraClient,
