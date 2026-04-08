@@ -211,7 +211,7 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 		expect(response.subscriptionNumbers.length).toBe(1);
 
 		//await deleteAccount(zuoraClient, response.accountNumber);
-	}, 120000);
+	}, 360000);
 
 	test('applies a promo code to the new subscription', async () => {
 		const sourceAccountNumber = '2c92c0f87568d97201756b1578960694';

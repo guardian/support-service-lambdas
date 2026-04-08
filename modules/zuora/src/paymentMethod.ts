@@ -7,6 +7,7 @@ import type { ZuoraClient } from './zuoraClient';
 // callers passing either work correctly.
 export type BankTransferCloneInput = {
 	type: string;
+	accountKey: string;
 	accountNumber: string;
 	bankCode: string;
 	accountHolderInfo: AccountHolderInfo;

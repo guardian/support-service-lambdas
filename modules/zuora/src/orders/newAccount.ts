@@ -50,6 +50,7 @@ export function buildNewAccountObject<
 	currency,
 	paymentGateway,
 	paymentMethod,
+	autoPay,
 	billToContact,
 	soldToContact,
 	deliveryInstructions,
@@ -62,6 +63,7 @@ export function buildNewAccountObject<
 	currency: IsoCurrency;
 	paymentGateway: PaymentGateway<T>;
 	paymentMethod?: T;
+	autoPay: boolean,
 	billToContact: Contact;
 	soldToContact?: Contact;
 	deliveryInstructions?: string;
@@ -76,7 +78,7 @@ export function buildNewAccountObject<
 			CreatedRequestId__c: createdRequestId,
 		},
 		billCycleDay: 0,
-		autoPay: true,
+		autoPay,
 		paymentGateway,
 		paymentMethod,
 		billToContact,
