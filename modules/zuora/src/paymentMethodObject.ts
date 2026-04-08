@@ -1,77 +1,56 @@
 import { z } from 'zod';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
-// Minimal fields needed to clone a BankTransfer payment method onto a new account.
-// The full BankTransferPaymentMethod type is a structural subtype of this, so
-// callers passing either work correctly.
-// AccountId is the Zuora internal account ID (not the account number/key).
-export type BankTransferCloneInput = {
-	Type: string;
-	AccountId: string;
-	Country: string;
-	BankTransferAccountNumber: string;
-	BankCode: string;
-	BankTransferAccountName: string | null;
-	MandateID: string | null;
-	TokenId?: string;
-};
-
 // Schema for GET /v1/object/payment-method/{id}
 // Uses PascalCase field names as per the Zuora object API.
 // See: https://developer.zuora.com/v1-api-reference/older-api/payment-methods/object_getpaymentmethod
-const paymentMethodByIdSchema = z.object({
+// We have to use this older API as it is the only one which can
+// successfully clone a bank transfer payment method
+const bankTransferPaymentMethodSchema = z.object({
 	Id: z.string(),
-	Type: z.string(),
+	Type: z.literal('BankTransfer'),
 	Country: z.string(),
-	// CreditCardReferenceTransaction fields
-	TokenId: z.string().optional(),
-	SecondTokenId: z.string().optional(),
-	// BankTransfer fields
 	BankTransferType: z.string().optional(),
-	BankTransferAccountNumberMask: z.string().optional(),
-	BankCode: z.string().optional(),
-	BranchCode: z.string().nullish(),
-	IBAN: z.string().optional(),
-	BankTransferAccountName: z.string().nullish(),
-	MandateID: z.string().nullish(),
+	BankTransferAccountNumberMask: z.string(),
+	BankCode: z.string(),
+	BankTransferAccountName: z.string(),
+	MandateID: z.string(),
+	TokenId: z.string().optional(),
 });
 
-export type PaymentMethodById = z.infer<typeof paymentMethodByIdSchema>;
+export type BankTransferPaymentMethod = z.infer<
+	typeof bankTransferPaymentMethodSchema
+>;
 
-export const getPaymentMethodById = async (
+const creditCardReferenceTransactionPaymentMethodSchema = z.object({
+	Id: z.string(),
+	Type: z.literal('CreditCardReferenceTransaction'),
+	Country: z.string(),
+	TokenId: z.string(),
+	SecondTokenId: z.string(),
+});
+
+export type CreditCardReferenceTransactionPaymentMethod = z.infer<
+	typeof creditCardReferenceTransactionPaymentMethodSchema
+>;
+
+const paymentMethodObjectSchema = z.discriminatedUnion('Type', [
+	bankTransferPaymentMethodSchema,
+	creditCardReferenceTransactionPaymentMethodSchema,
+	z.object({ Type: z.literal('CreditCard') }),
+	z.object({ Type: z.literal('PayPal') }),
+	z.object({ Type: z.literal('PayPalCP') }),
+	z.object({ Type: z.literal('PayPalNativeEC') }),
+	z.object({ Type: z.literal('PayPalEC') }),
+	z.object({ Type: z.literal('PayPalAdaptive') }),
+]);
+
+export type PaymentMethodObject = z.infer<typeof paymentMethodObjectSchema>;
+
+export const getPaymentMethodObjectById = async (
 	zuoraClient: ZuoraClient,
 	paymentMethodId: string,
-): Promise<PaymentMethodById> => {
+): Promise<PaymentMethodObject> => {
 	const path = `/v1/object/payment-method/${paymentMethodId}`;
-	return zuoraClient.get(path, paymentMethodByIdSchema);
-};
-
-// Schema for POST /v1/object/payment-method response
-const createPaymentMethodResponseSchema = z.object({
-	Id: z.string(),
-	Success: z.boolean(),
-});
-
-export const createBankTransferPaymentMethod = async (
-	zuoraClient: ZuoraClient,
-	bankTransfer: BankTransferCloneInput,
-): Promise<string> => {
-	const body = JSON.stringify({
-		ExistingMandate: 'Yes',
-		Type: bankTransfer.Type,
-		Country: bankTransfer.Country,
-		BankCode: bankTransfer.BankCode,
-		BankTransferType: 'DirectDebitUK',
-		BankTransferAccountName: bankTransfer.BankTransferAccountName,
-		BankTransferAccountNumber: bankTransfer.BankTransferAccountNumber,
-		AccountId: bankTransfer.AccountId,
-		MandateID: bankTransfer.MandateID,
-		TokenId: bankTransfer.TokenId,
-	});
-	const response: { Id: string; Success: boolean } = await zuoraClient.post(
-		'/v1/object/payment-method',
-		body,
-		createPaymentMethodResponseSchema,
-	);
-	return response.Id;
+	return zuoraClient.get(path, paymentMethodObjectSchema);
 };
