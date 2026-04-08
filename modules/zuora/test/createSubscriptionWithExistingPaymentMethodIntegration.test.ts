@@ -160,7 +160,7 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 	}, 120000);
 
 	test('creates a SupporterPlus subscription using an existing BankTransfer (GoCardless) payment method', async () => {
-		const sourceAccountNumber = '2c92c0f8757974d3017594cbffa00536';
+		const sourceAccountNumber = 'A01113215';
 		const requestId = `IT-createSubExistingPM-BankTransfer-${Date.now()}`;
 
 		const sourceAccount: z.infer<typeof sourceAccountSchema> =
