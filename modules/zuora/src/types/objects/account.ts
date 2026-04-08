@@ -50,6 +50,8 @@ export const zuoraAccountSchema = z.object({
 
 export type ZuoraAccount = z.infer<typeof zuoraAccountSchema>;
 
+export type ZuoraAccountBasicInfo = z.infer<typeof zuoraAccountBasicInfoSchema>;
+
 export const zuoraSubscriptionsFromAccountSchema = z.object({
 	subscriptions: z.array(zuoraSubscriptionSchema).optional(),
 });
@@ -57,3 +59,77 @@ export const zuoraSubscriptionsFromAccountSchema = z.object({
 export type ZuoraSubscriptionsFromAccountResponse = z.infer<
 	typeof zuoraSubscriptionsFromAccountSchema
 >;
+
+// Schemas for capturing full account data for cloning
+
+export const cloneContactSchema = z
+	.object({
+		firstName: z.string(),
+		lastName: z.string(),
+		workEmail: z.string().nullish(),
+		address1: z.string().nullish(),
+		address2: z.string().nullish(),
+		city: z.string().nullish(),
+		country: z.string().nullish(),
+		county: z.string().nullish(),
+		fax: z.string().nullish(),
+		homePhone: z.string().nullish(),
+		mobilePhone: z.string().nullish(),
+		nickname: z.string().nullish(),
+		otherPhone: z.string().nullish(),
+		otherPhoneType: z.string().nullish(),
+		personalEmail: z.string().nullish(),
+		workPhone: z.string().nullish(),
+		zipCode: z.string().nullish(),
+		state: z.string().nullish(),
+		taxRegion: z.string().nullish(),
+	})
+	.passthrough();
+
+export type CloneContact = z.infer<typeof cloneContactSchema>;
+
+export const cloneBasicInfoSchema = z
+	.object({
+		id: z.string(),
+		name: z.string(),
+		accountNumber: z.string(),
+		notes: z.string().nullish(),
+		status: z.string(),
+		crmId: z.string().nullish(),
+		batch: z.string().nullish(),
+		salesRep: z.string().nullish(),
+	})
+	.passthrough();
+
+export type CloneBasicInfo = z.infer<typeof cloneBasicInfoSchema>;
+
+export const cloneBillingAndPaymentSchema = z.object({
+	billCycleDay: z.number(),
+	currency: z.string(),
+	paymentTerm: z.string().nullish(),
+	paymentGateway: z.string().nullable(),
+	defaultPaymentMethodId: z.string(),
+	invoiceDeliveryPrefsEmail: z.boolean().nullish(),
+	invoiceDeliveryPrefsPrint: z.boolean().nullish(),
+	autoPay: z.boolean().nullish(),
+});
+
+export type CloneBillingAndPayment = z.infer<
+	typeof cloneBillingAndPaymentSchema
+>;
+
+export const cloneAccountSchema = z.object({
+	basicInfo: cloneBasicInfoSchema,
+	billingAndPayment: cloneBillingAndPaymentSchema,
+	billToContact: cloneContactSchema,
+	soldToContact: cloneContactSchema.optional(),
+});
+
+export type CloneAccountData = z.infer<typeof cloneAccountSchema>;
+
+export const createAccountResponseSchema = z.object({
+	accountId: z.string(),
+	accountNumber: z.string(),
+});
+
+export type CreateAccountResponse = z.infer<typeof createAccountResponseSchema>;
