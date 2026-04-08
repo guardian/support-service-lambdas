@@ -18,9 +18,7 @@ export type Contact = {
 	postalCode?: string;
 };
 
-export type NewAccount<
-	T extends AnyPaymentMethod,
-> = {
+export type NewAccount<T extends AnyPaymentMethod> = {
 	name: string;
 	currency: IsoCurrency;
 	crmId: string; // Salesforce accountId
@@ -39,9 +37,7 @@ export type NewAccount<
 };
 
 // Builder function to simplify the creation of a new account object.
-export function buildNewAccountObject<
-	T extends AnyPaymentMethod,
->({
+export function buildNewAccountObject<T extends AnyPaymentMethod>({
 	accountName,
 	createdRequestId,
 	salesforceAccountId,
@@ -63,7 +59,7 @@ export function buildNewAccountObject<
 	currency: IsoCurrency;
 	paymentGateway: PaymentGateway<T>;
 	paymentMethod?: T;
-	autoPay: boolean,
+	autoPay: boolean;
 	billToContact: Contact;
 	soldToContact?: Contact;
 	deliveryInstructions?: string;

@@ -22,7 +22,7 @@ import type {
 } from '@modules/zuora/orders/paymentMethods';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { getPaymentMethodById } from '@modules/zuora/paymentMethod';
+import { getPaymentMethodById } from '@modules/zuora/paymentMethodObject';
 
 export type CreateSubscriptionWithExistingPaymentMethodInput = Omit<
 	CreateSubscriptionInputFields<PaymentMethod>,
@@ -82,7 +82,7 @@ export const createSubscriptionWithExistingPaymentMethod = async (
 		zuoraClient,
 		existingPaymentMethod.id,
 	);
-	const canBeCreatedInOneApiCall = zuoraPaymentMethod.type != 'Bacs';
+	const canBeCreatedInOneApiCall = zuoraPaymentMethod.Type != 'BankTransfer';
 
 	const clonePaymentMethodResult = await clonePaymentMethod(
 		existingPaymentMethod,
@@ -108,16 +108,8 @@ export const createSubscriptionWithExistingPaymentMethod = async (
 		soldToContact: deliveryContact,
 	});
 
-	// TODO hack, remove this
-	const finalAccount = canBeCreatedInOneApiCall
-		? newAccount
-		: {
-				...newAccount,
-				paymentGateway: undefined,
-			};
-
 	const orderRequest = {
-		newAccount: { ...finalAccount, ...clonePaymentMethodResult },
+		newAccount: { ...newAccount, ...clonePaymentMethodResult },
 		orderDate: zuoraDateFormat(contractEffectiveDate),
 		description: 'Created by createSubscription.ts in support-service-lambdas',
 		subscriptions: [
