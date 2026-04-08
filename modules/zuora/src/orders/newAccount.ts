@@ -46,7 +46,6 @@ export function buildNewAccountObject<T extends AnyPaymentMethod>({
 	currency,
 	paymentGateway,
 	paymentMethod,
-	autoPay,
 	billToContact,
 	soldToContact,
 	deliveryInstructions,
@@ -59,7 +58,6 @@ export function buildNewAccountObject<T extends AnyPaymentMethod>({
 	currency: IsoCurrency;
 	paymentGateway: PaymentGateway<T>;
 	paymentMethod?: T;
-	autoPay: boolean;
 	billToContact: Contact;
 	soldToContact?: Contact;
 	deliveryInstructions?: string;
@@ -74,7 +72,7 @@ export function buildNewAccountObject<T extends AnyPaymentMethod>({
 			CreatedRequestId__c: createdRequestId,
 		},
 		billCycleDay: 0,
-		autoPay,
+		autoPay: true,
 		paymentGateway,
 		paymentMethod,
 		billToContact,

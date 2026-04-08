@@ -101,14 +101,10 @@ const BankTransferPaymentMethodSchema = BasePaymentMethodSchema.extend({
 	mandateInfo: MandateInfoSchema,
 });
 
-export type BankTransferPaymentMethod = z.infer<
-	typeof BankTransferPaymentMethodSchema
->;
-
 // Main payment method response schema
 export const DefaultPaymentMethodResponseSchema = z.object({
 	defaultPaymentMethodId: z.string(),
-	paymentGateway: z.string().nullable(),
+	paymentGateway: z.string(),
 	creditcard: z.array(CreditCardPaymentMethodSchema).optional(),
 	creditcardreferencetransaction: z
 		.array(CreditCardReferenceTransactionSchema)
@@ -116,7 +112,3 @@ export const DefaultPaymentMethodResponseSchema = z.object({
 	paypal: z.array(PayPalPaymentMethodSchema).optional(),
 	banktransfer: z.array(BankTransferPaymentMethodSchema).optional(),
 });
-
-export type DefaultPaymentMethodResponse = z.infer<
-	typeof DefaultPaymentMethodResponseSchema
->;
