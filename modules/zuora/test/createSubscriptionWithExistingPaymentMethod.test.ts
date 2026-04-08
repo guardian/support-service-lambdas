@@ -35,7 +35,10 @@ const baseInput = {
 		workEmail: 'john@example.com',
 		country: 'GB',
 	},
-	productPurchase: { product: 'GuardianAdLite' as const, ratePlan: 'Monthly' as const },
+	productPurchase: {
+		product: 'GuardianAdLite' as const,
+		ratePlan: 'Monthly' as const,
+	},
 };
 
 const orderResponse = {
@@ -80,7 +83,10 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 				productCatalog,
 				{
 					...baseInput,
-					existingPaymentMethod: { id: 'pm-existing-id', requiresCloning: false },
+					existingPaymentMethod: {
+						id: 'pm-existing-id',
+						requiresCloning: false,
+					},
 				},
 				undefined,
 			);
@@ -89,10 +95,16 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 			const [path, body] = mockPost.mock.calls[0] as [string, string];
 			expect(path).toBe('/v1/orders');
 			const parsed = JSON.parse(body) as {
-				newAccount: { hpmCreditCardPaymentMethodId?: string; paymentMethod?: unknown; autoPay: boolean };
+				newAccount: {
+					hpmCreditCardPaymentMethodId?: string;
+					paymentMethod?: unknown;
+					autoPay: boolean;
+				};
 				processingOptions: { runBilling: boolean; collectPayment: boolean };
 			};
-			expect(parsed.newAccount.hpmCreditCardPaymentMethodId).toBe('pm-existing-id');
+			expect(parsed.newAccount.hpmCreditCardPaymentMethodId).toBe(
+				'pm-existing-id',
+			);
 			expect(parsed.newAccount.paymentMethod).toBeUndefined();
 			expect(parsed.newAccount.autoPay).toBe(true);
 			expect(parsed.processingOptions.runBilling).toBe(true);
@@ -110,7 +122,10 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 				productCatalog,
 				{
 					...baseInput,
-					existingPaymentMethod: { id: 'pm-existing-id', requiresCloning: false },
+					existingPaymentMethod: {
+						id: 'pm-existing-id',
+						requiresCloning: false,
+					},
 				},
 				undefined,
 			);
@@ -128,13 +143,20 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 				productCatalog,
 				{
 					...baseInput,
-					existingPaymentMethod: { id: 'pm-existing-id', requiresCloning: false },
+					existingPaymentMethod: {
+						id: 'pm-existing-id',
+						requiresCloning: false,
+					},
 				},
 				undefined,
 			);
 
-			const postPaths = (mockPost.mock.calls as Array<[string, ...unknown[]]>).map(([p]) => p);
-			expect(postPaths).not.toContain('/v1/accounts/A00099999/billing-documents/generate');
+			const postPaths = (
+				mockPost.mock.calls as Array<[string, ...unknown[]]>
+			).map(([p]) => p);
+			expect(postPaths).not.toContain(
+				'/v1/accounts/A00099999/billing-documents/generate',
+			);
 		});
 
 		it('sets runBilling:false and collectPayment:false in processingOptions when runBilling is false', async () => {
@@ -147,7 +169,10 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 				productCatalog,
 				{
 					...baseInput,
-					existingPaymentMethod: { id: 'pm-existing-id', requiresCloning: false },
+					existingPaymentMethod: {
+						id: 'pm-existing-id',
+						requiresCloning: false,
+					},
 					runBilling: false,
 					collectPayment: false,
 				},
@@ -185,25 +210,32 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 			const [postPath, postBody] = mockPost.mock.calls[0] as [string, string];
 			expect(postPath).toBe('/v1/orders');
 			const parsed = JSON.parse(postBody) as {
-				newAccount: { paymentMethod: Record<string, unknown>; autoPay: boolean };
+				newAccount: {
+					paymentMethod: Record<string, unknown>;
+					autoPay: boolean;
+				};
 				processingOptions: { runBilling: boolean; collectPayment: boolean };
 			};
 			expect(parsed.newAccount.paymentMethod.type).toBe(
 				'CreditCardReferenceTransaction',
 			);
 			expect(parsed.newAccount.paymentMethod.tokenId).toBe('tok_stripe_123');
-			expect(parsed.newAccount.paymentMethod.secondTokenId).toBe('cus_stripe_456');
+			expect(parsed.newAccount.paymentMethod.secondTokenId).toBe(
+				'cus_stripe_456',
+			);
 			expect(parsed.newAccount.autoPay).toBe(true);
 			expect(parsed.processingOptions.runBilling).toBe(true);
 			expect(result.accountNumber).toBe('A00099999');
 		});
 
 		it('uses two-step flow for BankTransfer: creates orphan PM then assigns via hpmCreditCardPaymentMethodId', async () => {
-			const mockGet = jest.fn().mockResolvedValueOnce(bankTransferPaymentMethodById);
+			const mockGet = jest
+				.fn()
+				.mockResolvedValueOnce(bankTransferPaymentMethodById);
 			const mockPost = jest
 				.fn()
 				.mockResolvedValueOnce({ id: 'new-pm-id' }) // POST /v1/payment-methods (orphan)
-				.mockResolvedValueOnce(orderResponse);       // POST /v1/orders
+				.mockResolvedValueOnce(orderResponse); // POST /v1/orders
 			const mockPut = jest.fn();
 			const client = buildMockZuoraClient(mockGet, mockPost, mockPut);
 
@@ -229,13 +261,22 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 			);
 
 			// Step 2: POST /v1/orders with hpmCreditCardPaymentMethodId, autoPay:true
-			const [ordersPath, ordersBody] = mockPost.mock.calls[1] as [string, string];
+			const [ordersPath, ordersBody] = mockPost.mock.calls[1] as [
+				string,
+				string,
+			];
 			expect(ordersPath).toBe('/v1/orders');
 			const ordersRequest = JSON.parse(ordersBody) as {
-				newAccount: { hpmCreditCardPaymentMethodId: string; paymentMethod?: unknown; autoPay: boolean };
+				newAccount: {
+					hpmCreditCardPaymentMethodId: string;
+					paymentMethod?: unknown;
+					autoPay: boolean;
+				};
 				processingOptions: { runBilling: boolean; collectPayment: boolean };
 			};
-			expect(ordersRequest.newAccount.hpmCreditCardPaymentMethodId).toBe('new-pm-id');
+			expect(ordersRequest.newAccount.hpmCreditCardPaymentMethodId).toBe(
+				'new-pm-id',
+			);
 			expect(ordersRequest.newAccount.paymentMethod).toBeUndefined();
 			expect(ordersRequest.newAccount.autoPay).toBe(true);
 			expect(ordersRequest.processingOptions.runBilling).toBe(true);
@@ -298,9 +339,15 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 				productCatalog,
 				{
 					...baseInput,
-					productPurchase: { product: 'DigitalSubscription', ratePlan: 'Monthly' },
+					productPurchase: {
+						product: 'DigitalSubscription',
+						ratePlan: 'Monthly',
+					},
 					existingPaymentMethod: { id: 'pm-ccrt-id', requiresCloning: true },
-				appliedPromotion: { promoCode: 'PROMO25', supportRegionId: SupportRegionId.UK },
+					appliedPromotion: {
+						promoCode: 'PROMO25',
+						supportRegionId: SupportRegionId.UK,
+					},
 				},
 				promotion,
 			);
