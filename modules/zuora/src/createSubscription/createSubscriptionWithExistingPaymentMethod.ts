@@ -1,7 +1,10 @@
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { Promo } from '@modules/promotions/v2/schema';
-import { clonePaymentMethod } from '@modules/zuora/createSubscription/clonePaymentMethod';
-import type { ExistingPaymentMethod } from '@modules/zuora/createSubscription/clonePaymentMethod';
+import {
+	cloneBankTransfer,
+	clonePaymentMethod,
+	ExistingPaymentMethod,
+} from '@modules/zuora/createSubscription/clonePaymentMethod';
 import type {
 	CreateSubscriptionInputFields,
 	CreateSubscriptionResponse,
@@ -12,7 +15,6 @@ import {
 	getReaderType,
 } from '@modules/zuora/createSubscription/createSubscription';
 import { buildNewAccountObject } from '@modules/zuora/orders/newAccount';
-import { executeOrderRequest } from '@modules/zuora/orders/orderRequests';
 import type {
 	AnyPaymentMethod,
 	PaymentGateway,
@@ -20,6 +22,7 @@ import type {
 } from '@modules/zuora/orders/paymentMethods';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { getPaymentMethodById } from '@modules/zuora/paymentMethod';
 
 export type CreateSubscriptionWithExistingPaymentMethodInput = Omit<
 	CreateSubscriptionInputFields<PaymentMethod>,
@@ -75,9 +78,15 @@ export const createSubscriptionWithExistingPaymentMethod = async (
 		CreatedByCSR__c: createdByCSR,
 	};
 
-	const clonePaymentMethodResult = await clonePaymentMethod(
+	const zuoraPaymentMethod = await getPaymentMethodById(
 		zuoraClient,
+		existingPaymentMethod.id,
+	);
+	const canBeCreatedInOneApiCall = zuoraPaymentMethod.type != 'Bacs';
+
+	const clonePaymentMethodResult = await clonePaymentMethod(
 		existingPaymentMethod,
+		zuoraPaymentMethod,
 	);
 
 	const { deliveryContact } = {
@@ -93,12 +102,22 @@ export const createSubscriptionWithExistingPaymentMethod = async (
 		identityId: input.identityId,
 		currency: input.currency,
 		paymentGateway: input.paymentGateway,
+		paymentMethod: clonePaymentMethodResult?.paymentMethod,
+		autoPay: canBeCreatedInOneApiCall, // Zuora will only allow autoPay if we provide a valid payment method
 		billToContact: input.billToContact,
 		soldToContact: deliveryContact,
 	});
 
+	// TODO hack, remove this
+	const finalAccount = canBeCreatedInOneApiCall
+		? newAccount
+		: {
+				...newAccount,
+				paymentGateway: undefined,
+			};
+
 	const orderRequest = {
-		newAccount: { ...newAccount, ...clonePaymentMethodResult },
+		newAccount: { ...finalAccount, ...clonePaymentMethodResult },
 		orderDate: zuoraDateFormat(contractEffectiveDate),
 		description: 'Created by createSubscription.ts in support-service-lambdas',
 		subscriptions: [
@@ -108,15 +127,29 @@ export const createSubscriptionWithExistingPaymentMethod = async (
 			},
 		],
 		processingOptions: {
-			runBilling: runBilling ?? true,
-			collectPayment: collectPayment ?? true,
+			runBilling: canBeCreatedInOneApiCall ? (runBilling ?? true) : false,
+			collectPayment: canBeCreatedInOneApiCall
+				? (collectPayment ?? true)
+				: false,
 		},
 	};
 
-	return executeOrderRequest(
-		zuoraClient,
-		orderRequest,
-		createSubscriptionResponseSchema,
-		createdRequestId,
-	);
+	const accountCreateResponse: CreateSubscriptionResponse =
+		await zuoraClient.post(
+			`/v1/orders`,
+			JSON.stringify(orderRequest),
+			createSubscriptionResponseSchema,
+			{ 'idempotency-key': createdRequestId },
+		);
+
+	if (!canBeCreatedInOneApiCall) {
+		await cloneBankTransfer(
+			accountCreateResponse.accountNumber,
+			zuoraPaymentMethod,
+			runBilling ?? true,
+			collectPayment ?? true,
+			zuoraClient,
+		);
+	}
+	return accountCreateResponse;
 };
