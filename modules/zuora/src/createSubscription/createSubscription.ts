@@ -192,6 +192,7 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		currency: currency,
 		paymentGateway: paymentGateway,
 		paymentMethod: paymentMethod,
+		autoPay: true,
 		billToContact: billToContact,
 		soldToContact: deliveryContact,
 		deliveryInstructions: deliveryInstructions,

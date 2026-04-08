@@ -1,6 +1,10 @@
 import type { ZuoraAccount } from './types';
 import { voidSchema, zuoraAccountSchema } from './types';
 import type { ZuoraClient } from './zuoraClient';
+import {
+	PaymentGateway,
+	PaymentMethod,
+} from '@modules/zuora/orders/paymentMethods';
 
 export const getAccount = async (
 	zuoraClient: ZuoraClient,
@@ -25,6 +29,7 @@ export const updateAccount = async (
 		crmId?: string;
 		sfContactId__c?: string;
 		defaultPaymentMethodId?: string;
+		paymentGateway?: PaymentGateway<PaymentMethod>;
 		autoPay?: boolean;
 	},
 ): Promise<void> => {
