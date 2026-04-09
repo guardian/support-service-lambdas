@@ -33,7 +33,6 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'batch-email-sender',
 		'bigquery-acquisitions-publisher',
 		'component-event-stream',
-		'contributions-store-queue',
 		'dotcom-components',
 		...mobilePurchasesApps,
 		'promotions-tool',
@@ -141,6 +140,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		// misc
 		'discount-expiry-notifier',
 		'observer-data-export',
+		'contributions-store-queue',
 	],
 	ENGINE: ['price-migration-engine-state-machine'],
 	PUZZLES: ['puzzles-app'],
