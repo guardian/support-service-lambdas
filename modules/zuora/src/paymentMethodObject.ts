@@ -4,8 +4,8 @@ import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 // Schema for GET /v1/object/payment-method/{id}
 // Uses PascalCase field names as per the Zuora object API.
 // See: https://developer.zuora.com/v1-api-reference/older-api/payment-methods/object_getpaymentmethod
-// We have to use this older API as it is the only one which can
-// successfully clone a bank transfer payment method
+// We have to use this older API as it is the only one which returns the MandateId and the TokenId
+// which are needed to successfully clone a bank transfer payment method
 const bankTransferPaymentMethodSchema = z.object({
 	Id: z.string(),
 	Type: z.literal('BankTransfer'),
