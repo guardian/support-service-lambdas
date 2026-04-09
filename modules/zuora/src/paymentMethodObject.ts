@@ -25,7 +25,6 @@ export type BankTransferPaymentMethod = z.infer<
 const creditCardReferenceTransactionPaymentMethodSchema = z.object({
 	Id: z.string(),
 	Type: z.literal('CreditCardReferenceTransaction'),
-	Country: z.string(),
 	TokenId: z.string(),
 	SecondTokenId: z.string(),
 });
