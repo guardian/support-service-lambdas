@@ -15,10 +15,18 @@ export type ExistingPaymentMethod = {
 	requiresCloning: boolean;
 };
 
-export type ClonePaymentMethodResult = {
-	hpmCreditCardPaymentMethodId?: string;
-	paymentMethod?: ClonedCreditCardReferenceTransaction;
-};
+// The clonePaymentMethod function will return either an inline payment method
+// object which can be passed to Zuora or an id of an existing orphan payment
+// method but never both.
+export type ClonePaymentMethodResult =
+	| {
+			hpmCreditCardPaymentMethodId: string;
+			paymentMethod?: never;
+	  }
+	| {
+			paymentMethod: ClonedCreditCardReferenceTransaction;
+			hpmCreditCardPaymentMethodId?: never;
+	  };
 
 const createPaymentMethodResponseSchema = z.object({
 	Id: z.string(),
