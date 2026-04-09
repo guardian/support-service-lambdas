@@ -53,13 +53,21 @@ export const createSubscriptionWithExistingPaymentMethod = async (
 		acquisitionSource,
 		createdByCSR,
 		giftRecipient,
+		productPurchase,
+		currency,
+		accountName,
+		salesforceAccountId,
+		salesforceContactId,
+		identityId,
+		paymentGateway,
+		billToContact,
 	} = input;
 
 	const { contractEffectiveDate, createSubscriptionOrderAction } =
 		buildSubscriptionOrderAction(
 			productCatalog,
-			input.productPurchase,
-			input.currency,
+			productPurchase,
+			currency,
 			appliedPromotion,
 			promotion,
 		);
@@ -82,23 +90,24 @@ export const createSubscriptionWithExistingPaymentMethod = async (
 
 	const { deliveryContact } = {
 		deliveryContact: undefined,
-		...input.productPurchase,
+		...productPurchase,
 	};
 
 	const newAccount = buildNewAccountObject<AnyPaymentMethod>({
-		accountName: input.accountName,
-		createdRequestId: input.createdRequestId,
-		salesforceAccountId: input.salesforceAccountId,
-		salesforceContactId: input.salesforceContactId,
-		identityId: input.identityId,
-		currency: input.currency,
-		paymentGateway: input.paymentGateway,
-		billToContact: input.billToContact,
+		accountName,
+		createdRequestId,
+		salesforceAccountId,
+		salesforceContactId,
+		identityId,
+		currency,
+		paymentGateway,
+		billToContact,
 		soldToContact: deliveryContact,
+		...clonePaymentMethodResult,
 	});
 
 	const orderRequest = {
-		newAccount: { ...newAccount, ...clonePaymentMethodResult },
+		newAccount,
 		orderDate: zuoraDateFormat(contractEffectiveDate),
 		description:
 			'Created by createSubscriptionWithExistingPaymentMethod.ts in support-service-lambdas',

@@ -18,7 +18,7 @@ export type Contact = {
 	postalCode?: string;
 };
 
-export type NewAccount<T extends AnyPaymentMethod> = {
+type NewAccountBase<T extends AnyPaymentMethod> = {
 	name: string;
 	currency: IsoCurrency;
 	crmId: string; // Salesforce accountId
@@ -31,10 +31,37 @@ export type NewAccount<T extends AnyPaymentMethod> = {
 	billCycleDay: 0;
 	autoPay: boolean;
 	paymentGateway: PaymentGateway<T>; // Generic to make sure we will only accept payment gateways that match the payment method
-	paymentMethod?: T;
 	billToContact: Contact;
 	soldToContact?: Contact & { SpecialDeliveryInstructions__c?: string };
 };
+
+// The structure expected by Zuora in the Orders request
+export type NewAccount<T extends AnyPaymentMethod> =
+	| (NewAccountBase<T> & {
+			paymentMethod: T;
+			hpmCreditCardPaymentMethodId?: never;
+	  })
+	| (NewAccountBase<T> & {
+			hpmCreditCardPaymentMethodId: string;
+			paymentMethod?: never;
+	  });
+
+// Input type for the helper function
+type BuildNewAccountInput<T extends AnyPaymentMethod> = Omit<
+	NewAccountBase<T>,
+	'name' | 'crmId' | 'customFields' | 'billCycleDay' | 'autoPay'
+> & {
+	accountName: string;
+	createdRequestId: string;
+	salesforceAccountId: string;
+	salesforceContactId: string;
+	identityId: string;
+	soldToContact?: Contact;
+	deliveryInstructions?: string;
+} & (
+		| { paymentMethod: T; hpmCreditCardPaymentMethodId?: never }
+		| { hpmCreditCardPaymentMethodId: string; paymentMethod?: never }
+	);
 
 // Builder function to simplify the creation of a new account object.
 export function buildNewAccountObject<T extends AnyPaymentMethod>({
@@ -46,23 +73,12 @@ export function buildNewAccountObject<T extends AnyPaymentMethod>({
 	currency,
 	paymentGateway,
 	paymentMethod,
+	hpmCreditCardPaymentMethodId,
 	billToContact,
 	soldToContact,
 	deliveryInstructions,
-}: {
-	accountName: string;
-	createdRequestId: string;
-	salesforceAccountId: string;
-	salesforceContactId: string;
-	identityId: string;
-	currency: IsoCurrency;
-	paymentGateway: PaymentGateway<T>;
-	paymentMethod?: T;
-	billToContact: Contact;
-	soldToContact?: Contact;
-	deliveryInstructions?: string;
-}): NewAccount<T> {
-	return {
+}: BuildNewAccountInput<T>): NewAccount<T> {
+	const base: NewAccountBase<T> = {
 		name: accountName,
 		currency,
 		crmId: salesforceAccountId,
@@ -74,7 +90,6 @@ export function buildNewAccountObject<T extends AnyPaymentMethod>({
 		billCycleDay: 0,
 		autoPay: true,
 		paymentGateway,
-		paymentMethod,
 		billToContact,
 		soldToContact: soldToContact
 			? {
@@ -82,5 +97,13 @@ export function buildNewAccountObject<T extends AnyPaymentMethod>({
 					SpecialDeliveryInstructions__c: deliveryInstructions,
 				}
 			: undefined,
+	};
+	if (paymentMethod !== undefined) {
+		return { ...base, paymentMethod };
+	}
+	// hpmCreditCardPaymentMethodId is guaranteed non-undefined here by the union input type
+	return {
+		...base,
+		hpmCreditCardPaymentMethodId: hpmCreditCardPaymentMethodId!,
 	};
 }
