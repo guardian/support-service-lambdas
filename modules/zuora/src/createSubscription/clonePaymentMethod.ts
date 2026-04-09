@@ -52,7 +52,7 @@ function cloneCreditCardReferenceTransaction(
 ): { paymentMethod: ClonedCreditCardReferenceTransaction } {
 	return {
 		paymentMethod: {
-			type: 'CreditCardReferenceTransaction' as const,
+			type: zuoraPaymentMethod.Type,
 			tokenId: zuoraPaymentMethod.TokenId,
 			secondTokenId: zuoraPaymentMethod.SecondTokenId,
 		},
@@ -61,7 +61,7 @@ function cloneCreditCardReferenceTransaction(
 
 // Resolves the payment method to use when creating a new account.
 // - requiresCloning: false — returns the existing payment method id directly.
-// - requiresCloning: true, BankTransfer — creates a payment method on the new account and returns its id.
+// - requiresCloning: true, BankTransfer — creates a new orphan bank transfer payment method and returns its id.
 // - requiresCloning: true, CreditCardReferenceTransaction — returns the payment method details to embed inline in the order.
 // - requiresCloning: true, CreditCard/PayPal — not supported; throws an error.
 export async function clonePaymentMethod(
