@@ -4,12 +4,13 @@
  */
 
 import { SupportRegionId } from '@modules/internationalisation/countryGroup';
-import { CurrencyValues } from '@modules/internationalisation/currency';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import { getPromotion } from '@modules/promotions/v2/getPromotion';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
+import dayjs from 'dayjs';
 import { z } from 'zod';
 import { deleteAccount } from '@modules/zuora/account';
+import type { CreateSubscriptionWithExistingPaymentMethodInput } from '@modules/zuora/createSubscription/createSubscriptionWithExistingPaymentMethod';
 import { createSubscriptionWithExistingPaymentMethod } from '@modules/zuora/createSubscription/createSubscriptionWithExistingPaymentMethod';
 import type {
 	PaymentGateway,
@@ -19,35 +20,6 @@ import { getSubscription } from '@modules/zuora/subscription';
 import { zuoraSubscriptionSchema } from '@modules/zuora/types/objects/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import code from '../../zuora-catalog/test/fixtures/catalog-code.json';
-
-// Minimal schema to read only the fields we need to reproduce account details on a new account.
-const sourceContactSchema = z.object({
-	firstName: z.string(),
-	lastName: z.string(),
-	workEmail: z.string().nullish(),
-	address1: z.string().nullish(),
-	address2: z.string().nullish(),
-	city: z.string().nullish(),
-	country: z.string().nullish(),
-	state: z.string().nullish(),
-	zipCode: z.string().nullish(),
-});
-
-const sourceAccountSchema = z.object({
-	basicInfo: z.object({
-		name: z.string(),
-		crmId: z.string().nullish(),
-		sfContactId__c: z.string().nullish(),
-		IdentityId__c: z.string().nullish(),
-	}),
-	billingAndPayment: z.object({
-		currency: z.enum(CurrencyValues),
-		paymentGateway: z.string(),
-		defaultPaymentMethodId: z.string(),
-	}),
-	billToContact: sourceContactSchema,
-	soldToContact: sourceContactSchema.optional(),
-});
 
 describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 	const productCatalog = generateProductCatalog(zuoraCatalogSchema.parse(code));
@@ -59,41 +31,35 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 
 	test('creates a GuardianAdLite subscription using an existing CreditCardReferenceTransaction payment method', async () => {
 		const sourceAccountNumber = 'A00078074';
-		const requestId = `IT-createSubExistingPM-CCRT-${sourceAccountNumber.slice(-8)}-${Date.now()}`;
-
-		const sourceAccount: z.infer<typeof sourceAccountSchema> =
-			await zuoraClient.get(
-				`v1/accounts/${sourceAccountNumber}`,
-				sourceAccountSchema,
-			);
-
-		const response = await createSubscriptionWithExistingPaymentMethod(
-			zuoraClient,
-			productCatalog,
+		const sourceAccountInput: CreateSubscriptionWithExistingPaymentMethodInput =
 			{
-				accountName: sourceAccount.basicInfo.name,
-				createdRequestId: requestId,
-				salesforceAccountId: sourceAccount.basicInfo.crmId ?? '',
-				salesforceContactId: sourceAccount.basicInfo.sfContactId__c ?? '',
-				identityId: sourceAccount.basicInfo.IdentityId__c ?? '',
-				currency: sourceAccount.billingAndPayment.currency,
-				paymentGateway: sourceAccount.billingAndPayment
-					.paymentGateway as PaymentGateway<PaymentMethod>,
+				accountName: '0013E00001AU6xcQAD',
+				createdRequestId: `IT-createSubExistingPM-CCRT-${sourceAccountNumber}-${Date.now()}`,
+				salesforceAccountId: '0013E00001AU6xcQAD',
+				salesforceContactId: '0033E00001Cq8D2QAJ',
+				identityId: '9999999',
+				currency: 'GBP',
+				paymentGateway: 'Stripe Gateway 1' as PaymentGateway<PaymentMethod>,
 				existingPaymentMethod: {
-					id: sourceAccount.billingAndPayment.defaultPaymentMethodId,
+					id: '2c92c0f87568d97201756b1578b6069c',
 					requiresCloning: true,
 				},
 				billToContact: {
-					firstName: sourceAccount.billToContact.firstName,
-					lastName: sourceAccount.billToContact.lastName,
-					workEmail: sourceAccount.billToContact.workEmail ?? '',
-					country: sourceAccount.billToContact.country ?? '',
-					state: sourceAccount.billToContact.state,
+					firstName: 'TestFirstNameA',
+					lastName: 'TestLastNameA',
+					workEmail: 'integration-test-a@example.com',
+					country: 'United Kingdom',
+					state: undefined,
 				},
 				productPurchase: { product: 'GuardianAdLite', ratePlan: 'Monthly' },
 				runBilling: true,
 				collectPayment: true,
-			},
+			};
+
+		const response = await createSubscriptionWithExistingPaymentMethod(
+			zuoraClient,
+			productCatalog,
+			sourceAccountInput,
 			undefined,
 		);
 
@@ -103,47 +69,41 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 		await deleteAccount(zuoraClient, response.accountNumber);
 	}, 120000);
 
-	test('throws for an existing PayPal payment method because tokens cannot be reliably retrieved', async () => {
+	test('throws for a PayPal payment method', async () => {
 		const sourceAccountNumber = 'A00088294';
-		const requestId = `IT-createSubExistingPM-PayPal-${sourceAccountNumber.slice(-8)}-${Date.now()}`;
-
-		const sourceAccount: z.infer<typeof sourceAccountSchema> =
-			await zuoraClient.get(
-				`v1/accounts/${sourceAccountNumber}`,
-				sourceAccountSchema,
-			);
+		const sourceAccountInput: CreateSubscriptionWithExistingPaymentMethodInput =
+			{
+				accountName: '0019E00001JqWrBQAV',
+				createdRequestId: `IT-createSubExistingPM-PayPal-${sourceAccountNumber}-${Date.now()}`,
+				salesforceAccountId: '0019E00001JqWrBQAV',
+				salesforceContactId: '0039E000018HNvRQAW',
+				identityId: '100003000',
+				currency: 'USD',
+				paymentGateway: 'PayPal Express',
+				existingPaymentMethod: {
+					id: '2c92c0f875d488d70175d6a2a37d0343',
+					requiresCloning: true,
+				},
+				billToContact: {
+					firstName: 'TestFirstNameB',
+					lastName: 'TestLastNameB',
+					workEmail: 'integration-test-b@example.com',
+					country: 'United States',
+					state: 'Delaware',
+				},
+				productPurchase: {
+					product: 'DigitalSubscription',
+					ratePlan: 'Monthly',
+				},
+				runBilling: false,
+				collectPayment: false,
+			};
 
 		await expect(
 			createSubscriptionWithExistingPaymentMethod(
 				zuoraClient,
 				productCatalog,
-				{
-					accountName: sourceAccount.basicInfo.name,
-					createdRequestId: requestId,
-					salesforceAccountId: sourceAccount.basicInfo.crmId ?? '',
-					salesforceContactId: sourceAccount.basicInfo.sfContactId__c ?? '',
-					identityId: sourceAccount.basicInfo.IdentityId__c ?? '',
-					currency: sourceAccount.billingAndPayment.currency,
-					paymentGateway: sourceAccount.billingAndPayment
-						.paymentGateway as PaymentGateway<PaymentMethod>,
-					existingPaymentMethod: {
-						id: sourceAccount.billingAndPayment.defaultPaymentMethodId,
-						requiresCloning: true,
-					},
-					billToContact: {
-						firstName: sourceAccount.billToContact.firstName,
-						lastName: sourceAccount.billToContact.lastName,
-						workEmail: sourceAccount.billToContact.workEmail ?? '',
-						country: sourceAccount.billToContact.country ?? '',
-						state: sourceAccount.billToContact.state,
-					},
-					productPurchase: {
-						product: 'DigitalSubscription',
-						ratePlan: 'Monthly',
-					},
-					runBilling: false,
-					collectPayment: false,
-				},
+				sourceAccountInput,
 				undefined,
 			),
 		).rejects.toThrow(
@@ -152,37 +112,26 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 	}, 120000);
 
 	test('creates a SupporterPlus subscription using an existing BankTransfer (GoCardless) payment method', async () => {
-		const sourceAccountNumber = 'A01113215';
-		const requestId = `IT-createSubExistingPM-BankTransfer-${Date.now()}`;
-
-		const sourceAccount: z.infer<typeof sourceAccountSchema> =
-			await zuoraClient.get(
-				`v1/accounts/${sourceAccountNumber}`,
-				sourceAccountSchema,
-			);
-
-		const response = await createSubscriptionWithExistingPaymentMethod(
-			zuoraClient,
-			productCatalog,
+		// Account number: A01113215
+		const sourceAccountInput: CreateSubscriptionWithExistingPaymentMethodInput =
 			{
-				accountName: sourceAccount.basicInfo.name,
-				createdRequestId: requestId,
-				salesforceAccountId: sourceAccount.basicInfo.crmId ?? '',
-				salesforceContactId: sourceAccount.basicInfo.sfContactId__c ?? '',
-				identityId: sourceAccount.basicInfo.IdentityId__c ?? '',
-				currency: sourceAccount.billingAndPayment.currency,
-				paymentGateway: sourceAccount.billingAndPayment
-					.paymentGateway as PaymentGateway<PaymentMethod>,
+				accountName: '001UD00000Utt18YAB',
+				createdRequestId: `IT-createSubExistingPM-BankTransfer-A01113215-${Date.now()}`,
+				salesforceAccountId: '001UD00000Utt18YAB',
+				salesforceContactId: '003UD000010K3cfYAC',
+				identityId: '200663850',
+				currency: 'GBP',
+				paymentGateway: 'GoCardless',
 				existingPaymentMethod: {
-					id: sourceAccount.billingAndPayment.defaultPaymentMethodId,
+					id: '8ad08ef39d670e4a019d6c9a762e1357',
 					requiresCloning: true,
 				},
 				billToContact: {
-					firstName: sourceAccount.billToContact.firstName,
-					lastName: sourceAccount.billToContact.lastName,
-					workEmail: sourceAccount.billToContact.workEmail ?? '',
-					country: sourceAccount.billToContact.country ?? '',
-					state: sourceAccount.billToContact.state,
+					firstName: 'TestFirstName',
+					lastName: 'TestLastName',
+					workEmail: 'test@thegulocal.com',
+					country: 'United Kingdom',
+					state: undefined,
 				},
 				productPurchase: {
 					product: 'SupporterPlus',
@@ -191,7 +140,69 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 				},
 				runBilling: true,
 				collectPayment: true,
-			},
+			};
+
+		const response = await createSubscriptionWithExistingPaymentMethod(
+			zuoraClient,
+			productCatalog,
+			sourceAccountInput,
+			undefined,
+		);
+
+		expect(response.accountNumber).toMatch(/^A\d+$/);
+		expect(response.subscriptionNumbers.length).toBe(1);
+
+		await deleteAccount(zuoraClient, response.accountNumber);
+	}, 120000);
+
+	test('creates a NationalDelivery EverydayPlus subscription', async () => {
+		// Account number: A01113215
+		const sourceAccountInput: CreateSubscriptionWithExistingPaymentMethodInput =
+			{
+				accountName: '001UD00000Utt18YAB',
+				createdRequestId: `IT-createSubExistingPM-NationalDelivery-A01113215-${Date.now()}`,
+				salesforceAccountId: '001UD00000Utt18YAB',
+				salesforceContactId: '003UD000010K3cfYAC',
+				identityId: '200663850',
+				currency: 'GBP',
+				paymentGateway: 'GoCardless',
+				existingPaymentMethod: {
+					id: '8ad08ef39d670e4a019d6c9a762e1357',
+					requiresCloning: true,
+				},
+				billToContact: {
+					firstName: 'TestFirstName',
+					lastName: 'TestLastName',
+					workEmail: 'test@thegulocal.com',
+					country: 'United Kingdom',
+					state: undefined,
+				},
+				productPurchase: {
+					product: 'NationalDelivery',
+					ratePlan: 'EverydayPlus',
+					firstDeliveryDate: dayjs().add(7, 'day').toDate(),
+					deliveryContact: {
+						firstName: 'TestFirstName',
+						lastName: 'TestLastName',
+						workEmail: 'test@thegulocal.com',
+						country: 'United Kingdom',
+						state: undefined,
+						city: 'London',
+						address1: '1 Test Street',
+						address2: undefined,
+						postalCode: 'N1 9GU',
+					},
+					deliveryInstructions: 'Leave with concierge',
+					deliveryAgent: 123,
+				},
+				runBilling: true,
+				collectPayment: true,
+			};
+
+		const response = await createSubscriptionWithExistingPaymentMethod(
+			zuoraClient,
+			productCatalog,
+			sourceAccountInput,
 			undefined,
 		);
 
@@ -205,36 +216,26 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 		const sourceAccountNumber = 'A00078074';
 		const promoCode = 'E2E_TEST_SPLUS_MONTHLY';
 		const promotion = await getPromotion(promoCode, 'CODE');
-		const requestId = `IT-createSubExistingPM-promo-${sourceAccountNumber.slice(-8)}-${Date.now()}`;
 
-		const sourceAccount: z.infer<typeof sourceAccountSchema> =
-			await zuoraClient.get(
-				`v1/accounts/${sourceAccountNumber}`,
-				sourceAccountSchema,
-			);
-
-		const response = await createSubscriptionWithExistingPaymentMethod(
-			zuoraClient,
-			productCatalog,
+		const sourceAccountInput: CreateSubscriptionWithExistingPaymentMethodInput =
 			{
-				accountName: sourceAccount.basicInfo.name,
-				createdRequestId: requestId,
-				salesforceAccountId: sourceAccount.basicInfo.crmId ?? '',
-				salesforceContactId: sourceAccount.basicInfo.sfContactId__c ?? '',
-				identityId: sourceAccount.basicInfo.IdentityId__c ?? '',
-				currency: sourceAccount.billingAndPayment.currency,
-				paymentGateway: sourceAccount.billingAndPayment
-					.paymentGateway as PaymentGateway<PaymentMethod>,
+				accountName: '0013E00001AU6xcQAD',
+				createdRequestId: `IT-createSubExistingPM-promo-${sourceAccountNumber}-${Date.now()}`,
+				salesforceAccountId: '0013E00001AU6xcQAD',
+				salesforceContactId: '0033E00001Cq8D2QAJ',
+				identityId: '9999999',
+				currency: 'GBP',
+				paymentGateway: 'Stripe Gateway 1' as PaymentGateway<PaymentMethod>,
 				existingPaymentMethod: {
-					id: sourceAccount.billingAndPayment.defaultPaymentMethodId,
+					id: '2c92c0f87568d97201756b1578b6069c',
 					requiresCloning: true,
 				},
 				billToContact: {
-					firstName: sourceAccount.billToContact.firstName,
-					lastName: sourceAccount.billToContact.lastName,
-					workEmail: sourceAccount.billToContact.workEmail ?? '',
-					country: sourceAccount.billToContact.country ?? '',
-					state: sourceAccount.billToContact.state,
+					firstName: 'TestFirstNameA',
+					lastName: 'TestLastNameA',
+					workEmail: 'integration-test-a@example.com',
+					country: 'United Kingdom',
+					state: undefined,
 				},
 				productPurchase: {
 					product: 'SupporterPlus',
@@ -247,7 +248,12 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 				},
 				runBilling: false,
 				collectPayment: false,
-			},
+			};
+
+		const response = await createSubscriptionWithExistingPaymentMethod(
+			zuoraClient,
+			productCatalog,
+			sourceAccountInput,
 			promotion,
 		);
 
