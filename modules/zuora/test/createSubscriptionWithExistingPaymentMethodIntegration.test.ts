@@ -15,7 +15,6 @@ import type {
 	PaymentGateway,
 	PaymentMethod,
 } from '@modules/zuora/orders/paymentMethods';
-import { getPaymentMethods } from '@modules/zuora/paymentMethod';
 import { getSubscription } from '@modules/zuora/subscription';
 import { zuoraSubscriptionSchema } from '@modules/zuora/types/objects/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
@@ -44,6 +43,7 @@ const sourceAccountSchema = z.object({
 	billingAndPayment: z.object({
 		currency: z.enum(CurrencyValues),
 		paymentGateway: z.string(),
+		defaultPaymentMethodId: z.string(),
 	}),
 	billToContact: sourceContactSchema,
 	soldToContact: sourceContactSchema.optional(),
@@ -58,7 +58,7 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 	});
 
 	test('creates a GuardianAdLite subscription using an existing CreditCardReferenceTransaction payment method', async () => {
-		const sourceAccountNumber = '2c92c0f87568d97201756b1578960694';
+		const sourceAccountNumber = 'A00078074';
 		const requestId = `IT-createSubExistingPM-CCRT-${sourceAccountNumber.slice(-8)}-${Date.now()}`;
 
 		const sourceAccount: z.infer<typeof sourceAccountSchema> =
@@ -66,10 +66,6 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 				`v1/accounts/${sourceAccountNumber}`,
 				sourceAccountSchema,
 			);
-		const paymentMethods = await getPaymentMethods(
-			zuoraClient,
-			sourceAccountNumber,
-		);
 
 		const response = await createSubscriptionWithExistingPaymentMethod(
 			zuoraClient,
@@ -84,7 +80,7 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 				paymentGateway: sourceAccount.billingAndPayment
 					.paymentGateway as PaymentGateway<PaymentMethod>,
 				existingPaymentMethod: {
-					id: paymentMethods.defaultPaymentMethodId,
+					id: sourceAccount.billingAndPayment.defaultPaymentMethodId,
 					requiresCloning: true,
 				},
 				billToContact: {
@@ -104,11 +100,11 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 		expect(response.accountNumber).toMatch(/^A\d+$/);
 		expect(response.subscriptionNumbers.length).toBe(1);
 
-		//await deleteAccount(zuoraClient, response.accountNumber);
+		await deleteAccount(zuoraClient, response.accountNumber);
 	}, 120000);
 
 	test('throws for an existing PayPal payment method because tokens cannot be reliably retrieved', async () => {
-		const sourceAccountNumber = '2c92c0f875d488d70175d6a29ead032c';
+		const sourceAccountNumber = 'A00088294';
 		const requestId = `IT-createSubExistingPM-PayPal-${sourceAccountNumber.slice(-8)}-${Date.now()}`;
 
 		const sourceAccount: z.infer<typeof sourceAccountSchema> =
@@ -116,10 +112,6 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 				`v1/accounts/${sourceAccountNumber}`,
 				sourceAccountSchema,
 			);
-		const paymentMethods = await getPaymentMethods(
-			zuoraClient,
-			sourceAccountNumber,
-		);
 
 		await expect(
 			createSubscriptionWithExistingPaymentMethod(
@@ -135,7 +127,7 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 					paymentGateway: sourceAccount.billingAndPayment
 						.paymentGateway as PaymentGateway<PaymentMethod>,
 					existingPaymentMethod: {
-						id: paymentMethods.defaultPaymentMethodId,
+						id: sourceAccount.billingAndPayment.defaultPaymentMethodId,
 						requiresCloning: true,
 					},
 					billToContact: {
@@ -155,7 +147,7 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 				undefined,
 			),
 		).rejects.toThrow(
-			'Unsupported payment method type for cloning: PayPalEC. Only CreditCardReferenceTransaction and BankTransfer are supported.',
+			'Unsupported payment method type for cloning: PayPal. Only CreditCardReferenceTransaction and BankTransfer are supported.',
 		);
 	}, 120000);
 
@@ -168,10 +160,6 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 				`v1/accounts/${sourceAccountNumber}`,
 				sourceAccountSchema,
 			);
-		const paymentMethods = await getPaymentMethods(
-			zuoraClient,
-			sourceAccountNumber,
-		);
 
 		const response = await createSubscriptionWithExistingPaymentMethod(
 			zuoraClient,
@@ -186,7 +174,7 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 				paymentGateway: sourceAccount.billingAndPayment
 					.paymentGateway as PaymentGateway<PaymentMethod>,
 				existingPaymentMethod: {
-					id: paymentMethods.defaultPaymentMethodId,
+					id: sourceAccount.billingAndPayment.defaultPaymentMethodId,
 					requiresCloning: true,
 				},
 				billToContact: {
@@ -210,11 +198,11 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 		expect(response.accountNumber).toMatch(/^A\d+$/);
 		expect(response.subscriptionNumbers.length).toBe(1);
 
-		//await deleteAccount(zuoraClient, response.accountNumber);
-	}, 360000);
+		await deleteAccount(zuoraClient, response.accountNumber);
+	}, 120000);
 
 	test('applies a promo code to the new subscription', async () => {
-		const sourceAccountNumber = '2c92c0f87568d97201756b1578960694';
+		const sourceAccountNumber = 'A00078074';
 		const promoCode = 'E2E_TEST_SPLUS_MONTHLY';
 		const promotion = await getPromotion(promoCode, 'CODE');
 		const requestId = `IT-createSubExistingPM-promo-${sourceAccountNumber.slice(-8)}-${Date.now()}`;
@@ -224,10 +212,6 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 				`v1/accounts/${sourceAccountNumber}`,
 				sourceAccountSchema,
 			);
-		const paymentMethods = await getPaymentMethods(
-			zuoraClient,
-			sourceAccountNumber,
-		);
 
 		const response = await createSubscriptionWithExistingPaymentMethod(
 			zuoraClient,
@@ -242,7 +226,7 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 				paymentGateway: sourceAccount.billingAndPayment
 					.paymentGateway as PaymentGateway<PaymentMethod>,
 				existingPaymentMethod: {
-					id: paymentMethods.defaultPaymentMethodId,
+					id: sourceAccount.billingAndPayment.defaultPaymentMethodId,
 					requiresCloning: true,
 				},
 				billToContact: {
