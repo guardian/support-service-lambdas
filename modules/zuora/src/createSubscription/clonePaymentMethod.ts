@@ -9,9 +9,7 @@ import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 // Represents a Zuora payment method ID provided by the caller.
 // requiresCloning: false — the PM exists but is not yet attached to any account;
-//   it can be set as the default directly via updateAccount.
-// requiresCloning: true — the PM is attached to an existing account and must be
-//   cloned (re-created) on the new account before use.
+// requiresCloning: true — the PM is attached to an existing account and must be cloned before use.
 export type ExistingPaymentMethod = {
 	id: string;
 	requiresCloning: boolean;
