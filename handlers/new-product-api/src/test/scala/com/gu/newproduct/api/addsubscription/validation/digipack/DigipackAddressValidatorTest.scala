@@ -19,12 +19,12 @@ class DigipackAddressValidatorTest extends AnyFlatSpec with Matchers {
   )
 
   val validatedAddress = ValidatedAddress(
-    Address1("Address1"),
+    Some(Address1("Address1")),
     Some(Address2("Address2")),
-    City("City"),
+    Some(City("City")),
     Some(State("State")),
     Country.UK,
-    Postcode("N1 9GU"),
+    Some(Postcode("N1 9GU")),
   )
 
   it should "succeed if all required fields are populated" in {
@@ -32,36 +32,17 @@ class DigipackAddressValidatorTest extends AnyFlatSpec with Matchers {
   }
 
   it should "succeed if optional fields are missing" in {
-    val noOptionalFieldsAddress = testAddress.copy(state = None, address2 = None)
-    val validatedNoOptionalFieldsAddress = validatedAddress.copy(state = None, address2 = None)
+    val noOptionalFieldsAddress =
+      testAddress.copy(state = None, address2 = None, address1 = None, city = None, postcode = None)
+    val validatedNoOptionalFieldsAddress =
+      validatedAddress.copy(state = None, address2 = None, address1 = None, city = None, postcode = None)
 
     DigipackAddressValidator(noOptionalFieldsAddress) shouldBe Passed(validatedNoOptionalFieldsAddress)
   }
 
-  def failedResponse(fieldName: String) = Failed(s"Billing $fieldName must be populated in Zuora")
-
-  it should "fail if address1 is missing" in {
-    DigipackAddressValidator(testAddress.copy(address1 = None)) shouldBe failedResponse("address1")
-  }
-  it should "fail if address1 is just spaces" in {
-    DigipackAddressValidator(testAddress.copy(address1 = Some(Address1("  ")))) shouldBe failedResponse("address1")
-  }
-
-  it should "fail if city is missing" in {
-    DigipackAddressValidator(testAddress.copy(city = None)) shouldBe failedResponse("city")
-  }
-  it should "fail if city is just spaces" in {
-    DigipackAddressValidator(testAddress.copy(city = Some(City("  ")))) shouldBe failedResponse("city")
-  }
-
-  it should "fail if postcode is missing" in {
-    DigipackAddressValidator(testAddress.copy(postcode = None)) shouldBe failedResponse("postcode")
-  }
-  it should "fail if postcode is just spaces" in {
-    DigipackAddressValidator(testAddress.copy(postcode = Some(Postcode("  ")))) shouldBe failedResponse("postcode")
-  }
-
   it should "fail if country is missing" in {
-    DigipackAddressValidator(testAddress.copy(country = None)) shouldBe failedResponse("country")
+    DigipackAddressValidator(testAddress.copy(country = None)) shouldBe Failed(
+      "Billing country must be populated in Zuora",
+    )
   }
 }
