@@ -4,6 +4,7 @@ import { getCallerInfo } from '@modules/routing/getCallerInfo';
 import type { HandlerEnv } from '@modules/routing/lambdaHandler';
 import { LambdaHandlerWithServices } from '@modules/routing/lambdaHandler';
 import { logger } from '@modules/routing/logger';
+import { wrapFn } from '@modules/routing/wrapFn';
 
 export function SQSHandler<ConfigType, Services>(
 	configSchema: z.ZodType<ConfigType, z.ZodTypeDef, unknown>,
@@ -24,8 +25,10 @@ export function handleSQSMessages<Services>(
 	callerInfo: string,
 ) {
 	const recordHandlerWithLogging = logger.withContext(
-		logger.wrapFn(recordHandler, undefined, callerInfo, ([event]) => ({
+		wrapFn(recordHandler, undefined, callerInfo, ([event]) => ({
 			logOnEntryOnly: [event],
+			type: 'handler',
+			regressionTestInput: event,
 		})),
 		([record]) => record.messageId,
 	);

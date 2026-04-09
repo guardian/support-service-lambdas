@@ -494,6 +494,7 @@ const moduleRouting: ModuleDefinition = {
 	dependencies: {
 		...dep['zod'],
 		...dep['dayjs'],
+		...dep['@aws-sdk/client-s3'],
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
