@@ -1,9 +1,7 @@
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { Promo } from '@modules/promotions/v2/schema';
-import {
-	clonePaymentMethod,
-	ExistingPaymentMethod,
-} from '@modules/zuora/createSubscription/clonePaymentMethod';
+import type { ExistingPaymentMethod } from '@modules/zuora/createSubscription/clonePaymentMethod';
+import { clonePaymentMethod } from '@modules/zuora/createSubscription/clonePaymentMethod';
 import type {
 	CreateSubscriptionInputFields,
 	CreateSubscriptionResponse,
@@ -14,6 +12,7 @@ import {
 	getReaderType,
 } from '@modules/zuora/createSubscription/createSubscription';
 import { buildNewAccountObject } from '@modules/zuora/orders/newAccount';
+import { executeOrderRequest } from '@modules/zuora/orders/orderRequests';
 import type {
 	AnyPaymentMethod,
 	PaymentGateway,
@@ -21,7 +20,6 @@ import type {
 } from '@modules/zuora/orders/paymentMethods';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { executeOrderRequest } from '@modules/zuora/orders/orderRequests';
 
 export type CreateSubscriptionWithExistingPaymentMethodInput = Omit<
 	CreateSubscriptionInputFields<PaymentMethod>,

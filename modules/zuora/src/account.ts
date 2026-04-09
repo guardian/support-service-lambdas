@@ -1,10 +1,10 @@
-import type { ZuoraAccount } from './types';
-import { voidSchema, zuoraAccountSchema } from './types';
-import type { ZuoraClient } from './zuoraClient';
-import {
+import type {
 	PaymentGateway,
 	PaymentMethod,
 } from '@modules/zuora/orders/paymentMethods';
+import type { ZuoraAccount } from './types';
+import { voidSchema, zuoraAccountSchema } from './types';
+import type { ZuoraClient } from './zuoraClient';
 
 export const getAccount = async (
 	zuoraClient: ZuoraClient,

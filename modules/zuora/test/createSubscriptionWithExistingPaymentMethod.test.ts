@@ -48,26 +48,22 @@ const orderResponse = {
 };
 
 const ccrtPaymentMethodById = {
-	id: 'pm-ccrt-id',
-	type: 'CreditCardReferenceTransaction',
-	tokenId: 'tok_stripe_123',
-	secondTokenId: 'cus_stripe_456',
+	Id: 'pm-ccrt-id',
+	Type: 'CreditCardReferenceTransaction',
+	Country: 'GB',
+	TokenId: 'tok_stripe_123',
+	SecondTokenId: 'cus_stripe_456',
 };
 
 const bankTransferPaymentMethodById = {
-	id: 'pm-bt-id',
-	type: 'Bacs',
-	bankTransferType: 'BACS',
-	accountNumber: '****6819',
-	bankCode: '601613',
-	branchCode: null,
-	IBAN: 'GB29NWBK60161331926819',
-	accountHolderInfo: { accountHolderName: 'John Doe' },
-	mandateInfo: {
-		mandateId: 'GC-MANDATE-001',
-		mandateReason: null,
-		mandateStatus: null,
-	},
+	Id: 'pm-bt-id',
+	Type: 'BankTransfer',
+	Country: 'GB',
+	BankTransferType: 'BACS',
+	BankTransferAccountNumberMask: '****6819',
+	BankCode: '601613',
+	BankTransferAccountName: 'John Doe',
+	MandateID: 'GC-MANDATE-001',
 };
 
 describe('createSubscriptionWithExistingPaymentMethod', () => {
@@ -205,7 +201,7 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 			);
 
 			const [getPath] = mockGet.mock.calls[0] as [string];
-			expect(getPath).toBe('/v1/payment-methods/pm-ccrt-id');
+			expect(getPath).toBe('/v1/object/payment-method/pm-ccrt-id');
 
 			const [postPath, postBody] = mockPost.mock.calls[0] as [string, string];
 			expect(postPath).toBe('/v1/orders');
@@ -234,7 +230,7 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 				.mockResolvedValueOnce(bankTransferPaymentMethodById);
 			const mockPost = jest
 				.fn()
-				.mockResolvedValueOnce({ id: 'new-pm-id' }) // POST /v1/payment-methods (orphan)
+				.mockResolvedValueOnce({ Id: 'new-pm-id' }) // POST /v1/object/payment-method (orphan)
 				.mockResolvedValueOnce(orderResponse); // POST /v1/orders
 			const mockPut = jest.fn();
 			const client = buildMockZuoraClient(mockGet, mockPost, mockPut);
@@ -250,15 +246,13 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 				undefined,
 			);
 
-			// Step 1: POST /v1/payment-methods with no accountKey (orphan PM)
+			// Step 1: POST /v1/object/payment-method with no accountKey (orphan PM)
 			const [pmPath, pmBody] = mockPost.mock.calls[0] as [string, string];
-			expect(pmPath).toBe('/v1/payment-methods');
+			expect(pmPath).toBe('/v1/object/payment-method');
 			const pm = JSON.parse(pmBody) as Record<string, unknown>;
-			expect(pm.accountKey).toBeUndefined();
-			expect(pm.type).toBe('Bacs');
-			expect((pm.mandateInfo as Record<string, string>).mandateId).toBe(
-				'GC-MANDATE-001',
-			);
+			expect(pm.AccountKey).toBeUndefined();
+			expect(pm.Type).toBe('BankTransfer');
+			expect(pm.MandateID).toBe('GC-MANDATE-001');
 
 			// Step 2: POST /v1/orders with hpmCreditCardPaymentMethodId, autoPay:true
 			const [ordersPath, ordersBody] = mockPost.mock.calls[1] as [
