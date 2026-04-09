@@ -33,8 +33,8 @@ export type CreateSubscriptionWithExistingPaymentMethodInput = Omit<
 //
 // If requiresCloning is false, the existing PM id is passed directly to Zuora in the hpmCreditCardPaymentMethodId
 // parameter - https://developer.zuora.com/v1-api-reference/api/orders/post_order#orders/post_order/t=request&path=newaccount/hpmcreditcardpaymentmethodid
-// If requiresCloning is true, the payment method lives on another account and must be re-created first:
-//   - Bacs: create an orphan payment method (no accountKey), then use its ID directly as above.
+// If requiresCloning is true, the payment method is already attached to another account and must be re-created first:
+//   - BankTransfer: create an orphan payment method (no accountKey), then use its ID directly as above.
 //   - CreditCardReferenceTransaction: embed the payment method details inline in newAccount.paymentMethod.
 //   - CreditCard/PayPal: not supported (CreditCard has masked number; PayPal tokens are not reliably available).
 export const createSubscriptionWithExistingPaymentMethod = async (
