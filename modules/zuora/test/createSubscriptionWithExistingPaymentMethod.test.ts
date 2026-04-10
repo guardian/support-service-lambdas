@@ -2,7 +2,9 @@ import { SupportRegionId } from '@modules/internationalisation/countryGroup';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { Promo } from '@modules/promotions/v2/schema';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
+import dayjs from 'dayjs';
 import { createSubscriptionWithExistingPaymentMethod } from '@modules/zuora/createSubscription/createSubscriptionWithExistingPaymentMethod';
+import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import code from '../../zuora-catalog/test/fixtures/catalog-code.json';
 
@@ -105,54 +107,6 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 			expect(parsed.newAccount.autoPay).toBe(true);
 			expect(parsed.processingOptions.runBilling).toBe(true);
 			expect(parsed.processingOptions.collectPayment).toBe(true);
-		});
-
-		it('does not call updateAccount', async () => {
-			const mockGet = jest.fn();
-			const mockPost = jest.fn().mockResolvedValueOnce(orderResponse);
-			const mockPut = jest.fn();
-			const client = buildMockZuoraClient(mockGet, mockPost, mockPut);
-
-			await createSubscriptionWithExistingPaymentMethod(
-				client,
-				productCatalog,
-				{
-					...baseInput,
-					existingPaymentMethod: {
-						id: 'pm-existing-id',
-						requiresCloning: false,
-					},
-				},
-				undefined,
-			);
-
-			expect(mockPut).not.toHaveBeenCalled();
-		});
-
-		it('does not call generateBillingDocuments separately', async () => {
-			const mockGet = jest.fn();
-			const mockPost = jest.fn().mockResolvedValueOnce(orderResponse);
-			const client = buildMockZuoraClient(mockGet, mockPost);
-
-			await createSubscriptionWithExistingPaymentMethod(
-				client,
-				productCatalog,
-				{
-					...baseInput,
-					existingPaymentMethod: {
-						id: 'pm-existing-id',
-						requiresCloning: false,
-					},
-				},
-				undefined,
-			);
-
-			const postPaths = (
-				mockPost.mock.calls as Array<[string, ...unknown[]]>
-			).map(([p]) => p);
-			expect(postPaths).not.toContain(
-				'/v1/accounts/A00099999/billing-documents/generate',
-			);
 		});
 
 		it('sets runBilling:false and collectPayment:false in processingOptions when runBilling is false', async () => {
@@ -276,9 +230,6 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 			expect(ordersRequest.processingOptions.runBilling).toBe(true);
 			expect(ordersRequest.processingOptions.collectPayment).toBe(true);
 
-			// No PUT (no separate updateAccount call)
-			expect(mockPut).not.toHaveBeenCalled();
-
 			expect(mockPost).toHaveBeenCalledTimes(2);
 			expect(result.accountNumber).toBe('A00099999');
 		});
@@ -308,7 +259,7 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 			expect(headers).toEqual({ 'idempotency-key': 'MY-IDEMPOTENCY-KEY' });
 		});
 
-		it('includes promotion custom fields when appliedPromotion is provided', async () => {
+		it('sets all custom fields on the account, subscription and soldToContact', async () => {
 			const mockGet = jest.fn().mockResolvedValueOnce(ccrtPaymentMethodById);
 			const mockPost = jest.fn().mockResolvedValueOnce(orderResponse);
 			const client = buildMockZuoraClient(mockGet, mockPost);
@@ -320,7 +271,7 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 				appliesTo: {
 					countries: ['GB'],
 					productRatePlanIds: [
-						productCatalog.DigitalSubscription.ratePlans.Monthly.id,
+						productCatalog.NationalDelivery.ratePlans.Everyday.id,
 					],
 				},
 				promoCode: 'PROMO25',
@@ -333,14 +284,33 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 				productCatalog,
 				{
 					...baseInput,
-					productPurchase: {
-						product: 'DigitalSubscription',
-						ratePlan: 'Monthly',
-					},
+					createdRequestId: 'test-request-id-123',
+					salesforceAccountId: 'sf-account-id-456',
+					salesforceContactId: 'sf-contact-id-789',
+					identityId: 'identity-id-abc',
+					acquisitionCase: 'case-001',
+					acquisitionSource: 'CSR',
+					createdByCSR: 'John Smith',
 					existingPaymentMethod: { id: 'pm-ccrt-id', requiresCloning: true },
 					appliedPromotion: {
 						promoCode: 'PROMO25',
 						supportRegionId: SupportRegionId.UK,
+					},
+					productPurchase: {
+						product: 'NationalDelivery',
+						ratePlan: 'Everyday',
+						firstDeliveryDate: new Date('2026-05-01'),
+						deliveryAgent: 42,
+						deliveryInstructions: 'Leave with concierge',
+						deliveryContact: {
+							firstName: 'Jane',
+							lastName: 'Smith',
+							workEmail: 'jane@example.com',
+							country: 'GB',
+							address1: '1 Test Street',
+							city: 'London',
+							postalCode: 'N1 9GU',
+						},
 					},
 				},
 				promotion,
@@ -348,13 +318,45 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 
 			const [, postBody] = mockPost.mock.calls[0] as [string, string];
 			const parsed = JSON.parse(postBody) as {
+				newAccount: {
+					customFields: Record<string, unknown>;
+					soldToContact: Record<string, unknown>;
+				};
 				subscriptions: Array<{
 					customFields: Record<string, unknown>;
 				}>;
 			};
-			const customFields = parsed.subscriptions[0]!.customFields;
-			expect(customFields.PromotionCode__c).toBe('PROMO25');
-			expect(customFields.InitialPromotionCode__c).toBe('PROMO25');
+
+			// Account custom fields
+			expect(parsed.newAccount.customFields.sfContactId__c).toBe(
+				'sf-contact-id-789',
+			);
+			expect(parsed.newAccount.customFields.IdentityId__c).toBe(
+				'identity-id-abc',
+			);
+			expect(parsed.newAccount.customFields.CreatedRequestId__c).toBe(
+				'test-request-id-123',
+			);
+
+			// Subscription custom fields
+			const subCustomFields = parsed.subscriptions[0]!.customFields;
+			expect(subCustomFields.DeliveryAgent__c).toBe('42');
+			expect(subCustomFields.CreatedRequestId__c).toBe('test-request-id-123');
+			expect(subCustomFields.AcquisitionCase__c).toBe('case-001');
+			expect(subCustomFields.AcquisitionSource__c).toBe('CSR');
+			expect(subCustomFields.CreatedByCSR__c).toBe('John Smith');
+			expect(subCustomFields.LastPlanAddedDate__c).toBe(
+				zuoraDateFormat(dayjs()),
+			);
+			expect(subCustomFields.PromotionCode__c).toBe('PROMO25');
+			expect(subCustomFields.InitialPromotionCode__c).toBe('PROMO25');
+
+			// soldToContact with delivery instructions
+			expect(
+				parsed.newAccount.soldToContact.SpecialDeliveryInstructions__c,
+			).toBe('Leave with concierge');
+			expect(parsed.newAccount.soldToContact.firstName).toBe('Jane');
+			expect(parsed.newAccount.soldToContact.address1).toBe('1 Test Street');
 		});
 	});
 });

@@ -16,6 +16,7 @@ export type Contact = {
 	address1?: string;
 	address2?: string | null;
 	postalCode?: string;
+	SpecialDeliveryInstructions__c?: string;
 };
 
 type NewAccountBase<T extends AnyPaymentMethod> = {
@@ -26,13 +27,12 @@ type NewAccountBase<T extends AnyPaymentMethod> = {
 		sfContactId__c: string; // Salesforce contactId
 		IdentityId__c: string;
 		CreatedRequestId__c: string; // Support workers requestId, used to prevent duplicates
-		DeliveryAgent__c?: string; // Optional delivery agent for National Delivery products
 	};
 	billCycleDay: 0;
 	autoPay: boolean;
 	paymentGateway: PaymentGateway<T>; // Generic to make sure we will only accept payment gateways that match the payment method
 	billToContact: Contact;
-	soldToContact?: Contact & { SpecialDeliveryInstructions__c?: string };
+	soldToContact?: Contact;
 };
 
 // The structure expected by Zuora in the Orders request
@@ -48,7 +48,7 @@ export type NewAccount<T extends AnyPaymentMethod> =
 
 // Input type for the helper function
 type BuildNewAccountInput<T extends AnyPaymentMethod> = Omit<
-	NewAccountBase<T>,
+	NewAccount<T>,
 	'name' | 'crmId' | 'customFields' | 'billCycleDay' | 'autoPay'
 > & {
 	accountName: string;
@@ -56,54 +56,45 @@ type BuildNewAccountInput<T extends AnyPaymentMethod> = Omit<
 	salesforceAccountId: string;
 	salesforceContactId: string;
 	identityId: string;
-	soldToContact?: Contact;
-	deliveryInstructions?: string;
-} & (
-		| { paymentMethod: T; hpmCreditCardPaymentMethodId?: never }
-		| { hpmCreditCardPaymentMethodId: string; paymentMethod?: never }
-	);
+	deliveryInstructions: string | undefined;
+};
 
 // Builder function to simplify the creation of a new account object.
-export function buildNewAccountObject<T extends AnyPaymentMethod>({
-	accountName,
-	createdRequestId,
-	salesforceAccountId,
-	salesforceContactId,
-	identityId,
-	currency,
-	paymentGateway,
-	paymentMethod,
-	hpmCreditCardPaymentMethodId,
-	billToContact,
-	soldToContact,
-	deliveryInstructions,
-}: BuildNewAccountInput<T>): NewAccount<T> {
+export function buildNewAccountObject<T extends AnyPaymentMethod>(
+	input: BuildNewAccountInput<T>,
+): NewAccount<T> {
+	const soldToContactWithDeliveryInstructions = input.soldToContact && {
+		...input.soldToContact,
+		SpecialDeliveryInstructions__c: input.deliveryInstructions,
+	};
 	const base: NewAccountBase<T> = {
-		name: accountName,
-		currency,
-		crmId: salesforceAccountId,
+		name: input.accountName,
+		currency: input.currency,
+		crmId: input.salesforceAccountId,
 		customFields: {
-			sfContactId__c: salesforceContactId,
-			IdentityId__c: identityId,
-			CreatedRequestId__c: createdRequestId,
+			sfContactId__c: input.salesforceContactId,
+			IdentityId__c: input.identityId,
+			CreatedRequestId__c: input.createdRequestId,
 		},
 		billCycleDay: 0,
 		autoPay: true,
-		paymentGateway,
-		billToContact,
-		soldToContact: soldToContact
-			? {
-					...soldToContact,
-					SpecialDeliveryInstructions__c: deliveryInstructions,
-				}
-			: undefined,
+		paymentGateway: input.paymentGateway,
+		billToContact: input.billToContact,
+		soldToContact: soldToContactWithDeliveryInstructions,
 	};
-	if (paymentMethod !== undefined) {
-		return { ...base, paymentMethod };
+	if (input.paymentMethod !== undefined) {
+		return { ...base, paymentMethod: input.paymentMethod };
 	}
-	// hpmCreditCardPaymentMethodId is guaranteed non-undefined here by the union input type
-	return {
-		...base,
-		hpmCreditCardPaymentMethodId: hpmCreditCardPaymentMethodId!,
-	};
+	if (input.hpmCreditCardPaymentMethodId !== undefined) {
+		return {
+			...base,
+			hpmCreditCardPaymentMethodId: input.hpmCreditCardPaymentMethodId,
+		};
+	}
+	// This shouldn't happen because BuildNewAccountInput is a union which
+	// must contain either a paymentMethod or hpmCreditCardPaymentMethodId,
+	// but apparently TS can't figure that out here.
+	throw new Error(
+		'Either paymentMethod or hpmCreditCardPaymentMethodId must be provided',
+	);
 }
