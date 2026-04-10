@@ -178,7 +178,7 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 ): CreateOrderRequest {
 	const { deliveryContact, deliveryAgent, deliveryInstructions } = {
 		deliveryContact: undefined,
-		deliveryAgent: '',
+		deliveryAgent: undefined,
 		deliveryInstructions: undefined,
 		...productPurchase,
 	};
@@ -207,7 +207,7 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		);
 
 	const customFields = {
-		DeliveryAgent__c: deliveryAgent.toString(),
+		DeliveryAgent__c: deliveryAgent?.toString(),
 		ReaderType__c: getReaderType(giftRecipient, appliedPromotion),
 		LastPlanAddedDate__c: zuoraDateFormat(contractEffectiveDate),
 		InitialPromotionCode__c: appliedPromotion?.promoCode,

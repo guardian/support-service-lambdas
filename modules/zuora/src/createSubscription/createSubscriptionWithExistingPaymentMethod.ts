@@ -72,7 +72,15 @@ export const createSubscriptionWithExistingPaymentMethod = async (
 			promotion,
 		);
 
+	const { deliveryContact, deliveryAgent, deliveryInstructions } = {
+		deliveryContact: undefined,
+		deliveryAgent: undefined,
+		deliveryInstructions: undefined,
+		...productPurchase,
+	};
+
 	const subscriptionCustomFields = {
+		DeliveryAgent__c: deliveryAgent?.toString(),
 		ReaderType__c: getReaderType(giftRecipient, appliedPromotion),
 		LastPlanAddedDate__c: zuoraDateFormat(contractEffectiveDate),
 		InitialPromotionCode__c: appliedPromotion?.promoCode,
@@ -88,11 +96,6 @@ export const createSubscriptionWithExistingPaymentMethod = async (
 		zuoraClient,
 	);
 
-	const { deliveryContact } = {
-		deliveryContact: undefined,
-		...productPurchase,
-	};
-
 	const newAccount = buildNewAccountObject<AnyPaymentMethod>({
 		accountName,
 		createdRequestId,
@@ -103,6 +106,7 @@ export const createSubscriptionWithExistingPaymentMethod = async (
 		paymentGateway,
 		billToContact,
 		soldToContact: deliveryContact,
+		deliveryInstructions,
 		...clonePaymentMethodResult,
 	});
 

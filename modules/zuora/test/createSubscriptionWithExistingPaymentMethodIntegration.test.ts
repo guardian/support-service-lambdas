@@ -25,6 +25,22 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 	const productCatalog = generateProductCatalog(zuoraCatalogSchema.parse(code));
 	let zuoraClient: ZuoraClient;
 
+	const commonFields = {
+		acquisitionCase: '1234',
+		acquisitionSource: 'CSR',
+		createdByCSR: 'John Smith',
+		runBilling: true,
+		collectPayment: true,
+	};
+
+	const ukBillToContact = {
+		firstName: 'TestFirstName',
+		lastName: 'TestLastName',
+		workEmail: 'test@thegulocal.com',
+		country: 'United Kingdom',
+		state: undefined,
+	};
+
 	beforeAll(async () => {
 		zuoraClient = await ZuoraClient.create('CODE');
 	});
@@ -33,6 +49,7 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 		const sourceAccountNumber = 'A00078074';
 		const sourceAccountInput: CreateSubscriptionWithExistingPaymentMethodInput =
 			{
+				...commonFields,
 				accountName: '0013E00001AU6xcQAD',
 				createdRequestId: `IT-createSubExistingPM-CCRT-${sourceAccountNumber}-${Date.now()}`,
 				salesforceAccountId: '0013E00001AU6xcQAD',
@@ -44,16 +61,8 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 					id: '2c92c0f87568d97201756b1578b6069c',
 					requiresCloning: true,
 				},
-				billToContact: {
-					firstName: 'TestFirstNameA',
-					lastName: 'TestLastNameA',
-					workEmail: 'integration-test-a@example.com',
-					country: 'United Kingdom',
-					state: undefined,
-				},
+				billToContact: ukBillToContact,
 				productPurchase: { product: 'GuardianAdLite', ratePlan: 'Monthly' },
-				runBilling: true,
-				collectPayment: true,
 			};
 
 		const response = await createSubscriptionWithExistingPaymentMethod(
@@ -73,6 +82,7 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 		const sourceAccountNumber = 'A00088294';
 		const sourceAccountInput: CreateSubscriptionWithExistingPaymentMethodInput =
 			{
+				...commonFields,
 				accountName: '0019E00001JqWrBQAV',
 				createdRequestId: `IT-createSubExistingPM-PayPal-${sourceAccountNumber}-${Date.now()}`,
 				salesforceAccountId: '0019E00001JqWrBQAV',
@@ -85,9 +95,9 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 					requiresCloning: true,
 				},
 				billToContact: {
-					firstName: 'TestFirstNameB',
-					lastName: 'TestLastNameB',
-					workEmail: 'integration-test-b@example.com',
+					firstName: 'TestFirstName',
+					lastName: 'TestLastName',
+					workEmail: 'test@thegulocal.com',
 					country: 'United States',
 					state: 'Delaware',
 				},
@@ -95,8 +105,6 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 					product: 'DigitalSubscription',
 					ratePlan: 'Monthly',
 				},
-				runBilling: false,
-				collectPayment: false,
 			};
 
 		await expect(
@@ -115,6 +123,7 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 		// Account number: A01113215
 		const sourceAccountInput: CreateSubscriptionWithExistingPaymentMethodInput =
 			{
+				...commonFields,
 				accountName: '001UD00000Utt18YAB',
 				createdRequestId: `IT-createSubExistingPM-BankTransfer-A01113215-${Date.now()}`,
 				salesforceAccountId: '001UD00000Utt18YAB',
@@ -126,20 +135,12 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 					id: '8ad08ef39d670e4a019d6c9a762e1357',
 					requiresCloning: true,
 				},
-				billToContact: {
-					firstName: 'TestFirstName',
-					lastName: 'TestLastName',
-					workEmail: 'test@thegulocal.com',
-					country: 'United Kingdom',
-					state: undefined,
-				},
+				billToContact: ukBillToContact,
 				productPurchase: {
 					product: 'SupporterPlus',
 					ratePlan: 'Monthly',
 					amount: 12,
 				},
-				runBilling: true,
-				collectPayment: true,
 			};
 
 		const response = await createSubscriptionWithExistingPaymentMethod(
@@ -159,6 +160,7 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 		// Account number: A01113215
 		const sourceAccountInput: CreateSubscriptionWithExistingPaymentMethodInput =
 			{
+				...commonFields,
 				accountName: '001UD00000Utt18YAB',
 				createdRequestId: `IT-createSubExistingPM-NationalDelivery-A01113215-${Date.now()}`,
 				salesforceAccountId: '001UD00000Utt18YAB',
@@ -170,13 +172,7 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 					id: '8ad08ef39d670e4a019d6c9a762e1357',
 					requiresCloning: true,
 				},
-				billToContact: {
-					firstName: 'TestFirstName',
-					lastName: 'TestLastName',
-					workEmail: 'test@thegulocal.com',
-					country: 'United Kingdom',
-					state: undefined,
-				},
+				billToContact: ukBillToContact,
 				productPurchase: {
 					product: 'NationalDelivery',
 					ratePlan: 'EverydayPlus',
@@ -188,15 +184,13 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 						country: 'United Kingdom',
 						state: undefined,
 						city: 'London',
-						address1: '1 Test Street',
-						address2: undefined,
+						address1: 'Delivery address',
+						address2: '1 Test Street',
 						postalCode: 'N1 9GU',
 					},
 					deliveryInstructions: 'Leave with concierge',
 					deliveryAgent: 123,
 				},
-				runBilling: true,
-				collectPayment: true,
 			};
 
 		const response = await createSubscriptionWithExistingPaymentMethod(
@@ -219,6 +213,7 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 
 		const sourceAccountInput: CreateSubscriptionWithExistingPaymentMethodInput =
 			{
+				...commonFields,
 				accountName: '0013E00001AU6xcQAD',
 				createdRequestId: `IT-createSubExistingPM-promo-${sourceAccountNumber}-${Date.now()}`,
 				salesforceAccountId: '0013E00001AU6xcQAD',
@@ -230,13 +225,7 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 					id: '2c92c0f87568d97201756b1578b6069c',
 					requiresCloning: true,
 				},
-				billToContact: {
-					firstName: 'TestFirstNameA',
-					lastName: 'TestLastNameA',
-					workEmail: 'integration-test-a@example.com',
-					country: 'United Kingdom',
-					state: undefined,
-				},
+				billToContact: ukBillToContact,
 				productPurchase: {
 					product: 'SupporterPlus',
 					ratePlan: 'Monthly',
@@ -246,8 +235,6 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 					promoCode,
 					supportRegionId: SupportRegionId.UK,
 				},
-				runBilling: false,
-				collectPayment: false,
 			};
 
 		const response = await createSubscriptionWithExistingPaymentMethod(
