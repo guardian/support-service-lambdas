@@ -37,6 +37,7 @@ export type CreateSubscriptionWithExistingPaymentMethodInput = Omit<
 //   - BankTransfer: create an orphan payment method (no accountKey), then use its ID directly as above.
 //   - CreditCardReferenceTransaction: embed the payment method details inline in newAccount.paymentMethod.
 //   - CreditCard/PayPal: not supported (CreditCard has masked number; PayPal tokens are not reliably available).
+// More details in the associated PR: https://github.com/guardian/support-service-lambdas/pull/3503
 export const createSubscriptionWithExistingPaymentMethod = async (
 	zuoraClient: ZuoraClient,
 	productCatalog: ProductCatalog,
