@@ -1,5 +1,8 @@
 import Dependencies.*
 
+// CVE-2026-33871: force patched Netty across all subprojects
+ThisBuild / dependencyOverrides ++= nettyOverrides
+
 val scala2Settings = Seq(
   ThisBuild / scalaVersion := "2.13.18",
   version := "0.0.1",
