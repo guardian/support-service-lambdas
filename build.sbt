@@ -367,6 +367,7 @@ def lambdaProject(
       riffRaffManifestProjectName := s"support-service-lambdas::$projectName",
       riffRaffArtifactResources += (file(s"handlers/$projectName/$cfName"), s"cfn/$cfName"),
       dependencyOverrides ++= jacksonDependencies,
+      dependencyOverrides ++= nettyOverrides,
       libraryDependencies ++= externalDependencies ++ logging,
       Test / test := ((Test / test) dependsOn (projectDependencies.map(_.project / Test / test) *)).value,
       Test / testOnly := ((Test / testOnly) dependsOn (projectDependencies.map(_.project / Test / test) *)).evaluated,

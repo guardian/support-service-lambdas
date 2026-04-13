@@ -100,6 +100,23 @@ object Dependencies {
   val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.18.1" % Test
   val scalaMock = "org.scalamock" %% "scalamock" % "7.3.2" % Test
   val mockito = "org.mockito" % "mockito-core" % "5.23.0" % Test
+  // CVE-2026-33870: Netty HTTP Request Smuggling via Chunked Extension Quoted-String Parsing
+  // Affects io.netty:netty-codec-http < 4.1.132.Final, pulled in transitively by async-http-client and aws-sdk netty-nio-client
+  val nettyVersion = "4.1.132.Final"
+  val nettyOverrides: Seq[ModuleID] = Seq(
+    "io.netty" % "netty-buffer" % nettyVersion,
+    "io.netty" % "netty-codec" % nettyVersion,
+    "io.netty" % "netty-codec-http" % nettyVersion,
+    "io.netty" % "netty-codec-http2" % nettyVersion,
+    "io.netty" % "netty-common" % nettyVersion,
+    "io.netty" % "netty-handler" % nettyVersion,
+    "io.netty" % "netty-resolver" % nettyVersion,
+    "io.netty" % "netty-transport" % nettyVersion,
+    "io.netty" % "netty-transport-classes-epoll" % nettyVersion,
+    "io.netty" % "netty-transport-native-epoll" % nettyVersion,
+    "io.netty" % "netty-transport-native-unix-common" % nettyVersion,
+  )
+
   // play-json still uses an old version of jackson-core which has a vulnerability - https://security.snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-7569538
   val jacksonVersion = "2.18.6"
 
