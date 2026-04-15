@@ -93,8 +93,8 @@ export const createSubscriptionWithExistingPaymentMethod = async (
 	};
 
 	const clonePaymentMethodResult = await clonePaymentMethod(
-		existingPaymentMethod,
 		zuoraClient,
+		existingPaymentMethod,
 	);
 
 	const newAccount = buildNewAccountObject<AnyPaymentMethod>({
