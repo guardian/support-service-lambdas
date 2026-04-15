@@ -8,19 +8,6 @@ object Dependencies {
 
   val awsSdkVersion = "2.42.24"
 
-  // CVE-2026-33871: Netty HTTP/2 CONTINUATION frame flood DoS; patched in 4.1.132.Final
-  val nettyVersion = "4.1.132.Final"
-  val nettyOverrides: Seq[ModuleID] = Seq(
-    "io.netty" % "netty-codec-http2" % nettyVersion,
-    "io.netty" % "netty-codec-http" % nettyVersion,
-    "io.netty" % "netty-codec" % nettyVersion,
-    "io.netty" % "netty-transport" % nettyVersion,
-    "io.netty" % "netty-common" % nettyVersion,
-    "io.netty" % "netty-buffer" % nettyVersion,
-    "io.netty" % "netty-handler" % nettyVersion,
-    "io.netty" % "netty-transport-classes-epoll" % nettyVersion,
-  )
-
   val circeVersion = "0.14.13"
   val sttpVersion = "3.11.0"
   val http4sVersion = "0.22.15" // keep version 0.22.15, later versions pull in cats effect 3 which is not compatible
@@ -113,6 +100,8 @@ object Dependencies {
   val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.18.1" % Test
   val scalaMock = "org.scalamock" %% "scalamock" % "7.3.2" % Test
   val mockito = "org.mockito" % "mockito-core" % "5.23.0" % Test
+
+  // CVE-2026-33871: Netty HTTP/2 CONTINUATION frame flood DoS; patched in 4.1.132.Final
   // CVE-2026-33870: Netty HTTP Request Smuggling via Chunked Extension Quoted-String Parsing
   // Affects io.netty:netty-codec-http < 4.1.132.Final, pulled in transitively by async-http-client and aws-sdk netty-nio-client
   val nettyVersion = "4.1.132.Final"
