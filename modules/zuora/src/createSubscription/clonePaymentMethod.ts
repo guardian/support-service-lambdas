@@ -18,7 +18,7 @@ export type ExistingPaymentMethod = {
 // The clonePaymentMethod function will return either an inline payment method
 // object which can be passed to Zuora or an id of an existing orphan payment
 // method but never both.
-export type ClonePaymentMethodResult =
+export type ClonedPaymentMethod =
 	| {
 			hpmCreditCardPaymentMethodId: string;
 			paymentMethod?: never;
@@ -75,7 +75,7 @@ function cloneCreditCardReferenceTransaction(
 export async function clonePaymentMethod(
 	existingPaymentMethod: ExistingPaymentMethod,
 	zuoraClient: ZuoraClient,
-): Promise<ClonePaymentMethodResult> {
+): Promise<ClonedPaymentMethod> {
 	if (!existingPaymentMethod.requiresCloning) {
 		return { hpmCreditCardPaymentMethodId: existingPaymentMethod.id };
 	}
