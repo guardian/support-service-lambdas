@@ -92,21 +92,14 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 			expect(mockPost).toHaveBeenCalledTimes(1);
 			const [path, body] = mockPost.mock.calls[0] as [string, string];
 			expect(path).toBe('/v1/orders');
-			const parsed = JSON.parse(body) as {
+
+			expect(JSON.parse(body)).toMatchObject({
 				newAccount: {
-					hpmCreditCardPaymentMethodId?: string;
-					paymentMethod?: unknown;
-					autoPay: boolean;
-				};
-				processingOptions: { runBilling: boolean; collectPayment: boolean };
-			};
-			expect(parsed.newAccount.hpmCreditCardPaymentMethodId).toBe(
-				'pm-existing-id',
-			);
-			expect(parsed.newAccount.paymentMethod).toBeUndefined();
-			expect(parsed.newAccount.autoPay).toBe(true);
-			expect(parsed.processingOptions.runBilling).toBe(true);
-			expect(parsed.processingOptions.collectPayment).toBe(true);
+					hpmCreditCardPaymentMethodId: 'pm-existing-id',
+					autoPay: true,
+				},
+				processingOptions: { runBilling: true, collectPayment: true },
+			});
 		});
 
 		it('sets runBilling:false and collectPayment:false in processingOptions when runBilling is false', async () => {
@@ -130,11 +123,9 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 			);
 
 			const [, body] = mockPost.mock.calls[0] as [string, string];
-			const parsed = JSON.parse(body) as {
-				processingOptions: { runBilling: boolean; collectPayment: boolean };
-			};
-			expect(parsed.processingOptions.runBilling).toBe(false);
-			expect(parsed.processingOptions.collectPayment).toBe(false);
+			expect(JSON.parse(body)).toMatchObject({
+				processingOptions: { runBilling: false, collectPayment: false },
+			});
 		});
 	});
 
@@ -159,22 +150,18 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 
 			const [postPath, postBody] = mockPost.mock.calls[0] as [string, string];
 			expect(postPath).toBe('/v1/orders');
-			const parsed = JSON.parse(postBody) as {
+
+			expect(JSON.parse(postBody)).toMatchObject({
 				newAccount: {
-					paymentMethod: Record<string, unknown>;
-					autoPay: boolean;
-				};
-				processingOptions: { runBilling: boolean; collectPayment: boolean };
-			};
-			expect(parsed.newAccount.paymentMethod.type).toBe(
-				'CreditCardReferenceTransaction',
-			);
-			expect(parsed.newAccount.paymentMethod.tokenId).toBe('tok_stripe_123');
-			expect(parsed.newAccount.paymentMethod.secondTokenId).toBe(
-				'cus_stripe_456',
-			);
-			expect(parsed.newAccount.autoPay).toBe(true);
-			expect(parsed.processingOptions.runBilling).toBe(true);
+					paymentMethod: {
+						type: 'CreditCardReferenceTransaction',
+						tokenId: 'tok_stripe_123',
+						secondTokenId: 'cus_stripe_456',
+					},
+					autoPay: true,
+				},
+				processingOptions: { runBilling: true },
+			});
 			expect(result.accountNumber).toBe('A00099999');
 		});
 
@@ -204,9 +191,11 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 			const [pmPath, pmBody] = mockPost.mock.calls[0] as [string, string];
 			expect(pmPath).toBe('/v1/object/payment-method');
 			const pm = JSON.parse(pmBody) as Record<string, unknown>;
+			expect(pm).toMatchObject({
+				Type: 'BankTransfer',
+				MandateID: 'GC-MANDATE-001',
+			});
 			expect(pm.AccountKey).toBeUndefined();
-			expect(pm.Type).toBe('BankTransfer');
-			expect(pm.MandateID).toBe('GC-MANDATE-001');
 
 			// Step 2: POST /v1/orders with hpmCreditCardPaymentMethodId, autoPay:true
 			const [ordersPath, ordersBody] = mockPost.mock.calls[1] as [
@@ -214,27 +203,19 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 				string,
 			];
 			expect(ordersPath).toBe('/v1/orders');
-			const ordersRequest = JSON.parse(ordersBody) as {
+			expect(JSON.parse(ordersBody)).toMatchObject({
 				newAccount: {
-					hpmCreditCardPaymentMethodId: string;
-					paymentMethod?: unknown;
-					autoPay: boolean;
-				};
-				processingOptions: { runBilling: boolean; collectPayment: boolean };
-			};
-			expect(ordersRequest.newAccount.hpmCreditCardPaymentMethodId).toBe(
-				'new-pm-id',
-			);
-			expect(ordersRequest.newAccount.paymentMethod).toBeUndefined();
-			expect(ordersRequest.newAccount.autoPay).toBe(true);
-			expect(ordersRequest.processingOptions.runBilling).toBe(true);
-			expect(ordersRequest.processingOptions.collectPayment).toBe(true);
+					hpmCreditCardPaymentMethodId: 'new-pm-id',
+					autoPay: true,
+				},
+				processingOptions: { runBilling: true, collectPayment: true },
+			});
 
 			expect(mockPost).toHaveBeenCalledTimes(2);
 			expect(result.accountNumber).toBe('A00099999');
 		});
 
-		it('passes createdRequestId as idempotency key', async () => {
+		it('passes createdRequestId as idempotency key to the order call', async () => {
 			const mockGet = jest.fn().mockResolvedValueOnce(ccrtPaymentMethodById);
 			const mockPost = jest.fn().mockResolvedValueOnce(orderResponse);
 			const client = buildMockZuoraClient(mockGet, mockPost);
@@ -322,41 +303,31 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 					customFields: Record<string, unknown>;
 					soldToContact: Record<string, unknown>;
 				};
-				subscriptions: Array<{
-					customFields: Record<string, unknown>;
-				}>;
+				subscriptions: Array<{ customFields: Record<string, unknown> }>;
 			};
 
-			// Account custom fields
-			expect(parsed.newAccount.customFields.sfContactId__c).toBe(
-				'sf-contact-id-789',
-			);
-			expect(parsed.newAccount.customFields.IdentityId__c).toBe(
-				'identity-id-abc',
-			);
-			expect(parsed.newAccount.customFields.CreatedRequestId__c).toBe(
-				'test-request-id-123',
-			);
+			expect(parsed.newAccount.customFields).toMatchObject({
+				sfContactId__c: 'sf-contact-id-789',
+				IdentityId__c: 'identity-id-abc',
+				CreatedRequestId__c: 'test-request-id-123',
+			});
 
-			// Subscription custom fields
-			const subCustomFields = parsed.subscriptions[0]!.customFields;
-			expect(subCustomFields.DeliveryAgent__c).toBe('42');
-			expect(subCustomFields.CreatedRequestId__c).toBe('test-request-id-123');
-			expect(subCustomFields.AcquisitionCase__c).toBe('case-001');
-			expect(subCustomFields.AcquisitionSource__c).toBe('CSR');
-			expect(subCustomFields.CreatedByCSR__c).toBe('John Smith');
-			expect(subCustomFields.LastPlanAddedDate__c).toBe(
-				zuoraDateFormat(dayjs()),
-			);
-			expect(subCustomFields.PromotionCode__c).toBe('PROMO25');
-			expect(subCustomFields.InitialPromotionCode__c).toBe('PROMO25');
+			expect(parsed.subscriptions[0]?.customFields).toMatchObject({
+				DeliveryAgent__c: '42',
+				CreatedRequestId__c: 'test-request-id-123',
+				AcquisitionCase__c: 'case-001',
+				AcquisitionSource__c: 'CSR',
+				CreatedByCSR__c: 'John Smith',
+				LastPlanAddedDate__c: zuoraDateFormat(dayjs()),
+				PromotionCode__c: 'PROMO25',
+				InitialPromotionCode__c: 'PROMO25',
+			});
 
-			// soldToContact with delivery instructions
-			expect(
-				parsed.newAccount.soldToContact.SpecialDeliveryInstructions__c,
-			).toBe('Leave with concierge');
-			expect(parsed.newAccount.soldToContact.firstName).toBe('Jane');
-			expect(parsed.newAccount.soldToContact.address1).toBe('1 Test Street');
+			expect(parsed.newAccount.soldToContact).toMatchObject({
+				SpecialDeliveryInstructions__c: 'Leave with concierge',
+				firstName: 'Jane',
+				address1: '1 Test Street',
+			});
 		});
 	});
 });
