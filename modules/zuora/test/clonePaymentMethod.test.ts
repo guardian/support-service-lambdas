@@ -48,13 +48,10 @@ describe('clonePaymentMethod', () => {
 			const mockGet = jest.fn();
 			const client = buildMockZuoraClient(mockGet, jest.fn());
 
-			const result = await clonePaymentMethod(
-				{
-					id: 'pm-existing-id',
-					requiresCloning: false,
-				},
-				client,
-			);
+			const result = await clonePaymentMethod(client, {
+				id: 'pm-existing-id',
+				requiresCloning: false,
+			});
 
 			expect(result).toEqual({
 				hpmCreditCardPaymentMethodId: 'pm-existing-id',
@@ -68,13 +65,10 @@ describe('clonePaymentMethod', () => {
 			const mockGet = jest.fn().mockResolvedValueOnce(ccrtPaymentMethodById);
 			const client = buildMockZuoraClient(mockGet, jest.fn());
 
-			const result = await clonePaymentMethod(
-				{
-					id: 'pm-ccrt-id',
-					requiresCloning: true,
-				},
-				client,
-			);
+			const result = await clonePaymentMethod(client, {
+				id: 'pm-ccrt-id',
+				requiresCloning: true,
+			});
 
 			expect(result).toEqual({
 				paymentMethod: {
@@ -92,13 +86,10 @@ describe('clonePaymentMethod', () => {
 			const mockPost = jest.fn().mockResolvedValueOnce({ Id: 'new-pm-id' });
 			const client = buildMockZuoraClient(mockGet, mockPost);
 
-			const result = await clonePaymentMethod(
-				{
-					id: 'pm-bt-id',
-					requiresCloning: true,
-				},
-				client,
-			);
+			const result = await clonePaymentMethod(client, {
+				id: 'pm-bt-id',
+				requiresCloning: true,
+			});
 
 			expect(result).toEqual({ hpmCreditCardPaymentMethodId: 'new-pm-id' });
 			const [path, body] = mockPost.mock.calls[0] as [string, string];
@@ -114,7 +105,7 @@ describe('clonePaymentMethod', () => {
 			const client = buildMockZuoraClient(mockGet, jest.fn());
 
 			await expect(
-				clonePaymentMethod({ id: 'pm-pp-id', requiresCloning: true }, client),
+				clonePaymentMethod(client, { id: 'pm-pp-id', requiresCloning: true }),
 			).rejects.toThrow('Unsupported payment method type for cloning');
 		});
 
@@ -125,7 +116,7 @@ describe('clonePaymentMethod', () => {
 			const client = buildMockZuoraClient(mockGet, jest.fn());
 
 			await expect(
-				clonePaymentMethod({ id: 'pm-cc-id', requiresCloning: true }, client),
+				clonePaymentMethod(client, { id: 'pm-cc-id', requiresCloning: true }),
 			).rejects.toThrow('Unsupported payment method type for cloning');
 		});
 
@@ -137,13 +128,10 @@ describe('clonePaymentMethod', () => {
 			const client = buildMockZuoraClient(mockGet, jest.fn());
 
 			await expect(
-				clonePaymentMethod(
-					{
-						id: 'pm-unknown-id',
-						requiresCloning: true,
-					},
-					client,
-				),
+				clonePaymentMethod(client, {
+					id: 'pm-unknown-id',
+					requiresCloning: true,
+				}),
 			).rejects.toThrow('Unsupported payment method type for cloning');
 		});
 	});

@@ -33,8 +33,8 @@ const createPaymentMethodResponseSchema = z.object({
 });
 
 export async function cloneBankTransfer(
-	bankTransfer: BankTransferPaymentMethod,
 	zuoraClient: ZuoraClient,
+	bankTransfer: BankTransferPaymentMethod,
 ) {
 	const body = JSON.stringify({
 		ExistingMandate: 'Yes',
@@ -73,8 +73,8 @@ function cloneCreditCardReferenceTransaction(
 // - requiresCloning: true, CreditCardReferenceTransaction — returns the payment method details to embed inline in the order.
 // - requiresCloning: true, CreditCard/PayPal — not supported; throws an error.
 export async function clonePaymentMethod(
-	existingPaymentMethod: ExistingPaymentMethod,
 	zuoraClient: ZuoraClient,
+	existingPaymentMethod: ExistingPaymentMethod,
 ): Promise<ClonedPaymentMethod> {
 	if (!existingPaymentMethod.requiresCloning) {
 		return { hpmCreditCardPaymentMethodId: existingPaymentMethod.id };
@@ -86,7 +86,7 @@ export async function clonePaymentMethod(
 	);
 
 	if (zuoraPaymentMethod.Type === 'BankTransfer') {
-		return await cloneBankTransfer(zuoraPaymentMethod, zuoraClient);
+		return await cloneBankTransfer(zuoraClient, zuoraPaymentMethod);
 	} else if (zuoraPaymentMethod.Type === 'CreditCardReferenceTransaction') {
 		return cloneCreditCardReferenceTransaction(zuoraPaymentMethod);
 	} else {
