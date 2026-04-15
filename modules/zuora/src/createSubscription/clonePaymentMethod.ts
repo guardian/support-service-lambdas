@@ -32,7 +32,7 @@ const createPaymentMethodResponseSchema = z.object({
 	Id: z.string(),
 });
 
-export async function cloneBankTransfer(
+async function cloneBankTransfer(
 	zuoraClient: ZuoraClient,
 	bankTransfer: BankTransferPaymentMethod,
 ) {
