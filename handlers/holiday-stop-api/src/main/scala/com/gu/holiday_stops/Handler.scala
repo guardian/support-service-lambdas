@@ -4,7 +4,6 @@ import com.amazonaws.services.lambda.runtime.{Context, LambdaRuntime}
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.fulfilmentdates.FulfilmentDatesFetcher
 import com.gu.holiday_stops.WireHolidayStopRequest.toHolidayStopRequestDetail
-import com.gu.salesforce.SalesforceClient.withAlternateAccessTokenIfPresentInHeaderList
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.HolidayStopRequestId
 import com.gu.salesforce.holiday_stops.{SalesforceHolidayStopRequest, SalesforceSFSubscription}
@@ -124,7 +123,7 @@ object Handler extends Logging {
           now,
         )(
           request,
-          sfClient.setupRequest(withAlternateAccessTokenIfPresentInHeaderList(request.headers)),
+          sfClient,
         ),
     )
 

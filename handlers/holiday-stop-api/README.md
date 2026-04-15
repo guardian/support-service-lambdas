@@ -6,8 +6,6 @@ All endpoints require...
   - `x-identity-id` header which specifies the identityID of the user to request data for _(sent in the `manage-frontend` use-case)_
   - `x-salesforce-contact-id` header which specifies the Salesforce contact ID of the user to request data for _(sent in the CSR UI (in Salesforce) use-case)_
 
-**If being used in the CSR UI (in Salesforce) use-case**, then one should also pass the CSR's Session ID via the `X-Ephemeral-Salesforce-Access-Token` header (can be obtained in Apex with `UserInfo.getSessionId()`) so that the actions can be attributed correctly to the CSR (rather than the configured API user for this repo).
-
 #### Handling Multiple Environments
 The CSR UI (in Salesforce) is one consumer of this API and so each Salesforce environment is configured to speak the corresponding instance of the lambda.
 
