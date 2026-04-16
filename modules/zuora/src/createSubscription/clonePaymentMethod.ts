@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import type { ClonedCreditCardReferenceTransaction } from '@modules/zuora/orders/paymentMethods';
 import {
 	type BankTransferPaymentMethod,
 	type CreditCardReferenceTransactionPaymentMethod,
 	getPaymentMethodObjectById,
-} from '@modules/zuora/paymentMethodObject';
+} from '@modules/zuora/getPaymentMethodObjectById';
+import type { ClonedCreditCardReferenceTransaction } from '@modules/zuora/orders/paymentMethods';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 // Represents a Zuora payment method ID provided by the caller.
