@@ -96,7 +96,7 @@ object Dependencies {
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest-should" % "0.9.0" % Test
-  val scalatest = "org.scalatest" %% "scalatest" % "3.2.19" % Test
+  val scalatest = "org.scalatest" %% "scalatest" % "3.2.20" % Test
   val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.18.1" % Test
   val scalaMock = "org.scalamock" %% "scalamock" % "7.3.2" % Test
   val mockito = "org.mockito" % "mockito-core" % "5.23.0" % Test
