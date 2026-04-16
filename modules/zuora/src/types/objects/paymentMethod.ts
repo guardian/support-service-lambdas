@@ -19,7 +19,7 @@ export const BasePaymentMethodSchema = z.object({
 	lastTransactionStatus: z.string().nullable(),
 	maxConsecutivePaymentFailures: z.number().nullable(),
 	numConsecutiveFailures: z.number(),
-	paymentRetryWindow: z.union([z.string(), z.number()]).nullable(),
+	paymentRetryWindow: z.number().nullable(),
 	totalNumberOfProcessedPayments: z.number(),
 	totalNumberOfErrorPayments: z.number(),
 	createdDate: z.string(),
