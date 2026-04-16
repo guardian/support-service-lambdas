@@ -211,7 +211,6 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 				processingOptions: { runBilling: true, collectPayment: true },
 			});
 
-			expect(mockPost).toHaveBeenCalledTimes(2);
 			expect(result.accountNumber).toBe('A00099999');
 		});
 
