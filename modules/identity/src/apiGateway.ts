@@ -1,13 +1,15 @@
 import { ValidationError } from '@modules/errors';
+import { logger } from '@modules/routing/logger';
+import type { Handler } from '@modules/routing/router';
 import type { Stage } from '@modules/stage';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import type { IdentityUserDetails } from '@modules/identity/identity';
-import { SigningKeyNotFoundError } from '@modules/identity/identity';
 import {
 	ExpiredTokenError,
 	InvalidScopesError,
 	InvalidTokenError,
 	OktaTokenHelper,
+	SigningKeyNotFoundError,
 } from '@modules/identity/identity';
 
 type SuccessfulAuthentication = {
@@ -139,3 +141,27 @@ export const buildAuthenticate = (
 
 	return authenticate;
 };
+
+export function withIdentityUser<TPath, TBody>(
+	stage: Stage,
+	requiredScopes: string[],
+	handler: Handler<[APIGatewayProxyEvent, IdentityUserDetails], TPath, TBody>,
+): Handler<APIGatewayProxyEvent, TPath, TBody> {
+	const authenticate = buildAuthenticate(stage, requiredScopes);
+
+	return async (event: APIGatewayProxyEvent, path: TPath, body: TBody) => {
+		const maybeAuthenticatedEvent = await authenticate(event);
+
+		if (maybeAuthenticatedEvent.type === 'failure') {
+			return maybeAuthenticatedEvent.response;
+		}
+
+		logger.mutableAddContext(maybeAuthenticatedEvent.userDetails.identityId);
+
+		return await handler(
+			[event, maybeAuthenticatedEvent.userDetails],
+			path,
+			body,
+		);
+	};
+}

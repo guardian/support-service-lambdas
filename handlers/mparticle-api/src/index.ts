@@ -29,9 +29,19 @@ export const handlerHttp: Handler<
 	APIGatewayProxyResult
 > = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
 	try {
-		const { mParticleDataSubjectClient, batonS3Writer } = await services();
+		const {
+			mParticleDataSubjectClient,
+			batonS3Writer,
+			mParticleEventsAPIClient,
+			getNow,
+		} = await services();
 		console.debug('Processing HTTP request');
-		return httpRouter(mParticleDataSubjectClient, batonS3Writer)(event);
+		return httpRouter(
+			mParticleDataSubjectClient,
+			batonS3Writer,
+			mParticleEventsAPIClient,
+			getNow,
+		)(event);
 	} catch (error) {
 		console.error('HTTP handler error:', error);
 		return {
@@ -181,5 +191,6 @@ async function services() {
 			: undefined,
 		mParticleEnvironment,
 		isProd: stage === 'PROD',
+		getNow: () => new Date(),
 	};
 }
