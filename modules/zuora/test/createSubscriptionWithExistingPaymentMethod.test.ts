@@ -308,12 +308,10 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 			expect(parsed.newAccount.customFields).toMatchObject({
 				sfContactId__c: 'sf-contact-id-789',
 				IdentityId__c: 'identity-id-abc',
-				CreatedRequestId__c: 'test-request-id-123',
 			});
 
 			expect(parsed.subscriptions[0]?.customFields).toMatchObject({
 				DeliveryAgent__c: '42',
-				CreatedRequestId__c: 'test-request-id-123',
 				AcquisitionCase__c: 'case-001',
 				AcquisitionSource__c: 'CSR',
 				CreatedByCSR__c: 'John Smith',

@@ -15,7 +15,6 @@ exports[`the buildCreateSubscriptionRequest function builds request with applied
     "crmId": "sf-acc-1",
     "currency": "GBP",
     "customFields": {
-      "CreatedRequestId__c": "request-123",
       "IdentityId__c": "id-1",
       "sfContactId__c": "sf-con-1",
     },
@@ -40,7 +39,6 @@ exports[`the buildCreateSubscriptionRequest function builds request with applied
   "subscriptions": [
     {
       "customFields": {
-        "CreatedRequestId__c": "request-123",
         "DeliveryAgent__c": undefined,
         "InitialPromotionCode__c": "PROMO10",
         "LastPlanAddedDate__c": "2025-09-01",
@@ -132,7 +130,6 @@ exports[`the buildCreateSubscriptionRequest function builds request with gift re
     "crmId": "sf-acc-1",
     "currency": "GBP",
     "customFields": {
-      "CreatedRequestId__c": "request-123",
       "IdentityId__c": "id-1",
       "sfContactId__c": "sf-con-1",
     },
@@ -166,7 +163,6 @@ exports[`the buildCreateSubscriptionRequest function builds request with gift re
   "subscriptions": [
     {
       "customFields": {
-        "CreatedRequestId__c": "request-123",
         "DeliveryAgent__c": undefined,
         "InitialPromotionCode__c": undefined,
         "LastPlanAddedDate__c": "2025-09-01",
@@ -231,7 +227,6 @@ exports[`the buildCreateSubscriptionRequest function builds request without prom
     "crmId": "sf-acc-1",
     "currency": "GBP",
     "customFields": {
-      "CreatedRequestId__c": "request-123",
       "IdentityId__c": "id-1",
       "sfContactId__c": "sf-con-1",
     },
@@ -256,7 +251,6 @@ exports[`the buildCreateSubscriptionRequest function builds request without prom
   "subscriptions": [
     {
       "customFields": {
-        "CreatedRequestId__c": "request-123",
         "DeliveryAgent__c": undefined,
         "InitialPromotionCode__c": undefined,
         "LastPlanAddedDate__c": "2025-09-01",
@@ -330,7 +324,6 @@ exports[`the buildCreateSubscriptionRequest function sets delivery instructions 
     "crmId": "sf-acc-1",
     "currency": "GBP",
     "customFields": {
-      "CreatedRequestId__c": "request-123",
       "IdentityId__c": "id-1",
       "sfContactId__c": "sf-con-1",
     },
@@ -364,7 +357,6 @@ exports[`the buildCreateSubscriptionRequest function sets delivery instructions 
   "subscriptions": [
     {
       "customFields": {
-        "CreatedRequestId__c": "request-123",
         "DeliveryAgent__c": "42",
         "InitialPromotionCode__c": undefined,
         "LastPlanAddedDate__c": "2025-09-01",

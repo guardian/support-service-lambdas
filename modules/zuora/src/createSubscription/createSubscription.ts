@@ -160,7 +160,6 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 	productCatalog: ProductCatalog,
 	{
 		accountName,
-		createdRequestId,
 		salesforceAccountId,
 		salesforceContactId,
 		identityId,
@@ -185,7 +184,6 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 
 	const newAccount = buildNewAccountObject({
 		accountName: accountName,
-		createdRequestId: createdRequestId,
 		salesforceAccountId: salesforceAccountId,
 		salesforceContactId: salesforceContactId,
 		identityId: identityId,
@@ -212,7 +210,6 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		LastPlanAddedDate__c: zuoraDateFormat(contractEffectiveDate),
 		InitialPromotionCode__c: appliedPromotion?.promoCode,
 		PromotionCode__c: appliedPromotion?.promoCode,
-		CreatedRequestId__c: createdRequestId,
 	};
 	return {
 		newAccount: newAccount,

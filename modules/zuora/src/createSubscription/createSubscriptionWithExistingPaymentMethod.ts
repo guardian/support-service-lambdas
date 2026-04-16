@@ -86,7 +86,6 @@ export const createSubscriptionWithExistingPaymentMethod = async (
 		LastPlanAddedDate__c: zuoraDateFormat(contractEffectiveDate),
 		InitialPromotionCode__c: appliedPromotion?.promoCode,
 		PromotionCode__c: appliedPromotion?.promoCode,
-		CreatedRequestId__c: createdRequestId,
 		AcquisitionCase__c: acquisitionCase,
 		AcquisitionSource__c: acquisitionSource,
 		CreatedByCSR__c: createdByCSR,
@@ -99,7 +98,6 @@ export const createSubscriptionWithExistingPaymentMethod = async (
 
 	const newAccount = buildNewAccountObject<AnyPaymentMethod>({
 		accountName,
-		createdRequestId,
 		salesforceAccountId,
 		salesforceContactId,
 		identityId,
