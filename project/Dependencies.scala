@@ -104,7 +104,7 @@ object Dependencies {
   // CVE-2026-33871: Netty HTTP/2 CONTINUATION frame flood DoS; patched in 4.1.132.Final
   // CVE-2026-33870: Netty HTTP Request Smuggling via Chunked Extension Quoted-String Parsing
   // Affects io.netty:netty-codec-http < 4.1.132.Final, pulled in transitively by async-http-client and aws-sdk netty-nio-client
-  val nettyVersion = "4.1.132.Final"
+  val nettyVersion = "4.2.12.Final"
   val nettyOverrides: Seq[ModuleID] = Seq(
     "io.netty" % "netty-buffer" % nettyVersion,
     "io.netty" % "netty-codec" % nettyVersion,
