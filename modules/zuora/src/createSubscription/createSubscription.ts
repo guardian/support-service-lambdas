@@ -10,6 +10,7 @@ import type { AppliedPromotion, Promo } from '@modules/promotions/v2/schema';
 import type { ValidatedPromotion } from '@modules/promotions/v2/validatePromotion';
 import { validatePromotion } from '@modules/promotions/v2/validatePromotion';
 import dayjs from 'dayjs';
+import type { Dayjs } from 'dayjs';
 import { z } from 'zod';
 import { getChargeOverride } from '@modules/zuora/createSubscription/chargeOverride';
 import { getProductRatePlan } from '@modules/zuora/createSubscription/getProductRatePlan';
@@ -18,7 +19,10 @@ import { ReaderType } from '@modules/zuora/createSubscription/readerType';
 import { getSubscriptionDates } from '@modules/zuora/createSubscription/subscriptionDates';
 import type { Contact } from '@modules/zuora/orders/newAccount';
 import { buildNewAccountObject } from '@modules/zuora/orders/newAccount';
-import { buildCreateSubscriptionOrderAction } from '@modules/zuora/orders/orderActions';
+import {
+	buildCreateSubscriptionOrderAction,
+	type CreateSubscriptionOrderAction,
+} from '@modules/zuora/orders/orderActions';
 import type { CreateOrderRequest } from '@modules/zuora/orders/orderRequests';
 import { executeOrderRequest } from '@modules/zuora/orders/orderRequests';
 import type {
@@ -28,7 +32,7 @@ import type {
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
-const createSubscriptionResponseSchema = z.object({
+export const createSubscriptionResponseSchema = z.object({
 	orderNumber: z.string(),
 	accountNumber: z.string(),
 	subscriptionNumbers: z.array(z.string()),
@@ -56,6 +60,9 @@ export type CreateSubscriptionInputFields<T extends PaymentMethod> = {
 	appliedPromotion?: AppliedPromotion;
 	runBilling?: boolean;
 	collectPayment?: boolean;
+	acquisitionCase?: string;
+	acquisitionSource?: string;
+	createdByCSR?: string;
 };
 
 export type PromotionInputFields = {
@@ -93,6 +100,62 @@ export function getPromotionInputFields(
 	};
 }
 
+export function getReaderType(
+	giftRecipient: GiftRecipient | undefined,
+	appliedPromotion: AppliedPromotion | undefined,
+): ReaderType {
+	if (giftRecipient) {
+		return ReaderType.Gift;
+	}
+	if (appliedPromotion?.promoCode.endsWith('PATRON')) {
+		return ReaderType.Patron;
+	}
+	return ReaderType.Direct;
+}
+
+// Used by createSubscription and createSubscriptionWithExistingPaymentMethod.
+export function buildSubscriptionOrderAction(
+	productCatalog: ProductCatalog,
+	productPurchase: ProductPurchase,
+	currency: IsoCurrency,
+	appliedPromotion: AppliedPromotion | undefined,
+	promotion: Promo | undefined,
+): {
+	contractEffectiveDate: Dayjs;
+	customerAcceptanceDate: Dayjs;
+	createSubscriptionOrderAction: CreateSubscriptionOrderAction;
+} {
+	const { contractEffectiveDate, customerAcceptanceDate } =
+		getSubscriptionDates(dayjs(), productPurchase);
+	const chargeOverride = getChargeOverride(
+		productCatalog,
+		productPurchase,
+		currency,
+	);
+	const productRatePlan = getProductRatePlan(productCatalog, productPurchase);
+	const promotionInputFields = getPromotionInputFields(
+		appliedPromotion,
+		promotion,
+		productRatePlan.id,
+		productCatalog,
+		productPurchase.product,
+	);
+	const createSubscriptionOrderAction = buildCreateSubscriptionOrderAction({
+		productRatePlanId: productRatePlan.id,
+		contractEffectiveDate,
+		customerAcceptanceDate,
+		chargeOverride,
+		promotionInputFields,
+		termType: productRatePlan.termType,
+		termLengthInMonths: productRatePlan.termLengthInMonths,
+	});
+	return {
+		contractEffectiveDate,
+		customerAcceptanceDate,
+		createSubscriptionOrderAction,
+	};
+}
+
 export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 	productCatalog: ProductCatalog,
 	{
@@ -115,7 +178,7 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 ): CreateOrderRequest {
 	const { deliveryContact, deliveryAgent, deliveryInstructions } = {
 		deliveryContact: undefined,
-		deliveryAgent: '',
+		deliveryAgent: undefined,
 		deliveryInstructions: undefined,
 		...productPurchase,
 	};
@@ -133,42 +196,19 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		soldToContact: deliveryContact,
 		deliveryInstructions: deliveryInstructions,
 	});
-	const { contractEffectiveDate, customerAcceptanceDate } =
-		getSubscriptionDates(dayjs(), productPurchase);
 
-	const chargeOverride = getChargeOverride(
-		productCatalog,
-		productPurchase,
-		currency,
-	);
-	const readerType = giftRecipient
-		? ReaderType.Gift
-		: appliedPromotion?.promoCode.endsWith('PATRON')
-			? ReaderType.Patron
-			: ReaderType.Direct;
-
-	const productRatePlan = getProductRatePlan(productCatalog, productPurchase);
-	const promotionInputFields = getPromotionInputFields(
-		appliedPromotion,
-		promotion,
-		productRatePlan.id,
-		productCatalog,
-		productPurchase.product,
-	);
-
-	const createSubscriptionOrderAction = buildCreateSubscriptionOrderAction({
-		productRatePlanId: productRatePlan.id,
-		contractEffectiveDate: contractEffectiveDate,
-		customerAcceptanceDate: customerAcceptanceDate,
-		chargeOverride: chargeOverride,
-		promotionInputFields: promotionInputFields,
-		termType: productRatePlan.termType,
-		termLengthInMonths: productRatePlan.termLengthInMonths,
-	});
+	const { contractEffectiveDate, createSubscriptionOrderAction } =
+		buildSubscriptionOrderAction(
+			productCatalog,
+			productPurchase,
+			currency,
+			appliedPromotion,
+			promotion,
+		);
 
 	const customFields = {
-		DeliveryAgent__c: deliveryAgent.toString(),
-		ReaderType__c: readerType,
+		DeliveryAgent__c: deliveryAgent?.toString(),
+		ReaderType__c: getReaderType(giftRecipient, appliedPromotion),
 		LastPlanAddedDate__c: zuoraDateFormat(contractEffectiveDate),
 		InitialPromotionCode__c: appliedPromotion?.promoCode,
 		PromotionCode__c: appliedPromotion?.promoCode,
