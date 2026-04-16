@@ -82,7 +82,7 @@ object Dependencies {
 
   // Other
   val zio = "dev.zio" %% "zio" % "1.0.18"
-  val zio2Version = "2.1.18"
+  val zio2Version = "2.1.25"
   val zio2 = "dev.zio" %% "zio" % zio2Version
   val tapirVersion =
     "1.11.33" // stick with 1.11.33 for now as later versions indirectly pull in netty-codec-base which duplicates netty-codec content
