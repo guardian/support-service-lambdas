@@ -82,21 +82,21 @@ object Dependencies {
 
   // Other
   val zio = "dev.zio" %% "zio" % "1.0.18"
-  val zio2Version = "2.1.18"
+  val zio2Version = "2.1.25"
   val zio2 = "dev.zio" %% "zio" % zio2Version
   val tapirVersion =
     "1.11.33" // stick with 1.11.33 for now as later versions indirectly pull in netty-codec-base which duplicates netty-codec content
-  val enumeratum = "com.beachape" %% "enumeratum" % "1.9.2"
+  val enumeratum = "com.beachape" %% "enumeratum" % "1.9.7"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.4.0"
   val stripe = "com.stripe" % "stripe-java" % "29.1.0"
   val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.2.0"
   val commonsIO = "commons-io" % "commons-io" % "2.19.0"
-  val jodaTime = "joda-time" % "joda-time" % "2.14.0"
+  val jodaTime = "joda-time" % "joda-time" % "2.14.1"
   val typesafeConfig = "com.typesafe" % "config" % "1.4.6"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest-should" % "0.9.0" % Test
-  val scalatest = "org.scalatest" %% "scalatest" % "3.2.19" % Test
+  val scalatest = "org.scalatest" %% "scalatest" % "3.2.20" % Test
   val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.18.1" % Test
   val scalaMock = "org.scalamock" %% "scalamock" % "7.3.2" % Test
   val mockito = "org.mockito" % "mockito-core" % "5.23.0" % Test
