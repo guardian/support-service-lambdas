@@ -59,6 +59,7 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends AnyFlatSpec with M
             publicationDatesToBeStopped,
             maybeMatchingSubscription.get,
             None,
+            None,
           ),
         )
         .toDisjunction
@@ -97,7 +98,7 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends AnyFlatSpec with M
       ).toDisjunction
 
       deleteOp = new SalesforceHolidayStopRequest.WithdrawHolidayStopRequest(sfAuth.wrapWith(JsonHttp.patch))
-      _ <- deleteOp.run(withdrawTime, createResult).toDisjunction
+      _ <- deleteOp.run(withdrawTime, createResult, None).toDisjunction
 
     } yield EndToEndResults(createResult, preProcessingFetchResult, postProcessingFetchResult)
 
