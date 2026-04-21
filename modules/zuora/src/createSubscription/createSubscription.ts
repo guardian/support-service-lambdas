@@ -156,6 +156,54 @@ export function buildSubscriptionOrderAction(
 	};
 }
 
+type DeliveryFields = {
+	deliveryContact: Contact | undefined;
+	deliveryAgent: number | undefined;
+	deliveryInstructions: string | undefined;
+};
+
+function getDeliveryFields(productPurchase: ProductPurchase): DeliveryFields {
+	switch (productPurchase.product) {
+		case 'NationalDelivery':
+			return {
+				deliveryContact: productPurchase.deliveryContact,
+				deliveryAgent: productPurchase.deliveryAgent,
+				deliveryInstructions: productPurchase.deliveryInstructions,
+			};
+		case 'HomeDelivery':
+			return {
+				deliveryContact: productPurchase.deliveryContact,
+				deliveryAgent: undefined,
+				deliveryInstructions: productPurchase.deliveryInstructions,
+			};
+		case 'SubscriptionCard':
+		case 'NewspaperVoucher':
+		case 'GuardianWeeklyDomestic':
+		case 'GuardianWeeklyRestOfWorld':
+		case 'GuardianWeeklyZoneA':
+		case 'GuardianWeeklyZoneB':
+		case 'GuardianWeeklyZoneC':
+		case 'TierThree':
+			return {
+				deliveryContact: productPurchase.deliveryContact,
+				deliveryAgent: undefined,
+				deliveryInstructions: undefined,
+			};
+		case 'Contribution':
+		case 'DigitalSubscription':
+		case 'GuardianAdLite':
+		case 'PartnerMembership':
+		case 'PatronMembership':
+		case 'SupporterMembership':
+		case 'SupporterPlus':
+			return {
+				deliveryContact: undefined,
+				deliveryAgent: undefined,
+				deliveryInstructions: undefined,
+			};
+	}
+}
+
 export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 	productCatalog: ProductCatalog,
 	{
@@ -176,12 +224,8 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 	}: CreateSubscriptionInputFields<T>,
 	promotion: Promo | undefined,
 ): CreateOrderRequest {
-	const { deliveryContact, deliveryAgent, deliveryInstructions } = {
-		deliveryContact: undefined,
-		deliveryAgent: undefined,
-		deliveryInstructions: undefined,
-		...productPurchase,
-	};
+	const { deliveryContact, deliveryAgent, deliveryInstructions } =
+		getDeliveryFields(productPurchase);
 
 	const newAccount = buildNewAccountObject({
 		accountName: accountName,
