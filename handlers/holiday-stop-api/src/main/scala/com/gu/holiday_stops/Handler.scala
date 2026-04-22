@@ -4,7 +4,6 @@ import com.amazonaws.services.lambda.runtime.{Context, LambdaRuntime}
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.fulfilmentdates.FulfilmentDatesFetcher
 import com.gu.holiday_stops.WireHolidayStopRequest.toHolidayStopRequestDetail
-import com.gu.salesforce.SalesforceClient.withAlternateAccessTokenIfPresentInHeaderList
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.HolidayStopRequestId
 import com.gu.salesforce.holiday_stops.{SalesforceHolidayStopRequest, SalesforceSFSubscription}
@@ -124,7 +123,7 @@ object Handler extends Logging {
           now,
         )(
           request,
-          sfClient.setupRequest(withAlternateAccessTokenIfPresentInHeaderList(request.headers)),
+          sfClient,
         ),
     )
 
@@ -389,6 +388,7 @@ object Handler extends Logging {
         issuesData,
         matchingSfSub,
         requestBody.bulkSuspensionReason,
+        requestBody.userId,
       )
       sfErrorExposer = new SFErrorExposer(
         s"create new Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)",
@@ -520,6 +520,7 @@ object Handler extends Logging {
           requestBody.endDate,
           issuesData,
           existingPublicationsThatWereToBeStopped,
+          requestBody.userId,
         )
         .toApiGatewayOp(message => badRequest(s"build body for holiday stop request: $message"))
       sfErrorExposer = new SFErrorExposer(
@@ -557,6 +558,8 @@ object Handler extends Logging {
       backend: SttpBackend[Identity, Any],
   )(): Either[ApiFailure, AccessToken] = Zuora.accessTokenGetResponse(config.zuoraConfig, backend)
 
+  case class WithdrawHolidayStopQueryParams(userId: Option[String])
+
   def stepsToWithdraw(now: () => ZonedDateTime)(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
     val lookupOp =
@@ -568,6 +571,9 @@ object Handler extends Logging {
     (for {
       contact <- extractContactFromHeaders(req.headers)
       pathParams <- req.pathParamsAsCaseClass[SpecificHolidayStopRequestPathParams]()
+      queryParams <- req.queryParamsAsCaseClass[WithdrawHolidayStopQueryParams]()(
+        Json.reads[WithdrawHolidayStopQueryParams],
+      )
       existingForUser <- lookupOp
         .run(contact, None, None)
         .toDisjunction
@@ -582,7 +588,7 @@ object Handler extends Logging {
         None,
       )
       _ <- withdrawOp
-        .run(now(), pathParams.holidayStopRequestId)
+        .run(now(), pathParams.holidayStopRequestId, queryParams.userId)
         .toDisjunction
         .toApiGatewayOp(sfErrorExposer.parseFailureTo500ApiResponse _)
     } yield ApiGatewayResponse.successfulExecution).apiResponse
