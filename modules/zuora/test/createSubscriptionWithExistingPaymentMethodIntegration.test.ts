@@ -12,10 +12,8 @@ import { z } from 'zod';
 import { deleteAccount } from '@modules/zuora/account';
 import type { CreateSubscriptionWithExistingPaymentMethodInput } from '@modules/zuora/createSubscription/createSubscriptionWithExistingPaymentMethod';
 import { createSubscriptionWithExistingPaymentMethod } from '@modules/zuora/createSubscription/createSubscriptionWithExistingPaymentMethod';
-import type {
-	PaymentGateway,
-	PaymentMethod,
-} from '@modules/zuora/orders/paymentMethods';
+import type { PaymentGateway } from '@modules/zuora/orders/paymentGateways';
+import type { PaymentMethod } from '@modules/zuora/orders/paymentMethods';
 import { getSubscription } from '@modules/zuora/subscription';
 import { zuoraSubscriptionSchema } from '@modules/zuora/types/objects/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';

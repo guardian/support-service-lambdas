@@ -13,9 +13,9 @@ import {
 } from '@modules/zuora/createSubscription/createSubscription';
 import { buildNewAccountObject } from '@modules/zuora/orders/newAccount';
 import { executeOrderRequest } from '@modules/zuora/orders/orderRequests';
+import type { PaymentGateway } from '@modules/zuora/orders/paymentGateways';
 import type {
 	AnyPaymentMethod,
-	PaymentGateway,
 	PaymentMethod,
 } from '@modules/zuora/orders/paymentMethods';
 import { zuoraDateFormat } from '@modules/zuora/utils';

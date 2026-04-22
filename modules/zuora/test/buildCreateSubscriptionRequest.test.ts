@@ -8,10 +8,8 @@ import dayjs from 'dayjs';
 import { buildCreateSubscriptionRequest } from '@modules/zuora/createSubscription/createSubscription';
 import type { CreateSubscriptionInputFields } from '@modules/zuora/createSubscription/createSubscription';
 import type { CreateSubscriptionOrderAction } from '@modules/zuora/orders/orderActions';
-import type {
-	CreditCardReferenceTransaction,
-	PaymentGateway,
-} from '@modules/zuora/orders/paymentMethods';
+import type { PaymentGateway } from '@modules/zuora/orders/paymentGateways';
+import type { CreditCardReferenceTransaction } from '@modules/zuora/orders/paymentMethods';
 import code from '../../zuora-catalog/test/fixtures/catalog-code.json';
 import { ReaderType } from '../src/createSubscription/readerType';
 
