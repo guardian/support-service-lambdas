@@ -45,6 +45,19 @@ export type PaymentMethod =
 	| PayPalCompletePaymentsWithPaymentToken
 	| PayPalCompletePaymentsWithBAID;
 
+// A CreditCardReferenceTransaction with only the fields needed to clone it onto a new account.
+// Distinct from CreditCardReferenceTransaction, which includes card display fields (cardNumber,
+// expirationMonth, etc.) that are not available or needed during cloning.
+export type ClonedCreditCardReferenceTransaction = {
+	type: 'CreditCardReferenceTransaction';
+	tokenId: string;
+	secondTokenId: string;
+};
+
+export type AnyPaymentMethod =
+	| PaymentMethod
+	| ClonedCreditCardReferenceTransaction;
+
 //Gateway names need to match to those set in Zuora
 //See: https://apisandbox.zuora.com/apps/NewGatewaySetting.do?method=list
 type StripePaymentGateway =
@@ -67,7 +80,7 @@ type PaymentGatewayMap = {
 	PayPalCP: PayPalCompletePaymentsPaymentGateway;
 };
 
-export type PaymentGateway<T extends PaymentMethod> =
+export type PaymentGateway<T extends AnyPaymentMethod> =
 	T['type'] extends keyof PaymentGatewayMap
 		? PaymentGatewayMap[T['type']]
 		: never;

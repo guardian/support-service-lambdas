@@ -41,7 +41,7 @@ exports[`the buildCreateSubscriptionRequest function builds request with applied
     {
       "customFields": {
         "CreatedRequestId__c": "request-123",
-        "DeliveryAgent__c": "",
+        "DeliveryAgent__c": undefined,
         "InitialPromotionCode__c": "PROMO10",
         "LastPlanAddedDate__c": "2025-09-01",
         "PromotionCode__c": "PROMO10",
@@ -167,7 +167,7 @@ exports[`the buildCreateSubscriptionRequest function builds request with gift re
     {
       "customFields": {
         "CreatedRequestId__c": "request-123",
-        "DeliveryAgent__c": "",
+        "DeliveryAgent__c": undefined,
         "InitialPromotionCode__c": undefined,
         "LastPlanAddedDate__c": "2025-09-01",
         "PromotionCode__c": undefined,
@@ -257,7 +257,7 @@ exports[`the buildCreateSubscriptionRequest function builds request without prom
     {
       "customFields": {
         "CreatedRequestId__c": "request-123",
-        "DeliveryAgent__c": "",
+        "DeliveryAgent__c": undefined,
         "InitialPromotionCode__c": undefined,
         "LastPlanAddedDate__c": "2025-09-01",
         "PromotionCode__c": undefined,
@@ -279,6 +279,105 @@ exports[`the buildCreateSubscriptionRequest function builds request without prom
                   },
                 ],
                 "productRatePlanId": "8ad08cbd8586721c01858804e3275376",
+              },
+            ],
+            "terms": {
+              "autoRenew": true,
+              "initialTerm": {
+                "period": 12,
+                "periodType": "Month",
+                "termType": "TERMED",
+              },
+              "renewalSetting": "RENEW_WITH_SPECIFIC_TERM",
+              "renewalTerms": [
+                {
+                  "period": 12,
+                  "periodType": "Month",
+                },
+              ],
+            },
+          },
+          "triggerDates": [
+            {
+              "name": "ContractEffective",
+              "triggerDate": "2025-09-01",
+            },
+            {
+              "name": "CustomerAcceptance",
+              "triggerDate": "2025-09-05",
+            },
+          ],
+          "type": "CreateSubscription",
+        },
+      ],
+    },
+  ],
+}
+`;
+
+exports[`the buildCreateSubscriptionRequest function sets delivery instructions and delivery agent for a delivery product 1`] = `
+{
+  "description": "Created by createSubscription.ts in support-service-lambdas",
+  "newAccount": {
+    "autoPay": true,
+    "billCycleDay": 0,
+    "billToContact": {
+      "country": "GB",
+      "firstName": "A",
+      "lastName": "B",
+      "workEmail": "test@test.com",
+    },
+    "crmId": "sf-acc-1",
+    "currency": "GBP",
+    "customFields": {
+      "CreatedRequestId__c": "request-123",
+      "IdentityId__c": "id-1",
+      "sfContactId__c": "sf-con-1",
+    },
+    "name": "Test Account",
+    "paymentGateway": "Stripe PaymentIntents GNM Membership",
+    "paymentMethod": {
+      "cardNumber": "42424242424242",
+      "cardType": "Visa",
+      "expirationMonth": 12,
+      "expirationYear": 2099,
+      "secondTokenId": "test_second_token_id",
+      "tokenId": "test_token_id",
+      "type": "CreditCardReferenceTransaction",
+    },
+    "soldToContact": {
+      "SpecialDeliveryInstructions__c": "Leave with concierge",
+      "address1": "1 Test Street",
+      "city": "London",
+      "country": "GB",
+      "firstName": "Jane",
+      "lastName": "Smith",
+      "postalCode": "N1 9GU",
+      "workEmail": "jane@example.com",
+    },
+  },
+  "orderDate": "2025-09-01",
+  "processingOptions": {
+    "collectPayment": true,
+    "runBilling": true,
+  },
+  "subscriptions": [
+    {
+      "customFields": {
+        "CreatedRequestId__c": "request-123",
+        "DeliveryAgent__c": "42",
+        "InitialPromotionCode__c": undefined,
+        "LastPlanAddedDate__c": "2025-09-01",
+        "PromotionCode__c": undefined,
+        "ReaderType__c": "Direct",
+      },
+      "orderActions": [
+        {
+          "createSubscription": {
+            "subscribeToRatePlans": [
+              {
+                "chargeOverrides": [],
+                "productRatePlanId": "8ad096ca8992481d018992a363bd17ad",
               },
             ],
             "terms": {
