@@ -208,6 +208,7 @@ async function getDiscountToApply(
 			);
 			break;
 		case 'NoCheck':
+		case undefined:
 			break;
 	}
 
