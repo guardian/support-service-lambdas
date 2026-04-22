@@ -31,4 +31,9 @@ export default [
 			],
 		},
 	},
+	{
+		rules: {
+			'@typescript-eslint/switch-exhaustiveness-check': 'error',
+		},
+	},
 ];

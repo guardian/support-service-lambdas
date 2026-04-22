@@ -6,8 +6,6 @@ All endpoints require...
   - `x-identity-id` header which specifies the identityID of the user to request data for _(sent in the `manage-frontend` use-case)_
   - `x-salesforce-contact-id` header which specifies the Salesforce contact ID of the user to request data for _(sent in the CSR UI (in Salesforce) use-case)_
 
-**If being used in the CSR UI (in Salesforce) use-case**, then one should also pass the CSR's Session ID via the `X-Ephemeral-Salesforce-Access-Token` header (can be obtained in Apex with `UserInfo.getSessionId()`) so that the actions can be attributed correctly to the CSR (rather than the configured API user for this repo).
-
 #### Handling Multiple Environments
 The CSR UI (in Salesforce) is one consumer of this API and so each Salesforce environment is configured to speak the corresponding instance of the lambda.
 
@@ -29,9 +27,11 @@ creates a new all holiday stop, example body:
 {
     "startDate": "2023-06-10", 
     "endDate": "2024-06-14", 
-    "subscriptionName": "A-S00071783"
+    "subscriptionName": "A-S00071783",
+    "userId": "005XXXXXXXXXXXXXXX"
  }
 ```
+The optional `userId` field is a Salesforce User ID. When present, it is written to the `Last_Modified_By__c` field on the Holiday Stop Request so the CSR who made the change can be tracked.
 
 ### `POST` `/{STAGE}/bulk-hsr`
 creates a new holiday stop where it has been imposed because we are unable to fulfil the subscription.  
@@ -41,16 +41,17 @@ In this case, the `reason` field will hold the reason for the suspension:
     "startDate": "2023-06-10", 
     "endDate": "2024-06-14", 
     "subscriptionName": "A-S00071783",
-    "reason": "someReason"
+    "reason": "someReason",
+    "userId": "005XXXXXXXXXXXXXXX"
  }
 ```
-The reason has to be one from a closed set configured in Salesforce.
+The reason has to be one from a closed set configured in Salesforce. `userId` behaves as for POST /hsr.
 
 ### `PATCH` `/{STAGE}/hsr/{SUBSCRIPTION_NAME}/{SF_ID}`
-with the same body as create endpoint above, amends the holiday stop request (where holiday stop request `Id` matches `{SF_ID}`) to the newly specified dates and adds/removes the underlying detail records where appropriate.
+with the same body as create endpoint above, amends the holiday stop request (where holiday stop request `Id` matches `{SF_ID}`) to the newly specified dates and adds/removes the underlying detail records where appropriate. The optional `userId` field is written to `Last_Modified_By__c` as for POST.
 
-### `DELETE` `/{STAGE}/hsr/{SUBSCRIPTION_NAME}/{SF_ID}`
-marks the holiday stop request as 'withdrawn' in SalesForce (by placing timestamp in `Withdrawn_Time__c` field), where holiday stop request `Id` matches `{SF_ID}`.
+### `DELETE` `/{STAGE}/hsr/{SUBSCRIPTION_NAME}/{SF_ID}?userId={SF_USER_ID}`
+marks the holiday stop request as 'withdrawn' in SalesForce (by placing timestamp in `Withdrawn_Time__c` field), where holiday stop request `Id` matches `{SF_ID}`. The optional `userId` query string parameter is a Salesforce User ID written to `Last_Modified_By__c`.
 
 ### `POST` `/{STAGE}/hsr/{SUBSCRIPTION_NAME}/cancel?effectiveCancellationDate=yyyy-MM-dd`
 handles processing of holiday stops when a subscription is cancelled, unprocessed holiday stops before the effectiveCancellationDate will be marked with a charge code "ManualRefund_Cancellation" for reporting purposes.  This should only be called if the customer was refunded for holiday stops that fall in the cancellation period, otherwise no changes should be made to existing holiday stops.

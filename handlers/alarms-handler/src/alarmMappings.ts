@@ -30,6 +30,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'admin-console',
 		'apps-metering',
 		'apps-metering-exclusions-lambda',
+		'apps-metering-notifications-lambda',
 		'batch-email-sender',
 		'bigquery-acquisitions-publisher',
 		'component-event-stream',
