@@ -57,30 +57,3 @@ export type ClonedCreditCardReferenceTransaction = {
 export type AnyPaymentMethod =
 	| PaymentMethod
 	| ClonedCreditCardReferenceTransaction;
-
-//Gateway names need to match to those set in Zuora
-//See: https://apisandbox.zuora.com/apps/NewGatewaySetting.do?method=list
-type StripePaymentGateway =
-	| 'Stripe PaymentIntents GNM Membership'
-	| 'Stripe PaymentIntents GNM Membership AUS'
-	| 'Stripe - Observer - Tortoise Media';
-
-type PayPalPaymentGateway = 'PayPal Express';
-
-type PayPalCompletePaymentsPaymentGateway = 'PayPal Complete Payments';
-
-type GoCardlessPaymentGateway =
-	| 'GoCardless'
-	| 'GoCardless - Observer - Tortoise Media';
-
-type PaymentGatewayMap = {
-	CreditCardReferenceTransaction: StripePaymentGateway;
-	Bacs: GoCardlessPaymentGateway;
-	PayPalNativeEC: PayPalPaymentGateway;
-	PayPalCP: PayPalCompletePaymentsPaymentGateway;
-};
-
-export type PaymentGateway<T extends AnyPaymentMethod> =
-	T['type'] extends keyof PaymentGatewayMap
-		? PaymentGatewayMap[T['type']]
-		: never;

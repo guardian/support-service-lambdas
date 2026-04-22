@@ -1,8 +1,6 @@
 import type { IsoCurrency } from '@modules/internationalisation/currency';
-import type {
-	AnyPaymentMethod,
-	PaymentGateway,
-} from '@modules/zuora/orders/paymentMethods';
+import type { PaymentGateway } from '@modules/zuora/orders/paymentGateways';
+import type { AnyPaymentMethod } from '@modules/zuora/orders/paymentMethods';
 
 // This file contains types for creating a new account via the Orders API.
 

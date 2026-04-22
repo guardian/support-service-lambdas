@@ -25,10 +25,8 @@ import {
 } from '@modules/zuora/orders/orderActions';
 import type { CreateOrderRequest } from '@modules/zuora/orders/orderRequests';
 import { executeOrderRequest } from '@modules/zuora/orders/orderRequests';
-import type {
-	PaymentGateway,
-	PaymentMethod,
-} from '@modules/zuora/orders/paymentMethods';
+import type { PaymentGateway } from '@modules/zuora/orders/paymentGateways';
+import type { PaymentMethod } from '@modules/zuora/orders/paymentMethods';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
