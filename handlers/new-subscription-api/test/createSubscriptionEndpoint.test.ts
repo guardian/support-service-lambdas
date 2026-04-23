@@ -1,7 +1,7 @@
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import { getPromotion } from '@modules/promotions/v2/getPromotion';
-import { createSubscription } from '@modules/zuora/createSubscription/createSubscription';
+import { createSubscriptionWithExistingPaymentMethod } from '@modules/zuora/createSubscription/createSubscriptionWithExistingPaymentMethod';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import catalogCode from '../../../modules/zuora-catalog/test/fixtures/catalog-code.json';
@@ -10,11 +10,15 @@ import type { CreateSubscriptionRequest } from '../src/requestSchema';
 import type { CreateSubscriptionResponse } from '../src/responseSchema';
 
 jest.mock('@modules/product-catalog/api');
-jest.mock('@modules/zuora/createSubscription/createSubscription');
+jest.mock(
+	'@modules/zuora/createSubscription/createSubscriptionWithExistingPaymentMethod',
+);
 jest.mock('@modules/promotions/v2/getPromotion');
 
 const mockGetProductCatalogFromApi = jest.mocked(getProductCatalogFromApi);
-const mockCreateSubscription = jest.mocked(createSubscription);
+const mockCreateSubscriptionWithExistingPaymentMethod = jest.mocked(
+	createSubscriptionWithExistingPaymentMethod,
+);
 const mockGetPromotion = jest.mocked(getPromotion);
 
 const productCatalog = generateProductCatalog(
@@ -31,20 +35,18 @@ const baseRequest: CreateSubscriptionRequest = {
 	identityId: 'identity-123',
 	currency: 'GBP',
 	paymentGateway: 'Stripe PaymentIntents GNM Membership',
-	paymentMethod: {
-		type: 'CreditCardReferenceTransaction',
-		tokenId: 'tok_123',
-		secondTokenId: 'tok_456',
-		cardNumber: '424242424242',
-		cardType: 'Visa',
-		expirationMonth: 12,
-		expirationYear: 2099,
+	existingPaymentMethod: {
+		id: 'pm-123',
+		requiresCloning: false,
 	},
 	billToContact: {
 		firstName: 'John',
 		lastName: 'Doe',
 		workEmail: 'john.doe@example.com',
 		country: 'GB',
+		address1: '1 Test Street',
+		city: 'London',
+		postalCode: 'SW1A 1AA',
 	},
 	productPurchase: {
 		product: 'SupporterPlus',
@@ -65,7 +67,9 @@ const expectedResponse: CreateSubscriptionResponse = {
 beforeEach(() => {
 	jest.clearAllMocks();
 	mockGetProductCatalogFromApi.mockResolvedValue(productCatalog);
-	mockCreateSubscription.mockResolvedValue(expectedResponse);
+	mockCreateSubscriptionWithExistingPaymentMethod.mockResolvedValue(
+		expectedResponse,
+	);
 });
 
 describe('createNewSubscriptionEndpoint', () => {
@@ -79,14 +83,18 @@ describe('createNewSubscriptionEndpoint', () => {
 		expect(result.statusCode).toBe(200);
 		expect(JSON.parse(result.body)).toEqual(expectedResponse);
 		expect(mockGetProductCatalogFromApi).toHaveBeenCalledWith('CODE');
-		expect(mockCreateSubscription).toHaveBeenCalledTimes(1);
+		expect(
+			mockCreateSubscriptionWithExistingPaymentMethod,
+		).toHaveBeenCalledTimes(1);
 	});
 
 	it('creates a subscription without promotion when no promoCode is provided', async () => {
 		await createNewSubscriptionEndpoint('CODE', mockZuoraClient, baseRequest);
 
 		expect(mockGetPromotion).not.toHaveBeenCalled();
-		expect(mockCreateSubscription).toHaveBeenCalledWith(
+		expect(
+			mockCreateSubscriptionWithExistingPaymentMethod,
+		).toHaveBeenCalledWith(
 			mockZuoraClient,
 			productCatalog,
 			expect.objectContaining({ appliedPromotion: undefined }),
@@ -122,7 +130,9 @@ describe('createNewSubscriptionEndpoint', () => {
 
 		expect(result.statusCode).toBe(200);
 		expect(mockGetPromotion).toHaveBeenCalledWith('PROMO10', 'CODE');
-		expect(mockCreateSubscription).toHaveBeenCalledWith(
+		expect(
+			mockCreateSubscriptionWithExistingPaymentMethod,
+		).toHaveBeenCalledWith(
 			mockZuoraClient,
 			productCatalog,
 			expect.objectContaining({
@@ -149,7 +159,9 @@ describe('createNewSubscriptionEndpoint', () => {
 		);
 
 		expect(result.statusCode).toBe(200);
-		expect(mockCreateSubscription).toHaveBeenCalledWith(
+		expect(
+			mockCreateSubscriptionWithExistingPaymentMethod,
+		).toHaveBeenCalledWith(
 			mockZuoraClient,
 			productCatalog,
 			expect.objectContaining({ appliedPromotion: undefined }),
@@ -157,28 +169,12 @@ describe('createNewSubscriptionEndpoint', () => {
 		);
 	});
 
-	it('throws an error when product purchase is invalid', async () => {
-		const requestWithInvalidProduct: CreateSubscriptionRequest = {
-			...baseRequest,
-			productPurchase: {
-				product: 'NonExistentProduct',
-				ratePlan: 'Monthly',
-			},
-		};
-
-		await expect(
-			createNewSubscriptionEndpoint(
-				'CODE',
-				mockZuoraClient,
-				requestWithInvalidProduct,
-			),
-		).rejects.toThrow('Invalid product purchase');
-	});
-
-	it('passes the correct input fields to createSubscription', async () => {
+	it('passes the correct input fields to createSubscriptionWithExistingPaymentMethod', async () => {
 		await createNewSubscriptionEndpoint('CODE', mockZuoraClient, baseRequest);
 
-		expect(mockCreateSubscription).toHaveBeenCalledWith(
+		expect(
+			mockCreateSubscriptionWithExistingPaymentMethod,
+		).toHaveBeenCalledWith(
 			mockZuoraClient,
 			productCatalog,
 			expect.objectContaining({
@@ -189,9 +185,7 @@ describe('createNewSubscriptionEndpoint', () => {
 				identityId: 'identity-123',
 				currency: 'GBP',
 				paymentGateway: 'Stripe PaymentIntents GNM Membership',
-				paymentMethod: expect.objectContaining({
-					type: 'CreditCardReferenceTransaction',
-				}) as unknown,
+				existingPaymentMethod: { id: 'pm-123', requiresCloning: false },
 				billToContact: expect.objectContaining({
 					firstName: 'John',
 				}) as unknown,

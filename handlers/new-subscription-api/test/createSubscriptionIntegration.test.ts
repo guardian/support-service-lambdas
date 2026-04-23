@@ -25,25 +25,24 @@ describe('new-subscription-api integration tests', () => {
 			{
 				accountName: 'New Subscription API Integration Test',
 				createdRequestId: testRequestId,
-				salesforceAccountId: '0039E00000Ks6EAQAV',
-				salesforceContactId: '0039E00000Ks6EAQAV',
-				identityId: '200004836',
+				salesforceAccountId: '0013E00001AU6xcQAD',
+				salesforceContactId: '0033E00001Cq8D2QAJ',
+				identityId: '9999999',
 				currency: 'GBP',
 				paymentGateway: 'Stripe PaymentIntents GNM Membership',
-				paymentMethod: {
-					type: 'CreditCardReferenceTransaction',
-					tokenId: 'pm_card_visa',
-					secondTokenId: 'cus_test_12345',
-					cardNumber: '424242424242',
-					cardType: 'Visa',
-					expirationMonth: 12,
-					expirationYear: 2099,
+				existingPaymentMethod: {
+					// Payment method from account A00078074 in CODE
+					id: '2c92c0f87568d97201756b1578b6069c',
+					requiresCloning: true,
 				},
 				billToContact: {
 					firstName: 'Integration',
 					lastName: 'Test',
 					workEmail: 'integration.test@theguardian.com',
 					country: 'GB',
+					address1: '90 York Way',
+					city: 'London',
+					postalCode: 'N1 9GU',
 				},
 				productPurchase: {
 					product: 'SupporterPlus',
