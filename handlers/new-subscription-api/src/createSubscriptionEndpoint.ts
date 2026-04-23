@@ -85,9 +85,6 @@ export async function createNewSubscriptionEndpoint(
 		product: productPurchase.product,
 	});
 
-	// The createSubscription function is generic in the PaymentMethod type.
-	// PaymentGateway<PaymentMethod> resolves to the full union of all valid gateway strings,
-	// which matches what our request schema validates - so the cast here is safe.
 	const inputFields: CreateSubscriptionWithExistingPaymentMethodInput = {
 		accountName: requestBody.accountName,
 		createdRequestId: requestBody.createdRequestId,

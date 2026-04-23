@@ -1,8 +1,5 @@
 import { isoCurrencySchema } from '@modules/internationalisation/schemas';
-import {
-	deliveryContactSchema,
-	productPurchaseSchema,
-} from '@modules/product-catalog/productPurchaseSchema';
+import { productPurchaseSchema } from '@modules/product-catalog/productPurchaseSchema';
 import { appliedPromotionSchema } from '@modules/promotions/v2/schema';
 import { giftRecipientSchema } from '@modules/zuora/createSubscription/giftRecipient';
 import { paymentGatewaySchema } from '@modules/zuora/orders/paymentGateways';
@@ -11,6 +8,18 @@ import { z } from 'zod';
 const existingPaymentMethodSchema = z.object({
 	id: z.string(),
 	requiresCloning: z.boolean(),
+});
+
+export const contactSchema = z.object({
+	firstName: z.string(),
+	lastName: z.string(),
+	workEmail: z.string(),
+	country: z.string(),
+	state: z.string().nullish(),
+	city: z.string().optional(),
+	address1: z.string().optional(),
+	address2: z.string().nullish(),
+	postalCode: z.string().optional(),
 });
 
 export const createSubscriptionRequestSchema = z.object({
@@ -24,7 +33,7 @@ export const createSubscriptionRequestSchema = z.object({
 	currency: isoCurrencySchema,
 	paymentGateway: paymentGatewaySchema,
 	existingPaymentMethod: existingPaymentMethodSchema,
-	billToContact: deliveryContactSchema,
+	billToContact: contactSchema,
 	productPurchase: productPurchaseSchema,
 	giftRecipient: giftRecipientSchema.optional(),
 	appliedPromotion: appliedPromotionSchema.optional(),
