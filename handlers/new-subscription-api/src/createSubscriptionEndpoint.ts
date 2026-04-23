@@ -1,4 +1,3 @@
-import { SupportRegionId } from '@modules/internationalisation/countryGroup';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 import { productPurchaseSchema } from '@modules/product-catalog/productPurchaseSchema';
@@ -53,30 +52,23 @@ export async function createNewSubscriptionEndpoint(
 		product: productPurchase.product,
 	});
 
-	let promotion = undefined;
-	if (requestBody.promoCode) {
-		logger.log('Fetching promotion', { promoCode: requestBody.promoCode });
+	const appliedPromotion = requestBody.appliedPromotion;
+	let promotion;
+	if (appliedPromotion) {
+		logger.log('Fetching promotion', { promoCode: appliedPromotion.promoCode });
 		try {
-			promotion = await getPromotion(requestBody.promoCode, stage);
+			promotion = await getPromotion(appliedPromotion.promoCode, stage);
 			logger.log('Promotion fetched successfully', {
 				promoCode: promotion.promoCode,
 				name: promotion.name,
 			});
 		} catch (error) {
 			logger.log('Failed to fetch promotion, proceeding without promotion', {
-				promoCode: requestBody.promoCode,
+				promoCode: appliedPromotion.promoCode,
 				error: String(error),
 			});
 		}
 	}
-
-	const appliedPromotion =
-		requestBody.promoCode !== undefined && promotion !== undefined
-			? {
-					promoCode: requestBody.promoCode,
-					supportRegionId: SupportRegionId.UK,
-				}
-			: undefined;
 
 	logger.log('Building and executing create subscription request', {
 		accountName: requestBody.accountName,

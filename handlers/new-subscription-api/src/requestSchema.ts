@@ -42,7 +42,6 @@ export const createSubscriptionRequestSchema = z.object({
 	acquisitionCase: z.string().optional(),
 	acquisitionSource: z.string().optional(),
 	createdByCSR: z.string().optional(),
-	promoCode: z.string().optional(),
 });
 
 export type CreateSubscriptionRequest = z.infer<

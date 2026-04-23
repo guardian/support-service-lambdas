@@ -7,6 +7,7 @@
  *
  * @group integration
  */
+import { SupportRegionId } from '@modules/internationalisation/countryGroup';
 import type { Stage } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { createNewSubscriptionEndpoint } from '../src/createSubscriptionEndpoint';
@@ -34,6 +35,10 @@ describe('new-subscription-api integration tests', () => {
 					// Payment method from account A00078074 in CODE
 					id: '2c92c0f87568d97201756b1578b6069c',
 					requiresCloning: true,
+				},
+				appliedPromotion: {
+					promoCode: 'E2E_TEST_SPLUS_MONTHLY',
+					supportRegionId: SupportRegionId.UK,
 				},
 				billToContact: {
 					firstName: 'Integration',
