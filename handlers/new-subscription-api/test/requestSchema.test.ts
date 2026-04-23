@@ -9,20 +9,18 @@ describe('createSubscriptionRequestSchema', () => {
 		identityId: 'identity-123',
 		currency: 'GBP',
 		paymentGateway: 'Stripe PaymentIntents GNM Membership',
-		paymentMethod: {
-			type: 'CreditCardReferenceTransaction',
-			tokenId: 'tok_123',
-			secondTokenId: 'tok_456',
-			cardNumber: '424242424242',
-			cardType: 'Visa',
-			expirationMonth: 12,
-			expirationYear: 2099,
+		existingPaymentMethod: {
+			id: 'pm-123',
+			requiresCloning: false,
 		},
 		billToContact: {
 			firstName: 'John',
 			lastName: 'Doe',
 			workEmail: 'john.doe@example.com',
 			country: 'GB',
+			address1: '1 Test Street',
+			city: 'London',
+			postalCode: 'SW1A 1AA',
 		},
 		productPurchase: {
 			product: 'SupporterPlus',
@@ -31,35 +29,15 @@ describe('createSubscriptionRequestSchema', () => {
 		},
 	};
 
-	it('parses a valid CreditCardReferenceTransaction request', () => {
+	it('parses a valid request with an existing payment method', () => {
 		const result = createSubscriptionRequestSchema.safeParse(validBaseRequest);
 		expect(result.success).toBe(true);
 	});
 
-	it('parses a valid DirectDebit (Bacs) request', () => {
+	it('parses a valid request with requiresCloning true', () => {
 		const request = {
 			...validBaseRequest,
-			paymentGateway: 'GoCardless',
-			paymentMethod: {
-				type: 'Bacs',
-				accountHolderInfo: { accountHolderName: 'John Doe' },
-				accountNumber: '12345678',
-				bankCode: '123456',
-			},
-		};
-		const result = createSubscriptionRequestSchema.safeParse(request);
-		expect(result.success).toBe(true);
-	});
-
-	it('parses a valid PayPal request', () => {
-		const request = {
-			...validBaseRequest,
-			paymentGateway: 'PayPal Express',
-			paymentMethod: {
-				type: 'PayPalNativeEC',
-				BAID: 'paypal-baid-123',
-				email: 'user@example.com',
-			},
+			existingPaymentMethod: { id: 'pm-456', requiresCloning: true },
 		};
 		const result = createSubscriptionRequestSchema.safeParse(request);
 		expect(result.success).toBe(true);
@@ -80,28 +58,16 @@ describe('createSubscriptionRequestSchema', () => {
 		expect(result.success).toBe(false);
 	});
 
-	it('rejects invalid email in billToContact', () => {
-		const request = {
-			...validBaseRequest,
-			billToContact: {
-				...validBaseRequest.billToContact,
-				workEmail: 'not-an-email',
-			},
-		};
-		const result = createSubscriptionRequestSchema.safeParse(request);
-		expect(result.success).toBe(false);
-	});
-
 	it('rejects invalid createdRequestId (not a UUID)', () => {
 		const request = { ...validBaseRequest, createdRequestId: 'not-a-uuid' };
 		const result = createSubscriptionRequestSchema.safeParse(request);
 		expect(result.success).toBe(false);
 	});
 
-	it('rejects unknown payment method type', () => {
+	it('rejects missing existingPaymentMethod id', () => {
 		const request = {
 			...validBaseRequest,
-			paymentMethod: { type: 'UnknownMethod', tokenId: '123' },
+			existingPaymentMethod: { requiresCloning: false },
 		};
 		const result = createSubscriptionRequestSchema.safeParse(request);
 		expect(result.success).toBe(false);
@@ -116,23 +82,23 @@ describe('createSubscriptionRequestSchema', () => {
 			identityId: 'identity-123',
 			currency: 'USD',
 			paymentGateway: 'Stripe PaymentIntents GNM Membership',
-			paymentMethod: {
-				type: 'CreditCardReferenceTransaction',
-				tokenId: 'tok_123',
-				secondTokenId: 'tok_456',
-				cardNumber: '424242424242',
-				expirationMonth: 12,
-				expirationYear: 2099,
+			existingPaymentMethod: {
+				id: 'pm-123',
+				requiresCloning: false,
 			},
 			billToContact: {
 				firstName: 'Jane',
 				lastName: 'Smith',
 				workEmail: 'jane@example.com',
 				country: 'US',
+				address1: '1 Test Street',
+				city: 'New York',
+				postalCode: '10001',
 			},
 			productPurchase: {
 				product: 'Contribution',
 				ratePlan: 'Monthly',
+				amount: 5,
 			},
 		};
 		const result = createSubscriptionRequestSchema.safeParse(

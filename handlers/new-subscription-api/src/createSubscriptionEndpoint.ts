@@ -5,11 +5,8 @@ import { productPurchaseSchema } from '@modules/product-catalog/productPurchaseS
 import { getPromotion } from '@modules/promotions/v2/getPromotion';
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
-import {
-	createSubscription,
-	type CreateSubscriptionInputFields,
-} from '@modules/zuora/createSubscription/createSubscription';
-import type { PaymentMethod } from '@modules/zuora/orders/paymentMethods';
+import type { CreateSubscriptionWithExistingPaymentMethodInput } from '@modules/zuora/createSubscription/createSubscriptionWithExistingPaymentMethod';
+import { createSubscriptionWithExistingPaymentMethod } from '@modules/zuora/createSubscription/createSubscriptionWithExistingPaymentMethod';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import type { CreateSubscriptionRequest } from './requestSchema';
@@ -91,7 +88,7 @@ export async function createNewSubscriptionEndpoint(
 	// The createSubscription function is generic in the PaymentMethod type.
 	// PaymentGateway<PaymentMethod> resolves to the full union of all valid gateway strings,
 	// which matches what our request schema validates - so the cast here is safe.
-	const inputFields: CreateSubscriptionInputFields<PaymentMethod> = {
+	const inputFields: CreateSubscriptionWithExistingPaymentMethodInput = {
 		accountName: requestBody.accountName,
 		createdRequestId: requestBody.createdRequestId,
 		salesforceAccountId: requestBody.salesforceAccountId,
@@ -99,18 +96,19 @@ export async function createNewSubscriptionEndpoint(
 		identityId: requestBody.identityId,
 		currency: requestBody.currency,
 		paymentGateway: requestBody.paymentGateway,
-		paymentMethod: requestBody.paymentMethod,
+		existingPaymentMethod: requestBody.existingPaymentMethod,
 		billToContact: requestBody.billToContact,
 		productPurchase: productPurchase,
 		appliedPromotion: appliedPromotion,
 	};
 
-	const result: CreateSubscriptionResponse = await createSubscription(
-		zuoraClient,
-		productCatalog,
-		inputFields,
-		promotion,
-	);
+	const result: CreateSubscriptionResponse =
+		await createSubscriptionWithExistingPaymentMethod(
+			zuoraClient,
+			productCatalog,
+			inputFields,
+			promotion,
+		);
 
 	logger.log('Subscription created successfully', {
 		orderNumber: result.orderNumber,

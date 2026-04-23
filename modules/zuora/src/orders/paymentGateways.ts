@@ -36,6 +36,13 @@ type PaymentGatewayMap = {
 	ExistingPaymentMethod: GoCardlessPaymentGateway | StripePaymentGateway;
 };
 
+export const paymentGatewaySchema = z.union([
+	stripePaymentGatewaySchema,
+	goCardlessPaymentGatewaySchema,
+	payPalPaymentGatewaySchema,
+	payPalCompletePaymentsPaymentGatewaySchema,
+]);
+
 export type PaymentGateway<T extends AnyPaymentMethod> =
 	T['type'] extends keyof PaymentGatewayMap
 		? PaymentGatewayMap[T['type']]
