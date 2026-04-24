@@ -1,113 +1,51 @@
-import { getProductCatalogFromApi } from '@modules/product-catalog/api';
-import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
-import { productPurchaseSchema } from '@modules/product-catalog/productPurchaseSchema';
+import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { getPromotion } from '@modules/promotions/v2/getPromotion';
+import type { AppliedPromotion } from '@modules/promotions/v2/schema';
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
-import type { CreateSubscriptionWithExistingPaymentMethodInput } from '@modules/zuora/createSubscription/createSubscriptionWithExistingPaymentMethod';
 import { createSubscriptionWithExistingPaymentMethod } from '@modules/zuora/createSubscription/createSubscriptionWithExistingPaymentMethod';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import type { CreateSubscriptionRequest } from './requestSchema';
 import type { CreateSubscriptionResponse } from './responseSchema';
 
-function parseProductPurchase(
-	productPurchase: CreateSubscriptionRequest['productPurchase'],
-): ProductPurchase {
-	logger.log('Parsing product purchase', {
-		product: productPurchase.product,
-		ratePlan: productPurchase.ratePlan,
-	});
-	const parseResult = productPurchaseSchema.safeParse(productPurchase);
-	if (!parseResult.success) {
-		logger.log('Product purchase validation failed', {
-			errors: parseResult.error.errors,
+async function fetchPromotionFromAppliedPromotion(
+	stage: Stage,
+	appliedPromotion: AppliedPromotion | undefined,
+) {
+	if (appliedPromotion) {
+		logger.log('Fetching promotion from appliedPromotion', {
+			promoCode: appliedPromotion.promoCode,
 		});
-		throw new Error(
-			`Invalid product purchase: ${JSON.stringify(parseResult.error.errors)}`,
-		);
+		const promotion = await getPromotion(appliedPromotion.promoCode, stage);
+		logger.log('Promotion fetched successfully');
+		return promotion;
 	}
-	return parseResult.data;
+	return;
 }
 
 export async function createNewSubscriptionEndpoint(
 	stage: Stage,
 	zuoraClient: ZuoraClient,
+	productCatalog: ProductCatalog,
 	requestBody: CreateSubscriptionRequest,
 ): Promise<APIGatewayProxyResult> {
-	logger.log('Starting createNewSubscriptionEndpoint', {
-		createdRequestId: requestBody.createdRequestId,
-		product: requestBody.productPurchase.product,
-		ratePlan: requestBody.productPurchase.ratePlan,
-		currency: requestBody.currency,
-		identityId: requestBody.identityId,
-	});
+	logger.log('Starting createNewSubscriptionEndpoint');
+	const promotion = await fetchPromotionFromAppliedPromotion(
+		stage,
+		requestBody.appliedPromotion,
+	);
 
-	logger.log('Fetching product catalog');
-	const productCatalog = await getProductCatalogFromApi(stage);
-	logger.log('Product catalog fetched successfully');
-
-	const productPurchase = parseProductPurchase(requestBody.productPurchase);
-	logger.log('Product purchase validated successfully', {
-		product: productPurchase.product,
-	});
-
-	const appliedPromotion = requestBody.appliedPromotion;
-	let promotion;
-	if (appliedPromotion) {
-		logger.log('Fetching promotion', { promoCode: appliedPromotion.promoCode });
-		try {
-			promotion = await getPromotion(appliedPromotion.promoCode, stage);
-			logger.log('Promotion fetched successfully', {
-				promoCode: promotion.promoCode,
-				name: promotion.name,
-			});
-		} catch (error) {
-			logger.log('Failed to fetch promotion, proceeding without promotion', {
-				promoCode: appliedPromotion.promoCode,
-				error: String(error),
-			});
-		}
-	}
-
-	logger.log('Building and executing create subscription request', {
-		accountName: requestBody.accountName,
-		createdRequestId: requestBody.createdRequestId,
-		salesforceAccountId: requestBody.salesforceAccountId,
-		product: productPurchase.product,
-	});
-
-	const inputFields: CreateSubscriptionWithExistingPaymentMethodInput = {
-		accountName: requestBody.accountName,
-		createdRequestId: requestBody.createdRequestId,
-		salesforceAccountId: requestBody.salesforceAccountId,
-		salesforceContactId: requestBody.salesforceContactId,
-		identityId: requestBody.identityId,
-		currency: requestBody.currency,
-		paymentGateway: requestBody.paymentGateway,
-		existingPaymentMethod: requestBody.existingPaymentMethod,
-		billToContact: requestBody.billToContact,
-		productPurchase: productPurchase,
-		appliedPromotion: appliedPromotion,
-	};
-
+	logger.log('Building and executing create subscription request');
 	const result: CreateSubscriptionResponse =
 		await createSubscriptionWithExistingPaymentMethod(
 			zuoraClient,
 			productCatalog,
-			inputFields,
+			requestBody,
 			promotion,
 		);
 
-	logger.log('Subscription created successfully', {
-		orderNumber: result.orderNumber,
-		accountNumber: result.accountNumber,
-		subscriptionNumbers: result.subscriptionNumbers,
-		invoiceNumbers: result.invoiceNumbers,
-		paymentNumber: result.paymentNumber,
-		paidAmount: result.paidAmount,
-	});
-
+	logger.log('Subscription created successfully', result);
 	return {
 		statusCode: 200,
 		body: JSON.stringify(result),
