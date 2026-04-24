@@ -120,6 +120,34 @@ exports[`The New Subscription API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
+    "PromocodetablequeryaccessB0CB896A": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:Query",
+                "dynamodb:DescribeTable",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "support-admin-console-promos-CODE",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "PromocodetablequeryaccessB0CB896A",
+        "Roles": [
+          {
+            "Ref": "newsubscriptionapilambdaServiceRoleE544C2A4",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "S3catalogreadpolicyE18911B4": {
       "Properties": {
         "PolicyDocument": {
@@ -1088,6 +1116,34 @@ exports[`The New Subscription API stack matches the snapshot 2`] = `
         ],
       },
       "Type": "AWS::ApiGateway::DomainName",
+    },
+    "PromocodetablequeryaccessB0CB896A": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:Query",
+                "dynamodb:DescribeTable",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "support-admin-console-promos-PROD",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "PromocodetablequeryaccessB0CB896A",
+        "Roles": [
+          {
+            "Ref": "newsubscriptionapilambdaServiceRoleE544C2A4",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
     "S3catalogreadpolicyE18911B4": {
       "Properties": {

@@ -1,5 +1,6 @@
 import type { App } from 'aws-cdk-lib';
 import {
+	AllowPromoCodeTableQueryPolicy,
 	AllowS3CatalogReadPolicy,
 	AllowZuoraOAuthSecretsPolicy,
 } from './cdk/policies';
@@ -26,6 +27,7 @@ export class NewSubscriptionApi extends SrStack {
 		lambda.addPolicies(
 			new AllowZuoraOAuthSecretsPolicy(this),
 			new AllowS3CatalogReadPolicy(this),
+			new AllowPromoCodeTableQueryPolicy(this),
 		);
 	}
 }
