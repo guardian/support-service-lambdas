@@ -14,9 +14,9 @@ async function fetchPromotionFromAppliedPromotion(
 	appliedPromotion: AppliedPromotion | undefined,
 ) {
 	if (appliedPromotion) {
-		logger.log('Fetching promotion from appliedPromotion', {
-			promoCode: appliedPromotion.promoCode,
-		});
+		logger.log(
+			`Fetching promotion from appliedPromotion ${appliedPromotion.promoCode}`,
+		);
 		const promotion = await getPromotion(appliedPromotion.promoCode, stage);
 		logger.log('Promotion fetched successfully');
 		return promotion;

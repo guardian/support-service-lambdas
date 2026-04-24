@@ -28,12 +28,7 @@ export const handler: Handler = Router([
 		handler: withBodyParser(
 			createSubscriptionRequestSchema,
 			async (event, path, body: CreateSubscriptionRequest) => {
-				logger.log('Received POST /subscription request', {
-					createdRequestId: body.createdRequestId,
-					product: body.productPurchase.product,
-					ratePlan: body.productPurchase.ratePlan,
-					currency: body.currency,
-				});
+				logger.log('Received POST /subscription request', body);
 				logger.mutableAddContext(body.createdRequestId);
 
 				return createNewSubscriptionEndpoint(
