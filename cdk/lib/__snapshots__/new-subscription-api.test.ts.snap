@@ -132,9 +132,7 @@ exports[`The New Subscription API stack matches the snapshot 1`] = `
                 "dynamodb:DescribeTable",
               ],
               "Effect": "Allow",
-              "Resource": {
-                "Fn::ImportValue": "support-admin-console-promos-CODE",
-              },
+              "Resource": "arn:aws:dynamodb:*:*:table/support-admin-console-promos-CODE",
             },
           ],
           "Version": "2012-10-17",
@@ -1129,9 +1127,7 @@ exports[`The New Subscription API stack matches the snapshot 2`] = `
                 "dynamodb:DescribeTable",
               ],
               "Effect": "Allow",
-              "Resource": {
-                "Fn::ImportValue": "support-admin-console-promos-PROD",
-              },
+              "Resource": "arn:aws:dynamodb:*:*:table/support-admin-console-promos-PROD",
             },
           ],
           "Version": "2012-10-17",

@@ -103,7 +103,7 @@ export class AllowPromoCodeTableQueryPolicy extends GuAllowPolicy {
 				'dynamodb:DescribeTable',
 			],
 			resources: [
-				Fn.importValue(`support-admin-console-promos-${scope.stage}`),
+				`arn:aws:dynamodb:*:*:table/support-admin-console-promos-${scope.stage}`,
 			],
 		});
 	}
