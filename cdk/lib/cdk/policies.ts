@@ -92,3 +92,19 @@ export class AllowSupporterProductDataQueryPolicy extends GuAllowPolicy {
 		});
 	}
 }
+
+export class AllowPromoCodeTableQueryPolicy extends GuAllowPolicy {
+	constructor(scope: GuStack) {
+		super(scope, 'Promo code table query access', {
+			actions: [
+				'dynamodb:GetItem',
+				'dynamodb:Scan',
+				'dynamodb:Query',
+				'dynamodb:DescribeTable',
+			],
+			resources: [
+				Fn.importValue(`support-admin-console-promos-${scope.stage}`),
+			],
+		});
+	}
+}
