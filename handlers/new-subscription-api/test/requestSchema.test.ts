@@ -34,21 +34,16 @@ describe('createSubscriptionRequestSchema', () => {
 		expect(result.success).toBe(true);
 	});
 
-	it('parses a valid request with requiresCloning true', () => {
+
+	it('parses request with optional appliedPromotion', () => {
 		const request = {
 			...validBaseRequest,
-			existingPaymentMethod: { id: 'pm-456', requiresCloning: true },
+			appliedPromotion: { promoCode: 'PROMO10', supportRegionId: 'uk' },
 		};
 		const result = createSubscriptionRequestSchema.safeParse(request);
 		expect(result.success).toBe(true);
-	});
-
-	it('parses request with optional promoCode', () => {
-		const request = { ...validBaseRequest, promoCode: 'PROMO10' };
-		const result = createSubscriptionRequestSchema.safeParse(request);
-		expect(result.success).toBe(true);
 		if (result.success) {
-			expect(result.data.promoCode).toBe('PROMO10');
+			expect(result.data.appliedPromotion?.promoCode).toBe('PROMO10');
 		}
 	});
 
@@ -60,15 +55,6 @@ describe('createSubscriptionRequestSchema', () => {
 
 	it('rejects invalid createdRequestId (not a UUID)', () => {
 		const request = { ...validBaseRequest, createdRequestId: 'not-a-uuid' };
-		const result = createSubscriptionRequestSchema.safeParse(request);
-		expect(result.success).toBe(false);
-	});
-
-	it('rejects missing existingPaymentMethod id', () => {
-		const request = {
-			...validBaseRequest,
-			existingPaymentMethod: { requiresCloning: false },
-		};
 		const result = createSubscriptionRequestSchema.safeParse(request);
 		expect(result.success).toBe(false);
 	});

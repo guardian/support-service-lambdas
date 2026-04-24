@@ -1,3 +1,5 @@
+import { Lazy } from '@modules/lazy';
+import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { logger } from '@modules/routing/logger';
 import { Router } from '@modules/routing/router';
 import { withBodyParser } from '@modules/routing/withParsers';
@@ -9,6 +11,14 @@ import type { CreateSubscriptionRequest } from './requestSchema';
 import { createSubscriptionRequestSchema } from './requestSchema';
 
 const stage = stageFromEnvironment();
+const lazyZuoraClient = new Lazy(
+	async () => await ZuoraClient.create(stage),
+	'Create Zuora client',
+);
+const lazyProductCatalog = new Lazy(
+	async () => await getProductCatalogFromApi(stage),
+	'Get product catalog',
+);
 
 // main entry point from AWS
 export const handler: Handler = Router([
@@ -26,10 +36,12 @@ export const handler: Handler = Router([
 				});
 				logger.mutableAddContext(body.createdRequestId);
 
-				const zuoraClient = await ZuoraClient.create(stage);
-				logger.log('Zuora client created for stage', { stage });
-
-				return createNewSubscriptionEndpoint(stage, zuoraClient, body);
+				return createNewSubscriptionEndpoint(
+					stage,
+					await lazyZuoraClient.get(),
+					await lazyProductCatalog.get(),
+					body,
+				);
 			},
 		),
 	},
