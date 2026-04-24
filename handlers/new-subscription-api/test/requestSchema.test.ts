@@ -34,7 +34,6 @@ describe('createSubscriptionRequestSchema', () => {
 		expect(result.success).toBe(true);
 	});
 
-
 	it('parses request with optional appliedPromotion', () => {
 		const request = {
 			...validBaseRequest,
