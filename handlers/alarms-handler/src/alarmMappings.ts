@@ -9,21 +9,6 @@ export type Team =
 	| 'ENGINE'
 	| 'PUZZLES';
 
-const mobilePurchasesApps = [
-	'mobile-purchases-apple-pubsub',
-	'mobile-purchases-apple-subscription-status',
-	'mobile-purchases-apple-update-subscriptions',
-	'mobile-purchases-delete-user-subscription',
-	'mobile-purchases-feast-apple-pubsub',
-	'mobile-purchases-feast-apple-update-subscriptions',
-	'mobile-purchases-feast-google-pubsub',
-	'mobile-purchases-feast-google-update-subscriptions',
-	'mobile-purchases-google-oauth',
-	'mobile-purchases-google-pubsub',
-	'mobile-purchases-google-subscription-status',
-	'mobile-purchases-google-update-subscriptions',
-];
-
 const teamToAppMappings: Record<Team, string[]> = {
 	GROWTH: [
 		'acquisition-events-api',
@@ -35,7 +20,6 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'bigquery-acquisitions-publisher',
 		'component-event-stream',
 		'dotcom-components',
-		...mobilePurchasesApps,
 		'promotions-tool',
 		'promotions-lambdas',
 		'super-mode',
@@ -137,6 +121,20 @@ const teamToAppMappings: Record<Team, string[]> = {
 
 		// members-data-api
 		'membership-attribute-service',
+
+		// mobile-purchases-api
+		'mobile-purchases-apple-pubsub',
+		'mobile-purchases-apple-subscription-status',
+		'mobile-purchases-apple-update-subscriptions',
+		'mobile-purchases-delete-user-subscription',
+		'mobile-purchases-feast-apple-pubsub',
+		'mobile-purchases-feast-apple-update-subscriptions',
+		'mobile-purchases-feast-google-pubsub',
+		'mobile-purchases-feast-google-update-subscriptions',
+		'mobile-purchases-google-oauth',
+		'mobile-purchases-google-pubsub',
+		'mobile-purchases-google-subscription-status',
+		'mobile-purchases-google-update-subscriptions',
 
 		// misc
 		'discount-expiry-notifier',
