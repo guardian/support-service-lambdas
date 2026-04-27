@@ -150,9 +150,9 @@ describe('getSubscriptionInformation', () => {
 			chargedThroughDate: '2026-03-10', // it uses the effective start date of the contribution charge
 			ratePlanId: subscription.ratePlan.id,
 			chargeIds: [
-				productCatalogCode.SupporterPlus.ratePlans.Monthly.charges.Contribution
-					.id,
 				productCatalogCode.SupporterPlus.ratePlans.Monthly.charges.Subscription
+					.id,
+				productCatalogCode.SupporterPlus.ratePlans.Monthly.charges.Contribution
 					.id,
 			],
 		} satisfies Omit<SubscriptionInformation, 'chargedThroughDate'> & {

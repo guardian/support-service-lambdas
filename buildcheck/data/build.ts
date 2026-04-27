@@ -356,6 +356,16 @@ const zuoraSalesforceLinkRemover: HandlerDefinition = {
 	},
 };
 
+const newSubscriptionApi: HandlerDefinition = {
+	name: 'new-subscription-api',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
+};
+
 const newsletterAcquisition: HandlerDefinition = {
 	name: 'newsletter-acquisition',
 	dependencies: {
@@ -611,6 +621,7 @@ export const build: BuildDefinition = {
 		stripeDisputes,
 		ticketTailorWebhook,
 		updateSupporterPlusAmount,
+		newSubscriptionApi,
 		userBenefits,
 		writeOffUnpaidInvoices,
 		zuoraSalesforceLinkRemover,
