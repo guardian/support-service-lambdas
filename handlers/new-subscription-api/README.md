@@ -5,7 +5,7 @@
 An AWS Lambda that creates new Zuora subscriptions for Guardian products. It exposes a single endpoint:
 
 ```
-POST /subscriptions
+POST /subscription
 ```
 
 On receiving a request it:
@@ -36,10 +36,42 @@ pnpm it-test
 
 ### Manual testing
 
-Send a `POST` request to the CODE endpoint:
+Send a `POST` request to the CODE endpoint, for instance with cURL:
 
 ```
-https://new-subscription-api-code.support.guardianapis.com/subscriptions
+
+
+curl --location 'https://new-subscription-api-code.support.guardianapis.com/subscription' \
+--header 'Content-Type: application/json' \
+--header 'x-api-key: [REPLACE_THIS_WITH_A_REAL_API_KEY]' \
+--data-raw '{
+    "accountName": "Test Account",
+    "createdRequestId": "a1b2c3d4-e5f6-7890-abcd-ef1234567899",
+    "salesforceAccountId": "0011234567890ABCD",
+    "salesforceContactId": "0031234567890ABCD",
+    "identityId": "12345678",
+    "currency": "GBP",
+    "paymentGateway": "Stripe PaymentIntents GNM Membership",
+    "existingPaymentMethod": {
+        "id": "2c92c0f87568d97201756b1578b6069c",
+        "requiresCloning": true
+    },
+    "billToContact": {
+        "firstName": "John",
+        "lastName": "Doe",
+        "workEmail": "john.doe@example.com",
+        "country": "GB"
+    },
+    "appliedPromotion": {
+        "promoCode": "E2E_TEST_SPLUS_MONTHLY",
+        "supportRegionId": "uk"
+    },
+    "productPurchase": {
+        "product": "SupporterPlus",
+        "ratePlan": "Monthly",
+        "amount": 12
+    }
+}'
 ```
 
 Check the CloudWatch logs for execution details:
