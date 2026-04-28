@@ -29,7 +29,7 @@ export const handler: Handler = Router([
 			createSubscriptionRequestSchema,
 			async (event, path, body: CreateSubscriptionRequest) => {
 				logger.log('Received POST /subscription request', body);
-				logger.mutableAddContext(body.createdRequestId);
+				logger.mutableAddContext(body.identityId);
 
 				return createNewSubscriptionEndpoint(
 					stage,
