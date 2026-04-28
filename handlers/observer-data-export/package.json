@@ -7,7 +7,7 @@
     "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
-    "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/handlers/*.ts --sourcemap --source-root=/support-service-lambdas/handlers/observer-data-export/target/",
+    "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/handlers/*.ts --sourcemap --source-root=/support-service-lambdas/handlers/observer-data-export/target/",
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr observer-data-export.zip ./*.js.map ./*.js",
     "cdk:test": "pnpm --filter cdk test observer-data-export",
     "cdk:test-update": "pnpm --filter cdk test-update observer-data-export",
