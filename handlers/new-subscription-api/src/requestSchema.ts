@@ -1,14 +1,10 @@
 import { isoCurrencySchema } from '@modules/internationalisation/schemas';
 import { productPurchaseSchema } from '@modules/product-catalog/productPurchaseSchema';
 import { appliedPromotionSchema } from '@modules/promotions/v2/schema';
+import { existingPaymentMethodInputSchema } from '@modules/zuora/createSubscription/clonePaymentMethod';
 import { giftRecipientSchema } from '@modules/zuora/createSubscription/giftRecipient';
 import { paymentGatewaySchema } from '@modules/zuora/orders/paymentGateways';
 import { z } from 'zod';
-
-const existingPaymentMethodSchema = z.object({
-	id: z.string(),
-	requiresCloning: z.boolean(),
-});
 
 export const contactSchema = z.object({
 	firstName: z.string(),
@@ -32,7 +28,7 @@ export const createSubscriptionRequestSchema = z.object({
 	identityId: z.string(),
 	currency: isoCurrencySchema,
 	paymentGateway: paymentGatewaySchema,
-	existingPaymentMethod: existingPaymentMethodSchema,
+	existingPaymentMethod: existingPaymentMethodInputSchema,
 	billToContact: contactSchema,
 	productPurchase: productPurchaseSchema,
 	giftRecipient: giftRecipientSchema.optional(),
