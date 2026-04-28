@@ -9,14 +9,14 @@ exports[`The New Subscription API stack matches the snapshot 1`] = `
     "gu:cdk:version": "TEST",
   },
   "Outputs": {
-    "newsubscriptionapilambdanewsubscriptionapiCODEEndpoint20222639": {
+    "LambdaRestApiEndpoint7EDBC694": {
       "Value": {
         "Fn::Join": [
           "",
           [
             "https://",
             {
-              "Ref": "newsubscriptionapilambdanewsubscriptionapiCODE2838767B",
+              "Ref": "LambdaRestApi687C4D83",
             },
             ".execute-api.",
             {
@@ -28,7 +28,7 @@ exports[`The New Subscription API stack matches the snapshot 1`] = `
             },
             "/",
             {
-              "Ref": "newsubscriptionapilambdanewsubscriptionapiCODEDeploymentStageCODEC669AD9D",
+              "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
             },
             "/",
           ],
@@ -50,10 +50,10 @@ exports[`The New Subscription API stack matches the snapshot 1`] = `
           "Ref": "DomainName",
         },
         "RestApiId": {
-          "Ref": "newsubscriptionapilambdanewsubscriptionapiCODE2838767B",
+          "Ref": "LambdaRestApi687C4D83",
         },
         "Stage": {
-          "Ref": "newsubscriptionapilambdanewsubscriptionapiCODEDeploymentStageCODEC669AD9D",
+          "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
         },
       },
       "Type": "AWS::ApiGateway::BasePathMapping",
@@ -120,93 +120,10 @@ exports[`The New Subscription API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
-    "PromocodetablequeryaccessB0CB896A": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "dynamodb:GetItem",
-                "dynamodb:Scan",
-                "dynamodb:Query",
-                "dynamodb:DescribeTable",
-              ],
-              "Effect": "Allow",
-              "Resource": "arn:aws:dynamodb:*:*:table/support-admin-console-promos-CODE",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "PromocodetablequeryaccessB0CB896A",
-        "Roles": [
-          {
-            "Ref": "newsubscriptionapilambdaServiceRoleE544C2A4",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "S3catalogreadpolicyE18911B4": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-CODE/*",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "S3catalogreadpolicyE18911B4",
-        "Roles": [
-          {
-            "Ref": "newsubscriptionapilambdaServiceRoleE544C2A4",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "ZuoraOAuthSecretsManagerpolicy5448D99B": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "secretsmanager:GetSecretValue",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:secretsmanager:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":secret:CODE/Zuora-OAuth/SupportServiceLambdas-*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "ZuoraOAuthSecretsManagerpolicy5448D99B",
-        "Roles": [
-          {
-            "Ref": "newsubscriptionapilambdaServiceRoleE544C2A4",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "newsubscriptionapilambdaC15E5D99": {
+    "LambdaD247545B": {
       "DependsOn": [
-        "newsubscriptionapilambdaServiceRoleDefaultPolicy25179405",
-        "newsubscriptionapilambdaServiceRoleE544C2A4",
+        "LambdaServiceRoleDefaultPolicyDAE46E21",
+        "LambdaServiceRoleA8ED4D3B",
       ],
       "Properties": {
         "Code": {
@@ -232,7 +149,7 @@ exports[`The New Subscription API stack matches the snapshot 1`] = `
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "newsubscriptionapilambdaServiceRoleE544C2A4",
+            "LambdaServiceRoleA8ED4D3B",
             "Arn",
           ],
         },
@@ -263,7 +180,559 @@ exports[`The New Subscription API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "newsubscriptionapilambdaServiceRoleDefaultPolicy25179405": {
+    "LambdaRestApi687C4D83": {
+      "Properties": {
+        "ApiKeySourceType": "HEADER",
+        "Description": "API Gateway created by CDK",
+        "Name": "new-subscription-api-CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "new-subscription-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "LambdaRestApiANYApiPermissionTestnewsubscriptionapiCODELambdaRestApi3A8A1214ANYD095BAB9": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/test-invoke-stage/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiANYApiPermissionnewsubscriptionapiCODELambdaRestApi3A8A1214ANYF7F801D2": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/",
+              {
+                "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
+              },
+              "/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiANYC3C9D364": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "LambdaD247545B",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "LambdaRestApi687C4D83",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "LambdaRestApiAccount4E23441E": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "LambdaRestApi687C4D83",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "LambdaRestApiCloudWatchRole73082DF6",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "LambdaRestApiApiKeyB5CCCA11": {
+      "Properties": {
+        "Enabled": true,
+        "Name": "new-subscription-api-key-CODE",
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "LambdaRestApi687C4D83",
+            },
+            "StageName": {
+              "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "new-subscription-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
+    },
+    "LambdaRestApiCloudWatchRole73082DF6": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "new-subscription-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "LambdaRestApiDeployment953190893de338f5cef05548ce71ad0ca6defaf5": {
+      "DependsOn": [
+        "LambdaRestApiproxyANY486C4D1F",
+        "LambdaRestApiproxy22103CFD",
+        "LambdaRestApiANYC3C9D364",
+      ],
+      "Properties": {
+        "Description": "API Gateway created by CDK",
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "LambdaRestApiDeploymentStageCODECCF2AEE8": {
+      "DependsOn": [
+        "LambdaRestApiAccount4E23441E",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "LambdaRestApiDeployment953190893de338f5cef05548ce71ad0ca6defaf5",
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+        "StageName": "CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "new-subscription-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "LambdaRestApiUsagePlanD8F7DB8D": {
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "LambdaRestApi687C4D83",
+            },
+            "Stage": {
+              "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
+            },
+            "Throttle": {},
+          },
+        ],
+        "Description": "REST endpoints for new-subscription-api",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "new-subscription-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "UsagePlanName": "new-subscription-api-CODE",
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
+    },
+    "LambdaRestApiUsagePlanUsagePlanKeyResourcenewsubscriptionapiCODELambdaRestApiApiKey64101F3E1B637740": {
+      "Properties": {
+        "KeyId": {
+          "Ref": "LambdaRestApiApiKeyB5CCCA11",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "LambdaRestApiUsagePlanD8F7DB8D",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
+    },
+    "LambdaRestApiproxy22103CFD": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "LambdaRestApi687C4D83",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "LambdaRestApiproxyANY486C4D1F": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "LambdaD247545B",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "LambdaRestApiproxy22103CFD",
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "LambdaRestApiproxyANYApiPermissionTestnewsubscriptionapiCODELambdaRestApi3A8A1214ANYproxyA06806CE": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/test-invoke-stage/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiproxyANYApiPermissionnewsubscriptionapiCODELambdaRestApi3A8A1214ANYproxy713D2ECD": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/",
+              {
+                "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
+              },
+              "/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaServiceRoleA8ED4D3B": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "new-subscription-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "LambdaServiceRoleDefaultPolicyDAE46E21": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -354,566 +823,97 @@ exports[`The New Subscription API stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "newsubscriptionapilambdaServiceRoleDefaultPolicy25179405",
+        "PolicyName": "LambdaServiceRoleDefaultPolicyDAE46E21",
         "Roles": [
           {
-            "Ref": "newsubscriptionapilambdaServiceRoleE544C2A4",
+            "Ref": "LambdaServiceRoleA8ED4D3B",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "newsubscriptionapilambdaServiceRoleE544C2A4": {
+    "PromocodetablequeryaccessB0CB896A": {
       "Properties": {
-        "AssumeRolePolicyDocument": {
+        "PolicyDocument": {
           "Statement": [
             {
-              "Action": "sts:AssumeRole",
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:Query",
+                "dynamodb:DescribeTable",
+              ],
               "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
+              "Resource": "arn:aws:dynamodb:*:*:table/support-admin-console-promos-CODE",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "PromocodetablequeryaccessB0CB896A",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "S3catalogreadpolicyE18911B4": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-CODE/*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "S3catalogreadpolicyE18911B4",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "ZuoraOAuthSecretsManagerpolicy5448D99B": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:CODE/Zuora-OAuth/SupportServiceLambdas-*",
+                  ],
+                ],
               },
             },
           ],
           "Version": "2012-10-17",
         },
-        "ManagedPolicyArns": [
+        "PolicyName": "ZuoraOAuthSecretsManagerpolicy5448D99B",
+        "Roles": [
           {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "new-subscription-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
+            "Ref": "LambdaServiceRoleA8ED4D3B",
           },
         ],
       },
-      "Type": "AWS::IAM::Role",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiCODE2838767B": {
-      "Properties": {
-        "ApiKeySourceType": "HEADER",
-        "Description": "API Gateway created by CDK",
-        "Name": "new-subscription-api-CODE",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "new-subscription-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::RestApi",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiCODEANY7AE49035": {
-      "Properties": {
-        "ApiKeyRequired": true,
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "newsubscriptionapilambdaC15E5D99",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Fn::GetAtt": [
-            "newsubscriptionapilambdanewsubscriptionapiCODE2838767B",
-            "RootResourceId",
-          ],
-        },
-        "RestApiId": {
-          "Ref": "newsubscriptionapilambdanewsubscriptionapiCODE2838767B",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiCODEANYApiPermissionTestnewsubscriptionapiCODEnewsubscriptionapilambdanewsubscriptionapiCODEA5E256DEANY32431CE6": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "newsubscriptionapilambdaC15E5D99",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "newsubscriptionapilambdanewsubscriptionapiCODE2838767B",
-              },
-              "/test-invoke-stage/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiCODEANYApiPermissionnewsubscriptionapiCODEnewsubscriptionapilambdanewsubscriptionapiCODEA5E256DEANY35B3A4C9": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "newsubscriptionapilambdaC15E5D99",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "newsubscriptionapilambdanewsubscriptionapiCODE2838767B",
-              },
-              "/",
-              {
-                "Ref": "newsubscriptionapilambdanewsubscriptionapiCODEDeploymentStageCODEC669AD9D",
-              },
-              "/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiCODEAccount160145E1": {
-      "DeletionPolicy": "Retain",
-      "DependsOn": [
-        "newsubscriptionapilambdanewsubscriptionapiCODE2838767B",
-      ],
-      "Properties": {
-        "CloudWatchRoleArn": {
-          "Fn::GetAtt": [
-            "newsubscriptionapilambdanewsubscriptionapiCODECloudWatchRoleFE43CB0F",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::ApiGateway::Account",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiCODECloudWatchRoleFE43CB0F": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "apigateway.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "new-subscription-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiCODEDeploymentB92207D9f32fea4a0a02d865c8c86f9a8af308be": {
-      "DependsOn": [
-        "newsubscriptionapilambdanewsubscriptionapiCODEproxyANY323BC2DD",
-        "newsubscriptionapilambdanewsubscriptionapiCODEproxyBFBD1BEA",
-        "newsubscriptionapilambdanewsubscriptionapiCODEANY7AE49035",
-      ],
-      "Properties": {
-        "Description": "API Gateway created by CDK",
-        "RestApiId": {
-          "Ref": "newsubscriptionapilambdanewsubscriptionapiCODE2838767B",
-        },
-      },
-      "Type": "AWS::ApiGateway::Deployment",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiCODEDeploymentStageCODEC669AD9D": {
-      "DependsOn": [
-        "newsubscriptionapilambdanewsubscriptionapiCODEAccount160145E1",
-      ],
-      "Properties": {
-        "DeploymentId": {
-          "Ref": "newsubscriptionapilambdanewsubscriptionapiCODEDeploymentB92207D9f32fea4a0a02d865c8c86f9a8af308be",
-        },
-        "RestApiId": {
-          "Ref": "newsubscriptionapilambdanewsubscriptionapiCODE2838767B",
-        },
-        "StageName": "CODE",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "new-subscription-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::Stage",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiCODEUsagePlan27FD2B5C": {
-      "Properties": {
-        "ApiStages": [
-          {
-            "ApiId": {
-              "Ref": "newsubscriptionapilambdanewsubscriptionapiCODE2838767B",
-            },
-            "Stage": {
-              "Ref": "newsubscriptionapilambdanewsubscriptionapiCODEDeploymentStageCODEC669AD9D",
-            },
-            "Throttle": {},
-          },
-        ],
-        "Description": "REST endpoints for new-subscription-api",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "new-subscription-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "UsagePlanName": "new-subscription-api-CODE",
-      },
-      "Type": "AWS::ApiGateway::UsagePlan",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiCODEUsagePlanUsagePlanKeyResourcenewsubscriptionapiCODEnewsubscriptionapilambdanewsubscriptionapiCODEnewsubscriptionapikeyCODEA274BA02D48BD3AE": {
-      "Properties": {
-        "KeyId": {
-          "Ref": "newsubscriptionapilambdanewsubscriptionapiCODEnewsubscriptionapikeyCODE4D303CEF",
-        },
-        "KeyType": "API_KEY",
-        "UsagePlanId": {
-          "Ref": "newsubscriptionapilambdanewsubscriptionapiCODEUsagePlan27FD2B5C",
-        },
-      },
-      "Type": "AWS::ApiGateway::UsagePlanKey",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiCODEnewsubscriptionapikeyCODE4D303CEF": {
-      "Properties": {
-        "Enabled": true,
-        "Name": "new-subscription-api-key-CODE",
-        "StageKeys": [
-          {
-            "RestApiId": {
-              "Ref": "newsubscriptionapilambdanewsubscriptionapiCODE2838767B",
-            },
-            "StageName": {
-              "Ref": "newsubscriptionapilambdanewsubscriptionapiCODEDeploymentStageCODEC669AD9D",
-            },
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "new-subscription-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::ApiKey",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiCODEproxyANY323BC2DD": {
-      "Properties": {
-        "ApiKeyRequired": true,
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "newsubscriptionapilambdaC15E5D99",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Ref": "newsubscriptionapilambdanewsubscriptionapiCODEproxyBFBD1BEA",
-        },
-        "RestApiId": {
-          "Ref": "newsubscriptionapilambdanewsubscriptionapiCODE2838767B",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiCODEproxyANYApiPermissionTestnewsubscriptionapiCODEnewsubscriptionapilambdanewsubscriptionapiCODEA5E256DEANYproxy0E6AD1E7": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "newsubscriptionapilambdaC15E5D99",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "newsubscriptionapilambdanewsubscriptionapiCODE2838767B",
-              },
-              "/test-invoke-stage/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiCODEproxyANYApiPermissionnewsubscriptionapiCODEnewsubscriptionapilambdanewsubscriptionapiCODEA5E256DEANYproxyB14B287F": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "newsubscriptionapilambdaC15E5D99",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "newsubscriptionapilambdanewsubscriptionapiCODE2838767B",
-              },
-              "/",
-              {
-                "Ref": "newsubscriptionapilambdanewsubscriptionapiCODEDeploymentStageCODEC669AD9D",
-              },
-              "/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiCODEproxyBFBD1BEA": {
-      "Properties": {
-        "ParentId": {
-          "Fn::GetAtt": [
-            "newsubscriptionapilambdanewsubscriptionapiCODE2838767B",
-            "RootResourceId",
-          ],
-        },
-        "PathPart": "{proxy+}",
-        "RestApiId": {
-          "Ref": "newsubscriptionapilambdanewsubscriptionapiCODE2838767B",
-        },
-      },
-      "Type": "AWS::ApiGateway::Resource",
+      "Type": "AWS::IAM::Policy",
     },
   },
 }
@@ -928,14 +928,14 @@ exports[`The New Subscription API stack matches the snapshot 2`] = `
     "gu:cdk:version": "TEST",
   },
   "Outputs": {
-    "newsubscriptionapilambdanewsubscriptionapiPRODEndpointC4C065F6": {
+    "LambdaRestApiEndpoint7EDBC694": {
       "Value": {
         "Fn::Join": [
           "",
           [
             "https://",
             {
-              "Ref": "newsubscriptionapilambdanewsubscriptionapiPRODF2C9BF91",
+              "Ref": "LambdaRestApi687C4D83",
             },
             ".execute-api.",
             {
@@ -947,7 +947,7 @@ exports[`The New Subscription API stack matches the snapshot 2`] = `
             },
             "/",
             {
-              "Ref": "newsubscriptionapilambdanewsubscriptionapiPRODDeploymentStagePROD5AE60C2F",
+              "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
             },
             "/",
           ],
@@ -1011,7 +1011,7 @@ exports[`The New Subscription API stack matches the snapshot 2`] = `
                 [
                   "lambda:",
                   {
-                    "Ref": "newsubscriptionapilambdaC15E5D99",
+                    "Ref": "LambdaD247545B",
                   },
                 ],
               ],
@@ -1045,10 +1045,10 @@ exports[`The New Subscription API stack matches the snapshot 2`] = `
           "Ref": "DomainName",
         },
         "RestApiId": {
-          "Ref": "newsubscriptionapilambdanewsubscriptionapiPRODF2C9BF91",
+          "Ref": "LambdaRestApi687C4D83",
         },
         "Stage": {
-          "Ref": "newsubscriptionapilambdanewsubscriptionapiPRODDeploymentStagePROD5AE60C2F",
+          "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
         },
       },
       "Type": "AWS::ApiGateway::BasePathMapping",
@@ -1115,93 +1115,10 @@ exports[`The New Subscription API stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
-    "PromocodetablequeryaccessB0CB896A": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "dynamodb:GetItem",
-                "dynamodb:Scan",
-                "dynamodb:Query",
-                "dynamodb:DescribeTable",
-              ],
-              "Effect": "Allow",
-              "Resource": "arn:aws:dynamodb:*:*:table/support-admin-console-promos-PROD",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "PromocodetablequeryaccessB0CB896A",
-        "Roles": [
-          {
-            "Ref": "newsubscriptionapilambdaServiceRoleE544C2A4",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "S3catalogreadpolicyE18911B4": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-PROD/*",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "S3catalogreadpolicyE18911B4",
-        "Roles": [
-          {
-            "Ref": "newsubscriptionapilambdaServiceRoleE544C2A4",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "ZuoraOAuthSecretsManagerpolicy5448D99B": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "secretsmanager:GetSecretValue",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:secretsmanager:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":secret:PROD/Zuora-OAuth/SupportServiceLambdas-*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "ZuoraOAuthSecretsManagerpolicy5448D99B",
-        "Roles": [
-          {
-            "Ref": "newsubscriptionapilambdaServiceRoleE544C2A4",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "newsubscriptionapilambdaC15E5D99": {
+    "LambdaD247545B": {
       "DependsOn": [
-        "newsubscriptionapilambdaServiceRoleDefaultPolicy25179405",
-        "newsubscriptionapilambdaServiceRoleE544C2A4",
+        "LambdaServiceRoleDefaultPolicyDAE46E21",
+        "LambdaServiceRoleA8ED4D3B",
       ],
       "Properties": {
         "Code": {
@@ -1227,7 +1144,7 @@ exports[`The New Subscription API stack matches the snapshot 2`] = `
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "newsubscriptionapilambdaServiceRoleE544C2A4",
+            "LambdaServiceRoleA8ED4D3B",
             "Arn",
           ],
         },
@@ -1258,7 +1175,559 @@ exports[`The New Subscription API stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "newsubscriptionapilambdaServiceRoleDefaultPolicy25179405": {
+    "LambdaRestApi687C4D83": {
+      "Properties": {
+        "ApiKeySourceType": "HEADER",
+        "Description": "API Gateway created by CDK",
+        "Name": "new-subscription-api-PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "new-subscription-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "LambdaRestApiANYApiPermissionTestnewsubscriptionapiPRODLambdaRestApiBD1AB695ANY0121097B": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/test-invoke-stage/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiANYApiPermissionnewsubscriptionapiPRODLambdaRestApiBD1AB695ANYCD516792": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/",
+              {
+                "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
+              },
+              "/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiANYC3C9D364": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "LambdaD247545B",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "LambdaRestApi687C4D83",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "LambdaRestApiAccount4E23441E": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "LambdaRestApi687C4D83",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "LambdaRestApiCloudWatchRole73082DF6",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "LambdaRestApiApiKeyB5CCCA11": {
+      "Properties": {
+        "Enabled": true,
+        "Name": "new-subscription-api-key-PROD",
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "LambdaRestApi687C4D83",
+            },
+            "StageName": {
+              "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "new-subscription-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
+    },
+    "LambdaRestApiCloudWatchRole73082DF6": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "new-subscription-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "LambdaRestApiDeployment9531908966c6c98a864ac45dd220a38445156b5c": {
+      "DependsOn": [
+        "LambdaRestApiproxyANY486C4D1F",
+        "LambdaRestApiproxy22103CFD",
+        "LambdaRestApiANYC3C9D364",
+      ],
+      "Properties": {
+        "Description": "API Gateway created by CDK",
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "LambdaRestApiDeploymentStagePROD95065FBD": {
+      "DependsOn": [
+        "LambdaRestApiAccount4E23441E",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "LambdaRestApiDeployment9531908966c6c98a864ac45dd220a38445156b5c",
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+        "StageName": "PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "new-subscription-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "LambdaRestApiUsagePlanD8F7DB8D": {
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "LambdaRestApi687C4D83",
+            },
+            "Stage": {
+              "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
+            },
+            "Throttle": {},
+          },
+        ],
+        "Description": "REST endpoints for new-subscription-api",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "new-subscription-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "UsagePlanName": "new-subscription-api-PROD",
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
+    },
+    "LambdaRestApiUsagePlanUsagePlanKeyResourcenewsubscriptionapiPRODLambdaRestApiApiKeyD2F7304FDC6786BB": {
+      "Properties": {
+        "KeyId": {
+          "Ref": "LambdaRestApiApiKeyB5CCCA11",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "LambdaRestApiUsagePlanD8F7DB8D",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
+    },
+    "LambdaRestApiproxy22103CFD": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "LambdaRestApi687C4D83",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "LambdaRestApiproxyANY486C4D1F": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "LambdaD247545B",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "LambdaRestApiproxy22103CFD",
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "LambdaRestApiproxyANYApiPermissionTestnewsubscriptionapiPRODLambdaRestApiBD1AB695ANYproxyD253C075": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/test-invoke-stage/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiproxyANYApiPermissionnewsubscriptionapiPRODLambdaRestApiBD1AB695ANYproxy7D9DAA7E": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/",
+              {
+                "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
+              },
+              "/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaServiceRoleA8ED4D3B": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "new-subscription-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "LambdaServiceRoleDefaultPolicyDAE46E21": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -1349,566 +1818,97 @@ exports[`The New Subscription API stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "newsubscriptionapilambdaServiceRoleDefaultPolicy25179405",
+        "PolicyName": "LambdaServiceRoleDefaultPolicyDAE46E21",
         "Roles": [
           {
-            "Ref": "newsubscriptionapilambdaServiceRoleE544C2A4",
+            "Ref": "LambdaServiceRoleA8ED4D3B",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "newsubscriptionapilambdaServiceRoleE544C2A4": {
+    "PromocodetablequeryaccessB0CB896A": {
       "Properties": {
-        "AssumeRolePolicyDocument": {
+        "PolicyDocument": {
           "Statement": [
             {
-              "Action": "sts:AssumeRole",
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:Query",
+                "dynamodb:DescribeTable",
+              ],
               "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
+              "Resource": "arn:aws:dynamodb:*:*:table/support-admin-console-promos-PROD",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "PromocodetablequeryaccessB0CB896A",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "S3catalogreadpolicyE18911B4": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-PROD/*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "S3catalogreadpolicyE18911B4",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "ZuoraOAuthSecretsManagerpolicy5448D99B": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:PROD/Zuora-OAuth/SupportServiceLambdas-*",
+                  ],
+                ],
               },
             },
           ],
           "Version": "2012-10-17",
         },
-        "ManagedPolicyArns": [
+        "PolicyName": "ZuoraOAuthSecretsManagerpolicy5448D99B",
+        "Roles": [
           {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "new-subscription-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
+            "Ref": "LambdaServiceRoleA8ED4D3B",
           },
         ],
       },
-      "Type": "AWS::IAM::Role",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiPRODANYAFE9D7DE": {
-      "Properties": {
-        "ApiKeyRequired": true,
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "newsubscriptionapilambdaC15E5D99",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Fn::GetAtt": [
-            "newsubscriptionapilambdanewsubscriptionapiPRODF2C9BF91",
-            "RootResourceId",
-          ],
-        },
-        "RestApiId": {
-          "Ref": "newsubscriptionapilambdanewsubscriptionapiPRODF2C9BF91",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiPRODANYApiPermissionTestnewsubscriptionapiPRODnewsubscriptionapilambdanewsubscriptionapiPRODE7DA6E3AANY63FFA8B5": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "newsubscriptionapilambdaC15E5D99",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "newsubscriptionapilambdanewsubscriptionapiPRODF2C9BF91",
-              },
-              "/test-invoke-stage/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiPRODANYApiPermissionnewsubscriptionapiPRODnewsubscriptionapilambdanewsubscriptionapiPRODE7DA6E3AANY2F19D447": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "newsubscriptionapilambdaC15E5D99",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "newsubscriptionapilambdanewsubscriptionapiPRODF2C9BF91",
-              },
-              "/",
-              {
-                "Ref": "newsubscriptionapilambdanewsubscriptionapiPRODDeploymentStagePROD5AE60C2F",
-              },
-              "/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiPRODAccountA1135F44": {
-      "DeletionPolicy": "Retain",
-      "DependsOn": [
-        "newsubscriptionapilambdanewsubscriptionapiPRODF2C9BF91",
-      ],
-      "Properties": {
-        "CloudWatchRoleArn": {
-          "Fn::GetAtt": [
-            "newsubscriptionapilambdanewsubscriptionapiPRODCloudWatchRole01A2D6D3",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::ApiGateway::Account",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiPRODCloudWatchRole01A2D6D3": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "apigateway.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "new-subscription-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiPRODDeployment238790AA78fdac29400c6794f5fc86f1d27735ae": {
-      "DependsOn": [
-        "newsubscriptionapilambdanewsubscriptionapiPRODproxyANYB0FD8929",
-        "newsubscriptionapilambdanewsubscriptionapiPRODproxy906EE08E",
-        "newsubscriptionapilambdanewsubscriptionapiPRODANYAFE9D7DE",
-      ],
-      "Properties": {
-        "Description": "API Gateway created by CDK",
-        "RestApiId": {
-          "Ref": "newsubscriptionapilambdanewsubscriptionapiPRODF2C9BF91",
-        },
-      },
-      "Type": "AWS::ApiGateway::Deployment",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiPRODDeploymentStagePROD5AE60C2F": {
-      "DependsOn": [
-        "newsubscriptionapilambdanewsubscriptionapiPRODAccountA1135F44",
-      ],
-      "Properties": {
-        "DeploymentId": {
-          "Ref": "newsubscriptionapilambdanewsubscriptionapiPRODDeployment238790AA78fdac29400c6794f5fc86f1d27735ae",
-        },
-        "RestApiId": {
-          "Ref": "newsubscriptionapilambdanewsubscriptionapiPRODF2C9BF91",
-        },
-        "StageName": "PROD",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "new-subscription-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::Stage",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiPRODF2C9BF91": {
-      "Properties": {
-        "ApiKeySourceType": "HEADER",
-        "Description": "API Gateway created by CDK",
-        "Name": "new-subscription-api-PROD",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "new-subscription-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::RestApi",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiPRODUsagePlanEB4B8E7B": {
-      "Properties": {
-        "ApiStages": [
-          {
-            "ApiId": {
-              "Ref": "newsubscriptionapilambdanewsubscriptionapiPRODF2C9BF91",
-            },
-            "Stage": {
-              "Ref": "newsubscriptionapilambdanewsubscriptionapiPRODDeploymentStagePROD5AE60C2F",
-            },
-            "Throttle": {},
-          },
-        ],
-        "Description": "REST endpoints for new-subscription-api",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "new-subscription-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "UsagePlanName": "new-subscription-api-PROD",
-      },
-      "Type": "AWS::ApiGateway::UsagePlan",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiPRODUsagePlanUsagePlanKeyResourcenewsubscriptionapiPRODnewsubscriptionapilambdanewsubscriptionapiPRODnewsubscriptionapikeyPRODB7B0D183EE168842": {
-      "Properties": {
-        "KeyId": {
-          "Ref": "newsubscriptionapilambdanewsubscriptionapiPRODnewsubscriptionapikeyPRODB3FC770A",
-        },
-        "KeyType": "API_KEY",
-        "UsagePlanId": {
-          "Ref": "newsubscriptionapilambdanewsubscriptionapiPRODUsagePlanEB4B8E7B",
-        },
-      },
-      "Type": "AWS::ApiGateway::UsagePlanKey",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiPRODnewsubscriptionapikeyPRODB3FC770A": {
-      "Properties": {
-        "Enabled": true,
-        "Name": "new-subscription-api-key-PROD",
-        "StageKeys": [
-          {
-            "RestApiId": {
-              "Ref": "newsubscriptionapilambdanewsubscriptionapiPRODF2C9BF91",
-            },
-            "StageName": {
-              "Ref": "newsubscriptionapilambdanewsubscriptionapiPRODDeploymentStagePROD5AE60C2F",
-            },
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "new-subscription-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::ApiKey",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiPRODproxy906EE08E": {
-      "Properties": {
-        "ParentId": {
-          "Fn::GetAtt": [
-            "newsubscriptionapilambdanewsubscriptionapiPRODF2C9BF91",
-            "RootResourceId",
-          ],
-        },
-        "PathPart": "{proxy+}",
-        "RestApiId": {
-          "Ref": "newsubscriptionapilambdanewsubscriptionapiPRODF2C9BF91",
-        },
-      },
-      "Type": "AWS::ApiGateway::Resource",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiPRODproxyANYApiPermissionTestnewsubscriptionapiPRODnewsubscriptionapilambdanewsubscriptionapiPRODE7DA6E3AANYproxy36F9C02F": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "newsubscriptionapilambdaC15E5D99",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "newsubscriptionapilambdanewsubscriptionapiPRODF2C9BF91",
-              },
-              "/test-invoke-stage/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiPRODproxyANYApiPermissionnewsubscriptionapiPRODnewsubscriptionapilambdanewsubscriptionapiPRODE7DA6E3AANYproxyC5111B4F": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "newsubscriptionapilambdaC15E5D99",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "newsubscriptionapilambdanewsubscriptionapiPRODF2C9BF91",
-              },
-              "/",
-              {
-                "Ref": "newsubscriptionapilambdanewsubscriptionapiPRODDeploymentStagePROD5AE60C2F",
-              },
-              "/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "newsubscriptionapilambdanewsubscriptionapiPRODproxyANYB0FD8929": {
-      "Properties": {
-        "ApiKeyRequired": true,
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "newsubscriptionapilambdaC15E5D99",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Ref": "newsubscriptionapilambdanewsubscriptionapiPRODproxy906EE08E",
-        },
-        "RestApiId": {
-          "Ref": "newsubscriptionapilambdanewsubscriptionapiPRODF2C9BF91",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
+      "Type": "AWS::IAM::Policy",
     },
   },
 }

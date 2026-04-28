@@ -13,7 +13,6 @@ export class NewSubscriptionApi extends SrStack {
 		super(scope, { stage, app: 'new-subscription-api' });
 
 		const lambda = new SrApiLambda(this, 'Lambda', {
-			legacyId: `${this.app}-lambda`,
 			lambdaOverrides: {
 				description:
 					'A lambda that creates new Zuora subscriptions, replacing the new-product-api',
