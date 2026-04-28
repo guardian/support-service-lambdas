@@ -19,8 +19,7 @@ export class NewSubscriptionApi extends SrStack {
 					'A lambda that creates new Zuora subscriptions, replacing the new-product-api',
 			},
 			monitoring: {
-				errorImpact:
-					'a user may not be able to create a new subscription through the checkout flow',
+				errorImpact: 'CSRs may not be able to create new subscriptions',
 			},
 		});
 
