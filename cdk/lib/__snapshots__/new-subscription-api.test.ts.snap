@@ -984,7 +984,7 @@ exports[`The New Subscription API stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "new-subscription-api returned a 5XX response. Search the logs below for "error" for more information. Impact: a user may not be able to create a new subscription through the checkout flow",
+        "AlarmDescription": "new-subscription-api returned a 5XX response. Search the logs below for "error" for more information. Impact: CSRs may not be able to create new subscriptions",
         "AlarmName": "new-subscription-api-PROD 5XX errors",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
