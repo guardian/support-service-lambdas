@@ -228,6 +228,7 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		identityId,
 		currency,
 		paymentGateway,
+		paymentMethod,
 		billToContact,
 		productPurchase,
 		giftRecipient,
@@ -243,14 +244,12 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		getDeliveryFields(productPurchase);
 
 	const paymentFields =
-		input.paymentMethod.type === 'ExistingPaymentMethod'
+		paymentMethod.type === 'ExistingPaymentMethod'
 			? {
 					hpmCreditCardPaymentMethodId:
-						input.paymentMethod.hpmCreditCardPaymentMethodId,
+						paymentMethod.hpmCreditCardPaymentMethodId,
 				}
-			: {
-					paymentMethod: input.paymentMethod,
-				};
+			: { paymentMethod };
 
 	const newAccount = buildNewAccountObject<AnyPaymentMethod>({
 		accountName,
