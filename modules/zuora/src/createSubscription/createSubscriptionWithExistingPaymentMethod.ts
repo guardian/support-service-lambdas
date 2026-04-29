@@ -20,10 +20,12 @@ export type ExistingPaymentMethodInput = {
 	requiresCloning: boolean;
 };
 
-export type CreateSubscriptionWithExistingPaymentMethodInput =
-	CreateSubscriptionWithExistingPaymentMethodInputFields & {
-		existingPaymentMethodInput: ExistingPaymentMethodInput;
-	};
+export type CreateSubscriptionWithExistingPaymentMethodInput = Omit<
+	CreateSubscriptionWithExistingPaymentMethodInputFields,
+	'paymentMethod'
+> & {
+	existingPaymentMethod: ExistingPaymentMethodInput;
+};
 
 // Creates a new Zuora account and subscription using a pre-existing Zuora payment method ID.
 // If requiresCloning is false, the existing PM id is passed directly to Zuora in the hpmCreditCardPaymentMethodId
@@ -41,7 +43,7 @@ export const createSubscriptionWithExistingPaymentMethod = async (
 ): Promise<CreateSubscriptionResponse> => {
 	const paymentMethod = await clonePaymentMethod(
 		zuoraClient,
-		input.existingPaymentMethodInput,
+		input.existingPaymentMethod,
 	);
 
 	return executeOrderRequest(

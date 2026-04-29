@@ -63,5 +63,4 @@ export type ExistingPaymentMethod = {
 
 export type AnyPaymentMethod =
 	| PaymentMethod
-	| ClonedCreditCardReferenceTransaction
-	| ExistingPaymentMethod;
+	| ClonedCreditCardReferenceTransaction;
