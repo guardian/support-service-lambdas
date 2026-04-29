@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { ExistingPaymentMethodInput } from '@modules/zuora/createSubscription/createSubscriptionWithExistingPaymentMethod';
 import {
 	type BankTransferPaymentMethod,
 	type CreditCardReferenceTransactionPaymentMethod,
@@ -9,14 +10,6 @@ import type {
 	ExistingPaymentMethod,
 } from '@modules/zuora/orders/paymentMethods';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-
-// Represents a Zuora payment method ID provided by the caller.
-// requiresCloning: false — the PM exists but is not yet attached to any account;
-// requiresCloning: true — the PM is attached to an existing account and must be cloned before use.
-export type ExistingPaymentMethodInput = {
-	id: string;
-	requiresCloning: boolean;
-};
 
 // The clonePaymentMethod function will return either an inline payment method
 // object which can be passed to Zuora or an id of an existing orphan payment

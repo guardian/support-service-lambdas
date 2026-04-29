@@ -1,9 +1,8 @@
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { Promo } from '@modules/promotions/v2/schema';
-import type { ExistingPaymentMethodInput } from '@modules/zuora/createSubscription/clonePaymentMethod';
 import { clonePaymentMethod } from '@modules/zuora/createSubscription/clonePaymentMethod';
 import type {
-	CreateSubscriptionInputFieldsWithClonedPaymentMethod,
+	CreateSubscriptionInputFieldsWithExistingPaymentMethod,
 	CreateSubscriptionResponse,
 } from '@modules/zuora/createSubscription/createSubscription';
 import {
@@ -13,15 +12,20 @@ import {
 import { executeOrderRequest } from '@modules/zuora/orders/orderRequests';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
-export type CreateSubscriptionWithExistingPaymentMethodInput = Omit<
-	CreateSubscriptionInputFieldsWithClonedPaymentMethod,
-	'paymentMethod'
-> & {
-	existingPaymentMethod: ExistingPaymentMethodInput;
+// Represents a Zuora payment method ID provided by the caller.
+// requiresCloning: false — the PM exists but is not yet attached to any account;
+// requiresCloning: true — the PM is attached to an existing account and must be cloned before use.
+export type ExistingPaymentMethodInput = {
+	id: string;
+	requiresCloning: boolean;
 };
 
+export type CreateSubscriptionWithExistingPaymentMethodInput =
+	CreateSubscriptionInputFieldsWithExistingPaymentMethod & {
+		existingPaymentMethodInput: ExistingPaymentMethodInput;
+	};
+
 // Creates a new Zuora account and subscription using a pre-existing Zuora payment method ID.
-//
 // If requiresCloning is false, the existing PM id is passed directly to Zuora in the hpmCreditCardPaymentMethodId
 // parameter - https://developer.zuora.com/v1-api-reference/api/orders/post_order#orders/post_order/t=request&path=newaccount/hpmcreditcardpaymentmethodid
 // If requiresCloning is true, the payment method is already attached to another account and must be re-created first:
@@ -35,16 +39,16 @@ export const createSubscriptionWithExistingPaymentMethod = async (
 	input: CreateSubscriptionWithExistingPaymentMethodInput,
 	promotion: Promo | undefined,
 ): Promise<CreateSubscriptionResponse> => {
-	const clonedPaymentMethod = await clonePaymentMethod(
+	const paymentMethod = await clonePaymentMethod(
 		zuoraClient,
-		input.existingPaymentMethod,
+		input.existingPaymentMethodInput,
 	);
 
 	return executeOrderRequest(
 		zuoraClient,
 		buildCreateSubscriptionRequest(
 			productCatalog,
-			{ ...input, paymentMethod: clonedPaymentMethod },
+			{ ...input, paymentMethod },
 			promotion,
 		),
 		createSubscriptionResponseSchema,

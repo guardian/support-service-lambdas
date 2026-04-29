@@ -67,7 +67,7 @@ export type CreateSubscriptionInputFields<T extends PaymentMethod> = {
 	createdByCSR?: string;
 };
 
-export type CreateSubscriptionInputFieldsWithClonedPaymentMethod = Omit<
+export type CreateSubscriptionInputFieldsWithExistingPaymentMethod = Omit<
 	CreateSubscriptionInputFields<PaymentMethod>,
 	'paymentMethod'
 > & {
@@ -217,7 +217,7 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 	productCatalog: ProductCatalog,
 	input:
 		| CreateSubscriptionInputFields<T>
-		| CreateSubscriptionInputFieldsWithClonedPaymentMethod,
+		| CreateSubscriptionInputFieldsWithExistingPaymentMethod,
 	promotion: Promo | undefined,
 ): CreateOrderRequest {
 	const {
