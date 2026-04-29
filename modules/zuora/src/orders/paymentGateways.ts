@@ -33,7 +33,7 @@ type PaymentGatewayMap = {
 	Bacs: GoCardlessPaymentGateway;
 	PayPalNativeEC: PayPalPaymentGateway;
 	PayPalCP: PayPalCompletePaymentsPaymentGateway;
-	ExistingPaymentMethod: GoCardlessPaymentGateway;
+	ExistingPaymentMethod: GoCardlessPaymentGateway | StripePaymentGateway;
 };
 
 export type PaymentGateway<T extends AnyPaymentMethod> =
