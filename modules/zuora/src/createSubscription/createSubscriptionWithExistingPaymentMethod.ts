@@ -2,14 +2,15 @@ import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { Promo } from '@modules/promotions/v2/schema';
 import { clonePaymentMethod } from '@modules/zuora/createSubscription/clonePaymentMethod';
 import type {
+	CreateSubscriptionInputFields,
 	CreateSubscriptionResponse,
-	CreateSubscriptionWithExistingPaymentMethodInputFields,
 } from '@modules/zuora/createSubscription/createSubscription';
 import {
 	buildCreateSubscriptionRequest,
 	createSubscriptionResponseSchema,
 } from '@modules/zuora/createSubscription/createSubscription';
 import { executeOrderRequest } from '@modules/zuora/orders/orderRequests';
+import type { PaymentMethod } from '@modules/zuora/orders/paymentMethods';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 // Represents a Zuora payment method ID provided by the caller.
@@ -21,7 +22,7 @@ export type ExistingPaymentMethodInput = {
 };
 
 export type CreateSubscriptionWithExistingPaymentMethodInput = Omit<
-	CreateSubscriptionWithExistingPaymentMethodInputFields,
+	CreateSubscriptionInputFields<PaymentMethod>,
 	'paymentMethod'
 > & {
 	existingPaymentMethod: ExistingPaymentMethodInput;

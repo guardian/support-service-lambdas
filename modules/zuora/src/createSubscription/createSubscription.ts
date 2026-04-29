@@ -55,7 +55,7 @@ export type CreateSubscriptionInputFields<T extends PaymentMethod> = {
 	identityId: string;
 	currency: IsoCurrency;
 	paymentGateway: PaymentGateway<T>;
-	paymentMethod: T;
+	paymentMethod: T | ClonedPaymentMethod;
 	billToContact: Contact;
 	productPurchase: ProductPurchase;
 	giftRecipient?: GiftRecipient;
@@ -67,12 +67,6 @@ export type CreateSubscriptionInputFields<T extends PaymentMethod> = {
 	createdByCSR?: string;
 };
 
-export type CreateSubscriptionWithExistingPaymentMethodInputFields = Omit<
-	CreateSubscriptionInputFields<PaymentMethod>,
-	'paymentMethod'
-> & {
-	paymentMethod: ClonedPaymentMethod;
-};
 
 export type PromotionInputFields = {
 	validatedPromotion: ValidatedPromotion;
@@ -215,9 +209,7 @@ function getDeliveryFields(productPurchase: ProductPurchase): DeliveryFields {
 
 export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 	productCatalog: ProductCatalog,
-	input:
-		| CreateSubscriptionInputFields<T>
-		| CreateSubscriptionWithExistingPaymentMethodInputFields,
+	input: CreateSubscriptionInputFields<T>,
 	promotion: Promo | undefined,
 ): CreateOrderRequest {
 	const {
