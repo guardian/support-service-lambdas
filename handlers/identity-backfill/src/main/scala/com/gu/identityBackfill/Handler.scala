@@ -11,9 +11,11 @@ import com.gu.identityBackfill.WireRequestToDomainObject.WireModel.IdentityBackf
 import com.gu.identityBackfill.salesforce.ContactSyncCheck.RecordTypeId
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.identityBackfill.salesforce._
+import com.gu.identityBackfill.supporterProductData.UpdateSupporterProductDataService
 import com.gu.identityBackfill.zuora.{
   AddIdentityIdToAccount,
   CountZuoraAccountsForIdentityId,
+  GetSubscriptionsForAccount,
   GetZuoraAccountsForEmail,
   GetZuoraSubTypeForAccount,
 }
@@ -78,6 +80,12 @@ object Handler {
       val countZuoraAccounts: IdentityId => ClientFailableOp[Int] = CountZuoraAccountsForIdentityId(zuoraQuerier)
       val updateZuoraAccounts =
         IdentityBackfillSteps.updateZuoraBillingAccountsIdentityId(AddIdentityIdToAccount(zuoraRequests))(_, _)
+      val supporterProductDataService = UpdateSupporterProductDataService(stage.value)
+      val updateSupporterProductData =
+        IdentityBackfillSteps.pushSupporterProductData(
+          GetSubscriptionsForAccount(zuoraQuerier),
+          supporterProductDataService.update,
+        )(_, _)
 
       lazy val sfPatch = sfAuth.wrapWith(JsonHttp.patch)
       lazy val sfGet = sfAuth.wrapWith(JsonHttp.get)
@@ -104,6 +112,7 @@ object Handler {
             createGuestAccount.runRequest,
             updateZuoraAccounts,
             updateBuyersIdentityId,
+            updateSupporterProductData,
           ),
         ),
         healthcheck = () =>
