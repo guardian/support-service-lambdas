@@ -2,8 +2,8 @@ import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { Promo } from '@modules/promotions/v2/schema';
 import { clonePaymentMethod } from '@modules/zuora/createSubscription/clonePaymentMethod';
 import type {
-	CreateSubscriptionInputFieldsWithExistingPaymentMethod,
 	CreateSubscriptionResponse,
+	CreateSubscriptionWithExistingPaymentMethodInputFields,
 } from '@modules/zuora/createSubscription/createSubscription';
 import {
 	buildCreateSubscriptionRequest,
@@ -21,7 +21,7 @@ export type ExistingPaymentMethodInput = {
 };
 
 export type CreateSubscriptionWithExistingPaymentMethodInput =
-	CreateSubscriptionInputFieldsWithExistingPaymentMethod & {
+	CreateSubscriptionWithExistingPaymentMethodInputFields & {
 		existingPaymentMethodInput: ExistingPaymentMethodInput;
 	};
 
