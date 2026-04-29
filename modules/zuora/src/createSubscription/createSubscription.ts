@@ -208,10 +208,7 @@ function getDeliveryFields(productPurchase: ProductPurchase): DeliveryFields {
 
 export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 	productCatalog: ProductCatalog,
-	input: CreateSubscriptionInputFields<T>,
-	promotion: Promo | undefined,
-): CreateOrderRequest {
-	const {
+	{
 		accountName,
 		createdRequestId,
 		salesforceAccountId,
@@ -226,11 +223,12 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		appliedPromotion,
 		runBilling,
 		collectPayment,
+		createdByCSR,
 		acquisitionCase,
 		acquisitionSource,
-		createdByCSR,
-	} = input;
-
+	}: CreateSubscriptionInputFields<T>,
+	promotion: Promo | undefined,
+): CreateOrderRequest {
 	const { deliveryContact, deliveryAgent, deliveryInstructions } =
 		getDeliveryFields(productPurchase);
 
@@ -245,16 +243,16 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 			: { paymentMethod };
 
 	const newAccount = buildNewAccountObject<AnyPaymentMethod>({
-		accountName,
-		createdRequestId,
-		salesforceAccountId,
-		salesforceContactId,
-		identityId,
-		currency,
-		paymentGateway,
-		billToContact,
+		accountName: accountName,
+		createdRequestId: createdRequestId,
+		salesforceAccountId: salesforceAccountId,
+		salesforceContactId: salesforceContactId,
+		identityId: identityId,
+		currency: currency,
+		paymentGateway: paymentGateway,
+		billToContact: billToContact,
 		soldToContact: deliveryContact,
-		deliveryInstructions,
+		deliveryInstructions: deliveryInstructions,
 		...paymentFields,
 	});
 
