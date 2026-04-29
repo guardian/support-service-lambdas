@@ -246,6 +246,8 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 	const paymentFields =
 		paymentMethod.type === 'ExistingPaymentMethod'
 			? {
+					// The hpmCreditCardPaymentMethodId parameter is passed in at the same level as
+					// the paymentMethod parameter not nested underneath
 					hpmCreditCardPaymentMethodId:
 						paymentMethod.hpmCreditCardPaymentMethodId,
 				}
