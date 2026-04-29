@@ -67,7 +67,6 @@ export type CreateSubscriptionInputFields<T extends PaymentMethod> = {
 	createdByCSR?: string;
 };
 
-
 export type PromotionInputFields = {
 	validatedPromotion: ValidatedPromotion;
 	discountProductRatePlanId: string;
