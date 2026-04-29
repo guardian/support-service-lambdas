@@ -13,6 +13,7 @@ import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import { z } from 'zod';
 import { getChargeOverride } from '@modules/zuora/createSubscription/chargeOverride';
+import type { ClonedPaymentMethod } from '@modules/zuora/createSubscription/clonePaymentMethod';
 import { getProductRatePlan } from '@modules/zuora/createSubscription/getProductRatePlan';
 import type { GiftRecipient } from '@modules/zuora/createSubscription/giftRecipient';
 import { ReaderType } from '@modules/zuora/createSubscription/readerType';
@@ -26,7 +27,10 @@ import {
 import type { CreateOrderRequest } from '@modules/zuora/orders/orderRequests';
 import { executeOrderRequest } from '@modules/zuora/orders/orderRequests';
 import type { PaymentGateway } from '@modules/zuora/orders/paymentGateways';
-import type { PaymentMethod } from '@modules/zuora/orders/paymentMethods';
+import type {
+	AnyPaymentMethod,
+	PaymentMethod,
+} from '@modules/zuora/orders/paymentMethods';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
@@ -61,6 +65,13 @@ export type CreateSubscriptionInputFields<T extends PaymentMethod> = {
 	acquisitionCase?: string;
 	acquisitionSource?: string;
 	createdByCSR?: string;
+};
+
+export type CreateSubscriptionInputFieldsWithClonedPaymentMethod = Omit<
+	CreateSubscriptionInputFields<PaymentMethod>,
+	'paymentMethod'
+> & {
+	paymentMethod: ClonedPaymentMethod;
 };
 
 export type PromotionInputFields = {
@@ -204,7 +215,12 @@ function getDeliveryFields(productPurchase: ProductPurchase): DeliveryFields {
 
 export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 	productCatalog: ProductCatalog,
-	{
+	input:
+		| CreateSubscriptionInputFields<T>
+		| CreateSubscriptionInputFieldsWithClonedPaymentMethod,
+	promotion: Promo | undefined,
+): CreateOrderRequest {
+	const {
 		accountName,
 		createdRequestId,
 		salesforceAccountId,
@@ -212,31 +228,42 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		identityId,
 		currency,
 		paymentGateway,
-		paymentMethod,
 		billToContact,
 		productPurchase,
 		giftRecipient,
 		appliedPromotion,
 		runBilling,
 		collectPayment,
-	}: CreateSubscriptionInputFields<T>,
-	promotion: Promo | undefined,
-): CreateOrderRequest {
+		acquisitionCase,
+		acquisitionSource,
+		createdByCSR,
+	} = input;
+
 	const { deliveryContact, deliveryAgent, deliveryInstructions } =
 		getDeliveryFields(productPurchase);
 
-	const newAccount = buildNewAccountObject({
-		accountName: accountName,
-		createdRequestId: createdRequestId,
-		salesforceAccountId: salesforceAccountId,
-		salesforceContactId: salesforceContactId,
-		identityId: identityId,
-		currency: currency,
-		paymentGateway: paymentGateway,
-		paymentMethod: paymentMethod,
-		billToContact: billToContact,
+	const paymentFields =
+		input.paymentMethod.type === 'ExistingPaymentMethod'
+			? {
+					hpmCreditCardPaymentMethodId:
+						input.paymentMethod.hpmCreditCardPaymentMethodId,
+				}
+			: {
+					paymentMethod: input.paymentMethod,
+				};
+
+	const newAccount = buildNewAccountObject<AnyPaymentMethod>({
+		accountName,
+		createdRequestId,
+		salesforceAccountId,
+		salesforceContactId,
+		identityId,
+		currency,
+		paymentGateway,
+		billToContact,
 		soldToContact: deliveryContact,
-		deliveryInstructions: deliveryInstructions,
+		deliveryInstructions,
+		...paymentFields,
 	});
 
 	const { contractEffectiveDate, createSubscriptionOrderAction } =
@@ -255,6 +282,9 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		InitialPromotionCode__c: appliedPromotion?.promoCode,
 		PromotionCode__c: appliedPromotion?.promoCode,
 		CreatedRequestId__c: createdRequestId,
+		AcquisitionCase__c: acquisitionCase,
+		AcquisitionSource__c: acquisitionSource,
+		CreatedByCSR__c: createdByCSR,
 	};
 	return {
 		newAccount: newAccount,
@@ -272,6 +302,7 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		},
 	};
 }
+
 export const createSubscription = async <T extends PaymentMethod>(
 	zuoraClient: ZuoraClient,
 	productCatalog: ProductCatalog,

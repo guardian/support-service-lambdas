@@ -54,6 +54,14 @@ export type ClonedCreditCardReferenceTransaction = {
 	secondTokenId: string;
 };
 
+// An existing payment method which is unattached to an account and can be added
+// to an account with the hpmCreditCardPaymentMethodId parameter in the Orders API.
+export type ExistingPaymentMethod = {
+	type: 'ExistingPaymentMethod';
+	hpmCreditCardPaymentMethodId: string;
+};
+
 export type AnyPaymentMethod =
 	| PaymentMethod
-	| ClonedCreditCardReferenceTransaction;
+	| ClonedCreditCardReferenceTransaction
+	| ExistingPaymentMethod;

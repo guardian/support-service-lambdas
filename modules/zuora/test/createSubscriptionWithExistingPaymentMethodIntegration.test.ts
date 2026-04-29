@@ -151,7 +151,7 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 		expect(response.accountNumber).toMatch(/^A\d+$/);
 		expect(response.subscriptionNumbers.length).toBe(1);
 
-		await deleteAccount(zuoraClient, response.accountNumber);
+		//await deleteAccount(zuoraClient, response.accountNumber);
 	}, 120000);
 
 	test('creates a NationalDelivery EverydayPlus subscription', async () => {

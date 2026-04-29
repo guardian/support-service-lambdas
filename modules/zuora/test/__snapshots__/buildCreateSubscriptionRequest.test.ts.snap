@@ -40,6 +40,9 @@ exports[`the buildCreateSubscriptionRequest function builds request with applied
   "subscriptions": [
     {
       "customFields": {
+        "AcquisitionCase__c": "case_123",
+        "AcquisitionSource__c": "source_123",
+        "CreatedByCSR__c": "Jenny Wren",
         "CreatedRequestId__c": "request-123",
         "DeliveryAgent__c": undefined,
         "InitialPromotionCode__c": "PROMO10",
@@ -166,6 +169,9 @@ exports[`the buildCreateSubscriptionRequest function builds request with gift re
   "subscriptions": [
     {
       "customFields": {
+        "AcquisitionCase__c": "case_123",
+        "AcquisitionSource__c": "source_123",
+        "CreatedByCSR__c": "Jenny Wren",
         "CreatedRequestId__c": "request-123",
         "DeliveryAgent__c": undefined,
         "InitialPromotionCode__c": undefined,
@@ -256,6 +262,9 @@ exports[`the buildCreateSubscriptionRequest function builds request without prom
   "subscriptions": [
     {
       "customFields": {
+        "AcquisitionCase__c": "case_123",
+        "AcquisitionSource__c": "source_123",
+        "CreatedByCSR__c": "Jenny Wren",
         "CreatedRequestId__c": "request-123",
         "DeliveryAgent__c": undefined,
         "InitialPromotionCode__c": undefined,
@@ -364,6 +373,9 @@ exports[`the buildCreateSubscriptionRequest function sets delivery instructions 
   "subscriptions": [
     {
       "customFields": {
+        "AcquisitionCase__c": "case_123",
+        "AcquisitionSource__c": "source_123",
+        "CreatedByCSR__c": "Jenny Wren",
         "CreatedRequestId__c": "request-123",
         "DeliveryAgent__c": "42",
         "InitialPromotionCode__c": undefined,

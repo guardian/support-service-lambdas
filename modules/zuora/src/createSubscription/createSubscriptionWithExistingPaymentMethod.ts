@@ -1,32 +1,23 @@
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { Promo } from '@modules/promotions/v2/schema';
-import type { ExistingPaymentMethod } from '@modules/zuora/createSubscription/clonePaymentMethod';
+import type { ExistingPaymentMethodInput } from '@modules/zuora/createSubscription/clonePaymentMethod';
 import { clonePaymentMethod } from '@modules/zuora/createSubscription/clonePaymentMethod';
 import type {
-	CreateSubscriptionInputFields,
+	CreateSubscriptionInputFieldsWithClonedPaymentMethod,
 	CreateSubscriptionResponse,
 } from '@modules/zuora/createSubscription/createSubscription';
 import {
-	buildSubscriptionOrderAction,
+	buildCreateSubscriptionRequest,
 	createSubscriptionResponseSchema,
-	getReaderType,
 } from '@modules/zuora/createSubscription/createSubscription';
-import { buildNewAccountObject } from '@modules/zuora/orders/newAccount';
 import { executeOrderRequest } from '@modules/zuora/orders/orderRequests';
-import type { PaymentGateway } from '@modules/zuora/orders/paymentGateways';
-import type {
-	AnyPaymentMethod,
-	PaymentMethod,
-} from '@modules/zuora/orders/paymentMethods';
-import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 export type CreateSubscriptionWithExistingPaymentMethodInput = Omit<
-	CreateSubscriptionInputFields<PaymentMethod>,
-	'paymentGateway' | 'paymentMethod'
+	CreateSubscriptionInputFieldsWithClonedPaymentMethod,
+	'paymentMethod'
 > & {
-	paymentGateway: PaymentGateway<PaymentMethod>;
-	existingPaymentMethod: ExistingPaymentMethod;
+	existingPaymentMethod: ExistingPaymentMethodInput;
 };
 
 // Creates a new Zuora account and subscription using a pre-existing Zuora payment method ID.
@@ -44,94 +35,19 @@ export const createSubscriptionWithExistingPaymentMethod = async (
 	input: CreateSubscriptionWithExistingPaymentMethodInput,
 	promotion: Promo | undefined,
 ): Promise<CreateSubscriptionResponse> => {
-	const {
-		existingPaymentMethod,
-		appliedPromotion,
-		runBilling,
-		collectPayment,
-		createdRequestId,
-		acquisitionCase,
-		acquisitionSource,
-		createdByCSR,
-		giftRecipient,
-		productPurchase,
-		currency,
-		accountName,
-		salesforceAccountId,
-		salesforceContactId,
-		identityId,
-		paymentGateway,
-		billToContact,
-	} = input;
-
-	const { contractEffectiveDate, createSubscriptionOrderAction } =
-		buildSubscriptionOrderAction(
-			productCatalog,
-			productPurchase,
-			currency,
-			appliedPromotion,
-			promotion,
-		);
-
-	const { deliveryContact, deliveryAgent, deliveryInstructions } = {
-		deliveryContact: undefined,
-		deliveryAgent: undefined,
-		deliveryInstructions: undefined,
-		...productPurchase,
-	};
-
-	const subscriptionCustomFields = {
-		DeliveryAgent__c: deliveryAgent?.toString(),
-		ReaderType__c: getReaderType(giftRecipient, appliedPromotion),
-		LastPlanAddedDate__c: zuoraDateFormat(contractEffectiveDate),
-		InitialPromotionCode__c: appliedPromotion?.promoCode,
-		PromotionCode__c: appliedPromotion?.promoCode,
-		CreatedRequestId__c: createdRequestId,
-		AcquisitionCase__c: acquisitionCase,
-		AcquisitionSource__c: acquisitionSource,
-		CreatedByCSR__c: createdByCSR,
-	};
-
-	const clonePaymentMethodResult = await clonePaymentMethod(
+	const clonedPaymentMethod = await clonePaymentMethod(
 		zuoraClient,
-		existingPaymentMethod,
+		input.existingPaymentMethod,
 	);
-
-	const newAccount = buildNewAccountObject<AnyPaymentMethod>({
-		accountName,
-		createdRequestId,
-		salesforceAccountId,
-		salesforceContactId,
-		identityId,
-		currency,
-		paymentGateway,
-		billToContact,
-		soldToContact: deliveryContact,
-		deliveryInstructions,
-		...clonePaymentMethodResult,
-	});
-
-	const orderRequest = {
-		newAccount,
-		orderDate: zuoraDateFormat(contractEffectiveDate),
-		description:
-			'Created by createSubscriptionWithExistingPaymentMethod.ts in support-service-lambdas',
-		subscriptions: [
-			{
-				orderActions: [createSubscriptionOrderAction],
-				customFields: subscriptionCustomFields,
-			},
-		],
-		processingOptions: {
-			runBilling: runBilling ?? true,
-			collectPayment: collectPayment ?? true,
-		},
-	};
 
 	return executeOrderRequest(
 		zuoraClient,
-		orderRequest,
+		buildCreateSubscriptionRequest(
+			productCatalog,
+			{ ...input, paymentMethod: clonedPaymentMethod },
+			promotion,
+		),
 		createSubscriptionResponseSchema,
-		createdRequestId,
+		input.createdRequestId,
 	);
 };
