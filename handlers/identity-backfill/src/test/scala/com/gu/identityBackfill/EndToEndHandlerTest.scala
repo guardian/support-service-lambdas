@@ -87,6 +87,11 @@ class EndToEndHandlerTest extends AnyFlatSpec with Matchers {
     requests should be(
       List(
         BasicRequest(
+          "POST",
+          "/action/query",
+          """{"queryString":"SELECT Id, Name, TermEndDate, ContractEffectiveDate FROM Subscription where AccountId='2c92a0fb4a38064e014a3f48f1663ad8' and Status='Active'"}""",
+        ),
+        BasicRequest(
           "PATCH",
           s"/services/data/v$salesforceApiVersion/sobjects/Contact/00110000011AABBAAB",
           """{"IdentityID__c":"1234"}""",
@@ -173,10 +178,18 @@ object EndToEndData {
 
   def responses: Map[String, HTTPResponse] =
     GetByEmailTestresponses ++ responsesGetSFContactSyncCheckFieldsTest
+  def supporterProductDataPostResponses: Map[POSTRequest, HTTPResponse] = Map(
+    POSTRequest(
+      "/action/query",
+      """{"queryString":"SELECT Id, Name, TermEndDate, ContractEffectiveDate FROM Subscription where AccountId='2c92a0fb4a38064e014a3f48f1663ad8' and Status='Active'"}""",
+    ) -> HTTPResponse(200, """{"records":[],"size":0,"done":true}"""),
+  )
+
   def postResponses: Map[POSTRequest, HTTPResponse] =
     GetZuoraAccountsForEmailData.postResponses(false) ++
       CountZuoraAccountsForIdentityIdData.postResponses(false) ++
-      SalesforceAuthenticateData.postResponses
+      SalesforceAuthenticateData.postResponses ++
+      supporterProductDataPostResponses
 
   def identityBackfillRequest(dryRun: Boolean): String =
     s"""

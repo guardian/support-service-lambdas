@@ -18,6 +18,7 @@ class StepsTest extends AnyFlatSpec with Matchers {
 
     var zuoraUpdate: Option[(Set[AccountId], IdentityId)] = None // !!
     var salesforceUpdate: Option[(Option[SFContactId], IdentityId)] = None // !!
+    var supporterProductDataUpdate: Option[(Set[AccountId], IdentityId)] = None // !!
     var emailToCheck: Option[EmailAddress] = None // !!
 
     def getSteps(succeed: Boolean = true): DomainRequest => ApiResponse = {
@@ -41,6 +42,10 @@ class StepsTest extends AnyFlatSpec with Matchers {
           salesforceUpdate = Some((sFContactId, identityId))
           ContinueProcessing(())
         },
+        updateSupporterProductData = (accountIds, identityId) => {
+          supporterProductDataUpdate = Some((accountIds, identityId))
+          ContinueProcessing(())
+        },
       )
     }
 
@@ -58,6 +63,7 @@ class StepsTest extends AnyFlatSpec with Matchers {
     result should be(expectedResult)
     zuoraUpdate should be(Some((Set(AccountId("acc")), IdentityId("existing"))))
     salesforceUpdate should be(Some((Some(SFContactId("sf")), IdentityId("existing"))))
+    supporterProductDataUpdate should be(Some((Set(AccountId("acc")), IdentityId("existing"))))
     emailToCheck should be(Some(EmailAddress("email@address")))
   }
 
@@ -73,6 +79,7 @@ class StepsTest extends AnyFlatSpec with Matchers {
     result should be(expectedResult)
     zuoraUpdate should be(None)
     salesforceUpdate should be(None)
+    supporterProductDataUpdate should be(None)
     emailToCheck should be(Some(EmailAddress("email@address")))
   }
 
@@ -88,6 +95,7 @@ class StepsTest extends AnyFlatSpec with Matchers {
     result should be(expectedResult)
     zuoraUpdate should be(Some((Set(AccountId("acc")), IdentityId("created"))))
     salesforceUpdate should be(Some((Some(SFContactId("sf")), IdentityId("created"))))
+    supporterProductDataUpdate should be(Some((Set(AccountId("acc")), IdentityId("created"))))
     emailToCheck should be(Some(EmailAddress("email@address")))
   }
 
