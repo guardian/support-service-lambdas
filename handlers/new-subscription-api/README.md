@@ -1,7 +1,7 @@
 # new-subscription-api
 
 ## Overview
-The nenew-subscription-api is an API which Salesforce uses to enable Customer Service Representatives (CSRs) to purchase new subscriptions on behalf of customers.
+The new-subscription-api is an API which Salesforce uses to enable Customer Service Representatives (CSRs) to purchase new subscriptions on behalf of customers.
 
 It will replace the old new-product-api which is currently used for the same purpose, the main reasons for the migration are:
 - To use the same account creation code for both the website and Salesforce. This will reduce the amount of code we have to maintain, reduce the risk of differences resulting in bugs, and make it easier to add new features in the future.
@@ -10,7 +10,7 @@ It will replace the old new-product-api which is currently used for the same pur
 - Migrate the codebase from Scala to Typescript in line with our strategic aims
 
 ## Implementation
-The nenew-subscription-api is implemented as an API gateway in front of an AWS Lambda, authentication is via an API Gateway API key. 
+The new-subscription-api is implemented as an API gateway in front of an AWS Lambda, authentication is via an API Gateway API key. 
 The API exposes a single endpoint:
 
 ```
@@ -77,7 +77,7 @@ Non-tokenised credit card payment methods (ones where the full credit card detai
 PayPal may be clone in the same way as a `CreditCardReferenceTransaction` but this is not implemented currently.
 
 ### This flow is detailed in this flow chart:
-![img.png](img.png)
+![flow-chart.png](flow-chart.png)
 
 ## How to Test
 
