@@ -32,8 +32,6 @@ export const createSubscriptionRequestSchema = z.object({
 	productPurchase: productPurchaseSchema,
 	giftRecipient: giftRecipientSchema.optional(),
 	promoCode: z.string().optional(),
-	runBilling: z.boolean().optional(),
-	collectPayment: z.boolean().optional(),
 	acquisitionCase: z.string(),
 	acquisitionSource: z.string(),
 	createdByCSR: z.string(),
