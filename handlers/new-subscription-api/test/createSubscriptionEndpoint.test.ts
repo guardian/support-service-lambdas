@@ -69,6 +69,9 @@ const baseRequestBody = {
 		ratePlan: 'Monthly',
 		amount: 25,
 	},
+	acquisitionCase: 'case_123',
+	acquisitionSource: 'source_123',
+	createdByCSR: 'Jenny Wren',
 };
 
 const expectedResponse: CreateSubscriptionResponse = {
@@ -93,6 +96,7 @@ beforeEach(() => {
 	mockZuoraClientCreate.mockResolvedValue(mockZuoraClient);
 	mockGetProductCatalogFromApi.mockResolvedValue(productCatalog);
 	mockClonePaymentMethod.mockResolvedValue({
+		type: 'ExistingPaymentMethod',
 		hpmCreditCardPaymentMethodId: 'pm-123',
 	});
 	mockExecuteOrderRequest.mockResolvedValue(expectedResponse);

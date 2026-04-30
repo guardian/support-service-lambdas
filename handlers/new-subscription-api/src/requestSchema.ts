@@ -1,7 +1,7 @@
 import { isoCurrencySchema } from '@modules/internationalisation/schemas';
 import { productPurchaseSchema } from '@modules/product-catalog/productPurchaseSchema';
 import { appliedPromotionSchema } from '@modules/promotions/v2/schema';
-import { existingPaymentMethodInputSchema } from '@modules/zuora/createSubscription/clonePaymentMethod';
+import { existingPaymentMethodInputSchema } from '@modules/zuora/createSubscription/createSubscriptionWithExistingPaymentMethod';
 import { giftRecipientSchema } from '@modules/zuora/createSubscription/giftRecipient';
 import { paymentGatewaySchema } from '@modules/zuora/orders/paymentGateways';
 import { z } from 'zod';
@@ -35,9 +35,9 @@ export const createSubscriptionRequestSchema = z.object({
 	appliedPromotion: appliedPromotionSchema.optional(),
 	runBilling: z.boolean().optional(),
 	collectPayment: z.boolean().optional(),
-	acquisitionCase: z.string().optional(),
-	acquisitionSource: z.string().optional(),
-	createdByCSR: z.string().optional(),
+	acquisitionCase: z.string(),
+	acquisitionSource: z.string(),
+	createdByCSR: z.string(),
 });
 
 export type CreateSubscriptionRequest = z.infer<
