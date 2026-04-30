@@ -13,6 +13,7 @@ import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import { z } from 'zod';
 import { getChargeOverride } from '@modules/zuora/createSubscription/chargeOverride';
+import type { ClonedPaymentMethod } from '@modules/zuora/createSubscription/clonePaymentMethod';
 import { getProductRatePlan } from '@modules/zuora/createSubscription/getProductRatePlan';
 import type { GiftRecipient } from '@modules/zuora/createSubscription/giftRecipient';
 import { ReaderType } from '@modules/zuora/createSubscription/readerType';
@@ -26,7 +27,10 @@ import {
 import type { CreateOrderRequest } from '@modules/zuora/orders/orderRequests';
 import { executeOrderRequest } from '@modules/zuora/orders/orderRequests';
 import type { PaymentGateway } from '@modules/zuora/orders/paymentGateways';
-import type { PaymentMethod } from '@modules/zuora/orders/paymentMethods';
+import type {
+	AnyPaymentMethod,
+	PaymentMethod,
+} from '@modules/zuora/orders/paymentMethods';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
@@ -51,7 +55,7 @@ export type CreateSubscriptionInputFields<T extends PaymentMethod> = {
 	identityId: string;
 	currency: IsoCurrency;
 	paymentGateway: PaymentGateway<T>;
-	paymentMethod: T;
+	paymentMethod: T | ClonedPaymentMethod;
 	billToContact: Contact;
 	productPurchase: ProductPurchase;
 	giftRecipient?: GiftRecipient;
@@ -219,13 +223,26 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		appliedPromotion,
 		runBilling,
 		collectPayment,
+		createdByCSR,
+		acquisitionCase,
+		acquisitionSource,
 	}: CreateSubscriptionInputFields<T>,
 	promotion: Promo | undefined,
 ): CreateOrderRequest {
 	const { deliveryContact, deliveryAgent, deliveryInstructions } =
 		getDeliveryFields(productPurchase);
 
-	const newAccount = buildNewAccountObject({
+	const paymentFields =
+		paymentMethod.type === 'ExistingPaymentMethod'
+			? {
+					// The hpmCreditCardPaymentMethodId parameter is passed in at the same level as
+					// the paymentMethod parameter not nested underneath
+					hpmCreditCardPaymentMethodId:
+						paymentMethod.hpmCreditCardPaymentMethodId,
+				}
+			: { paymentMethod };
+
+	const newAccount = buildNewAccountObject<AnyPaymentMethod>({
 		accountName: accountName,
 		createdRequestId: createdRequestId,
 		salesforceAccountId: salesforceAccountId,
@@ -233,10 +250,10 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		identityId: identityId,
 		currency: currency,
 		paymentGateway: paymentGateway,
-		paymentMethod: paymentMethod,
 		billToContact: billToContact,
 		soldToContact: deliveryContact,
 		deliveryInstructions: deliveryInstructions,
+		...paymentFields,
 	});
 
 	const { contractEffectiveDate, createSubscriptionOrderAction } =
@@ -255,6 +272,9 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		InitialPromotionCode__c: appliedPromotion?.promoCode,
 		PromotionCode__c: appliedPromotion?.promoCode,
 		CreatedRequestId__c: createdRequestId,
+		AcquisitionCase__c: acquisitionCase,
+		AcquisitionSource__c: acquisitionSource,
+		CreatedByCSR__c: createdByCSR,
 	};
 	return {
 		newAccount: newAccount,
@@ -272,6 +292,7 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		},
 	};
 }
+
 export const createSubscription = async <T extends PaymentMethod>(
 	zuoraClient: ZuoraClient,
 	productCatalog: ProductCatalog,
