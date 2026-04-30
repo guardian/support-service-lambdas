@@ -7,7 +7,7 @@ exports[`generateProductCatalog function code Generated product billing period t
 import type { ProductKey } from '@modules/product-catalog/productCatalog';
 	
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- we are using this for type generation
-	const productBillingPeriods = {"Contribution":["Annual","Month"],"DigitalSubscription":["Annual","Month","Quarter"],"GuardianAdLite":["Month"],"GuardianWeeklyDomestic":["Annual","Month","Quarter"],"GuardianWeeklyRestOfWorld":["Annual","Month","Quarter"],"GuardianWeeklyZoneA":["Annual","Quarter","Semi_Annual","Three_Years","Two_Years"],"GuardianWeeklyZoneB":["Annual","Quarter","Semi_Annual","Three_Years","Two_Years"],"GuardianWeeklyZoneC":["Annual","Quarter"],"NationalDelivery":["Month"],"HomeDelivery":["Month"],"SubscriptionCard":["Month"],"NewspaperVoucher":["Month"],"PartnerMembership":["Annual","Month"],"PatronMembership":["Annual","Month"],"SupporterMembership":["Annual","Month"],"SupporterPlus":["Annual","Month"],"TierThree":["Annual","Month"],"GuardianPatron":["Month"],"OneTimeContribution":["OneTime"]} as const;
+	const productBillingPeriods = {"GuardianAdLite":["Month"],"GuardianWeeklyZoneB":["Annual","Quarter","Semi_Annual","Three_Years","Two_Years"],"TierThree":["Annual","Month"],"DigitalSubscription":["Annual","Month","Quarter"],"HomeDelivery":["Month"],"NationalDelivery":["Month"],"SupporterPlus":["Annual","Month"],"SupporterMembership":["Annual","Month"],"GuardianWeeklyRestOfWorld":["Annual","Month","Quarter"],"GuardianWeeklyDomestic":["Annual","Month","Quarter"],"SubscriptionCard":["Month"],"Contribution":["Annual","Month"],"GuardianWeeklyZoneA":["Annual","Quarter","Semi_Annual","Three_Years","Two_Years"],"GuardianWeeklyZoneC":["Annual","Quarter"],"NewspaperVoucher":["Month"],"PatronMembership":["Annual","Month"],"PartnerMembership":["Annual","Month"],"GuardianPatron":["Month"],"OneTimeContribution":["OneTime"]} as const;
 	
 	export type ProductBillingPeriod<P extends ProductKey> = (typeof productBillingPeriods)[P][number];
 	"
@@ -254,12 +254,12 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         },
         "id": "71a10c626869c3262f1c33d50fd3000f",
         "pricing": {
-          "AUD": 533,
-          "CAD": 437,
-          "EUR": 353,
-          "GBP": 203,
-          "NZD": 665,
-          "USD": 365,
+          "AUD": 600,
+          "CAD": 480,
+          "EUR": 366,
+          "GBP": 228,
+          "NZD": 660,
+          "USD": 432,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -307,12 +307,12 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         },
         "id": "71a1889a11e9c3262efc33d4d2e6003d",
         "pricing": {
-          "AUD": 49,
-          "CAD": 41,
-          "EUR": 34,
-          "GBP": 21.5,
-          "NZD": 60,
-          "USD": 35,
+          "AUD": 50,
+          "CAD": 40,
+          "EUR": 30.5,
+          "GBP": 19,
+          "NZD": 55,
+          "USD": 36,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -367,12 +367,12 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         },
         "id": "71a1b1d5ae19c3274a6c33d4e8c80000",
         "pricing": {
-          "AUD": 137,
-          "CAD": 113,
-          "EUR": 92,
-          "GBP": 54.5,
-          "NZD": 170,
-          "USD": 95,
+          "AUD": 150,
+          "CAD": 120,
+          "EUR": 91.5,
+          "GBP": 57,
+          "NZD": 165,
+          "USD": 108,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -431,8 +431,8 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         },
         "id": "71a10c626ff9c22b079c245239af0009",
         "pricing": {
-          "GBP": 339,
-          "USD": 435,
+          "GBP": 386.91,
+          "USD": 456,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -476,8 +476,8 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         },
         "id": "71a17af0e0e9c22c33ec241bf657005b",
         "pricing": {
-          "GBP": 31,
-          "USD": 39,
+          "GBP": 32.24,
+          "USD": 38,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -524,8 +524,8 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         },
         "id": "71a10c6268a9c22b079c2452f51f0137",
         "pricing": {
-          "GBP": 86.9,
-          "USD": 111,
+          "GBP": 96.61,
+          "USD": 114,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -793,7 +793,7 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         },
         "id": "2c92c0f85aff3453015b10496b5e3d17",
         "pricing": {
-          "GBP": 83.99,
+          "GBP": 88.99,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -824,7 +824,7 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         },
         "id": "2c92c0f961f9cf300161fc4f71473a34",
         "pricing": {
-          "GBP": 20.99,
+          "GBP": 21.99,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -885,7 +885,7 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         },
         "id": "2c92c0f85aff33ff015b1042d4ba0a05",
         "pricing": {
-          "GBP": 73.99,
+          "GBP": 77.99,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -953,7 +953,7 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         },
         "id": "2c92c0f95aff3b56015b104aa9a13ea5",
         "pricing": {
-          "GBP": 34.99,
+          "GBP": 36.99,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -1040,7 +1040,7 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         },
         "id": "71a116628be96ab11606b51ec6060555",
         "pricing": {
-          "GBP": 83.99,
+          "GBP": 88.99,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -1101,7 +1101,7 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         },
         "id": "71a1383e2a796aafcb16b527842001ca",
         "pricing": {
-          "GBP": 73.99,
+          "GBP": 77.99,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -1138,7 +1138,7 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         },
         "id": "71a1166283a96ab11606b50ebbb50381",
         "pricing": {
-          "GBP": 34.99,
+          "GBP": 36.99,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -1225,7 +1225,7 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         },
         "id": "2c92c0f95aff3b53015b10469bbf5f5f",
         "pricing": {
-          "GBP": 69.99,
+          "GBP": 72.99,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -1256,7 +1256,7 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         },
         "id": "2c92c0f961f9cf300161fc44f2661258",
         "pricing": {
-          "GBP": 15.99,
+          "GBP": 16.99,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -1317,7 +1317,7 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         },
         "id": "2c92c0f855c3b8190155c585a95e6f5a",
         "pricing": {
-          "GBP": 61.99,
+          "GBP": 64.99,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -1385,7 +1385,7 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         },
         "id": "2c92c0f95aff3b54015b1047efaa2ac3",
         "pricing": {
-          "GBP": 27.99,
+          "GBP": 29.99,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -1644,7 +1644,7 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         },
         "id": "2c92c0f86fa49142016fa49eaa492988",
         "pricing": {
-          "GBP": 69.99,
+          "GBP": 73.99,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -1675,7 +1675,7 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         },
         "id": "2c92c0f86fa49142016fa49eb1732a39",
         "pricing": {
-          "GBP": 15.99,
+          "GBP": 16.99,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -1736,7 +1736,7 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         },
         "id": "2c92c0f86fa49142016fa49ea1af28c8",
         "pricing": {
-          "GBP": 61.99,
+          "GBP": 64.99,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -1804,7 +1804,7 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         },
         "id": "2c92c0f86fa49142016fa49eaecb29dd",
         "pricing": {
-          "GBP": 27.99,
+          "GBP": 29.99,
         },
         "termLengthInMonths": 12,
         "termType": "Recurring",

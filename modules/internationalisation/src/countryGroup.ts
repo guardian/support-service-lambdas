@@ -344,3 +344,8 @@ export const countryGroupBySupportRegionId = (
 			return countryGroups.International;
 	}
 };
+export const supportRegionIdFromCountry = (country: IsoCountry) => {
+	return Object.values(countryGroups).find((countryGroup) =>
+		countryGroup.countries.includes(country),
+	)?.supportRegionId;
+};

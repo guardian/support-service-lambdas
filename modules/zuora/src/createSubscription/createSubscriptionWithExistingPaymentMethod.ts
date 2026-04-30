@@ -1,5 +1,6 @@
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { Promo } from '@modules/promotions/v2/schema';
+import { z } from 'zod';
 import { clonePaymentMethod } from '@modules/zuora/createSubscription/clonePaymentMethod';
 import type {
 	CreateSubscriptionInputFields,
@@ -13,13 +14,20 @@ import { executeOrderRequest } from '@modules/zuora/orders/orderRequests';
 import type { PaymentMethod } from '@modules/zuora/orders/paymentMethods';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
-// Represents a Zuora payment method ID provided by the caller.
-// requiresCloning: false — the PM exists but is not yet attached to any account;
-// requiresCloning: true — the PM is attached to an existing account and must be cloned before use.
-export type ExistingPaymentMethodInput = {
-	id: string;
-	requiresCloning: boolean;
-};
+export const existingPaymentMethodInputSchema = z.object({
+	id: z
+		.string()
+		.describe('Zuora payment method ID to clone or attach to the new account'),
+	requiresCloning: z
+		.boolean()
+		.describe(
+			'true if it is already attached and in use by an existing account',
+		),
+});
+
+export type ExistingPaymentMethodInput = z.infer<
+	typeof existingPaymentMethodInputSchema
+>;
 
 export type CreateSubscriptionWithExistingPaymentMethodInput = Omit<
 	CreateSubscriptionInputFields<PaymentMethod>,

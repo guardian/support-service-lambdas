@@ -164,7 +164,9 @@ type DeliveryFields = {
 	deliveryInstructions: string | undefined;
 };
 
-function getDeliveryFields(productPurchase: ProductPurchase): DeliveryFields {
+export function getDeliveryFields(
+	productPurchase: ProductPurchase,
+): DeliveryFields {
 	switch (productPurchase.product) {
 		case 'NationalDelivery':
 			return {
