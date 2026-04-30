@@ -2,7 +2,7 @@ package com.gu.identityBackfill.zuora
 
 import com.gu.identityBackfill.Types.AccountId
 import com.gu.identityBackfill.supporterProductData.{ZuoraRatePlan, ZuoraSubscription}
-import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
+import com.gu.util.resthttp.Types.{ClientFailableOp, GenericError, traverse}
 import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import play.api.libs.json.{Json, Reads}
@@ -47,14 +47,6 @@ object GetSubscriptionsForAccount {
 
   private def parseDate(value: String, field: String, sub: String): ClientFailableOp[LocalDate] =
     Try(LocalDate.parse(value)).toEither.left
-      .map(err => com.gu.util.resthttp.Types.GenericError(s"could not parse $field for $sub: ${err.getMessage}"))
+      .map(err => GenericError(s"could not parse $field for $sub: ${err.getMessage}"))
       .toClientFailableOp
-
-  private def traverse[A, B](as: List[A])(f: A => ClientFailableOp[B]): ClientFailableOp[List[B]] =
-    as.foldLeft[ClientFailableOp[List[B]]](ClientSuccess(Nil)) { (acc, a) =>
-      for {
-        bs <- acc
-        b <- f(a)
-      } yield bs :+ b
-    }
 }

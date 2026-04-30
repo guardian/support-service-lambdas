@@ -21,30 +21,30 @@ class UpdateSupporterProductDataService(
       subscriptions: List[ZuoraSubscription],
       identityId: IdentityId,
   ): Either[String, Unit] = {
-    val items = subscriptions.flatMap { sub =>
-      sub.ratePlans.map { rp =>
-        SupporterRatePlanItem(
-          subscriptionName = sub.subscriptionName,
-          identityId = identityId.value,
-          productRatePlanId = rp.productRatePlanId,
-          productRatePlanName = rp.ratePlanName,
-          termEndDate = sub.termEndDate,
-          contractEffectiveDate = sub.contractEffectiveDate,
-        )
-      }
-    }
+    val items = for {
+      sub <- subscriptions
+      rp <- sub.ratePlans
+    } yield SupporterRatePlanItem(
+      subscriptionName = sub.subscriptionName,
+      identityId = identityId,
+      productRatePlanId = rp.productRatePlanId,
+      productRatePlanName = rp.ratePlanName,
+      termEndDate = sub.termEndDate,
+      contractEffectiveDate = sub.contractEffectiveDate,
+    )
 
     if (items.isEmpty) {
       logger.info(s"No active rate plans for identity ${identityId.value}; nothing to send to ${queueName.value}")
       Right(())
     } else {
       logger.info(s"Sending ${items.size} rate plan messages to ${queueName.value}")
-      val errors = items.flatMap { item =>
-        sendMessage(queueName, Payload(item.asJson.noSpaces)) match {
+      val errors = for {
+        item <- items
+        error <- sendMessage(queueName, Payload(item.asJson.noSpaces)) match {
           case Left(err) => Some(s"${item.subscriptionName}/${item.productRatePlanId}: $err")
           case Right(_) => None
         }
-      }
+      } yield error
       if (errors.isEmpty) Right(()) else Left(errors.mkString("; "))
     }
   }
