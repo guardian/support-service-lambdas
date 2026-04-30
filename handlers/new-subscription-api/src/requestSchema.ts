@@ -1,6 +1,5 @@
 import { isoCurrencySchema } from '@modules/internationalisation/schemas';
 import { productPurchaseSchema } from '@modules/product-catalog/productPurchaseSchema';
-import { appliedPromotionSchema } from '@modules/promotions/v2/schema';
 import { existingPaymentMethodInputSchema } from '@modules/zuora/createSubscription/createSubscriptionWithExistingPaymentMethod';
 import { giftRecipientSchema } from '@modules/zuora/createSubscription/giftRecipient';
 import { paymentGatewaySchema } from '@modules/zuora/orders/paymentGateways';
@@ -32,7 +31,7 @@ export const createSubscriptionRequestSchema = z.object({
 	billToContact: contactSchema,
 	productPurchase: productPurchaseSchema,
 	giftRecipient: giftRecipientSchema.optional(),
-	appliedPromotion: appliedPromotionSchema.optional(),
+	promoCode: z.string().optional(),
 	runBilling: z.boolean().optional(),
 	collectPayment: z.boolean().optional(),
 	acquisitionCase: z.string(),

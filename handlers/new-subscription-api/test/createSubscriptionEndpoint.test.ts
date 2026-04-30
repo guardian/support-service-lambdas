@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return -- jest expect matchers and requireActual return any */
-import { SupportRegionId } from '@modules/internationalisation/countryGroup';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import { getPromotion } from '@modules/promotions/v2/getPromotion';
@@ -136,10 +135,7 @@ describe('createNewSubscriptionEndpoint', () => {
 		const result = await handler(
 			makeEvent({
 				...baseRequestBody,
-				appliedPromotion: {
-					promoCode: 'E2E_TEST_SPLUS_MONTHLY',
-					supportRegionId: SupportRegionId.UK,
-				},
+				promoCode: 'E2E_TEST_SPLUS_MONTHLY',
 			}),
 		);
 
@@ -172,10 +168,7 @@ describe('createNewSubscriptionEndpoint', () => {
 		const result = await handler(
 			makeEvent({
 				...baseRequestBody,
-				appliedPromotion: {
-					promoCode: 'INVALID_PROMO',
-					supportRegionId: SupportRegionId.UK,
-				},
+				promoCode: 'INVALID_PROMO',
 			}),
 		);
 
@@ -201,10 +194,7 @@ describe('createNewSubscriptionEndpoint', () => {
 		const result = await handler(
 			makeEvent({
 				...baseRequestBody,
-				appliedPromotion: {
-					promoCode: 'EXPIRED_PROMO',
-					supportRegionId: SupportRegionId.UK,
-				},
+				promoCode: 'EXPIRED_PROMO',
 			}),
 		);
 
