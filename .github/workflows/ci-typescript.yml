@@ -69,6 +69,7 @@ jobs:
           - mobile-purchases-to-supporter-product-data
           - new-subscription-api
           - newsletter-acquisition
+          - multiple-account-api
           # MARKER new-lambda: github-action
     runs-on: ubuntu-latest
     permissions:
