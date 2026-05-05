@@ -62,7 +62,5 @@ export class MultipleAccountApi extends SrStack {
 		});
 
 		secondaryUserTable.grantFullAccess(lambda);
-
-
 	}
 }
