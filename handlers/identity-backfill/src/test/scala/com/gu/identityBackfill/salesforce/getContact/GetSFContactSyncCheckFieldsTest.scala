@@ -34,7 +34,7 @@ class GetSFContactSyncCheckFieldsTest extends AnyFlatSpec with Matchers {
         records = List(
           ContactSyncCheckFields(
             "00110000011AABBAAB",
-            Some("STANDARD_TEST_DUMMY"),
+            Some("01220000000VB52AAG"),
             "123",
             "Testing",
             Some("United Kingdom"),
@@ -64,7 +64,7 @@ object GetSFContactSyncCheckFieldsTest {
       |                "url": "/services/data/v$salesforceApiVersion/sobjects/Contact/00110000011AABBAAB"
       |            },
       |            "Id": "00110000011AABBAAB",
-      |            "RecordTypeId": "STANDARD_TEST_DUMMY",
+      |            "RecordTypeId": "01220000000VB52AAG",
       |            "LastName": "123",
       |            "FirstName": "Testing",
       |            "OtherCountry": "United Kingdom",
