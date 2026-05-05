@@ -120,6 +120,77 @@ exports[`The Multiple account api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
+    "InvitationTable052C0851": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "subscriptionName",
+            "AttributeType": "S",
+          },
+          {
+            "AttributeName": "invitationCode",
+            "AttributeType": "S",
+          },
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "GlobalSecondaryIndexes": [
+          {
+            "IndexName": "invitationCode-index",
+            "KeySchema": [
+              {
+                "AttributeName": "invitationCode",
+                "KeyType": "HASH",
+              },
+            ],
+            "Projection": {
+              "ProjectionType": "ALL",
+            },
+          },
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "subscriptionName",
+            "KeyType": "HASH",
+          },
+          {
+            "AttributeName": "invitationCode",
+            "KeyType": "RANGE",
+          },
+        ],
+        "SSESpecification": {
+          "SSEEnabled": true,
+        },
+        "StreamSpecification": {
+          "StreamViewType": "NEW_AND_OLD_IMAGES",
+        },
+        "TableName": "multiple-account-invitation-CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "multiple-account-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::DynamoDB::Table",
+      "UpdateReplacePolicy": "Delete",
+    },
     "LambdaD247545B": {
       "DependsOn": [
         "LambdaServiceRoleDefaultPolicyDAE46E21",
@@ -132,7 +203,7 @@ exports[`The Multiple account api stack matches the snapshot 1`] = `
           },
           "S3Key": "support/CODE/multiple-account-api/multiple-account-api.zip",
         },
-        "Description": "A lambda that enables the addition of discounts to existing subscriptions",
+        "Description": "A lambda that provides an API to manage multiple accounts",
         "Environment": {
           "Variables": {
             "APP": "multiple-account-api",
@@ -820,6 +891,58 @@ exports[`The Multiple account api stack matches the snapshot 1`] = `
                 ],
               },
             },
+            {
+              "Action": "dynamodb:*",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "InvitationTable052C0851",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "InvitationTable052C0851",
+                          "Arn",
+                        ],
+                      },
+                      "/index/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "dynamodb:*",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "SecondaryUserTable22C9D3B4",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "SecondaryUserTable22C9D3B4",
+                          "Arn",
+                        ],
+                      },
+                      "/index/*",
+                    ],
+                  ],
+                },
+              ],
+            },
           ],
           "Version": "2012-10-17",
         },
@@ -831,6 +954,77 @@ exports[`The Multiple account api stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "SecondaryUserTable22C9D3B4": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "subscriptionName",
+            "AttributeType": "S",
+          },
+          {
+            "AttributeName": "secondaryIdentityId",
+            "AttributeType": "S",
+          },
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "GlobalSecondaryIndexes": [
+          {
+            "IndexName": "secondaryIdentityId-index",
+            "KeySchema": [
+              {
+                "AttributeName": "secondaryIdentityId",
+                "KeyType": "HASH",
+              },
+            ],
+            "Projection": {
+              "ProjectionType": "ALL",
+            },
+          },
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "subscriptionName",
+            "KeyType": "HASH",
+          },
+          {
+            "AttributeName": "secondaryIdentityId",
+            "KeyType": "RANGE",
+          },
+        ],
+        "SSESpecification": {
+          "SSEEnabled": true,
+        },
+        "StreamSpecification": {
+          "StreamViewType": "NEW_AND_OLD_IMAGES",
+        },
+        "TableName": "multiple-account-secondary-user-CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "multiple-account-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::DynamoDB::Table",
+      "UpdateReplacePolicy": "Delete",
     },
   },
 }
@@ -901,7 +1095,7 @@ exports[`The Multiple account api stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "multiple-account-api returned a 5XX response. Search the logs below for "error" for more information. Impact: an eligible user may not have been offered a discount during the cancellation flow",
+        "AlarmDescription": "multiple-account-api returned a 5XX response. Search the logs below for "error" for more information. Impact: The multiple account system is experiencing errors",
         "AlarmName": "multiple-account-api-PROD 5XX errors",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
@@ -1032,6 +1226,77 @@ exports[`The Multiple account api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
+    "InvitationTable052C0851": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "subscriptionName",
+            "AttributeType": "S",
+          },
+          {
+            "AttributeName": "invitationCode",
+            "AttributeType": "S",
+          },
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "GlobalSecondaryIndexes": [
+          {
+            "IndexName": "invitationCode-index",
+            "KeySchema": [
+              {
+                "AttributeName": "invitationCode",
+                "KeyType": "HASH",
+              },
+            ],
+            "Projection": {
+              "ProjectionType": "ALL",
+            },
+          },
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "subscriptionName",
+            "KeyType": "HASH",
+          },
+          {
+            "AttributeName": "invitationCode",
+            "KeyType": "RANGE",
+          },
+        ],
+        "SSESpecification": {
+          "SSEEnabled": true,
+        },
+        "StreamSpecification": {
+          "StreamViewType": "NEW_AND_OLD_IMAGES",
+        },
+        "TableName": "multiple-account-invitation-PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "multiple-account-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::DynamoDB::Table",
+      "UpdateReplacePolicy": "Retain",
+    },
     "LambdaD247545B": {
       "DependsOn": [
         "LambdaServiceRoleDefaultPolicyDAE46E21",
@@ -1044,7 +1309,7 @@ exports[`The Multiple account api stack matches the snapshot 2`] = `
           },
           "S3Key": "support/PROD/multiple-account-api/multiple-account-api.zip",
         },
-        "Description": "A lambda that enables the addition of discounts to existing subscriptions",
+        "Description": "A lambda that provides an API to manage multiple accounts",
         "Environment": {
           "Variables": {
             "APP": "multiple-account-api",
@@ -1732,6 +1997,58 @@ exports[`The Multiple account api stack matches the snapshot 2`] = `
                 ],
               },
             },
+            {
+              "Action": "dynamodb:*",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "InvitationTable052C0851",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "InvitationTable052C0851",
+                          "Arn",
+                        ],
+                      },
+                      "/index/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "dynamodb:*",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "SecondaryUserTable22C9D3B4",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "SecondaryUserTable22C9D3B4",
+                          "Arn",
+                        ],
+                      },
+                      "/index/*",
+                    ],
+                  ],
+                },
+              ],
+            },
           ],
           "Version": "2012-10-17",
         },
@@ -1743,6 +2060,77 @@ exports[`The Multiple account api stack matches the snapshot 2`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "SecondaryUserTable22C9D3B4": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "subscriptionName",
+            "AttributeType": "S",
+          },
+          {
+            "AttributeName": "secondaryIdentityId",
+            "AttributeType": "S",
+          },
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "GlobalSecondaryIndexes": [
+          {
+            "IndexName": "secondaryIdentityId-index",
+            "KeySchema": [
+              {
+                "AttributeName": "secondaryIdentityId",
+                "KeyType": "HASH",
+              },
+            ],
+            "Projection": {
+              "ProjectionType": "ALL",
+            },
+          },
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "subscriptionName",
+            "KeyType": "HASH",
+          },
+          {
+            "AttributeName": "secondaryIdentityId",
+            "KeyType": "RANGE",
+          },
+        ],
+        "SSESpecification": {
+          "SSEEnabled": true,
+        },
+        "StreamSpecification": {
+          "StreamViewType": "NEW_AND_OLD_IMAGES",
+        },
+        "TableName": "multiple-account-secondary-user-PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "multiple-account-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::DynamoDB::Table",
+      "UpdateReplacePolicy": "Retain",
     },
   },
 }
