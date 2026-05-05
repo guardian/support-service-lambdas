@@ -24,7 +24,6 @@ type NewAccountBase<T extends AnyPaymentMethod> = {
 	customFields: {
 		sfContactId__c: string; // Salesforce contactId
 		IdentityId__c: string;
-		CreatedRequestId__c: string; // Support workers requestId, used to prevent duplicates
 	};
 	billCycleDay: 0;
 	autoPay: boolean;
@@ -50,7 +49,6 @@ type BuildNewAccountInput<T extends AnyPaymentMethod> = Omit<
 	'name' | 'crmId' | 'customFields' | 'billCycleDay' | 'autoPay'
 > & {
 	accountName: string;
-	createdRequestId: string;
 	salesforceAccountId: string;
 	salesforceContactId: string;
 	identityId: string;
@@ -72,7 +70,6 @@ export function buildNewAccountObject<T extends AnyPaymentMethod>(
 		customFields: {
 			sfContactId__c: input.salesforceContactId,
 			IdentityId__c: input.identityId,
-			CreatedRequestId__c: input.createdRequestId,
 		},
 		billCycleDay: 0,
 		autoPay: true,
