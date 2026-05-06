@@ -13,7 +13,6 @@ export * from './filterRows';
 export * from './formatDuration';
 export * from './loadConfig';
 export * from './loadState';
-export * from './main';
 export * from './parseArgs';
 export * from './parseLine';
 export * from './pickEmail';
