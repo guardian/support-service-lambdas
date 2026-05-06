@@ -1,0 +1,22 @@
+{
+  "name": "identity-backfill-batch",
+  "scripts": {
+    "test": "jest --group=-integration --passWithNoTests",
+    "it-test": "jest --group=integration",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts'",
+    "check-formatting": "prettier --check \"**/*.ts\"",
+    "fix-formatting": "prettier --write \"**/*.ts\"",
+    "build": "tsc --noEmit",
+    "backfill-batch": "tsx ./src/run.ts"
+  },
+  "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/module/package.json.ts",
+  "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "dayjs": "^1.11.13",
+    "tsx": "^4.21.0"
+  }
+}
