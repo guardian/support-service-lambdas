@@ -32,6 +32,7 @@ export class MultipleAccountApi extends SrStack {
 			billingMode: BillingMode.PAY_PER_REQUEST,
 			partitionKey: { name: 'subscriptionName', type: AttributeType.STRING },
 			sortKey: { name: 'invitationCode', type: AttributeType.STRING },
+			timeToLiveAttribute: 'expiryDate',
 			encryption: TableEncryption.AWS_MANAGED,
 			stream: StreamViewType.NEW_AND_OLD_IMAGES,
 			removalPolicy:
@@ -50,6 +51,7 @@ export class MultipleAccountApi extends SrStack {
 			billingMode: BillingMode.PAY_PER_REQUEST,
 			partitionKey: { name: 'subscriptionName', type: AttributeType.STRING },
 			sortKey: { name: 'secondaryIdentityId', type: AttributeType.STRING },
+			timeToLiveAttribute: 'expiryDate',
 			encryption: TableEncryption.AWS_MANAGED,
 			stream: StreamViewType.NEW_AND_OLD_IMAGES,
 			removalPolicy:
