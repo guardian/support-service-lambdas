@@ -70,6 +70,7 @@ jobs:
           - new-subscription-api
           - newsletter-acquisition
           - multiple-account-api
+          - observer-benefits-api
           # MARKER new-lambda: github-action
     runs-on: ubuntu-latest
     permissions:
