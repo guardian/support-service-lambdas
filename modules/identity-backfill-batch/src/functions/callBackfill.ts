@@ -1,17 +1,11 @@
-import { z } from 'zod';
-
-export type ApiOutcome =
-	| { kind: 'success'; identityId: string | null; rawBody: string }
-	| { kind: 'rejected'; reason: string; httpStatus: number }
-	| { kind: 'error'; reason: string; httpStatus: number | null };
-
-export type ApiConfig = {
-	url: string;
-	apiKey: string;
-};
+import type { IApiConfig } from '../interfaces';
+import type { ApiOutcome } from '../types';
+import { extractIdentityId } from './extractIdentityId';
+import { extractMessage } from './extractMessage';
+import { sleep } from './sleep';
 
 export async function callBackfill(
-	config: ApiConfig,
+	config: IApiConfig,
 	emailAddress: string,
 	dryRun: boolean,
 	maxRetries = 3,
@@ -80,24 +74,4 @@ export async function callBackfill(
 		reason: lastError.reason,
 		httpStatus: lastError.status,
 	};
-}
-
-const responseBodySchema = z.object({ message: z.string().optional() });
-
-function extractMessage(text: string): string {
-	try {
-		const obj = responseBodySchema.parse(JSON.parse(text));
-		return obj.message ?? text.slice(0, 300);
-	} catch {
-		return text.slice(0, 300);
-	}
-}
-
-function extractIdentityId(body: string): string | null {
-	const match = body.match(/identity\s*id[^"]*"\s*:\s*"([^"]+)"/i);
-	return match?.[1] ?? null;
-}
-
-export function sleep(ms: number): Promise<void> {
-	return new Promise((resolve) => setTimeout(resolve, ms));
 }
