@@ -275,6 +275,12 @@ importers:
 
   handlers/multiple-account-api:
     dependencies:
+      '@aws-sdk/client-dynamodb':
+        specifier: ^3.940.0
+        version: 3.995.0
+      '@aws-sdk/util-dynamodb':
+        specifier: ^3.940.0
+        version: 3.995.0(@aws-sdk/client-dynamodb@3.995.0)
       zod:
         specifier: 'catalog:'
         version: 3.25.76

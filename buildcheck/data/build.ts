@@ -381,6 +381,8 @@ const newsletterAcquisition: HandlerDefinition = {
 const multipleAccountApi: HandlerDefinition = {
 	name: 'multiple-account-api',
 	dependencies: {
+		...dep['@aws-sdk/client-dynamodb'],
+		...dep['@aws-sdk/util-dynamodb'],
 		...dep.zod,
 	},
 	devDependencies: {
