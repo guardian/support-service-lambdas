@@ -1,3 +1,4 @@
+import { IDENTITY_STATUS_HAS, IDENTITY_STATUS_NONE } from '../constants';
 import type { ICsvRow } from '../interfaces';
 import type { FilterMode } from '../types';
 
@@ -6,12 +7,12 @@ export function filterRows(rows: ICsvRow[], mode: FilterMode): ICsvRow[] {
 		case 'all':
 			return rows;
 		case 'has-identity-id':
-			return rows.filter((r) => r.identity_status === 'Has Identity ID');
+			return rows.filter((r) => r.identity_status === IDENTITY_STATUS_HAS);
 		case 'no-identity-id':
 			return rows.filter(
 				(r) =>
-					r.identity_status === 'Has Identity ID' ||
-					r.identity_status === 'No Identity ID',
+					r.identity_status === IDENTITY_STATUS_HAS ||
+					r.identity_status === IDENTITY_STATUS_NONE,
 			);
 	}
 }

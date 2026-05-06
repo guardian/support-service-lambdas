@@ -1,3 +1,9 @@
+import {
+	API_CLIENT_ID,
+	API_TOKEN_PLACEHOLDER,
+	DEFAULT_MAX_RETRIES,
+	INITIAL_BACKOFF_MS,
+} from '../constants';
 import type { IApiConfig } from '../interfaces';
 import type { ApiOutcome } from '../types';
 import { extractIdentityId } from './extractIdentityId';
@@ -8,11 +14,11 @@ export async function callBackfill(
 	config: IApiConfig,
 	emailAddress: string,
 	dryRun: boolean,
-	maxRetries = 3,
+	maxRetries = DEFAULT_MAX_RETRIES,
 ): Promise<ApiOutcome> {
 	const params = new URLSearchParams({
-		apiClientId: 'identity-backfill-batch',
-		apiToken: 'batch',
+		apiClientId: API_CLIENT_ID,
+		apiToken: API_TOKEN_PLACEHOLDER,
 	});
 	const url = `${config.url}?${params.toString()}`;
 	const body = JSON.stringify({ emailAddress, dryRun });
@@ -64,7 +70,7 @@ export async function callBackfill(
 		}
 
 		if (attempt < maxRetries) {
-			const backoffMs = 500 * Math.pow(2, attempt - 1);
+			const backoffMs = INITIAL_BACKOFF_MS * Math.pow(2, attempt - 1);
 			await sleep(backoffMs);
 		}
 	}

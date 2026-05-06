@@ -1,12 +1,10 @@
 import { appendFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { ERRORS_FILE, ERRORS_HEADER } from '../constants';
 import type { ICsvRow } from '../interfaces';
 import { csvRow } from './csvRow';
 import { ensureHeader } from './ensureHeader';
 import { pickEmail } from './pickEmail';
-
-const HEADER =
-	'timestamp,email,sub_id,sub_number,sf_product,http_status,reason\n';
 
 export function appendError(
 	outputDir: string,
@@ -14,8 +12,8 @@ export function appendError(
 	httpStatus: number | null,
 	reason: string,
 ): void {
-	const path = join(outputDir, 'errors.csv');
-	ensureHeader(path, HEADER);
+	const path = join(outputDir, ERRORS_FILE);
+	ensureHeader(path, ERRORS_HEADER);
 	appendFileSync(
 		path,
 		csvRow([

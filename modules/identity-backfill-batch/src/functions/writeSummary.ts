@@ -1,5 +1,6 @@
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { SUMMARY_FILE } from '../constants';
 import type { IState } from '../interfaces';
 import type { Stage } from '../types';
 import { formatDuration } from './formatDuration';
@@ -23,5 +24,5 @@ export function writeSummary(
 		`Errors:          ${state.errored.size}`,
 		``,
 	];
-	writeFileSync(join(outputDir, 'summary.txt'), lines.join('\n'));
+	writeFileSync(join(outputDir, SUMMARY_FILE), lines.join('\n'));
 }

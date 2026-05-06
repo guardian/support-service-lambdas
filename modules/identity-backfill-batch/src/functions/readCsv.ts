@@ -1,18 +1,7 @@
 import { readFileSync } from 'node:fs';
+import { CSV_REQUIRED_COLUMNS } from '../constants';
 import type { ICsvRow } from '../interfaces';
 import { parseLine } from './parseLine';
-
-const REQUIRED_COLUMNS = [
-	'sub_id',
-	'sub_number',
-	'subscription_end_date',
-	'sub_status',
-	'zuora_bill_to_email',
-	'sf_contact_email',
-	'identity_status',
-	'sf_product',
-	'account_crm_id',
-] as const;
 
 export function readCsv(path: string): ICsvRow[] {
 	const content = readFileSync(path, 'utf8');
@@ -26,7 +15,7 @@ export function readCsv(path: string): ICsvRow[] {
 		throw new Error(`CSV header missing: ${path}`);
 	}
 	const header = parseLine(headerLine);
-	for (const col of REQUIRED_COLUMNS) {
+	for (const col of CSV_REQUIRED_COLUMNS) {
 		if (!header.includes(col)) {
 			throw new Error(
 				`CSV missing required column "${col}". Found: ${header.join(', ')}`,
