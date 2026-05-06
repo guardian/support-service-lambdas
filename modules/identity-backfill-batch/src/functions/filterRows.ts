@@ -7,10 +7,12 @@ export function filterRows(rows: ICsvRow[], mode: FilterMode): ICsvRow[] {
 		case 'all':
 			return rows;
 		case 'has-identity-id':
-			return rows.filter((r) => r.identity_status === IDENTITY_STATUS_HAS);
+			return rows.filter(
+				(r: ICsvRow) => r.identity_status === IDENTITY_STATUS_HAS,
+			);
 		case 'no-identity-id':
 			return rows.filter(
-				(r) =>
+				(r: ICsvRow) =>
 					r.identity_status === IDENTITY_STATUS_HAS ||
 					r.identity_status === IDENTITY_STATUS_NONE,
 			);

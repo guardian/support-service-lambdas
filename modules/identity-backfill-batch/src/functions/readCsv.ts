@@ -32,7 +32,7 @@ export function readCsv(path: string): ICsvRow[] {
 		return at !== undefined ? (fields[at] ?? '') : '';
 	};
 
-	return lines.slice(1).map((line) => {
+	return lines.slice(1).map((line): ICsvRow => {
 		const fields = parseLine(line);
 		return {
 			sub_id: get(fields, 'sub_id'),

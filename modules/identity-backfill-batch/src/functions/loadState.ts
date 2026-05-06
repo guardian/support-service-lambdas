@@ -7,12 +7,16 @@ import { stateFileSchema } from '../schemas';
 export function loadState(outputDir: string): IState {
 	const path = join(outputDir, STATE_FILE);
 	if (!existsSync(path)) {
-		return { processed: new Set(), rejected: new Set(), errored: new Set() };
+		return {
+			processed: new Set<string>(),
+			rejected: new Set<string>(),
+			errored: new Set<string>(),
+		};
 	}
 	const raw = stateFileSchema.parse(JSON.parse(readFileSync(path, 'utf8')));
 	return {
-		processed: new Set(raw.processed ?? []),
-		rejected: new Set(raw.rejected ?? []),
-		errored: new Set(raw.errored ?? []),
+		processed: new Set<string>(raw.processed ?? []),
+		rejected: new Set<string>(raw.rejected ?? []),
+		errored: new Set<string>(raw.errored ?? []),
 	};
 }

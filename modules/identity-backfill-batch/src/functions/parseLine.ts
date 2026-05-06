@@ -7,7 +7,7 @@ export function parseLine(line: string): string[] {
 	let cur = '';
 	let inQuotes = false;
 	for (let i = 0; i < line.length; i++) {
-		const c = line[i];
+		const c = line[i] ?? '';
 		if (inQuotes) {
 			if (c === '"' && line[i + 1] === '"') {
 				cur += '"';

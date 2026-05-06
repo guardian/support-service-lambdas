@@ -17,21 +17,24 @@ import {
 	writeSummary,
 } from './functions';
 import type { IApiConfig, IArgs, ICsvRow, IState } from './interfaces';
+import type { ApiOutcome } from './types';
 
 async function main(): Promise<void> {
-	const args = parseArgs(process.argv.slice(2));
-	const config = loadConfig(args.stage);
+	const args: IArgs = parseArgs(process.argv.slice(2));
+	const config: IApiConfig = loadConfig(args.stage);
 	const outputDir = createOutputDir(args.stage);
-	const state = loadState(outputDir);
+	const state: IState = loadState(outputDir);
 	const startedAt = new Date();
 
 	console.log(`identity-backfill-batch — ${args.stage}`);
 	console.log(`output: ${outputDir}`);
 
-	const allRows = readCsv(args.csv);
-	const filtered = filterRows(allRows, args.filter);
-	const limited = args.limit ? filtered.slice(0, args.limit) : filtered;
-	const todo = limited.filter((r) => {
+	const allRows: ICsvRow[] = readCsv(args.csv);
+	const filtered: ICsvRow[] = filterRows(allRows, args.filter);
+	const limited: ICsvRow[] = args.limit
+		? filtered.slice(0, args.limit)
+		: filtered;
+	const todo: ICsvRow[] = limited.filter((r: ICsvRow) => {
 		const email = pickEmail(r);
 		if (!email) {
 			return false;
@@ -91,7 +94,7 @@ async function processRow(
 	state: IState,
 	intervalMs: number,
 ): Promise<void> {
-	const dryRun = await callBackfill(config, email, true);
+	const dryRun: ApiOutcome = await callBackfill(config, email, true);
 
 	if (dryRun.kind === 'rejected') {
 		appendRejected(outputDir, row, dryRun.reason);
@@ -116,7 +119,7 @@ async function processRow(
 	}
 
 	await sleep(intervalMs);
-	const real = await callBackfill(config, email, false);
+	const real: ApiOutcome = await callBackfill(config, email, false);
 	if (real.kind === 'success') {
 		appendProcessed(outputDir, row, real.identityId, 'real');
 		state.processed.add(email);
@@ -129,7 +132,7 @@ async function processRow(
 	}
 }
 
-main().catch((err) => {
+main().catch((err: unknown) => {
 	console.error(err);
 	process.exit(1);
 });

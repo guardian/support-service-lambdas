@@ -10,11 +10,16 @@ import { extractIdentityId } from './extractIdentityId';
 import { extractMessage } from './extractMessage';
 import { sleep } from './sleep';
 
+interface ILastError {
+	status: number | null;
+	reason: string;
+}
+
 export async function callBackfill(
 	config: IApiConfig,
 	emailAddress: string,
 	dryRun: boolean,
-	maxRetries = DEFAULT_MAX_RETRIES,
+	maxRetries: number = DEFAULT_MAX_RETRIES,
 ): Promise<ApiOutcome> {
 	const params = new URLSearchParams({
 		apiClientId: API_CLIENT_ID,
@@ -23,7 +28,7 @@ export async function callBackfill(
 	const url = `${config.url}?${params.toString()}`;
 	const body = JSON.stringify({ emailAddress, dryRun });
 
-	let lastError: { status: number | null; reason: string } = {
+	let lastError: ILastError = {
 		status: null,
 		reason: 'unknown',
 	};
@@ -62,7 +67,7 @@ export async function callBackfill(
 					httpStatus: response.status,
 				};
 			}
-		} catch (err) {
+		} catch (err: unknown) {
 			lastError = {
 				status: null,
 				reason: err instanceof Error ? err.message : String(err),
