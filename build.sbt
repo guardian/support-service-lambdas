@@ -398,9 +398,11 @@ lazy val `identity-backfill` = lambdaProject(
   Seq(supportInternationalisation),
   Seq(
     zuora,
+    `zuora-core`,
     `salesforce-client` % "compile->compile;test->test",
     handler,
     effectsDepIncludingTestFolder,
+    `effects-sqs`,
     testDep,
   ),
 )

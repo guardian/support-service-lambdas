@@ -90,7 +90,7 @@ jobs:
       - run: pnpm --filter ${{ matrix.subproject }} package
 
       - name: Upload to Riff-Raff
-        uses: guardian/actions-riff-raff@v4
+        uses: guardian/actions-riff-raff@v4.3.0
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
