@@ -132,7 +132,7 @@ exports[`The Observer benefits api stack matches the snapshot 1`] = `
           },
           "S3Key": "support/CODE/observer-benefits-api/observer-benefits-api.zip",
         },
-        "Description": "A lambda that enables the addition of discounts to existing subscriptions",
+        "Description": "Handles API requests for observer benefits",
         "Environment": {
           "Variables": {
             "APP": "observer-benefits-api",
@@ -901,7 +901,7 @@ exports[`The Observer benefits api stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "observer-benefits-api returned a 5XX response. Search the logs below for "error" for more information. Impact: an eligible user may not have been offered a discount during the cancellation flow",
+        "AlarmDescription": "observer-benefits-api returned a 5XX response. Search the logs below for "error" for more information. Impact: An eligible user may not be getting Observer digital benefits",
         "AlarmName": "observer-benefits-api-PROD 5XX errors",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
@@ -1044,7 +1044,7 @@ exports[`The Observer benefits api stack matches the snapshot 2`] = `
           },
           "S3Key": "support/PROD/observer-benefits-api/observer-benefits-api.zip",
         },
-        "Description": "A lambda that enables the addition of discounts to existing subscriptions",
+        "Description": "Handles API requests for observer benefits",
         "Environment": {
           "Variables": {
             "APP": "observer-benefits-api",
