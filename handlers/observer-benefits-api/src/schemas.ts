@@ -2,7 +2,7 @@ import z from 'zod';
 
 export const requestSchema = z.object({
 	subscriptionId: z.string(),
-	postCode: z.string(),
+	postCode: z.string().nonempty(),
 });
 export type RequestBody = z.infer<typeof requestSchema>;
 
