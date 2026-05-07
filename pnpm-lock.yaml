@@ -336,6 +336,9 @@ importers:
 
   handlers/observer-benefits-api:
     dependencies:
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.19
       zod:
         specifier: 'catalog:'
         version: 3.25.76

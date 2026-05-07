@@ -392,6 +392,7 @@ const observerBenefitsApi: HandlerDefinition = {
 	name: 'observer-benefits-api',
 	dependencies: {
 		...dep.zod,
+		...dep.dayjs,
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
