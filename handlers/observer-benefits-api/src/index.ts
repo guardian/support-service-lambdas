@@ -1,24 +1,23 @@
+import { logger } from '@modules/routing/logger';
 import { Router } from '@modules/routing/router';
-import type {
-	APIGatewayProxyEvent,
-	APIGatewayProxyResult,
-	Handler,
-} from 'aws-lambda';
+import { withBodyParser } from '@modules/routing/withParsers';
+import type { Handler } from 'aws-lambda';
+import { isActiveEndpoint } from './isActiveEndpoint';
+import type { RequestBody } from './schemas';
+import { requestSchema } from './schemas';
 
 export const handler: Handler = Router([
 	{
-		httpMethod: 'GET',
-		path: '/',
-		handler: handleRequest,
+		httpMethod: 'POST',
+		path: '/is-active',
+		handler: withBodyParser(
+			requestSchema,
+			async (_event, _path, body: RequestBody) => {
+				logger.log('Received POST /is-active request', body);
+				logger.mutableAddContext(body.subscriptionId);
+
+				return isActiveEndpoint(body);
+			},
+		),
 	},
 ]);
-
-async function handleRequest(
-	event: APIGatewayProxyEvent,
-): Promise<APIGatewayProxyResult> {
-	console.log(`Input is ${JSON.stringify(event)}`);
-	return await Promise.resolve({
-		body: 'Hello World',
-		statusCode: 200,
-	});
-}
