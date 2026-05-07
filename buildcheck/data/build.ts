@@ -397,6 +397,10 @@ const observerBenefitsApi: HandlerDefinition = {
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 	},
+	extraScripts: {
+		'it-test':
+			'NODE_OPTIONS="$NODE_OPTIONS --experimental-vm-modules" jest --group=integration',
+	},
 };
 
 // MARKER new-lambda: buildcheck-const
