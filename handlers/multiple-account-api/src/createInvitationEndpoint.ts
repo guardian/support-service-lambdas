@@ -1,4 +1,3 @@
-import crypto from 'crypto';
 import { getOrCreateIdentityId } from '@modules/identity/idapi';
 import type { IdentityClient } from '@modules/identity/identityClient';
 import { logger } from '@modules/routing/logger';
@@ -8,6 +7,7 @@ import type {
 } from '@modules/zuora/types/objects';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyResult } from 'aws-lambda';
+import { customAlphabet } from 'nanoid';
 import { z } from 'zod';
 import type { InvitationRepository } from './invitationRepository';
 
@@ -18,12 +18,14 @@ export const createInvitationBodySchema = z.object({
 
 export type CreateInvitationBody = z.infer<typeof createInvitationBodySchema>;
 
-const generateInvitationCode = (): string =>
-	crypto.randomBytes(6).toString('base64url');
+const generateInvitationCode = customAlphabet(
+	'123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz',
+	12,
+);
 
 const THIRTY_DAYS_IN_SECONDS = 30 * 24 * 60 * 60;
 
-export const createInvitationHandler =
+export const createInvitationEndpoint =
 	(repo: InvitationRepository, identityClient: IdentityClient) =>
 	async (
 		body: CreateInvitationBody,
@@ -32,6 +34,10 @@ export const createInvitationHandler =
 		account: ZuoraAccount,
 	): Promise<APIGatewayProxyResult> => {
 		logger.mutableAddContext(body.subscriptionName);
+
+		//TODO: check that the user has no more than maximum invites
+		//TODO: check that the secondary email does not already have an existing invite for this subscription
+		//TODO: other validation?
 
 		const secondaryIdentityId = await getOrCreateIdentityId(
 			identityClient,
@@ -49,6 +55,8 @@ export const createInvitationHandler =
 			invitedDate: now.toISOString(),
 			expiryDate: Math.floor(now.getTime() / 1000) + THIRTY_DAYS_IN_SECONDS,
 		});
+
+		// TODO: do we trigger the invite email from here?
 
 		return {
 			statusCode: 201,

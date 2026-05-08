@@ -19,6 +19,7 @@
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.940.0",
     "@aws-sdk/util-dynamodb": "^3.940.0",
+    "nanoid": "^3.3.12",
     "zod": "catalog:"
   },
   "devDependencies": {

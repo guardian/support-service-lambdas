@@ -383,6 +383,7 @@ const multipleAccountApi: HandlerDefinition = {
 	dependencies: {
 		...dep['@aws-sdk/client-dynamodb'],
 		...dep['@aws-sdk/util-dynamodb'],
+		...dep.nanoid,
 		...dep.zod,
 	},
 	devDependencies: {

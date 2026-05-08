@@ -7,6 +7,7 @@ import {
 	Table,
 	TableEncryption,
 } from 'aws-cdk-lib/aws-dynamodb';
+import { GuAllowPolicy } from '@guardian/cdk/lib/constructs/iam';
 import { SrApiLambda } from './cdk/SrApiLambda';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
@@ -45,6 +46,15 @@ export class MultipleAccountApi extends SrStack {
 		});
 
 		invitationTable.grantFullAccess(lambda);
+
+		lambda.addPolicies(
+			new GuAllowPolicy(this, 'AllowGetIdentityClientToken', {
+				actions: ['ssm:GetParameter'],
+				resources: [
+					`arn:aws:ssm:${this.region}:${this.account}:parameter/${this.stage}/support/multiple-account-api/identity-client-access-token`,
+				],
+			}),
+		);
 
 		const secondaryUserTable = new Table(this, 'SecondaryUserTable', {
 			tableName: `${app}-secondary-user-${this.stage}`,

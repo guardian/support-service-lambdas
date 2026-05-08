@@ -1,15 +1,23 @@
-import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb';
-import { marshall } from '@aws-sdk/util-dynamodb';
+import {
+	DeleteItemCommand,
+	DynamoDBClient,
+	GetItemCommand,
+	PutItemCommand,
+} from '@aws-sdk/client-dynamodb';
+import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import type { Stage } from '@modules/stage';
+import { z } from 'zod';
 
-export type InvitationRecord = {
-	subscriptionName: string;
-	invitationCode: string;
-	primaryIdentityId: string;
-	secondaryIdentityId: string;
-	invitedDate: string;
-	expiryDate: number;
-};
+const invitationRecordSchema = z.object({
+	subscriptionName: z.string(),
+	invitationCode: z.string(),
+	primaryIdentityId: z.string(),
+	secondaryIdentityId: z.string(),
+	invitedDate: z.string(),
+	expiryDate: z.number(),
+});
+
+export type InvitationRecord = z.infer<typeof invitationRecordSchema>;
 
 export class InvitationRepository {
 	constructor(
@@ -29,6 +37,40 @@ export class InvitationRepository {
 			new PutItemCommand({
 				TableName: this.tableName,
 				Item: marshall(record),
+			}),
+		);
+	}
+
+	async get(
+		subscriptionName: string,
+		invitationCode: string,
+	): Promise<InvitationRecord | undefined> {
+		const result = await this.client.send(
+			new GetItemCommand({
+				TableName: this.tableName,
+				Key: {
+					subscriptionName: { S: subscriptionName },
+					invitationCode: { S: invitationCode },
+				},
+			}),
+		);
+		if (!result.Item) {
+			return undefined;
+		}
+		return invitationRecordSchema.parse(unmarshall(result.Item));
+	}
+
+	async delete(
+		subscriptionName: string,
+		invitationCode: string,
+	): Promise<void> {
+		await this.client.send(
+			new DeleteItemCommand({
+				TableName: this.tableName,
+				Key: {
+					subscriptionName: { S: subscriptionName },
+					invitationCode: { S: invitationCode },
+				},
 			}),
 		);
 	}

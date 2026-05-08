@@ -1,7 +1,7 @@
 import * as identity from '@modules/identity/idapi';
 import type { IdentityClient } from '@modules/identity/identityClient';
 import type { ZuoraAccount } from '@modules/zuora/types/objects';
-import { createInvitationHandler } from '../src/invitation';
+import { createInvitationEndpoint } from '../src/createInvitationEndpoint';
 import type { InvitationRecord } from '../src/invitationRepository';
 import type { InvitationRepository } from '../src/invitationRepository';
 
@@ -50,7 +50,7 @@ describe('createInvitationHandler', () => {
 	it('saves an invitation record and returns 201 with invitationCode', async () => {
 		mockGetOrCreateIdentityId.mockResolvedValue('secondary-identity-456');
 
-		const handler = createInvitationHandler(mockRepo, mockIdentityClient);
+		const handler = createInvitationEndpoint(mockRepo, mockIdentityClient);
 		const result = await handler(
 			{
 				subscriptionName: 'A-S00000001',
@@ -85,7 +85,7 @@ describe('createInvitationHandler', () => {
 		mockGetOrCreateIdentityId.mockResolvedValue('secondary-identity-456');
 
 		const beforeCall = Math.floor(Date.now() / 1000);
-		const handler = createInvitationHandler(mockRepo, mockIdentityClient);
+		const handler = createInvitationEndpoint(mockRepo, mockIdentityClient);
 		await handler(
 			{
 				subscriptionName: 'A-S00000001',
@@ -111,7 +111,7 @@ describe('createInvitationHandler', () => {
 			new Error('Identity service unavailable'),
 		);
 
-		const handler = createInvitationHandler(mockRepo, mockIdentityClient);
+		const handler = createInvitationEndpoint(mockRepo, mockIdentityClient);
 		await expect(
 			handler(
 				{

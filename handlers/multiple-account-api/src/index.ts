@@ -6,8 +6,8 @@ import { stageFromEnvironment } from '@modules/stage';
 import type { Handler } from 'aws-lambda';
 import {
 	createInvitationBodySchema,
-	createInvitationHandler,
-} from './invitation';
+	createInvitationEndpoint,
+} from './createInvitationEndpoint';
 import { InvitationRepository } from './invitationRepository';
 
 const stage = stageFromEnvironment();
@@ -27,7 +27,7 @@ export const handler: Handler = Router([
 				stage,
 				async (body, zuoraClient, subscription, account) => {
 					const identityClient = await identityClientPromise;
-					return createInvitationHandler(repo, identityClient)(
+					return createInvitationEndpoint(repo, identityClient)(
 						body,
 						zuoraClient,
 						subscription,
