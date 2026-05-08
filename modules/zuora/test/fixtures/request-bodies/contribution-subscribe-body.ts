@@ -46,7 +46,6 @@ export const contributionSubscribeBody = (
 					PaymentGateway:
 						paymentOptions[additionOptions?.paymentMethod ?? 'directDebit']
 							.PaymentGateway,
-					CreatedRequestId__c: '17d9e675-4198-c0b0-0000-00000001280e',
 					BillCycleDay: 0,
 					AutoPay: true,
 					PaymentTerm: 'Due Upon Receipt',
@@ -96,7 +95,6 @@ export const contributionSubscribeBody = (
 						RenewalTerm: additionOptions?.termLength ?? 12,
 						TermType: 'TERMED',
 						ReaderType__c: 'Direct',
-						CreatedRequestId__c: '17d9e675-4198-c0b0-0000-00000001280e',
 					},
 				},
 				SubscribeOptions: { GenerateInvoice: true, ProcessPayments: true },

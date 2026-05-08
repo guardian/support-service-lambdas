@@ -14,7 +14,7 @@ class PricesFromZuoraCatalogEffectsTest extends AnyFlatSpec with Matchers {
   it should "load catalog" taggedAs EffectsTest in {
 
     import ProductsData._
-    val expectedProducts = digital ++ voucher ++ hd ++ subsCard ++ gw ++ supporterPlus ++ nationalDelivery ++ tierThree
+    val expectedProducts = digital ++ voucher ++ hd ++ subsCard ++ gw ++ supporterPlus ++ nationalDelivery
 
     val actual = for {
       zuoraIds <- ZuoraIds.zuoraIdsForStage(Stage("CODE"))
@@ -75,12 +75,12 @@ object ProductsData {
     DigitalVoucherSaturday,
   )
   val gw = Set(
-    GuardianWeeklyROWQuarterly,
-    GuardianWeeklyDomesticMonthly,
-    GuardianWeeklyROWMonthly,
-    GuardianWeeklyROWAnnual,
-    GuardianWeeklyDomesticQuarterly,
-    GuardianWeeklyDomesticAnnual,
+    GuardianWeeklyPlusROWQuarterly,
+    GuardianWeeklyPlusDomesticMonthly,
+    GuardianWeeklyPlusROWMonthly,
+    GuardianWeeklyPlusROWAnnual,
+    GuardianWeeklyPlusDomesticQuarterly,
+    GuardianWeeklyPlusDomesticAnnual,
   )
   val supporterPlus = Set(
     AnnualSupporterPlus,
@@ -90,12 +90,5 @@ object ProductsData {
     NationalDeliveryEveryday,
     NationalDeliverySixday,
     NationalDeliveryWeekend,
-  )
-
-  val tierThree = Set(
-    TierThreeDomesticMonthly,
-    TierThreeDomesticAnnual,
-    TierThreeROWMonthly,
-    TierThreeROWAnnual,
   )
 }

@@ -62,7 +62,6 @@ export const createSubscribeBody = ({
 					CrmId: '0019E00002QSysUQAT', // The Saleforce Account ID
 					IdentityId__c: '200175946',
 					PaymentGateway: 'GoCardless',
-					CreatedRequestId__c: '17d9e675-4198-c0b0-0000-00000001280e',
 					BillCycleDay: 0,
 					AutoPay: true,
 					PaymentTerm: 'Due Upon Receipt',

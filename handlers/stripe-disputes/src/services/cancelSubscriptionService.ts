@@ -14,30 +14,38 @@ import type { ZuoraSubscription } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 
+export interface CancelSubscriptionResult {
+	cancelled: boolean;
+	negativeInvoiceId?: string;
+}
+
 export async function cancelSubscriptionService(
 	logger: Logger,
 	zuoraClient: ZuoraClient,
 	subscription: ZuoraSubscription,
-): Promise<boolean> {
+): Promise<CancelSubscriptionResult> {
 	if (subscription.status !== 'Active') {
 		logger.log(
 			`Subscription already inactive (${subscription.status}), skipping cancellation`,
 		);
-		return false;
+		return { cancelled: false };
 	}
 
 	logger.log(
 		`Canceling active subscription: ${subscription.subscriptionNumber}`,
 	);
 
-	await cancelSubscription(
+	const cancelResponse = await cancelSubscription(
 		zuoraClient,
 		subscription.subscriptionNumber,
 		dayjs(),
-		false,
-		undefined,
-		'EndOfLastInvoicePeriod',
+		true,
 	);
+
+	const negativeInvoiceId = cancelResponse.invoiceId;
+	if (negativeInvoiceId) {
+		logger.log(`Cancellation generated negative invoice: ${negativeInvoiceId}`);
+	}
 
 	logger.log('Subscription cancellation succeeded');
 
@@ -53,29 +61,20 @@ export async function cancelSubscriptionService(
 		// Don't throw - the cancellation succeeded even if the update failed
 	}
 
-	// Get account details to retrieve customer email
-	const account = await getAccount(zuoraClient, subscription.accountNumber);
+	// Send cancellation email - non-critical, should not block the flow
+	try {
+		const account = await getAccount(zuoraClient, subscription.accountNumber);
+		const customerEmail = account.billToContact.workEmail;
 
-	const customerEmail = account.billToContact.workEmail;
+		if (!customerEmail) {
+			logger.error(
+				`No email address found for subscription ${subscription.subscriptionNumber}`,
+			);
+		} else {
+			logger.log(
+				`Sending dispute cancellation email to customer: ${customerEmail}`,
+			);
 
-	if (!customerEmail) {
-		logger.error(
-			`No email address found for subscription ${subscription.subscriptionNumber}`,
-		);
-		return false;
-	}
-
-	if (!customerEmail) {
-		logger.error(
-			`No email address found for subscription ${subscription.subscriptionNumber}`,
-		);
-	} else {
-		// Send email notification to customer
-		logger.log(
-			`Sending dispute cancellation email to customer: ${customerEmail}`,
-		);
-
-		try {
 			const emailMessage: EmailMessageWithIdentityUserId = {
 				To: {
 					Address: customerEmail,
@@ -96,11 +95,10 @@ export async function cancelSubscriptionService(
 			);
 
 			logger.log('Dispute cancellation email sent successfully');
-		} catch (emailError) {
-			logger.error('Failed to send dispute cancellation email:', emailError);
-			// Don't throw - we still want to return true since cancellation succeeded
 		}
+	} catch (emailError) {
+		logger.error('Failed to send dispute cancellation email:', emailError);
 	}
 
-	return true;
+	return { cancelled: true, negativeInvoiceId };
 }

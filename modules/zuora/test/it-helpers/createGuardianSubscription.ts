@@ -72,7 +72,6 @@ async function subscribe(
 				InvoiceTemplateId: string;
 				AutoPay: boolean;
 				PaymentTerm: string;
-				CreatedRequestId__c: string;
 				Name: string;
 				sfContactId__c: string;
 				Batch: string;
@@ -97,7 +96,6 @@ async function subscribe(
 					InitialTerm: number;
 					ReaderType__c: string;
 					TermType: string;
-					CreatedRequestId__c: string;
 					InitialTermPeriodType: string;
 				};
 			};

@@ -94,6 +94,22 @@ export class AllowSupporterProductDataQueryPolicy extends GuAllowPolicy {
 	}
 }
 
+export class AllowPromoCodeTableQueryPolicy extends GuAllowPolicy {
+	constructor(scope: GuStack) {
+		super(scope, 'Promo code table query access', {
+			actions: [
+				'dynamodb:GetItem',
+				'dynamodb:Scan',
+				'dynamodb:Query',
+				'dynamodb:DescribeTable',
+			],
+			resources: [
+				`arn:aws:dynamodb:*:*:table/support-admin-console-promos-${scope.stage}`,
+			],
+		});
+	}
+}
+
 export class AllowS3RegressionLogsWritePolicy extends GuPutS3ObjectsPolicy {
 	constructor(scope: GuStack) {
 		super(scope, 'S3 Regression Logs Write Policy', {

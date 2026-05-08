@@ -18,10 +18,11 @@ import type {
 } from '@modules/zuora/types';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import type { EmailFields } from './sendEmail';
 import { supporterPlusAmountBands } from './supporterPlusAmountBands';
-import { doUpdate } from './zuoraApi';
+import { doEnsureTerm, doUpdate } from './zuoraApi';
 
 type UpdatablePlans =
 	| 'Annual'
@@ -165,6 +166,7 @@ export const updateSupporterPlusAmount = async (
 	productCatalog: ProductCatalog,
 	subscriptionNumber: string,
 	newPaymentAmount: number,
+	now: Dayjs,
 ): Promise<EmailFields> => {
 	const currency = account.billingAndPayment.currency;
 	if (!isSupportedCurrency(currency)) {
@@ -202,16 +204,23 @@ export const updateSupporterPlusAmount = async (
 			(shouldExtendTerm ? ' (term extension needed)' : ''),
 	);
 
+	await doEnsureTerm({
+		zuoraClient,
+		today: now,
+		shouldExtendTerm,
+		subscriptionNumber,
+		accountNumber: subscription.accountNumber,
+		isBrokenSub: supporterPlusData.isBrokenSub,
+	});
+
 	await doUpdate({
 		zuoraClient,
 		applyFromDate,
-		shouldExtendTerm,
 		subscriptionNumber,
 		accountNumber: subscription.accountNumber,
 		ratePlanId: supporterPlusData.ratePlan.id,
 		chargeNumber: chargeToUpdate.number,
 		contributionAmount: newContributionAmount,
-		isBrokenSub: supporterPlusData.isBrokenSub,
 	});
 
 	return {

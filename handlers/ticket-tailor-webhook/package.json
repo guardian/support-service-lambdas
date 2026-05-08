@@ -7,7 +7,7 @@
     "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
-    "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/index.ts --sourcemap --source-root=/support-service-lambdas/handlers/ticket-tailor-webhook/target/",
+    "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/index.ts --sourcemap --source-root=/support-service-lambdas/handlers/ticket-tailor-webhook/target/",
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr ticket-tailor-webhook.zip ./*.js.map ./*.js",
     "cdk:test": "pnpm --filter cdk test ticket-tailor-webhook",
     "cdk:test-update": "pnpm --filter cdk test-update ticket-tailor-webhook",

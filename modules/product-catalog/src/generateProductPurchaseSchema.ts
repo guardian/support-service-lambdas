@@ -23,7 +23,7 @@ const header = `
 import { z } from 'zod';
 import { ProductKey } from '@modules/product-catalog/productCatalog';
 
-const deliveryContactSchema = z.object({
+export const deliveryContactSchema = z.object({
 	firstName: z.string(),
 	lastName: z.string(),
 	workEmail: z.string(),
@@ -35,10 +35,7 @@ const deliveryContactSchema = z.object({
 	postalCode: z.string(),
 });
 
-const dateOrDateStringSchema = z.preprocess(
-	(input) => (typeof input === 'string' ? new Date(input) : input),
-	z.date(),
-);
+const dateOrDateStringSchema = z.coerce.date();
 
 `;
 

@@ -7,6 +7,7 @@ export async function writeOffInvoiceService(
 	zuoraClient: ZuoraClient,
 	invoiceId: string | undefined,
 	disputeId: string,
+	comment?: string,
 ): Promise<boolean> {
 	if (!invoiceId) {
 		logger.log('No invoice ID found, skipping invoice write-off');
@@ -17,7 +18,8 @@ export async function writeOffInvoiceService(
 	await writeOffInvoice(
 		zuoraClient,
 		invoiceId,
-		`Invoice write-off due to Stripe dispute closure. Dispute ID: ${disputeId}`,
+		comment ??
+			`Invoice write-off due to Stripe dispute closure. Dispute ID: ${disputeId}`,
 	);
 
 	logger.log('Invoice write-off succeeded');

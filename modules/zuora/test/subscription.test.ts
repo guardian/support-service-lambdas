@@ -11,12 +11,11 @@ import {
 	getSubscriptionsByAccountNumber,
 } from '@modules/zuora/subscription';
 import type {
-	ZuoraLowerCaseSuccess,
 	ZuoraSubscription,
 	ZuoraSubscriptionsFromAccountResponse,
 } from '@modules/zuora/types';
 import {
-	voidSchema,
+	cancelSubscriptionResponseSchema,
 	zuoraSubscriptionSchema,
 	zuoraSubscriptionsFromAccountSchema,
 } from '@modules/zuora/types';
@@ -31,14 +30,14 @@ describe('subscription', () => {
 
 	describe('cancelSubscription', () => {
 		it('should cancel subscription with correct parameters', async () => {
-			const mockResponse: ZuoraLowerCaseSuccess = {
-				success: true,
+			const mockResponse = {
+				invoiceId: 'INV-12345',
 			};
 
 			mockZuoraClient.put = jest.fn().mockResolvedValue(mockResponse);
 
 			const contractEffectiveDate = dayjs('2025-08-01');
-			await cancelSubscription(
+			const result = await cancelSubscription(
 				mockZuoraClient,
 				'SUB-12345',
 				contractEffectiveDate,
@@ -46,10 +45,11 @@ describe('subscription', () => {
 				false,
 			);
 
+			expect(result).toEqual({ invoiceId: 'INV-12345' });
 			expect(mockZuoraClient.put).toHaveBeenCalledWith(
 				'/v1/subscriptions/SUB-12345/cancel',
 				expect.stringContaining('"cancellationEffectiveDate":"2025-08-01"'),
-				voidSchema,
+				cancelSubscriptionResponseSchema,
 				{ 'zuora-version': '211.0' },
 			);
 
@@ -66,24 +66,25 @@ describe('subscription', () => {
 		});
 
 		it('should handle undefined collect parameter', async () => {
-			const mockResponse: ZuoraLowerCaseSuccess = {
-				success: true,
+			const mockResponse = {
+				invoiceId: 'INV-67890',
 			};
 
 			mockZuoraClient.put = jest.fn().mockResolvedValue(mockResponse);
 
 			const contractEffectiveDate = dayjs('2025-08-02');
-			await cancelSubscription(
+			const result = await cancelSubscription(
 				mockZuoraClient,
 				'SUB-12345',
 				contractEffectiveDate,
 				false,
 			);
 
+			expect(result).toEqual({ invoiceId: 'INV-67890' });
 			expect(mockZuoraClient.put).toHaveBeenCalledWith(
 				'/v1/subscriptions/SUB-12345/cancel',
 				expect.stringContaining('"cancellationEffectiveDate":"2025-08-02"'),
-				voidSchema,
+				cancelSubscriptionResponseSchema,
 				{ 'zuora-version': '211.0' },
 			);
 
@@ -101,11 +102,11 @@ describe('subscription', () => {
 		});
 
 		it('should support EndOfLastInvoicePeriod cancellation policy', async () => {
-			const mockResponse = { Success: true, Id: '123' };
+			const mockResponse = {};
 			mockZuoraClient.put.mockResolvedValue(mockResponse);
 			const contractEffectiveDate = dayjs('2025-08-03');
 
-			await cancelSubscription(
+			const result = await cancelSubscription(
 				mockZuoraClient,
 				'SUB-12345',
 				contractEffectiveDate,
@@ -114,10 +115,11 @@ describe('subscription', () => {
 				'EndOfLastInvoicePeriod',
 			);
 
+			expect(result).toEqual({});
 			expect(mockZuoraClient.put).toHaveBeenCalledWith(
 				'/v1/subscriptions/SUB-12345/cancel',
 				expect.not.stringContaining('cancellationEffectiveDate'),
-				voidSchema,
+				cancelSubscriptionResponseSchema,
 				{ 'zuora-version': '211.0' },
 			);
 

@@ -4,6 +4,7 @@ import com.gu.identityBackfill.PreReqCheck.PreReqResult
 import com.gu.identityBackfill.TypeConvert._
 import com.gu.identityBackfill.Types._
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
+import com.gu.identityBackfill.supporterProductData.ZuoraSubscription
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse
@@ -24,6 +25,7 @@ object IdentityBackfillSteps extends Logging {
       createGuestAccount: EmailAddress => ClientFailableOp[IdentityId],
       updateZuoraAccounts: (Set[AccountId], IdentityId) => ApiGatewayOp[Unit],
       updateSalesforceAccount: (Option[SFContactId], IdentityId) => ApiGatewayOp[Unit],
+      updateSupporterProductData: (Set[AccountId], IdentityId) => ApiGatewayOp[Unit],
   )(request: DomainRequest): ApiResponse = {
 
     (for {
@@ -35,9 +37,32 @@ object IdentityBackfillSteps extends Logging {
       }).toApiGatewayOp("create guest identity account")
       _ <- updateZuoraAccounts(preReq.zuoraAccountIds, requiredIdentityId)
       _ <- updateSalesforceAccount(preReq.maybeBuyer, requiredIdentityId)
-      // need to remember which ones we updated?
+      _ <- updateSupporterProductData(preReq.zuoraAccountIds, requiredIdentityId)
     } yield ApiGatewayResponse.successfulExecution).apiResponse
 
+  }
+
+  def pushSupporterProductData(
+      getSubscriptionsForAccount: AccountId => ClientFailableOp[List[ZuoraSubscription]],
+      sendToSqs: (List[ZuoraSubscription], IdentityId) => Either[String, Unit],
+  )(accountIds: Set[AccountId], identityId: IdentityId): ApiGatewayOp[Unit] = {
+    val subscriptions = accountIds.toList.flatMap { accountId =>
+      getSubscriptionsForAccount(accountId) match {
+        case ClientSuccess(subs) => subs
+        case failure: ClientFailure =>
+          logger.warn(
+            s"Failed to fetch active subscriptions for account ${accountId.value} " +
+              s"while updating SupporterProductData: ${failure.message}",
+          )
+          Nil
+      }
+    }
+    sendToSqs(subscriptions, identityId) match {
+      case Right(_) => ContinueProcessing(())
+      case Left(err) =>
+        logger.warn(s"Failed to publish SupporterProductData messages for identity ${identityId.value}: $err")
+        ContinueProcessing(())
+    }
   }
 
   def dryRunAbort(request: DomainRequest): ApiGatewayOp[Unit] =

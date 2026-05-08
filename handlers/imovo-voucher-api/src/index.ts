@@ -23,15 +23,17 @@ function buildDependencies(): Dependencies {
 	const stage = stageFromEnvironment();
 	const baseUrl = getEnvVar('IMOVO_API_BASE_URL');
 	const tableName = getEnvVar('VOUCHER_TABLE_NAME');
+	const voucherBaseUrl = getEnvVar('IMOVO_VOUCHER_BASE_URL');
 
 	return {
 		voucherProvider: new ImovoVoucherProvider(secretsClient, stage, baseUrl),
 		voucherRepository: new DynamoVoucherRepository(dynamoClient, tableName),
-		emailSender: new BrazeEmailSender(stage),
+		emailSender: new BrazeEmailSender(stage, voucherBaseUrl),
 	};
 }
 
 export const handler = async (event: SQSEvent): Promise<void> => {
 	const deps = buildDependencies();
-	await handleSqsEvent(event, deps);
+	const campaignCode = getEnvVar('IMOVO_CAMPAIGN_CODE');
+	await handleSqsEvent(event, deps, campaignCode);
 };

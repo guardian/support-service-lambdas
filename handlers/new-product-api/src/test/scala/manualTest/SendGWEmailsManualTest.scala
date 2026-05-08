@@ -23,7 +23,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{
   SortCode,
 }
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
-import com.gu.newproduct.api.productcatalog.PlanId.{GuardianWeeklyROWMonthly, NationalDeliveryWeekend}
+import com.gu.newproduct.api.productcatalog.PlanId.{GuardianWeeklyPlusROWMonthly, NationalDeliveryWeekend}
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
 import com.gu.newproduct.api.productcatalog._
 
@@ -82,7 +82,7 @@ object SendGWEmailsManualTest {
 
     GuardianWeeklyEmailData(
       plan = Plan(
-        GuardianWeeklyROWMonthly,
+        GuardianWeeklyPlusROWMonthly,
         PlanDescription("Monthly"),
         testStartDateRules,
         Map(GBP -> PaymentPlan(GBP, AmountMinorUnits(3112), Monthly, "GBP 32.12 every month")),

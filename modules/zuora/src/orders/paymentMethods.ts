@@ -45,29 +45,25 @@ export type PaymentMethod =
 	| PayPalCompletePaymentsWithPaymentToken
 	| PayPalCompletePaymentsWithBAID;
 
-//Gateway names need to match to those set in Zuora
-//See: https://apisandbox.zuora.com/apps/NewGatewaySetting.do?method=list
-type StripePaymentGateway =
-	| 'Stripe PaymentIntents GNM Membership'
-	| 'Stripe PaymentIntents GNM Membership AUS'
-	| 'Stripe - Observer - Tortoise Media';
-
-type PayPalPaymentGateway = 'PayPal Express';
-
-type PayPalCompletePaymentsPaymentGateway = 'PayPal Complete Payments';
-
-type GoCardlessPaymentGateway =
-	| 'GoCardless'
-	| 'GoCardless - Observer - Tortoise Media';
-
-type PaymentGatewayMap = {
-	CreditCardReferenceTransaction: StripePaymentGateway;
-	Bacs: GoCardlessPaymentGateway;
-	PayPalNativeEC: PayPalPaymentGateway;
-	PayPalCP: PayPalCompletePaymentsPaymentGateway;
+// A CreditCardReferenceTransaction with only the fields needed to clone it onto a new account.
+// Distinct from CreditCardReferenceTransaction, which includes card display fields (cardNumber,
+// expirationMonth, etc.) that are not available or needed during cloning.
+export type ClonedCreditCardReferenceTransaction = {
+	type: 'CreditCardReferenceTransaction';
+	tokenId: string;
+	secondTokenId: string;
 };
 
-export type PaymentGateway<T extends PaymentMethod> =
-	T['type'] extends keyof PaymentGatewayMap
-		? PaymentGatewayMap[T['type']]
-		: never;
+// An existing payment method which is unattached to an account and can be added
+// to an account with the hpmCreditCardPaymentMethodId parameter in the Orders API.
+// Unfortunately it can't just be passed in the paymentMethod param in the same way
+// as all the other payment method types, it needs to sit as a single parameter at
+// the same level as paymentMethod.
+export type ExistingPaymentMethod = {
+	type: 'ExistingPaymentMethod';
+	hpmCreditCardPaymentMethodId: string;
+};
+
+export type AnyPaymentMethod =
+	| PaymentMethod
+	| ClonedCreditCardReferenceTransaction;

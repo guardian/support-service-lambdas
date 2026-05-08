@@ -19,10 +19,10 @@ import { createSubscription } from '@modules/zuora/createSubscription/createSubs
 import type { PreviewCreateSubscriptionInputFields } from '@modules/zuora/createSubscription/previewCreateSubscription';
 import { previewCreateSubscription } from '@modules/zuora/createSubscription/previewCreateSubscription';
 import { getInvoice } from '@modules/zuora/invoice';
+import type { PaymentGateway } from '@modules/zuora/orders/paymentGateways';
 import type {
 	CreditCardReferenceTransaction,
 	DirectDebit,
-	PaymentGateway,
 } from '@modules/zuora/orders/paymentMethods';
 import { getSubscription } from '@modules/zuora/subscription';
 import { zuoraSubscriptionSchema } from '@modules/zuora/types/objects/subscription';

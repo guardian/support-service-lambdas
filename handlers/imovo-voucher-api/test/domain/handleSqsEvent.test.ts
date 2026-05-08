@@ -65,7 +65,7 @@ describe('handleSqsEvent', () => {
 		});
 		const deps = buildFakeDeps();
 
-		await handleSqsEvent(event, deps);
+		await handleSqsEvent(event, deps, 'TEST-CAMPAIGN');
 
 		expect(deps.savedRecords).toHaveLength(1);
 		expect(deps.savedRecords[0]?.voucherCode).toBe('FAKE-CODE');
@@ -79,7 +79,7 @@ describe('handleSqsEvent', () => {
 		);
 		const deps = buildFakeDeps();
 
-		await handleSqsEvent(event, deps);
+		await handleSqsEvent(event, deps, 'TEST-CAMPAIGN');
 
 		expect(deps.savedRecords).toHaveLength(2);
 		expect(deps.savedRecords[0]?.identityId).toBe('id-a');
@@ -94,18 +94,61 @@ describe('handleSqsEvent', () => {
 		});
 		const deps = buildFakeDeps();
 
-		await handleSqsEvent(event, deps);
+		await handleSqsEvent(event, deps, 'TEST-CAMPAIGN');
 
 		expect(deps.emailedRecords).toHaveLength(1);
 		expect(deps.emailedRecords[0]?.voucherCode).toBe('FAKE-CODE');
 		expect(deps.emailedRecords[0]?.identityId).toBe('id-1');
 	});
 
+	it('skips SNS SubscriptionConfirmation messages', async () => {
+		const subscriptionConfirmation = {
+			Type: 'SubscriptionConfirmation',
+			MessageId: 'sns-confirm-1',
+			TopicArn: 'arn:aws:sns:eu-west-1:942464564246:PrintPromoTopic',
+			Message: 'You have chosen to subscribe to the topic...',
+			SubscribeURL:
+				'https://sns.eu-west-1.amazonaws.com/?Action=ConfirmSubscription...',
+			Token: 'some-token',
+			Timestamp: '2026-01-01T00:00:00.000Z',
+		};
+		const event = buildSqsEvent(subscriptionConfirmation);
+		const deps = buildFakeDeps();
+
+		await handleSqsEvent(event, deps, 'TEST-CAMPAIGN');
+
+		expect(deps.savedRecords).toHaveLength(0);
+		expect(deps.emailedRecords).toHaveLength(0);
+	});
+
+	it('processes a message wrapped in an SNS envelope', async () => {
+		const snsWrappedBody = {
+			Type: 'Notification',
+			MessageId: 'sns-msg-1',
+			TopicArn: 'arn:aws:sns:eu-west-1:942464564246:PrintPromoTopic',
+			Message: JSON.stringify({
+				email: 'sns-user@example.com',
+				identityId: 'id-sns',
+				voucherType: 'registration-reward',
+			}),
+			Timestamp: '2026-01-01T00:00:00.000Z',
+		};
+		const event = buildSqsEvent(snsWrappedBody);
+		const deps = buildFakeDeps();
+
+		await handleSqsEvent(event, deps, 'TEST-CAMPAIGN');
+
+		expect(deps.savedRecords).toHaveLength(1);
+		expect(deps.savedRecords[0]?.identityId).toBe('id-sns');
+		expect(deps.savedRecords[0]?.voucherCode).toBe('FAKE-CODE');
+		expect(deps.emailedRecords).toHaveLength(1);
+	});
+
 	it('throws on invalid SQS message body', async () => {
 		const event = buildSqsEvent({ email: 'not-valid' });
 		const deps = buildFakeDeps();
 
-		await expect(handleSqsEvent(event, deps)).rejects.toThrow(
+		await expect(handleSqsEvent(event, deps, 'TEST-CAMPAIGN')).rejects.toThrow(
 			'Invalid SQS message format',
 		);
 	});
@@ -121,7 +164,9 @@ describe('handleSqsEvent', () => {
 			requestVoucher: () => Promise.reject(new Error('provider down')),
 		};
 
-		await expect(handleSqsEvent(event, deps)).rejects.toThrow('provider down');
+		await expect(handleSqsEvent(event, deps, 'TEST-CAMPAIGN')).rejects.toThrow(
+			'provider down',
+		);
 		expect(deps.savedRecords).toHaveLength(0);
 	});
 });

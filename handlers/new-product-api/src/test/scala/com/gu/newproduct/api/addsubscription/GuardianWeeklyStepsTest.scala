@@ -14,7 +14,10 @@ import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{
 }
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BillToAddress, SoldToAddress}
-import com.gu.newproduct.api.productcatalog.PlanId.{GuardianWeeklyDomesticMonthly, GuardianWeeklyDomesticQuarterly}
+import com.gu.newproduct.api.productcatalog.PlanId.{
+  GuardianWeeklyPlusDomesticMonthly,
+  GuardianWeeklyPlusDomesticQuarterly,
+}
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription, PlanId}
@@ -41,9 +44,13 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
   val testFirstPaymentDate = LocalDate.of(2018, 7, 18)
   val testZuoraAccountId = ZuoraAccountId("acccc")
   val quarterlyRatePlan =
-    Plan(GuardianWeeklyDomesticQuarterly, PlanDescription("GW Oct 18 - Quarterly - Domestic"), testStartDateRules)
+    Plan(
+      GuardianWeeklyPlusDomesticQuarterly,
+      PlanDescription("GW + Digital - Quarterly - Domestic"),
+      testStartDateRules,
+    )
   val monthlyRatePlan =
-    Plan(GuardianWeeklyDomesticMonthly, PlanDescription("GW Oct 18 - Monthly - Domestic"), testStartDateRules)
+    Plan(GuardianWeeklyPlusDomesticMonthly, PlanDescription("GW + Digital - Monthly - Domestic"), testStartDateRules)
   val testCaseId = CaseId("case")
   val testAcquistionSource = AcquisitionSource("CSR")
   val testCSR = CreatedByCSR("bob")
@@ -61,15 +68,15 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
 
   def stubGetZuoraId(planId: PlanId) = {
     planId match {
-      case GuardianWeeklyDomesticQuarterly => Some(quarterlyTestRatePlanZuoraId)
-      case GuardianWeeklyDomesticMonthly => Some(monthlyTestRatePlanZuoraId)
+      case GuardianWeeklyPlusDomesticQuarterly => Some(quarterlyTestRatePlanZuoraId)
+      case GuardianWeeklyPlusDomesticMonthly => Some(monthlyTestRatePlanZuoraId)
       case _ => fail()
     }
   }
 
   def stubGetPlanAndCharge(planId: PlanId): Option[PlanAndCharge] = {
     planId match {
-      case GuardianWeeklyDomesticMonthly =>
+      case GuardianWeeklyPlusDomesticMonthly =>
         Some(PlanAndCharge(monthlyTestRatePlanZuoraId, monthlyTestRatePlanChargeZuoraId))
       case _ => fail()
     }
@@ -94,8 +101,8 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
 
   def stubGetPlan(planId: PlanId) = {
     planId match {
-      case GuardianWeeklyDomesticQuarterly => quarterlyRatePlan
-      case GuardianWeeklyDomesticMonthly => monthlyRatePlan
+      case GuardianWeeklyPlusDomesticQuarterly => quarterlyRatePlan
+      case GuardianWeeklyPlusDomesticMonthly => monthlyRatePlan
       case _ => fail()
     }
   }
@@ -131,7 +138,7 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
       stubGetZuoraId,
       stubGetPlanAndCharge,
       stubGetVoucherCustomerData,
-      stubValidateStartDate(GuardianWeeklyDomesticQuarterly),
+      stubValidateStartDate(GuardianWeeklyPlusDomesticQuarterly),
       stubValidateAddress,
       stubCreate,
       stubSendEmail(quarterlyRatePlan),
@@ -144,7 +151,6 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
       addDigipackSub = dummySteps,
       addGuardianWeeklyDomesticSub = stubAddVoucherSteps,
       addGuardianWeeklyROWSub = stubAddVoucherSteps,
-      addTierThree = dummySteps,
     )(
       ApiGatewayRequest(
         None,
@@ -158,7 +164,7 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
                 "zuoraAccountId" -> JsString(testZuoraAccountId.value),
                 "acquisitionSource" -> JsString(testAcquistionSource.value),
                 "createdByCSR" -> JsString(testCSR.value),
-                "planId" -> JsString(GuardianWeeklyDomesticQuarterly.name),
+                "planId" -> JsString(GuardianWeeklyPlusDomesticQuarterly.name),
               ),
             ),
           ),

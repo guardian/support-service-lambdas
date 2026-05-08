@@ -7,7 +7,7 @@ export default (pkg: HandlerDefinition) => {
 		: 'src/index.ts';
 	const handlerScripts = {
 		build:
-			'esbuild --bundle --platform=node --target=node20 --outdir=target/ ' +
+			'esbuild --bundle --platform=node --target=node22 --outdir=target/ ' +
 			entryPoints +
 			` --sourcemap --source-root=/support-service-lambdas/handlers/${pkg.name}/target/`,
 		package: `pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr ${pkg.name}.zip ./*.js.map ./*.js`,

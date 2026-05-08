@@ -672,82 +672,10 @@
       "paymentPlan" : "GBP 10.79 every month"
     } ]
   }, {
-    "label" : "Digital + Print (Tier Three)",
-    "plans" : [ {
-      "id" : "tier_three_domestic_monthly",
-      "label" : "Tier Three - Monthly - Domestic",
-      "startDateRules" : {
-        "daysOfWeek" : [ "Friday" ],
-        "selectableWindow" : {
-          "startDate" : "2020-01-01",
-          "sizeInDays" : 28
-        }
-      },
-      "paymentPlans" : [ {
-        "currencyCode" : "GBP",
-        "amount" : 27,
-        "billingPeriod" : "Monthly",
-        "description" : "GBP 27.00 every month"
-      } ],
-      "paymentPlan" : "GBP 27.00 every month"
-    }, {
-      "id" : "tier_three_domestic_annual",
-      "label" : "Tier Three - Annual - Domestic",
-      "startDateRules" : {
-        "daysOfWeek" : [ "Friday" ],
-        "selectableWindow" : {
-          "startDate" : "2020-01-01",
-          "sizeInDays" : 28
-        }
-      },
-      "paymentPlans" : [ {
-        "currencyCode" : "GBP",
-        "amount" : 300,
-        "billingPeriod" : "Annual",
-        "description" : "GBP 300.00 every 12 months"
-      } ],
-      "paymentPlan" : "GBP 300.00 every 12 months"
-    }, {
-      "id" : "tier_three_row_monthly",
-      "label" : "Tier Three - Monthly - ROW",
-      "startDateRules" : {
-        "daysOfWeek" : [ "Friday" ],
-        "selectableWindow" : {
-          "startDate" : "2020-01-01",
-          "sizeInDays" : 28
-        }
-      },
-      "paymentPlans" : [ {
-        "currencyCode" : "GBP",
-        "amount" : 48,
-        "billingPeriod" : "Monthly",
-        "description" : "GBP 48.00 every month"
-      } ],
-      "paymentPlan" : "GBP 48.00 every month"
-    }, {
-      "id" : "tier_three_row_annual",
-      "label" : "Tier Three - Annual - ROW",
-      "startDateRules" : {
-        "daysOfWeek" : [ "Friday" ],
-        "selectableWindow" : {
-          "startDate" : "2020-01-01",
-          "sizeInDays" : 28
-        }
-      },
-      "paymentPlans" : [ {
-        "currencyCode" : "GBP",
-        "amount" : 546,
-        "billingPeriod" : "Annual",
-        "description" : "GBP 546.00 every 12 months"
-      } ],
-      "paymentPlan" : "GBP 546.00 every 12 months"
-    } ],
-    "enabledForDeliveryCountries" : [ "United Kingdom" ]
-  }, {
     "label" : "Guardian Weekly - Domestic",
     "plans" : [ {
-      "id" : "guardian_weekly_domestic_monthly",
-      "label" : "GW Oct 18 - Monthly - Domestic",
+      "id" : "guardian_weekly_plus_domestic_monthly",
+      "label" : "GW + Digital - Monthly - Domestic",
       "startDateRules" : {
         "daysOfWeek" : [ "Friday" ],
         "selectableWindow" : {
@@ -768,8 +696,8 @@
       } ],
       "paymentPlan" : "GBP 11111.11 every month"
     }, {
-      "id" : "guardian_weekly_domestic_quarterly",
-      "label" : "GW Oct 18 - Quarterly - Domestic",
+      "id" : "guardian_weekly_plus_domestic_quarterly",
+      "label" : "GW + Digital - Quarterly - Domestic",
       "startDateRules" : {
         "daysOfWeek" : [ "Friday" ],
         "selectableWindow" : {
@@ -790,8 +718,8 @@
       } ],
       "paymentPlan" : "GBP 22222.22 every 3 months"
     }, {
-      "id" : "guardian_weekly_domestic_annual",
-      "label" : "GW Oct 18 - Annual - Domestic",
+      "id" : "guardian_weekly_plus_domestic_annual",
+      "label" : "GW + Digital - Annual - Domestic",
       "startDateRules" : {
         "daysOfWeek" : [ "Friday" ],
         "selectableWindow" : {
@@ -816,8 +744,8 @@
   }, {
     "label" : "Guardian Weekly - ROW",
     "plans" : [ {
-      "id" : "guardian_weekly_row_monthly",
-      "label" : "GW Oct 18 - Monthly - ROW",
+      "id" : "guardian_weekly_plus_row_monthly",
+      "label" : "GW + Digital - Monthly - ROW",
       "startDateRules" : {
         "daysOfWeek" : [ "Friday" ],
         "selectableWindow" : {
@@ -838,8 +766,8 @@
       } ],
       "paymentPlan" : "GBP 44444.44 every month"
     }, {
-      "id" : "guardian_weekly_row_quarterly",
-      "label" : "GW Oct 18 - Quarterly - ROW",
+      "id" : "guardian_weekly_plus_row_quarterly",
+      "label" : "GW + Digital - Quarterly - ROW",
       "startDateRules" : {
         "daysOfWeek" : [ "Friday" ],
         "selectableWindow" : {
@@ -860,8 +788,8 @@
       } ],
       "paymentPlan" : "GBP 55555.55 every 3 months"
     }, {
-      "id" : "guardian_weekly_row_annual",
-      "label" : "GW Oct 18 - Annual - ROW",
+      "id" : "guardian_weekly_plus_row_annual",
+      "label" : "GW + Digital - Annual - ROW",
       "startDateRules" : {
         "daysOfWeek" : [ "Friday" ],
         "selectableWindow" : {

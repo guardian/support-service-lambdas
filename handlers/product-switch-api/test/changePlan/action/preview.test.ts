@@ -67,14 +67,15 @@ This tests a scenario that occurs when the product switch occurs on the day that
  In such a situation, no error should be thrown and the refund amount returned output should be 0.
  */
 test('dont expect a refund if switching on the charged through date', () => {
-	const currentDate = dayjs('2025-01-01');
+	const currentDate = dayjs('2025-01-01T12:45:23.563829');
+	const chargedThroughDate = dayjs('2025-01-01');
 
-	expect(isRefundExpected(currentDate, currentDate)).toBe(false);
+	expect(isRefundExpected(chargedThroughDate, currentDate)).toBe(false);
 });
 
 test('expect a refund if switching before the charged through date', () => {
-	const currentDate = dayjs('2025-01-01');
-	const chargedThroughDate = currentDate.add(1, 'day');
+	const currentDate = dayjs('2025-01-01T12:45:23.563829');
+	const chargedThroughDate = dayjs('2025-01-02');
 
 	expect(isRefundExpected(chargedThroughDate, currentDate)).toBe(true);
 });

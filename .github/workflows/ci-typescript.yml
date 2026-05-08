@@ -67,6 +67,9 @@ jobs:
           - write-off-unpaid-invoices
           - mparticle-api
           - mobile-purchases-to-supporter-product-data
+          - new-subscription-api
+          - newsletter-acquisition
+          # MARKER new-lambda: github-action
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -87,7 +90,7 @@ jobs:
       - run: pnpm --filter ${{ matrix.subproject }} package
 
       - name: Upload to Riff-Raff
-        uses: guardian/actions-riff-raff@v4
+        uses: guardian/actions-riff-raff@v4.3.0
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}

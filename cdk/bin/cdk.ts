@@ -20,6 +20,8 @@ import { MParticleApi } from '../lib/mparticle-api';
 import { NegativeInvoicesProcessor } from '../lib/negative-invoices-processor';
 import type { NewProductApiProps } from '../lib/new-product-api';
 import { NewProductApi } from '../lib/new-product-api';
+import { NewSubscriptionApi } from '../lib/new-subscription-api';
+import { NewsletterAcquisition } from '../lib/newsletter-acquisition';
 import { ObserverDataExport } from '../lib/observer-data-export';
 import { PressReaderEntitlements } from '../lib/press-reader-entitlements';
 import { ProductSwitchApi } from '../lib/product-switch-api';
@@ -148,6 +150,8 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	MobilePurchasesToSupporterProductData,
 	StripeDisputes,
 	ZuoraAutoCancel,
+	NewSubscriptionApi,
+	// MARKER new-lambda: cdk-bin
 ];
 
 // generate all stacks for all stages
@@ -281,4 +285,16 @@ new SalesforceEventBus(app, 'salesforce-event-bus-CODE', {
 new SalesforceEventBus(app, 'salesforce-event-bus-PROD', {
 	stack: 'support',
 	stage: 'PROD',
+});
+new NewsletterAcquisition(app, 'newsletter-acquisition-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+	identitySnsTopicArn:
+		'arn:aws:sns:eu-west-1:942464564246:identity-identity-api-public-CODE-NewsletterAcquisitionTopic',
+});
+new NewsletterAcquisition(app, 'newsletter-acquisition-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+	identitySnsTopicArn:
+		'arn:aws:sns:eu-west-1:942464564246:identity-identity-api-public-PROD-NewsletterAcquisitionTopic',
 });
