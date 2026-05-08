@@ -70,8 +70,8 @@ function isValid(
 	postCode: string,
 ): boolean {
 	const matchPostCode =
-		account.billToContact.zipCode?.replaceAll(' ', '') ===
-		postCode.replaceAll(' ', '');
+		account.billToContact.zipCode?.toLowerCase().replaceAll(' ', '') ===
+		postCode.toLowerCase().replaceAll(' ', '');
 	const isObserver =
 		isNewspaperProduct(guardianSubscription.ratePlan.productKey) &&
 		observerRatePlanKeys.includes(
