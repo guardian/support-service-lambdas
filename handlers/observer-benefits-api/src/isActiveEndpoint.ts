@@ -8,6 +8,7 @@ import {
 } from '@modules/product-catalog/productCatalog';
 import { logger } from '@modules/routing/logger';
 import { getAccount } from '@modules/zuora/account';
+import { ZuoraError } from '@modules/zuora/errors/zuoraError';
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraAccount } from '@modules/zuora/types';
 import { zuoraDateFormat } from '@modules/zuora/utils/common';
@@ -52,26 +53,26 @@ export async function isActiveEndpoint(
 			getSinglePlanFlattenedSubscriptionOrThrow(filteredSubscription);
 
 		if (isValid(subscription, account, body.postCode)) {
-			return Promise.resolve({
-				statusCode: 200,
-				body: JSON.stringify({
-					isActive: true,
-					renews: zuoraDateFormat(dayjs(zuoraSubscription.termEndDate)), // Convert IsoDateTimeString to IsoDate
-				}),
-			});
+			return buildReponseBody(
+				true,
+				zuoraDateFormat(dayjs(zuoraSubscription.termEndDate)),
+			);
 		}
-
-		return Promise.resolve({
-			statusCode: 200,
-			body: JSON.stringify({ isActive: false }),
-		});
+		return buildReponseBody(false);
 	} catch (error) {
 		logger.error('Error fetching subscription or account', error);
-		return Promise.resolve({
-			statusCode: 200,
-			body: JSON.stringify({ isActive: false }),
-		});
+		if (error instanceof ZuoraError && error.code === 200) {
+			return buildReponseBody(false);
+		}
+		throw error;
 	}
+}
+
+function buildReponseBody(isActive: boolean, renews?: string) {
+	return {
+		statusCode: 200,
+		body: JSON.stringify({ isActive, renews }),
+	};
 }
 
 function isValid(
