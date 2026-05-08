@@ -32,37 +32,46 @@ export async function isActiveEndpoint(
 	zuoraCatalog: ZuoraCatalog,
 	body: RequestBody,
 ): Promise<APIGatewayProxyResult> {
-	logger.log('Checking if subscription is active', body.subscriptionId);
+	try {
+		logger.log('Checking if subscription is active', body.subscriptionId);
+		const zuoraSubscription = await getSubscription(
+			zuoraClient,
+			body.subscriptionId,
+		);
+		const account = await getAccount(
+			zuoraClient,
+			zuoraSubscription.accountNumber,
+		);
+		const parser = new GuardianSubscriptionParser(zuoraCatalog, productCatalog);
+		const guardianSubscription =
+			parser.toGuardianSubscription(zuoraSubscription);
+		const filter = SubscriptionFilter.activeNonEndedSubscriptionFilter(dayjs());
+		const filteredSubscription =
+			filter.filterSubscription(guardianSubscription);
+		const subscription: GuardianSubscription =
+			getSinglePlanFlattenedSubscriptionOrThrow(filteredSubscription);
 
-	const zuoraSubscription = await getSubscription(
-		zuoraClient,
-		body.subscriptionId,
-	);
-	const parser = new GuardianSubscriptionParser(zuoraCatalog, productCatalog);
-	const guardianSubscription = parser.toGuardianSubscription(zuoraSubscription);
-	const filter = SubscriptionFilter.activeNonEndedSubscriptionFilter(dayjs());
-	const filteredSubscription = filter.filterSubscription(guardianSubscription);
-	const subscription: GuardianSubscription =
-		getSinglePlanFlattenedSubscriptionOrThrow(filteredSubscription);
+		if (isValid(subscription, account, body.postCode)) {
+			return Promise.resolve({
+				statusCode: 200,
+				body: JSON.stringify({
+					isActive: true,
+					renews: zuoraDateFormat(dayjs(zuoraSubscription.termEndDate)), // Convert IsoDateTimeString to IsoDate
+				}),
+			});
+		}
 
-	const account = await getAccount(
-		zuoraClient,
-		zuoraSubscription.accountNumber,
-	);
-	if (isValid(subscription, account, body.postCode)) {
 		return Promise.resolve({
 			statusCode: 200,
-			body: JSON.stringify({
-				isActive: true,
-				renews: zuoraDateFormat(dayjs(zuoraSubscription.termEndDate)), // Convert IsoDateTimeString to IsoDate
-			}),
+			body: JSON.stringify({ isActive: false }),
+		});
+	} catch (error) {
+		logger.error('Error fetching subscription or account', error);
+		return Promise.resolve({
+			statusCode: 200,
+			body: JSON.stringify({ isActive: false }),
 		});
 	}
-
-	return Promise.resolve({
-		statusCode: 200,
-		body: JSON.stringify({ isActive: false }),
-	});
 }
 
 function isValid(

@@ -37,3 +37,24 @@ test('returns isActive true for a valid Observer subscription with matching post
 		expect(body.renews).toBeDefined();
 	}
 });
+
+test('returns isActive false for a invalid Observer subscription', async () => {
+	const zuoraClient = await ZuoraClient.create(stage);
+	const productCatalog = await getProductCatalogFromApi(stage);
+	const zuoraCatalog = await getZuoraCatalogFromS3(stage);
+
+	const result = await isActiveEndpoint(
+		zuoraClient,
+		productCatalog,
+		zuoraCatalog,
+		{
+			subscriptionId: 'Invalid-Subscription-Id',
+			postCode: 'N1 9GU',
+		},
+	);
+
+	expect(result.statusCode).toEqual(200);
+	const body = responseSchema.parse(JSON.parse(result.body));
+	logger.log('body', body);
+	expect(body.isActive).toEqual(false);
+});
