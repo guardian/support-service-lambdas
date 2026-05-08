@@ -6,6 +6,7 @@
  * @group integration
  */
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
+import { logger } from '@modules/routing/logger';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 import { isActiveEndpoint } from '../src/isActiveEndpoint';
@@ -30,6 +31,7 @@ test('returns isActive true for a valid Observer subscription with matching post
 
 	expect(result.statusCode).toEqual(200);
 	const body = responseSchema.parse(JSON.parse(result.body));
+	logger.log('body', body);
 	expect(body.isActive).toEqual(true);
 	if (body.isActive) {
 		expect(body.renews).toBeDefined();

@@ -10,6 +10,7 @@ import { logger } from '@modules/routing/logger';
 import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraAccount } from '@modules/zuora/types';
+import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ZuoraCatalog } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import type { APIGatewayProxyResult } from 'aws-lambda';
@@ -53,7 +54,7 @@ export async function isActiveEndpoint(
 			statusCode: 200,
 			body: JSON.stringify({
 				isActive: true,
-				renews: zuoraSubscription.termEndDate,
+				renews: zuoraDateFormat(dayjs(zuoraSubscription.termEndDate)), // Convert IsoDateTimeString to IsoDate
 			}),
 		});
 	}
