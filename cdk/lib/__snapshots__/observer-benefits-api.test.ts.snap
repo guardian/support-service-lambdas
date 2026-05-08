@@ -529,6 +529,10 @@ exports[`The Observer benefits api stack matches the snapshot 1`] = `
             "Value": "CODE",
           },
         ],
+        "Throttle": {
+          "BurstLimit": 10,
+          "RateLimit": 20,
+        },
         "UsagePlanName": "observer-benefits-api-CODE",
       },
       "Type": "AWS::ApiGateway::UsagePlan",
@@ -1498,6 +1502,10 @@ exports[`The Observer benefits api stack matches the snapshot 2`] = `
             "Value": "PROD",
           },
         ],
+        "Throttle": {
+          "BurstLimit": 10,
+          "RateLimit": 20,
+        },
         "UsagePlanName": "observer-benefits-api-PROD",
       },
       "Type": "AWS::ApiGateway::UsagePlan",

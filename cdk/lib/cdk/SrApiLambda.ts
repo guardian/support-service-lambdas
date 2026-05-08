@@ -1,5 +1,9 @@
 import { Duration } from 'aws-cdk-lib';
 import { ApiKeySourceType, LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
+import type {
+	QuotaSettings,
+	ThrottleSettings,
+} from 'aws-cdk-lib/aws-apigateway/lib/usage-plan';
 import { SrApiGateway5xxAlarm } from './SrApiGateway5xxAlarm';
 import type { SrLambdaProps } from './SrLambda';
 import { getNameWithStage, SrLambda } from './SrLambda';
@@ -26,6 +30,16 @@ type SrApiLambdaProps = SrLambdaProps & {
 	 * of it here or add a public facing fastly enabled domain.
 	 */
 	srRestDomainProps?: SrRestDomainProps;
+	/**
+	 * Number of requests clients can make in a given time period.
+	 * @default none
+	 */
+	readonly quota?: QuotaSettings;
+	/**
+	 * Overall throttle settings for the API.
+	 * @default none
+	 */
+	readonly throttle?: ThrottleSettings;
 };
 
 const defaultProps = {
@@ -78,6 +92,8 @@ export class SrApiLambda extends SrLambda {
 			const usagePlan = this.api.addUsagePlan('UsagePlan', {
 				name: getNameWithStage(scope, props.nameSuffix),
 				description: 'REST endpoints for ' + scope.app,
+				throttle: props.throttle,
+				quota: props.quota,
 				apiStages: [
 					{
 						stage: this.api.deploymentStage,

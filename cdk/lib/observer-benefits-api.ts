@@ -19,6 +19,10 @@ export class ObserverBenefitsApi extends SrStack {
 				errorImpact:
 					'An eligible user may not be getting Observer digital benefits',
 			},
+			throttle: {
+				rateLimit: 20,
+				burstLimit: 10,
+			},
 		});
 
 		lambda.addPolicies(
