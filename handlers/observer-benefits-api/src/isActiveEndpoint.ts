@@ -2,30 +2,18 @@ import type { GuardianSubscription } from '@modules/guardian-subscription/getSin
 import { getSinglePlanFlattenedSubscriptionOrThrow } from '@modules/guardian-subscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import { GuardianSubscriptionParser } from '@modules/guardian-subscription/guardianSubscriptionParser';
 import { SubscriptionFilter } from '@modules/guardian-subscription/subscriptionFilter';
-import {
-	isNewspaperProduct,
-	type ProductCatalog,
-} from '@modules/product-catalog/productCatalog';
+import { type ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { logger } from '@modules/routing/logger';
 import { getAccount } from '@modules/zuora/account';
 import { ZuoraError } from '@modules/zuora/errors/zuoraError';
 import { getSubscription } from '@modules/zuora/subscription';
-import type { ZuoraAccount } from '@modules/zuora/types';
 import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ZuoraCatalog } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import dayjs from 'dayjs';
 import type { RequestBody } from './schemas';
-
-const observerRatePlanKeys = [
-	'Everyday',
-	'EverydayPlus',
-	'Weekend',
-	'WeekendPlus',
-	'Sunday',
-	'SundayPlus',
-];
+import { isValid } from './validation';
 
 export async function isActiveEndpoint(
 	zuoraClient: ZuoraClient,
@@ -73,20 +61,4 @@ function buildReponseBody(isActive: boolean, renews?: string) {
 		statusCode: 200,
 		body: JSON.stringify({ isActive, renews }),
 	};
-}
-
-function isValid(
-	guardianSubscription: GuardianSubscription,
-	account: ZuoraAccount,
-	postCode: string,
-): boolean {
-	const matchPostCode =
-		account.billToContact.zipCode?.toLowerCase().replaceAll(' ', '') ===
-		postCode.toLowerCase().replaceAll(' ', '');
-	const isObserver =
-		isNewspaperProduct(guardianSubscription.ratePlan.productKey) &&
-		observerRatePlanKeys.includes(
-			guardianSubscription.ratePlan.productRatePlanKey,
-		);
-	return matchPostCode && isObserver;
 }
