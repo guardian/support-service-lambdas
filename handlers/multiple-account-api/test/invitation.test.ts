@@ -1,6 +1,8 @@
 import * as identity from '@modules/identity/idapi';
 import type { IdentityClient } from '@modules/identity/identityClient';
 import type { ZuoraAccount } from '@modules/zuora/types/objects';
+import { zuoraDateFormat } from '@modules/zuora/utils';
+import dayjs from 'dayjs';
 import { createInvitationEndpoint } from '../src/createInvitationEndpoint';
 import type { InvitationRecord } from '../src/invitationRepository';
 import type { InvitationRepository } from '../src/invitationRepository';
@@ -31,12 +33,30 @@ const mockAccount: ZuoraAccount = {
 	},
 };
 
+const testDay = dayjs('2026-05-11').startOf('day');
+
+const mockInvitations = [
+	{
+		subscriptionName: 'A-S12345',
+		invitationCode: 'invitation-code',
+		primaryIdentityId: '99999999',
+		secondaryIdentityId: '8888888',
+		invitedDate: zuoraDateFormat(testDay),
+		expiryDate: dayjs(testDay).add(1, 'm').toDate().getTime(),
+	},
+];
+
 const mockSave = jest
 	.fn<Promise<void>, [InvitationRecord]>()
 	.mockResolvedValue(undefined);
 
+const mockList = jest
+	.fn<Promise<InvitationRecord[]>, [string]>()
+	.mockResolvedValue(mockInvitations);
+
 const mockRepo: InvitationRepository = {
 	save: mockSave,
+	list: mockList,
 } as unknown as InvitationRepository;
 
 const mockIdentityClient = {} as IdentityClient;
@@ -45,6 +65,7 @@ describe('createInvitationHandler', () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		mockSave.mockResolvedValue(undefined);
+		mockList.mockResolvedValue(mockInvitations);
 	});
 
 	it('saves an invitation record and returns 201 with invitationCode', async () => {
@@ -81,10 +102,11 @@ describe('createInvitationHandler', () => {
 		);
 	});
 
-	it('sets expiryDate approximately 30 days from now', async () => {
+	it('sets expiryDate one month from now', async () => {
 		mockGetOrCreateIdentityId.mockResolvedValue('secondary-identity-456');
+		jest.useFakeTimers().setSystemTime(testDay.toDate());
 
-		const beforeCall = Math.floor(Date.now() / 1000);
+		const now = dayjs().add(1, 'month').toDate().getTime();
 		const handler = createInvitationEndpoint(mockRepo, mockIdentityClient);
 		await handler(
 			{
@@ -95,15 +117,10 @@ describe('createInvitationHandler', () => {
 			undefined as never,
 			mockAccount,
 		);
-		const afterCall = Math.floor(Date.now() / 1000);
 
 		const savedRecord = mockSave.mock.calls[0]?.[0];
 		expect(savedRecord).toBeDefined();
-		const thirtyDays = 30 * 24 * 60 * 60;
-		expect(savedRecord?.expiryDate).toBeGreaterThanOrEqual(
-			beforeCall + thirtyDays,
-		);
-		expect(savedRecord?.expiryDate).toBeLessThanOrEqual(afterCall + thirtyDays);
+		expect(savedRecord?.expiryDate).toBe(now);
 	});
 
 	it('propagates errors from identity lookup as a 500', async () => {

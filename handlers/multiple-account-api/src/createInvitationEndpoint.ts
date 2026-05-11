@@ -6,8 +6,10 @@ import type {
 	ZuoraAccount,
 	ZuoraSubscription,
 } from '@modules/zuora/types/objects';
+import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyResult } from 'aws-lambda';
+import dayjs from 'dayjs';
 import { customAlphabet } from 'nanoid';
 import { z } from 'zod';
 import type { InvitationRepository } from './invitationRepository';
@@ -24,7 +26,6 @@ const generateInvitationCode = customAlphabet(
 	12,
 );
 
-const THIRTY_DAYS_IN_SECONDS = 30 * 24 * 60 * 60;
 const MAXIMUM_NUMBER_OF_INVITES = 5;
 
 async function validateInvitationInformation(
@@ -34,8 +35,12 @@ async function validateInvitationInformation(
 ) {
 	logger.log('Validating invitation information');
 
+	// Check subscription is a valid digital plus subscription
+
+
 	const currentInvites = await repo.list(subscriptionName);
 
+	// Check the secondary user has not been invited already
 	const inviteAlreadyExistsForUser = currentInvites.find(
 		(invite) => invite.secondaryIdentityId === secondaryIdentityId,
 	);
@@ -44,6 +49,7 @@ async function validateInvitationInformation(
 		throw new ValidationError('An invite already exists for this subscription');
 	}
 
+	// Check the subscription still has free invites
 	const subscriptionHasAvailableInvites =
 		currentInvites.length < MAXIMUM_NUMBER_OF_INVITES;
 
@@ -77,7 +83,7 @@ export const createInvitationEndpoint =
 			secondaryIdentityId,
 		);
 
-		const now = new Date();
+		const now = dayjs();
 		const invitationCode = generateInvitationCode();
 
 		await repo.save({
@@ -85,8 +91,8 @@ export const createInvitationEndpoint =
 			invitationCode,
 			primaryIdentityId: account.basicInfo.identityId,
 			secondaryIdentityId,
-			invitedDate: now.toISOString(),
-			expiryDate: Math.floor(now.getTime() / 1000) + THIRTY_DAYS_IN_SECONDS,
+			invitedDate: zuoraDateFormat(now),
+			expiryDate: now.add(1, 'month').toDate().getTime(),
 		});
 
 		// TODO: do we trigger the invite email from here?
