@@ -1,6 +1,6 @@
-import { ValidationError } from '@modules/errors';
 import { getOrCreateIdentityId } from '@modules/identity/idapi';
 import type { IdentityClient } from '@modules/identity/identityClient';
+import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { logger } from '@modules/routing/logger';
 import type {
 	ZuoraAccount,
@@ -8,11 +8,16 @@ import type {
 } from '@modules/zuora/types/objects';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { ZuoraCatalog } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import dayjs from 'dayjs';
 import { customAlphabet } from 'nanoid';
 import { z } from 'zod';
 import type { InvitationRepository } from './invitationRepository';
+import {
+	checkSubscriptionIsActiveDigitalPlus,
+	validateInvitationInformation,
+} from './validation';
 
 export const createInvitationBodySchema = z.object({
 	subscriptionName: z.string(),
@@ -26,51 +31,27 @@ const generateInvitationCode = customAlphabet(
 	12,
 );
 
-const MAXIMUM_NUMBER_OF_INVITES = 5;
-
-async function validateInvitationInformation(
-	repo: InvitationRepository,
-	subscriptionName: string,
-	secondaryIdentityId: string,
-) {
-	logger.log('Validating invitation information');
-
-	// Check subscription is a valid digital plus subscription
-
-
-	const currentInvites = await repo.list(subscriptionName);
-
-	// Check the secondary user has not been invited already
-	const inviteAlreadyExistsForUser = currentInvites.find(
-		(invite) => invite.secondaryIdentityId === secondaryIdentityId,
-	);
-
-	if (inviteAlreadyExistsForUser) {
-		throw new ValidationError('An invite already exists for this subscription');
-	}
-
-	// Check the subscription still has free invites
-	const subscriptionHasAvailableInvites =
-		currentInvites.length < MAXIMUM_NUMBER_OF_INVITES;
-
-	if (!subscriptionHasAvailableInvites) {
-		throw new ValidationError(
-			'This subscription already has the maximum number of invites',
-		);
-	}
-	//TODO: other validation?
-}
-
 export const createInvitationEndpoint =
-	(repo: InvitationRepository, identityClient: IdentityClient) =>
+	(
+		invitationRepository: InvitationRepository,
+		identityClient: IdentityClient,
+		zuoraCatalog: ZuoraCatalog,
+		productCatalog: ProductCatalog,
+	) =>
 	async (
 		body: CreateInvitationBody,
 		_zuoraClient: ZuoraClient,
-		_subscription: ZuoraSubscription,
+		zuoraSubscription: ZuoraSubscription,
 		account: ZuoraAccount,
 	): Promise<APIGatewayProxyResult> => {
 		const { subscriptionName } = body;
 		logger.mutableAddContext(subscriptionName);
+
+		checkSubscriptionIsActiveDigitalPlus(
+			zuoraSubscription,
+			zuoraCatalog,
+			productCatalog,
+		);
 
 		const secondaryIdentityId = await getOrCreateIdentityId(
 			identityClient,
@@ -78,7 +59,7 @@ export const createInvitationEndpoint =
 		);
 
 		await validateInvitationInformation(
-			repo,
+			invitationRepository,
 			subscriptionName,
 			secondaryIdentityId,
 		);
@@ -86,7 +67,7 @@ export const createInvitationEndpoint =
 		const now = dayjs();
 		const invitationCode = generateInvitationCode();
 
-		await repo.save({
+		await invitationRepository.save({
 			subscriptionName: body.subscriptionName,
 			invitationCode,
 			primaryIdentityId: account.basicInfo.identityId,
