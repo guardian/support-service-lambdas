@@ -31,16 +31,19 @@ export async function isActiveEndpoint(
 			zuoraClient,
 			zuoraSubscription.accountNumber,
 		);
-		const parser = new GuardianSubscriptionParser(zuoraCatalog, productCatalog);
-		const guardianSubscription =
-			parser.toGuardianSubscription(zuoraSubscription);
-		const filter = SubscriptionFilter.activeNonEndedSubscriptionFilter(dayjs());
-		const filteredSubscription =
-			filter.filterSubscription(guardianSubscription);
-		const subscription: GuardianSubscription =
-			getSinglePlanFlattenedSubscriptionOrThrow(filteredSubscription);
 
-		if (isValid(subscription, account, body.postCode)) {
+		const subscriptionParser = new GuardianSubscriptionParser(
+			zuoraCatalog,
+			productCatalog,
+		).toGuardianSubscription(zuoraSubscription);
+		const activeSubscription =
+			SubscriptionFilter.activeNonEndedSubscriptionFilter(
+				dayjs(),
+			).filterSubscription(subscriptionParser);
+		const guardianSubscription: GuardianSubscription =
+			getSinglePlanFlattenedSubscriptionOrThrow(activeSubscription);
+
+		if (isValid(guardianSubscription, account, body.postCode)) {
 			return buildReponseBody(
 				true,
 				zuoraDateFormat(dayjs(zuoraSubscription.termEndDate)),
