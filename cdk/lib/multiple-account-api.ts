@@ -1,3 +1,4 @@
+import { GuAllowPolicy } from '@guardian/cdk/lib/constructs/iam';
 import type { App } from 'aws-cdk-lib';
 import { RemovalPolicy } from 'aws-cdk-lib';
 import {
@@ -7,7 +8,6 @@ import {
 	Table,
 	TableEncryption,
 } from 'aws-cdk-lib/aws-dynamodb';
-import { GuAllowPolicy } from '@guardian/cdk/lib/constructs/iam';
 import { SrApiLambda } from './cdk/SrApiLambda';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';

@@ -3,6 +3,7 @@ import {
 	DynamoDBClient,
 	GetItemCommand,
 	PutItemCommand,
+	QueryCommand,
 } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import type { Stage } from '@modules/stage';
@@ -58,6 +59,21 @@ export class InvitationRepository {
 			return undefined;
 		}
 		return invitationRecordSchema.parse(unmarshall(result.Item));
+	}
+
+	async list(subscriptionName: string): Promise<InvitationRecord[]> {
+		const result = await this.client.send(
+			new QueryCommand({
+				TableName: this.tableName,
+				KeyConditionExpression: 'subscriptionName = :subscriptionName',
+				ExpressionAttributeValues: {
+					':subscriptionName': { S: subscriptionName },
+				},
+			}),
+		);
+		return (result.Items ?? []).map((item) =>
+			invitationRecordSchema.parse(unmarshall(item)),
+		);
 	}
 
 	async delete(

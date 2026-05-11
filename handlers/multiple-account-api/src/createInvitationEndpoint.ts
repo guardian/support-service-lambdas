@@ -1,3 +1,4 @@
+import { ValidationError } from '@modules/errors';
 import { getOrCreateIdentityId } from '@modules/identity/idapi';
 import type { IdentityClient } from '@modules/identity/identityClient';
 import { logger } from '@modules/routing/logger';
@@ -24,6 +25,35 @@ const generateInvitationCode = customAlphabet(
 );
 
 const THIRTY_DAYS_IN_SECONDS = 30 * 24 * 60 * 60;
+const MAXIMUM_NUMBER_OF_INVITES = 5;
+
+async function validateInvitationInformation(
+	repo: InvitationRepository,
+	subscriptionName: string,
+	secondaryIdentityId: string,
+) {
+	logger.log('Validating invitation information');
+
+	const currentInvites = await repo.list(subscriptionName);
+
+	const inviteAlreadyExistsForUser = currentInvites.find(
+		(invite) => invite.secondaryIdentityId === secondaryIdentityId,
+	);
+
+	if (inviteAlreadyExistsForUser) {
+		throw new ValidationError('An invite already exists for this subscription');
+	}
+
+	const subscriptionHasAvailableInvites =
+		currentInvites.length < MAXIMUM_NUMBER_OF_INVITES;
+
+	if (!subscriptionHasAvailableInvites) {
+		throw new ValidationError(
+			'This subscription already has the maximum number of invites',
+		);
+	}
+	//TODO: other validation?
+}
 
 export const createInvitationEndpoint =
 	(repo: InvitationRepository, identityClient: IdentityClient) =>
@@ -33,15 +63,18 @@ export const createInvitationEndpoint =
 		_subscription: ZuoraSubscription,
 		account: ZuoraAccount,
 	): Promise<APIGatewayProxyResult> => {
-		logger.mutableAddContext(body.subscriptionName);
-
-		//TODO: check that the user has no more than maximum invites
-		//TODO: check that the secondary email does not already have an existing invite for this subscription
-		//TODO: other validation?
+		const { subscriptionName } = body;
+		logger.mutableAddContext(subscriptionName);
 
 		const secondaryIdentityId = await getOrCreateIdentityId(
 			identityClient,
 			body.secondaryUserEmail,
+		);
+
+		await validateInvitationInformation(
+			repo,
+			subscriptionName,
+			secondaryIdentityId,
 		);
 
 		const now = new Date();
