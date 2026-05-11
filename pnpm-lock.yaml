@@ -273,6 +273,16 @@ importers:
         specifier: ^4.21.0
         version: 4.21.0
 
+  handlers/multiple-account-api:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.147
+        version: 8.10.158
+
   handlers/negative-invoices-processor:
     dependencies:
       '@google-cloud/bigquery':
