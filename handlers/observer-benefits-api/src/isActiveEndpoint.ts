@@ -13,7 +13,7 @@ import type { ZuoraCatalog } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import dayjs from 'dayjs';
 import type { RequestBody } from './schemas';
-import { isValid } from './validation';
+import { validateSubscription } from './validation';
 
 export async function isActiveEndpoint(
 	zuoraClient: ZuoraClient,
@@ -43,7 +43,7 @@ export async function isActiveEndpoint(
 		const guardianSubscription: GuardianSubscription =
 			getSinglePlanFlattenedSubscriptionOrThrow(activeSubscription);
 
-		if (isValid(guardianSubscription, account, body.postCode)) {
+		if (validateSubscription(guardianSubscription, account, body.postCode)) {
 			return buildReponseBody(
 				true,
 				zuoraDateFormat(dayjs(zuoraSubscription.termEndDate)),

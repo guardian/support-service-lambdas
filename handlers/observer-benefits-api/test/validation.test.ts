@@ -1,6 +1,6 @@
 import type { GuardianSubscription } from '@modules/guardian-subscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import type { ZuoraAccount } from '@modules/zuora/types';
-import { isValid } from '../src/validation';
+import { validateSubscription } from '../src/validation';
 
 function makeSubscription(
 	productKey: string,
@@ -19,13 +19,13 @@ function makeAccount(zipCode: string | null): ZuoraAccount {
 	} as unknown as ZuoraAccount;
 }
 
-describe('isValid', () => {
+describe('validateSubscription', () => {
 	describe('returns true', () => {
 		test('when postcode and product match', () => {
 			const subscription = makeSubscription('HomeDelivery', 'Everyday');
 			const account = makeAccount('N1 9GU');
 
-			const result = isValid(subscription, account, 'N1 9GU');
+			const result = validateSubscription(subscription, account, 'N1 9GU');
 
 			expect(result).toBe(true);
 		});
@@ -34,7 +34,7 @@ describe('isValid', () => {
 			const subscription = makeSubscription('HomeDelivery', 'Weekend');
 			const account = makeAccount('n1 9gu');
 
-			const result = isValid(subscription, account, 'N1 9GU');
+			const result = validateSubscription(subscription, account, 'N1 9GU');
 
 			expect(result).toBe(true);
 		});
@@ -43,7 +43,7 @@ describe('isValid', () => {
 			const subscription = makeSubscription('HomeDelivery', 'Sunday');
 			const account = makeAccount('N19GU');
 
-			const result = isValid(subscription, account, 'N1 9GU');
+			const result = validateSubscription(subscription, account, 'N1 9GU');
 
 			expect(result).toBe(true);
 		});
@@ -59,7 +59,7 @@ describe('isValid', () => {
 			const subscription = makeSubscription('HomeDelivery', ratePlanKey);
 			const account = makeAccount('N1 9GU');
 
-			const result = isValid(subscription, account, 'N1 9GU');
+			const result = validateSubscription(subscription, account, 'N1 9GU');
 
 			expect(result).toBe(true);
 		});
@@ -73,7 +73,7 @@ describe('isValid', () => {
 			const subscription = makeSubscription(productKey, 'Everyday');
 			const account = makeAccount('N1 9GU');
 
-			const result = isValid(subscription, account, 'N1 9GU');
+			const result = validateSubscription(subscription, account, 'N1 9GU');
 			expect(result).toBe(true);
 		});
 	});
@@ -83,7 +83,7 @@ describe('isValid', () => {
 			const subscription = makeSubscription('HomeDelivery', 'Everyday');
 			const account = makeAccount('N1 9GU');
 
-			const result = isValid(subscription, account, 'N1 9GX');
+			const result = validateSubscription(subscription, account, 'N1 9GX');
 
 			expect(result).toBe(false);
 		});
@@ -92,7 +92,7 @@ describe('isValid', () => {
 			const subscription = makeSubscription('Contribution', 'Monthly');
 			const account = makeAccount('N1 9GU');
 
-			const result = isValid(subscription, account, 'N1 9GU');
+			const result = validateSubscription(subscription, account, 'N1 9GU');
 
 			expect(result).toBe(false);
 		});
@@ -101,7 +101,7 @@ describe('isValid', () => {
 			const subscription = makeSubscription('HomeDelivery', 'Sixday');
 			const account = makeAccount('N1 9GU');
 
-			const result = isValid(subscription, account, 'N1 9GU');
+			const result = validateSubscription(subscription, account, 'N1 9GU');
 
 			expect(result).toBe(false);
 		});
