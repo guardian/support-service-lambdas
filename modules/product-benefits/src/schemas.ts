@@ -10,6 +10,7 @@ export const productBenefitListSchema = z.enum([
 	'hideSupportMessaging',
 	'allowRejectAll',
 	'liveEvents',
+	'multipleAccounts',
 ]);
 
 export type ProductBenefit = z.infer<typeof productBenefitListSchema>;

@@ -19,6 +19,7 @@ export const digitalSubscriptionBenefits = supporterPlusBenefits.concat([
 	'newspaperEdition',
 	'guardianWeeklyEdition',
 	'newspaperArchive',
+	'multipleAccounts',
 ]);
 
 export const productBenefitMapping: Record<
