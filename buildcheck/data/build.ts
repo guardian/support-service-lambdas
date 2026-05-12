@@ -650,8 +650,8 @@ export const build: BuildDefinition = {
 		userBenefits,
 		writeOffUnpaidInvoices,
 		zuoraSalesforceLinkRemover,
-		observerBenefitsApi,
 		multipleAccountApi,
+		observerBenefitsApi,
 		// MARKER new-lambda: buildcheck-reference
 	],
 
