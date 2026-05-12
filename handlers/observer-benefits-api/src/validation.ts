@@ -11,14 +11,23 @@ const observerRatePlanKeys = [
 	'SundayPlus',
 ];
 
-export function isValid(
+function sanitizePostCode(postCode: string): string {
+	return postCode.toLowerCase().replace(/\s+/g, '');
+}
+
+export function validateSubscription(
 	guardianSubscription: GuardianSubscription,
 	account: ZuoraAccount,
 	postCode: string,
 ): boolean {
+	const { zipCode } = account.billToContact;
+
+	if (!zipCode) {
+		return false;
+	}
+
 	const matchPostCode =
-		account.billToContact.zipCode?.toLowerCase().replaceAll(' ', '') ===
-		postCode.toLowerCase().replaceAll(' ', '');
+		sanitizePostCode(zipCode) === sanitizePostCode(postCode);
 	const isObserver =
 		isNewspaperProduct(guardianSubscription.ratePlan.productKey) &&
 		observerRatePlanKeys.includes(
