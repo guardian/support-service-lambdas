@@ -16,7 +16,7 @@ export class ObserverBenefitsApi extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
 		super(scope, { stage, app: 'observer-benefits-api' });
 
-		const app = this.app;
+		const app = 'observer-api';
 
 		const lambda = new SrApiLambda(this, 'Lambda', {
 			lambdaOverrides: {
