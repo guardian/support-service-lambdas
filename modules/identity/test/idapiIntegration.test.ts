@@ -36,6 +36,6 @@ describe('idapi module', () => {
 			client,
 			`${Date.now()}@theguardian.com`,
 		);
-		expect( /^\d+$/.test(identityId)).toBe(true);
+		expect(/^\d+$/.test(identityId)).toBe(true);
 	});
 });
