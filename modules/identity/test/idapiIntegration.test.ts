@@ -1,3 +1,7 @@
+/**
+ * @group integration
+ */
+
 import { createGuestAccount, getUserByEmail } from '@modules/identity/idapi';
 import { IdentityClient } from '@modules/identity/identityClient';
 
