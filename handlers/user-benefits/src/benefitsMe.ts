@@ -1,5 +1,5 @@
 import { buildAuthenticate } from '@modules/identity/apiGateway';
-import type { IdentityUserDetails } from '@modules/identity/identity';
+import type { IdentityUserDetails } from '@modules/identity/oktaTokenHelper';
 import { Lazy } from '@modules/lazy';
 import type { UserBenefitsResponse } from '@modules/product-benefits/schemas';
 import { getUserBenefits } from '@modules/product-benefits/userBenefits';
