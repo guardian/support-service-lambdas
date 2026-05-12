@@ -25,3 +25,18 @@ export const annualContribHalfPriceSupporterPlusForOneYear: Discount = {
 	upToPeriodsType: 'Years',
 	discountPercentage: 50,
 };
+
+export const monthlyDigiPlus: Discount = {
+	productRatePlanId: {
+		PROD: 'tbc',
+		CODE: '6257d4fb107e4b438a6ede085f86d628',
+	},
+	productRatePlanChargeId: {
+		PROD: 'tbc',
+		CODE: '4a02ba3ebdcb4a469c402e09895cc716',
+	},
+	name: 'Upsell - Supporter Plus to Digital Plus Switch tbc off',
+	upToPeriods: 1,
+	upToPeriodsType: 'Months',
+	discountPercentage: 0,
+};
