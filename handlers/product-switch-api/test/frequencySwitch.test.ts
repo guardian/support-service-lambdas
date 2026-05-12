@@ -61,6 +61,7 @@ function makeAccount(overrides?: {
 			firstName: 'Test',
 			lastName: 'Customer',
 			workEmail: 'test@example.com',
+			zipCode: null,
 		},
 		metrics: {
 			totalInvoiceBalance: overrides?.totalInvoiceBalance ?? 0,

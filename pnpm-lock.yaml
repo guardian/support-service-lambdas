@@ -334,6 +334,19 @@ importers:
         specifier: ^8.10.147
         version: 8.10.158
 
+  handlers/observer-benefits-api:
+    dependencies:
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.19
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.147
+        version: 8.10.158
+
   handlers/observer-data-export:
     dependencies:
       '@types/aws-lambda':
