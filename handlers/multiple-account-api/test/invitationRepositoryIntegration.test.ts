@@ -8,6 +8,7 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { getAwsConfig } from '@modules/aws/config';
 import type { Stage } from '@modules/stage';
+import dayjs from 'dayjs';
 import { InvitationRepository } from '../src/invitationRepository';
 
 const stage: Stage = 'CODE';
@@ -18,7 +19,7 @@ const testRecord = {
 	primaryIdentityId: '12345678',
 	secondaryIdentityId: '87654321',
 	invitedDate: new Date().toISOString(),
-	expiryDate: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60,
+	expiryDate: dayjs().add(10, 'seconds').toDate().getTime(),
 };
 
 const repo = new InvitationRepository(
