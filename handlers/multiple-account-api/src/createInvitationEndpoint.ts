@@ -15,7 +15,7 @@ import { customAlphabet } from 'nanoid';
 import { z } from 'zod';
 import type { InvitationRepository } from './invitationRepository';
 import {
-	checkSubscriptionIsActiveDigitalPlus,
+	checkSubscriptionHasMultipleAccountsBenefit,
 	validateInvitationInformation,
 } from './validation';
 
@@ -47,7 +47,8 @@ export const createInvitationEndpoint =
 		const { subscriptionName } = body;
 		logger.mutableAddContext(subscriptionName);
 
-		checkSubscriptionIsActiveDigitalPlus(
+		// TODO: give benefit to staff members
+		checkSubscriptionHasMultipleAccountsBenefit(
 			zuoraSubscription,
 			zuoraCatalog,
 			productCatalog,

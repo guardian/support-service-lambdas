@@ -1,11 +1,21 @@
 import * as identity from '@modules/identity/idapi';
 import type { IdentityClient } from '@modules/identity/identityClient';
-import type { ZuoraAccount } from '@modules/zuora/types/objects';
+import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
+import type {
+	ZuoraAccount,
+	ZuoraSubscription,
+} from '@modules/zuora/types/objects';
+import { zuoraSubscriptionSchema } from '@modules/zuora/types/objects';
 import { zuoraDateFormat } from '@modules/zuora/utils';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
+import code from '../../../modules/zuora-catalog/test/fixtures/catalog-code.json';
 import { createInvitationEndpoint } from '../src/createInvitationEndpoint';
-import type { InvitationRecord } from '../src/invitationRepository';
-import type { InvitationRepository } from '../src/invitationRepository';
+import type {
+	InvitationRecord,
+	InvitationRepository,
+} from '../src/invitationRepository';
+import weekendSub from './fixtures/weekend-subscription.json';
 
 jest.mock('@modules/identity/idapi');
 
@@ -13,25 +23,12 @@ const mockGetOrCreateIdentityId = jest.mocked(identity.getOrCreateIdentityId);
 
 const mockAccount: ZuoraAccount = {
 	basicInfo: {
-		id: 'account-id',
 		identityId: 'primary-identity-123',
 	},
-	billingAndPayment: {
-		currency: 'GBP',
-		defaultPaymentMethodId: 'payment-method-id',
-		paymentGateway: 'Stripe PaymentIntents GNM Membership',
-	},
-	billToContact: {
-		firstName: 'Test',
-		lastName: 'User',
-		workEmail: 'test@example.com',
-	},
-	metrics: {
-		totalInvoiceBalance: 0,
-		currency: 'GBP',
-		creditBalance: 0,
-	},
-};
+} as ZuoraAccount;
+
+const mockSubscription: ZuoraSubscription =
+	zuoraSubscriptionSchema.parse(weekendSub);
 
 const testDay = dayjs('2026-05-11').startOf('day');
 
@@ -45,6 +42,10 @@ const mockInvitations = [
 		expiryDate: dayjs(testDay).add(1, 'm').toDate().getTime(),
 	},
 ];
+
+const zuoraCatalog = zuoraCatalogSchema.parse(code);
+
+const productCatalog = generateProductCatalog(zuoraCatalog);
 
 const mockSave = jest
 	.fn<Promise<void>, [InvitationRecord]>()
@@ -71,14 +72,19 @@ describe('createInvitationHandler', () => {
 	it('saves an invitation record and returns 201 with invitationCode', async () => {
 		mockGetOrCreateIdentityId.mockResolvedValue('secondary-identity-456');
 
-		const handler = createInvitationEndpoint(mockRepo, mockIdentityClient);
+		const handler = createInvitationEndpoint(
+			mockRepo,
+			mockIdentityClient,
+			zuoraCatalog,
+			productCatalog,
+		);
 		const result = await handler(
 			{
 				subscriptionName: 'A-S00000001',
 				secondaryUserEmail: 'secondary@example.com',
 			},
 			undefined as never,
-			undefined as never,
+			mockSubscription,
 			mockAccount,
 		);
 
@@ -107,14 +113,19 @@ describe('createInvitationHandler', () => {
 		jest.useFakeTimers().setSystemTime(testDay.toDate());
 
 		const now = dayjs().add(1, 'month').toDate().getTime();
-		const handler = createInvitationEndpoint(mockRepo, mockIdentityClient);
+		const handler = createInvitationEndpoint(
+			mockRepo,
+			mockIdentityClient,
+			zuoraCatalog,
+			productCatalog,
+		);
 		await handler(
 			{
 				subscriptionName: 'A-S00000001',
 				secondaryUserEmail: 'secondary@example.com',
 			},
 			undefined as never,
-			undefined as never,
+			mockSubscription,
 			mockAccount,
 		);
 
@@ -128,7 +139,12 @@ describe('createInvitationHandler', () => {
 			new Error('Identity service unavailable'),
 		);
 
-		const handler = createInvitationEndpoint(mockRepo, mockIdentityClient);
+		const handler = createInvitationEndpoint(
+			mockRepo,
+			mockIdentityClient,
+			zuoraCatalog,
+			productCatalog,
+		);
 		await expect(
 			handler(
 				{
@@ -136,7 +152,7 @@ describe('createInvitationHandler', () => {
 					secondaryUserEmail: 'secondary@example.com',
 				},
 				undefined as never,
-				undefined as never,
+				mockSubscription,
 				mockAccount,
 			),
 		).rejects.toThrow('Identity service unavailable');
