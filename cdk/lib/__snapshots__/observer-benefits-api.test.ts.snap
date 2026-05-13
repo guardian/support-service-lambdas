@@ -243,6 +243,18 @@ exports[`The Observer benefits api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
+    "FastlyCname": {
+      "Properties": {
+        "Name": "observer-benefits-api.code.dev-guardianapis.com",
+        "RecordType": "CNAME",
+        "ResourceRecords": [
+          "dualstack.guardian.map.fastly.net",
+        ],
+        "Stage": "CODE",
+        "TTL": 3600,
+      },
+      "Type": "Guardian::DNS::RecordSet",
+    },
     "LambdaD247545B": {
       "DependsOn": [
         "LambdaServiceRoleDefaultPolicyDAE46E21",
@@ -2030,6 +2042,18 @@ exports[`The Observer benefits api stack matches the snapshot 2`] = `
         ],
       },
       "Type": "AWS::ApiGateway::DomainName",
+    },
+    "FastlyCname": {
+      "Properties": {
+        "Name": "observer-benefits-api.guardianapis.com",
+        "RecordType": "CNAME",
+        "ResourceRecords": [
+          "dualstack.guardian.map.fastly.net",
+        ],
+        "Stage": "PROD",
+        "TTL": 3600,
+      },
+      "Type": "Guardian::DNS::RecordSet",
     },
     "LambdaD247545B": {
       "DependsOn": [

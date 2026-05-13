@@ -29,6 +29,9 @@ export class ObserverBenefitsApi extends SrStack {
 				rateLimit: 20,
 				burstLimit: 10,
 			},
+			srRestDomainProps: {
+				publicDomain: true,
+			},
 		});
 
 		lambda.addPolicies(
