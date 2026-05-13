@@ -1,14 +1,14 @@
 import { ValidationError } from '@modules/errors';
 import type { Stage } from '@modules/stage';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import type { IdentityUserDetails } from '@modules/identity/identity';
-import { SigningKeyNotFoundError } from '@modules/identity/identity';
+import type { IdentityUserDetails } from '@modules/identity/oktaTokenHelper';
+import { SigningKeyNotFoundError } from '@modules/identity/oktaTokenHelper';
 import {
 	ExpiredTokenError,
 	InvalidScopesError,
 	InvalidTokenError,
 	OktaTokenHelper,
-} from '@modules/identity/identity';
+} from '@modules/identity/oktaTokenHelper';
 
 type SuccessfulAuthentication = {
 	type: 'success';

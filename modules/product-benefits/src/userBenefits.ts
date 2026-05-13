@@ -1,5 +1,5 @@
 import { distinct } from '@modules/arrayFunctions';
-import type { IdentityUserDetails } from '@modules/identity/identity';
+import type { IdentityUserDetails } from '@modules/identity/oktaTokenHelper';
 import type {
 	ProductCatalogHelper,
 	ProductKey,
