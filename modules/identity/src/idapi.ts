@@ -64,7 +64,7 @@ export const createGuestAccount = async (
 	return response.guestRegistrationRequest.userId;
 };
 
-export const getOrCreateIdentityId = async (
+export const getOrCreateUserFromEmail = async (
 	client: IdentityClient,
 	email: string,
 ): Promise<string> => {
