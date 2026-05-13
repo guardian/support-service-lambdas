@@ -8,7 +8,6 @@ import {
 } from './cdk/policies';
 import { SrApiLambda } from './cdk/SrApiLambda';
 import { SrLambda } from './cdk/SrLambda';
-import { SrRestDomain } from './cdk/SrRestDomain';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
 
@@ -16,7 +15,7 @@ export class ObserverBenefitsApi extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
 		super(scope, { stage, app: 'observer-benefits-api' });
 
-		const app = 'observer-api';
+		const app = this.app;
 
 		const lambda = new SrApiLambda(this, 'Lambda', {
 			lambdaOverrides: {
@@ -73,8 +72,8 @@ export class ObserverBenefitsApi extends SrStack {
 		});
 
 		// ---- API Key ---- //
-		const usagePlan = new UsagePlan(this, 'UserBenefitsUsagePlan', {
-			name: `user-benefits-api-usage-plan-${this.stage}`,
+		const usagePlan = new UsagePlan(this, 'observerBenefitsUsagePlan', {
+			name: `observer-benefits-api-usage-plan-${this.stage}`,
 			apiStages: [
 				{
 					api: apiGateway.api,
@@ -86,10 +85,5 @@ export class ObserverBenefitsApi extends SrStack {
 			apiKeyName: `${app}-api-key-${this.stage}`,
 		});
 		usagePlan.addApiKey(apiKey);
-
-		new SrRestDomain(this, apiGateway.api, {
-			publicDomain: true,
-			domainIdOverride: 'NS1 DNS entry',
-		});
 	}
 }
