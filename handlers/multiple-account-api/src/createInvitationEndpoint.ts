@@ -1,4 +1,4 @@
-import { getOrCreateIdentityId } from '@modules/identity/idapi';
+import { getOrCreateUserFromEmail } from '@modules/identity/idapi';
 import type { IdentityClient } from '@modules/identity/identityClient';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { logger } from '@modules/routing/logger';
@@ -47,14 +47,14 @@ export const createInvitationEndpoint =
 		const { subscriptionName } = body;
 		logger.mutableAddContext(subscriptionName);
 
-		// TODO: give benefit to staff members
+		// TODO: give benefit to staff members?
 		checkSubscriptionHasMultipleAccountsBenefit(
 			zuoraSubscription,
 			zuoraCatalog,
 			productCatalog,
 		);
 
-		const secondaryIdentityId = await getOrCreateIdentityId(
+		const secondaryIdentityId = await getOrCreateUserFromEmail(
 			identityClient,
 			body.secondaryUserEmail,
 		);
