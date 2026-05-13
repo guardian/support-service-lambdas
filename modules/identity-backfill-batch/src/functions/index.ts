@@ -9,7 +9,6 @@ export * from './escapeCsv';
 export * from './eta';
 export * from './extractIdentityId';
 export * from './extractMessage';
-export * from './filterRows';
 export * from './formatDuration';
 export * from './loadConfig';
 export * from './loadState';

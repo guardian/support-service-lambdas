@@ -6,7 +6,6 @@ import {
 	callBackfill,
 	createOutputDir,
 	eta,
-	filterRows,
 	loadConfig,
 	loadState,
 	parseArgs,
@@ -30,10 +29,9 @@ async function main(): Promise<void> {
 	console.log(`output: ${outputDir}`);
 
 	const allRows: ICsvRow[] = readCsv(args.csv);
-	const filtered: ICsvRow[] = filterRows(allRows, args.filter);
 	const limited: ICsvRow[] = args.limit
-		? filtered.slice(0, args.limit)
-		: filtered;
+		? allRows.slice(0, args.limit)
+		: allRows;
 	const todo: ICsvRow[] = limited.filter((r: ICsvRow) => {
 		const email = pickEmail(r);
 		if (!email) {
@@ -47,7 +45,6 @@ async function main(): Promise<void> {
 	});
 
 	console.log(`csv total:       ${allRows.length}`);
-	console.log(`filter applied:  ${args.filter} -> ${filtered.length}`);
 	console.log(`limit:           ${args.limit ?? 'none'} -> ${limited.length}`);
 	console.log(
 		`already done:    ${state.processed.size + state.rejected.size + state.errored.size}`,
