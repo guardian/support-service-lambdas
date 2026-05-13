@@ -1,7 +1,7 @@
 import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
 import { awsConfig } from '@modules/aws/config';
 import { ValidationError } from '@modules/errors';
-import type { IdentityUserDetails } from '@modules/identity/identity';
+import type { IdentityUserDetails } from '@modules/identity/oktaTokenHelper';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import { getUserDetailsSchema } from './schemas';
