@@ -8,6 +8,7 @@ import {
 	Table,
 	TableEncryption,
 } from 'aws-cdk-lib/aws-dynamodb';
+import { AllowZuoraOAuthSecretsPolicy } from './cdk/policies';
 import { SrApiLambda } from './cdk/SrApiLambda';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
@@ -74,5 +75,7 @@ export class MultipleAccountApi extends SrStack {
 		});
 
 		secondaryUserTable.grantFullAccess(lambda);
+
+		lambda.addPolicies(new AllowZuoraOAuthSecretsPolicy(this));
 	}
 }
