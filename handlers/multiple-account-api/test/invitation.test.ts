@@ -19,7 +19,9 @@ import weekendSub from './fixtures/weekend-subscription.json';
 
 jest.mock('@modules/identity/idapi');
 
-const mockGetOrCreateIdentityId = jest.mocked(identity.getOrCreateIdentityId);
+const mockGetOrCreateUserFromEmail = jest.mocked(
+	identity.getOrCreateUserFromEmail,
+);
 
 const mockAccount: ZuoraAccount = {
 	basicInfo: {
@@ -70,7 +72,7 @@ describe('createInvitationHandler', () => {
 	});
 
 	it('saves an invitation record and returns 201 with invitationCode', async () => {
-		mockGetOrCreateIdentityId.mockResolvedValue('secondary-identity-456');
+		mockGetOrCreateUserFromEmail.mockResolvedValue('secondary-identity-456');
 
 		const handler = createInvitationEndpoint(
 			mockRepo,
@@ -102,14 +104,14 @@ describe('createInvitationHandler', () => {
 			}),
 		);
 
-		expect(mockGetOrCreateIdentityId).toHaveBeenCalledWith(
+		expect(mockGetOrCreateUserFromEmail).toHaveBeenCalledWith(
 			mockIdentityClient,
 			'secondary@example.com',
 		);
 	});
 
 	it('sets expiryDate one month from now', async () => {
-		mockGetOrCreateIdentityId.mockResolvedValue('secondary-identity-456');
+		mockGetOrCreateUserFromEmail.mockResolvedValue('secondary-identity-456');
 		jest.useFakeTimers().setSystemTime(testDay.toDate());
 
 		const now = dayjs().add(1, 'month').toDate().getTime();
@@ -135,7 +137,7 @@ describe('createInvitationHandler', () => {
 	});
 
 	it('propagates errors from identity lookup as a 500', async () => {
-		mockGetOrCreateIdentityId.mockRejectedValue(
+		mockGetOrCreateUserFromEmail.mockRejectedValue(
 			new Error('Identity service unavailable'),
 		);
 
