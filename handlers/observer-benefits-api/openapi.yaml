@@ -7,6 +7,9 @@ info:
   version: '1.0.0'
 servers:
   - url: 'https://observer-benefits-api.guardianapis.com'
+    description: Production environment
+  - url: 'https://observer-benefits-api.code.dev-guardianapis.com'
+    description: Code environment for testing and development
 paths:
   /is-active:
     post:
