@@ -29,6 +29,17 @@ export class MultipleAccountApi extends SrStack {
 			},
 		});
 
+		lambda.addPolicies(
+			new GuAllowPolicy(this, 'AllowGetIdentityClientToken', {
+				actions: ['ssm:GetParameter'],
+				resources: [
+					`arn:aws:ssm:${this.region}:${this.account}:parameter/${this.stage}/support/multiple-account-api/identity-client-access-token`,
+				],
+			}),
+		);
+
+		lambda.addPolicies(new AllowZuoraOAuthSecretsPolicy(this));
+
 		const invitationTable = new Table(this, 'InvitationTable', {
 			tableName: `${app}-invitation-${this.stage}`,
 			billingMode: BillingMode.PAY_PER_REQUEST,
@@ -48,15 +59,6 @@ export class MultipleAccountApi extends SrStack {
 
 		invitationTable.grantFullAccess(lambda);
 
-		lambda.addPolicies(
-			new GuAllowPolicy(this, 'AllowGetIdentityClientToken', {
-				actions: ['ssm:GetParameter'],
-				resources: [
-					`arn:aws:ssm:${this.region}:${this.account}:parameter/${this.stage}/support/multiple-account-api/identity-client-access-token`,
-				],
-			}),
-		);
-
 		const secondaryUserTable = new Table(this, 'SecondaryUserTable', {
 			tableName: `${app}-secondary-user-${this.stage}`,
 			billingMode: BillingMode.PAY_PER_REQUEST,
@@ -75,7 +77,5 @@ export class MultipleAccountApi extends SrStack {
 		});
 
 		secondaryUserTable.grantFullAccess(lambda);
-
-		lambda.addPolicies(new AllowZuoraOAuthSecretsPolicy(this));
 	}
 }
