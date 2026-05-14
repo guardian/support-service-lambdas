@@ -1,4 +1,4 @@
-import { logger } from '@modules/routing/logger';
+import { logger } from '../../../../../modules/logger/src/logger';
 import type { BrazeClient } from '../../services/brazeClient';
 import { deleteBrazeUser } from '../../services/brazeClient';
 import type {

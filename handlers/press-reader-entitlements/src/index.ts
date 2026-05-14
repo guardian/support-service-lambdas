@@ -2,7 +2,6 @@ import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { userHasGuardianEmail } from '@modules/product-benefits/userBenefits';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
-import { logger } from '@modules/routing/logger';
 import { Router } from '@modules/routing/router';
 import type { Stage } from '@modules/stage';
 import { stageFromEnvironment } from '@modules/stage';
@@ -14,6 +13,7 @@ import type {
 	Handler,
 } from 'aws-lambda';
 import dayjs from 'dayjs';
+import { logger } from '../../../modules/logger/src/logger';
 import { getClientAccessToken, getUserDetails } from './identity';
 import { getLatestSubscription } from './supporterProductData';
 import type { Member } from './xmlBuilder';

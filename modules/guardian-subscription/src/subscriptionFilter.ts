@@ -1,6 +1,6 @@
 import { partitionByType } from '@modules/arrayFunctions';
+import { logger } from '@modules/logger/logger';
 import { mapValuesMap, partitionByValueType } from '@modules/mapFunctions';
-import { logger } from '@modules/routing/logger';
 import type { RatePlanCharge } from '@modules/zuora/types';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { Dayjs } from 'dayjs';

@@ -1,6 +1,6 @@
-import type { Logger } from '@modules/routing/logger';
 import { rejectPayment } from '@modules/zuora/payment';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { Logger } from '../../../../modules/logger/src/logger';
 
 export async function rejectPaymentService(
 	logger: Logger,

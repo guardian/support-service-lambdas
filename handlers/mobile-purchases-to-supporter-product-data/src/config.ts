@@ -1,8 +1,8 @@
 import { loadConfig } from '@modules/aws/appConfig';
 import { getIfDefined } from '@modules/nullAndUndefined';
-import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import { z } from 'zod';
+import { logger } from '../../../modules/logger/src/logger';
 
 const configSchema = z.object({
 	mobilePurchasesApiKey: z.string(),

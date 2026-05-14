@@ -1,4 +1,4 @@
-import type { Logger } from '@modules/routing/logger';
+import type { Logger } from '../../../../modules/logger/src/logger';
 import { authenticateWithSalesforce } from '../../src/services/salesforceAuth';
 import type { SalesforceCredentials } from '../../src/types';
 

@@ -8,6 +8,7 @@
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
     "build": "tsc --noEmit",
+    "buildcheck": "pnpm --filter buildcheck snapshot:assert modules/product-catalog",
     "generateFiles": "tsx src/generateSchemaCommand.ts",
     "validateSchema": "prettier --write src/productCatalogSchema.ts && pnpm run sortSchemaKeys",
     "sortSchemaKeys": "for i in {1..3}; do eslint --fix src/productCatalogSchema.ts; done",

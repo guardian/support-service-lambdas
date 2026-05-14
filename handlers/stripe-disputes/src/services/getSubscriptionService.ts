@@ -1,7 +1,7 @@
-import type { Logger } from '@modules/routing/logger';
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { Logger } from '../../../../modules/logger/src/logger';
 
 export async function getSubscriptionService(
 	logger: Logger,

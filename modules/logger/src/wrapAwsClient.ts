@@ -6,8 +6,8 @@ import type {
 	MetadataBearer,
 	MiddlewareStack,
 } from '@smithy/types';
-import { getCallerInfo } from '@modules/routing/getCallerInfo';
-import { logger } from '@modules/routing/logger';
+import { getCallerInfo } from '@modules/logger/getCallerInfo';
+import { logger } from '@modules/logger/logger';
 
 export function wrapAwsClient<
 	Input extends object,

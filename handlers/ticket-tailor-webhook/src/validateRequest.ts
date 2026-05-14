@@ -1,7 +1,7 @@
 import { createHmac, timingSafeEqual } from 'crypto';
-import { logger } from '@modules/routing/logger';
 import { getSecretValue } from '@modules/secrets-manager/getSecret';
 import type { Stage } from '@modules/stage';
+import { logger } from '../../../modules/logger/src/logger';
 import type { ApiGatewayToSqsEvent } from './apiGatewayToSqsEvent';
 
 export type HmacKey = {

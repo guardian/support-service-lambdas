@@ -1,6 +1,5 @@
 import { sum } from '@modules/arrayFunctions';
 import { Lazy } from '@modules/lazy';
-import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import {
 	getBillingPreview,
@@ -18,6 +17,7 @@ import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getZuoraCatalog } from '@modules/zuora-catalog/S3';
 import dayjs from 'dayjs';
+import { logger } from '../../../modules/logger/src/logger';
 import { EligibilityChecker } from './eligibilityChecker';
 import { generateCancellationDiscountConfirmationEmail } from './generateCancellationDiscountConfirmationEmail';
 import { getDiscountFromSubscription } from './productToDiscountMapping';

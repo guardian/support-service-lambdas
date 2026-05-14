@@ -1,6 +1,6 @@
-import type { Logger } from '@modules/routing/logger';
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { Logger } from '../../../../modules/logger/src/logger';
 import { getSubscriptionService } from '../../src/services/getSubscriptionService';
 
 jest.mock('@modules/zuora/subscription');

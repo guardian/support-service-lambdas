@@ -3,11 +3,11 @@ import { chunkArray } from '@modules/arrayFunctions';
 import { sendBatchMessagesToQueue } from '@modules/aws/sqs';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
-import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import { parse } from 'csv-parse/sync';
 import dayjs from 'dayjs';
+import { logger } from '../../../modules/logger/src/logger';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 

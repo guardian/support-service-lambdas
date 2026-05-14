@@ -3,7 +3,6 @@ import { getSinglePlanFlattenedSubscriptionOrThrow } from '@modules/guardian-sub
 import { GuardianSubscriptionParser } from '@modules/guardian-subscription/guardianSubscriptionParser';
 import { SubscriptionFilter } from '@modules/guardian-subscription/subscriptionFilter';
 import { type ProductCatalog } from '@modules/product-catalog/productCatalog';
-import { logger } from '@modules/routing/logger';
 import { getAccount } from '@modules/zuora/account';
 import { ZuoraError } from '@modules/zuora/errors/zuoraError';
 import { getSubscription } from '@modules/zuora/subscription';
@@ -12,6 +11,7 @@ import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ZuoraCatalog } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import dayjs from 'dayjs';
+import { logger } from '../../../modules/logger/src/logger';
 import type { RequestBody } from './schemas';
 import { validateSubscription } from './validation';
 

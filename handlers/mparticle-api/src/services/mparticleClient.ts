@@ -1,4 +1,4 @@
-import { getCallerInfo } from '@modules/routing/getCallerInfo';
+import { getCallerInfo } from '../../../../modules/logger/src/getCallerInfo';
 import type { AppConfig } from './config';
 import type { HttpResponse, Schema } from './make-http-request';
 import { RestRequestMaker } from './make-http-request';

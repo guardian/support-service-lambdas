@@ -3,7 +3,6 @@ import {
 	type EmailMessageWithIdentityUserId,
 	sendEmail,
 } from '@modules/email/email';
-import type { Logger } from '@modules/routing/logger';
 import { stageFromEnvironment } from '@modules/stage';
 import { getAccount } from '@modules/zuora/account';
 import {
@@ -13,6 +12,7 @@ import {
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
+import type { Logger } from '../../../../modules/logger/src/logger';
 
 export interface CancelSubscriptionResult {
 	cancelled: boolean;

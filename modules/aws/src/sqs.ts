@@ -8,7 +8,7 @@ import {
 	SendMessageCommand,
 	SQSClient,
 } from '@aws-sdk/client-sqs';
-import { logger } from '@modules/routing/logger';
+import { logger } from '@modules/logger/logger';
 import { awsConfig } from '@modules/aws/config';
 
 const defaultClient = new SQSClient(awsConfig);

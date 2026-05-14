@@ -4,7 +4,6 @@ import { isoCurrencySchema } from '@modules/internationalisation/schemas';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
-import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import {
 	getBillingPreview,
@@ -29,6 +28,7 @@ import type {
 import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
+import { logger } from '../../../modules/logger/src/logger';
 import { EligibilityChecker } from '../../discount-api/src/eligibilityChecker';
 import { zuoraSwitchResponseSchema } from './changePlan/schemas';
 import type { ZuoraPreviewResponse } from './doPreviewInvoices';

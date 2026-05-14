@@ -6,7 +6,6 @@ import { GuardianSubscriptionParser } from '@modules/guardian-subscription/guard
 import { SubscriptionFilter } from '@modules/guardian-subscription/subscriptionFilter';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
-import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import { getSubscription } from '@modules/zuora/subscription';
 import type {
@@ -17,6 +16,7 @@ import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import type dayjs from 'dayjs';
+import { logger } from '../../../../modules/logger/src/logger';
 import { removePendingUpdateAmendments } from './action/amendments';
 import { DoPreviewAction } from './action/preview';
 import { DoSwitchAction } from './action/switch';

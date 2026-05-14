@@ -1,5 +1,5 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
-import { logger } from '@modules/routing/logger';
+import { logger } from '../../../modules/logger/src/logger';
 import { buildDiagnosticLinks } from './buildDiagnosticLinks';
 import { buildAlarmUrl, buildRow, buildText } from './buildRow';
 import type { Tags } from './cloudwatch/getTags';

@@ -17,7 +17,7 @@ const mockStripeCredentials = {
 	webhook_endpoint_secret: 'whsec_test_mock_webhook_secret',
 };
 
-jest.mock('@modules/routing/logger', () => ({
+jest.mock('../../../modules/logger/src/logger', () => ({
 	Logger: jest.fn(() => mockLogger),
 }));
 

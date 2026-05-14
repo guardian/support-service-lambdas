@@ -1,5 +1,5 @@
-import { logger } from '@modules/routing/logger';
 import type { SQSEvent } from 'aws-lambda';
+import { logger } from '../../../modules/logger/src/logger';
 import { getEnv } from '../../../modules/routing/src/lambdaHandler';
 import type { Services } from '../src';
 import { GoogleChatSendMessage } from '../src';

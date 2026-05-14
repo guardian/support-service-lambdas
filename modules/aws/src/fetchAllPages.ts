@@ -1,4 +1,4 @@
-import { logger } from '@modules/routing/logger';
+import { logger } from '@modules/logger/logger';
 
 export type AWSPage<O> = {
 	nextToken: string | undefined;

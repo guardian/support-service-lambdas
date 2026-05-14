@@ -10,7 +10,7 @@ const mockLogger = {
 const mockHandleListenDisputeCreated = jest.fn();
 const mockHandleListenDisputeClosed = jest.fn();
 
-jest.mock('@modules/routing/logger', () => ({
+jest.mock('../../../modules/logger/src/logger', () => ({
 	Logger: jest.fn(() => mockLogger),
 }));
 

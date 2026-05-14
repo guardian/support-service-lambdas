@@ -9,7 +9,6 @@ import type {
 	ProductCatalog,
 	ProductRatePlan,
 } from '@modules/product-catalog/productCatalog';
-import { logger } from '@modules/routing/logger';
 import type {
 	RatePlan,
 	RatePlanCharge,
@@ -20,6 +19,7 @@ import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
+import { logger } from '../../../modules/logger/src/logger';
 import type { EmailFields } from './sendEmail';
 import { supporterPlusAmountBands } from './supporterPlusAmountBands';
 import { doEnsureTerm, doUpdate } from './zuoraApi';

@@ -1,7 +1,7 @@
 import { sendMessageToQueue } from '@modules/aws/sqs';
 import { prettyPrint } from '@modules/prettyPrint';
-import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
+import { logger } from '../../../modules/logger/src/logger';
 import type { SubscriptionInformation } from './changePlan/prepare/subscriptionInformation';
 import type { TargetInformation } from './changePlan/prepare/targetInformation';
 import type { ProductSwitchRequestBody } from './changePlan/schemas';

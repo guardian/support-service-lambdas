@@ -1,4 +1,4 @@
-import type { Logger } from '@modules/routing/logger';
+import type { Logger } from '../../../../modules/logger/src/logger';
 import type { ListenDisputeCreatedRequestBody } from '../../src/dtos';
 import type { ZuoraInvoiceFromStripeChargeIdResult } from '../../src/interfaces';
 import {

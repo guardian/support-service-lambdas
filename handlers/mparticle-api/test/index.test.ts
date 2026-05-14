@@ -1,5 +1,5 @@
-import { logger } from '@modules/routing/logger';
 import type { Context, SQSEvent } from 'aws-lambda';
+import { logger } from '../../../modules/logger/src/logger';
 import { processUserDeletion } from '../src/apis/dataSubjectRequests/deleteUser';
 import { handlerDeletion } from '../src/index';
 
@@ -24,7 +24,7 @@ jest.mock('../src/services/config', () => ({
 	getEnv: jest.fn().mockReturnValue('test'),
 }));
 
-jest.mock('@modules/routing/logger', () => ({
+jest.mock('../../../modules/logger/src/logger', () => ({
 	logger: {
 		log: jest.fn(),
 		error: jest.fn(),

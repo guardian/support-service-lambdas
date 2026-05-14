@@ -6,7 +6,6 @@
 import console from 'console';
 import { invokeFunction } from '@modules/aws/lambda';
 import { ValidationError } from '@modules/errors';
-import { logger } from '@modules/routing/logger';
 import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraAccount, ZuoraSubscription } from '@modules/zuora/types';
@@ -16,6 +15,7 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import dayjs from 'dayjs';
 import z from 'zod';
+import { logger } from '../../../../modules/logger/src/logger';
 import type { ContributionTestAdditionalOptions } from '../../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import { createContribution } from '../../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import type { PreviewResponse } from '../../src/changePlan/action/preview';

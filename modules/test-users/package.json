@@ -8,6 +8,7 @@
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
     "build": "tsc --noEmit",
+    "buildcheck": "pnpm --filter buildcheck snapshot:assert modules/test-users",
     "createDigitalSubscription": "tsx ./src/createDigitalSubscription.ts",
     "createAnnualContribution": "tsx ./src/createAnnualContribution.ts",
     "createMonthlyContribution": "tsx ./src/createMonthlyContribution.ts",

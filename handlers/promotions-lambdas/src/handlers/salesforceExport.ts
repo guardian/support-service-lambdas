@@ -1,12 +1,12 @@
 import { DynamoDBClient, ScanCommand } from '@aws-sdk/client-dynamodb';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
 import { awsConfig } from '@modules/aws/config';
-import { logger } from '@modules/routing/logger';
 import { sfApiVersion } from '@modules/salesforce/config';
 import { SfClient } from '@modules/salesforce/sfClient';
 import type { Stage } from '@modules/stage';
 import { voidSchema } from '@modules/zuora/types';
 import { z } from 'zod';
+import { logger } from '../../../../modules/logger/src/logger';
 import type { PromoCodeViewItem } from '../lib/promoCodeViewSchema';
 import { promoCodeViewSchema } from '../lib/promoCodeViewSchema';
 

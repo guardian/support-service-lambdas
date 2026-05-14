@@ -6,13 +6,13 @@ import {
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { awsConfig } from '@modules/aws/config';
 import { promoCampaignSchema } from '@modules/promotions/v2/schema';
-import { logger } from '@modules/routing/logger';
 import type {
 	AttributeValue,
 	DynamoDBBatchResponse,
 	DynamoDBRecord,
 	DynamoDBStreamEvent,
 } from 'aws-lambda';
+import { logger } from '../../../../modules/logger/src/logger';
 import type { PromoCodeViewItem } from '../lib/promoCodeViewSchema';
 
 const getString = (attr: AttributeValue | undefined): string | undefined =>

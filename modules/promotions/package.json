@@ -7,7 +7,8 @@
     "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
-    "build": "tsc --noEmit"
+    "build": "tsc --noEmit",
+    "buildcheck": "pnpm --filter buildcheck snapshot:assert modules/promotions"
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/module/package.json.ts",
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
