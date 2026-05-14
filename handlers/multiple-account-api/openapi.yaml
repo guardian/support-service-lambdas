@@ -3,9 +3,6 @@ info:
   title: Multiple Account API
   version: 1.0.0
   description: API for creating invitation codes used by the multiple account feature.
-  license:
-    name: Apache 2.0
-    url: https://www.apache.org/licenses/LICENSE-2.0.html
 servers:
   - url: https://multiple-account-api-code.support.guardianapis.com
     description: CODE
