@@ -72,6 +72,7 @@ describe('createInvitationHandler', () => {
 	});
 
 	it('saves an invitation record and returns 201 with invitationCode', async () => {
+		jest.useFakeTimers().setSystemTime(testDay.toDate());
 		mockGetOrCreateUserFromEmail.mockResolvedValue('secondary-identity-456');
 
 		const handler = createInvitationEndpoint(
@@ -82,7 +83,7 @@ describe('createInvitationHandler', () => {
 		);
 		const result = await handler(
 			{
-				subscriptionName: 'A-S00000001',
+				subscriptionName: 'A-S00974337',
 				secondaryUserEmail: 'secondary@example.com',
 			},
 			undefined as never,
@@ -97,10 +98,12 @@ describe('createInvitationHandler', () => {
 
 		expect(mockSave).toHaveBeenCalledWith(
 			expect.objectContaining({
-				subscriptionName: 'A-S00000001',
+				expiryDate: testDay.add(1, 'month').toDate().getTime(),
+				invitationCode: expect.any(String) as string,
+				invitedDate: zuoraDateFormat(testDay),
 				primaryIdentityId: 'primary-identity-123',
 				secondaryIdentityId: 'secondary-identity-456',
-				invitationCode: body.invitationCode,
+				subscriptionName: 'A-S00974337',
 			}),
 		);
 
