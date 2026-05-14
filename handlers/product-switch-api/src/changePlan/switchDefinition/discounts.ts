@@ -38,5 +38,5 @@ export const monthlyDigiPlus: Discount = {
 	name: 'Upsell - Supporter Plus to Digital Plus Switch tbc off',
 	upToPeriods: 1,
 	upToPeriodsType: 'Months',
-	discountPercentage: 0,
+	discountPercentage: 25,
 };
