@@ -55,6 +55,10 @@ export function isDeliveryProductPurchase(
 	return isDeliveryProduct(productPurchase.product);
 }
 
+export function isNewspaperProduct(productKey: ProductKey): boolean {
+	return isInList(newspaperProducts)(productKey);
+}
+
 // Products which do not support promotions
 const promotionExcludedKeys = [
 	'Contribution',

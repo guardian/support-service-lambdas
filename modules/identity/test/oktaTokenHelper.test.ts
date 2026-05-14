@@ -12,7 +12,7 @@ import {
 	InvalidScopesError,
 	OktaTokenHelper,
 	SigningKeyNotFoundError,
-} from '../src/identity';
+} from '@modules/identity/oktaTokenHelper';
 import { buildProxyEvent } from './fixtures';
 
 type Config = {

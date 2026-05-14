@@ -388,6 +388,21 @@ const multipleAccountApi: HandlerDefinition = {
 	},
 };
 
+const observerBenefitsApi: HandlerDefinition = {
+	name: 'observer-benefits-api',
+	dependencies: {
+		...dep.zod,
+		...dep.dayjs,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
+	extraScripts: {
+		'it-test':
+			'NODE_OPTIONS="$NODE_OPTIONS --experimental-vm-modules" jest --group=integration',
+	},
+};
+
 // MARKER new-lambda: buildcheck-const
 
 const srcOnly = {
@@ -636,6 +651,7 @@ export const build: BuildDefinition = {
 		writeOffUnpaidInvoices,
 		zuoraSalesforceLinkRemover,
 		multipleAccountApi,
+		observerBenefitsApi,
 		// MARKER new-lambda: buildcheck-reference
 	],
 
