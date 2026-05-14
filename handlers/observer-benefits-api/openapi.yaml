@@ -5,7 +5,8 @@ info:
     Checks whether a Zuora subscription is an active Observer subscription
     whose billing postcode matches the supplied postcode.
   version: '1.0.0'
-
+servers:
+  - url: 'https://observer-benefits-api.guardianapis.com'
 paths:
   /is-active:
     post:
