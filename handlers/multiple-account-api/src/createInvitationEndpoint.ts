@@ -69,7 +69,7 @@ export const createInvitationEndpoint =
 		const invitationCode = generateInvitationCode();
 
 		await invitationRepository.save({
-			subscriptionName: body.subscriptionName,
+			subscriptionName: zuoraSubscription.subscriptionNumber,
 			invitationCode,
 			primaryIdentityId: account.basicInfo.identityId,
 			secondaryIdentityId,
