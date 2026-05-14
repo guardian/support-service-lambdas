@@ -13,7 +13,7 @@ import type { ZuoraCatalog } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
 import type { InvitationRepository } from './invitationRepository';
 
-const MAXIMUM_NUMBER_OF_INVITES = 5;
+const MAXIMUM_NUMBER_OF_INVITES_PER_SUBSCRIPTION = 5;
 
 function productHasMultipleAccountsBenefit(productKey: ProductKey) {
 	return productBenefitMapping[productKey].includes('multipleAccounts');
@@ -63,12 +63,11 @@ export async function validateInvitationInformation(
 
 	// Check the subscription still has free invites
 	const subscriptionHasAvailableInvites =
-		currentInvites.length < MAXIMUM_NUMBER_OF_INVITES;
+		currentInvites.length < MAXIMUM_NUMBER_OF_INVITES_PER_SUBSCRIPTION;
 
 	if (!subscriptionHasAvailableInvites) {
 		throw new ValidationError(
 			'This subscription already has the maximum number of invites',
 		);
 	}
-	//TODO: other validation?
 }

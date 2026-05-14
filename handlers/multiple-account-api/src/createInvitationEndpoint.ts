@@ -47,7 +47,6 @@ export const createInvitationEndpoint =
 		const { subscriptionName } = body;
 		logger.mutableAddContext(subscriptionName);
 
-		// TODO: give benefit to staff members?
 		checkSubscriptionHasMultipleAccountsBenefit(
 			zuoraSubscription,
 			zuoraCatalog,
@@ -77,7 +76,7 @@ export const createInvitationEndpoint =
 			expiryDate: now.add(1, 'month').toDate().getTime(),
 		});
 
-		// TODO: do we trigger the invite email from here?
+		// TODO: trigger the invite email
 
 		return {
 			statusCode: 201,
