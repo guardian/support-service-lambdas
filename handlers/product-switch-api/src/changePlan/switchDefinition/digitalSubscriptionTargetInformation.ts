@@ -29,7 +29,10 @@ export const digitalSubscriptionTargetInformation: SwitchTargetInformation<
 			throw new ValidationError("digital plus doesn't have a variable amount");
 		}
 		let discount: Discount | undefined = undefined;
-		if (switchActionData.discountEnabled) {
+		if (
+			switchActionData.discountEnabled &&
+			productRatePlan.billingPeriod === 'Month'
+		) {
 			discount = monthlyDigiPlus;
 		}
 
