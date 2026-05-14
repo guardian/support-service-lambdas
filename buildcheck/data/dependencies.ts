@@ -57,6 +57,7 @@ export const devDeps = separateDepRecords({
 	'ts-jest': '^29.3.2',
 	// linting
 	'eslint-plugin-sort-keys-fix': '^1.1.2',
+	'@redocly/cli': '2.30.5',
 });
 
 // do not use, migrate away
