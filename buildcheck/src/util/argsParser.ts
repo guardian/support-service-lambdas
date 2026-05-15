@@ -31,7 +31,11 @@ export function parseArguments(argv: string[]): ParsedArgs {
 
 	const repoRoot = args[1];
 
-	if (!fs.existsSync(repoRoot) || !repoRoot.startsWith('/')) {
+	if (
+		!fs.existsSync(repoRoot) ||
+		!repoRoot.startsWith('/') ||
+		!repoRoot.endsWith('support-service-lambdas')
+	) {
 		throw new Error(`Invalid repository root: ${repoRoot}`);
 	}
 
