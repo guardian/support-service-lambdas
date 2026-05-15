@@ -14,8 +14,7 @@ servers:
   - url: 'https://observer-benefits-api.code.dev-guardianapis.com'
     description: Code environment for testing and development
 security:
-  - identityId: []
-    apiKey: []
+  - apiKey: []
 paths:
   /is-active:
     post:
@@ -67,10 +66,6 @@ paths:
 
 components:
   securitySchemes:
-    identityId:
-      type: apiKey
-      in: header
-      name: x-identity-id
     apiKey:
       type: apiKey
       in: header
