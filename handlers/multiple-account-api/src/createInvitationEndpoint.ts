@@ -1,6 +1,7 @@
 import { getOrCreateUserFromEmail } from '@modules/identity/idapi';
 import type { IdentityClient } from '@modules/identity/identityClient';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
+import { created } from '@modules/routing/apiGatewayResponses';
 import { logger } from '@modules/routing/logger';
 import type {
 	ZuoraAccount,
@@ -78,8 +79,5 @@ export const createInvitationEndpoint =
 
 		// TODO: trigger the invite email
 
-		return {
-			statusCode: 201,
-			body: JSON.stringify({ invitationCode }),
-		};
+		return created({ invitationCode });
 	};

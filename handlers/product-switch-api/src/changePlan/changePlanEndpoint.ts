@@ -6,6 +6,7 @@ import { GuardianSubscriptionParser } from '@modules/guardian-subscription/guard
 import { SubscriptionFilter } from '@modules/guardian-subscription/subscriptionFilter';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
+import { ok } from '@modules/routing/apiGatewayResponses';
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import { getSubscription } from '@modules/zuora/subscription';
@@ -57,10 +58,7 @@ export class ChangePlanEndpoint {
 				account,
 			);
 			const response = await productSwitchEndpoint.doPreview();
-			return {
-				body: JSON.stringify(response),
-				statusCode: 200,
-			};
+			return ok(response);
 		};
 	}
 
@@ -80,10 +78,7 @@ export class ChangePlanEndpoint {
 				account,
 			);
 			const response = await productSwitchEndpoint.doSwitch();
-			return {
-				body: JSON.stringify(response),
-				statusCode: 200,
-			};
+			return ok(response);
 		};
 	}
 

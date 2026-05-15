@@ -3,6 +3,7 @@ import { getSinglePlanFlattenedSubscriptionOrThrow } from '@modules/guardian-sub
 import { GuardianSubscriptionParser } from '@modules/guardian-subscription/guardianSubscriptionParser';
 import { SubscriptionFilter } from '@modules/guardian-subscription/subscriptionFilter';
 import { type ProductCatalog } from '@modules/product-catalog/productCatalog';
+import { ok } from '@modules/routing/apiGatewayResponses';
 import { logger } from '@modules/routing/logger';
 import { getAccount } from '@modules/zuora/account';
 import { ZuoraError } from '@modules/zuora/errors/zuoraError';
@@ -60,8 +61,5 @@ export async function isActiveEndpoint(
 }
 
 function buildReponseBody(isActive: boolean, renews?: string) {
-	return {
-		statusCode: 200,
-		body: JSON.stringify({ isActive, renews }),
-	};
+	return ok({ isActive, renews });
 }

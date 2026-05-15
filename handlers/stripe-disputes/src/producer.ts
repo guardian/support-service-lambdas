@@ -1,3 +1,4 @@
+import { badRequest, ok } from '@modules/routing/apiGatewayResponses';
 import { Logger } from '@modules/routing/logger';
 import { Router } from '@modules/routing/router';
 import { withBodyParser } from '@modules/routing/withParsers';
@@ -35,13 +36,10 @@ const router = Router([
 						return handleStripeWebhook(logger, 'dispute.closed')(event);
 					default:
 						logger.log(`Unhandled webhook event type: ${eventType}`);
-						return {
-							statusCode: 200,
-							body: JSON.stringify({
-								received: true,
-								message: `Event type ${eventType} not handled`,
-							}),
-						};
+						return ok({
+							received: true,
+							message: `Event type ${eventType} not handled`,
+						});
 				}
 			},
 		),
@@ -59,18 +57,12 @@ export const handler = async (
 
 	if (!stripeSignature) {
 		logger.error('Missing Stripe-Signature header');
-		return {
-			statusCode: 400,
-			body: JSON.stringify({ message: 'Missing Stripe-Signature header' }),
-		};
+		return badRequest('Missing Stripe-Signature header');
 	}
 
 	if (!event.body) {
 		logger.error('Missing request body');
-		return {
-			statusCode: 400,
-			body: JSON.stringify({ message: 'Missing request body' }),
-		};
+		return badRequest('Missing request body');
 	}
 
 	const endpointSecretObject: StripeCredentials =

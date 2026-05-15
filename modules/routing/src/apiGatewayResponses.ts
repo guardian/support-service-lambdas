@@ -16,6 +16,20 @@ export function internalServerError(): APIGatewayProxyResult {
 	};
 }
 
+export function ok(body: unknown): APIGatewayProxyResult {
+	return {
+		body: JSON.stringify(body),
+		statusCode: 200,
+	};
+}
+
+export function created(body: unknown): APIGatewayProxyResult {
+	return {
+		body: JSON.stringify(body),
+		statusCode: 201,
+	};
+}
+
 export function buildErrorResponse(error: unknown): APIGatewayProxyResult {
 	if (error instanceof ValidationError) {
 		console.log(
