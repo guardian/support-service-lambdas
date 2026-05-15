@@ -30,8 +30,6 @@ export interface BuildDefinition {
 	modules: ModuleDefinition[];
 }
 
-// MARKER new-lambda: buildcheck-const
-
 const srcOnly = {
 	lint: "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts'",
 	test: 'jest --group=-integration --passWithNoTests',
@@ -759,6 +757,8 @@ const observerBenefitsApi: HandlerDefinition = {
 		moduleZuoraCatalog,
 	],
 };
+
+// MARKER new-lambda: buildcheck-const
 
 export const build: BuildDefinition = {
 	handlers: [

@@ -1,4 +1,5 @@
 import { Lazy } from '@modules/lazy';
+import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
 import { inAppPurchaseProductRatePlanId } from '@modules/product-benefits/inAppPurchase';
@@ -8,7 +9,6 @@ import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supp
 import { sendToSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
 import type { DynamoDBRecord, Handler, SQSEvent } from 'aws-lambda';
 import dayjs from 'dayjs';
-import { logger } from '../../../modules/logger/src/logger';
 import type { Config } from './config';
 import { getConfig } from './config';
 import { fetchSubscription } from './mobileProductPurchasesApi';

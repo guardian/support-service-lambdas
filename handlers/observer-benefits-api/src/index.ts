@@ -1,4 +1,5 @@
 import { Lazy } from '@modules/lazy';
+import { logger } from '@modules/logger/logger';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { Router } from '@modules/routing/router';
 import { withBodyParser } from '@modules/routing/withParsers';
@@ -6,7 +7,6 @@ import { stageFromEnvironment } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 import type { Handler } from 'aws-lambda';
-import { logger } from '../../../modules/logger/src/logger';
 import { isActiveEndpoint } from './isActiveEndpoint';
 import type { RequestBody } from './schemas';
 import { requestSchema } from './schemas';

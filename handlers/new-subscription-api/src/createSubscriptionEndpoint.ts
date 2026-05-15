@@ -1,6 +1,7 @@
 import { ValidationError } from '@modules/errors';
 import { supportRegionIdFromCountry } from '@modules/internationalisation/countryGroup';
 import { isoCountrySchema } from '@modules/internationalisation/schemas';
+import { logger } from '@modules/logger/logger';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { getPromotion } from '@modules/promotions/v2/getPromotion';
 import type { Stage } from '@modules/stage';
@@ -8,7 +9,6 @@ import { getDeliveryFields } from '@modules/zuora/createSubscription/createSubsc
 import { createSubscriptionWithExistingPaymentMethod } from '@modules/zuora/createSubscription/createSubscriptionWithExistingPaymentMethod';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyResult } from 'aws-lambda';
-import { logger } from '../../../modules/logger/src/logger';
 import type { CreateSubscriptionRequest } from './requestSchema';
 import type { CreateSubscriptionResponse } from './responseSchema';
 

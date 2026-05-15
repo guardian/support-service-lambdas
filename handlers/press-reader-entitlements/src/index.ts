@@ -1,4 +1,5 @@
 import { Lazy } from '@modules/lazy';
+import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { userHasGuardianEmail } from '@modules/product-benefits/userBenefits';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
@@ -13,7 +14,6 @@ import type {
 	Handler,
 } from 'aws-lambda';
 import dayjs from 'dayjs';
-import { logger } from '../../../modules/logger/src/logger';
 import { getClientAccessToken, getUserDetails } from './identity';
 import { getLatestSubscription } from './supporterProductData';
 import type { Member } from './xmlBuilder';

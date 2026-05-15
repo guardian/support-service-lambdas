@@ -1,5 +1,5 @@
+// eslint-disable-next-line import/order -- the other import must come after the mocks
 import type { SQSEvent } from 'aws-lambda';
-import { handler } from '../src/consumer';
 
 const mockLogger = {
 	log: jest.fn(),
@@ -18,6 +18,9 @@ jest.mock('../src/sqs-consumers', () => ({
 	handleListenDisputeCreated: mockHandleListenDisputeCreated,
 	handleListenDisputeClosed: mockHandleListenDisputeClosed,
 }));
+
+// eslint-disable-next-line import/first -- this must come after the mocks
+import { handler } from '../src/consumer';
 
 describe('Consumer Handler', () => {
 	const createMockSqsEvent = (

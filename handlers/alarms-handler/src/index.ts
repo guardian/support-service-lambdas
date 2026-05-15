@@ -1,3 +1,4 @@
+import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { HandlerEnv } from '@modules/routing/lambdaHandler';
 import { SQSHandler } from '@modules/routing/sqsHandler';
@@ -5,7 +6,6 @@ import type { Authorisation } from '@modules/zuora/auth';
 import { RestClient } from '@modules/zuora/restClient';
 import type { SNSEventRecord, SQSRecord } from 'aws-lambda';
 import { z } from 'zod';
-import { logger } from '../../../modules/logger/src/logger';
 import type { AppToTeams } from './alarmMappings';
 import { prodAppToTeams } from './alarmMappings';
 import { buildCloudWatchAlarmMessage } from './buildCloudWatchAlarmMessage';

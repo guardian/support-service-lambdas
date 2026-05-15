@@ -1,4 +1,5 @@
 import { ValidationError } from '@modules/errors';
+import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { SimpleInvoiceItem } from '@modules/zuora/billingPreview';
 import { getNextInvoiceTotal } from '@modules/zuora/billingPreview';
@@ -6,7 +7,6 @@ import type { ZuoraSubscription } from '@modules/zuora/types';
 import type { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import { logger } from '../../../modules/logger/src/logger';
 
 export class EligibilityChecker {
 	constructor() {}

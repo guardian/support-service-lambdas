@@ -1,11 +1,11 @@
 import { Lazy } from '@modules/lazy';
+import { logger } from '@modules/logger/logger';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { Router } from '@modules/routing/router';
 import { withBodyParser } from '@modules/routing/withParsers';
 import { stageFromEnvironment } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { Handler } from 'aws-lambda';
-import { logger } from '../../../modules/logger/src/logger';
 import { createNewSubscriptionEndpoint } from './createSubscriptionEndpoint';
 import type { CreateSubscriptionRequest } from './requestSchema';
 import { createSubscriptionRequestSchema } from './requestSchema';
