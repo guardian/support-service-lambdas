@@ -1,11 +1,11 @@
 import { loadConfig } from '@modules/aws/appConfig';
 import { invokeFunction } from '@modules/aws/lambda';
 import { Lazy } from '@modules/lazy';
+import { getCallerInfo } from '@modules/logger/getCallerInfo';
+import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import dayjs from 'dayjs';
 import type { z } from 'zod';
-import { getCallerInfo } from '@modules/routing/getCallerInfo';
-import { logger } from '@modules/routing/logger';
 
 export type HandlerEnv<ConfigType> = {
 	now: () => dayjs.Dayjs;

@@ -5,8 +5,8 @@ import {
 } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { awsConfig } from '@modules/aws/config';
+import { logger } from '@modules/logger/logger';
 import { promoCampaignSchema } from '@modules/promotions/v2/schema';
-import { logger } from '@modules/routing/logger';
 import type {
 	AttributeValue,
 	DynamoDBBatchResponse,

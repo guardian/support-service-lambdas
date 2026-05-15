@@ -491,6 +491,13 @@ const moduleInternationalisation: ModuleDefinition = {
 	extraScripts: srcOnly,
 };
 
+const moduleLogger: ModuleDefinition = {
+	name: 'logger',
+	devDependencies: {
+		...devDeps['@smithy/types'],
+	},
+};
+
 const moduleProductBenefits: ModuleDefinition = {
 	name: 'product-benefits',
 	dependencies: {
@@ -678,6 +685,7 @@ export const build: BuildDefinition = {
 		moduleGuardianSubscription,
 		moduleIdentity,
 		moduleInternationalisation,
+		moduleLogger,
 		moduleProductBenefits,
 		moduleProductCatalog,
 		modulePromotions,

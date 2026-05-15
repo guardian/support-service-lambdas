@@ -1,8 +1,8 @@
 import type { MetricAlarm } from '@aws-sdk/client-cloudwatch';
 import { flatten, groupMap } from '@modules/arrayFunctions';
+import { logger } from '@modules/logger/logger';
 import type { HandlerEnv } from '@modules/routing/lambdaHandler';
 import { LambdaHandler } from '@modules/routing/lambdaHandler';
-import { logger } from '@modules/routing/logger';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import type { AppToTeams } from './alarmMappings';
