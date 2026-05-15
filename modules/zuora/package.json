@@ -16,6 +16,12 @@
     "@aws-sdk/client-s3": "^3.940.0",
     "@aws-sdk/client-secrets-manager": "^3.940.0",
     "dayjs": "^1.11.13",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "aws": "workspace:*",
+    "internationalisation": "workspace:*",
+    "logger": "workspace:*",
+    "product-catalog": "workspace:*",
+    "promotions": "workspace:*",
+    "zuora-catalog": "workspace:*"
   }
 }

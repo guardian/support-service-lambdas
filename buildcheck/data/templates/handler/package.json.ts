@@ -37,12 +37,6 @@ export default (pkg: HandlerDefinition) => {
 		'cdk:test-update': 'pnpm --filter cdk test-update ' + pkg.name,
 		'update-lambda': `../../update-lambda.sh "${pkg.name}"${pkg.functionNames ? ` ${pkg.functionNames.join(' ')}` : ''}`,
 		'update-stack': `../../update-stack.sh "${pkg.name}"`,
-		buildcheck: `pnpm --filter buildcheck snapshot:assert handlers/${pkg.name}`,
-		'buildcheck:all': runInOrder('buildcheck'),
-		'type-check:all': runInOrder('type-check'),
-		'lint:all': runInOrder('lint'),
-		'check-formatting:all': runInOrder('check-formatting'),
-		'test:all': runInOrder('test'),
 	};
 	return buildPackageJson(pkg, handlerScripts, __filename);
 };

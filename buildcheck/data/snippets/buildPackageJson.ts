@@ -1,3 +1,4 @@
+import { recordFromEntries } from '../../src/util/dependencyMapper';
 import type { ModuleDefinition } from '../build';
 import { disallowedLibs } from '../dependencies';
 import { notice } from './notices';
@@ -39,7 +40,12 @@ export function buildPackageJson(
 		},
 		NOTICE1: notice(filename),
 		NOTICE2: 'all dependencies are defined in buildcheck/data/build.ts',
-		dependencies: pkg.dependencies,
+		dependencies: {
+			...pkg.dependencies,
+			...recordFromEntries(
+				pkg.moduleDeps.map((module) => [module.name, 'workspace:*']),
+			),
+		},
 		devDependencies: pkg.devDependencies,
 	};
 }

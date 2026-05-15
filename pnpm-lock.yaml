@@ -138,9 +138,18 @@ importers:
       '@aws-sdk/credential-providers':
         specifier: ^3.940.0
         version: 3.995.0
+      aws:
+        specifier: workspace:*
+        version: link:../../modules/aws
+      routing:
+        specifier: workspace:*
+        version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
         version: 3.25.76
+      zuora:
+        specifier: workspace:*
+        version: link:../../modules/zuora
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -154,9 +163,21 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.19
+      email:
+        specifier: workspace:*
+        version: link:../../modules/email
+      routing:
+        specifier: workspace:*
+        version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
         version: 3.25.76
+      zuora:
+        specifier: workspace:*
+        version: link:../../modules/zuora
+      zuora-catalog:
+        specifier: workspace:*
+        version: link:../../modules/zuora-catalog
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -170,18 +191,30 @@ importers:
       '@google-cloud/bigquery':
         specifier: ^7.9.3
         version: 7.9.4
+      aws:
+        specifier: workspace:*
+        version: link:../../modules/aws
       aws-sdk:
         specifier: ^2.1692.0
         version: 2.1692.0
+      bigquery:
+        specifier: workspace:*
+        version: link:../../modules/bigquery
       dayjs:
         specifier: ^1.11.13
         version: 1.11.19
+      email:
+        specifier: workspace:*
+        version: link:../../modules/email
       google-auth-library:
         specifier: ^9.15.0
         version: 9.15.1
       zod:
         specifier: 'catalog:'
         version: 3.25.76
+      zuora:
+        specifier: workspace:*
+        version: link:../../modules/zuora
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -191,6 +224,16 @@ importers:
         version: 2.7.4
 
   handlers/generate-product-catalog:
+    dependencies:
+      aws:
+        specifier: workspace:*
+        version: link:../../modules/aws
+      product-catalog:
+        specifier: workspace:*
+        version: link:../../modules/product-catalog
+      zuora-catalog:
+        specifier: workspace:*
+        version: link:../../modules/zuora-catalog
     devDependencies:
       '@aws-sdk/client-s3':
         specifier: ^3.940.0
@@ -210,6 +253,9 @@ importers:
       '@aws-sdk/util-dynamodb':
         specifier: ^3.940.0
         version: 3.995.0(@aws-sdk/client-dynamodb@3.995.0)
+      email:
+        specifier: workspace:*
+        version: link:../../modules/email
       zod:
         specifier: 'catalog:'
         version: 3.25.76
@@ -222,6 +268,13 @@ importers:
         version: 4.21.0
 
   handlers/metric-push-api:
+    dependencies:
+      aws:
+        specifier: workspace:*
+        version: link:../../modules/aws
+      routing:
+        specifier: workspace:*
+        version: link:../../modules/routing
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -232,9 +285,18 @@ importers:
       '@aws-sdk/client-dynamodb':
         specifier: ^3.940.0
         version: 3.995.0
+      aws:
+        specifier: workspace:*
+        version: link:../../modules/aws
       dayjs:
         specifier: ^1.11.13
         version: 1.11.19
+      product-benefits:
+        specifier: workspace:*
+        version: link:../../modules/product-benefits
+      supporter-product-data:
+        specifier: workspace:*
+        version: link:../../modules/supporter-product-data
       zod:
         specifier: 'catalog:'
         version: 3.25.76
@@ -257,6 +319,12 @@ importers:
       '@peculiar/x509':
         specifier: ^1.12.3
         version: 1.14.2
+      aws:
+        specifier: workspace:*
+        version: link:../../modules/aws
+      routing:
+        specifier: workspace:*
+        version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
         version: 3.25.76
@@ -288,6 +356,9 @@ importers:
       nanoid:
         specifier: ^3.3.12
         version: 3.3.12
+      routing:
+        specifier: workspace:*
+        version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
         version: 3.25.76
@@ -304,9 +375,15 @@ importers:
       '@google-cloud/bigquery':
         specifier: ^7.9.3
         version: 7.9.4
+      aws:
+        specifier: workspace:*
+        version: link:../../modules/aws
       aws-sdk:
         specifier: ^2.1692.0
         version: 2.1692.0
+      bigquery:
+        specifier: workspace:*
+        version: link:../../modules/bigquery
       dayjs:
         specifier: ^1.11.13
         version: 1.11.19
@@ -316,6 +393,9 @@ importers:
       zod:
         specifier: 'catalog:'
         version: 3.25.76
+      zuora:
+        specifier: workspace:*
+        version: link:../../modules/zuora
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -326,9 +406,24 @@ importers:
 
   handlers/new-subscription-api:
     dependencies:
+      internationalisation:
+        specifier: workspace:*
+        version: link:../../modules/internationalisation
+      product-catalog:
+        specifier: workspace:*
+        version: link:../../modules/product-catalog
+      promotions:
+        specifier: workspace:*
+        version: link:../../modules/promotions
+      routing:
+        specifier: workspace:*
+        version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
         version: 3.25.76
+      zuora:
+        specifier: workspace:*
+        version: link:../../modules/zuora
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -355,9 +450,24 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.19
+      guardian-subscription:
+        specifier: workspace:*
+        version: link:../../modules/guardian-subscription
+      product-catalog:
+        specifier: workspace:*
+        version: link:../../modules/product-catalog
+      routing:
+        specifier: workspace:*
+        version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
         version: 3.25.76
+      zuora:
+        specifier: workspace:*
+        version: link:../../modules/zuora
+      zuora-catalog:
+        specifier: workspace:*
+        version: link:../../modules/zuora-catalog
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -368,6 +478,9 @@ importers:
       '@types/aws-lambda':
         specifier: ^8.10.147
         version: 8.10.158
+      aws:
+        specifier: workspace:*
+        version: link:../../modules/aws
 
   handlers/press-reader-entitlements:
     dependencies:
@@ -380,15 +493,36 @@ importers:
       '@aws-sdk/util-dynamodb':
         specifier: ^3.940.0
         version: 3.995.0(@aws-sdk/client-dynamodb@3.995.0)
+      aws:
+        specifier: workspace:*
+        version: link:../../modules/aws
       dayjs:
         specifier: ^1.11.13
         version: 1.11.19
       fast-xml-parser:
         specifier: ^5.5.8
         version: 5.5.8
+      identity:
+        specifier: workspace:*
+        version: link:../../modules/identity
+      product-benefits:
+        specifier: workspace:*
+        version: link:../../modules/product-benefits
+      product-catalog:
+        specifier: workspace:*
+        version: link:../../modules/product-catalog
+      routing:
+        specifier: workspace:*
+        version: link:../../modules/routing
+      supporter-product-data:
+        specifier: workspace:*
+        version: link:../../modules/supporter-product-data
       zod:
         specifier: 'catalog:'
         version: 3.25.76
+      zuora:
+        specifier: workspace:*
+        version: link:../../modules/zuora
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -399,12 +533,39 @@ importers:
       '@aws-sdk/client-sqs':
         specifier: ^3.940.0
         version: 3.995.0
+      aws:
+        specifier: workspace:*
+        version: link:../../modules/aws
       dayjs:
         specifier: ^1.11.13
         version: 1.11.19
+      email:
+        specifier: workspace:*
+        version: link:../../modules/email
+      guardian-subscription:
+        specifier: workspace:*
+        version: link:../../modules/guardian-subscription
+      internationalisation:
+        specifier: workspace:*
+        version: link:../../modules/internationalisation
+      product-catalog:
+        specifier: workspace:*
+        version: link:../../modules/product-catalog
+      routing:
+        specifier: workspace:*
+        version: link:../../modules/routing
+      supporter-product-data:
+        specifier: workspace:*
+        version: link:../../modules/supporter-product-data
       zod:
         specifier: 'catalog:'
         version: 3.25.76
+      zuora:
+        specifier: workspace:*
+        version: link:../../modules/zuora
+      zuora-catalog:
+        specifier: workspace:*
+        version: link:../../modules/zuora-catalog
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -418,6 +579,18 @@ importers:
       '@aws-sdk/util-dynamodb':
         specifier: ^3.940.0
         version: 3.995.0(@aws-sdk/client-dynamodb@3.995.0)
+      aws:
+        specifier: workspace:*
+        version: link:../../modules/aws
+      promotions:
+        specifier: workspace:*
+        version: link:../../modules/promotions
+      salesforce:
+        specifier: workspace:*
+        version: link:../../modules/salesforce
+      zuora:
+        specifier: workspace:*
+        version: link:../../modules/zuora
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -434,6 +607,9 @@ importers:
       csv-parse:
         specifier: ^5.6.0
         version: 5.6.0
+      zuora:
+        specifier: workspace:*
+        version: link:../../modules/zuora
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -465,12 +641,27 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.19
+      email:
+        specifier: workspace:*
+        version: link:../../modules/email
+      routing:
+        specifier: workspace:*
+        version: link:../../modules/routing
+      salesforce:
+        specifier: workspace:*
+        version: link:../../modules/salesforce
+      secrets-manager:
+        specifier: workspace:*
+        version: link:../../modules/secrets-manager
       stripe:
         specifier: ^18.5.0
         version: 18.5.0(@types/node@24.10.1)
       zod:
         specifier: 'catalog:'
         version: 3.25.76
+      zuora:
+        specifier: workspace:*
+        version: link:../../modules/zuora
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -487,6 +678,12 @@ importers:
       '@aws-sdk/client-secrets-manager':
         specifier: ^3.940.0
         version: 3.995.0
+      aws:
+        specifier: workspace:*
+        version: link:../../modules/aws
+      secrets-manager:
+        specifier: workspace:*
+        version: link:../../modules/secrets-manager
       zod:
         specifier: 'catalog:'
         version: 3.25.76
@@ -506,15 +703,40 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.19
+      email:
+        specifier: workspace:*
+        version: link:../../modules/email
+      internationalisation:
+        specifier: workspace:*
+        version: link:../../modules/internationalisation
+      product-catalog:
+        specifier: workspace:*
+        version: link:../../modules/product-catalog
+      routing:
+        specifier: workspace:*
+        version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
         version: 3.25.76
+      zuora:
+        specifier: workspace:*
+        version: link:../../modules/zuora
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
         version: 8.10.158
 
   handlers/user-benefits:
+    dependencies:
+      identity:
+        specifier: workspace:*
+        version: link:../../modules/identity
+      product-benefits:
+        specifier: workspace:*
+        version: link:../../modules/product-benefits
+      product-catalog:
+        specifier: workspace:*
+        version: link:../../modules/product-catalog
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -525,18 +747,33 @@ importers:
       '@aws-sdk/client-secrets-manager':
         specifier: ^3.940.0
         version: 3.995.0
+      aws:
+        specifier: workspace:*
+        version: link:../../modules/aws
+      bigquery:
+        specifier: workspace:*
+        version: link:../../modules/bigquery
       dayjs:
         specifier: ^1.11.13
         version: 1.11.19
+      zuora:
+        specifier: workspace:*
+        version: link:../../modules/zuora
 
   handlers/zuora-salesforce-link-remover:
     dependencies:
       '@aws-sdk/client-secrets-manager':
         specifier: ^3.940.0
         version: 3.995.0
+      salesforce:
+        specifier: workspace:*
+        version: link:../../modules/salesforce
       zod:
         specifier: 'catalog:'
         version: 3.25.76
+      zuora:
+        specifier: workspace:*
+        version: link:../../modules/zuora
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -568,6 +805,9 @@ importers:
       '@aws-sdk/lib-storage':
         specifier: ^3.940.0
         version: 3.995.0(@aws-sdk/client-s3@3.995.0)
+      logger:
+        specifier: workspace:*
+        version: link:../logger
       zod:
         specifier: 'catalog:'
         version: 3.25.76
@@ -605,12 +845,27 @@ importers:
       '@aws-sdk/client-sqs':
         specifier: ^3.940.0
         version: 3.995.0
+      aws:
+        specifier: workspace:*
+        version: link:../aws
 
   modules/guardian-subscription:
     dependencies:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.19
+      logger:
+        specifier: workspace:*
+        version: link:../logger
+      product-catalog:
+        specifier: workspace:*
+        version: link:../product-catalog
+      zuora:
+        specifier: workspace:*
+        version: link:../zuora
+      zuora-catalog:
+        specifier: workspace:*
+        version: link:../zuora-catalog
     devDependencies:
       '@aws-sdk/client-cloudwatch-logs':
         specifier: ^3.940.0
@@ -624,9 +879,15 @@ importers:
       '@okta/jwt-verifier':
         specifier: ^4.0.1
         version: 4.0.2
+      aws:
+        specifier: workspace:*
+        version: link:../aws
       zod:
         specifier: 'catalog:'
         version: 3.25.76
+      zuora:
+        specifier: workspace:*
+        version: link:../zuora
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -649,11 +910,27 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.19
+      identity:
+        specifier: workspace:*
+        version: link:../identity
+      product-catalog:
+        specifier: workspace:*
+        version: link:../product-catalog
+      supporter-product-data:
+        specifier: workspace:*
+        version: link:../supporter-product-data
       zod:
         specifier: 'catalog:'
         version: 3.25.76
 
   modules/product-catalog:
+    dependencies:
+      logger:
+        specifier: workspace:*
+        version: link:../logger
+      zuora-catalog:
+        specifier: workspace:*
+        version: link:../zuora-catalog
     devDependencies:
       eslint-plugin-sort-keys-fix:
         specifier: ^1.1.2
@@ -679,18 +956,39 @@ importers:
       '@aws-sdk/util-dynamodb':
         specifier: ^3.940.0
         version: 3.995.0(@aws-sdk/client-dynamodb@3.995.0)
+      aws:
+        specifier: workspace:*
+        version: link:../aws
+      internationalisation:
+        specifier: workspace:*
+        version: link:../internationalisation
+      logger:
+        specifier: workspace:*
+        version: link:../logger
+      product-catalog:
+        specifier: workspace:*
+        version: link:../product-catalog
       zod:
         specifier: 'catalog:'
         version: 3.25.76
 
   modules/routing:
     dependencies:
+      aws:
+        specifier: workspace:*
+        version: link:../aws
       dayjs:
         specifier: ^1.11.13
         version: 1.11.19
+      logger:
+        specifier: workspace:*
+        version: link:../logger
       zod:
         specifier: 'catalog:'
         version: 3.25.76
+      zuora:
+        specifier: workspace:*
+        version: link:../zuora
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -698,9 +996,15 @@ importers:
 
   modules/salesforce:
     dependencies:
+      secrets-manager:
+        specifier: workspace:*
+        version: link:../secrets-manager
       zod:
         specifier: 'catalog:'
         version: 3.25.76
+      zuora:
+        specifier: workspace:*
+        version: link:../zuora
     devDependencies:
       '@types/jest':
         specifier: ^29.5.14
@@ -717,11 +1021,24 @@ importers:
       '@aws-sdk/client-secrets-manager':
         specifier: ^3.940.0
         version: 3.995.0
+      aws:
+        specifier: workspace:*
+        version: link:../aws
       aws-sdk-client-mock:
         specifier: 4.1.0
         version: 4.1.0
 
   modules/supporter-product-data:
+    dependencies:
+      aws:
+        specifier: workspace:*
+        version: link:../aws
+      logger:
+        specifier: workspace:*
+        version: link:../logger
+      zuora:
+        specifier: workspace:*
+        version: link:../zuora
     devDependencies:
       '@aws-sdk/client-dynamodb':
         specifier: ^3.940.0
@@ -738,9 +1055,18 @@ importers:
 
   modules/sync-supporter-product-data:
     dependencies:
+      aws:
+        specifier: workspace:*
+        version: link:../aws
+      product-catalog:
+        specifier: workspace:*
+        version: link:../product-catalog
       zod:
         specifier: 'catalog:'
         version: 3.25.76
+      zuora:
+        specifier: workspace:*
+        version: link:../zuora
     devDependencies:
       '@aws-sdk/client-sqs':
         specifier: ^3.940.0
@@ -753,6 +1079,13 @@ importers:
         version: 4.21.0
 
   modules/test-users:
+    dependencies:
+      product-catalog:
+        specifier: workspace:*
+        version: link:../product-catalog
+      zuora:
+        specifier: workspace:*
+        version: link:../zuora
     devDependencies:
       dayjs:
         specifier: ^1.11.13
@@ -772,18 +1105,39 @@ importers:
       '@aws-sdk/client-secrets-manager':
         specifier: ^3.940.0
         version: 3.995.0
+      aws:
+        specifier: workspace:*
+        version: link:../aws
       dayjs:
         specifier: ^1.11.13
         version: 1.11.19
+      internationalisation:
+        specifier: workspace:*
+        version: link:../internationalisation
+      logger:
+        specifier: workspace:*
+        version: link:../logger
+      product-catalog:
+        specifier: workspace:*
+        version: link:../product-catalog
+      promotions:
+        specifier: workspace:*
+        version: link:../promotions
       zod:
         specifier: 'catalog:'
         version: 3.25.76
+      zuora-catalog:
+        specifier: workspace:*
+        version: link:../zuora-catalog
 
   modules/zuora-catalog:
     dependencies:
       '@aws-sdk/client-s3':
         specifier: ^3.940.0
         version: 3.995.0
+      aws:
+        specifier: workspace:*
+        version: link:../aws
       zod:
         specifier: 'catalog:'
         version: 3.25.76

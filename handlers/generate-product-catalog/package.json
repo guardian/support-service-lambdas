@@ -12,16 +12,15 @@
     "cdk:test": "pnpm --filter cdk test generate-product-catalog",
     "cdk:test-update": "pnpm --filter cdk test-update generate-product-catalog",
     "update-lambda": "../../update-lambda.sh \"generate-product-catalog\"",
-    "update-stack": "../../update-stack.sh \"generate-product-catalog\"",
-    "buildcheck": "pnpm --filter buildcheck snapshot:assert handlers/generate-product-catalog",
-    "buildcheck:all": "pnpm --filter aws buildcheck && pnpm --filter logger buildcheck && pnpm --filter product-catalog buildcheck && pnpm --filter zuora-catalog buildcheck && pnpm --filter generate-product-catalog buildcheck && pnpm buildcheck",
-    "type-check:all": "pnpm --filter aws type-check && pnpm --filter logger type-check && pnpm --filter product-catalog type-check && pnpm --filter zuora-catalog type-check && pnpm --filter generate-product-catalog type-check && pnpm type-check",
-    "lint:all": "pnpm --filter aws lint && pnpm --filter logger lint && pnpm --filter product-catalog lint && pnpm --filter zuora-catalog lint && pnpm --filter generate-product-catalog lint && pnpm lint",
-    "check-formatting:all": "pnpm --filter aws check-formatting && pnpm --filter logger check-formatting && pnpm --filter product-catalog check-formatting && pnpm --filter zuora-catalog check-formatting && pnpm --filter generate-product-catalog check-formatting && pnpm check-formatting",
-    "test:all": "pnpm --filter aws test && pnpm --filter logger test && pnpm --filter product-catalog test && pnpm --filter zuora-catalog test && pnpm --filter generate-product-catalog test && pnpm test"
+    "update-stack": "../../update-stack.sh \"generate-product-catalog\""
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
+  "dependencies": {
+    "aws": "workspace:*",
+    "product-catalog": "workspace:*",
+    "zuora-catalog": "workspace:*"
+  },
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.940.0",
     "@types/aws-lambda": "^8.10.147"

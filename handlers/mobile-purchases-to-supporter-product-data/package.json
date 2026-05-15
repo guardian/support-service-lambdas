@@ -13,12 +13,6 @@
     "cdk:test-update": "pnpm --filter cdk test-update mobile-purchases-to-supporter-product-data",
     "update-lambda": "../../update-lambda.sh \"mobile-purchases-to-supporter-product-data\"",
     "update-stack": "../../update-stack.sh \"mobile-purchases-to-supporter-product-data\"",
-    "buildcheck": "pnpm --filter buildcheck snapshot:assert handlers/mobile-purchases-to-supporter-product-data",
-    "buildcheck:all": "pnpm --filter aws buildcheck && pnpm --filter logger buildcheck && pnpm --filter product-benefits buildcheck && pnpm --filter identity buildcheck && pnpm --filter zuora buildcheck && pnpm --filter internationalisation buildcheck && pnpm --filter product-catalog buildcheck && pnpm --filter zuora-catalog buildcheck && pnpm --filter promotions buildcheck && pnpm --filter supporter-product-data buildcheck && pnpm --filter mobile-purchases-to-supporter-product-data buildcheck && pnpm buildcheck",
-    "type-check:all": "pnpm --filter aws type-check && pnpm --filter logger type-check && pnpm --filter product-benefits type-check && pnpm --filter identity type-check && pnpm --filter zuora type-check && pnpm --filter internationalisation type-check && pnpm --filter product-catalog type-check && pnpm --filter zuora-catalog type-check && pnpm --filter promotions type-check && pnpm --filter supporter-product-data type-check && pnpm --filter mobile-purchases-to-supporter-product-data type-check && pnpm type-check",
-    "lint:all": "pnpm --filter aws lint && pnpm --filter logger lint && pnpm --filter product-benefits lint && pnpm --filter identity lint && pnpm --filter zuora lint && pnpm --filter internationalisation lint && pnpm --filter product-catalog lint && pnpm --filter zuora-catalog lint && pnpm --filter promotions lint && pnpm --filter supporter-product-data lint && pnpm --filter mobile-purchases-to-supporter-product-data lint && pnpm lint",
-    "check-formatting:all": "pnpm --filter aws check-formatting && pnpm --filter logger check-formatting && pnpm --filter product-benefits check-formatting && pnpm --filter identity check-formatting && pnpm --filter zuora check-formatting && pnpm --filter internationalisation check-formatting && pnpm --filter product-catalog check-formatting && pnpm --filter zuora-catalog check-formatting && pnpm --filter promotions check-formatting && pnpm --filter supporter-product-data check-formatting && pnpm --filter mobile-purchases-to-supporter-product-data check-formatting && pnpm check-formatting",
-    "test:all": "pnpm --filter aws test && pnpm --filter logger test && pnpm --filter product-benefits test && pnpm --filter identity test && pnpm --filter zuora test && pnpm --filter internationalisation test && pnpm --filter product-catalog test && pnpm --filter zuora-catalog test && pnpm --filter promotions test && pnpm --filter supporter-product-data test && pnpm --filter mobile-purchases-to-supporter-product-data test && pnpm test",
     "runFullSync": "tsx src/fullSyncCommand.ts"
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
@@ -26,7 +20,10 @@
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.940.0",
     "zod": "catalog:",
-    "dayjs": "^1.11.13"
+    "dayjs": "^1.11.13",
+    "aws": "workspace:*",
+    "product-benefits": "workspace:*",
+    "supporter-product-data": "workspace:*"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147",

@@ -64,13 +64,12 @@ jobs:
       - run: pnpm --filter "./buildcheck" type-check
       - run: pnpm --filter "./buildcheck" check-formatting
       - run: pnpm --filter "./buildcheck" lint
-      - run: pnpm --filter "./buildcheck" snapshot:assert ROOT
+      - run: pnpm --filter "./buildcheck" snapshot:assert 'ROOT|modules|handlers/${{ matrix.subproject }}'
       - run: pnpm --filter cdk package ${{ matrix.subproject }}
-      - run: pnpm --filter ${{ matrix.subproject }} buildcheck:all
-      - run: pnpm --filter ${{ matrix.subproject }} type-check:all
-      - run: pnpm --filter ${{ matrix.subproject }} lint:all
-      - run: pnpm --filter ${{ matrix.subproject }} check-formatting:all
-      - run: pnpm --filter ${{ matrix.subproject }} test:all
+      - run: pnpm --filter ${{ matrix.subproject }}... type-check
+      - run: pnpm --filter ${{ matrix.subproject }}... lint
+      - run: pnpm --filter ${{ matrix.subproject }}... check-formatting
+      - run: pnpm --filter ${{ matrix.subproject }}... test
       - run: pnpm --filter ${{ matrix.subproject }} package
 
       - name: Upload to Riff-Raff

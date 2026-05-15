@@ -12,13 +12,7 @@
     "cdk:test": "pnpm --filter cdk test salesforce-disaster-recovery-health-check",
     "cdk:test-update": "pnpm --filter cdk test-update salesforce-disaster-recovery-health-check",
     "update-lambda": "../../update-lambda.sh \"salesforce-disaster-recovery-health-check\" salesforce-disaster-recovery-health-check-",
-    "update-stack": "../../update-stack.sh \"salesforce-disaster-recovery-health-check\"",
-    "buildcheck": "pnpm --filter buildcheck snapshot:assert handlers/salesforce-disaster-recovery-health-check",
-    "buildcheck:all": "pnpm --filter salesforce-disaster-recovery-health-check buildcheck && pnpm buildcheck",
-    "type-check:all": "pnpm --filter salesforce-disaster-recovery-health-check type-check && pnpm type-check",
-    "lint:all": "pnpm --filter salesforce-disaster-recovery-health-check lint && pnpm lint",
-    "check-formatting:all": "pnpm --filter salesforce-disaster-recovery-health-check check-formatting && pnpm check-formatting",
-    "test:all": "pnpm --filter salesforce-disaster-recovery-health-check test && pnpm test"
+    "update-stack": "../../update-stack.sh \"salesforce-disaster-recovery-health-check\""
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",

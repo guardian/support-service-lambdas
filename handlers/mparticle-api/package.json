@@ -13,19 +13,15 @@
     "cdk:test-update": "pnpm --filter cdk test-update mparticle-api",
     "update-lambda": "../../update-lambda.sh \"mparticle-api\" mparticle-api-http- mparticle-api-baton- mparticle-api-mma-user-deletion-",
     "update-stack": "../../update-stack.sh \"mparticle-api\"",
-    "buildcheck": "pnpm --filter buildcheck snapshot:assert handlers/mparticle-api",
-    "buildcheck:all": "pnpm --filter aws buildcheck && pnpm --filter logger buildcheck && pnpm --filter routing buildcheck && pnpm --filter zuora buildcheck && pnpm --filter internationalisation buildcheck && pnpm --filter product-catalog buildcheck && pnpm --filter zuora-catalog buildcheck && pnpm --filter promotions buildcheck && pnpm --filter mparticle-api buildcheck && pnpm buildcheck",
-    "type-check:all": "pnpm --filter aws type-check && pnpm --filter logger type-check && pnpm --filter routing type-check && pnpm --filter zuora type-check && pnpm --filter internationalisation type-check && pnpm --filter product-catalog type-check && pnpm --filter zuora-catalog type-check && pnpm --filter promotions type-check && pnpm --filter mparticle-api type-check && pnpm type-check",
-    "lint:all": "pnpm --filter aws lint && pnpm --filter logger lint && pnpm --filter routing lint && pnpm --filter zuora lint && pnpm --filter internationalisation lint && pnpm --filter product-catalog lint && pnpm --filter zuora-catalog lint && pnpm --filter promotions lint && pnpm --filter mparticle-api lint && pnpm lint",
-    "check-formatting:all": "pnpm --filter aws check-formatting && pnpm --filter logger check-formatting && pnpm --filter routing check-formatting && pnpm --filter zuora check-formatting && pnpm --filter internationalisation check-formatting && pnpm --filter product-catalog check-formatting && pnpm --filter zuora-catalog check-formatting && pnpm --filter promotions check-formatting && pnpm --filter mparticle-api check-formatting && pnpm check-formatting",
-    "test:all": "pnpm --filter aws test && pnpm --filter logger test && pnpm --filter routing test && pnpm --filter zuora test && pnpm --filter internationalisation test && pnpm --filter product-catalog test && pnpm --filter zuora-catalog test && pnpm --filter promotions test && pnpm --filter mparticle-api test && pnpm test",
     "check-config": "tsx runManual/runLoadConfig.ts"
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
     "@peculiar/x509": "^1.12.3",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "aws": "workspace:*",
+    "routing": "workspace:*"
   },
   "devDependencies": {
     "@faker-js/faker": "^9.8.0",

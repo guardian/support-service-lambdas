@@ -12,19 +12,17 @@
     "cdk:test": "pnpm --filter cdk test discount-api",
     "cdk:test-update": "pnpm --filter cdk test-update discount-api",
     "update-lambda": "../../update-lambda.sh \"discount-api\"",
-    "update-stack": "../../update-stack.sh \"discount-api\"",
-    "buildcheck": "pnpm --filter buildcheck snapshot:assert handlers/discount-api",
-    "buildcheck:all": "pnpm --filter email buildcheck && pnpm --filter aws buildcheck && pnpm --filter logger buildcheck && pnpm --filter routing buildcheck && pnpm --filter zuora buildcheck && pnpm --filter internationalisation buildcheck && pnpm --filter product-catalog buildcheck && pnpm --filter zuora-catalog buildcheck && pnpm --filter promotions buildcheck && pnpm --filter discount-api buildcheck && pnpm buildcheck",
-    "type-check:all": "pnpm --filter email type-check && pnpm --filter aws type-check && pnpm --filter logger type-check && pnpm --filter routing type-check && pnpm --filter zuora type-check && pnpm --filter internationalisation type-check && pnpm --filter product-catalog type-check && pnpm --filter zuora-catalog type-check && pnpm --filter promotions type-check && pnpm --filter discount-api type-check && pnpm type-check",
-    "lint:all": "pnpm --filter email lint && pnpm --filter aws lint && pnpm --filter logger lint && pnpm --filter routing lint && pnpm --filter zuora lint && pnpm --filter internationalisation lint && pnpm --filter product-catalog lint && pnpm --filter zuora-catalog lint && pnpm --filter promotions lint && pnpm --filter discount-api lint && pnpm lint",
-    "check-formatting:all": "pnpm --filter email check-formatting && pnpm --filter aws check-formatting && pnpm --filter logger check-formatting && pnpm --filter routing check-formatting && pnpm --filter zuora check-formatting && pnpm --filter internationalisation check-formatting && pnpm --filter product-catalog check-formatting && pnpm --filter zuora-catalog check-formatting && pnpm --filter promotions check-formatting && pnpm --filter discount-api check-formatting && pnpm check-formatting",
-    "test:all": "pnpm --filter email test && pnpm --filter aws test && pnpm --filter logger test && pnpm --filter routing test && pnpm --filter zuora test && pnpm --filter internationalisation test && pnpm --filter product-catalog test && pnpm --filter zuora-catalog test && pnpm --filter promotions test && pnpm --filter discount-api test && pnpm test"
+    "update-stack": "../../update-stack.sh \"discount-api\""
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
     "dayjs": "^1.11.13",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "email": "workspace:*",
+    "routing": "workspace:*",
+    "zuora": "workspace:*",
+    "zuora-catalog": "workspace:*"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147"

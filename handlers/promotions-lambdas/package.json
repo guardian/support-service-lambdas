@@ -12,19 +12,17 @@
     "cdk:test": "pnpm --filter cdk test promotions-lambdas",
     "cdk:test-update": "pnpm --filter cdk test-update promotions-lambdas",
     "update-lambda": "../../update-lambda.sh \"promotions-lambdas\" promotions-lambdas-promo-code-view- promotions-lambdas-salesforce-export-",
-    "update-stack": "../../update-stack.sh \"promotions-lambdas\"",
-    "buildcheck": "pnpm --filter buildcheck snapshot:assert handlers/promotions-lambdas",
-    "buildcheck:all": "pnpm --filter aws buildcheck && pnpm --filter logger buildcheck && pnpm --filter promotions buildcheck && pnpm --filter internationalisation buildcheck && pnpm --filter product-catalog buildcheck && pnpm --filter zuora-catalog buildcheck && pnpm --filter salesforce buildcheck && pnpm --filter secrets-manager buildcheck && pnpm --filter zuora buildcheck && pnpm --filter promotions-lambdas buildcheck && pnpm buildcheck",
-    "type-check:all": "pnpm --filter aws type-check && pnpm --filter logger type-check && pnpm --filter promotions type-check && pnpm --filter internationalisation type-check && pnpm --filter product-catalog type-check && pnpm --filter zuora-catalog type-check && pnpm --filter salesforce type-check && pnpm --filter secrets-manager type-check && pnpm --filter zuora type-check && pnpm --filter promotions-lambdas type-check && pnpm type-check",
-    "lint:all": "pnpm --filter aws lint && pnpm --filter logger lint && pnpm --filter promotions lint && pnpm --filter internationalisation lint && pnpm --filter product-catalog lint && pnpm --filter zuora-catalog lint && pnpm --filter salesforce lint && pnpm --filter secrets-manager lint && pnpm --filter zuora lint && pnpm --filter promotions-lambdas lint && pnpm lint",
-    "check-formatting:all": "pnpm --filter aws check-formatting && pnpm --filter logger check-formatting && pnpm --filter promotions check-formatting && pnpm --filter internationalisation check-formatting && pnpm --filter product-catalog check-formatting && pnpm --filter zuora-catalog check-formatting && pnpm --filter salesforce check-formatting && pnpm --filter secrets-manager check-formatting && pnpm --filter zuora check-formatting && pnpm --filter promotions-lambdas check-formatting && pnpm check-formatting",
-    "test:all": "pnpm --filter aws test && pnpm --filter logger test && pnpm --filter promotions test && pnpm --filter internationalisation test && pnpm --filter product-catalog test && pnpm --filter zuora-catalog test && pnpm --filter salesforce test && pnpm --filter secrets-manager test && pnpm --filter zuora test && pnpm --filter promotions-lambdas test && pnpm test"
+    "update-stack": "../../update-stack.sh \"promotions-lambdas\""
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
     "@aws-sdk/util-dynamodb": "^3.940.0",
-    "@aws-sdk/client-dynamodb": "^3.940.0"
+    "@aws-sdk/client-dynamodb": "^3.940.0",
+    "aws": "workspace:*",
+    "promotions": "workspace:*",
+    "salesforce": "workspace:*",
+    "zuora": "workspace:*"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147"
