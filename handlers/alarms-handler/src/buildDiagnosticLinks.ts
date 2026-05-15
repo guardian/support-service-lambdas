@@ -1,4 +1,4 @@
-import { logger } from '@modules/routing/logger';
+import { logger } from '@modules/logger/logger';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 

@@ -1,8 +1,8 @@
 import { Lazy } from '@modules/lazy';
+import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { userHasGuardianEmail } from '@modules/product-benefits/userBenefits';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
-import { logger } from '@modules/routing/logger';
 import { Router } from '@modules/routing/router';
 import type { Stage } from '@modules/stage';
 import { stageFromEnvironment } from '@modules/stage';

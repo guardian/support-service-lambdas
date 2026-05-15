@@ -1,4 +1,4 @@
-import { Logger } from '@modules/routing/logger';
+import { Logger } from '@modules/logger/logger';
 import { Router } from '@modules/routing/router';
 import { withBodyParser } from '@modules/routing/withParsers';
 import { getSecretValue } from '@modules/secrets-manager/getSecret';

@@ -1,9 +1,9 @@
 import { mapPartition, mapValues, zipAll } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
+import { getCallerInfo } from '@modules/logger/getCallerInfo';
+import { logger } from '@modules/logger/logger';
 import { objectEntries } from '@modules/objectFunctions';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { getCallerInfo } from '@modules/routing/getCallerInfo';
-import { logger } from '@modules/routing/logger';
 
 export type HttpMethod =
 	| 'GET'

@@ -1,4 +1,4 @@
-import type { Logger } from '@modules/routing/logger';
+import type { Logger } from '@modules/logger/logger';
 import { stageFromEnvironment } from '@modules/stage';
 import { ZuoraError } from '@modules/zuora/errors';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';

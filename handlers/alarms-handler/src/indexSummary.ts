@@ -1,10 +1,10 @@
 import type { AlarmHistoryItem } from '@aws-sdk/client-cloudwatch';
 import { groupMap } from '@modules/arrayFunctions';
 import type { Lazy } from '@modules/lazy';
+import { logger } from '@modules/logger/logger';
 import { objectEntries, objectKeys } from '@modules/objectFunctions';
 import type { HandlerEnv } from '@modules/routing/lambdaHandler';
 import { LambdaHandler } from '@modules/routing/lambdaHandler';
-import { logger } from '@modules/routing/logger';
 import { z } from 'zod';
 import type { AppToTeams, Team } from './alarmMappings';
 import { prodAppToTeams } from './alarmMappings';
