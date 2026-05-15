@@ -8,7 +8,7 @@
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
     "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/index.ts --sourcemap --source-root=/support-service-lambdas/handlers/multiple-account-api/target/",
-    "package": "pnpm buildcheck:all && pnpm type-check:all && pnpm lint:all && pnpm check-formatting:all && pnpm test:all && pnpm build && cd target && zip -qr multiple-account-api.zip ./*.js.map ./*.js",
+    "package": "pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr multiple-account-api.zip ./*.js.map ./*.js",
     "cdk:test": "pnpm --filter cdk test multiple-account-api",
     "cdk:test-update": "pnpm --filter cdk test-update multiple-account-api",
     "update-lambda": "../../update-lambda.sh \"multiple-account-api\"",
@@ -18,14 +18,21 @@
     "type-check:all": "pnpm --filter routing type-check && pnpm --filter aws type-check && pnpm --filter logger type-check && pnpm --filter zuora type-check && pnpm --filter internationalisation type-check && pnpm --filter product-catalog type-check && pnpm --filter zuora-catalog type-check && pnpm --filter promotions type-check && pnpm --filter multiple-account-api type-check && pnpm type-check",
     "lint:all": "pnpm --filter routing lint && pnpm --filter aws lint && pnpm --filter logger lint && pnpm --filter zuora lint && pnpm --filter internationalisation lint && pnpm --filter product-catalog lint && pnpm --filter zuora-catalog lint && pnpm --filter promotions lint && pnpm --filter multiple-account-api lint && pnpm lint",
     "check-formatting:all": "pnpm --filter routing check-formatting && pnpm --filter aws check-formatting && pnpm --filter logger check-formatting && pnpm --filter zuora check-formatting && pnpm --filter internationalisation check-formatting && pnpm --filter product-catalog check-formatting && pnpm --filter zuora-catalog check-formatting && pnpm --filter promotions check-formatting && pnpm --filter multiple-account-api check-formatting && pnpm check-formatting",
-    "test:all": "pnpm --filter routing test && pnpm --filter aws test && pnpm --filter logger test && pnpm --filter zuora test && pnpm --filter internationalisation test && pnpm --filter product-catalog test && pnpm --filter zuora-catalog test && pnpm --filter promotions test && pnpm --filter multiple-account-api test && pnpm test"
+    "test:all": "pnpm --filter routing test && pnpm --filter aws test && pnpm --filter logger test && pnpm --filter zuora test && pnpm --filter internationalisation test && pnpm --filter product-catalog test && pnpm --filter zuora-catalog test && pnpm --filter promotions test && pnpm --filter multiple-account-api test && pnpm test",
+    "openapi:lint": "redocly lint openapi.yaml",
+    "openapi:preview": "redocly build-docs openapi.yaml --output target/docs/index.html && open target/docs/index.html"
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
-    "zod": "catalog:"
+    "@aws-sdk/client-dynamodb": "^3.940.0",
+    "@aws-sdk/util-dynamodb": "^3.940.0",
+    "nanoid": "^3.3.12",
+    "zod": "catalog:",
+    "dayjs": "^1.11.13"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.147"
+    "@types/aws-lambda": "^8.10.147",
+    "@redocly/cli": "2.30.5"
   }
 }

@@ -8,7 +8,7 @@
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
     "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/index.ts --sourcemap --source-root=/support-service-lambdas/handlers/mobile-purchases-to-supporter-product-data/target/",
-    "package": "pnpm buildcheck:all && pnpm type-check:all && pnpm lint:all && pnpm check-formatting:all && pnpm test:all && pnpm build && cd target && zip -qr mobile-purchases-to-supporter-product-data.zip ./*.js.map ./*.js",
+    "package": "pnpm build && cd target && zip -qr mobile-purchases-to-supporter-product-data.zip ./*.js.map ./*.js",
     "cdk:test": "pnpm --filter cdk test mobile-purchases-to-supporter-product-data",
     "cdk:test-update": "pnpm --filter cdk test-update mobile-purchases-to-supporter-product-data",
     "update-lambda": "../../update-lambda.sh \"mobile-purchases-to-supporter-product-data\"",

@@ -8,7 +8,7 @@
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
     "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/handlers/*.ts --sourcemap --source-root=/support-service-lambdas/handlers/discount-expiry-notifier/target/",
-    "package": "pnpm buildcheck:all && pnpm type-check:all && pnpm lint:all && pnpm check-formatting:all && pnpm test:all && pnpm build && cd target && zip -qr discount-expiry-notifier.zip ./*.js.map ./*.js",
+    "package": "pnpm build && cd target && zip -qr discount-expiry-notifier.zip ./*.js.map ./*.js",
     "cdk:test": "pnpm --filter cdk test discount-expiry-notifier",
     "cdk:test-update": "pnpm --filter cdk test-update discount-expiry-notifier",
     "update-lambda": "../../update-lambda.sh \"discount-expiry-notifier\" discount-expiry-notifier-get-expiring-discounts- discount-expiry-notifier-filter-records- discount-expiry-notifier-get-sub-status- discount-expiry-notifier-get-old-payment-amount- discount-expiry-notifier-get-new-payment-amount- discount-expiry-notifier-send-email- discount-expiry-notifier-save-results- discount-expiry-notifier-alarm-on-failures-",

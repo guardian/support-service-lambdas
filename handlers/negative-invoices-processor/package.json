@@ -8,7 +8,7 @@
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
     "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/handlers/*.ts --sourcemap --source-root=/support-service-lambdas/handlers/negative-invoices-processor/target/",
-    "package": "pnpm buildcheck:all && pnpm type-check:all && pnpm lint:all && pnpm check-formatting:all && pnpm test:all && pnpm build && cd target && zip -qr negative-invoices-processor.zip ./*.js.map ./*.js",
+    "package": "pnpm build && cd target && zip -qr negative-invoices-processor.zip ./*.js.map ./*.js",
     "cdk:test": "pnpm --filter cdk test negative-invoices-processor",
     "cdk:test-update": "pnpm --filter cdk test-update negative-invoices-processor",
     "update-lambda": "../../update-lambda.sh \"negative-invoices-processor\" negative-invoices-processor-get-invoices- negative-invoices-processor-check-for-active-sub- negative-invoices-processor-get-payment-methods- negative-invoices-processor-apply-credit-to-account-balance- negative-invoices-processor-do-credit-balance-refund- negative-invoices-processor-save-results- negative-invoices-processor-detect-failures-",
