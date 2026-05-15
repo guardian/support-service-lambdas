@@ -1,3 +1,40 @@
 {
-  "extends": "../../tsconfig.json"
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@modules/*": [
+        "../../modules/*"
+      ],
+      "@modules/guardian-subscription/*": [
+        "../../modules/guardian-subscription/src/*"
+      ],
+      "@modules/logger/*": [
+        "../../modules/logger/src/*"
+      ],
+      "@modules/product-catalog/*": [
+        "../../modules/product-catalog/src/*"
+      ],
+      "@modules/zuora-catalog/*": [
+        "../../modules/zuora-catalog/src/*"
+      ],
+      "@modules/aws/*": [
+        "../../modules/aws/src/*"
+      ],
+      "@modules/zuora/*": [
+        "../../modules/zuora/src/*"
+      ],
+      "@modules/internationalisation/*": [
+        "../../modules/internationalisation/src/*"
+      ],
+      "@modules/promotions/*": [
+        "../../modules/promotions/src/*"
+      ],
+      "@modules/routing/*": [
+        "../../modules/routing/src/*"
+      ],
+      "@modules/observer-benefits-api/*": [
+        "../../modules/observer-benefits-api/src/*"
+      ]
+    }
+  }
 }
