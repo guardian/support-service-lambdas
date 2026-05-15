@@ -1,5 +1,5 @@
 import { recordFromEntries } from '../../src/util/dependencyMapper';
-import type { HandlerDefinition, ModuleDefinition } from '../build';
+import type { ModuleDefinition } from '../build';
 
 export const collectAllDeps = (
 	pkg: ModuleDefinition,
@@ -14,7 +14,6 @@ export const collectAllDeps = (
 	});
 
 export function buildTsConfigJson(pkg: ModuleDefinition) {
-
 	const transitiveDeps = [...collectAllDeps(pkg), pkg.name];
 
 	return {

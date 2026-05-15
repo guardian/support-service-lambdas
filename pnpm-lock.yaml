@@ -353,9 +353,21 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.19
+      guardian-subscription:
+        specifier: workspace:*
+        version: link:../../modules/guardian-subscription
+      identity:
+        specifier: workspace:*
+        version: link:../../modules/identity
+      logger:
+        specifier: workspace:*
+        version: link:../../modules/logger
       nanoid:
         specifier: ^3.3.12
         version: 3.3.12
+      product-benefits:
+        specifier: workspace:*
+        version: link:../../modules/product-benefits
       routing:
         specifier: workspace:*
         version: link:../../modules/routing
