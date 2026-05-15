@@ -1,0 +1,123 @@
+openapi: 3.0.3
+info:
+  title: Multiple Account API
+  version: 1.0.0
+  description: API for creating invitation codes used by the multiple account feature.
+servers:
+  - url: https://multiple-account-api-code.support.guardianapis.com
+    description: CODE
+  - url: https://multiple-account-api.support.guardianapis.com
+    description: PROD
+security:
+  - identityId: []
+    apiKey: []
+paths:
+  /invitation:
+    post:
+      operationId: createInvitation
+      summary: Create invitation
+      description: Creates a new invitation for a subscription and returns an invitation code.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInvitationRequest'
+            examples:
+              default:
+                value:
+                  subscriptionName: A-S00974337
+                  secondaryUserEmail: integration-test2+multiple-account@theguardian.com
+      responses:
+        '201':
+          description: Invitation created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateInvitationResponse'
+              examples:
+                default:
+                  value:
+                    invitationCode: RpwR62kMnAxe
+        '400':
+          description: Invalid request or validation failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParserError'
+            text/plain:
+              schema:
+                type: string
+              examples:
+                validationError:
+                  value: An invitation already exists for this subscription
+        '404':
+          description: Route not found.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Not Found
+        '500':
+          description: Internal server error.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Internal server error
+components:
+  securitySchemes:
+    identityId:
+      type: apiKey
+      in: header
+      name: x-identity-id
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key
+  schemas:
+    CreateInvitationRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - subscriptionName
+        - secondaryUserEmail
+      properties:
+        subscriptionName:
+          type: string
+          description: Zuora subscription number.
+          example: A-S00974337
+        secondaryUserEmail:
+          type: string
+          format: email
+          example: integration-test2+multiple-account@theguardian.com
+    CreateInvitationResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - invitationCode
+      properties:
+        invitationCode:
+          type: string
+          minLength: 12
+          maxLength: 12
+          pattern: '^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{12}$'
+          description: 12-character Base58 invitation code.
+          example: RpwR62kMnAxe
+    ParserError:
+      type: object
+      additionalProperties: true
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          enum:
+            - Missing request body
+            - Invalid request body - not json
+            - Invalid request body - wrong type
+            - Invalid request path
+        details:
+          description: Parser-specific error details.
+
+
