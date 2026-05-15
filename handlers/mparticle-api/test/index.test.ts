@@ -321,6 +321,7 @@ describe('handlerDeletion', () => {
 
 		// Should log the SubscribeURL so it can be found in CloudWatch
 
+		// eslint-disable-next-line @typescript-eslint/unbound-method -- logger is fully mocked via jest.fn(), `this` binding is irrelevant
 		expect(logger.log).toHaveBeenCalledWith(
 			expect.stringContaining('SubscriptionConfirmation'),
 			expect.objectContaining({ subscribeUrl }),
