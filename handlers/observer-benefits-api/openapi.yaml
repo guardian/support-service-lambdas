@@ -5,14 +5,21 @@ info:
     Checks whether a Zuora subscription is an active Observer subscription
     whose billing postcode matches the supplied postcode.
   version: '1.0.0'
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
 servers:
   - url: 'https://observer-benefits-api.guardianapis.com'
     description: Production environment
   - url: 'https://observer-benefits-api.code.dev-guardianapis.com'
     description: Code environment for testing and development
+security:
+  - identityId: []
+    apiKey: []
 paths:
   /is-active:
     post:
+      operationId: checkActiveSubscription
       summary: Check if a subscription is an active Observer subscription
       description: >
         Looks up the subscription and associated account in Zuora, then returns
@@ -59,6 +66,15 @@ paths:
           description: An unexpected error occurred.
 
 components:
+  securitySchemes:
+    identityId:
+      type: apiKey
+      in: header
+      name: x-identity-id
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key
   schemas:
     IsActiveRequest:
       type: object
