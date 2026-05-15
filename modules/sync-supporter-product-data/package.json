@@ -8,7 +8,6 @@
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
     "build": "tsc --noEmit",
-    "buildcheck": "pnpm --filter buildcheck snapshot:assert modules/sync-supporter-product-data",
     "sync-user": "tsx ./src/syncUser.ts"
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/module/package.json.ts",

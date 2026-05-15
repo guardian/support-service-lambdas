@@ -20,7 +20,7 @@ export function buildTsConfigJson(pkg: ModuleDefinition) {
 		extends: '../../tsconfig.json',
 		compilerOptions: {
 			paths: {
-				'@modules/*': ['../../modules/*'],
+				'@modules/*': ['../../modules/*'], // special case, everyone gets this for free
 				...recordFromEntries(
 					transitiveDeps.map(
 						(moduleName) =>
