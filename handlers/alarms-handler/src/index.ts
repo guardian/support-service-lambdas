@@ -1,4 +1,3 @@
-import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { HandlerEnv } from '@modules/routing/lambdaHandler';
 import { SQSHandler } from '@modules/routing/sqsHandler';

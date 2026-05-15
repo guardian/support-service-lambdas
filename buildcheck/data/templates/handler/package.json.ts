@@ -13,7 +13,8 @@ export default (pkg: HandlerDefinition) => {
 			` --sourcemap --source-root=/support-service-lambdas/handlers/${pkg.name}/target/`,
 		package: [
 			'pnpm build',
-			`cd target && zip -qr ${pkg.name}.zip ./*.js.map ./*.js`,
+			'cd target',
+			`zip -qr ${pkg.name}.zip ./*.js.map ./*.js`,
 		].join(' && '),
 		'cdk:test': 'pnpm --filter cdk test ' + pkg.name,
 		'cdk:test-update': 'pnpm --filter cdk test-update ' + pkg.name,

@@ -14,11 +14,11 @@ import { BatonS3WriterImpl } from './services/batonS3Writer';
 import { BrazeClient } from './services/brazeClient';
 import type { AppConfig } from './services/config';
 import { getAppConfig, getEnv } from './services/config';
-import { MParticleClient } from './services/mparticleClient';
 import type {
 	BulkDeletionAPI,
 	MParticleClient as MParticleClientType,
 } from './services/mparticleClient';
+import { MParticleClient } from './services/mparticleClient';
 import {
 	DeletionRequestBodySchema,
 	SnsMessageSchema,

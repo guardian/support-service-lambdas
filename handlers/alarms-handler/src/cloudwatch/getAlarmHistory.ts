@@ -19,7 +19,6 @@ import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { objectInnerJoin, objectKeys } from '@modules/objectFunctions';
 import type { Dayjs } from 'dayjs';
-import { logger } from '../../../../modules/logger/src/logger';
 import type { Tags } from './getTags';
 import { getTags } from './getTags';
 

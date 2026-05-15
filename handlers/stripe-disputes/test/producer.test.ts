@@ -1,5 +1,5 @@
-// eslint-disable-next-line import/order -- the other import must come after the mocks
 import type { APIGatewayProxyEvent } from 'aws-lambda';
+import { handler } from '../src/producer';
 
 const mockLogger = {
 	log: jest.fn(),
@@ -44,9 +44,6 @@ jest.mock('stripe', () => {
 jest.mock('../src/services', () => ({
 	handleStripeWebhook: jest.fn(() => jest.fn()),
 }));
-
-// eslint-disable-next-line import/first -- this must come after the mocks
-import { handler } from '../src/producer';
 
 describe('Producer Handler', () => {
 	const createMockApiGatewayEvent = (

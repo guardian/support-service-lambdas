@@ -4,7 +4,6 @@ import { getSinglePlanFlattenedSubscriptionOrThrow } from '@modules/guardian-sub
 import type { GuardianSubscriptionMultiPlan } from '@modules/guardian-subscription/guardianSubscriptionParser';
 import { GuardianSubscriptionParser } from '@modules/guardian-subscription/guardianSubscriptionParser';
 import { SubscriptionFilter } from '@modules/guardian-subscription/subscriptionFilter';
-import { logger } from '@modules/logger/logger';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';

@@ -2,7 +2,6 @@ import { getSingleOrThrow } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { isSupportedCurrency } from '@modules/internationalisation/currency';
-import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
 import type { ProductBillingPeriod } from '@modules/product-catalog/productBillingPeriods';
