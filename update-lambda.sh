@@ -43,11 +43,12 @@ fi
 echo "Updating handler $PROJECT_NAME"
 
 if [ -n "$QUICK_MODE" ]; then
-  pushd "handlers/$PROJECT_NAME"
-  pnpm build
-  cd target && zip -qr "$PROJECT_NAME.zip" ./*.js.map ./*.js
-  popd
+  pnpm --filter "$PROJECT_NAME" package
 else
+  pnpm --filter "$PROJECT_NAME"... type-check
+  pnpm --filter "$PROJECT_NAME"... lint
+  pnpm --filter "$PROJECT_NAME"... check-formatting
+  pnpm --filter "$PROJECT_NAME"... test
   pnpm --filter "$PROJECT_NAME" package
 fi
 

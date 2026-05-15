@@ -1,4 +1,4 @@
-import { logger } from '@modules/logger/logger';
+import { logger } from './logger/src/logger';
 
 export class Lazy<T> {
 	private val: Promise<T> | undefined;
