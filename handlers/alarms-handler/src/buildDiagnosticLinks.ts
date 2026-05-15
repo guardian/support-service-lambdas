@@ -1,6 +1,6 @@
+import { logger } from '@modules/logger/logger';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { logger } from '../../../modules/logger/src/logger';
 
 dayjs.extend(utc);
 

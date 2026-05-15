@@ -1,3 +1,4 @@
+import { Logger } from '@modules/logger/logger';
 import { Router } from '@modules/routing/router';
 import { withBodyParser } from '@modules/routing/withParsers';
 import { getSecretValue } from '@modules/secrets-manager/getSecret';
@@ -5,7 +6,6 @@ import { stageFromEnvironment } from '@modules/stage';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import Stripe from 'stripe';
 import { z } from 'zod';
-import { Logger } from '../../../modules/logger/src/logger';
 import { handleStripeWebhook } from './services';
 import type { StripeCredentials } from './types';
 

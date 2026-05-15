@@ -6,8 +6,8 @@ import {
 import { flatten } from '@modules/arrayFunctions';
 import { fetchAllPages } from '@modules/aws/fetchAllPages';
 import { Lazy } from '@modules/lazy';
+import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
-import { logger } from '../../../../modules/logger/src/logger';
 import type { Tags } from './getTags';
 import { getTags } from './getTags';
 

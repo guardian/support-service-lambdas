@@ -1,6 +1,6 @@
+import type { Logger } from '@modules/logger/logger';
 import { writeOffInvoice } from '@modules/zuora/invoice';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { Logger } from '../../../../modules/logger/src/logger';
 
 export async function writeOffInvoiceService(
 	logger: Logger,

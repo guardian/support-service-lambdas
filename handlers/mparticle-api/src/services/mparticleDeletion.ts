@@ -1,4 +1,4 @@
-import { logger } from '../../../../modules/logger/src/logger';
+import { logger } from '@modules/logger/logger';
 import type { DeletionResult } from '../types/deletionMessage';
 import { HttpError } from './make-http-request';
 import type { BulkDeletionAPI, MParticleClient } from './mparticleClient';

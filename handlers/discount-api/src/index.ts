@@ -1,4 +1,5 @@
 import { sendEmail } from '@modules/email/email';
+import { logger } from '@modules/logger/logger';
 import { Router } from '@modules/routing/router';
 import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
 import { withBodyParser } from '@modules/routing/withParsers';
@@ -11,7 +12,6 @@ import type {
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyResult, Handler } from 'aws-lambda';
 import dayjs from 'dayjs';
-import { logger } from '../../../modules/logger/src/logger';
 import {
 	applyDiscountEndpoint,
 	previewDiscountEndpoint,

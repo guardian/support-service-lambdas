@@ -15,6 +15,7 @@ import {
 } from '@modules/arrayFunctions';
 import { fetchAllPages } from '@modules/aws/fetchAllPages';
 import { Lazy } from '@modules/lazy';
+import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { objectInnerJoin, objectKeys } from '@modules/objectFunctions';
 import type { Dayjs } from 'dayjs';

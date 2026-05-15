@@ -1,6 +1,6 @@
+import type { Logger } from '@modules/logger/logger';
 import { rejectPayment } from '@modules/zuora/payment';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { Logger } from '../../../../modules/logger/src/logger';
 import { rejectPaymentService } from '../../src/services/rejectPaymentService';
 
 jest.mock('@modules/zuora/payment');

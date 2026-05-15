@@ -2,7 +2,7 @@ import { BrazeClient, deleteBrazeUser } from '../../src/services/brazeClient';
 import { HttpError } from '../../src/services/make-http-request';
 
 // Mock the logger
-jest.mock('../../../../modules/logger/src/logger', () => ({
+jest.mock('@modules/logger/logger', () => ({
 	logger: {
 		log: jest.fn(),
 		error: jest.fn(),

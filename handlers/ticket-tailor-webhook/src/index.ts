@@ -1,8 +1,8 @@
 import { putMetric } from '@modules/aws/cloudwatch';
+import { logger } from '@modules/logger/logger';
 import type { Stage } from '@modules/stage';
 import { stageFromEnvironment } from '@modules/stage';
 import type { SQSEvent, SQSRecord } from 'aws-lambda';
-import { logger } from '../../../modules/logger/src/logger';
 import type { ApiGatewayToSqsEvent } from './apiGatewayToSqsEvent';
 import { apiGatewayToSqsEventSchema } from './apiGatewayToSqsEvent';
 import { createGuestAccount, fetchUserType } from './idapiService';

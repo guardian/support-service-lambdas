@@ -1,6 +1,6 @@
+import { getCallerInfo } from '@modules/logger/getCallerInfo';
+import { logger } from '@modules/logger/logger';
 import { z } from 'zod';
-import { getCallerInfo } from '../../../../modules/logger/src/getCallerInfo';
-import { logger } from '../../../../modules/logger/src/logger';
 import type { DeletionResult } from '../types/deletionMessage';
 import {
 	HttpError,

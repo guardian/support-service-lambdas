@@ -5,7 +5,7 @@ import type {
 } from '../../src/services/mparticleClient';
 import { deleteMParticleUser } from '../../src/services/mparticleDeletion';
 
-jest.mock('../../../../modules/logger/src/logger', () => ({
+jest.mock('@modules/logger/logger', () => ({
 	logger: {
 		log: jest.fn(),
 		error: jest.fn(),

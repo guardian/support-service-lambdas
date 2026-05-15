@@ -1,4 +1,5 @@
 import { sendMessageToQueue } from '@modules/aws/sqs';
+import { logger } from '@modules/logger/logger';
 import { prettyPrint } from '@modules/prettyPrint';
 import type { Stage } from '@modules/stage';
 import { logger } from '../../../modules/logger/src/logger';

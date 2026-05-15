@@ -18,7 +18,7 @@ jest.mock('@aws-sdk/client-dynamodb', () => {
 
 const mockLoggerLog = jest.fn();
 const mockLoggerError = jest.fn();
-jest.mock('../../../modules/logger/src/logger', () => ({
+jest.mock('@modules/logger/logger', () => ({
 	logger: {
 		log: (...args: unknown[]): void => {
 			mockLoggerLog(...args);

@@ -1,4 +1,5 @@
 import { Lazy } from '@modules/lazy';
+import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { userHasGuardianEmail } from '@modules/product-benefits/userBenefits';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';

@@ -1,3 +1,4 @@
+import type { Logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import AWS from 'aws-sdk';
