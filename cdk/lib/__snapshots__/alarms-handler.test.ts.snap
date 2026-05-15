@@ -243,6 +243,27 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       },
       "Type": "AWS::SNS::Subscription",
     },
+    "S3RegressionLogsWritePolicyAC7B3924": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:PutObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3:::gu-reader-revenue-logs/CODE/alarms-handler/*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "S3RegressionLogsWritePolicyAC7B3924",
+        "Roles": [
+          {
+            "Ref": "TriggeredLambdaServiceRoleBB080110",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "ScheduledCloudwatchPolicy193637E2": {
       "Properties": {
         "PolicyDocument": {
@@ -1506,6 +1527,27 @@ DLQ: https://",
         },
       },
       "Type": "AWS::SNS::Subscription",
+    },
+    "S3RegressionLogsWritePolicyAC7B3924": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:PutObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3:::gu-reader-revenue-logs/PROD/alarms-handler/*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "S3RegressionLogsWritePolicyAC7B3924",
+        "Roles": [
+          {
+            "Ref": "TriggeredLambdaServiceRoleBB080110",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
     "ScheduledCloudwatchPolicy193637E2": {
       "Properties": {

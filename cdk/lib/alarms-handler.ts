@@ -11,6 +11,7 @@ import {
 	EmailSubscription,
 	SqsSubscription,
 } from 'aws-cdk-lib/aws-sns-subscriptions';
+import { AllowS3RegressionLogsWritePolicy } from './cdk/policies';
 import { SrAppConfigKey } from './cdk/SrAppConfigKey';
 import { getNameWithStage } from './cdk/SrLambda';
 import { SrScheduledLambda } from './cdk/SrScheduledLambda';
@@ -60,6 +61,7 @@ export class AlarmsHandler extends SrStack {
 			targetingAccountRoleArn.valueAsString,
 		);
 		const describeAlarmsPolicy = buildDescribeAlarmsPolicy(this);
+		const logsWritePolicy = new AllowS3RegressionLogsWritePolicy(this);
 
 		const triggeredLambda = new SrSqsLambda(this, 'TriggeredLambda', {
 			monitoring: {
@@ -69,7 +71,7 @@ export class AlarmsHandler extends SrStack {
 			maxReceiveCount: 3,
 		});
 
-		triggeredLambda.addPolicies(alarmTagFetchingPolicy);
+		triggeredLambda.addPolicies(alarmTagFetchingPolicy, logsWritePolicy);
 
 		const triggerSnsTopic = new Topic(this, 'Topic', {
 			topicName: `${app}-topic-${this.stage}`,

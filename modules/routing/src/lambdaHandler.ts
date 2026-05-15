@@ -6,6 +6,7 @@ import dayjs from 'dayjs';
 import type { z } from 'zod';
 import { getCallerInfo } from '@modules/routing/getCallerInfo';
 import { logger } from '@modules/routing/logger';
+import { wrapFn } from '@modules/routing/wrapFn';
 
 export type HandlerEnv<ConfigType> = {
 	now: () => dayjs.Dayjs;
@@ -28,12 +29,14 @@ export function LambdaHandler<ConfigType, E>(
 	handler: (event: E, env: HandlerEnv<ConfigType>) => Promise<void>,
 ) {
 	const callerInfo = getCallerInfo();
-	const handlerWithEntryExitLogging = logger.wrapFn(
+	const handlerWithEntryExitLogging = wrapFn(
 		handler,
 		undefined,
 		callerInfo,
 		([event]) => ({
 			logOnEntryOnly: [event],
+			type: 'handler',
+			regressionTestInput: event,
 		}),
 	);
 	return LambdaHandlerWithServices(
@@ -70,7 +73,7 @@ export function LambdaHandlerWithServices<ConfigType, Services, E>(
 	}, 'load config from SSM');
 
 	const handlerProps: Lazy<Services> = lazyEnv.then(
-		logger.wrapFn(
+		wrapFn(
 			async ({ stage, stack, app }) => {
 				const config = await loadConfig(stage, stack, app, configSchema);
 				const handlerProps = { now: () => dayjs(), stage, config };
@@ -78,7 +81,11 @@ export function LambdaHandlerWithServices<ConfigType, Services, E>(
 			},
 			'lambdaColdStart',
 			callerInfo,
-			(args) => ({ logOnEntryOnly: args }),
+			(args) => ({
+				logOnEntryOnly: args,
+				type: 'coldStart',
+				regressionTestColdStartEnv: args,
+			}),
 		),
 	);
 

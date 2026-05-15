@@ -1,5 +1,5 @@
 import { getCallerInfo } from '@modules/routing/getCallerInfo';
-import { logger } from '@modules/routing/logger';
+import { wrapFn } from '@modules/routing/wrapFn';
 import type z from 'zod';
 import type { BearerTokenProvider } from '@modules/zuora/auth';
 
@@ -91,7 +91,7 @@ export abstract class RestClient {
 
 	// has to be a function so that the callerInfo is refreshed on every call
 	fetchWithLogging = (maybeCallerInfo?: string) =>
-		logger.wrapFn(
+		wrapFn(
 			this.fetch.bind(this),
 			() => 'HTTP ' + this.constructor.name,
 			maybeCallerInfo,
@@ -101,6 +101,8 @@ export abstract class RestClient {
 					body !== undefined || headers !== undefined
 						? [{ body, headers }]
 						: undefined,
+				type: 'outgoingRequest',
+				regressionTestRequestKey: `HTTP ${this.constructor.name} ${method} ${path}`,
 			}),
 		);
 
