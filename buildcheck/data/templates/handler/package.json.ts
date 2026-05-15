@@ -1,28 +1,10 @@
-import type { HandlerDefinition, ModuleDefinition } from '../../build';
+import type { HandlerDefinition } from '../../build';
 import { buildPackageJson } from '../../snippets/buildPackageJson';
-
-export const collectAllDeps = (
-	pkg: ModuleDefinition,
-	visited: Set<string> = new Set(),
-): string[] =>
-	pkg.moduleDeps.flatMap((dep) => {
-		if (visited.has(dep.name)) {
-			return [];
-		}
-		visited.add(dep.name);
-		return [dep.name, ...collectAllDeps(dep, visited)];
-	});
 
 export default (pkg: HandlerDefinition) => {
 	const entryPoints = pkg.entryPoints
 		? pkg.entryPoints.join(' ')
 		: 'src/index.ts';
-
-	const orderedPackageNames = [...collectAllDeps(pkg), pkg.name];
-	const runInOrder = (script: string) =>
-		orderedPackageNames
-			.map((name) => `pnpm --filter ${name} ${script}`)
-			.join(' && ') + ` && pnpm ${script}`;
 
 	const handlerScripts = {
 		build:
