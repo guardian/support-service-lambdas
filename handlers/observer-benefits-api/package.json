@@ -8,11 +8,13 @@
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
     "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/index.ts --sourcemap --source-root=/support-service-lambdas/handlers/observer-benefits-api/target/",
-    "package": "pnpm build && cd target && zip -qr observer-benefits-api.zip ./*.js.map ./*.js",
+    "package": "pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr observer-benefits-api.zip ./*.js.map ./*.js",
     "cdk:test": "pnpm --filter cdk test observer-benefits-api",
     "cdk:test-update": "pnpm --filter cdk test-update observer-benefits-api",
     "update-lambda": "../../update-lambda.sh \"observer-benefits-api\"",
-    "update-stack": "../../update-stack.sh \"observer-benefits-api\""
+    "update-stack": "../../update-stack.sh \"observer-benefits-api\"",
+    "openapi:lint": "redocly lint openapi.yaml",
+    "openapi:preview": "redocly build-docs openapi.yaml --output target/docs/index.html && open target/docs/index.html"
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
@@ -26,6 +28,7 @@
     "zuora-catalog": "workspace:*"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.147"
+    "@types/aws-lambda": "^8.10.147",
+    "@redocly/cli": "2.30.5"
   }
 }

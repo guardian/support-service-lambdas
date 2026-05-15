@@ -481,6 +481,9 @@ importers:
         specifier: workspace:*
         version: link:../../modules/zuora-catalog
     devDependencies:
+      '@redocly/cli':
+        specifier: 2.30.5
+        version: 2.30.5(@opentelemetry/api@1.9.1)(core-js@3.49.0)
       '@types/aws-lambda':
         specifier: ^8.10.147
         version: 8.10.158
