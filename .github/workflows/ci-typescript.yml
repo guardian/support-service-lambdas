@@ -33,7 +33,7 @@ jobs:
       - run: pnpm --filter "./buildcheck" type-check
       - run: pnpm --filter "./buildcheck" check-formatting
       - run: pnpm --filter "./buildcheck" lint
-      - run: pnpm --filter "./buildcheck" snapshot:assert ROOT
+      - run: pnpm --filter "./buildcheck" snapshot:assert 'ROOT|modules'
       - run: pnpm --filter "./modules/**" check-formatting
       - run: pnpm --filter "./modules/**" build
       - run: pnpm --filter "./modules/**" lint
