@@ -1,0 +1,99 @@
+---
+# This template creates the openapi file of the new lambda
+
+to: handlers/<%=lambdaName%>/openapi.yaml
+sh: git add handlers/<%=lambdaName%>/openapi.yaml
+---
+openapi: 3.0.3
+info:
+  title: <%=lambdaName%> API
+  description: A test API.
+  version: 1.0.0
+
+servers:
+  - url: https://<%=lambdaName%>-code.support.guardianapis.com
+    description: CODE
+  - url: https://<%=lambdaName%>.support.guardianapis.com
+    description: PROD
+
+security:
+  - apiKey: []
+
+paths:
+  /test:
+    post:
+      operationId: test
+      summary: Test endpoint
+      description: A simple test endpoint that returns a greeting.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestRequest'
+            example:
+              name: World
+      responses:
+        '200':
+          description: Successful greeting response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestResponse'
+              example:
+                message: Hello World!
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: Invalid request body
+        '500':
+          description: Unexpected server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: Internal server error
+
+components:
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key for authenticating requests.
+
+  schemas:
+    TestRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: The name to greet
+          example: World
+
+    TestResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: The greeting message
+          example: Hello World!
+
+    ErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: Human-readable error message
+

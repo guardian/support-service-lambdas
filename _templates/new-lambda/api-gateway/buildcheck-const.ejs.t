@@ -11,5 +11,9 @@ const <%= h.changeCase.camel(lambdaName) %>: HandlerDefinition = {
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
-	},
+		...devDeps['@redocly/cli'],
+    },
+    extraScripts: {
+        ...openApiScripts,
+    },
 };

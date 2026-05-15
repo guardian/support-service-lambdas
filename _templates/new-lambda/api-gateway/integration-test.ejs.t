@@ -1,8 +1,8 @@
 ---
 # This template creates a jest integration test for the new lambda
 
-to: handlers/<%=lambdaName%>/test/firstIntegration.test.ts
-sh: git add handlers/<%=lambdaName%>/test/firstIntegration.test.ts
+to: handlers/<%=lambdaName%>/test/testEndpointIntegration.test.ts
+sh: git add handlers/<%=lambdaName%>/test/testEndpointIntegration.test.ts
 ---
 /**
 * This is an integration test, the `@group integration` tag ensures that it will only be run by the `pnpm it-test`
@@ -11,6 +11,15 @@ sh: git add handlers/<%=lambdaName%>/test/firstIntegration.test.ts
 *
 * @group integration
 */
-test("my app", () => {
-    expect(1 + 1).toEqual(2);
+import { testRequestEndpoint } from '../src/testEndpoint';
+
+test('testEndpoint', async () => {
+	const result = testRequestEndpoint({ name: 'Alice' });
+
+	await expect(result).resolves.toEqual({
+		statusCode: 200,
+		body: JSON.stringify({
+			message: 'Hello Alice!',
+		}),
+	});
 });

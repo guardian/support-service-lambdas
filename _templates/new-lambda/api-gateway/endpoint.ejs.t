@@ -1,21 +1,20 @@
 ---
 # This template creates add file to contain endpoint logic
 
-to: handlers/<%=lambdaName%>/src/endpoints.ts
-sh: git add handlers/<%=lambdaName%>/src/endpoints.ts
+to: handlers/<%=lambdaName%>/src/testEndpoint.ts
+sh: git add handlers/<%=lambdaName%>/src/testEndpoint.ts
 ---
+import { ok } from '@modules/routing/apiGatewayResponses';
+import type { APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
 
 export const testRequestSchema = z.object({
-    name: z.string(),
+	name: z.string(),
 });
-
-export const testResponseSchema = z.object({
-    message: z.string(),
-});
-
 export type TestRequest = z.infer<typeof testRequestSchema>;
 
-export function testRequestEndpoint(request: TestRequest): string {
-    return `Hello, ${request.name}!`;
+export function testRequestEndpoint(
+	body: TestRequest,
+): Promise<APIGatewayProxyResult> {
+	return Promise.resolve(ok(`Hello ${body.name}!`));
 }

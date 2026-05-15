@@ -5,29 +5,20 @@ to: handlers/<%=lambdaName%>/src/index.ts
 sh: git add handlers/<%=lambdaName%>/src/index.ts
 ---
 import { Router } from '@modules/routing/router';
-import type {
-	APIGatewayProxyEvent,
-	APIGatewayProxyResult,
-	Handler,
-} from 'aws-lambda';
+import { withBodyParser } from '@modules/routing/withParsers';
+import type { Handler } from 'aws-lambda';
+import { testRequestEndpoint, testRequestSchema } from './testEndpoint';
 
 export const handler: Handler = Router([
 	{
-		httpMethod: 'GET',
-		path: '/',
-		handler: handleRequest,
+		httpMethod: 'POST',
+		path: '/test',
+		handler: withBodyParser(testRequestSchema, async (event, path, body) =>
+			testRequestEndpoint(body),
+		),
 	},
 ]);
 
-async function handleRequest(
-	event: APIGatewayProxyEvent,
-): Promise<APIGatewayProxyResult> {
-	console.log(`Input is ${JSON.stringify(event)}`);
-	return await Promise.resolve({
-		body: 'Hello World',
-		statusCode: 200,
-	});
-}
 
 
 
