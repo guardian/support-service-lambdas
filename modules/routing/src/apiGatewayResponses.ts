@@ -23,8 +23,17 @@ export function ok(body: unknown): APIGatewayProxyResult {
 	};
 }
 
-export function created(body: unknown): APIGatewayProxyResult {
+/**
+ * Returns a 201 Created response. Use when a new resource has been successfully created.
+ * @param body - The response body to return, typically containing details of the newly created resource.
+ * @param location - Optional URL of the newly created resource, set as the Location response header.
+ */
+export function created(
+	body: unknown,
+	location?: string,
+): APIGatewayProxyResult {
 	return {
+		headers: location ? { Location: location } : undefined,
 		body: JSON.stringify(body),
 		statusCode: 201,
 	};
