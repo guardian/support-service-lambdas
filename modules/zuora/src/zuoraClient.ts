@@ -15,7 +15,7 @@ export class ZuoraClient extends RestClient {
 			stage,
 			credentials,
 		);
-		return new ZuoraClient(bearerTokenProvider);
+		return new ZuoraClient(undefined, bearerTokenProvider);
 	}
 
 	/*

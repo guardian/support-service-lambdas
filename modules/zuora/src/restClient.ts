@@ -1,4 +1,5 @@
 import { getCallerInfo } from '@modules/routing/getCallerInfo';
+import type { RequestLogger } from '@modules/routing/requestLogger';
 import { wrapFn } from '@modules/routing/wrapFn';
 import type z from 'zod';
 import type { BearerTokenProvider } from '@modules/zuora/auth';
@@ -24,7 +25,10 @@ export type RestResult = {
 };
 
 export abstract class RestClient {
-	public constructor(readonly tokenProvider: BearerTokenProvider) {}
+	public constructor(
+		private readonly requestLogger: RequestLogger | undefined,
+		readonly tokenProvider: BearerTokenProvider,
+	) {}
 
 	public async get<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
 		path: string,
@@ -92,6 +96,7 @@ export abstract class RestClient {
 	// has to be a function so that the callerInfo is refreshed on every call
 	fetchWithLogging = (maybeCallerInfo?: string) =>
 		wrapFn(
+			this.requestLogger,
 			this.fetch.bind(this),
 			() => 'HTTP ' + this.constructor.name,
 			maybeCallerInfo,

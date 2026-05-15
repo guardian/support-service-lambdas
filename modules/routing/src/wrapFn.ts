@@ -1,9 +1,10 @@
 import { getCallerInfo } from '@modules/routing/getCallerInfo';
 import type { AsyncFunction, LoggableInput } from '@modules/routing/logger';
 import { logger } from '@modules/routing/logger';
+import type { RequestLogger } from '@modules/routing/requestLogger';
 import {
 	type RegressionLoggableInput,
-	wrapRegressionTestLogging,
+	withRegressionTestLogging,
 } from '@modules/routing/requestLogger';
 
 /**
@@ -16,6 +17,7 @@ import {
  * @param responseToLoggable
  */
 export function wrapFn<TArgs extends unknown[], TReturn>(
+	requestLogger: RequestLogger | undefined,
 	fn: AsyncFunction<TArgs, TReturn>,
 	functionName: string | (() => string) = fn.name,
 	callerInfo: string = getCallerInfo(),
@@ -23,8 +25,9 @@ export function wrapFn<TArgs extends unknown[], TReturn>(
 	responseToLoggable: (result: TReturn) => unknown = (result) => result,
 ): AsyncFunction<TArgs, TReturn> {
 	return async (...args: TArgs): Promise<TReturn> => {
+		const input = argsToLoggable(args);
 		const consoleLogged = logger.wrapFn(
-			wrapRegressionTestLogging(fn, argsToLoggable(args)),
+			withRegressionTestLogging(fn, input, requestLogger),
 			functionName,
 			callerInfo,
 			argsToLoggable,

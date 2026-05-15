@@ -141,6 +141,9 @@ importers:
         specifier: 'catalog:'
         version: 3.25.76
     devDependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.940.0
+        version: 3.995.0
       '@types/aws-lambda':
         specifier: ^8.10.147
         version: 8.10.158

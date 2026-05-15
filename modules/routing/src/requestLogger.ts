@@ -132,14 +132,14 @@ async function writeGroupToS3(key: string, group: GroupType) {
 	await new S3Client(awsConfig).send(command);
 }
 
-type GroupType = z.infer<typeof groupSchema>;
+export type GroupType = z.infer<typeof groupSchema>;
 type LogRecord = z.infer<typeof logRecordSchema>;
 const logRecordSchema = z.object({
 	requestKey: z.string(),
 	response: z.unknown(),
 });
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- will be needed to read the values back in later
-const groupSchema = z.object({
+
+export const groupSchema = z.object({
 	outgoingFetch: z.array(logRecordSchema),
 	coldStartFetch: z.array(logRecordSchema),
 	coldStartEnv: z.unknown(),
@@ -147,18 +147,19 @@ const groupSchema = z.object({
 	response: z.unknown(),
 });
 
-function buildRequestLogger() {
+export function buildRequestLogger() {
+	// const isPlayback = getEnv('PLAYBACK') === 'true';
 	try {
 		const parsedStage = stageSchema.safeParse(process.env.STAGE);
 		return parsedStage.success
 			? new RequestLogger(parsedStage.data)
 			: undefined;
 	} catch {
-		return undefined; // mainly because tests don't mock stageSchema properly
+		return undefined; // mainly because tests don't mock stageSchema itself properly
 	}
 }
 
-const requestLogger: RequestLogger | undefined = buildRequestLogger();
+// const requestLogger: RequestLogger | undefined = buildRequestLogger();
 
 export type RegressionLoggableInput = {
 	type?: 'handler' | 'coldStart' | 'outgoingRequest';
@@ -186,9 +187,10 @@ export type RegressionLoggableInput = {
 	  }
 );
 
-export function wrapRegressionTestLogging<TArgs extends unknown[], TReturn>(
+export function withRegressionTestLogging<TArgs extends unknown[], TReturn>(
 	fn: AsyncFunction<TArgs, TReturn>,
 	loggableInput: RegressionLoggableInput,
+	requestLogger: RequestLogger | undefined,
 ): AsyncFunction<TArgs, TReturn> {
 	if (requestLogger === undefined) {
 		return fn;

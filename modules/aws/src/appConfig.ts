@@ -1,9 +1,8 @@
-import { GetParametersByPathCommand, SSMClient } from '@aws-sdk/client-ssm';
+import type { SSMClient } from '@aws-sdk/client-ssm';
+import { GetParametersByPathCommand } from '@aws-sdk/client-ssm';
 import { objectEntries } from '@modules/objectFunctions';
-import { wrapAwsClient } from '@modules/routing/wrapAwsClient';
 import type { z } from 'zod';
 import { groupMap, mapValues, partitionByType } from '../../arrayFunctions';
-import { awsConfig } from '../src/config';
 import { fetchAllPages } from './fetchAllPages';
 
 /**
@@ -16,6 +15,7 @@ import { fetchAllPages } from './fetchAllPages';
  * @param schema this schema will validate that all your config is present
  */
 export const loadConfig = async <O, I>(
+	ssmClient: SSMClient,
 	stage: string,
 	stack: string,
 	app: string,
@@ -23,14 +23,20 @@ export const loadConfig = async <O, I>(
 ): Promise<O> => {
 	const configRoot = '/' + [stage, stack, app].join('/');
 	console.log('getting app config from SSM', configRoot);
-	const configFlat: SSMKeyValuePairs = await readAllRecursive(configRoot);
+	const configFlat: SSMKeyValuePairs = await readAllRecursive(
+		ssmClient,
+		configRoot,
+	);
 	return parseSSMConfigToObject(configFlat, configRoot, schema);
 };
 
 export type SSMKeyValuePairs = Array<Record<string, string>>;
 
-async function readAllRecursive(configRoot: string): Promise<SSMKeyValuePairs> {
-	const ssm = wrapAwsClient(new SSMClient(awsConfig));
+async function readAllRecursive(
+	ssmClient: SSMClient,
+	configRoot: string,
+): Promise<SSMKeyValuePairs> {
+	// const ssm = wrapAwsClient(new SSMClient(awsConfig));
 	return fetchAllPages<Record<string, string>>(
 		'GetParametersByPathCommand',
 		async (token) => {
@@ -40,7 +46,7 @@ async function readAllRecursive(configRoot: string): Promise<SSMKeyValuePairs> {
 				WithDecryption: true,
 				NextToken: token,
 			});
-			const result = await ssm.send(command);
+			const result = await ssmClient.send(command);
 
 			if (!result.Parameters) {
 				throw new Error(

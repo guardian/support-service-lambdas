@@ -2,6 +2,7 @@ import type { AlarmHistoryItem } from '@aws-sdk/client-cloudwatch';
 import { CloudWatchClient } from '@aws-sdk/client-cloudwatch';
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
 import { awsConfig, getAwsConfig, isRunningLocally } from '@modules/aws/config';
+import type { RequestLogger } from '@modules/routing/requestLogger';
 import { wrapAwsClient } from '@modules/routing/wrapAwsClient';
 import type { Dayjs } from 'dayjs';
 import { getAlarmHistory } from './cloudwatch/getAlarmHistory';
@@ -12,6 +13,7 @@ import { getTags } from './cloudwatch/getTags';
 import type { Accounts } from './configSchema';
 
 const buildCrossAccountCloudwatchClient = (
+	requestLogger: RequestLogger | undefined,
 	roleArn: string,
 	profile: string,
 ) => {
@@ -22,7 +24,7 @@ const buildCrossAccountCloudwatchClient = (
 				credentials: fromTemporaryCredentials({ params: { RoleArn: roleArn } }),
 			};
 
-	return wrapAwsClient(new CloudWatchClient(config));
+	return wrapAwsClient(requestLogger, new CloudWatchClient(config));
 };
 
 type CloudWatchClients = {
@@ -37,12 +39,20 @@ export type Cloudwatch = {
 	getAlarmHistory: (now: Date) => Promise<AlarmHistoryItem[]>;
 };
 
-export const buildCloudwatch = (config: Accounts) => {
+export const buildCloudwatch = (
+	requestLogger: RequestLogger | undefined,
+	config: Accounts,
+) => {
 	const { MOBILE, TARGETING } = config;
 	const cloudwatchClients: CloudWatchClients = {
-		membership: wrapAwsClient(new CloudWatchClient(awsConfig)),
-		mobile: buildCrossAccountCloudwatchClient(MOBILE.roleArn, 'mobile'),
+		membership: wrapAwsClient(requestLogger, new CloudWatchClient(awsConfig)),
+		mobile: buildCrossAccountCloudwatchClient(
+			requestLogger,
+			MOBILE.roleArn,
+			'mobile',
+		),
 		targeting: buildCrossAccountCloudwatchClient(
+			requestLogger,
 			TARGETING.roleArn,
 			'targeting',
 		),
