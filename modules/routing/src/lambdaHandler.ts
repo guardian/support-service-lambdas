@@ -1,17 +1,23 @@
 import { loadConfig } from '@modules/aws/appConfig';
 import { invokeFunction } from '@modules/aws/lambda';
+import { getSSMClient } from '@modules/aws/ssm';
 import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
+import type { Stage } from '@modules/stage';
+import { stageSchema } from '@modules/stage';
 import dayjs from 'dayjs';
 import type { z } from 'zod';
 import { getCallerInfo } from '@modules/routing/getCallerInfo';
 import { logger } from '@modules/routing/logger';
+import type { RequestLogger } from '@modules/routing/requestLogger';
+import { buildRequestLogger } from '@modules/routing/requestLogger';
 import { wrapFn } from '@modules/routing/wrapFn';
 
 export type HandlerEnv<ConfigType> = {
 	now: () => dayjs.Dayjs;
-	stage: string;
+	stage: Stage;
 	config: ConfigType;
+	requestLogger: RequestLogger | undefined;
 };
 
 /**
@@ -26,22 +32,16 @@ export type HandlerEnv<ConfigType> = {
  */
 export function LambdaHandler<ConfigType, E>(
 	configSchema: z.ZodType<ConfigType, z.ZodTypeDef, unknown>,
-	handler: (event: E, env: HandlerEnv<ConfigType>) => Promise<void>,
+	handler: (requestLogger: RequestLogger | undefined) => (
+		event: E,
+		env: HandlerEnv<ConfigType>,
+		// requestLogger: RequestLogger | undefined,
+	) => Promise<void>,
 ) {
 	const callerInfo = getCallerInfo();
-	const handlerWithEntryExitLogging = wrapFn(
-		handler,
-		undefined,
-		callerInfo,
-		([event]) => ({
-			logOnEntryOnly: [event],
-			type: 'handler',
-			regressionTestInput: event,
-		}),
-	);
 	return LambdaHandlerWithServices(
 		configSchema,
-		handlerWithEntryExitLogging,
+		handler,
 		(servicesAndConfig) => servicesAndConfig,
 		callerInfo,
 	);
@@ -60,13 +60,21 @@ export function LambdaHandler<ConfigType, E>(
  */
 export function LambdaHandlerWithServices<ConfigType, Services, E>(
 	configSchema: z.ZodType<ConfigType, z.ZodTypeDef, unknown>,
-	handler: (event: E, services: Services) => Promise<void>,
+	handler: (requestLogger: RequestLogger | undefined) => (
+		event: E,
+		services: Services,
+		// requestLogger: RequestLogger | undefined,
+	) => Promise<void>,
 	buildServices: (handlerProps: HandlerEnv<ConfigType>) => Services,
 	callerInfo: string,
 ) {
+	const playbackKey = process.env['PLAYBACK_KEY'];
+	const requestLogger =
+		playbackKey === undefined ? buildRequestLogger() : buildRequestLogger(); // TODO new RequestPlayback(playbackKey);
+
 	// only expect env vars on a cold start, don't load if this file is referenced in tests
 	const lazyEnv = new Lazy(() => {
-		const stage = getEnv('STAGE');
+		const stage = stageSchema.parse(getEnv('STAGE'));
 		const stack = getEnv('STACK');
 		const app = getEnv('APP');
 		return Promise.resolve({ stage, stack, app });
@@ -74,9 +82,22 @@ export function LambdaHandlerWithServices<ConfigType, Services, E>(
 
 	const handlerProps: Lazy<Services> = lazyEnv.then(
 		wrapFn(
+			requestLogger,
 			async ({ stage, stack, app }) => {
-				const config = await loadConfig(stage, stack, app, configSchema);
-				const handlerProps = { now: () => dayjs(), stage, config };
+				const ssmClient = getSSMClient(requestLogger);
+				const config = await loadConfig(
+					ssmClient,
+					stage,
+					stack,
+					app,
+					configSchema,
+				);
+				const handlerProps: HandlerEnv<ConfigType> = {
+					now: () => dayjs(),
+					stage,
+					config,
+					requestLogger,
+				};
 				return buildServices(handlerProps);
 			},
 			'lambdaColdStart',
@@ -89,14 +110,30 @@ export function LambdaHandlerWithServices<ConfigType, Services, E>(
 		),
 	);
 
+	const handlerWithEntryExitLogging = wrapFn(
+		requestLogger,
+		handler(requestLogger),
+		undefined,
+		callerInfo,
+		([event]) => ({
+			logOnEntryOnly: [event],
+			type: 'handler',
+			regressionTestInput: event,
+		}),
+	);
+
 	const handlerWithContextClearance = logger.withContext(
-		handler,
+		handlerWithEntryExitLogging,
 		undefined,
 		true,
 	);
 
 	return async (event: E) => {
-		return await handlerWithContextClearance(event, await handlerProps.get());
+		return await handlerWithContextClearance(
+			event,
+			await handlerProps.get(),
+			// requestLogger,
+		);
 	};
 }
 

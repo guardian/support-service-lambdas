@@ -45,6 +45,7 @@ const alarmsHandler: HandlerDefinition = {
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 		...dep.dayjs,
+		...dep['@aws-sdk/client-s3'],
 	},
 };
 

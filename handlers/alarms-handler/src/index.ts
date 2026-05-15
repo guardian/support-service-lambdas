@@ -1,6 +1,7 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { HandlerEnv } from '@modules/routing/lambdaHandler';
 import { logger } from '@modules/routing/logger';
+import type { RequestLogger } from '@modules/routing/requestLogger';
 import { SQSHandler } from '@modules/routing/sqsHandler';
 import type { Authorisation } from '@modules/zuora/auth';
 import { RestClient } from '@modules/zuora/restClient';
@@ -43,16 +44,18 @@ export type Services = {
 // called by AWS
 export const handler = SQSHandler(
 	ConfigSchema,
-	handlerWithStage,
+	(requestLogger: RequestLogger | undefined) => handlerWithStage,
 	buildServices,
 );
 
 // runs on cold start only
-function buildServices({ config }: HandlerEnv<ConfigSchema>) {
+function buildServices({ config, requestLogger }: HandlerEnv<ConfigSchema>) {
 	return {
 		webhookUrls: config.webhookUrls,
-		getTags: buildCloudwatch(config.accounts).getTags,
-		googleChatSendMessage: new GoogleChatSendMessage(new GoogleChatClient()),
+		getTags: buildCloudwatch(requestLogger, config.accounts).getTags,
+		googleChatSendMessage: new GoogleChatSendMessage(
+			new GoogleChatClient(requestLogger),
+		),
 	};
 }
 
@@ -80,8 +83,8 @@ export async function handlerWithStage(record: SQSRecord, services: Services) {
 export class GoogleChatClient extends RestClient {
 	static baseUrl = 'https://chat.googleapis.com/v1';
 
-	constructor() {
-		super({
+	constructor(requestLogger: RequestLogger | undefined) {
+		super(requestLogger, {
 			getAuthorisation(): Promise<Authorisation> {
 				return Promise.resolve({
 					baseUrl: GoogleChatClient.baseUrl,

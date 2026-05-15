@@ -1,5 +1,10 @@
 import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
+import type { RequestLogger } from '@modules/routing/requestLogger';
+import { wrapAwsClient } from '@modules/routing/wrapAwsClient';
 import { awsConfig } from './config';
+
+export const getSSMClient = (requestLogger: RequestLogger | undefined) =>
+	wrapAwsClient(requestLogger, new SSMClient(awsConfig));
 
 export const getSSMParam = async (name: string): Promise<string> => {
 	console.log('getting parameter from SSM', name);

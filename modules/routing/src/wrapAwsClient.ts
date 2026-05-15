@@ -6,13 +6,18 @@ import type {
 	MiddlewareStack,
 } from '@smithy/types';
 import { getCallerInfo } from '@modules/routing/getCallerInfo';
+import type { RequestLogger } from '@modules/routing/requestLogger';
 import { wrapFn } from '@modules/routing/wrapFn';
 
 export function wrapAwsClient<
 	Input extends object,
 	Output extends MetadataBearer,
 	T extends { middlewareStack: MiddlewareStack<Input, Output> },
->(client: T, callerInfo: string = getCallerInfo()): T {
+>(
+	requestLogger: RequestLogger | undefined,
+	client: T,
+	callerInfo: string = getCallerInfo(),
+): T {
 	client.middlewareStack.add(
 		<Input extends object, Output extends MetadataBearer>(
 			next: BuildHandler<Input, Output>,
@@ -27,6 +32,7 @@ export function wrapAwsClient<
 
 			return async (inputs) => {
 				const output = await wrapFn(
+					requestLogger,
 					extractAwsOutput,
 					'AWS ' + context.clientName + ' ' + context.commandName,
 					callerInfo,

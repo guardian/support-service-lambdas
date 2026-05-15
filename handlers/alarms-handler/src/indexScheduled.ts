@@ -3,6 +3,7 @@ import { flatten, groupMap } from '@modules/arrayFunctions';
 import type { HandlerEnv } from '@modules/routing/lambdaHandler';
 import { LambdaHandler } from '@modules/routing/lambdaHandler';
 import { logger } from '@modules/routing/logger';
+import type { RequestLogger } from '@modules/routing/requestLogger';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import type { AppToTeams } from './alarmMappings';
@@ -16,37 +17,42 @@ import { ConfigSchema } from './configSchema';
 // called by AWS
 export const handler = LambdaHandler(ConfigSchema, handlerWithStage);
 
-export async function handlerWithStage(
-	ev: unknown,
-	{ now, stage, config }: HandlerEnv<ConfigSchema>,
-) {
-	try {
-		const alarms = await buildCloudwatch(config.accounts).getAllAlarmsInAlarm();
+export function handlerWithStage(requestLogger: RequestLogger | undefined) {
+	return async (
+		ev: unknown,
+		{ now, stage, config }: HandlerEnv<ConfigSchema>,
+	) => {
+		try {
+			const alarms = await buildCloudwatch(
+				requestLogger,
+				config.accounts,
+			).getAllAlarmsInAlarm();
 
-		const chatMessages = await getChatMessages(
-			now(),
-			stage,
-			alarms,
-			prodAppToTeams,
-			config.webhookUrls,
-		);
+			const chatMessages = await getChatMessages(
+				now(),
+				stage,
+				alarms,
+				prodAppToTeams,
+				config.webhookUrls,
+			);
 
-		await Promise.all(
-			chatMessages.map(async (chatMessage) => {
-				logger.log('sending one chat message to', chatMessage.webhookUrl);
-				const response = await fetch(chatMessage.webhookUrl, {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify(chatMessage.body),
-				});
-				logger.log('http response', response, await response.text());
-				return response;
-			}),
-		);
-	} catch (error) {
-		console.error(error);
-		throw error;
-	}
+			await Promise.all(
+				chatMessages.map(async (chatMessage) => {
+					logger.log('sending one chat message to', chatMessage.webhookUrl);
+					const response = await fetch(chatMessage.webhookUrl, {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify(chatMessage.body),
+					});
+					logger.log('http response', response, await response.text());
+					return response;
+				}),
+			);
+		} catch (error) {
+			console.error(error);
+			throw error;
+		}
+	};
 }
 
 function activeOverOneDay(now: dayjs.Dayjs) {

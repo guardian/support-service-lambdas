@@ -12,7 +12,7 @@ import type { SecretNames } from '@modules/salesforce/secrets';
 
 export class SfClient extends RestClient {
 	constructor(tokenProvider: BearerTokenProvider) {
-		super(tokenProvider);
+		super(undefined, tokenProvider);
 	}
 
 	/**

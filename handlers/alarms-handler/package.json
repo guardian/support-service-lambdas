@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147",
-    "dayjs": "^1.11.13"
+    "dayjs": "^1.11.13",
+    "@aws-sdk/client-s3": "^3.940.0"
   }
 }
