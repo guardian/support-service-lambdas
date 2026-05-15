@@ -1,24 +1,52 @@
+import { IdentityClient } from '@modules/identity/identityClient';
+import { Lazy } from '@modules/lazy';
+import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { Router } from '@modules/routing/router';
-import type {
-	APIGatewayProxyEvent,
-	APIGatewayProxyResult,
-	Handler,
-} from 'aws-lambda';
+import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
+import { withBodyParser } from '@modules/routing/withParsers';
+import { stageFromEnvironment } from '@modules/stage';
+import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
+import type { Handler } from 'aws-lambda';
+import {
+	createInvitationBodySchema,
+	createInvitationEndpoint,
+} from './createInvitationEndpoint';
+import { InvitationRepository } from './invitationRepository';
+
+const stage = stageFromEnvironment();
+const invitationRepository = InvitationRepository.create(stage);
+const identityClientPromise = IdentityClient.create(
+	stage,
+	`/${stage}/support/multiple-account-api/identity-client-access-token`,
+);
+const lazyProductCatalog = new Lazy(
+	async () => await getProductCatalogFromApi(stage),
+	'Get product catalog',
+);
+const lazyZuoraCatalog = new Lazy(
+	async () => await getZuoraCatalogFromS3(stage),
+	'Get Zuora catalog',
+);
 
 export const handler: Handler = Router([
 	{
-		httpMethod: 'GET',
-		path: '/',
-		handler: handleRequest,
+		httpMethod: 'POST',
+		path: '/invitation',
+		handler: withBodyParser(
+			createInvitationBodySchema,
+			withMMAIdentityCheck(
+				stage,
+				async (body, zuoraClient, subscription, account) => {
+					const identityClient = await identityClientPromise;
+					return createInvitationEndpoint(
+						invitationRepository,
+						identityClient,
+						await lazyZuoraCatalog.get(),
+						await lazyProductCatalog.get(),
+					)(body, zuoraClient, subscription, account);
+				},
+				({ body }) => body.subscriptionName,
+			),
+		),
 	},
 ]);
-
-async function handleRequest(
-	event: APIGatewayProxyEvent,
-): Promise<APIGatewayProxyResult> {
-	console.log(`Input is ${JSON.stringify(event)}`);
-	return await Promise.resolve({
-		body: 'Hello World',
-		statusCode: 200,
-	});
-}

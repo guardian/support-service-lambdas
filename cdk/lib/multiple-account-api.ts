@@ -1,3 +1,4 @@
+import { GuAllowPolicy } from '@guardian/cdk/lib/constructs/iam';
 import type { App } from 'aws-cdk-lib';
 import { RemovalPolicy } from 'aws-cdk-lib';
 import {
@@ -7,6 +8,10 @@ import {
 	Table,
 	TableEncryption,
 } from 'aws-cdk-lib/aws-dynamodb';
+import {
+	AllowS3CatalogReadPolicy,
+	AllowZuoraOAuthSecretsPolicy,
+} from './cdk/policies';
 import { SrApiLambda } from './cdk/SrApiLambda';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
@@ -26,6 +31,18 @@ export class MultipleAccountApi extends SrStack {
 				errorImpact: 'The multiple account system is experiencing errors',
 			},
 		});
+
+		lambda.addPolicies(
+			new GuAllowPolicy(this, 'AllowGetIdentityClientToken', {
+				actions: ['ssm:GetParameter'],
+				resources: [
+					`arn:aws:ssm:${this.region}:${this.account}:parameter/${this.stage}/support/multiple-account-api/identity-client-access-token`,
+				],
+			}),
+		);
+
+		lambda.addPolicies(new AllowZuoraOAuthSecretsPolicy(this));
+		lambda.addPolicies(new AllowS3CatalogReadPolicy(this));
 
 		const invitationTable = new Table(this, 'InvitationTable', {
 			tableName: `${app}-invitation-${this.stage}`,
