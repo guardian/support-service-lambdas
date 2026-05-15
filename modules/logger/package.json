@@ -12,6 +12,6 @@
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/module/package.json.ts",
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "devDependencies": {
-    "@smithy/types": "^4.9.8"
+    "@smithy/types": "4.12.0"
   }
 }

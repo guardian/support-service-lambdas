@@ -17,6 +17,6 @@
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147",
-    "@smithy/types": "^4.9.8"
+    "@smithy/types": "4.12.0"
   }
 }
