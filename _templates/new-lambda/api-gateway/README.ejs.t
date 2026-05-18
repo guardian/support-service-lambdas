@@ -11,7 +11,7 @@ sh: git add handlers/<%=lambdaName%>/README.md
 #### CODE - https://<%=lambdaName%>-code.support.guardianapis.com/
 
 #### PROD - https://<%=lambdaName%>.support.guardianapis.com/
-
+<% if (includeOpenApiDoc == 'Y') { %>
 ## OpenAPI
 
 The OpenAPI description for this handler is in `openapi.yaml`. The spec is linted automatically as part of `pnpm package`.
@@ -30,5 +30,6 @@ pnpm --filter <%=lambdaName%> openapi:preview
 
 - OpenAPI specification: https://spec.openapis.org/oas/latest.html
 - Redocly CLI: https://redocly.com/docs/cli/
+<% } %>
 
 
