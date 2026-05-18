@@ -2,7 +2,7 @@ import type { AlarmHistoryItem } from '@aws-sdk/client-cloudwatch';
 import { CloudWatchClient } from '@aws-sdk/client-cloudwatch';
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
 import { awsConfig, getAwsConfig, isRunningLocally } from '@modules/aws/config';
-import { wrapAwsClient } from '@modules/routing/wrapAwsClient';
+import { wrapAwsClient } from '@modules/logger/wrapAwsClient';
 import type { Dayjs } from 'dayjs';
 import { getAlarmHistory } from './cloudwatch/getAlarmHistory';
 import type { AlarmWithTags } from './cloudwatch/getAllAlarmsInAlarm';

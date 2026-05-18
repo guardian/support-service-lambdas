@@ -1,6 +1,6 @@
+import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { HandlerEnv } from '@modules/routing/lambdaHandler';
-import { logger } from '@modules/routing/logger';
 import { SQSHandler } from '@modules/routing/sqsHandler';
 import type { Authorisation } from '@modules/zuora/auth';
 import { RestClient } from '@modules/zuora/restClient';

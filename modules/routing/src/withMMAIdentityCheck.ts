@@ -1,4 +1,5 @@
 import { ValidationError } from '@modules/errors';
+import { logger } from '@modules/logger/logger';
 import type { Stage } from '@modules/stage';
 import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
@@ -12,7 +13,6 @@ import type {
 	APIGatewayProxyEventHeaders,
 	APIGatewayProxyResult,
 } from 'aws-lambda';
-import { logger } from '@modules/routing/logger';
 import type { Handler } from '@modules/routing/router';
 
 export function assertIdentityIdMatches(

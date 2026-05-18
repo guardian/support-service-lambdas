@@ -1,10 +1,11 @@
+import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { Dayjs } from 'dayjs';
 import { zuoraDateFormat } from '@modules/zuora/utils';
-import { catalog } from '../../../../../handlers/discount-api/src/productToDiscountMapping';
 
 export const digiSubSubscribeBody = (
 	subscriptionDate: Dayjs,
 	createWithOldPrice: boolean,
+	productCatalog: ProductCatalog,
 ) => {
 	const chargeOverride = createWithOldPrice
 		? {
@@ -57,7 +58,8 @@ export const digiSubSubscribeBody = (
 					RatePlanData: [
 						{
 							RatePlan: {
-								ProductRatePlanId: catalog.CODE.digiSub.Month,
+								ProductRatePlanId:
+									productCatalog.DigitalSubscription.ratePlans.Monthly.id,
 							},
 							...chargeOverride,
 							SubscriptionProductFeatureList: [],

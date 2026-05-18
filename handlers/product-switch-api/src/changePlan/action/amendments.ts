@@ -1,4 +1,4 @@
-import { logger } from '@modules/routing/logger';
+import { logger } from '@modules/logger/logger';
 import { ZuoraError } from '@modules/zuora/errors/zuoraError';
 import { voidSchema } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';

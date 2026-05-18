@@ -2,12 +2,12 @@ import { ValidationError } from '@modules/errors';
 import { getSinglePlanFlattenedSubscriptionOrThrow } from '@modules/guardian-subscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import { GuardianSubscriptionParser } from '@modules/guardian-subscription/guardianSubscriptionParser';
 import { SubscriptionFilter } from '@modules/guardian-subscription/subscriptionFilter';
+import { logger } from '@modules/logger/logger';
 import { productBenefitMapping } from '@modules/product-benefits/productBenefit';
 import type {
 	ProductCatalog,
 	ProductKey,
 } from '@modules/product-catalog/productCatalog';
-import { logger } from '@modules/routing/logger';
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import type { ZuoraCatalog } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';

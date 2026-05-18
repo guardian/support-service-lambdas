@@ -1,6 +1,6 @@
 import { loadConfig } from '@modules/aws/appConfig';
+import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
-import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import { z } from 'zod';
 

@@ -1,4 +1,4 @@
-import type { Logger } from '@modules/routing/logger';
+import type { Logger } from '@modules/logger/logger';
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getSubscriptionService } from '../../src/services/getSubscriptionService';

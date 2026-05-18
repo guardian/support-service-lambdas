@@ -1,5 +1,5 @@
 import { sendEmail } from '@modules/email/email';
-import { logger } from '@modules/routing/logger';
+import { logger } from '@modules/logger/logger';
 import { Router } from '@modules/routing/router';
 import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
 import { withBodyParser } from '@modules/routing/withParsers';
