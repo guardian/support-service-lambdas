@@ -1,8 +1,8 @@
 ---
 # This template creates the openapi file of the new lambda
 
-to: handlers/<%=lambdaName%>/openapi.yaml
-sh: git add handlers/<%=lambdaName%>/openapi.yaml
+to: <% if (includeOpenApiDoc == 'Y') { %>handlers/<%=lambdaName%>/openapi.yaml<% } %>
+sh: <% if (includeOpenApiDoc == 'Y') { %>git add handlers/<%=lambdaName%>/openapi.yaml<% } %>
 ---
 openapi: 3.0.3
 info:

@@ -11,9 +11,11 @@ const <%= h.changeCase.camel(lambdaName) %>: HandlerDefinition = {
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
+	<% if (includeOpenApiDoc === 'Y'){ %>
 		...devDeps['@redocly/cli'],
     },
     extraScripts: {
         ...openApiScripts,
+    <% } %>
     },
 };
