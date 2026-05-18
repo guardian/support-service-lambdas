@@ -1,5 +1,5 @@
 ---
-# This template creates the openapi file of the new lambda
+# This template creates an Open API specification for the new lambda if the user has requested one
 
 to: <% if (includeOpenApiDoc == 'Y') { %>handlers/<%=lambdaName%>/openapi.yaml<% } %>
 sh: <% if (includeOpenApiDoc == 'Y') { %>git add handlers/<%=lambdaName%>/openapi.yaml<% } %>

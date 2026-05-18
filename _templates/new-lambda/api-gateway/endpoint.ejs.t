@@ -1,5 +1,5 @@
 ---
-# This template creates add file to contain endpoint logic
+# This template creates a file to contain the logic for the first example endpoint
 
 to: handlers/<%=lambdaName%>/src/testEndpoint.ts
 sh: git add handlers/<%=lambdaName%>/src/testEndpoint.ts
