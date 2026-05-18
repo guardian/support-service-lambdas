@@ -4,9 +4,9 @@ import { getSinglePlanFlattenedSubscriptionOrThrow } from '@modules/guardian-sub
 import type { GuardianSubscriptionMultiPlan } from '@modules/guardian-subscription/guardianSubscriptionParser';
 import { GuardianSubscriptionParser } from '@modules/guardian-subscription/guardianSubscriptionParser';
 import { SubscriptionFilter } from '@modules/guardian-subscription/subscriptionFilter';
+import { logger } from '@modules/logger/logger';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
-import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import { getSubscription } from '@modules/zuora/subscription';
 import type {

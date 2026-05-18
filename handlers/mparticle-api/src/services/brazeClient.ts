@@ -1,5 +1,5 @@
-import { getCallerInfo } from '@modules/routing/getCallerInfo';
-import { logger } from '@modules/routing/logger';
+import { getCallerInfo } from '@modules/logger/getCallerInfo';
+import { logger } from '@modules/logger/logger';
 import { z } from 'zod';
 import type { DeletionResult } from '../types/deletionMessage';
 import {

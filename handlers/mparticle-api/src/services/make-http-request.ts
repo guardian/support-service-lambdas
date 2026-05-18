@@ -1,5 +1,5 @@
 import { groupMap } from '@modules/arrayFunctions';
-import { logger } from '@modules/routing/logger';
+import { logger } from '@modules/logger/logger';
 import type { z } from 'zod';
 
 export class HttpError extends Error {

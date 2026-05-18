@@ -1,10 +1,10 @@
 import { ValidationError } from '@modules/errors';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { isoCurrencySchema } from '@modules/internationalisation/schemas';
+import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
-import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import {
 	getBillingPreview,

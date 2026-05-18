@@ -407,10 +407,15 @@ const observerBenefitsApi: HandlerDefinition = {
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
+		...devDeps['@redocly/cli'],
 	},
 	extraScripts: {
 		'it-test':
 			'NODE_OPTIONS="$NODE_OPTIONS --experimental-vm-modules" jest --group=integration',
+		'openapi:lint': 'redocly lint openapi.yaml',
+		'openapi:preview':
+			'redocly build-docs openapi.yaml --output target/docs/index.html && open target/docs/index.html',
+		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr observer-benefits-api.zip ./*.js.map ./*.js`,
 	},
 };
 
@@ -484,6 +489,13 @@ const moduleInternationalisation: ModuleDefinition = {
 		...dep['zod'],
 	},
 	extraScripts: srcOnly,
+};
+
+const moduleLogger: ModuleDefinition = {
+	name: 'logger',
+	devDependencies: {
+		...devDeps['@smithy/types'],
+	},
 };
 
 const moduleProductBenefits: ModuleDefinition = {
@@ -673,6 +685,7 @@ export const build: BuildDefinition = {
 		moduleGuardianSubscription,
 		moduleIdentity,
 		moduleInternationalisation,
+		moduleLogger,
 		moduleProductBenefits,
 		moduleProductCatalog,
 		modulePromotions,

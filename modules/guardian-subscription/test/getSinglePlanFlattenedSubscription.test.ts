@@ -1,6 +1,6 @@
+import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
-import { logger } from '@modules/routing/logger';
 import { zuoraSubscriptionSchema } from '@modules/zuora/types';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';

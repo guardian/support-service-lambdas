@@ -42,7 +42,7 @@ object Dependencies {
 
   // GCP
   val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.66.0"
-  val grpcNettyOverride = "io.grpc" % "grpc-netty-shaded" % "1.80.0"
+  val grpcNettyOverride = "io.grpc" % "grpc-netty-shaded" % "1.81.0"
 
   // Cats
   val catsCore = "org.typelevel" %% "cats-core" % catsVersion
@@ -82,7 +82,7 @@ object Dependencies {
 
   // Other
   val zio = "dev.zio" %% "zio" % "1.0.18"
-  val zio2Version = "2.1.25"
+  val zio2Version = "2.1.26"
   val zio2 = "dev.zio" %% "zio" % zio2Version
   val tapirVersion =
     "1.11.33" // stick with 1.11.33 for now as later versions indirectly pull in netty-codec-base which duplicates netty-codec content
@@ -91,8 +91,8 @@ object Dependencies {
   val stripe = "com.stripe" % "stripe-java" % "29.1.0"
   val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.2.0"
   val commonsIO = "commons-io" % "commons-io" % "2.22.0"
-  val jodaTime = "joda-time" % "joda-time" % "2.14.1"
-  val typesafeConfig = "com.typesafe" % "config" % "1.4.6"
+  val jodaTime = "joda-time" % "joda-time" % "2.14.2"
+  val typesafeConfig = "com.typesafe" % "config" % "1.4.8"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest-should" % "0.9.0" % Test

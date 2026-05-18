@@ -1,6 +1,6 @@
-import { getCallerInfo } from '@modules/routing/getCallerInfo';
-import { Logger } from '@modules/routing/logger';
-import { prettyPrint } from '@modules/routing/prettyPrint';
+import { getCallerInfo } from '@modules/logger/getCallerInfo';
+import { Logger } from '@modules/logger/logger';
+import { prettyPrint } from '@modules/logger/prettyPrint';
 
 // If you reformat this section of the file, you will need to update the expected line numbers
 function getMessage(logger: Logger) {

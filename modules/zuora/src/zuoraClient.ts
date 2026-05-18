@@ -1,4 +1,4 @@
-import { logger } from '@modules/routing/logger';
+import { logger } from '@modules/logger/logger';
 import type { Stage } from '@modules/stage';
 import type { ZodTypeDef } from 'zod';
 import { z } from 'zod';

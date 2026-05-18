@@ -1,4 +1,4 @@
-import { logger } from '@modules/routing/logger';
+import { logger } from '@modules/logger/logger';
 import { getSecretValue } from '@modules/secrets-manager/getSecret';
 import type { Stage } from '@modules/stage';
 import { z } from 'zod';

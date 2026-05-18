@@ -1,12 +1,12 @@
 import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
 import { awsConfig } from '@modules/aws/config';
+import { logger } from '@modules/logger/logger';
 import type {
 	ProductCatalog,
 	ProductKey,
 } from '@modules/product-catalog/productCatalog';
 import { supportsPromotions } from '@modules/product-catalog/productCatalog';
-import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import type { Promo } from '@modules/promotions/v2/schema';
 import { promoSchema } from '@modules/promotions/v2/schema';
