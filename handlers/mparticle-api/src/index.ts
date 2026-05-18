@@ -1,5 +1,5 @@
 import { internalServerError } from '@modules/routing/apiGatewayResponses';
-import { logger } from '@modules/routing/logger';
+import { logger } from '@modules/logger/logger';
 import type {
 	APIGatewayProxyEvent,
 	APIGatewayProxyResult,

@@ -2,9 +2,9 @@ import type { GuardianSubscription } from '@modules/guardian-subscription/getSin
 import { getSinglePlanFlattenedSubscriptionOrThrow } from '@modules/guardian-subscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import { GuardianSubscriptionParser } from '@modules/guardian-subscription/guardianSubscriptionParser';
 import { SubscriptionFilter } from '@modules/guardian-subscription/subscriptionFilter';
+import { logger } from '@modules/logger/logger';
 import { type ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { ok } from '@modules/routing/apiGatewayResponses';
-import { logger } from '@modules/routing/logger';
 import { getAccount } from '@modules/zuora/account';
 import { ZuoraError } from '@modules/zuora/errors/zuoraError';
 import { getSubscription } from '@modules/zuora/subscription';

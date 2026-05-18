@@ -1,13 +1,11 @@
+import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { Dayjs } from 'dayjs';
 import { zuoraDateFormat } from '@modules/zuora/utils';
-import {
-	catalog,
-	sandboxProductRatePlanChargeIds,
-} from '../../../../../handlers/discount-api/src/productToDiscountMapping';
 import type { ContributionTestAdditionalOptions } from '../../it-helpers/createGuardianSubscription';
 
 export const contributionSubscribeBody = (
 	subscriptionDate: Dayjs,
+	productCatalog: ProductCatalog,
 	additionOptions?: ContributionTestAdditionalOptions,
 ) => {
 	const paymentOptions = {
@@ -68,16 +66,18 @@ export const contributionSubscribeBody = (
 						{
 							RatePlan: {
 								ProductRatePlanId:
-									catalog.CODE.recurringContribution[billingPeriod],
+									productCatalog.Contribution.ratePlans[
+										billingPeriod === 'Month' ? 'Monthly' : billingPeriod
+									].id,
 							},
 							RatePlanChargeData: [
 								{
 									RatePlanCharge: {
 										Price: additionOptions?.price ?? 100,
 										ProductRatePlanChargeId:
-											sandboxProductRatePlanChargeIds.recurringContribution[
-												billingPeriod
-											],
+											productCatalog.Contribution.ratePlans[
+												billingPeriod === 'Month' ? 'Monthly' : billingPeriod
+											].charges.Contribution.id,
 										EndDateCondition: 'SubscriptionEnd',
 									},
 								},

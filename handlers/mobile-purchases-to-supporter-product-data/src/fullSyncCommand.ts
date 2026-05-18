@@ -1,9 +1,9 @@
 import * as fs from 'node:fs';
 import { chunkArray } from '@modules/arrayFunctions';
 import { sendBatchMessagesToQueue } from '@modules/aws/sqs';
+import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
-import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import { parse } from 'csv-parse/sync';

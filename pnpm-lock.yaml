@@ -358,6 +358,9 @@ importers:
         specifier: 'catalog:'
         version: 3.25.76
     devDependencies:
+      '@redocly/cli':
+        specifier: 2.30.5
+        version: 2.30.5(@opentelemetry/api@1.9.1)(core-js@3.49.0)
       '@types/aws-lambda':
         specifier: ^8.10.147
         version: 8.10.158
@@ -637,6 +640,12 @@ importers:
         specifier: 'catalog:'
         version: 3.25.76
 
+  modules/logger:
+    devDependencies:
+      '@smithy/types':
+        specifier: 4.12.0
+        version: 4.12.0
+
   modules/product-benefits:
     dependencies:
       dayjs:
@@ -686,7 +695,7 @@ importers:
         version: 3.25.76
     devDependencies:
       '@smithy/types':
-        specifier: ^4.9.8
+        specifier: 4.12.0
         version: 4.12.0
       '@types/aws-lambda':
         specifier: ^8.10.147

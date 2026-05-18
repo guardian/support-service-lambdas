@@ -1,4 +1,4 @@
-import { logger } from '@modules/routing/logger';
+import { logger } from '@modules/logger/logger';
 import type { SQSEvent } from 'aws-lambda';
 import { getEnv } from '../../../modules/routing/src/lambdaHandler';
 import type { Services } from '../src';

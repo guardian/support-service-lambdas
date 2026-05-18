@@ -3,8 +3,8 @@
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { logger } from '@modules/logger/logger';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
-import { logger } from '@modules/routing/logger';
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import { zuoraSubscriptionSchema } from '@modules/zuora/types';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';

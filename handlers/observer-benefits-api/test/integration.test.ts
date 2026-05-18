@@ -5,8 +5,8 @@
  *
  * @group integration
  */
+import { logger } from '@modules/logger/logger';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
-import { logger } from '@modules/routing/logger';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 import { isActiveEndpoint } from '../src/isActiveEndpoint';

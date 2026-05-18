@@ -1,0 +1,132 @@
+openapi: '3.0.3'
+info:
+  title: Observer Benefits API
+  description: >
+    Checks whether a Zuora subscription is an active Observer subscription
+    whose billing postcode matches the supplied postcode.
+  version: '1.0.0'
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: 'https://observer-benefits-api.guardianapis.com'
+    description: Production environment
+  - url: 'https://observer-benefits-api.code.dev-guardianapis.com'
+    description: Code environment for testing and development
+security:
+  - apiKey: []
+paths:
+  /is-active:
+    post:
+      operationId: checkActiveSubscription
+      summary: Check if a subscription is an active Observer subscription
+      description: >
+        Looks up the subscription and associated account in Zuora, then returns
+        whether the subscription is an active Observer rate plan and the billing
+        postcode matches the one provided.
+        Postcode comparison is case-insensitive and whitespace-insensitive.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IsActiveRequest'
+            example:
+              subscriptionId: A-S00123456
+              postCode: N1 9GU
+      responses:
+        '200':
+          description: >
+            Always returned when the subscription lookup completes (including
+            when the subscription does not exist or does not match).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IsActiveResponse'
+              examples:
+                active:
+                  summary: Active Observer subscription with matching postcode
+                  value:
+                    isActive: true
+                    renews: '2027-08-01'
+                inactive:
+                  summary: Subscription not active or postcode does not match
+                  value:
+                    isActive: false
+        '400':
+          description: >
+            The request body is missing, is not valid JSON, or is missing
+            required fields.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: An unexpected error occurred.
+
+components:
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key
+  schemas:
+    IsActiveRequest:
+      type: object
+      required:
+        - subscriptionId
+        - postCode
+      properties:
+        subscriptionId:
+          type: string
+          minLength: 1
+          description: The Zuora subscription number (e.g. A-S00123456).
+          example: A-S00123456
+        postCode:
+          type: string
+          minLength: 1
+          description: >
+            The billing postcode to compare against the account's billing address.
+            Comparison is case-insensitive and ignores whitespace.
+          example: N1 9GU
+
+    IsActiveResponse:
+      oneOf:
+        - $ref: '#/components/schemas/IsActiveTrue'
+        - $ref: '#/components/schemas/IsActiveFalse'
+      discriminator:
+        propertyName: isActive
+
+    IsActiveTrue:
+      type: object
+      required:
+        - isActive
+        - renews
+      properties:
+        isActive:
+          type: boolean
+          enum: [true]
+        renews:
+          type: string
+          format: date
+          description: The subscription term end date in YYYY-MM-DD format.
+          example: '2027-08-01'
+
+    IsActiveFalse:
+      type: object
+      required:
+        - isActive
+      properties:
+        isActive:
+          type: boolean
+          enum: [false]
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: A human-readable error message.
+          example: Invalid request body - wrong type
+        details:
+          description: Optional additional detail about the error.

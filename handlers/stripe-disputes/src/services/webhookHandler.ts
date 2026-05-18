@@ -1,6 +1,6 @@
+import type { Logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { internalServerError, ok } from '@modules/routing/apiGatewayResponses';
-import type { Logger } from '@modules/routing/logger';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import AWS from 'aws-sdk';
 import {
