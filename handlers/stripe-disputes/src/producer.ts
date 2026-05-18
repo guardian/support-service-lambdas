@@ -1,5 +1,5 @@
-import { badRequest, ok } from '@modules/routing/apiGatewayResponses';
 import { Logger } from '@modules/logger/logger';
+import { badRequest, ok } from '@modules/routing/apiGatewayResponses';
 import { Router } from '@modules/routing/router';
 import { withBodyParser } from '@modules/routing/withParsers';
 import { getSecretValue } from '@modules/secrets-manager/getSecret';
