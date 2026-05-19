@@ -1,4 +1,3 @@
-import { internalServerError } from '@modules/routing/apiGatewayResponses';
 import { logger } from '@modules/logger/logger';
 import { internalServerError } from '@modules/routing/apiGatewayResponses';
 import type {
