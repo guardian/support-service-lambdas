@@ -12,7 +12,7 @@ import { helloRequestEndpoint, helloRequestSchema } from './helloEndpoint';
 export const handler: Handler = Router([
 	{
 		httpMethod: 'POST',
-		path: '/test',
+		path: '/hello',
 		handler: withBodyParser(helloRequestSchema, async (event, path, body) =>
 			helloRequestEndpoint(body),
 		),
