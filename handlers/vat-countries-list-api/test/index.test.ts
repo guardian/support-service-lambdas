@@ -7,9 +7,11 @@ describe('vat-countries-list-api handler', () => {
 		const callHandler = (
 			event: APIGatewayProxyEvent,
 		): Promise<APIGatewayProxyResult> =>
-			(handler as unknown as (
-				e: APIGatewayProxyEvent,
-			) => Promise<APIGatewayProxyResult>)(event);
+			(
+				handler as unknown as (
+					e: APIGatewayProxyEvent,
+				) => Promise<APIGatewayProxyResult>
+			)(event);
 
 		const response = await callHandler({
 			httpMethod: 'GET',

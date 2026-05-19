@@ -9,8 +9,7 @@ export class VatCountriesListApi extends SrStack {
 
 		new SrApiLambda(this, 'Lambda', {
 			lambdaOverrides: {
-				description:
-					'A lambda that returns a list of VAT compliant countries',
+				description: 'A lambda that returns a list of VAT compliant countries',
 			},
 			monitoring: {
 				errorImpact:
