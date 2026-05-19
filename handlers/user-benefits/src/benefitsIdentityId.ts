@@ -3,10 +3,14 @@ import type { UserBenefitsResponse } from '@modules/product-benefits/schemas';
 import { getUserBenefitsExcludingStaff } from '@modules/product-benefits/userBenefits';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
+import {
+	badRequest,
+	buildErrorResponse,
+} from '@modules/routing/apiGatewayResponses';
 import type { Stage } from '@modules/stage';
 import { stageFromEnvironment } from '@modules/stage';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { buildErrorResponse, buildHttpResponse } from './response';
+import { buildHttpResponse } from './response';
 import { getTrialInformation } from './trials';
 
 const stage = stageFromEnvironment();
@@ -41,12 +45,7 @@ export const benefitsIdentityIdHandler = async (
 	try {
 		const identityId = event.pathParameters?.identityId;
 		if (!identityId) {
-			return {
-				statusCode: 400,
-				body: JSON.stringify({
-					message: 'Identity ID missing from request path',
-				}),
-			};
+			return badRequest('Identity ID missing from request path');
 		}
 
 		const userBenefitsResponse = await getUserBenefitsResponse(
