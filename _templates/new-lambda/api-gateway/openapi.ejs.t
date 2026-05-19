@@ -20,17 +20,17 @@ security:
   - apiKey: []
 
 paths:
-  /test:
+  /hello:
     post:
-      operationId: test
-      summary: Test endpoint
-      description: A simple test endpoint that returns a greeting.
+      operationId: hello
+      summary: Hello endpoint
+      description: A simple endpoint that returns a greeting.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TestRequest'
+              $ref: '#/components/schemas/HelloRequest'
             example:
               name: World
       responses:
@@ -39,7 +39,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TestResponse'
+                $ref: '#/components/schemas/HelloResponse'
               example:
                 message: Hello World!
         '400':
@@ -68,7 +68,7 @@ components:
       description: API key for authenticating requests.
 
   schemas:
-    TestRequest:
+    HelloRequest:
       type: object
       required:
         - name
@@ -78,7 +78,7 @@ components:
           description: The name to greet
           example: World
 
-    TestResponse:
+    HelloResponse:
       type: object
       required:
         - message
