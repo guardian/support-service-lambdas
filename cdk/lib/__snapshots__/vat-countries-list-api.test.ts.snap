@@ -132,7 +132,7 @@ exports[`The Vat countries list api stack matches the snapshot 1`] = `
           },
           "S3Key": "support/CODE/vat-countries-list-api/vat-countries-list-api.zip",
         },
-        "Description": "A lambda that enables the addition of discounts to existing subscriptions",
+        "Description": "A lambda that returns a list of VAT compliant countries",
         "Environment": {
           "Variables": {
             "APP": "vat-countries-list-api",
@@ -807,7 +807,7 @@ exports[`The Vat countries list api stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "vat-countries-list-api returned a 5XX response. Search the logs below for "error" for more information. Impact: an eligible user may not have been offered a discount during the cancellation flow",
+        "AlarmDescription": "vat-countries-list-api returned a 5XX response. Search the logs below for "error" for more information. Impact: users from VAT compliant countries will see the choice cards in epics/banners and https://support.theguardian.com/contribute screen",
         "AlarmName": "vat-countries-list-api-PROD 5XX errors",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
@@ -950,7 +950,7 @@ exports[`The Vat countries list api stack matches the snapshot 2`] = `
           },
           "S3Key": "support/PROD/vat-countries-list-api/vat-countries-list-api.zip",
         },
-        "Description": "A lambda that enables the addition of discounts to existing subscriptions",
+        "Description": "A lambda that returns a list of VAT compliant countries",
         "Environment": {
           "Variables": {
             "APP": "vat-countries-list-api",
