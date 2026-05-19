@@ -522,6 +522,16 @@ importers:
         specifier: ^8.10.147
         version: 8.10.158
 
+  handlers/user-subscription-api:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.147
+        version: 8.10.158
+
   handlers/write-off-unpaid-invoices:
     dependencies:
       '@aws-sdk/client-secrets-manager':

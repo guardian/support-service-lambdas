@@ -419,6 +419,16 @@ const observerBenefitsApi: HandlerDefinition = {
 	},
 };
 
+const userSubscriptionApi: HandlerDefinition = {
+	name: 'user-subscription-api',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
+};
+
 // MARKER new-lambda: buildcheck-const
 
 const srcOnly = {
@@ -675,6 +685,7 @@ export const build: BuildDefinition = {
 		zuoraSalesforceLinkRemover,
 		multipleAccountApi,
 		observerBenefitsApi,
+		userSubscriptionApi,
 		// MARKER new-lambda: buildcheck-reference
 	],
 
