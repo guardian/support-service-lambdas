@@ -1,6 +1,8 @@
 import { ValidationError } from '@modules/errors';
 import { prettyPrint } from '@modules/prettyPrint';
+import { stringify } from '@modules/stringify';
 import type { APIGatewayProxyResult } from 'aws-lambda';
+import type { z } from 'zod';
 
 export function badRequest(message: string): APIGatewayProxyResult {
 	return {
@@ -16,9 +18,20 @@ export function internalServerError(): APIGatewayProxyResult {
 	};
 }
 
-export function ok(body: unknown): APIGatewayProxyResult {
+/**
+ * Return a 200 OK response with the provided body.
+ * @param body
+ * @param schema - an optional Zod schema, passing this will ensure that we only return fields that are defined in the schema
+ */
+export function ok<T extends Record<string, unknown>>(
+	body: T,
+	schema?: z.ZodType<T>,
+): APIGatewayProxyResult {
+	const stringBody = schema
+		? stringify(schema.parse(body), schema)
+		: JSON.stringify(body);
 	return {
-		body: JSON.stringify(body),
+		body: stringBody,
 		statusCode: 200,
 	};
 }
@@ -26,15 +39,20 @@ export function ok(body: unknown): APIGatewayProxyResult {
 /**
  * Returns a 201 Created response. Use when a new resource has been successfully created.
  * @param body - The response body to return, typically containing details of the newly created resource.
- * @param location - Optional URL of the newly created resource, set as the Location response header.
+ * @param options - An options object which can contain a URL of the newly created resource,
+ * set as the Location response header, and/or a Zod schema to ensure only defined fields are
+ * returned in the response body.
  */
-export function created(
-	body: unknown,
-	location?: string,
+export function created<T extends Record<string, unknown>>(
+	body: T,
+	options?: { location?: string; schema?: z.ZodType<T> },
 ): APIGatewayProxyResult {
+	const stringBody = options?.schema
+		? stringify(options.schema.parse(body), options.schema)
+		: JSON.stringify(body);
 	return {
-		headers: location ? { Location: location } : undefined,
-		body: JSON.stringify(body),
+		headers: options?.location ? { Location: options.location } : undefined,
+		body: stringBody,
 		statusCode: 201,
 	};
 }

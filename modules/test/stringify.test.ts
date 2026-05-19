@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { stringify } from '../src/stringify';
+import { stringify } from '@modules/stringify';
 
 test('stringify should not serialise any stray values in the object, for security reasons', () => {
 	const testSchema = z.object({
