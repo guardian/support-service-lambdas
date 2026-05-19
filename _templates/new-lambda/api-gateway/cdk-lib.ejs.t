@@ -23,6 +23,10 @@ export class <%= PascalCase %> extends SrStack {
         				errorImpact:
         					'an eligible user may not have been offered a discount during the cancellation flow',
         			},
+        			throttle: {
+                        rateLimit: 20,
+                        burstLimit: 10,
+                    },
         			<% if (includeApiKey !== 'Y'){ %>
         			isPublic: true, // Don't create an API Key for this lambda
         			<% } %>
