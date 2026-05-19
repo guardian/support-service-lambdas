@@ -418,6 +418,22 @@ const observerBenefitsApi: HandlerDefinition = {
 	},
 };
 
+const userSubscriptionApi: HandlerDefinition = {
+	name: 'user-subscription-api',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+
+		...devDeps['@redocly/cli'],
+	},
+	extraScripts: {
+		...openApiScripts,
+		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr user-subscription-api.zip ./*.js.map ./*.js`,
+	},
+};
+
 // MARKER new-lambda: buildcheck-const
 
 const moduleAws: ModuleDefinition = {
@@ -669,6 +685,7 @@ export const build: BuildDefinition = {
 		zuoraSalesforceLinkRemover,
 		multipleAccountApi,
 		observerBenefitsApi,
+		userSubscriptionApi,
 		// MARKER new-lambda: buildcheck-reference
 	],
 
