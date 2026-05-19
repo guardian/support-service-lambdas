@@ -522,6 +522,16 @@ importers:
         specifier: ^8.10.147
         version: 8.10.158
 
+  handlers/vat-countries-list-api:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.147
+        version: 8.10.158
+
   handlers/write-off-unpaid-invoices:
     dependencies:
       '@aws-sdk/client-secrets-manager':
@@ -768,6 +778,8 @@ importers:
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
+
+  modules/vat-countries-list: {}
 
   modules/zuora:
     dependencies:

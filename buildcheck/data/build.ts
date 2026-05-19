@@ -418,6 +418,16 @@ const observerBenefitsApi: HandlerDefinition = {
 	},
 };
 
+const vatCountriesListApi: HandlerDefinition = {
+	name: 'vat-countries-list-api',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
+};
+
 // MARKER new-lambda: buildcheck-const
 
 const moduleAws: ModuleDefinition = {
@@ -669,6 +679,7 @@ export const build: BuildDefinition = {
 		zuoraSalesforceLinkRemover,
 		multipleAccountApi,
 		observerBenefitsApi,
+		vatCountriesListApi,
 		// MARKER new-lambda: buildcheck-reference
 	],
 

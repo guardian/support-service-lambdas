@@ -1,0 +1,25 @@
+{
+  "name": "vat-countries-list-api",
+  "scripts": {
+    "test": "jest --group=-integration",
+    "it-test": "jest --group=integration",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
+    "check-formatting": "prettier --check \"**/*.ts\"",
+    "fix-formatting": "prettier --write \"**/*.ts\"",
+    "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/index.ts --sourcemap --source-root=/support-service-lambdas/handlers/vat-countries-list-api/target/",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr vat-countries-list-api.zip ./*.js.map ./*.js",
+    "cdk:test": "pnpm --filter cdk test vat-countries-list-api",
+    "cdk:test-update": "pnpm --filter cdk test-update vat-countries-list-api",
+    "update-lambda": "../../update-lambda.sh \"vat-countries-list-api\"",
+    "update-stack": "../../update-stack.sh \"vat-countries-list-api\""
+  },
+  "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
+  "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.147"
+  }
+}
