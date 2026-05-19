@@ -13,8 +13,14 @@ export const testRequestSchema = z.object({
 });
 export type TestRequest = z.infer<typeof testRequestSchema>;
 
+const testResponseSchema = z.object({
+	message: z.string(),
+});
+
 export function testRequestEndpoint(
 	body: TestRequest,
 ): Promise<APIGatewayProxyResult> {
-	return Promise.resolve(ok(`Hello ${body.name}!`));
+	return Promise.resolve(
+		ok({ message: `Hello ${body.name}!` }, testResponseSchema),
+	);
 }
