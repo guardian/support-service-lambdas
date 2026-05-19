@@ -16,26 +16,27 @@ eg. from the root of the repo run
 ### Api Gateway with a custom domain name
 We have a code generation script (using [Hygen](https://www.hygen.io/)) which will generate a scaffold for new lambdas 
 with an API Gateway front end and a custom domain name. To use it run `pnpm new-lambda` at the root of the repo, you will be prompted to 
-- provide a name for 
-your new lambda - the convention is to use a hyphenated name such as `my-new-lambda`.
+- provide a name for your new lambda - the convention is to use a hyphenated name such as `my-new-lambda`.
 - decide whether to create an api key for your lambda - the default is to do so.
+- decide whether to add example schemas for JSON reads/writes - the default is to do so
 
-This will then carry out the following actions:
-1. create a new subdirectory of `\handlers` with the name of your new lambda
-1. add a `package.json` a `riff-raff.yaml`, a `tsconfig.json` and a `src\index.ts` file to this directory
-1. add a new CDK lib definition for your new lambda and the related infrastructure into the `cdk\libs` directory
+This will then make changes to your workspace which can be seen in the git status:
+1. create a new subdirectory of `handlers` with the name of your new lambda
+1. add a `src` and `test` folder with a basic `index.ts` and example tests.
+1. add the definition to `buildcheck/build.ts` and generate the handler build files
+1. add a new CDK lib definition for your new lambda and the related infrastructure into the `cdk/lib` directory
 1. create a new instance of that lib in [cdk.ts](https://github.com/guardian/support-service-lambdas/blob/1d30b16d34554d780f2e21018bf7ab6ac02209e4/cdk/bin/cdk.ts)
-1. add the new project to [ci-typescript.yml](https://github.com/guardian/support-service-lambdas/blob/647299d94b471d0065030bce692a4631078346bb/.github/workflows/ci-typescript.yml)
-so that it is built in Github
+1. add the new project to [ci-typescript.yml](https://github.com/guardian/support-service-lambdas/blob/647299d94b471d0065030bce692a4631078346bb/.github/workflows/ci-typescript.yml) so that it is built automatically in Github Actions
 
-You can test this has worked by pushing your branch and deploying to code (take note of important deployment note above).
+You can test this has worked by pushing your branch and deploying it to code using riffraff (take note of important deployment note above).
+
 You should then be able to call your lambda with cUrl 
 ```shell
 curl --location 'https://my-new-lambda-code.support.guardianapis.com/prod'
 ```
 and receive a 200 response with the body 'Hello World'.
 
-You can then go ahead and write your lambda in `my-new-lambda\index.ts`
+You can then go ahead and write your lambda in `my-new-lambda/index.ts`
 
 
 ## Scala lambdas

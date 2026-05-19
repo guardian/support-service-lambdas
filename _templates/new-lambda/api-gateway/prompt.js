@@ -13,4 +13,11 @@ module.exports = [
 		message: 'Should I generate an API key for this lambda? (Y/n)',
 		default: 'Y',
 	},
+	{
+		type: 'input',
+		name: 'jsonApi',
+		message:
+			'Should I generate an example JSON schema and types for your API input/output? (Y/n)',
+		default: 'Y',
+	},
 ];
