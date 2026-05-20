@@ -19,7 +19,10 @@ export const handler: Handler = Router([
 async function handleRequest(
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> {
-	logger.log('Received GET / request for VAT countries list', event);
+	logger.log(
+		'Received GET / request for contributions-only countries list',
+		event,
+	);
 
 	return Promise.resolve(ok({ countries }));
 }
