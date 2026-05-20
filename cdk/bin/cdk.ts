@@ -10,6 +10,7 @@ import {
 	membershipCertificateId,
 	membershipHostedZoneId,
 } from '../lib/constants';
+import { ContributionsOnlyCountriesApi } from '../lib/contributions-only-countries-api';
 import { DiscountApi } from '../lib/discount-api';
 import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
@@ -155,6 +156,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	NewSubscriptionApi,
 	MultipleAccountApi,
 	ObserverBenefitsApi,
+	ContributionsOnlyCountriesApi,
 	// MARKER new-lambda: cdk-bin
 ];
 
