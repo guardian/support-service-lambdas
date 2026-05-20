@@ -454,6 +454,7 @@ const moduleEmail: ModuleDefinition = {
 	name: 'email',
 	dependencies: {
 		...dep['@aws-sdk/client-sqs'],
+		...dep['dayjs'],
 	},
 };
 
