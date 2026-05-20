@@ -1,0 +1,26 @@
+# MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/riff-raff.yaml.ts
+stacks:
+  - support
+regions:
+  - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  gao-test-lambda-cloudformation:
+    type: cloud-formation
+    app: gao-test-lambda
+    parameters:
+      templateStagePaths:
+        CODE: gao-test-lambda-CODE.template.json
+        PROD: gao-test-lambda-PROD.template.json
+  gao-test-lambda:
+    type: aws-lambda
+    parameters:
+      fileName: gao-test-lambda.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+        - gao-test-lambda-
+    dependencies:
+      - gao-test-lambda-cloudformation

@@ -444,6 +444,22 @@ const userSubscriptionsApi: HandlerDefinition = {
 	},
 };
 
+const gaoTestLambda: HandlerDefinition = {
+	name: 'gao-test-lambda',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+
+		...devDeps['@redocly/cli'],
+	},
+	extraScripts: {
+		...openApiScripts,
+		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr gao-test-lambda.zip ./*.js.map ./*.js`,
+	},
+};
+
 // MARKER new-lambda: buildcheck-const
 
 const moduleAws: ModuleDefinition = {
@@ -697,6 +713,7 @@ export const build: BuildDefinition = {
 		observerBenefitsApi,
 		contributionsOnlyCountriesApi,
 		userSubscriptionsApi,
+		gaoTestLambda,
 		// MARKER new-lambda: buildcheck-reference
 	],
 
