@@ -8,23 +8,28 @@ import { deleteRepoFiles, readLines, writeFiles } from './util/file-writer';
 
 // main entry point from pnpm
 try {
-	const { mode, repoRoot } = parseArguments(process.argv);
+	const { repoRoot, ...otherArgs } = parseArguments(process.argv);
 
-	const previouslyGeneratedFiles = extractGeneratedFilenames(
-		readLines(repoRoot, warningFileName),
-	);
-	console.log('previouslyGeneratedFiles to delete', previouslyGeneratedFiles);
-
-	switch (mode) {
+	switch (otherArgs.mode) {
 		case 'generate': {
+			const previouslyGeneratedFiles = extractGeneratedFilenames(
+				readLines(repoRoot, warningFileName),
+			);
 			deleteRepoFiles(repoRoot, previouslyGeneratedFiles);
-			const files = generate();
-			writeFiles(repoRoot, files);
+			writeFiles(repoRoot, generate());
 			break;
 		}
-		case 'clean':
+		case 'clean': {
+			const previouslyGeneratedFiles = extractGeneratedFilenames(
+				readLines(repoRoot, warningFileName),
+			);
 			deleteRepoFiles(repoRoot, previouslyGeneratedFiles);
 			break;
+		}
+		case 'seed':
+			throw new Error(
+				`Seed command not yet implemented: ${otherArgs.seedName}`,
+			);
 	}
 } catch (error) {
 	console.error(error);
