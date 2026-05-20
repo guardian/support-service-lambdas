@@ -1,6 +1,6 @@
-import type { IsoCountry } from '@modules/internationalisation/country';
+import type { IsoCountry } from './country';
 
-export const countries: IsoCountry[] = [
+export const contributionsOnlyCountries: IsoCountry[] = [
 	'RS',
 	'EG',
 	'PK',

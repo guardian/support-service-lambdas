@@ -460,11 +460,6 @@ const moduleBigquery: ModuleDefinition = {
 	},
 };
 
-const moduleContributionsOnlyCountriesList: ModuleDefinition = {
-	name: 'contributions-only-countries-list',
-	extraScripts: srcOnly,
-};
-
 const moduleEmail: ModuleDefinition = {
 	name: 'email',
 	dependencies: {
@@ -691,7 +686,6 @@ export const build: BuildDefinition = {
 	modules: [
 		moduleAws,
 		moduleBigquery,
-		moduleContributionsOnlyCountriesList,
 		moduleEmail,
 		moduleGuardianSubscription,
 		moduleIdentity,

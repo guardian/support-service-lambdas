@@ -1,4 +1,4 @@
-import { countries } from '@modules/contributions-only-countries-list';
+import { contributionsOnlyCountries } from '@modules/internationalisation/contributionsOnlyCountries';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { handler } from '../src/index';
 
@@ -15,8 +15,8 @@ describe('contributions-only-countries-api handler', () => {
 
 		const response = await callHandler({
 			httpMethod: 'GET',
-			resource: '/',
-			path: '/',
+			resource: '/contributions-only-countries',
+			path: '/contributions-only-countries',
 			headers: {},
 			multiValueHeaders: {},
 			queryStringParameters: null,
@@ -29,6 +29,8 @@ describe('contributions-only-countries-api handler', () => {
 		} as APIGatewayProxyEvent);
 
 		expect(response.statusCode).toBe(200);
-		expect(JSON.parse(response.body)).toEqual({ countries });
+		expect(JSON.parse(response.body)).toEqual({
+			contributionsOnlyCountries,
+		});
 	});
 });

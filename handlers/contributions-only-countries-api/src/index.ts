@@ -1,4 +1,4 @@
-import { countries } from '@modules/contributions-only-countries-list';
+import { contributionsOnlyCountries } from '@modules/internationalisation/contributionsOnlyCountries';
 import { logger } from '@modules/logger/logger';
 import { ok } from '@modules/routing/apiGatewayResponses';
 import { Router } from '@modules/routing/router';
@@ -8,10 +8,12 @@ import type {
 	Handler,
 } from 'aws-lambda';
 
+const contributionsOnlyCountriesPath = '/contributions-only-countries';
+
 export const handler: Handler = Router([
 	{
 		httpMethod: 'GET',
-		path: '/',
+		path: contributionsOnlyCountriesPath,
 		handler: handleRequest,
 	},
 ]);
@@ -20,9 +22,9 @@ async function handleRequest(
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> {
 	logger.log(
-		'Received GET / request for contributions-only countries list',
+		`Received GET ${event.path} request for contributions-only countries list`,
 		event,
 	);
 
-	return Promise.resolve(ok({ countries }));
+	return Promise.resolve(ok({ contributionsOnlyCountries }));
 }
