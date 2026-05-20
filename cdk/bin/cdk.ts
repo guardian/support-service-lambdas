@@ -19,6 +19,7 @@ import { MetricPushApi } from '../lib/metric-push-api';
 import { MobilePurchasesToSupporterProductData } from '../lib/mobile-purchases-to-supporter-product-data';
 import { MParticleApi } from '../lib/mparticle-api';
 import { MultipleAccountApi } from '../lib/multiple-account-api';
+import { NastiaTestApiEndpoint } from '../lib/nastia-test-api-endpoint';
 import { NegativeInvoicesProcessor } from '../lib/negative-invoices-processor';
 import type { NewProductApiProps } from '../lib/new-product-api';
 import { NewProductApi } from '../lib/new-product-api';
@@ -159,6 +160,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	ObserverBenefitsApi,
 	ContributionsOnlyCountriesApi,
 	UserSubscriptionsApi,
+	NastiaTestApiEndpoint,
 	// MARKER new-lambda: cdk-bin
 ];
 

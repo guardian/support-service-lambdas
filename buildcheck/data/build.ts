@@ -444,6 +444,22 @@ const userSubscriptionsApi: HandlerDefinition = {
 	},
 };
 
+const nastiaTestApiEndpoint: HandlerDefinition = {
+	name: 'nastia-test-api-endpoint',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+
+		...devDeps['@redocly/cli'],
+	},
+	extraScripts: {
+		...openApiScripts,
+		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr nastia-test-api-endpoint.zip ./*.js.map ./*.js`,
+	},
+};
+
 // MARKER new-lambda: buildcheck-const
 
 const moduleAws: ModuleDefinition = {
@@ -697,6 +713,7 @@ export const build: BuildDefinition = {
 		observerBenefitsApi,
 		contributionsOnlyCountriesApi,
 		userSubscriptionsApi,
+		nastiaTestApiEndpoint,
 		// MARKER new-lambda: buildcheck-reference
 	],
 

@@ -1,0 +1,28 @@
+{
+  "name": "nastia-test-api-endpoint",
+  "scripts": {
+    "test": "jest --group=-integration",
+    "it-test": "jest --group=integration",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
+    "check-formatting": "prettier --check \"**/*.ts\"",
+    "fix-formatting": "prettier --write \"**/*.ts\"",
+    "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/index.ts --sourcemap --source-root=/support-service-lambdas/handlers/nastia-test-api-endpoint/target/",
+    "package": "pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr nastia-test-api-endpoint.zip ./*.js.map ./*.js",
+    "cdk:test": "pnpm --filter cdk test nastia-test-api-endpoint",
+    "cdk:test-update": "pnpm --filter cdk test-update nastia-test-api-endpoint",
+    "update-lambda": "../../update-lambda.sh \"nastia-test-api-endpoint\"",
+    "update-stack": "../../update-stack.sh \"nastia-test-api-endpoint\"",
+    "openapi:lint": "redocly lint openapi.yaml",
+    "openapi:preview": "redocly build-docs openapi.yaml --output target/docs/index.html && open target/docs/index.html"
+  },
+  "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
+  "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.147",
+    "@redocly/cli": "2.30.5"
+  }
+}

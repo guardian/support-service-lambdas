@@ -308,6 +308,19 @@ importers:
         specifier: ^8.10.147
         version: 8.10.158
 
+  handlers/nastia-test-api-endpoint:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@redocly/cli':
+        specifier: 2.30.5
+        version: 2.30.5(@opentelemetry/api@1.9.1)(core-js@3.49.0)
+      '@types/aws-lambda':
+        specifier: ^8.10.147
+        version: 8.10.158
+
   handlers/negative-invoices-processor:
     dependencies:
       '@google-cloud/bigquery':

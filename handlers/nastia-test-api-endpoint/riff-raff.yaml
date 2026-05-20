@@ -1,0 +1,26 @@
+# MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/riff-raff.yaml.ts
+stacks:
+  - support
+regions:
+  - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  nastia-test-api-endpoint-cloudformation:
+    type: cloud-formation
+    app: nastia-test-api-endpoint
+    parameters:
+      templateStagePaths:
+        CODE: nastia-test-api-endpoint-CODE.template.json
+        PROD: nastia-test-api-endpoint-PROD.template.json
+  nastia-test-api-endpoint:
+    type: aws-lambda
+    parameters:
+      fileName: nastia-test-api-endpoint.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+        - nastia-test-api-endpoint-
+    dependencies:
+      - nastia-test-api-endpoint-cloudformation
