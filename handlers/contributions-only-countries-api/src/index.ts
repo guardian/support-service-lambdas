@@ -1,7 +1,7 @@
+import { countries } from '@modules/contributions-only-countries-list';
 import { logger } from '@modules/logger/logger';
 import { ok } from '@modules/routing/apiGatewayResponses';
 import { Router } from '@modules/routing/router';
-import { countries } from '@modules/vat-countries-list';
 import type {
 	APIGatewayProxyEvent,
 	APIGatewayProxyResult,

@@ -1,1 +1,0 @@
-export { countries } from './src/VATComplianceCountriesList';

@@ -418,8 +418,8 @@ const observerBenefitsApi: HandlerDefinition = {
 	},
 };
 
-const vatCountriesListApi: HandlerDefinition = {
-	name: 'vat-countries-list-api',
+const contributionsOnlyCountriesApi: HandlerDefinition = {
+	name: 'contributions-only-countries-api',
 	dependencies: {
 		...dep.zod,
 	},
@@ -458,6 +458,11 @@ const moduleBigquery: ModuleDefinition = {
 		...devDeps['jest'],
 		...devDeps['ts-jest'],
 	},
+};
+
+const moduleContributionsOnlyCountriesList: ModuleDefinition = {
+	name: 'contributions-only-countries-list',
+	extraScripts: srcOnly,
 };
 
 const moduleEmail: ModuleDefinition = {
@@ -679,13 +684,14 @@ export const build: BuildDefinition = {
 		zuoraSalesforceLinkRemover,
 		multipleAccountApi,
 		observerBenefitsApi,
-		vatCountriesListApi,
+		contributionsOnlyCountriesApi,
 		// MARKER new-lambda: buildcheck-reference
 	],
 
 	modules: [
 		moduleAws,
 		moduleBigquery,
+		moduleContributionsOnlyCountriesList,
 		moduleEmail,
 		moduleGuardianSubscription,
 		moduleIdentity,

@@ -1,5 +1,5 @@
 {
-  "name": "vat-countries-list",
+  "name": "contributions-only-countries-list",
   "scripts": {
     "test": "jest --group=-integration --passWithNoTests",
     "it-test": "jest --group=integration",

@@ -1,9 +1,9 @@
-import { countries } from '@modules/vat-countries-list';
+import { countries } from '@modules/contributions-only-countries-list';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { handler } from '../src/index';
 
-describe('vat-countries-list-api handler', () => {
-	it('returns VAT countries', async () => {
+describe('contributions-only-countries-api handler', () => {
+	it('returns contributions-only countries', async () => {
 		const callHandler = (
 			event: APIGatewayProxyEvent,
 		): Promise<APIGatewayProxyResult> =>

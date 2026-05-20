@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`The Vat countries list api stack matches the snapshot 1`] = `
+exports[`The contributions-only countries list api stack matches the snapshot 1`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
@@ -61,7 +61,7 @@ exports[`The Vat countries list api stack matches the snapshot 1`] = `
     "DNSRecord": {
       "Properties": {
         "HostedZoneId": "Z3KO35ELNWZMSX",
-        "Name": "vat-countries-list-api-code.support.guardianapis.com",
+        "Name": "contributions-only-countries-api-code.support.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -77,7 +77,7 @@ exports[`The Vat countries list api stack matches the snapshot 1`] = `
     },
     "DomainName": {
       "Properties": {
-        "DomainName": "vat-countries-list-api-code.support.guardianapis.com",
+        "DomainName": "contributions-only-countries-api-code.support.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -98,7 +98,7 @@ exports[`The Vat countries list api stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "vat-countries-list-api",
+            "Value": "contributions-only-countries-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -130,18 +130,18 @@ exports[`The Vat countries list api stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "support/CODE/vat-countries-list-api/vat-countries-list-api.zip",
+          "S3Key": "support/CODE/contributions-only-countries-api/contributions-only-countries-api.zip",
         },
-        "Description": "A lambda that returns a list of VAT compliant countries",
+        "Description": "A lambda that returns a list of countries that are contributions-only",
         "Environment": {
           "Variables": {
-            "APP": "vat-countries-list-api",
+            "APP": "contributions-only-countries-api",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
           },
         },
-        "FunctionName": "vat-countries-list-api-CODE",
+        "FunctionName": "contributions-only-countries-api-CODE",
         "Handler": "index.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
@@ -157,7 +157,7 @@ exports[`The Vat countries list api stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "vat-countries-list-api",
+            "Value": "contributions-only-countries-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -183,11 +183,11 @@ exports[`The Vat countries list api stack matches the snapshot 1`] = `
     "LambdaRestApi687C4D83": {
       "Properties": {
         "Description": "API Gateway created by CDK",
-        "Name": "vat-countries-list-api-CODE",
+        "Name": "contributions-only-countries-api-CODE",
         "Tags": [
           {
             "Key": "App",
-            "Value": "vat-countries-list-api",
+            "Value": "contributions-only-countries-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -209,7 +209,7 @@ exports[`The Vat countries list api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::RestApi",
     },
-    "LambdaRestApiANYApiPermissionTestvatcountrieslistapiCODELambdaRestApi670295C6ANY96C6AAAC": {
+    "LambdaRestApiANYApiPermissionTestcontributionsonlycountriesapiCODELambdaRestApi88CD51D0ANY789DDA45": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -246,7 +246,7 @@ exports[`The Vat countries list api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "LambdaRestApiANYApiPermissionvatcountrieslistapiCODELambdaRestApi670295C6ANY5D918B2B": {
+    "LambdaRestApiANYApiPermissioncontributionsonlycountriesapiCODELambdaRestApi88CD51D0ANY7BEC73DC": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -378,7 +378,7 @@ exports[`The Vat countries list api stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "vat-countries-list-api",
+            "Value": "contributions-only-countries-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -401,7 +401,7 @@ exports[`The Vat countries list api stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "LambdaRestApiDeployment953190891e15ee164c52f4e49ed886395d80bd22": {
+    "LambdaRestApiDeployment953190894fc22401a079ce8b559e3118b4f85a76": {
       "DependsOn": [
         "LambdaRestApiproxyANY486C4D1F",
         "LambdaRestApiproxy22103CFD",
@@ -421,7 +421,7 @@ exports[`The Vat countries list api stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "LambdaRestApiDeployment953190891e15ee164c52f4e49ed886395d80bd22",
+          "Ref": "LambdaRestApiDeployment953190894fc22401a079ce8b559e3118b4f85a76",
         },
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",
@@ -430,7 +430,7 @@ exports[`The Vat countries list api stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "vat-countries-list-api",
+            "Value": "contributions-only-countries-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -507,7 +507,7 @@ exports[`The Vat countries list api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::Method",
     },
-    "LambdaRestApiproxyANYApiPermissionTestvatcountrieslistapiCODELambdaRestApi670295C6ANYproxyE0989214": {
+    "LambdaRestApiproxyANYApiPermissionTestcontributionsonlycountriesapiCODELambdaRestApi88CD51D0ANYproxy3467ECAB": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -544,7 +544,7 @@ exports[`The Vat countries list api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "LambdaRestApiproxyANYApiPermissionvatcountrieslistapiCODELambdaRestApi670295C6ANYproxy0972D948": {
+    "LambdaRestApiproxyANYApiPermissioncontributionsonlycountriesapiCODELambdaRestApi88CD51D0ANYproxyF0683CA7": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -616,7 +616,7 @@ exports[`The Vat countries list api stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "vat-countries-list-api",
+            "Value": "contributions-only-countries-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -677,7 +677,7 @@ exports[`The Vat countries list api stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/support/CODE/vat-countries-list-api/vat-countries-list-api.zip",
+                      "/support/CODE/contributions-only-countries-api/contributions-only-countries-api.zip",
                     ],
                   ],
                 },
@@ -698,7 +698,7 @@ exports[`The Vat countries list api stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/support/vat-countries-list-api",
+                    ":parameter/CODE/support/contributions-only-countries-api",
                   ],
                 ],
               },
@@ -721,7 +721,7 @@ exports[`The Vat countries list api stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/support/vat-countries-list-api/*",
+                    ":parameter/CODE/support/contributions-only-countries-api/*",
                   ],
                 ],
               },
@@ -742,7 +742,7 @@ exports[`The Vat countries list api stack matches the snapshot 1`] = `
 }
 `;
 
-exports[`The Vat countries list api stack matches the snapshot 2`] = `
+exports[`The contributions-only countries list api stack matches the snapshot 2`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
@@ -807,13 +807,13 @@ exports[`The Vat countries list api stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "vat-countries-list-api returned a 5XX response. Search the logs below for "error" for more information. Impact: users from VAT compliant countries will see the choice cards in epics/banners and https://support.theguardian.com/contribute screen",
-        "AlarmName": "vat-countries-list-api-PROD 5XX errors",
+        "AlarmDescription": "contributions-only-countries-api returned a 5XX response. Search the logs below for "error" for more information. Impact: users from contributions-only countries will see the choice cards in epics/banners and support site",
+        "AlarmName": "contributions-only-countries-api-PROD 5XX errors",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
             "Name": "ApiName",
-            "Value": "vat-countries-list-api-PROD",
+            "Value": "contributions-only-countries-api-PROD",
           },
         ],
         "EvaluationPeriods": 1,
@@ -824,7 +824,7 @@ exports[`The Vat countries list api stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "vat-countries-list-api",
+            "Value": "contributions-only-countries-api",
           },
           {
             "Key": "DiagnosticLinks",
@@ -879,7 +879,7 @@ exports[`The Vat countries list api stack matches the snapshot 2`] = `
     "DNSRecord": {
       "Properties": {
         "HostedZoneId": "Z3KO35ELNWZMSX",
-        "Name": "vat-countries-list-api.support.guardianapis.com",
+        "Name": "contributions-only-countries-api.support.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -895,7 +895,7 @@ exports[`The Vat countries list api stack matches the snapshot 2`] = `
     },
     "DomainName": {
       "Properties": {
-        "DomainName": "vat-countries-list-api.support.guardianapis.com",
+        "DomainName": "contributions-only-countries-api.support.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -916,7 +916,7 @@ exports[`The Vat countries list api stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "vat-countries-list-api",
+            "Value": "contributions-only-countries-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -948,18 +948,18 @@ exports[`The Vat countries list api stack matches the snapshot 2`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "support/PROD/vat-countries-list-api/vat-countries-list-api.zip",
+          "S3Key": "support/PROD/contributions-only-countries-api/contributions-only-countries-api.zip",
         },
-        "Description": "A lambda that returns a list of VAT compliant countries",
+        "Description": "A lambda that returns a list of countries that are contributions-only",
         "Environment": {
           "Variables": {
-            "APP": "vat-countries-list-api",
+            "APP": "contributions-only-countries-api",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",
           },
         },
-        "FunctionName": "vat-countries-list-api-PROD",
+        "FunctionName": "contributions-only-countries-api-PROD",
         "Handler": "index.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
@@ -975,7 +975,7 @@ exports[`The Vat countries list api stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "vat-countries-list-api",
+            "Value": "contributions-only-countries-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -1001,11 +1001,11 @@ exports[`The Vat countries list api stack matches the snapshot 2`] = `
     "LambdaRestApi687C4D83": {
       "Properties": {
         "Description": "API Gateway created by CDK",
-        "Name": "vat-countries-list-api-PROD",
+        "Name": "contributions-only-countries-api-PROD",
         "Tags": [
           {
             "Key": "App",
-            "Value": "vat-countries-list-api",
+            "Value": "contributions-only-countries-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -1027,7 +1027,7 @@ exports[`The Vat countries list api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::RestApi",
     },
-    "LambdaRestApiANYApiPermissionTestvatcountrieslistapiPRODLambdaRestApiDFA07F97ANYB7A31BC9": {
+    "LambdaRestApiANYApiPermissionTestcontributionsonlycountriesapiPRODLambdaRestApi8AF286C2ANY7B117DD8": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -1064,7 +1064,7 @@ exports[`The Vat countries list api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "LambdaRestApiANYApiPermissionvatcountrieslistapiPRODLambdaRestApiDFA07F97ANY4C19C4DF": {
+    "LambdaRestApiANYApiPermissioncontributionsonlycountriesapiPRODLambdaRestApi8AF286C2ANY7A3C63E5": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -1196,7 +1196,7 @@ exports[`The Vat countries list api stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "vat-countries-list-api",
+            "Value": "contributions-only-countries-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -1219,7 +1219,7 @@ exports[`The Vat countries list api stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "LambdaRestApiDeployment95319089b3e0492abc2b8e88eff38c2a524b5ba8": {
+    "LambdaRestApiDeployment95319089977580f54d2b9cd12c270fd360159028": {
       "DependsOn": [
         "LambdaRestApiproxyANY486C4D1F",
         "LambdaRestApiproxy22103CFD",
@@ -1239,7 +1239,7 @@ exports[`The Vat countries list api stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "LambdaRestApiDeployment95319089b3e0492abc2b8e88eff38c2a524b5ba8",
+          "Ref": "LambdaRestApiDeployment95319089977580f54d2b9cd12c270fd360159028",
         },
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",
@@ -1248,7 +1248,7 @@ exports[`The Vat countries list api stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "vat-countries-list-api",
+            "Value": "contributions-only-countries-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -1325,7 +1325,7 @@ exports[`The Vat countries list api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::Method",
     },
-    "LambdaRestApiproxyANYApiPermissionTestvatcountrieslistapiPRODLambdaRestApiDFA07F97ANYproxyA6FB86A4": {
+    "LambdaRestApiproxyANYApiPermissionTestcontributionsonlycountriesapiPRODLambdaRestApi8AF286C2ANYproxyD36B5F61": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -1362,7 +1362,7 @@ exports[`The Vat countries list api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "LambdaRestApiproxyANYApiPermissionvatcountrieslistapiPRODLambdaRestApiDFA07F97ANYproxy1040C1B6": {
+    "LambdaRestApiproxyANYApiPermissioncontributionsonlycountriesapiPRODLambdaRestApi8AF286C2ANYproxy9DE2C196": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -1434,7 +1434,7 @@ exports[`The Vat countries list api stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "vat-countries-list-api",
+            "Value": "contributions-only-countries-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -1495,7 +1495,7 @@ exports[`The Vat countries list api stack matches the snapshot 2`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/support/PROD/vat-countries-list-api/vat-countries-list-api.zip",
+                      "/support/PROD/contributions-only-countries-api/contributions-only-countries-api.zip",
                     ],
                   ],
                 },
@@ -1516,7 +1516,7 @@ exports[`The Vat countries list api stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/support/vat-countries-list-api",
+                    ":parameter/PROD/support/contributions-only-countries-api",
                   ],
                 ],
               },
@@ -1539,7 +1539,7 @@ exports[`The Vat countries list api stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/support/vat-countries-list-api/*",
+                    ":parameter/PROD/support/contributions-only-countries-api/*",
                   ],
                 ],
               },

@@ -10,6 +10,7 @@ import {
 	membershipCertificateId,
 	membershipHostedZoneId,
 } from '../lib/constants';
+import { ContributionsOnlyCountriesApi } from '../lib/contributions-only-countries-api';
 import { DiscountApi } from '../lib/discount-api';
 import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
@@ -42,7 +43,6 @@ import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
 import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
 import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
 import { UserBenefits } from '../lib/user-benefits';
-import { VatCountriesListApi } from '../lib/vat-countries-list-api';
 import { WriteOffUnpaidInvoices } from '../lib/write-off-unpaid-invoices';
 import { ZuoraAutoCancel } from '../lib/zuora-auto-cancel';
 import { ZuoraSalesforceLinkRemover } from '../lib/zuora-salesforce-link-remover';
@@ -156,7 +156,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	NewSubscriptionApi,
 	MultipleAccountApi,
 	ObserverBenefitsApi,
-	VatCountriesListApi,
+	ContributionsOnlyCountriesApi,
 	// MARKER new-lambda: cdk-bin
 ];
 
