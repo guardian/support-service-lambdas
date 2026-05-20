@@ -26,6 +26,7 @@ import { NewSubscriptionApi } from '../lib/new-subscription-api';
 import { NewsletterAcquisition } from '../lib/newsletter-acquisition';
 import { ObserverBenefitsApi } from '../lib/observer-benefits-api';
 import { ObserverDataExport } from '../lib/observer-data-export';
+import { PaulTestLambda } from '../lib/paul-test-lambda';
 import { PressReaderEntitlements } from '../lib/press-reader-entitlements';
 import { ProductSwitchApi } from '../lib/product-switch-api';
 import { PromotionsLambdas } from '../lib/promotions-lambdas';
@@ -159,6 +160,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	ObserverBenefitsApi,
 	ContributionsOnlyCountriesApi,
 	UserSubscriptionsApi,
+	PaulTestLambda,
 	// MARKER new-lambda: cdk-bin
 ];
 
