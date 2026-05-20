@@ -444,6 +444,22 @@ const userSubscriptionsApi: HandlerDefinition = {
 	},
 };
 
+const joeandrupertTestLambda: HandlerDefinition = {
+	name: 'joeandrupert-test-lambda',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+
+		...devDeps['@redocly/cli'],
+	},
+	extraScripts: {
+		...openApiScripts,
+		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr joeandrupert-test-lambda.zip ./*.js.map ./*.js`,
+	},
+};
+
 // MARKER new-lambda: buildcheck-const
 
 const moduleAws: ModuleDefinition = {
@@ -697,6 +713,7 @@ export const build: BuildDefinition = {
 		observerBenefitsApi,
 		contributionsOnlyCountriesApi,
 		userSubscriptionsApi,
+		joeandrupertTestLambda,
 		// MARKER new-lambda: buildcheck-reference
 	],
 

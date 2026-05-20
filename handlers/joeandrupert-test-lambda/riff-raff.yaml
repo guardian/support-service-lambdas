@@ -1,0 +1,26 @@
+# MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/riff-raff.yaml.ts
+stacks:
+  - support
+regions:
+  - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  joeandrupert-test-lambda-cloudformation:
+    type: cloud-formation
+    app: joeandrupert-test-lambda
+    parameters:
+      templateStagePaths:
+        CODE: joeandrupert-test-lambda-CODE.template.json
+        PROD: joeandrupert-test-lambda-PROD.template.json
+  joeandrupert-test-lambda:
+    type: aws-lambda
+    parameters:
+      fileName: joeandrupert-test-lambda.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+        - joeandrupert-test-lambda-
+    dependencies:
+      - joeandrupert-test-lambda-cloudformation
