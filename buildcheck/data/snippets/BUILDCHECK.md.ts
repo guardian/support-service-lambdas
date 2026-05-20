@@ -1,4 +1,4 @@
-import type { GeneratedFile } from '../../src/steps/generatedFile';
+import type { GeneratedFile } from '../types';
 import { notice, relativePath } from './notices';
 
 export const warningFileName = 'BUILDCHECK.md';

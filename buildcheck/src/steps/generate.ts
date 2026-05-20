@@ -1,12 +1,12 @@
 import * as path from 'path';
 import { build } from '../../data/build';
 import { generateWarningFile } from '../../data/snippets/BUILDCHECK.md';
+import type { GeneratedFile } from '../../data/types';
 import {
 	handlerTemplates,
 	moduleTemplates,
 } from '../dynamic/generated/generatedMappings';
 import { applyTemplates } from '../dynamic/templater';
-import type { GeneratedFile } from './generatedFile';
 
 // generates files across the whole repository
 export function generate(): GeneratedFile[] {

@@ -1,6 +1,6 @@
 import * as path from 'path';
 import { contentPostProcessor } from '../../data/snippets/notices';
-import type { GeneratedFile } from '../steps/generatedFile';
+import type { GeneratedFile } from '../../data/types';
 
 export type TemplateContent = string | Record<string, unknown>;
 

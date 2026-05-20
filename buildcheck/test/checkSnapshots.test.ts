@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { build } from '../data/build';
+import type { GeneratedFile } from '../data/types';
 import { generate } from '../src/steps/generate';
-import type { GeneratedFile } from '../src/steps/generatedFile';
 
 function readContent(repoRoot: string, relativePath: string) {
 	const fullDiskPath = path.join(repoRoot, relativePath);
