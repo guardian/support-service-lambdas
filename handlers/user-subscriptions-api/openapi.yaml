@@ -1,13 +1,13 @@
 openapi: 3.0.3
 info:
-  title: user-subscription-api API
+  title: user-subscriptions-api API
   description: A test API.
   version: 1.0.0
 
 servers:
-  - url: https://user-subscription-api-code.support.guardianapis.com
+  - url: https://user-subscriptions-api-code.support.guardianapis.com
     description: CODE
-  - url: https://user-subscription-api.support.guardianapis.com
+  - url: https://user-subscriptions-api.support.guardianapis.com
     description: PROD
 
 security:

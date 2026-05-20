@@ -418,8 +418,8 @@ const observerBenefitsApi: HandlerDefinition = {
 	},
 };
 
-const userSubscriptionApi: HandlerDefinition = {
-	name: 'user-subscription-api',
+const userSubscriptionsApi: HandlerDefinition = {
+	name: 'user-subscriptions-api',
 	dependencies: {
 		...dep.zod,
 	},
@@ -430,7 +430,7 @@ const userSubscriptionApi: HandlerDefinition = {
 	},
 	extraScripts: {
 		...openApiScripts,
-		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr user-subscription-api.zip ./*.js.map ./*.js`,
+		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr user-subscriptions-api.zip ./*.js.map ./*.js`,
 	},
 };
 
@@ -685,7 +685,7 @@ export const build: BuildDefinition = {
 		zuoraSalesforceLinkRemover,
 		multipleAccountApi,
 		observerBenefitsApi,
-		userSubscriptionApi,
+		userSubscriptionsApi,
 		// MARKER new-lambda: buildcheck-reference
 	],
 

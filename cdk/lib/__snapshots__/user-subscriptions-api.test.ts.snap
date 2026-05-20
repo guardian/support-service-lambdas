@@ -61,7 +61,7 @@ exports[`The User subscription api stack matches the snapshot 1`] = `
     "DNSRecord": {
       "Properties": {
         "HostedZoneId": "Z3KO35ELNWZMSX",
-        "Name": "user-subscription-api-code.support.guardianapis.com",
+        "Name": "user-subscriptions-api-code.support.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -77,7 +77,7 @@ exports[`The User subscription api stack matches the snapshot 1`] = `
     },
     "DomainName": {
       "Properties": {
-        "DomainName": "user-subscription-api-code.support.guardianapis.com",
+        "DomainName": "user-subscriptions-api-code.support.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -98,7 +98,7 @@ exports[`The User subscription api stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "user-subscription-api",
+            "Value": "user-subscriptions-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -130,18 +130,18 @@ exports[`The User subscription api stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "support/CODE/user-subscription-api/user-subscription-api.zip",
+          "S3Key": "support/CODE/user-subscriptions-api/user-subscriptions-api.zip",
         },
         "Description": "A lambda that efficiently returns detailed user subscription information for account overview",
         "Environment": {
           "Variables": {
-            "APP": "user-subscription-api",
+            "APP": "user-subscriptions-api",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
           },
         },
-        "FunctionName": "user-subscription-api-CODE",
+        "FunctionName": "user-subscriptions-api-CODE",
         "Handler": "index.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
@@ -157,7 +157,7 @@ exports[`The User subscription api stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "user-subscription-api",
+            "Value": "user-subscriptions-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -184,11 +184,11 @@ exports[`The User subscription api stack matches the snapshot 1`] = `
       "Properties": {
         "ApiKeySourceType": "HEADER",
         "Description": "API Gateway created by CDK",
-        "Name": "user-subscription-api-CODE",
+        "Name": "user-subscriptions-api-CODE",
         "Tags": [
           {
             "Key": "App",
-            "Value": "user-subscription-api",
+            "Value": "user-subscriptions-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -210,7 +210,7 @@ exports[`The User subscription api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::RestApi",
     },
-    "LambdaRestApiANYApiPermissionTestusersubscriptionapiCODELambdaRestApi6384D370ANYB790779A": {
+    "LambdaRestApiANYApiPermissionTestusersubscriptionsapiCODELambdaRestApi9B623317ANY0DC9995E": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -247,7 +247,7 @@ exports[`The User subscription api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "LambdaRestApiANYApiPermissionusersubscriptionapiCODELambdaRestApi6384D370ANY16512D13": {
+    "LambdaRestApiANYApiPermissionusersubscriptionsapiCODELambdaRestApi9B623317ANY18984228": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -351,7 +351,7 @@ exports[`The User subscription api stack matches the snapshot 1`] = `
     "LambdaRestApiApiKeyB5CCCA11": {
       "Properties": {
         "Enabled": true,
-        "Name": "user-subscription-api-key-CODE",
+        "Name": "user-subscriptions-api-key-CODE",
         "StageKeys": [
           {
             "RestApiId": {
@@ -365,7 +365,7 @@ exports[`The User subscription api stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "user-subscription-api",
+            "Value": "user-subscriptions-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -419,7 +419,7 @@ exports[`The User subscription api stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "user-subscription-api",
+            "Value": "user-subscriptions-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -442,7 +442,7 @@ exports[`The User subscription api stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "LambdaRestApiDeployment95319089b91d668de0227e572bb1a5bb7daa6219": {
+    "LambdaRestApiDeployment953190890cf5b1428cbbe9abb9f234283f617171": {
       "DependsOn": [
         "LambdaRestApiproxyANY486C4D1F",
         "LambdaRestApiproxy22103CFD",
@@ -462,7 +462,7 @@ exports[`The User subscription api stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "LambdaRestApiDeployment95319089b91d668de0227e572bb1a5bb7daa6219",
+          "Ref": "LambdaRestApiDeployment953190890cf5b1428cbbe9abb9f234283f617171",
         },
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",
@@ -471,7 +471,7 @@ exports[`The User subscription api stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "user-subscription-api",
+            "Value": "user-subscriptions-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -506,11 +506,11 @@ exports[`The User subscription api stack matches the snapshot 1`] = `
             "Throttle": {},
           },
         ],
-        "Description": "REST endpoints for user-subscription-api",
+        "Description": "REST endpoints for user-subscriptions-api",
         "Tags": [
           {
             "Key": "App",
-            "Value": "user-subscription-api",
+            "Value": "user-subscriptions-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -529,11 +529,11 @@ exports[`The User subscription api stack matches the snapshot 1`] = `
             "Value": "CODE",
           },
         ],
-        "UsagePlanName": "user-subscription-api-CODE",
+        "UsagePlanName": "user-subscriptions-api-CODE",
       },
       "Type": "AWS::ApiGateway::UsagePlan",
     },
-    "LambdaRestApiUsagePlanUsagePlanKeyResourceusersubscriptionapiCODELambdaRestApiApiKey15A7C5EF5653067A": {
+    "LambdaRestApiUsagePlanUsagePlanKeyResourceusersubscriptionsapiCODELambdaRestApiApiKey6F36D099926168D5": {
       "Properties": {
         "KeyId": {
           "Ref": "LambdaRestApiApiKeyB5CCCA11",
@@ -601,7 +601,7 @@ exports[`The User subscription api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::Method",
     },
-    "LambdaRestApiproxyANYApiPermissionTestusersubscriptionapiCODELambdaRestApi6384D370ANYproxy1B6DA325": {
+    "LambdaRestApiproxyANYApiPermissionTestusersubscriptionsapiCODELambdaRestApi9B623317ANYproxy44B6B89B": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -638,7 +638,7 @@ exports[`The User subscription api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "LambdaRestApiproxyANYApiPermissionusersubscriptionapiCODELambdaRestApi6384D370ANYproxy195C3CE7": {
+    "LambdaRestApiproxyANYApiPermissionusersubscriptionsapiCODELambdaRestApi9B623317ANYproxy0116E1F8": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -710,7 +710,7 @@ exports[`The User subscription api stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "user-subscription-api",
+            "Value": "user-subscriptions-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -771,7 +771,7 @@ exports[`The User subscription api stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/support/CODE/user-subscription-api/user-subscription-api.zip",
+                      "/support/CODE/user-subscriptions-api/user-subscriptions-api.zip",
                     ],
                   ],
                 },
@@ -792,7 +792,7 @@ exports[`The User subscription api stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/support/user-subscription-api",
+                    ":parameter/CODE/support/user-subscriptions-api",
                   ],
                 ],
               },
@@ -815,7 +815,7 @@ exports[`The User subscription api stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/support/user-subscription-api/*",
+                    ":parameter/CODE/support/user-subscriptions-api/*",
                   ],
                 ],
               },
@@ -901,13 +901,13 @@ exports[`The User subscription api stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "user-subscription-api returned a 5XX response. Search the logs below for "error" for more information. Impact: users may be receiving errors or missing information on manage their account",
-        "AlarmName": "user-subscription-api-PROD 5XX errors",
+        "AlarmDescription": "user-subscriptions-api returned a 5XX response. Search the logs below for "error" for more information. Impact: users may be receiving errors or missing information on manage their account",
+        "AlarmName": "user-subscriptions-api-PROD 5XX errors",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
             "Name": "ApiName",
-            "Value": "user-subscription-api-PROD",
+            "Value": "user-subscriptions-api-PROD",
           },
         ],
         "EvaluationPeriods": 1,
@@ -918,7 +918,7 @@ exports[`The User subscription api stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "user-subscription-api",
+            "Value": "user-subscriptions-api",
           },
           {
             "Key": "DiagnosticLinks",
@@ -973,7 +973,7 @@ exports[`The User subscription api stack matches the snapshot 2`] = `
     "DNSRecord": {
       "Properties": {
         "HostedZoneId": "Z3KO35ELNWZMSX",
-        "Name": "user-subscription-api.support.guardianapis.com",
+        "Name": "user-subscriptions-api.support.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -989,7 +989,7 @@ exports[`The User subscription api stack matches the snapshot 2`] = `
     },
     "DomainName": {
       "Properties": {
-        "DomainName": "user-subscription-api.support.guardianapis.com",
+        "DomainName": "user-subscriptions-api.support.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -1010,7 +1010,7 @@ exports[`The User subscription api stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "user-subscription-api",
+            "Value": "user-subscriptions-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -1042,18 +1042,18 @@ exports[`The User subscription api stack matches the snapshot 2`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "support/PROD/user-subscription-api/user-subscription-api.zip",
+          "S3Key": "support/PROD/user-subscriptions-api/user-subscriptions-api.zip",
         },
         "Description": "A lambda that efficiently returns detailed user subscription information for account overview",
         "Environment": {
           "Variables": {
-            "APP": "user-subscription-api",
+            "APP": "user-subscriptions-api",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",
           },
         },
-        "FunctionName": "user-subscription-api-PROD",
+        "FunctionName": "user-subscriptions-api-PROD",
         "Handler": "index.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
@@ -1069,7 +1069,7 @@ exports[`The User subscription api stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "user-subscription-api",
+            "Value": "user-subscriptions-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -1096,11 +1096,11 @@ exports[`The User subscription api stack matches the snapshot 2`] = `
       "Properties": {
         "ApiKeySourceType": "HEADER",
         "Description": "API Gateway created by CDK",
-        "Name": "user-subscription-api-PROD",
+        "Name": "user-subscriptions-api-PROD",
         "Tags": [
           {
             "Key": "App",
-            "Value": "user-subscription-api",
+            "Value": "user-subscriptions-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -1122,7 +1122,7 @@ exports[`The User subscription api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::RestApi",
     },
-    "LambdaRestApiANYApiPermissionTestusersubscriptionapiPRODLambdaRestApiBFEFAED5ANYDD61862B": {
+    "LambdaRestApiANYApiPermissionTestusersubscriptionsapiPRODLambdaRestApi7930A929ANY9906258B": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -1159,7 +1159,7 @@ exports[`The User subscription api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "LambdaRestApiANYApiPermissionusersubscriptionapiPRODLambdaRestApiBFEFAED5ANYBEAA68AC": {
+    "LambdaRestApiANYApiPermissionusersubscriptionsapiPRODLambdaRestApi7930A929ANY76D5C39C": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -1263,7 +1263,7 @@ exports[`The User subscription api stack matches the snapshot 2`] = `
     "LambdaRestApiApiKeyB5CCCA11": {
       "Properties": {
         "Enabled": true,
-        "Name": "user-subscription-api-key-PROD",
+        "Name": "user-subscriptions-api-key-PROD",
         "StageKeys": [
           {
             "RestApiId": {
@@ -1277,7 +1277,7 @@ exports[`The User subscription api stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "user-subscription-api",
+            "Value": "user-subscriptions-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -1331,7 +1331,7 @@ exports[`The User subscription api stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "user-subscription-api",
+            "Value": "user-subscriptions-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -1354,7 +1354,7 @@ exports[`The User subscription api stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "LambdaRestApiDeployment95319089e36af8fba3c4d3ee025cd3243b6c3ec3": {
+    "LambdaRestApiDeployment95319089cd6f7ccd411f0bdaefbdaef46b7dafff": {
       "DependsOn": [
         "LambdaRestApiproxyANY486C4D1F",
         "LambdaRestApiproxy22103CFD",
@@ -1374,7 +1374,7 @@ exports[`The User subscription api stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "LambdaRestApiDeployment95319089e36af8fba3c4d3ee025cd3243b6c3ec3",
+          "Ref": "LambdaRestApiDeployment95319089cd6f7ccd411f0bdaefbdaef46b7dafff",
         },
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",
@@ -1383,7 +1383,7 @@ exports[`The User subscription api stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "user-subscription-api",
+            "Value": "user-subscriptions-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -1418,11 +1418,11 @@ exports[`The User subscription api stack matches the snapshot 2`] = `
             "Throttle": {},
           },
         ],
-        "Description": "REST endpoints for user-subscription-api",
+        "Description": "REST endpoints for user-subscriptions-api",
         "Tags": [
           {
             "Key": "App",
-            "Value": "user-subscription-api",
+            "Value": "user-subscriptions-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -1441,11 +1441,11 @@ exports[`The User subscription api stack matches the snapshot 2`] = `
             "Value": "PROD",
           },
         ],
-        "UsagePlanName": "user-subscription-api-PROD",
+        "UsagePlanName": "user-subscriptions-api-PROD",
       },
       "Type": "AWS::ApiGateway::UsagePlan",
     },
-    "LambdaRestApiUsagePlanUsagePlanKeyResourceusersubscriptionapiPRODLambdaRestApiApiKeyC16EBA196F02907E": {
+    "LambdaRestApiUsagePlanUsagePlanKeyResourceusersubscriptionsapiPRODLambdaRestApiApiKey018D322D48335FF8": {
       "Properties": {
         "KeyId": {
           "Ref": "LambdaRestApiApiKeyB5CCCA11",
@@ -1513,7 +1513,7 @@ exports[`The User subscription api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::Method",
     },
-    "LambdaRestApiproxyANYApiPermissionTestusersubscriptionapiPRODLambdaRestApiBFEFAED5ANYproxy845063B7": {
+    "LambdaRestApiproxyANYApiPermissionTestusersubscriptionsapiPRODLambdaRestApi7930A929ANYproxy2EF7FD40": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -1550,7 +1550,7 @@ exports[`The User subscription api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "LambdaRestApiproxyANYApiPermissionusersubscriptionapiPRODLambdaRestApiBFEFAED5ANYproxyFEA55E9B": {
+    "LambdaRestApiproxyANYApiPermissionusersubscriptionsapiPRODLambdaRestApi7930A929ANYproxyC6683162": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -1622,7 +1622,7 @@ exports[`The User subscription api stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "user-subscription-api",
+            "Value": "user-subscriptions-api",
           },
           {
             "Key": "gu:cdk:version",
@@ -1683,7 +1683,7 @@ exports[`The User subscription api stack matches the snapshot 2`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/support/PROD/user-subscription-api/user-subscription-api.zip",
+                      "/support/PROD/user-subscriptions-api/user-subscriptions-api.zip",
                     ],
                   ],
                 },
@@ -1704,7 +1704,7 @@ exports[`The User subscription api stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/support/user-subscription-api",
+                    ":parameter/PROD/support/user-subscriptions-api",
                   ],
                 ],
               },
@@ -1727,7 +1727,7 @@ exports[`The User subscription api stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/support/user-subscription-api/*",
+                    ":parameter/PROD/support/user-subscriptions-api/*",
                   ],
                 ],
               },

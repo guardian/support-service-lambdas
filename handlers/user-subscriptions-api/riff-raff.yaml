@@ -7,20 +7,20 @@ allowedStages:
   - CODE
   - PROD
 deployments:
-  user-subscription-api-cloudformation:
+  user-subscriptions-api-cloudformation:
     type: cloud-formation
-    app: user-subscription-api
+    app: user-subscriptions-api
     parameters:
       templateStagePaths:
-        CODE: user-subscription-api-CODE.template.json
-        PROD: user-subscription-api-PROD.template.json
-  user-subscription-api:
+        CODE: user-subscriptions-api-CODE.template.json
+        PROD: user-subscriptions-api-PROD.template.json
+  user-subscriptions-api:
     type: aws-lambda
     parameters:
-      fileName: user-subscription-api.zip
+      fileName: user-subscriptions-api.zip
       bucketSsmLookup: true
       prefixStack: false
       functionNames:
-        - user-subscription-api-
+        - user-subscriptions-api-
     dependencies:
-      - user-subscription-api-cloudformation
+      - user-subscriptions-api-cloudformation

@@ -3,9 +3,9 @@ import { SrApiLambda } from './cdk/SrApiLambda';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
 
-export class UserSubscriptionApi extends SrStack {
+export class UserSubscriptionsApi extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
-		super(scope, { stage, app: 'user-subscription-api' });
+		super(scope, { stage, app: 'user-subscriptions-api' });
 
 		new SrApiLambda(this, 'Lambda', {
 			lambdaOverrides: {

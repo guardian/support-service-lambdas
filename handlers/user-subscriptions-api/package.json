@@ -1,5 +1,5 @@
 {
-  "name": "user-subscription-api",
+  "name": "user-subscriptions-api",
   "scripts": {
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration",
@@ -7,12 +7,12 @@
     "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
-    "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/index.ts --sourcemap --source-root=/support-service-lambdas/handlers/user-subscription-api/target/",
-    "package": "pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr user-subscription-api.zip ./*.js.map ./*.js",
-    "cdk:test": "pnpm --filter cdk test user-subscription-api",
-    "cdk:test-update": "pnpm --filter cdk test-update user-subscription-api",
-    "update-lambda": "../../update-lambda.sh \"user-subscription-api\"",
-    "update-stack": "../../update-stack.sh \"user-subscription-api\"",
+    "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/index.ts --sourcemap --source-root=/support-service-lambdas/handlers/user-subscriptions-api/target/",
+    "package": "pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr user-subscriptions-api.zip ./*.js.map ./*.js",
+    "cdk:test": "pnpm --filter cdk test user-subscriptions-api",
+    "cdk:test-update": "pnpm --filter cdk test-update user-subscriptions-api",
+    "update-lambda": "../../update-lambda.sh \"user-subscriptions-api\"",
+    "update-stack": "../../update-stack.sh \"user-subscriptions-api\"",
     "openapi:lint": "redocly lint openapi.yaml",
     "openapi:preview": "redocly build-docs openapi.yaml --output target/docs/index.html && open target/docs/index.html"
   },

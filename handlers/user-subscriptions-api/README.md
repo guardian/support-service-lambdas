@@ -1,10 +1,10 @@
-# user-subscription-api API
+# user-subscriptions-api API
 
 ## URLs
 
-#### CODE - https://user-subscription-api-code.support.guardianapis.com/
+#### CODE - https://user-subscriptions-api-code.support.guardianapis.com/
 
-#### PROD - https://user-subscription-api.support.guardianapis.com/
+#### PROD - https://user-subscriptions-api.support.guardianapis.com/
 
 ## OpenAPI
 
@@ -14,10 +14,10 @@ The OpenAPI description for this handler is in `openapi.yaml`. The spec is linte
 
 ```bash
 # Lint the OpenAPI spec
-pnpm --filter user-subscription-api openapi:lint
+pnpm --filter user-subscriptions-api openapi:lint
 
 # Open an interactive preview in the browser
-pnpm --filter user-subscription-api openapi:preview
+pnpm --filter user-subscriptions-api openapi:preview
 ```
 
 ### External documentation

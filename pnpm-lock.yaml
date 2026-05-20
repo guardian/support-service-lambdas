@@ -522,7 +522,7 @@ importers:
         specifier: ^8.10.147
         version: 8.10.158
 
-  handlers/user-subscription-api:
+  handlers/user-subscriptions-api:
     dependencies:
       zod:
         specifier: 'catalog:'
