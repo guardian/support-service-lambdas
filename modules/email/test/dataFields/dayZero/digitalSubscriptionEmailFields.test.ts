@@ -1,13 +1,13 @@
 import dayjs from 'dayjs';
+import { buildDigitalSubscriptionEmailFields } from '@modules/email/dataFields/dayZero/digitalSubscriptionEmailFields';
 import { DataExtensionNames } from '@modules/email/email';
-import { buildDigitalSubscriptionEmailFields } from '@modules/email/emailDataFields/dayZero/digitalSubscriptionEmailFields';
 import {
 	directDebitPaymentMethod,
 	emailAddress,
 	emailUser,
 	mandateId,
 	subscriptionNumber,
-} from '../fixtures/emailFields/emailFieldsTestData';
+} from '../fixtures/emailFieldsTestData';
 
 describe('digitalSubscriptionEmailFields', () => {
 	test('should build the correct email fields for digital subscription thank you email', () => {

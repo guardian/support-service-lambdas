@@ -1,14 +1,14 @@
 import dayjs from 'dayjs';
+import { formatDate } from '@modules/email/dataFields/dayZero/paymentEmailFields';
+import { buildTierThreeEmailFields } from '@modules/email/dataFields/dayZero/tierThreeEmailFields';
 import { DataExtensionNames } from '@modules/email/email';
-import { formatDate } from '@modules/email/emailDataFields/dayZero/paymentEmailFields';
-import { buildTierThreeEmailFields } from '@modules/email/emailDataFields/dayZero/tierThreeEmailFields';
 import {
 	creditCardPaymentMethod,
 	emailAddress,
 	emailUser,
 	paperPaymentSchedule,
 	subscriptionNumber,
-} from '../fixtures/emailFields/emailFieldsTestData';
+} from '../fixtures/emailFieldsTestData';
 
 describe('Tier three thank you email fields', () => {
 	it('should build correct email fields for monthly tier three', () => {

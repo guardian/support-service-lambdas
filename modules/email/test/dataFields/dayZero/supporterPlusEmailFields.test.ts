@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
+import { buildSupporterPlusEmailFields } from '@modules/email/dataFields/dayZero/supporterPlusEmailFields';
+import type { EmailPaymentMethod } from '@modules/email/dataFields/dayZero/types';
 import { DataExtensionNames } from '@modules/email/email';
-import { buildSupporterPlusEmailFields } from '@modules/email/emailDataFields/dayZero/supporterPlusEmailFields';
-import type { EmailPaymentMethod } from '@modules/email/emailDataFields/dayZero/types';
 import {
 	creditCardPaymentMethod,
 	directDebitPaymentMethod,
@@ -12,7 +12,7 @@ import {
 	paymentSchedule,
 	subscriptionNumber,
 	today,
-} from '../fixtures/emailFields/emailFieldsTestData';
+} from '../fixtures/emailFieldsTestData';
 
 describe('Supporter plus thank you email fields', () => {
 	it('should build correct email fields for monthly supporter plus with DD', () => {

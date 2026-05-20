@@ -1,5 +1,5 @@
-import { describePayments as describeSchedule } from '@modules/email/emailDataFields/dayZero/paymentDescription';
-import type { EmailPaymentSchedule } from '@modules/email/emailDataFields/dayZero/types';
+import { describePayments as describeSchedule } from '@modules/email/dataFields/dayZero/paymentDescription';
+import type { EmailPaymentSchedule } from '@modules/email/dataFields/dayZero/types';
 
 type Payment = { date: Date; amount: number };
 type PaymentSchedule = EmailPaymentSchedule;

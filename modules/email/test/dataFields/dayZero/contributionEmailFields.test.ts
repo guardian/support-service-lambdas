@@ -1,12 +1,12 @@
 import dayjs from 'dayjs';
+import { buildContributionEmailFields } from '@modules/email/dataFields/dayZero/contributionEmailFields';
 import { DataExtensionNames } from '@modules/email/email';
-import { buildContributionEmailFields } from '@modules/email/emailDataFields/dayZero/contributionEmailFields';
 import {
 	directDebitPaymentMethod,
 	emailAddress,
 	emailUser,
 	mandateId,
-} from '../fixtures/emailFields/emailFieldsTestData';
+} from '../fixtures/emailFieldsTestData';
 
 describe('contributionEmailFields', () => {
 	test('should build the correct email fields for recurring contribution thank you email', () => {

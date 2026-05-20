@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
+import { buildPaperEmailFields } from '@modules/email/dataFields/dayZero/paperEmailFields';
 import { DataExtensionNames } from '@modules/email/email';
-import { buildPaperEmailFields } from '@modules/email/emailDataFields/dayZero/paperEmailFields';
 import {
 	deliveryAgentDetails,
 	deliveryContact,
@@ -10,7 +10,7 @@ import {
 	mandateId,
 	paperPaymentSchedule,
 	subscriptionNumber,
-} from '../fixtures/emailFields/emailFieldsTestData';
+} from '../fixtures/emailFieldsTestData';
 
 describe('Paper email fields', () => {
 	const today = dayjs('2025-11-11');

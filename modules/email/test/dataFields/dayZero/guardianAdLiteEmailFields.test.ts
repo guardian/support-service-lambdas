@@ -1,12 +1,12 @@
 import dayjs from 'dayjs';
+import { buildGuardianAdLiteEmailFields } from '@modules/email/dataFields/dayZero/guardianAdLiteEmailFields';
 import { DataExtensionNames } from '@modules/email/email';
-import { buildGuardianAdLiteEmailFields } from '@modules/email/emailDataFields/dayZero/guardianAdLiteEmailFields';
 import {
 	creditCardPaymentMethod,
 	emailAddress,
 	emailUser,
 	subscriptionNumber,
-} from '../fixtures/emailFields/emailFieldsTestData';
+} from '../fixtures/emailFieldsTestData';
 
 describe('guardianAdLiteEmailFields', () => {
 	test('should build the correct email fields for Guardian Ad-Lite', () => {

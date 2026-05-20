@@ -3,7 +3,7 @@ import type {
 	EmailDeliveryAgentDetails,
 	EmailPaymentMethod,
 	EmailUser,
-} from '@modules/email/emailDataFields/dayZero/types';
+} from '@modules/email/dataFields/dayZero/types';
 
 export const today = '2025-11-11';
 export const emailAddress = 'test@thegulocal.com';

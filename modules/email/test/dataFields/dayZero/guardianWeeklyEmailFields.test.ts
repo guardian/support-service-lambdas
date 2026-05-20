@@ -1,15 +1,15 @@
 import dayjs from 'dayjs';
+import { buildGuardianWeeklyEmailFields } from '@modules/email/dataFields/dayZero/guardianWeeklyEmailFields';
+import { formatDate } from '@modules/email/dataFields/dayZero/paymentEmailFields';
+import type { EmailGiftRecipient } from '@modules/email/dataFields/dayZero/types';
 import { DataExtensionNames } from '@modules/email/email';
-import { buildGuardianWeeklyEmailFields } from '@modules/email/emailDataFields/dayZero/guardianWeeklyEmailFields';
-import { formatDate } from '@modules/email/emailDataFields/dayZero/paymentEmailFields';
-import type { EmailGiftRecipient } from '@modules/email/emailDataFields/dayZero/types';
 import {
 	creditCardPaymentMethod,
 	emailAddress,
 	emailUser,
 	paperPaymentSchedule,
 	subscriptionNumber,
-} from '../fixtures/emailFields/emailFieldsTestData';
+} from '../fixtures/emailFieldsTestData';
 
 describe('Guardian weekly thank you email fields', () => {
 	it('should build correct email fields for monthly domestic', () => {
