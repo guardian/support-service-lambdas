@@ -14,6 +14,7 @@ import { ContributionsOnlyCountriesApi } from '../lib/contributions-only-countri
 import { DiscountApi } from '../lib/discount-api';
 import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
+import { GrahamTestLambda } from '../lib/graham-test-lambda';
 import { ImovoVoucherApi } from '../lib/imovo-voucher-api';
 import { MetricPushApi } from '../lib/metric-push-api';
 import { MobilePurchasesToSupporterProductData } from '../lib/mobile-purchases-to-supporter-product-data';
@@ -159,6 +160,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	ObserverBenefitsApi,
 	ContributionsOnlyCountriesApi,
 	UserSubscriptionsApi,
+	GrahamTestLambda,
 	// MARKER new-lambda: cdk-bin
 ];
 
