@@ -9,4 +9,4 @@ It is a public API endpoint
 # Urls
 
 - PROD: https://contributions-only-countries-api.support.guardianapis.com/
-- CODE: https://contributions-only-countries-api.support.guardianapis.com/
+- CODE: https://contributions-only-countries-api-code.support.guardianapis.com/
