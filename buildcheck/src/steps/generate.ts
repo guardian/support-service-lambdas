@@ -5,21 +5,21 @@ import {
 	handlerTemplates,
 	moduleTemplates,
 } from '../dynamic/generated/generatedMappings';
-import { applyTemplates } from '../dynamic/templater';
+import { applyFileTemplates } from '../dynamic/templater';
 import type { GeneratedFile } from './generatedFile';
 
 // generates files across the whole repository
 export function generate(): GeneratedFile[] {
 	const handlersFiles = build.handlers.flatMap((pkg) => {
 		const handlerFiles = withWarningFile(
-			applyTemplates(pkg, handlerTemplates),
+			applyFileTemplates(pkg, handlerTemplates),
 			'../..',
 		);
 		return prependToTargetPath(handlerFiles, ['handlers', pkg.name]);
 	});
 	const modulesFiles = build.modules.flatMap((pkg) => {
 		const moduleFiles = withWarningFile(
-			applyTemplates(pkg, moduleTemplates),
+			applyFileTemplates(pkg, moduleTemplates),
 			'../..',
 		);
 		return prependToTargetPath(moduleFiles, ['modules', pkg.name]);
