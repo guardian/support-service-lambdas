@@ -16,11 +16,10 @@ export class UserSubscriptionsApi extends SrStack {
 				errorImpact:
 					'users may be receiving errors or missing information on manage their account',
 			},
-			// TODO work out what this means
-			// throttle: {
-			// 	rateLimit: 20,
-			// 	burstLimit: 10,
-			// },
+			throttle: {
+				rateLimit: 20,
+				burstLimit: 10,
+			},
 		});
 	}
 }

@@ -529,6 +529,10 @@ exports[`The User subscription api stack matches the snapshot 1`] = `
             "Value": "CODE",
           },
         ],
+        "Throttle": {
+          "BurstLimit": 10,
+          "RateLimit": 20,
+        },
         "UsagePlanName": "user-subscriptions-api-CODE",
       },
       "Type": "AWS::ApiGateway::UsagePlan",
@@ -1441,6 +1445,10 @@ exports[`The User subscription api stack matches the snapshot 2`] = `
             "Value": "PROD",
           },
         ],
+        "Throttle": {
+          "BurstLimit": 10,
+          "RateLimit": 20,
+        },
         "UsagePlanName": "user-subscriptions-api-PROD",
       },
       "Type": "AWS::ApiGateway::UsagePlan",
