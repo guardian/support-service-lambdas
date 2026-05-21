@@ -70,10 +70,7 @@ function runSeedCommand2<S extends keyof typeof seedConfigs>(
 		execSync(command, { cwd: repoRoot, stdio: 'inherit' });
 	});
 
-	const allPaths = [
-		...resolvedFiles.map((f) => f.targetPath),
-		...seedConfig.postProcessExpectedFiles(opts),
-	];
+	const allPaths = resolvedFiles.map((f) => f.targetPath);
 	log(seedName, 'staging files...');
 	execSync(`git add ${allPaths.map((p) => `"${p}"`).join(' ')}`, {
 		cwd: repoRoot,

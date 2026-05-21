@@ -17,6 +17,5 @@ export interface InsertChunks {
 export type SeedGenerator<T> = {
 	argsSchema: ZodObject<ZodRawShape, 'strip', ZodTypeAny, T, unknown>;
 	postProcessCommands: (opts: T) => string[];
-	postProcessExpectedFiles: (opts: T) => string[];
 	resolveTargetPath: (path: string, opts: T) => string;
 };
