@@ -19,10 +19,10 @@ export function runSeedCommand(
 		);
 	}
 
-	runSeedCommand2(seedName, seedArgv, repoRoot);
+	runValidSeed(seedName, seedArgv, repoRoot);
 }
 
-function runSeedCommand2<S extends keyof typeof seedConfigs>(
+function runValidSeed<S extends keyof typeof seedConfigs>(
 	seedName: S,
 	seedArgv: string[],
 	repoRoot: string,
@@ -35,9 +35,22 @@ function runSeedCommand2<S extends keyof typeof seedConfigs>(
 	if (!parseResult.success) {
 		const shape = seedConfig.argsSchema.shape;
 		const schemaKeys = Object.keys(shape);
-		const syntax = `Syntax: pnpm ${seedName} ${schemaKeys.map((k) => `--${k}=<value>`).join(' ')}`;
+		const failedKeys = new Set(
+			parseResult.error.errors.map((e) => e.path[0]?.toString()),
+		);
+		const syntax = `Syntax: pnpm ${seedName} ${schemaKeys
+			.map((k) => {
+				const description = shape[k].description ?? 'value';
+				return `--${k}=<${description}>`;
+			})
+			.join(' ')}`;
 		const suggested = `Suggested: pnpm ${seedName} ${schemaKeys
-			.map((k) => `--${k}=${flags[k] ?? `<${k}>`}`)
+			.map((k) => {
+				const description = shape[k].description ?? k;
+				const value =
+					k in flags && !failedKeys.has(k) ? flags[k] : `<${description}>`;
+				return `--${k}=${value}`;
+			})
 			.join(' ')}`;
 		const errors = parseResult.error.errors.map(
 			(e) => `  --${e.path.join('.')}: ${e.message}`,

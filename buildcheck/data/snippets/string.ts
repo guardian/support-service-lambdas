@@ -29,11 +29,13 @@ export const booleanFlag = z
 	.string()
 	.toLowerCase()
 	.pipe(z.enum(['y', 'yes', 'true', 'n', 'no', 'false']))
-	.transform((v) => ['y', 'yes', 'true'].includes(v));
+	.transform((v) => ['y', 'yes', 'true'].includes(v))
+	.describe('Y/N');
 
 export const kebabCaseSchema = z
 	.string()
 	.regex(
 		/^[a-z][a-z0-9-]+[a-z0-9]$/,
 		'Must be kebab-case, at least 3 characters, e.g. my-new-lambda',
-	);
+	)
+	.describe('kebab-case-string');
