@@ -16,7 +16,7 @@ import type { WebhookUrls } from './configSchema';
 import { ConfigSchema } from './configSchema';
 
 // only teams that have opted in will get the weekly summary
-const weeklySummaryTeams: Team[] = ['VALUE'];
+const weeklySummaryTeams: Team[] = ['LIFECYCLE'];
 
 // called by AWS
 export const handler = LambdaHandler(ConfigSchema, handlerWithStage);
