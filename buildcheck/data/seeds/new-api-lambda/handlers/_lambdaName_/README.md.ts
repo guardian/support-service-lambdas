@@ -30,6 +30,5 @@ pnpm --filter ${lambdaName} openapi:preview
 - OpenAPI specification: https://spec.openapis.org/oas/latest.html
 - Redocly CLI: https://redocly.com/docs/cli/
 `
-		: ''
-}
-`;
+		: '\n'
+}`;
