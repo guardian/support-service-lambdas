@@ -38,13 +38,13 @@ function runValidSeed<S extends keyof typeof seedConfigs>(
 		const failedKeys = new Set(
 			parseResult.error.errors.map((e) => e.path[0]?.toString()),
 		);
-		const syntax = `Syntax: pnpm ${seedName} ${schemaKeys
+		const syntax = `Syntax: pnpm ${seedName}-next ${schemaKeys
 			.map((k) => {
 				const description = shape[k].description ?? 'value';
 				return `--${k}=<${description}>`;
 			})
 			.join(' ')}`;
-		const suggested = `Suggested: pnpm ${seedName} ${schemaKeys
+		const suggested = `Suggested: pnpm ${seedName}-next ${schemaKeys
 			.map((k) => {
 				const description = shape[k].description ?? k;
 				const value =
