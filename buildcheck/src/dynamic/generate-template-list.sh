@@ -14,28 +14,29 @@ template_dir="$data_dir/templates"
 seeds_dir="$data_dir/seeds"
 generated_dir="$src_dir/dynamic/generated"
 output_file="$generated_dir/generatedMappings.ts"
+seed_output_file="$generated_dir/generatedSeedMappings.ts"
 
 [[ -d "$generated_dir" ]] || mkdir $generated_dir
 
 # Emit import lines for all *.ts files found under a directory.
-# Usage: emit_imports <search_dir> <path_prefix_to_strip> <import_path_prefix>
+# Usage: emit_imports <search_dir> <path_prefix_to_strip> <import_path_prefix> <target_file>
 emit_imports() {
-    local search_dir="$1" strip_prefix="$2" import_prefix="$3"
+    local search_dir="$1" strip_prefix="$2" import_prefix="$3" target_file="$4"
     while IFS= read -r -d '' file; do
         local rel_path="${file#$strip_prefix/}"
         local name_without_ext="${rel_path%.ts}"
         local import_name
         import_name=$(echo "$name_without_ext" | sed 's/[^a-zA-Z0-9]/_/g')
         echo "import $import_name from '$import_prefix/$name_without_ext';"
-    done < <(find "$search_dir" -name "*.ts" -type f -print0 2>/dev/null | sort -z) >> "$output_file"
+    done < <(find "$search_dir" -name "*.ts" -type f -print0 2>/dev/null | sort -z) >> "$target_file"
 }
 
 # Emit a Template array const for all *.ts files found under a directory.
-# Usage: emit_group <search_dir> <path_strip_prefix> <const_name> <type_expr>
+# Usage: emit_group <search_dir> <path_strip_prefix> <const_name> <type_expr> <target_file>
 emit_group() {
-    local search_dir="$1" strip_prefix="$2" const_name="$3" type_expr="$4"
-    echo "" >> "$output_file"
-    echo "export const ${const_name}Templates: Array<Template<${type_expr}>> = [" >> "$output_file"
+    local search_dir="$1" strip_prefix="$2" const_name="$3" type_expr="$4" target_file="$5"
+    echo "" >> "$target_file"
+    echo "export const ${const_name}Templates: Array<Template<${type_expr}>> = [" >> "$target_file"
     while IFS= read -r -d '' file; do
         local from_repo_root="${file#$repo_root/}"
         local rel_path="${file#$strip_prefix/}"
@@ -44,8 +45,8 @@ emit_group() {
         import_name=$(echo "$name_without_ext" | sed 's/[^a-zA-Z0-9]/_/g')
         template_name="${name_without_ext#*/}"  # strip first path segment (group name)
         echo "  { targetPath: \"$template_name\", value: $import_name, templateFilename: \"$from_repo_root\" },"
-    done < <(find "$search_dir" -name "*.ts" -type f -print0 2>/dev/null | sort -z) >> "$output_file"
-    echo "];" >> "$output_file"
+    done < <(find "$search_dir" -name "*.ts" -type f -print0 2>/dev/null | sort -z) >> "$target_file"
+    echo "];" >> "$target_file"
 }
 
 # Discover managed subdirs
@@ -60,24 +61,14 @@ while IFS= read -r -d '' file; do
     seed_names+=("$(basename "${file%.ts}")")
 done < <(find "$seeds_dir" -mindepth 1 -maxdepth 1 -name "*.ts" -type f -print0 2>/dev/null | sort -z)
 
-echo -n "" > "$output_file" # empty the file
+# ---- generatedMappings.ts: handler and module templates only ----
+echo -n "" > "$output_file"
 
-echo "/* eslint-disable import/order -- import order is managed by the generator script */" >> "$output_file"
-# Type imports first
 echo "import type { HandlerDefinition, ModuleDefinition } from '../../../data/build';" >> "$output_file"
-for seed_name in "${seed_names[@]}"; do
-    const_name=$(echo "${seed_name}" | sed 's/[^a-zA-Z0-9]/_/g')
-    echo "import type { GenerationOptions as ${const_name}_GenerationOptions } from '../../../data/seeds/${seed_name}';"
-done >> "$output_file"
 
 # Value imports: managed templates
 for subdir_name in "${managed_subdirs[@]}"; do
-    emit_imports "$template_dir/$subdir_name" "$template_dir" '../../../data/templates'
-done
-
-# Value imports: seed templates
-for seed_name in "${seed_names[@]}"; do
-    emit_imports "$seeds_dir/$seed_name" "$seeds_dir" '../../../data/seeds'
+    emit_imports "$template_dir/$subdir_name" "$template_dir" '../../../data/templates' "$output_file"
 done
 
 echo "import { type Template } from '../templater';" >> "$output_file"
@@ -93,23 +84,55 @@ echo " */" >> "$output_file"
 for subdir_name in "${managed_subdirs[@]}"; do
     const_name=$(echo "${subdir_name}" | sed 's/[^a-zA-Z0-9]/_/g')
     capitalized_const_name=$(echo "${const_name}" | awk '{print toupper(substr($0,0,1)) substr($0,2)}')
-    emit_group "$template_dir/$subdir_name" "$template_dir" "$const_name" "${capitalized_const_name}Definition"
+    emit_group "$template_dir/$subdir_name" "$template_dir" "$const_name" "${capitalized_const_name}Definition" "$output_file"
 done
+
+# ---- generatedSeedMappings.ts: seed templates and seedConfigs ----
+echo -n "" > "$seed_output_file"
+
+echo "/* eslint-disable import/order -- import order is managed by the generator script */" >> "$seed_output_file"
+
+# Type imports per seed
+for seed_name in "${seed_names[@]}"; do
+    const_name=$(echo "${seed_name}" | sed 's/[^a-zA-Z0-9]/_/g')
+    echo "import type { GenerationOptions as ${const_name}_GenerationOptions } from '../../../data/seeds/${seed_name}';" >> "$seed_output_file"
+done
+
+# Value imports: seed index files (default exports)
+for seed_name in "${seed_names[@]}"; do
+    const_name=$(echo "${seed_name}" | sed 's/[^a-zA-Z0-9]/_/g')
+    echo "import ${const_name}_seed from '../../../data/seeds/${seed_name}';" >> "$seed_output_file"
+done
+
+# Value imports: seed templates
+for seed_name in "${seed_names[@]}"; do
+    emit_imports "$seeds_dir/$seed_name" "$seeds_dir" '../../../data/seeds' "$seed_output_file"
+done
+
+echo "import { type Template } from '../templater';" >> "$seed_output_file"
+echo "import type { SeedConfig } from '../../steps/seedConfig';" >> "$seed_output_file"
+
+echo "" >> "$seed_output_file"
+echo "/*" >> "$seed_output_file"
+echo " * This file is gitignored and edits will be overwritten." >> "$seed_output_file"
+echo " * Generated by $0" >> "$seed_output_file"
+echo " * Generated on $(date)" >> "$seed_output_file"
+echo " */" >> "$seed_output_file"
 
 # Seed template arrays
 for seed_name in "${seed_names[@]}"; do
     const_name=$(echo "${seed_name}" | sed 's/[^a-zA-Z0-9]/_/g')
-    emit_group "$seeds_dir/$seed_name" "$seeds_dir" "$const_name" "${const_name}_GenerationOptions"
+    emit_group "$seeds_dir/$seed_name" "$seeds_dir" "$const_name" "${const_name}_GenerationOptions" "$seed_output_file"
 done
 
-# Seed lookup object — individual arrays are precisely typed above; this lookup uses object as the common bound
-echo "" >> "$output_file"
-echo "export const seedTemplates: Record<string, Array<Template<never>>> = {" >> "$output_file"
+# Seed lookup object — wraps the precisely-typed template array with the seed's parseArgs/postProcess/resolveTargetPath
+echo "" >> "$seed_output_file"
+echo "export const seedConfigs: Record<string, SeedConfig<never>> = {" >> "$seed_output_file"
 for seed_name in "${seed_names[@]}"; do
     const_name=$(echo "${seed_name}" | sed 's/[^a-zA-Z0-9]/_/g')
-    echo "  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- individual arrays are precisely typed; this lookup uses never as the common bound"
-    echo "  '${seed_name}': ${const_name}Templates as unknown as Array<Template<never>>,"
-done >> "$output_file"
-echo "};" >> "$output_file"
+    echo "  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- each seed is precisely typed above; never is used as the common bound for the lookup map" >> "$seed_output_file"
+    echo "  '${seed_name}': { ...${const_name}_seed, templates: ${const_name}Templates } as unknown as SeedConfig<never>," >> "$seed_output_file"
+done
+echo "};" >> "$seed_output_file"
 
-echo "$script_name: FINISH generated $output_file"
+echo "$script_name: FINISH generated $output_file and $seed_output_file"

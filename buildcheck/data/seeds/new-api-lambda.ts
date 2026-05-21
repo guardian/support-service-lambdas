@@ -1,3 +1,6 @@
+import { handlerTemplates } from '../../src/dynamic/generated/generatedMappings';
+import type { SeedGenerator } from '../types';
+
 const truthyValues = new Set(['y', 'yes', 'true']);
 const falsyValues = new Set(['n', 'no', 'false']);
 
@@ -30,9 +33,7 @@ export interface GenerationOptions {
 	includeOpenApiDoc: boolean;
 }
 
-export function parseArgs(
-	argv: string[],
-): GenerationOptions | { error: string } {
+function parseArgs(argv: string[]): GenerationOptions | { error: string } {
 	const errors: string[] = [];
 
 	const lambdaName = argv[0];
@@ -82,7 +83,11 @@ export function parseArgs(
 		errors.push('Missing required flag: --includeOpenApiDoc');
 	}
 
-	if (errors.length > 0) {
+	if (
+		errors.length > 0 ||
+		includeApiKey === undefined ||
+		includeOpenApiDoc === undefined
+	) {
 		const syntax = `Syntax: pnpm new-api-lambda <lambdaName> --includeApiKey=<Y|N> --includeOpenApiDoc=<Y|N>`;
 		const suggested = `Suggested: ${suggestedCommand(
 			/^[a-z][a-z0-9-]+[a-z0-9]$/.test(lambdaName) ? lambdaName : undefined,
@@ -94,14 +99,29 @@ export function parseArgs(
 
 	return {
 		lambdaName: lambdaName,
-		includeApiKey: includeApiKey!,
-		includeOpenApiDoc: includeOpenApiDoc!,
+		includeApiKey,
+		includeOpenApiDoc,
 	};
 }
 
-export const postProcessCommand = (opts: GenerationOptions): string =>
-	`pnpm --filter cdk test-update ${opts.lambdaName}`;
+export const postProcessCommands = (opts: GenerationOptions): string[] => [
+	'pnpm --filter buildcheck snapshot:update',
+	'pnpm install',
+	'pnpm --filter cdk lint --fix',
+	'pnpm fix-formatting',
+	`pnpm --filter cdk test-update ${opts.lambdaName}`,
+];
 
 export const postProcessExpectedFiles = (opts: GenerationOptions): string[] => [
 	`cdk/lib/__snapshots__/${opts.lambdaName}.test.ts.snap`,
+	...handlerTemplates.map((t) => `handlers/${opts.lambdaName}/${t.targetPath}`),
+	`handlers/${opts.lambdaName}/BUILDCHECK.md`,
 ];
+
+export default {
+	parseArgs,
+	postProcessCommands,
+	postProcessExpectedFiles,
+	resolveTargetPath: (path: string, opts: GenerationOptions) =>
+		path.replace(/_lambdaName_/g, opts.lambdaName),
+} satisfies SeedGenerator<GenerationOptions>;

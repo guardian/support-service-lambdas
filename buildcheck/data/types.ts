@@ -13,3 +13,9 @@ export interface InsertChunk {
 export interface InsertChunks {
 	chunks: InsertChunk[];
 }
+export type SeedGenerator<GenerationOptions> = {
+	parseArgs: (argv: string[]) => GenerationOptions | { error: string };
+	postProcessCommands: (opts: GenerationOptions) => string[];
+	postProcessExpectedFiles: (opts: GenerationOptions) => string[];
+	resolveTargetPath: (path: string, opts: GenerationOptions) => string;
+};
