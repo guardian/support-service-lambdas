@@ -418,6 +418,32 @@ const observerBenefitsApi: HandlerDefinition = {
 	},
 };
 
+const contributionsOnlyCountriesApi: HandlerDefinition = {
+	name: 'contributions-only-countries-api',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
+};
+
+const userSubscriptionsApi: HandlerDefinition = {
+	name: 'user-subscriptions-api',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+
+		...devDeps['@redocly/cli'],
+	},
+	extraScripts: {
+		...openApiScripts,
+		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr user-subscriptions-api.zip ./*.js.map ./*.js`,
+	},
+};
+
 // MARKER new-lambda: buildcheck-const
 
 const moduleAws: ModuleDefinition = {
@@ -670,6 +696,8 @@ export const build: BuildDefinition = {
 		zuoraSalesforceLinkRemover,
 		multipleAccountApi,
 		observerBenefitsApi,
+		contributionsOnlyCountriesApi,
+		userSubscriptionsApi,
 		// MARKER new-lambda: buildcheck-reference
 	],
 
