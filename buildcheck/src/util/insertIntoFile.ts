@@ -2,6 +2,11 @@ import * as fs from 'fs';
 import * as path from 'path';
 import type { SeedInsertionResult } from '../steps/insertChunks';
 
+/**
+ * Applies all chunks from a {@link SeedInsertionResult} to an existing file on disk.
+ * Each chunk is inserted as a new line immediately before the line containing its marker string.
+ * Throws if any marker is not found in the file.
+ */
 export function insertIntoFile(
 	repoRoot: string,
 	insertion: SeedInsertionResult,

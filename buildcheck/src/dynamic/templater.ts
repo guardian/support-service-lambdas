@@ -9,6 +9,13 @@ import {
 	type SeedResult,
 } from '../steps/insertChunks';
 
+/**
+ * The union of all values a template function may return.
+ * - `string` — written verbatim to the target file.
+ * - `Record<string, unknown>` — serialised by file extension (`.yaml` via js-yaml, `.json` via JSON.stringify).
+ * - `InsertChunks` — injects content into an existing file before named marker lines.
+ * - `null` — skips this template entirely (used for conditional files).
+ */
 export type TemplateContent =
 	| string
 	| Record<string, unknown>
@@ -21,6 +28,11 @@ export interface Template<Definition> {
 	templateFilename: string;
 }
 
+/**
+ * Applies templates in the context of the managed-file pipeline (handlers and modules).
+ * Throws if any template returns {@link InsertChunks}, as partial-file management
+ * is not supported for managed templates.
+ */
 export function applyFileTemplates<Definition>(
 	pkg: Definition,
 	templates: Array<Template<Definition>>,
@@ -34,6 +46,11 @@ export function applyFileTemplates<Definition>(
 	return files;
 }
 
+/**
+ * Evaluates all templates against `opts`, splitting results into new files and
+ * injections into existing files. Null-returning templates are dropped.
+ * Used by both the managed-file pipeline and the seed pipeline.
+ */
 export function applyTemplates<Definition>(
 	opts: Definition,
 	templates: Array<Template<Definition>>,
