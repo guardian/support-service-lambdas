@@ -1,19 +1,5 @@
+import { toPascalCase, toSentenceCase } from '../../../../snippets/string';
 import type { GenerationOptions } from '../../../new-api-lambda';
-
-function toPascalCase(name: string): string {
-	return name
-		.split('-')
-		.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-		.join('');
-}
-
-function toSentenceCase(name: string): string {
-	const words = name.split('-');
-	return [
-		words[0].charAt(0).toUpperCase() + words[0].slice(1),
-		...words.slice(1),
-	].join(' ');
-}
 
 export default ({ lambdaName }: GenerationOptions): string => {
 	const className = toPascalCase(lambdaName);

@@ -6,7 +6,6 @@ export default ({ lambdaName }: GenerationOptions): InsertChunks => ({
 		{
 			marker: '# MARKER new-lambda: github-action',
 			content: `          - ${lambdaName}`,
-			position: 'before',
 		},
 	],
 });

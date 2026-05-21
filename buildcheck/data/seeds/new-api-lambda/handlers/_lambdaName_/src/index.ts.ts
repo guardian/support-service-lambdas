@@ -1,5 +1,4 @@
-export default (): string =>
-	`import { Router } from '@modules/routing/router';
+export default `import { Router } from '@modules/routing/router';
 import { withBodyParser } from '@modules/routing/withParsers';
 import type { Handler } from 'aws-lambda';
 import { helloRequestEndpoint, helloRequestSchema } from './helloEndpoint';

@@ -6,7 +6,6 @@ import type { ZodObject, ZodRawShape, ZodTypeAny } from 'zod';
 export interface InsertChunk {
 	marker: string;
 	content: string;
-	position: 'before';
 }
 
 /**
