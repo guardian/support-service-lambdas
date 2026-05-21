@@ -58,8 +58,6 @@ export function applyTemplates<Definition>(
 					targetPath,
 					templateFilename: template.templateFilename,
 					chunks: rawContent.chunks,
-					postProcessCommand: rawContent.postProcessCommand,
-					postProcessExpectedFiles: rawContent.postProcessExpectedFiles,
 				} satisfies SeedInsertionResult,
 			];
 		}

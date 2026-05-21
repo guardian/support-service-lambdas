@@ -2,6 +2,7 @@ import {
 	extractGeneratedFilenames,
 	warningFileName,
 } from '../data/snippets/BUILDCHECK.md';
+import { runSeedCommand } from './commands/runSeedCommand';
 import { generate } from './steps/generate';
 import { parseArguments } from './util/argsParser';
 import { deleteRepoFiles, readLines, writeFiles } from './util/file-writer';
@@ -27,9 +28,8 @@ try {
 			break;
 		}
 		case 'seed':
-			throw new Error(
-				`Seed command not yet implemented: ${otherArgs.seedName}`,
-			);
+			runSeedCommand(otherArgs.seedName, otherArgs.seedArgv, repoRoot);
+			break;
 	}
 } catch (error) {
 	console.error(error);

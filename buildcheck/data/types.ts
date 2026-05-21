@@ -8,11 +8,8 @@ export interface InsertChunk {
 }
 
 /**
- * this represents one or more insertions into an existing file and any command
- * to run e.g. snapshot test update
+ * this represents one or more insertions into an existing file
  */
 export interface InsertChunks {
 	chunks: InsertChunk[];
-	postProcessCommand?: string;
-	postProcessExpectedFiles?: string[];
 }
