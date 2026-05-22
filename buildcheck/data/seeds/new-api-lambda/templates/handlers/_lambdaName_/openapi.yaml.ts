@@ -1,4 +1,4 @@
-import type { TemplateContent } from '../../../../../../src/dynamic/templater';
+import type { TemplateContent } from '../../../../../types';
 import type { GenerationOptions } from '../../../index';
 
 export default ({

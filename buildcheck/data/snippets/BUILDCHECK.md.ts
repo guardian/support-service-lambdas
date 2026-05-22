@@ -1,4 +1,4 @@
-import type { GeneratedFile } from '../../src/steps/generatedFile';
+import type { GeneratedFile } from '../../src/dynamic/templater';
 import { notice, relativePath } from './notices';
 
 export const warningFileName = 'BUILDCHECK.md';
@@ -25,6 +25,7 @@ ${fileList.map((name) => '- [' + name + '](' + name + ')').join('\n')}
 `;
 
 	return {
+		kind: 'file',
 		targetPath: warningFileName,
 		content,
 		templateFilename: relativePath(__filename),

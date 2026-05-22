@@ -1,5 +1,5 @@
-import type { TemplateContent } from '../../../../../../src/dynamic/templater';
 import { toPascalCase, toSentenceCase } from '../../../../../snippets/string';
+import type { TemplateContent } from '../../../../../types';
 import type { GenerationOptions } from '../../../index';
 
 export default ({ lambdaName }: GenerationOptions): TemplateContent => {

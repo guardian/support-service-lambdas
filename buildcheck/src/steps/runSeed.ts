@@ -1,10 +1,14 @@
 import { execSync } from 'child_process';
+import type { SeedIndex } from '../../data/types';
 import { seedConfigs } from '../dynamic/generated/generatedSeedMappings';
-import { applyTemplates } from '../dynamic/templater';
+import type { GeneratedFile } from '../dynamic/templater';
+import { applyTemplates, type Template } from '../dynamic/templater';
 import { assertFilesExist, writeFiles } from '../util/file-writer';
 import { assertMarkersPresent, insertIntoFiles } from '../util/fileInserter';
-import type { SeedFileResult } from './insertChunks';
-import type { SeedConfig } from './seedConfig';
+
+export type SeedConfig<T> = SeedIndex<T> & {
+	templates: Array<Template<T>>;
+};
 
 function parseFlags(
 	seedConfig: SeedConfig<never>,
@@ -53,7 +57,7 @@ export function runSeed<S extends keyof typeof seedConfigs>(
 
 	const { files, insertions } = applyTemplates(opts, seedConfig.templates);
 
-	const resolvedFiles: SeedFileResult[] = files.map((file) => ({
+	const resolvedFiles: GeneratedFile[] = files.map((file) => ({
 		...file,
 		targetPath: seedConfig.resolveTargetPath(file.targetPath, opts),
 	}));

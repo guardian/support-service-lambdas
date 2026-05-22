@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import type { GeneratedFile } from '../steps/generatedFile';
-import type { SeedFileResult } from '../steps/insertChunks';
+import type { GeneratedFile } from '../dynamic/templater';
 import { safeJoin } from './safeJoin';
 
 export function writeFiles(rootPath: string, files: GeneratedFile[]): void {
@@ -47,7 +46,7 @@ export function deleteRepoFiles(
 	});
 }
 
-export function assertFilesExist(repoRoot: string, files: SeedFileResult[]) {
+export function assertFilesExist(repoRoot: string, files: GeneratedFile[]) {
 	for (const file of files) {
 		const fullPath = path.join(repoRoot, file.targetPath);
 		if (fs.existsSync(fullPath)) {

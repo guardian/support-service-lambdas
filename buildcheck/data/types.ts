@@ -1,19 +1,25 @@
 import type { ZodObject, ZodRawShape, ZodTypeAny } from 'zod';
 
 /**
- * A single injection into an existing file.
- * @property marker - A string that uniquely identifies the target line; the content is inserted on the line immediately before it.
- * @property content - The text to insert.
+ * The union of all values a file template function may return.
+ *
+ * - `string` — written verbatim to the target file.
+ * - `Record<string, unknown>` — serialised by file extension (`.yaml` via js-yaml, `.json` via JSON.stringify).
+ * - `null` — skips this template entirely (used for conditional files).
+ *
+ * Note: insertion templates (files ending in `.inserts.ts`) return {@link InsertChunks}
  */
-export interface InsertChunk {
-	marker: string;
-	content: string;
-}
+export type TemplateContent = string | Record<string, unknown> | null;
 
 /**
  * One or more injections to apply to an existing file.
+ *
+ * This is returned by templates ending in .inject.ts
  */
-export type InsertChunks = InsertChunk[];
+export type InsertChunks = Array<{
+	marker: string;
+	content: string;
+}>;
 
 /**
  * The contract that every seed index file must satisfy.
@@ -31,7 +37,7 @@ export type InsertChunks = InsertChunk[];
  *   `handlers/_lambdaName_/src/index.ts` becomes
  *   `handlers/my-lambda/src/index.ts`.
  */
-export type SeedGenerator<T> = {
+export type SeedIndex<T> = {
 	argsSchema: ZodObject<ZodRawShape, 'strip', ZodTypeAny, T, unknown>;
 	postProcessCommands: (opts: T) => string[];
 	resolveTargetPath: (path: string, opts: T) => string;

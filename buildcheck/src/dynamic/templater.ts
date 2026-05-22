@@ -1,19 +1,6 @@
 import * as path from 'path';
 import { contentPostProcessor } from '../../data/snippets/notices';
-import type { InsertChunks } from '../../data/types';
-import {
-	type SeedFileResult,
-	type SeedInsertionResult,
-} from '../steps/insertChunks';
-
-/**
- * The union of all values a template function may return.
- * - `string` — written verbatim to the target file.
- * - `Record<string, unknown>` — serialised by file extension (`.yaml` via js-yaml, `.json` via JSON.stringify).
- * - `null` — skips this template entirely (used for conditional files).
- * Insertion templates (`.inserts.ts` files) return {@link InsertChunks} and are identified by `kind: 'insertion'` on the {@link Template}.
- */
-export type TemplateContent = string | Record<string, unknown> | null;
+import type { InsertChunks, TemplateContent } from '../../data/types';
 
 interface TemplateBase {
 	targetPath: string;
@@ -34,6 +21,20 @@ export type Template<Definition> =
 	| FileTemplate<Definition>
 	| InsertionTemplate<Definition>;
 
+export interface GeneratedFile {
+	readonly kind: 'file';
+	targetPath: string;
+	content: string;
+	templateFilename: string;
+}
+
+export interface SeedInsertionResult {
+	readonly kind: 'insertion';
+	targetPath: string;
+	templateFilename: string;
+	chunks: InsertChunks;
+}
+
 /**
  * Evaluates all templates against `opts`, splitting results into new files and
  * injections into existing files. Null-returning templates are dropped.
@@ -43,7 +44,7 @@ export function applyTemplates<Definition>(
 	opts: Definition,
 	templates: Array<Template<Definition>>,
 	insertWarningComment: boolean = false,
-): { files: SeedFileResult[]; insertions: SeedInsertionResult[] } {
+): { files: GeneratedFile[]; insertions: SeedInsertionResult[] } {
 	const fileTemplates = templates.filter((r) => r.kind === 'file');
 	const insertionTemplates = templates.filter((r) => r.kind === 'insertion');
 
@@ -79,7 +80,7 @@ export function applyFileTemplates<Definition>(
 					insertWarningComment,
 				),
 				templateFilename: template.templateFilename,
-			} satisfies SeedFileResult,
+			} satisfies GeneratedFile,
 		];
 	});
 }

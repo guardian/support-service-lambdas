@@ -131,7 +131,7 @@ for seed_name in "${seed_names[@]}"; do
 done
 
 echo "import { type Template } from '../templater';" >> "$seed_output_file"
-echo "import type { SeedConfig } from '../../steps/seedConfig';" >> "$seed_output_file"
+echo "import type { SeedConfig } from '../../steps/runSeed';" >> "$seed_output_file"
 
 echo "" >> "$seed_output_file"
 echo "/*" >> "$seed_output_file"

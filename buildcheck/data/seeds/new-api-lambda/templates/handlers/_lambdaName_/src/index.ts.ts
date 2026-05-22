@@ -1,4 +1,4 @@
-import type { TemplateContent } from '../../../../../../../src/dynamic/templater';
+import type { TemplateContent } from '../../../../../../types';
 
 export default `import { Router } from '@modules/routing/router';
 import { withBodyParser } from '@modules/routing/withParsers';

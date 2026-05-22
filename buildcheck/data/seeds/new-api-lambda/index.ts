@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { handlerTemplates } from '../../../src/dynamic/generated/generatedMappings';
 import { booleanFlag, kebabCaseSchema } from '../../snippets/string';
-import type { SeedGenerator } from '../../types';
+import type { SeedIndex } from '../../types';
 
 const argsSchema = z.object({
 	lambdaName: kebabCaseSchema,
@@ -34,4 +34,4 @@ export default {
 	postProcessCommands,
 	resolveTargetPath: (path: string, opts: GenerationOptions) =>
 		path.replace(/_lambdaName_/g, opts.lambdaName),
-} satisfies SeedGenerator<GenerationOptions>;
+} satisfies SeedIndex<GenerationOptions>;

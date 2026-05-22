@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import path from 'path';
-import type { SeedInsertionResult } from '../steps/insertChunks';
+import type { SeedInsertionResult } from '../dynamic/templater';
 import { safeJoin } from './safeJoin';
 
 /**

@@ -5,8 +5,8 @@ import {
 	handlerTemplates,
 	moduleTemplates,
 } from '../dynamic/generated/generatedMappings';
+import type { GeneratedFile } from '../dynamic/templater';
 import { applyFileTemplates } from '../dynamic/templater';
-import type { GeneratedFile } from './generatedFile';
 
 // generates files across the whole repository
 export function generate(): GeneratedFile[] {

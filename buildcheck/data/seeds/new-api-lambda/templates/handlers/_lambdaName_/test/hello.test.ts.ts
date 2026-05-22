@@ -1,4 +1,4 @@
-import type { TemplateContent } from '../../../../../../../src/dynamic/templater';
+import type { TemplateContent } from '../../../../../../types';
 
 export default `/**
  * This is a unit test, it can be run by the \`pnpm test\` command, and will be run by the CI/CD pipeline

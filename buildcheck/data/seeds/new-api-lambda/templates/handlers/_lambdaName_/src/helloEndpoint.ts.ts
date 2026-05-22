@@ -1,4 +1,4 @@
-import type { TemplateContent } from '../../../../../../../src/dynamic/templater';
+import type { TemplateContent } from '../../../../../../types';
 
 export default `import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
 import type { APIGatewayProxyResult } from 'aws-lambda';
