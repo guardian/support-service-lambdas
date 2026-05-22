@@ -5,10 +5,9 @@ export interface SeedFileResult extends GeneratedFile {
 	readonly kind: 'file';
 }
 
-export interface SeedInsertionResult extends InsertChunks {
+export interface SeedInsertionResult {
 	readonly kind: 'insertion';
 	targetPath: string;
 	templateFilename: string;
+	chunks: InsertChunks;
 }
-
-export type SeedResult = SeedFileResult | SeedInsertionResult;

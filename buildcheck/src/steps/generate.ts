@@ -12,14 +12,14 @@ import type { GeneratedFile } from './generatedFile';
 export function generate(): GeneratedFile[] {
 	const handlersFiles = build.handlers.flatMap((pkg) => {
 		const handlerFiles = withWarningFile(
-			applyFileTemplates(pkg, handlerTemplates),
+			applyFileTemplates(pkg, handlerTemplates, true),
 			'../..',
 		);
 		return prependToTargetPath(handlerFiles, ['handlers', pkg.name]);
 	});
 	const modulesFiles = build.modules.flatMap((pkg) => {
 		const moduleFiles = withWarningFile(
-			applyFileTemplates(pkg, moduleTemplates),
+			applyFileTemplates(pkg, moduleTemplates, true),
 			'../..',
 		);
 		return prependToTargetPath(moduleFiles, ['modules', pkg.name]);

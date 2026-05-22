@@ -22,8 +22,10 @@ data/
       README.md
       templates/             ← template files (directory mirrors target repo structure)
         .github/workflows/
-          ci-typescript.yml.ts
+          ci-typescript.yml.inserts.ts
         cdk/
+          bin/
+            cdk.ts.inserts.ts
           lib/
             _lambdaName_.ts.ts
         handlers/
@@ -53,7 +55,11 @@ Testing changes can be tricky as the tool edits workspace files when you run it.
 
 ## What a template file can return
 
-Each file under `data/seeds/<seed-name>/templates/` is a TypeScript module with a default export — a function that takes the parsed args and returns one of:
+These have a default export — a function that takes the parsed args and returns a suitable value.
+
+### Normal template files (named `FILENAME.ts`)
+
+These define an entire file and return one of:
 
 **`string`** — written verbatim to the target file:
 ```ts
@@ -69,7 +75,11 @@ export default ({ lambdaName }: GenerationOptions) => ({
 });
 ```
 
-**`InsertChunks`** — injects content into an existing file before a named marker line, rather than creating a new file.
+**`null`** — skips the file entirely (useful for conditional files like an optional OpenAPI spec).
+
+### Insertion template files (named `FILENAME.inserts.ts`)
+
+These inject content into an existing file before a named marker line, rather than creating a new file. The `.inserts` part is stripped to derive the target filename — e.g. `cdk/bin/cdk.ts.inserts.ts` targets `cdk/bin/cdk.ts`:
 ```ts
 export default ({ lambdaName }: GenerationOptions): InsertChunks => ({
   chunks: [
@@ -81,11 +91,9 @@ export default ({ lambdaName }: GenerationOptions): InsertChunks => ({
 });
 ```
 
-**`null`** — skips the file entirely (useful for conditional files like an optional OpenAPI spec).
-
 ## Adding a new template file to an existing seed
 
-1. Create a `.ts` file under `data/seeds/<seed-name>/templates/` at the path that mirrors where the output should be written (you can rewrite dynamic path elements using your index.ts)
+1. Create a `.ts` file (or `.inserts.ts` for insertions) under `data/seeds/<seed-name>/templates/` at the path that mirrors where the output should be written (you can rewrite dynamic path elements using your index.ts)
 1. Export a default function returning one of the types above
 1. Test as per the Testing section above
 

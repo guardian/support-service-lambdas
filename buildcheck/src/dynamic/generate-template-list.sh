@@ -31,24 +31,41 @@ emit_imports() {
     done < <(find "$search_dir" -name "*.ts" -type f -print0 2>/dev/null | sort -z) >> "$target_file"
 }
 
+# Returns "insertion" if the filename ends in .inserts.ts, otherwise "file"
+get_kind() {
+    local rel_path="$1"
+    if [[ "$rel_path" == *.inserts.ts ]]; then
+        echo "insertion"
+    else
+        echo "file"
+    fi
+}
+
+# Strips .inserts from the target path (e.g. build.ts.inserts -> build.ts)
+strip_inserts() {
+    echo "${1/.inserts/}"
+}
+
 # Emit a Template array const for all *.ts files found under a directory.
-# Usage: emit_group <search_dir> <path_strip_prefix> <const_name> <type_expr> <target_file> [extra_path_segments_to_strip]
+# Usage: emit_group <search_dir> <path_strip_prefix> <const_name> <type_expr> <target_file> [extra_path_segments_to_strip] [array_type]
 emit_group() {
-    local search_dir="$1" strip_prefix="$2" const_name="$3" type_expr="$4" target_file="$5" extra_strip="${6:-0}"
+    local search_dir="$1" strip_prefix="$2" const_name="$3" type_expr="$4" target_file="$5" extra_strip="${6:-0}" array_type="${7:-Template}"
     echo "" >> "$target_file"
-    echo "export const ${const_name}Templates: Array<Template<${type_expr}>> = [" >> "$target_file"
+    echo "export const ${const_name}Templates: Array<${array_type}<${type_expr}>> = [" >> "$target_file"
     while IFS= read -r -d '' file; do
         local from_repo_root="${file#$repo_root/}"
         local rel_path="${file#$strip_prefix/}"
         local name_without_ext="${rel_path%.ts}"
-        local import_name template_name
+        local import_name template_name kind
         import_name=$(echo "$name_without_ext" | sed 's/[^a-zA-Z0-9]/_/g')
         template_name="${name_without_ext#*/}"  # strip first path segment (group name)
         local i
         for (( i=1; i<extra_strip; i++ )); do
             template_name="${template_name#*/}"
         done
-        echo "  { targetPath: \"$template_name\", value: $import_name, templateFilename: \"$from_repo_root\" },"
+        kind=$(get_kind "$rel_path")
+        template_name=$(strip_inserts "$template_name")
+        echo "  { kind: \"$kind\", targetPath: \"$template_name\", value: $import_name, templateFilename: \"$from_repo_root\" },"
     done < <(find "$search_dir" -name "*.ts" -type f -print0 2>/dev/null | sort -z) >> "$target_file"
     echo "];" >> "$target_file"
 }
@@ -75,7 +92,7 @@ for subdir_name in "${managed_subdirs[@]}"; do
     emit_imports "$template_dir/$subdir_name" "$template_dir" '../../../data/templates' "$output_file"
 done
 
-echo "import { type Template } from '../templater';" >> "$output_file"
+echo "import { type FileTemplate } from '../templater';" >> "$output_file"
 
 echo "" >> "$output_file"
 echo "/*" >> "$output_file"
@@ -88,7 +105,7 @@ echo " */" >> "$output_file"
 for subdir_name in "${managed_subdirs[@]}"; do
     const_name=$(echo "${subdir_name}" | sed 's/[^a-zA-Z0-9]/_/g')
     capitalized_const_name=$(echo "${const_name}" | awk '{print toupper(substr($0,0,1)) substr($0,2)}')
-    emit_group "$template_dir/$subdir_name" "$template_dir" "$const_name" "${capitalized_const_name}Definition" "$output_file"
+    emit_group "$template_dir/$subdir_name" "$template_dir" "$const_name" "${capitalized_const_name}Definition" "$output_file" 0 FileTemplate
 done
 
 # ---- generatedSeedMappings.ts: seed templates and seedConfigs ----

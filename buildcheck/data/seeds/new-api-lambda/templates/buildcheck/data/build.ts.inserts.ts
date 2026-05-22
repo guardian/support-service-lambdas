@@ -21,18 +21,16 @@ export default ({
 };
 `;
 
-	return {
-		chunks: [
-			{
-				marker: '// MARKER new-lambda: buildcheck-const',
-				content: constDefinition,
-			},
-			{
-				marker: '// MARKER new-lambda: buildcheck-reference',
-				content: `		${camelName},`,
-			},
-		],
-	};
+	return [
+		{
+			marker: '// MARKER new-lambda: buildcheck-const',
+			content: constDefinition,
+		},
+		{
+			marker: '// MARKER new-lambda: buildcheck-reference',
+			content: `		${camelName},`,
+		},
+	];
 };
 
 function openApiScripts(lambdaName: string) {
