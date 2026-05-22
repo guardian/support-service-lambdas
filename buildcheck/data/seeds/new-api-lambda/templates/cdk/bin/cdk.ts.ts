@@ -1,6 +1,6 @@
-import { toPascalCase } from '../../../../snippets/string';
-import type { InsertChunks } from '../../../../types';
-import type { GenerationOptions } from '../../../new-api-lambda';
+import { toPascalCase } from '../../../../../snippets/string';
+import type { InsertChunks } from '../../../../../types';
+import type { GenerationOptions } from '../../../index';
 
 export default ({ lambdaName }: GenerationOptions): InsertChunks => {
 	const className = toPascalCase(lambdaName);

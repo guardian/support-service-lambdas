@@ -1,5 +1,5 @@
-import { toPascalCase, toSentenceCase } from '../../../../snippets/string';
-import type { GenerationOptions } from '../../../new-api-lambda';
+import { toPascalCase, toSentenceCase } from '../../../../../snippets/string';
+import type { GenerationOptions } from '../../../index';
 
 export default ({ lambdaName }: GenerationOptions): string => {
 	const className = toPascalCase(lambdaName);

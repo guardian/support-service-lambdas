@@ -4,7 +4,7 @@ Creates the standard boilerplate for a new API Gateway lambda in this repository
 
 If you want to create a new lambda, follow the instructions here - [handlers/HOWTO-create-lambda.md](../handlers/HOWTO-create-lambda.md)
 
-To learn how seeds work and how to edit or add templates see [README-seeds.md](../../README-seeds.md)
+To learn how seeds work and how to edit or add templates see [README-seeds.md](../../../README-seeds.md)
 
 ## Usage
 
@@ -32,6 +32,6 @@ The seed writes the handler source files, CDK stack definition and test, and wir
 - **Handler source** — `handlers/<lambdaName>/src/index.ts`, `helloEndpoint.ts`, and tests under `handlers/<lambdaName>/test/`
 - **OpenAPI** — `handlers/<lambdaName>/openapi.yaml` and `redocly.yaml` (only if `--includeOpenApiDoc=Y`)
 - **CDK** — `cdk/lib/<lambdaName>.ts` and [`cdk/lib/<lambdaName>.test.ts`](../../../cdk/lib/)
-- **Wired into existing files** — adds the lambda to [`.github/workflows/ci-typescript.yml`](../../../.github/workflows/ci-typescript.yml), [`buildcheck/data/build.ts`](../build.ts), and [`cdk/bin/cdk.ts`](../../../cdk/bin/cdk.ts)
+- **Wired into existing files** — adds the lambda to [`.github/workflows/ci-typescript.yml`](../../../../.github/workflows/ci-typescript.yml), [`buildcheck/data/build.ts`](../../build.ts), and [`cdk/bin/cdk.ts`](../../../../cdk/bin/cdk.ts)
 
 After writing files, the seed automatically runs `pnpm snapshot:update`, `pnpm install`, CDK lint, formatting, and `pnpm --filter cdk test-update` to generate the initial CDK snapshot.

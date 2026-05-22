@@ -1,5 +1,5 @@
-import { toPascalCase } from '../../../../snippets/string';
-import type { GenerationOptions } from '../../../new-api-lambda';
+import { toPascalCase } from '../../../../../snippets/string';
+import type { GenerationOptions } from '../../../index';
 
 export default ({ lambdaName, includeApiKey }: GenerationOptions): string => {
 	const className = toPascalCase(lambdaName);

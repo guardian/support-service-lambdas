@@ -32,9 +32,9 @@ emit_imports() {
 }
 
 # Emit a Template array const for all *.ts files found under a directory.
-# Usage: emit_group <search_dir> <path_strip_prefix> <const_name> <type_expr> <target_file>
+# Usage: emit_group <search_dir> <path_strip_prefix> <const_name> <type_expr> <target_file> [extra_path_segments_to_strip]
 emit_group() {
-    local search_dir="$1" strip_prefix="$2" const_name="$3" type_expr="$4" target_file="$5"
+    local search_dir="$1" strip_prefix="$2" const_name="$3" type_expr="$4" target_file="$5" extra_strip="${6:-0}"
     echo "" >> "$target_file"
     echo "export const ${const_name}Templates: Array<Template<${type_expr}>> = [" >> "$target_file"
     while IFS= read -r -d '' file; do
@@ -44,6 +44,10 @@ emit_group() {
         local import_name template_name
         import_name=$(echo "$name_without_ext" | sed 's/[^a-zA-Z0-9]/_/g')
         template_name="${name_without_ext#*/}"  # strip first path segment (group name)
+        local i
+        for (( i=1; i<extra_strip; i++ )); do
+            template_name="${template_name#*/}"
+        done
         echo "  { targetPath: \"$template_name\", value: $import_name, templateFilename: \"$from_repo_root\" },"
     done < <(find "$search_dir" -name "*.ts" -type f -print0 2>/dev/null | sort -z) >> "$target_file"
     echo "];" >> "$target_file"
@@ -55,11 +59,11 @@ while IFS= read -r -d '' subdir; do
     managed_subdirs+=("$(basename "$subdir")")
 done < <(find "$template_dir" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
 
-# Discover seed names from *.ts files directly under seeds/ (e.g. new-api-lambda.ts -> new-api-lambda)
+# Discover seed names from index.ts files inside seed subdirectories (e.g. seeds/new-api-lambda/index.ts -> new-api-lambda)
 seed_names=()
 while IFS= read -r -d '' file; do
-    seed_names+=("$(basename "${file%.ts}")")
-done < <(find "$seeds_dir" -mindepth 1 -maxdepth 1 -name "*.ts" -type f -print0 2>/dev/null | sort -z)
+    seed_names+=("$(basename "$(dirname "$file")")")
+done < <(find "$seeds_dir" -mindepth 2 -maxdepth 2 -name "index.ts" -type f -print0 2>/dev/null | sort -z)
 
 # ---- generatedMappings.ts: handler and module templates only ----
 echo -n "" > "$output_file"
@@ -95,18 +99,18 @@ echo "/* eslint-disable import/order -- import order is managed by the generator
 # Type imports per seed
 for seed_name in "${seed_names[@]}"; do
     const_name=$(echo "${seed_name}" | sed 's/[^a-zA-Z0-9]/_/g')
-    echo "import type { GenerationOptions as ${const_name}_GenerationOptions } from '../../../data/seeds/${seed_name}';" >> "$seed_output_file"
+    echo "import type { GenerationOptions as ${const_name}_GenerationOptions } from '../../../data/seeds/${seed_name}/index';" >> "$seed_output_file"
 done
 
 # Value imports: seed index files (default exports)
 for seed_name in "${seed_names[@]}"; do
     const_name=$(echo "${seed_name}" | sed 's/[^a-zA-Z0-9]/_/g')
-    echo "import ${const_name}_seed from '../../../data/seeds/${seed_name}';" >> "$seed_output_file"
+    echo "import ${const_name}_seed from '../../../data/seeds/${seed_name}/index';" >> "$seed_output_file"
 done
 
 # Value imports: seed templates
 for seed_name in "${seed_names[@]}"; do
-    emit_imports "$seeds_dir/$seed_name" "$seeds_dir" '../../../data/seeds' "$seed_output_file"
+    emit_imports "$seeds_dir/$seed_name/templates" "$seeds_dir" '../../../data/seeds' "$seed_output_file"
 done
 
 echo "import { type Template } from '../templater';" >> "$seed_output_file"
@@ -122,7 +126,7 @@ echo " */" >> "$seed_output_file"
 # Seed template arrays
 for seed_name in "${seed_names[@]}"; do
     const_name=$(echo "${seed_name}" | sed 's/[^a-zA-Z0-9]/_/g')
-    emit_group "$seeds_dir/$seed_name" "$seeds_dir" "$const_name" "${const_name}_GenerationOptions" "$seed_output_file"
+    emit_group "$seeds_dir/$seed_name/templates" "$seeds_dir" "$const_name" "${const_name}_GenerationOptions" "$seed_output_file" 2
 done
 
 # Seed lookup object — wraps the precisely-typed template array with the seed's parseArgs/postProcess/resolveTargetPath

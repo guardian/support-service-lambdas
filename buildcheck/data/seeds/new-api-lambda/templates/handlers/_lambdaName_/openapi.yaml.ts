@@ -1,4 +1,4 @@
-import type { GenerationOptions } from '../../../new-api-lambda';
+import type { GenerationOptions } from '../../../index';
 
 export default ({
 	lambdaName,

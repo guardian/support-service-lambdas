@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { handlerTemplates } from '../../src/dynamic/generated/generatedMappings';
-import { booleanFlag, kebabCaseSchema } from '../snippets/string';
-import type { SeedGenerator } from '../types';
+import { handlerTemplates } from '../../../src/dynamic/generated/generatedMappings';
+import { booleanFlag, kebabCaseSchema } from '../../snippets/string';
+import type { SeedGenerator } from '../../types';
 
 const argsSchema = z.object({
 	lambdaName: kebabCaseSchema,

@@ -1,6 +1,6 @@
-import { toCamelCase } from '../../../../snippets/string';
-import type { InsertChunks } from '../../../../types';
-import type { GenerationOptions } from '../../../new-api-lambda';
+import { toCamelCase } from '../../../../../snippets/string';
+import type { InsertChunks } from '../../../../../types';
+import type { GenerationOptions } from '../../../index';
 
 export default ({
 	lambdaName,
