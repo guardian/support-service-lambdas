@@ -25,13 +25,13 @@ function parseFlags(
 	const failedKeys = new Set(
 		parseResult.error.errors.map((e) => e.path[0]?.toString()),
 	);
-	const syntax = `Syntax: pnpm --filter buildcheck seed ${seedName} ${schemaKeys
+	const syntax = `Syntax: pnpm seed ${seedName} ${schemaKeys
 		.map((k) => {
 			const description = shape[k].description ?? 'value';
 			return `--${k}=<${description}>`;
 		})
 		.join(' ')}`;
-	const suggested = `Suggested: pnpm --filter buildcheck seed ${seedName} ${schemaKeys
+	const suggested = `Suggested: pnpm seed ${seedName} ${schemaKeys
 		.map((k) => {
 			const description = shape[k].description ?? k;
 			const value =

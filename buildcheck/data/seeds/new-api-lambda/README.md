@@ -9,12 +9,8 @@ To learn how seeds work and how to edit or add templates see [README-seeds.md](.
 ## Usage
 
 ```bash
-pnpm --filter buildcheck seed new-api-lambda --lambdaName=<name> --includeApiKey=<Y|N> --includeOpenApiDoc=<Y|N>
-```
-
-Example:
-```bash
-pnpm --filter buildcheck seed new-api-lambda --lambdaName=my-new-lambda --includeApiKey=Y --includeOpenApiDoc=N
+cd buildcheck
+pnpm seed new-api-lambda --lambdaName=<name> --includeApiKey=<Y|N> --includeOpenApiDoc=<Y|N>
 ```
 
 ## Flags

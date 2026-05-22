@@ -48,7 +48,7 @@ The template files are inside each seed inside [`data/seeds/`](data/seeds/) unde
 Testing changes can be tricky as the tool edits workspace files when you run it.  This is the recommended method to edit and test a change:
 
 1. commit your change locally (don't push yet)
-1. Run the seed: `pnpm --filter buildcheck seed <seed-name> --key=value ...` (see the seed's own README.md for the exact command)
+1. Run the seed: `pnpm seed <seed-name> --key=value ...` (see the seed's own README.md for the exact command)
 1. Review the generated output with `git diff`
 1. Roll back the generated files: `git checkout HEAD -- .`
 1. Amend your template commit and repeat until happy, then push
