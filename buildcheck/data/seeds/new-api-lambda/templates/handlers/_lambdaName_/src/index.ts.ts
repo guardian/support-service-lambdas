@@ -1,3 +1,5 @@
+import type { TemplateContent } from '../../../../../../../src/dynamic/templater';
+
 export default `import { Router } from '@modules/routing/router';
 import { withBodyParser } from '@modules/routing/withParsers';
 import type { Handler } from 'aws-lambda';
@@ -12,4 +14,4 @@ export const handler: Handler = Router([
 		),
 	},
 ]);
-`;
+` satisfies TemplateContent;

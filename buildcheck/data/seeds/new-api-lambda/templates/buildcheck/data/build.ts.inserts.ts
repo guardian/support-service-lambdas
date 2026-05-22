@@ -5,10 +5,24 @@ import type { GenerationOptions } from '../../../index';
 export default ({
 	lambdaName,
 	includeOpenApiDoc,
-}: GenerationOptions): InsertChunks => {
+}: GenerationOptions): InsertChunks => [
+	{
+		marker: '// MARKER new-lambda: buildcheck-const',
+		content: buildHandlerConstDefinition(lambdaName, includeOpenApiDoc),
+	},
+	{
+		marker: '// MARKER new-lambda: buildcheck-reference',
+		content: `		${toCamelCase(lambdaName)},`,
+	},
+];
+
+function buildHandlerConstDefinition(
+	lambdaName: string,
+	includeOpenApiDoc: boolean,
+) {
 	const camelName = toCamelCase(lambdaName);
 
-	const constDefinition = `const ${camelName}: HandlerDefinition = {
+	return `const ${camelName}: HandlerDefinition = {
 	name: '${lambdaName}',
 	dependencies: {
 		...dep.zod,
@@ -20,18 +34,7 @@ export default ({
 	${includeOpenApiDoc ? openApiScripts(lambdaName) : ''}
 };
 `;
-
-	return [
-		{
-			marker: '// MARKER new-lambda: buildcheck-const',
-			content: constDefinition,
-		},
-		{
-			marker: '// MARKER new-lambda: buildcheck-reference',
-			content: `		${camelName},`,
-		},
-	];
-};
+}
 
 function openApiScripts(lambdaName: string) {
 	return `extraScripts: {

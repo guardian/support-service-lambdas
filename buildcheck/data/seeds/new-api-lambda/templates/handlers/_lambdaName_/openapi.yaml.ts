@@ -1,9 +1,10 @@
+import type { TemplateContent } from '../../../../../../src/dynamic/templater';
 import type { GenerationOptions } from '../../../index';
 
 export default ({
 	lambdaName,
 	includeOpenApiDoc,
-}: GenerationOptions): Record<string, unknown> | null => {
+}: GenerationOptions): TemplateContent => {
 	if (!includeOpenApiDoc) {
 		return null;
 	}

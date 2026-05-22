@@ -1,3 +1,5 @@
+import type { TemplateContent } from '../../../../../../../src/dynamic/templater';
+
 export default `/**
  * This is an integration test, the \`@group integration\` tag ensures that it will only be run by the \`pnpm it-test\`
  * command and will not be run during continuous integration.
@@ -17,4 +19,4 @@ test('helloEndpoint', async () => {
 		}),
 	});
 });
-`;
+` satisfies TemplateContent;

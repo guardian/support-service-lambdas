@@ -1,5 +1,6 @@
-export default (): string =>
-	`import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
+import type { TemplateContent } from '../../../../../../../src/dynamic/templater';
+
+export default `import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
 
@@ -23,4 +24,4 @@ export function helloRequestEndpoint(
 		return Promise.resolve(buildErrorResponse(e));
 	}
 }
-`;
+` satisfies TemplateContent;

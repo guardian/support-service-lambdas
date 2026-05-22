@@ -1,6 +1,10 @@
+import type { TemplateContent } from '../../../../../../src/dynamic/templater';
 import type { GenerationOptions } from '../../../index';
 
-export default ({ lambdaName, includeOpenApiDoc }: GenerationOptions): string =>
+export default ({
+	lambdaName,
+	includeOpenApiDoc,
+}: GenerationOptions): TemplateContent =>
 	`# ${lambdaName} API
 
 ## URLs

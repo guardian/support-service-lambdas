@@ -1,14 +1,14 @@
+import type { TemplateContent } from '../../../../../../src/dynamic/templater';
 import { toPascalCase, toSentenceCase } from '../../../../../snippets/string';
 import type { GenerationOptions } from '../../../index';
 
-export default ({ lambdaName }: GenerationOptions): string => {
+export default ({ lambdaName }: GenerationOptions): TemplateContent => {
 	const className = toPascalCase(lambdaName);
-	const sentenceName = toSentenceCase(lambdaName);
 	return `import { App } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
 import { ${className} } from './${lambdaName}';
 
-describe('The ${sentenceName} stack', () => {
+describe('The ${toSentenceCase(lambdaName)} stack', () => {
 	it('matches the snapshot', () => {
 		const app = new App();
 		const codeStack = new ${className}(app, 'CODE');

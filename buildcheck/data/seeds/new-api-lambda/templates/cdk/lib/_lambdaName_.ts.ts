@@ -1,15 +1,16 @@
+import type { TemplateContent } from '../../../../../../src/dynamic/templater';
 import { toPascalCase } from '../../../../../snippets/string';
 import type { GenerationOptions } from '../../../index';
 
-export default ({ lambdaName, includeApiKey }: GenerationOptions): string => {
-	const className = toPascalCase(lambdaName);
-
-	return `import type { App } from 'aws-cdk-lib';
+export default ({
+	lambdaName,
+	includeApiKey,
+}: GenerationOptions): TemplateContent => `import type { App } from 'aws-cdk-lib';
 import { SrApiLambda } from './cdk/SrApiLambda';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
 
-export class ${className} extends SrStack {
+export class ${toPascalCase(lambdaName)} extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
 		super(scope, { stage, app: '${lambdaName}' });
 
@@ -34,4 +35,3 @@ export class ${className} extends SrStack {
 	}
 }
 `;
-};
