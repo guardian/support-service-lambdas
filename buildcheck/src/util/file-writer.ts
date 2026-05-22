@@ -1,6 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import type { GeneratedFile } from '../steps/generatedFile';
+import type { SeedFileResult } from '../steps/insertChunks';
+import { safeJoin } from './safeJoin';
 
 export function writeFiles(rootPath: string, files: GeneratedFile[]): void {
 	files.forEach((file) => {
@@ -11,20 +13,6 @@ export function writeFiles(rootPath: string, files: GeneratedFile[]): void {
 		console.log(`${scriptName}: writing: ${file.targetPath}`);
 		fs.writeFileSync(fullPath, file.content);
 	});
-}
-
-function safeJoin(basePath: string, relativePath: string): string {
-	const fullPath = path.join(basePath, relativePath);
-	const resolvedBase = path.resolve(basePath);
-	const resolvedTarget = path.resolve(fullPath);
-
-	if (!resolvedTarget.startsWith(resolvedBase + path.sep)) {
-		throw new Error(
-			`Path traversal detected: ${relativePath} escapes base directory ${basePath}`,
-		);
-	}
-
-	return fullPath;
 }
 
 function ensureDirectoryExists(dirPath: string): void {
@@ -57,4 +45,16 @@ export function deleteRepoFiles(
 			fs.unlinkSync(fullPath);
 		}
 	});
+}
+
+export function assertFilesExist(repoRoot: string, files: SeedFileResult[]) {
+	for (const file of files) {
+		const fullPath = path.join(repoRoot, file.targetPath);
+		if (fs.existsSync(fullPath)) {
+			throw new Error(
+				`Seed file already exists: ${file.targetPath}\n` +
+					`Check for uncommitted changes, resolve any issues, and try again.`,
+			);
+		}
+	}
 }

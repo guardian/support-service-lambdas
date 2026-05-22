@@ -38,3 +38,16 @@ export type SeedGenerator<T> = {
 	postProcessCommands: (opts: T) => string[];
 	resolveTargetPath: (path: string, opts: T) => string;
 };
+/**
+ * we want to keep the template return types clean, so we need to look inside
+ * to work out what it's come back with
+ *
+ * @param value
+ */
+export function isInsertChunks(value: unknown): value is InsertChunks {
+	if (typeof value !== 'object' || value === null || !('chunks' in value)) {
+		return false;
+	}
+	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- narrowing unknown after 'in' check, no safer alternative
+	return Array.isArray((value as Record<string, unknown>)['chunks']);
+}

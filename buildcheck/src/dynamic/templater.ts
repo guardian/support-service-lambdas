@@ -1,9 +1,9 @@
 import * as path from 'path';
 import { contentPostProcessor } from '../../data/snippets/notices';
 import type { InsertChunks } from '../../data/types';
+import { isInsertChunks } from '../../data/types';
 import type { GeneratedFile } from '../steps/generatedFile';
 import {
-	isInsertChunks,
 	type SeedFileResult,
 	type SeedInsertionResult,
 	type SeedResult,

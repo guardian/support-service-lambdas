@@ -2,9 +2,10 @@ import {
 	extractGeneratedFilenames,
 	warningFileName,
 } from '../data/snippets/BUILDCHECK.md';
-import { runSeedCommand } from './commands/runSeedCommand';
+import { seedConfigs } from './dynamic/generated/generatedSeedMappings';
 import { generate } from './steps/generate';
-import { parseArguments } from './util/argsParser';
+import { runSeed } from './steps/runSeed';
+import { parseArguments, parseFlags } from './util/argsParser';
 import { deleteRepoFiles, readLines, writeFiles } from './util/file-writer';
 
 // main entry point from pnpm
@@ -27,9 +28,17 @@ try {
 			deleteRepoFiles(repoRoot, previouslyGeneratedFiles);
 			break;
 		}
-		case 'seed':
-			runSeedCommand(otherArgs.seedName, otherArgs.seedArgv, repoRoot);
+		case 'seed': {
+			if (!(otherArgs.seedName in seedConfigs)) {
+				throw new Error(
+					`Unknown seed: '${otherArgs.seedName}'. Available seeds: ${Object.keys(seedConfigs).join(', ')}`,
+				);
+			}
+
+			const flags = parseFlags(otherArgs.seedArgv);
+			runSeed(otherArgs.seedName, flags, repoRoot);
 			break;
+		}
 	}
 } catch (error) {
 	console.error(error);
