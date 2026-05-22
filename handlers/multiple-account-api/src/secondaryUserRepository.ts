@@ -5,35 +5,33 @@ import {
 	QueryCommand,
 } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
-import { getMaybeSingleOrThrow } from '@modules/arrayFunctions';
 import type { Stage } from '@modules/stage';
 import { z } from 'zod';
 
-const invitationRecordSchema = z.object({
+const secondaryUserRecordSchema = z.object({
 	subscriptionName: z.string(),
-	invitationCode: z.string(),
-	primaryIdentityId: z.string(),
 	secondaryIdentityId: z.string(),
-	invitedDate: z.string(),
+	primaryIdentityId: z.string(),
+	acceptedDate: z.string(),
 	expiryDate: z.number(),
 });
 
-export type InvitationRecord = z.infer<typeof invitationRecordSchema>;
+export type SecondaryUserRecord = z.infer<typeof secondaryUserRecordSchema>;
 
-export class InvitationRepository {
+export class SecondaryUserRepository {
 	constructor(
 		private readonly client: DynamoDBClient,
 		private readonly tableName: string,
 	) {}
 
-	static create(stage: Stage): InvitationRepository {
-		return new InvitationRepository(
+	static create(stage: Stage): SecondaryUserRepository {
+		return new SecondaryUserRepository(
 			new DynamoDBClient({}),
-			`multiple-account-invitation-${stage}`,
+			`multiple-account-secondary-user-${stage}`,
 		);
 	}
 
-	async save(record: InvitationRecord): Promise<void> {
+	async save(record: SecondaryUserRecord): Promise<void> {
 		await this.client.send(
 			new PutItemCommand({
 				TableName: this.tableName,
@@ -42,32 +40,23 @@ export class InvitationRepository {
 		);
 	}
 
-	async get(invitationCode: string): Promise<InvitationRecord | undefined> {
+	async get(secondaryIdentityId: string): Promise<SecondaryUserRecord[]> {
 		const result = await this.client.send(
 			new QueryCommand({
 				TableName: this.tableName,
-				IndexName: 'invitationCode-index',
-				KeyConditionExpression: 'invitationCode = :invitationCode',
+				IndexName: 'secondaryIdentityId-index',
+				KeyConditionExpression: 'secondaryIdentityId = :secondaryIdentityId',
 				ExpressionAttributeValues: {
-					':invitationCode': { S: invitationCode },
+					':secondaryIdentityId': { S: secondaryIdentityId },
 				},
 			}),
 		);
-
-		const item = getMaybeSingleOrThrow(
-			result.Items ?? [],
-			() =>
-				new Error(
-					`Multiple invitations found with the invitationCode ${invitationCode}`,
-				),
+		return (result.Items ?? []).map((item) =>
+			secondaryUserRecordSchema.parse(unmarshall(item)),
 		);
-		if (!item) {
-			return undefined;
-		}
-		return invitationRecordSchema.parse(unmarshall(item));
 	}
 
-	async list(subscriptionName: string): Promise<InvitationRecord[]> {
+	async list(subscriptionName: string): Promise<SecondaryUserRecord[]> {
 		const result = await this.client.send(
 			new QueryCommand({
 				TableName: this.tableName,
@@ -78,22 +67,23 @@ export class InvitationRepository {
 			}),
 		);
 		return (result.Items ?? []).map((item) =>
-			invitationRecordSchema.parse(unmarshall(item)),
+			secondaryUserRecordSchema.parse(unmarshall(item)),
 		);
 	}
 
 	async delete(
 		subscriptionName: string,
-		invitationCode: string,
+		secondaryIdentityId: string,
 	): Promise<void> {
 		await this.client.send(
 			new DeleteItemCommand({
 				TableName: this.tableName,
 				Key: {
 					subscriptionName: { S: subscriptionName },
-					invitationCode: { S: invitationCode },
+					secondaryIdentityId: { S: secondaryIdentityId },
 				},
 			}),
 		);
 	}
 }
+
