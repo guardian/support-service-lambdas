@@ -15,8 +15,8 @@ loadConfig('CODE', 'support', 'alarms-handler', ConfigSchema)
 			now: () => dayjs(),
 			config: {
 				webhookUrls: {
-					VALUE: testWebhook,
-					GROWTH: testWebhook,
+					LIFECYCLE: testWebhook,
+					MARTECH: testWebhook,
 					SRE: testWebhook,
 					PORTFOLIO: testWebhook,
 					PLATFORM: testWebhook,
