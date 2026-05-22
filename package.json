@@ -10,7 +10,6 @@
 		"test": "pnpm --stream -r run test",
 		"it-test": "pnpm --stream -r run it-test",
 		"new-api-lambda": "pnpm hygen new-lambda api-gateway && pnpm snapshot:update && pnpm install && pnpm --filter cdk lint --fix && pnpm fix-formatting && pnpm --filter cdk test-update && git add .",
-		"new-api-lambda-next": "pnpm --filter buildcheck seed new-api-lambda \"$@\"",
 		"prepare": "husky",
 		"fix-formatting": "pnpm -r run fix-formatting",
 		"check-formatting": "pnpm -r run check-formatting",
