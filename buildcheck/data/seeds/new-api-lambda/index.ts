@@ -1,7 +1,8 @@
 import { z } from 'zod';
-import { handlerTemplates } from '../../../src/dynamic/generated/generatedMappings';
+import { toTargetPath } from '../../../src/dynamic/templater';
+import templates from '../../managed/handler/_generated_tsIndex';
 import { booleanFlag, kebabCaseSchema } from '../../snippets/string';
-import type { SeedIndex } from '../../types';
+import type { SeedIndex } from '../types';
 
 const argsSchema = z.object({
 	lambdaName: kebabCaseSchema,
@@ -9,13 +10,13 @@ const argsSchema = z.object({
 	includeOpenApiDoc: booleanFlag,
 });
 
-export type GenerationOptions = z.infer<typeof argsSchema>;
+export type TemplateParams = z.infer<typeof argsSchema>;
 
-const postProcessCommands = (opts: GenerationOptions): string[] => {
+const postProcessCommands = (opts: TemplateParams): string[] => {
 	const expectedFiles = [
 		`cdk/lib/__snapshots__/${opts.lambdaName}.test.ts.snap`,
-		...handlerTemplates.map(
-			(t) => `handlers/${opts.lambdaName}/${t.targetPath}`,
+		...templates.map((t) =>
+			toTargetPath(`handlers/${opts.lambdaName}/${t.relativeName}`),
 		),
 		`handlers/${opts.lambdaName}/BUILDCHECK.md`,
 	];
@@ -32,6 +33,6 @@ const postProcessCommands = (opts: GenerationOptions): string[] => {
 export default {
 	argsSchema,
 	postProcessCommands,
-	resolveTargetPath: (path: string, opts: GenerationOptions) =>
+	resolveTargetPath: (path: string, opts: TemplateParams) =>
 		path.replace(/_lambdaName_/g, opts.lambdaName),
-} satisfies SeedIndex<GenerationOptions>;
+} satisfies SeedIndex<TemplateParams>;

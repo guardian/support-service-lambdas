@@ -63,13 +63,13 @@ These define an entire file and return one of:
 
 **`string`** — written verbatim to the target file:
 ```ts
-export default ({ lambdaName }: GenerationOptions): string =>
+export default ({ lambdaName }: TemplateParams): string =>
   `export const name = '${lambdaName}';\n`;
 ```
 
 **`Record<string, unknown>`** — serialised automatically by file extension (`.yaml` via `js-yaml`, `.json` via `JSON.stringify`):
 ```ts
-export default ({ lambdaName }: GenerationOptions) => ({
+export default ({ lambdaName }: TemplateParams) => ({
   name: lambdaName,
   version: '1.0.0',
 });
@@ -81,7 +81,7 @@ export default ({ lambdaName }: GenerationOptions) => ({
 
 These inject content into an existing file before a named marker line, rather than creating a new file. The `.inserts` part is stripped to derive the target filename — e.g. `cdk/bin/cdk.ts.inserts.ts` targets `cdk/bin/cdk.ts`:
 ```ts
-export default ({ lambdaName }: GenerationOptions): InsertChunks => ({
+export default ({ lambdaName }: TemplateParams): InsertChunks => ({
   chunks: [
     {
       marker: '# MARKER new-lambda: list',

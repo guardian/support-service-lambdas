@@ -1,11 +1,11 @@
 import { toCamelCase } from '../../../../../snippets/string';
 import type { InsertChunks } from '../../../../../types';
-import type { GenerationOptions } from '../../../index';
+import type { TemplateParams } from '../../../index';
 
 export default ({
 	lambdaName,
 	includeOpenApiDoc,
-}: GenerationOptions): InsertChunks => [
+}: TemplateParams): InsertChunks => [
 	{
 		marker: '// MARKER new-lambda: buildcheck-const',
 		content: buildHandlerConstDefinition(lambdaName, includeOpenApiDoc),

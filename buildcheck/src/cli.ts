@@ -2,10 +2,12 @@ import {
 	extractGeneratedFilenames,
 	warningFileName,
 } from '../data/snippets/BUILDCHECK.md';
-import { seedConfigs } from './dynamic/generated/generatedSeedMappings';
+import { getSeedEntryOrThrow } from './seed/args/getSeedEntry';
+import { recordFromFlags } from './seed/args/recordFromFlags';
+import { validateFlags } from './seed/args/validateFlags';
+import { runSeed } from './seed/runSeed';
 import { generate } from './steps/generate';
-import { runSeed } from './steps/runSeed';
-import { parseArguments, parseFlags } from './util/argsParser';
+import { parseArguments } from './util/argsParser';
 import { deleteRepoFiles, readLines, writeFiles } from './util/file-writer';
 
 // main entry point from pnpm
@@ -18,7 +20,7 @@ try {
 				readLines(repoRoot, warningFileName),
 			);
 			deleteRepoFiles(repoRoot, previouslyGeneratedFiles);
-			writeFiles(repoRoot, generate());
+			writeFiles(repoRoot, generate(repoRoot));
 			break;
 		}
 		case 'clean': {
@@ -29,14 +31,18 @@ try {
 			break;
 		}
 		case 'seed': {
-			if (!(otherArgs.seedName in seedConfigs)) {
-				throw new Error(
-					`Unknown seed: '${otherArgs.seedName}'. Available seeds: ${Object.keys(seedConfigs).join(', ')}`,
-				);
-			}
+			const seedName = otherArgs.seedName;
 
-			const flags = parseFlags(otherArgs.seedArgv);
-			runSeed(otherArgs.seedName, flags, repoRoot);
+			const entry = getSeedEntryOrThrow(seedName);
+
+			const opts = validateFlags(
+				entry.index.argsSchema,
+				`pnpm seed ${seedName}`,
+				recordFromFlags(otherArgs.seedArgv),
+			);
+
+			runSeed(seedName, repoRoot, entry, opts);
+
 			break;
 		}
 	}

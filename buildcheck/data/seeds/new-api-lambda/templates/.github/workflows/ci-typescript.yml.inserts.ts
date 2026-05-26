@@ -1,7 +1,7 @@
 import type { InsertChunks } from '../../../../../types';
-import type { GenerationOptions } from '../../../index';
+import type { TemplateParams } from '../../../index';
 
-export default ({ lambdaName }: GenerationOptions): InsertChunks => [
+export default ({ lambdaName }: TemplateParams): InsertChunks => [
 	{
 		marker: '# MARKER new-lambda: github-action',
 		content: `          - ${lambdaName}`,

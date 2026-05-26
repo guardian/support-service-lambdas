@@ -1,11 +1,11 @@
 import { toPascalCase } from '../../../../../snippets/string';
 import type { TemplateContent } from '../../../../../types';
-import type { GenerationOptions } from '../../../index';
+import type { TemplateParams } from '../../../index';
 
 export default ({
 	lambdaName,
 	includeApiKey,
-}: GenerationOptions): TemplateContent => `import type { App } from 'aws-cdk-lib';
+}: TemplateParams): TemplateContent => `import type { App } from 'aws-cdk-lib';
 import { SrApiLambda } from './cdk/SrApiLambda';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';

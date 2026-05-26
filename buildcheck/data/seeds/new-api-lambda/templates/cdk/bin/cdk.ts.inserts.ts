@@ -1,8 +1,8 @@
 import { toPascalCase } from '../../../../../snippets/string';
 import type { InsertChunks } from '../../../../../types';
-import type { GenerationOptions } from '../../../index';
+import type { TemplateParams } from '../../../index';
 
-export default ({ lambdaName }: GenerationOptions): InsertChunks => [
+export default ({ lambdaName }: TemplateParams): InsertChunks => [
 	{
 		marker: 'import type { SrStageNames }',
 		content: `import { ${toPascalCase(lambdaName)} } from '../lib/${lambdaName}';`,

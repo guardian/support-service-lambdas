@@ -1,10 +1,10 @@
 import type { TemplateContent } from '../../../../../types';
-import type { GenerationOptions } from '../../../index';
+import type { TemplateParams } from '../../../index';
 
 export default ({
 	lambdaName,
 	includeOpenApiDoc,
-}: GenerationOptions): TemplateContent =>
+}: TemplateParams): TemplateContent =>
 	`# ${lambdaName} API
 
 ## URLs

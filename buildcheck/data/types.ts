@@ -1,5 +1,3 @@
-import type { ZodObject, ZodRawShape, ZodTypeAny } from 'zod';
-
 /**
  * The union of all values a file template function may return.
  *
@@ -22,23 +20,28 @@ export type InsertChunks = Array<{
 }>;
 
 /**
- * The contract that every seed index file must satisfy.
- * Each seed exports a default object of this type, which is combined with its
- * template array at code-generation time to produce a {@link SeedConfig}.
- *
- * @property argsSchema - A Zod object schema that parses and validates raw CLI
- *   flag strings (e.g. `{ lambdaName: 'my-lambda' }`) into the typed options
- *   object `T`. Field names become the flag names (`--lambdaName=...`).
- * @property postProcessCommands - Shell commands to run in the repo root after
- *   all seed files have been written and injected (e.g. snapshot updates, CDK
- *   test regeneration). Run in order.
- * @property resolveTargetPath - Expands tokens in template target paths.
- *   For example, replacing `_lambdaName_` with the actual lambda name so that
- *   `handlers/_lambdaName_/src/index.ts` becomes
- *   `handlers/my-lambda/src/index.ts`.
+ * A single entry in a generated template index (_generated_tsIndex.ts).
+ * Represents a file template (never an insertion).
+ * Used by managed template groups (handler, module) which never have insertions.
  */
-export type SeedIndex<T> = {
-	argsSchema: ZodObject<ZodRawShape, 'strip', ZodTypeAny, T, unknown>;
-	postProcessCommands: (opts: T) => string[];
-	resolveTargetPath: (path: string, opts: T) => string;
+export type FileTemplate<T> = {
+	kind: 'file';
+	relativeName: string;
+	value: TemplateContent | ((data: T) => TemplateContent);
 };
+
+/**
+ * A single entry in a generated template index (_generated_tsIndex.ts).
+ * Represents an insertion template.
+ */
+export type InsertionTemplate<T> = {
+	kind: 'insertion';
+	relativeName: string;
+	value: InsertChunks | ((data: T) => InsertChunks);
+};
+
+/**
+ * Union of file and insertion template entries.
+ * Used by seed groups which may contain either kind.
+ */
+export type AnyTemplate<T> = FileTemplate<T> | InsertionTemplate<T>;

@@ -1,37 +1,29 @@
 import * as path from 'path';
 import { contentPostProcessor } from '../../data/snippets/notices';
-import type { InsertChunks, TemplateContent } from '../../data/types';
-
-interface TemplateBase {
-	targetPath: string;
-	templateFilename: string;
-}
-
-export type FileTemplate<Definition> = TemplateBase & {
-	kind: 'file';
-	value: TemplateContent | ((data: Definition) => TemplateContent);
-};
-
-export type InsertionTemplate<Definition> = TemplateBase & {
-	kind: 'insertion';
-	value: InsertChunks | ((data: Definition) => InsertChunks);
-};
-
-export type Template<Definition> =
-	| FileTemplate<Definition>
-	| InsertionTemplate<Definition>;
+import type {
+	AnyTemplate,
+	FileTemplate,
+	InsertChunks,
+	InsertionTemplate,
+	TemplateContent,
+} from '../../data/types';
 
 export interface GeneratedFile {
 	readonly kind: 'file';
+	/**
+	 * relative path to the repo root
+	 */
 	targetPath: string;
 	content: string;
+	/**
+	 * used for the snapshot test names
+	 */
 	templateFilename: string;
 }
 
 export interface SeedInsertionResult {
 	readonly kind: 'insertion';
 	targetPath: string;
-	templateFilename: string;
 	chunks: InsertChunks;
 }
 
@@ -42,20 +34,27 @@ export interface SeedInsertionResult {
  */
 export function applyTemplates<Definition>(
 	opts: Definition,
-	templates: Array<Template<Definition>>,
+	groupDir: string,
+	templates: Array<AnyTemplate<Definition>>,
 	insertWarningComment: boolean = false,
 ): { files: GeneratedFile[]; insertions: SeedInsertionResult[] } {
 	const fileTemplates = templates.filter((r) => r.kind === 'file');
 	const insertionTemplates = templates.filter((r) => r.kind === 'insertion');
 
 	return {
-		files: applyFileTemplates(opts, fileTemplates, insertWarningComment),
-		insertions: applyInsertionTemplates(insertionTemplates, opts),
+		files: applyFileTemplates(
+			opts,
+			groupDir,
+			fileTemplates,
+			insertWarningComment,
+		),
+		insertions: applyInsertionTemplates(opts, insertionTemplates),
 	};
 }
 
 export function applyFileTemplates<Definition>(
 	opts: Definition,
+	groupDir: string,
 	fileTemplates: Array<FileTemplate<Definition>>,
 	insertWarningComment: boolean,
 ) {
@@ -69,25 +68,27 @@ export function applyFileTemplates<Definition>(
 			return [];
 		}
 
+		const templateFilename = path.join(groupDir, template.relativeName);
+		const targetPath = toTargetPath(template.relativeName);
 		return [
 			{
 				kind: template.kind,
-				targetPath: template.targetPath,
+				targetPath,
 				content: serializeContent(
 					rawContent,
-					template.targetPath,
-					template.templateFilename,
+					targetPath,
+					templateFilename,
 					insertWarningComment,
 				),
-				templateFilename: template.templateFilename,
+				templateFilename,
 			} satisfies GeneratedFile,
 		];
 	});
 }
 
 function applyInsertionTemplates<Definition>(
-	insertionTemplates: Array<InsertionTemplate<Definition>>,
 	opts: Definition,
+	insertionTemplates: Array<InsertionTemplate<Definition>>,
 ) {
 	return insertionTemplates.map((template) => {
 		const chunks =
@@ -96,11 +97,21 @@ function applyInsertionTemplates<Definition>(
 				: template.value;
 		return {
 			kind: template.kind,
-			targetPath: template.targetPath,
-			templateFilename: template.templateFilename,
+			targetPath: toTargetPath(template.relativeName),
 			chunks,
 		} satisfies SeedInsertionResult;
 	});
+}
+
+/** Derive the target path in the repo from a template filename (relative to templates/).
+ *  e.g. `foo.json.ts`       -> `foo.json`
+ *       `foo.ts.inserts.ts` -> `foo.ts`  (insertion: strip .inserts.ts)
+ */
+export function toTargetPath(relPath: string): string {
+	if (relPath.endsWith('.inserts.ts')) {
+		return relPath.slice(0, -'.inserts.ts'.length);
+	}
+	return relPath.endsWith('.ts') ? relPath.slice(0, -3) : relPath;
 }
 
 function serializeContent(
