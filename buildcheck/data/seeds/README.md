@@ -4,11 +4,11 @@ Seeds generate the initial boilerplate for a new lambda.
 
 Unlike managed files (which buildcheck owns and regenerates on every `snapshot:update`), seed output is written once and then owned by the developer — you edit the generated files directly from that point on.
 
-If you want to create a new lambda, follow the instructions here - [handlers/HOWTO-create-lambda.md](../handlers/HOWTO-create-lambda.md)
+If you want to create a new lambda, follow the instructions here - [handlers/HOWTO-create-lambda.md](../../../handlers/HOWTO-create-lambda.md)
 
 ## Seed specific documentation
 
-[new-api-lambda README.md](data/seeds/new-api-lambda/README.md)
+[api-lambda README.md](api-lambda/README.md)
 
 ## What does a seed look like?
 
@@ -17,8 +17,10 @@ Each seed lives in its own subdirectory under [`data/seeds/`](data/seeds/), here
 ```
 data/
   seeds/
-    new-api-lambda/
-      index.ts               ← seed index
+    types.ts                 ← types specific to seeds (as opposed to managed)
+    _generated_dirIndex.ts   ← auto generated index of available seeds
+    api-lambda/
+      index.ts               ← seed specific flags and post-processing commands
       README.md
       templates/             ← template files (directory mirrors target repo structure)
         .github/workflows/
@@ -32,9 +34,12 @@ data/
           _lambdaName_/
             src/
               index.ts.ts
+              ...
+            ...
 ```
 
-The `.ts` extension on each template file is stripped when resolving the target path. Token substitution (e.g. `_lambdaName_`) is handled by the seed's `resolveTargetPath`.
+The `.ts`  (and `.inserts` where applicable) extension on each template file is stripped when resolving the target path.
+Token substitution (e.g. `_lambdaName_`) is handled by the seed's `resolveTargetPath`.
 
 ## Editing an existing seed template
 
@@ -100,9 +105,14 @@ export default ({ lambdaName }: TemplateParams): InsertChunks => ({
 ## Adding a new seed package
 
 1. Create `data/seeds/<seed-name>/index.ts` — this is the seed index file.
-It must default-export an object satisfying [`SeedGenerator<T>`](data/types.ts):
-   - `argsSchema` — a Zod object schema defining the command line flags; the inferred type becomes `T`
+It must default-export an object satisfying [`SeedIndex<T>`](types.ts):
+   - `argsSchema` — a Zod object schema defining the command line flags; the inferred type becomes `T`.
    - `postProcessCommands(opts: T): string[]` — shell commands to run after files are written (e.g. snapshot updates)
    - `resolveTargetPath(path: string, opts: T): string` — filename transformations to convert placeholders to real paths (e.g. replace `_lambdaName_` with the actual name)
 1. Create a `data/seeds/<seed-name>/templates/` directory and add one or more template files as described above
 1. Test as per the Testing section above
+
+## Interactive prompts
+
+When you run `pnpm seed <seed-name>` without valid flags, buildcheck prompts you interactively
+based on the descriptions on the schema.

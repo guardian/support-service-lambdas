@@ -27,6 +27,18 @@ After editing the build definition, it's easy to refresh the build files using `
 1. review the git diff (if necessary update the build definition and run snapshot:update again)
 1. commit and push
 
+### ...create a new lambda from scratch
+Run the seed — it will prompt you interactively if you omit flags:
+```bash
+cd buildcheck
+pnpm seed api-lambda
+```
+Or supply flags directly to skip the prompts:
+```bash
+pnpm seed api-lambda --lambdaName=my-lambda --includeApiKey=Y --includeOpenApiDoc=N
+```
+See [data/seeds/api-lambda/README.md](data/seeds/api-lambda/README.md) for full details.
+
 ## Pros and cons of buildcheck
 The benefits and drawbacks of buildcheck are similar to CDK or SBT:
 - prevent inconsistencies between lambdas/modules including dependency versions and pnpm scripts

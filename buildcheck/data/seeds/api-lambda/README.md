@@ -1,16 +1,22 @@
-# new-api-lambda seed reference
+# api-lambda seed reference
 
 Creates the standard boilerplate for a new API Gateway lambda in this repository.
 
 If you want to create a new lambda, follow the instructions here - [handlers/HOWTO-create-lambda.md](../handlers/HOWTO-create-lambda.md)
 
-To learn how seeds work and how to edit or add templates see [README-seeds.md](../../../README-seeds.md)
+To learn how seeds work and how to edit or add templates see [seeds/README.md](../README.md)
 
 ## Usage
 
 ```bash
 cd buildcheck
-pnpm seed new-api-lambda --lambdaName=<name> --includeApiKey=<Y|N> --includeOpenApiDoc=<Y|N>
+pnpm seed api-lambda
+```
+
+You can supply all flags directly to skip the prompts:
+
+```bash
+pnpm seed api-lambda --lambdaName=<name> --includeApiKey=<Y|N> --includeOpenApiDoc=<Y|N>
 ```
 
 ## Flags
