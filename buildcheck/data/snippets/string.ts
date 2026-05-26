@@ -44,7 +44,7 @@ export const booleanFlag = (defaultValue: boolean | null) =>
 		.transform((v) =>
 			['y', 'yes', 'true', ...(defaultValue === true ? [''] : [])].includes(v),
 		)
-		.describe(defaultValue === null ? 'y/n' : defaultValue ? 'Y' : 'N');
+		.describe(defaultValue === null ? 'y/n' : defaultValue ? 'Y/n' : 'y/N');
 
 export const kebabCaseSchema = z
 	.string()

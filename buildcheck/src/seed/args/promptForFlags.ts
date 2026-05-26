@@ -46,27 +46,26 @@ async function promptField(
 	key: string,
 	schema: ZodTypeAny,
 ): Promise<string> {
-	const { prompt, hint, isBooleanField, defaultValue } = parseDescription(
-		schema,
-		key,
-	);
-	const suffix = isBooleanField ? ` (${hint})` : '';
-
+	const { prompt, defaultValue } = parseDescription(schema, key);
 	// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- intentional re-prompt loop; exits via return on valid input
 	while (true) {
 		const raw = await new Promise<string>((resolve) => {
-			rl.question(`? ${prompt}${suffix} › ${defaultValue ?? ''}`, resolve);
+			rl.question(
+				`? ${prompt} › ${defaultValue ? `[${defaultValue}] ` : ''}`,
+				resolve,
+			);
 		});
 
 		const input = raw.trim() === '' && defaultValue ? defaultValue : raw.trim();
 
 		const result = schema.safeParse(input);
 		if (result.success) {
-			return raw;
+			process.stdout.write(` \x1b[32m✓\x1b[0m Using ${key}: ${result.data}\n`);
+			return input;
 		}
 
 		const message = result.error.errors[0]?.message ?? 'Invalid value';
-		process.stdout.write(`  ✗ ${message}\n`);
+		process.stdout.write(`  \x1b[31m✗\x1b[0m ${message}\n`);
 	}
 }
 
