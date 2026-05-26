@@ -10,18 +10,18 @@ import type { WebhookUrls } from '../src/configSchema';
 import { getChatMessages } from '../src/indexSummary';
 
 const testAppToTeams: AppToTeams = (app) => {
-	const mapping: Record<string, Array<'VALUE' | 'GROWTH'>> = {
-		'product-move-api': ['VALUE'],
-		'soft-opt-in-consent-setter': ['VALUE'],
-		'support-reminders': ['GROWTH'],
+	const mapping: Record<string, Array<'LIFECYCLE' | 'MARTECH'>> = {
+		'product-move-api': ['LIFECYCLE'],
+		'soft-opt-in-consent-setter': ['LIFECYCLE'],
+		'support-reminders': ['MARTECH'],
 	};
 	return mapping[app ?? ''] ?? [];
 };
 
 it('should convert alarm history into summary chat messages', async () => {
 	const webhookUrls: WebhookUrls = {
-		VALUE: 'http://thegulocal.com/VALUE_WEBHOOK',
-		GROWTH: 'http://thegulocal.com/GROWTH_WEBHOOK',
+		LIFECYCLE: 'http://thegulocal.com/LIFECYCLE_WEBHOOK',
+		MARTECH: 'http://thegulocal.com/MARTECH_WEBHOOK',
 		SRE: '',
 		PORTFOLIO: '',
 		PLATFORM: '',
@@ -42,8 +42,8 @@ it('should convert alarm history into summary chat messages', async () => {
 
 const expected = [
 	{
-		team: 'VALUE',
-		webhookUrl: 'http://thegulocal.com/VALUE_WEBHOOK',
+		team: 'LIFECYCLE',
+		webhookUrl: 'http://thegulocal.com/LIFECYCLE_WEBHOOK',
 		payload: {
 			cardsV2: [
 				{
@@ -130,8 +130,8 @@ const expected = [
 		},
 	},
 	{
-		team: 'GROWTH',
-		webhookUrl: 'http://thegulocal.com/GROWTH_WEBHOOK',
+		team: 'MARTECH',
+		webhookUrl: 'http://thegulocal.com/MARTECH_WEBHOOK',
 		payload: {
 			cardsV2: [
 				{

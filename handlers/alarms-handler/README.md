@@ -6,10 +6,10 @@ First you need to create a webhook for the channel that you want the alarms to g
 
 The important thing is that the name of the Parameter Store key follows a strong convention. 
 
-For instance for the Value Alarms channel, there is a team `VALUE` defined in the alarmMappings.ts file. The parameter store key must then be 
+For instance for the Value Alarms channel, there is a team `LIFECYCLE` defined in the alarmMappings.ts file. The parameter store key must then be 
 
 ```
-/PROD/support/alarms-handler/webhookUrls/VALUE
+/PROD/support/alarms-handler/webhookUrls/LIFECYCLE
 ```
 That key contains the webhook for the Value Alarms channel.
 

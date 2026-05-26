@@ -8,8 +8,8 @@ import { getChatMessages } from '../src/indexScheduled';
 
 it('should convert some alarms into a chat message', async () => {
 	const webhookUrls: WebhookUrls = {
-		VALUE: 'http://thegulocal.com/VALUE_WEBHOOK',
-		GROWTH: 'http://thegulocal.com/GROWTH_WEBHOOK',
+		LIFECYCLE: 'http://thegulocal.com/LIFECYCLE_WEBHOOK',
+		MARTECH: 'http://thegulocal.com/MARTECH_WEBHOOK',
 		SRE: '',
 		PORTFOLIO: '',
 		PLATFORM: '',
@@ -75,7 +75,7 @@ const expected = [
 				},
 			],
 		},
-		webhookUrl: 'http://thegulocal.com/VALUE_WEBHOOK',
+		webhookUrl: 'http://thegulocal.com/LIFECYCLE_WEBHOOK',
 	},
 	{
 		body: {
@@ -108,7 +108,7 @@ const expected = [
 				},
 			],
 		},
-		webhookUrl: 'http://thegulocal.com/GROWTH_WEBHOOK',
+		webhookUrl: 'http://thegulocal.com/MARTECH_WEBHOOK',
 	},
 ];
 
