@@ -3,18 +3,17 @@
  */
 
 import dayjs from 'dayjs';
-import {
-	getSupporterProductData,
-	sendToSupporterProductData,
-} from '@modules/supporter-product-data/supporterProductData';
+import { SupporterProductDataRepository } from '@modules/supporter-product-data/supporterProductData';
+
+const repo = SupporterProductDataRepository.create('CODE');
 
 test('Dynamo Integration', async () => {
-	const supporterData = await getSupporterProductData('CODE', '110001137');
+	const supporterData = await repo.get('110001137');
 	expect(supporterData?.length).toEqual(4);
 	expect(supporterData?.[0]?.contractEffectiveDate.year()).toEqual(2024);
 });
 
-test('sendToSupporterProductData Integration', async () => {
+test('send Integration', async () => {
 	const supporterItem = {
 		subscriptionName: 'A-S1234567',
 		identityId: '104528145',
@@ -23,6 +22,6 @@ test('sendToSupporterProductData Integration', async () => {
 		termEndDate: dayjs().add(1, 'week'),
 		contractEffectiveDate: dayjs('2024-10-10'),
 	};
-	const response = await sendToSupporterProductData('CODE', supporterItem);
+	const response = await repo.send(supporterItem);
 	expect(response.$metadata.httpStatusCode).toEqual(200);
 });

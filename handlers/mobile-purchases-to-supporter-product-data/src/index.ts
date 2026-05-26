@@ -6,7 +6,7 @@ import { inAppPurchaseProductRatePlanId } from '@modules/product-benefits/inAppP
 import type { Stage } from '@modules/stage';
 import { stageFromEnvironment } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
-import { sendToSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
+import { SupporterProductDataRepository } from '@modules/supporter-product-data/supporterProductData';
 import type { DynamoDBRecord, Handler, SQSEvent } from 'aws-lambda';
 import dayjs from 'dayjs';
 import type { Config } from './config';
@@ -87,7 +87,9 @@ export const fetchSubscriptionAndDoUpdate = async (
 		termEndDate: subscription.to,
 		contractEffectiveDate: subscription.from,
 	};
-	await sendToSupporterProductData(stage, supporterProductDataItem);
+	await SupporterProductDataRepository.create(stage).send(
+		supporterProductDataItem,
+	);
 	logger.log(
 		'info',
 		`Successfully updated supporter product data with item ${prettyPrint(supporterProductDataItem)}`,

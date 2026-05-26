@@ -1,5 +1,5 @@
 import type { Stage } from '@modules/stage';
-import { sendToSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
+import type { SupporterProductDataRepository } from '@modules/supporter-product-data/supporterProductData';
 import type {
 	CreateOrderRequest,
 	OrderRequest,
@@ -23,8 +23,9 @@ export type SwitchResponse = { message: string };
 export class DoSwitchAction {
 	constructor(
 		private zuoraClient: ZuoraClient,
-		private stage: Stage,
+		private supporterProductDataRepository: SupporterProductDataRepository,
 		private today: dayjs.Dayjs,
+		private stage: Stage,
 	) {}
 	async switch(
 		input: Pick<ProductSwitchRequestBody, 'csrUserId' | 'caseId'>,
@@ -50,8 +51,7 @@ export class DoSwitchAction {
 				switchInformation.target,
 				switchInformation.subscription,
 			),
-			sendToSupporterProductData(
-				this.stage,
+			this.supporterProductDataRepository.send(
 				supporterRatePlanItemFromSwitchInformation(
 					this.today,
 					switchInformation,

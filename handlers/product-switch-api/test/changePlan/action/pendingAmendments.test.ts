@@ -205,8 +205,9 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 
 		const result = await new DoSwitchAction(
 			mockZuoraClient as unknown as ZuoraClient,
-			'CODE',
+			{ send: sendToSupporterProductData } as never,
 			dayjs('2025-09-16'),
+			'CODE',
 		).switch(
 			{ caseId: 'asdfCaseId', csrUserId: 'asdfCsrUserId' },
 			{
