@@ -8,7 +8,7 @@ import { SupporterProductDataRepository } from '@modules/supporter-product-data/
 const repo = SupporterProductDataRepository.create('CODE');
 
 test('Dynamo Integration', async () => {
-	const supporterData = await repo.get('110001137');
+	const supporterData = await repo.listByIdentityId('110001137');
 	expect(supporterData?.length).toEqual(4);
 	expect(supporterData?.[0]?.contractEffectiveDate.year()).toEqual(2024);
 });

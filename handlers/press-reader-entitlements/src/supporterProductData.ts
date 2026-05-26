@@ -12,7 +12,7 @@ export async function getLatestSubscription(
 	productCatalog: ProductCatalog,
 ): Promise<SupporterRatePlanItem | undefined> {
 	const supporterProductDataItems =
-		await supporterProductDataRepository.get(identityId);
+		await supporterProductDataRepository.listByIdentityId(identityId);
 
 	if (supporterProductDataItems) {
 		return getLatestValidSubscription(

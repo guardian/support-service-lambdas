@@ -25,7 +25,7 @@ export const getUserProducts = async (
 	identityId: string,
 ): Promise<Array<ProductKey | InAppPurchaseProductKey>> => {
 	const supporterProductDataItems =
-		await supporterProductDataRepository.get(identityId);
+		await supporterProductDataRepository.listByIdentityId(identityId);
 	if (supporterProductDataItems === undefined) {
 		console.log('No supporter product data found');
 		return [];
