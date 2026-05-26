@@ -1,13 +1,26 @@
 import { z } from 'zod';
 import { toTargetPath } from '../../../src/dynamic/templater';
 import templates from '../../managed/handler/_generated_tsIndex';
-import { booleanFlag, kebabCaseSchema } from '../../snippets/string';
+import {
+	booleanFlag,
+	kebabCaseSchema,
+	withPrompt,
+} from '../../snippets/string';
 import type { SeedIndex } from '../types';
 
 const argsSchema = z.object({
-	lambdaName: kebabCaseSchema,
-	includeApiKey: booleanFlag,
-	includeOpenApiDoc: booleanFlag,
+	lambdaName: withPrompt(
+		kebabCaseSchema,
+		'Enter new lambda name e.g. widgets-query-sync',
+	),
+	includeApiKey: withPrompt(
+		booleanFlag(true),
+		'Should I generate an API key for this lambda?',
+	),
+	includeOpenApiDoc: withPrompt(
+		booleanFlag(true),
+		'Should I generate an Open API description for this lambda?',
+	),
 });
 
 export type TemplateParams = z.infer<typeof argsSchema>;

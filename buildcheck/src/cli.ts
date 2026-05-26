@@ -11,42 +11,44 @@ import { parseArguments } from './util/argsParser';
 import { deleteRepoFiles, readLines, writeFiles } from './util/file-writer';
 
 // main entry point from pnpm
-try {
-	const { repoRoot, ...otherArgs } = parseArguments(process.argv);
+void (async () => {
+	try {
+		const { repoRoot, ...otherArgs } = parseArguments(process.argv);
 
-	switch (otherArgs.mode) {
-		case 'generate': {
-			const previouslyGeneratedFiles = extractGeneratedFilenames(
-				readLines(repoRoot, warningFileName),
-			);
-			deleteRepoFiles(repoRoot, previouslyGeneratedFiles);
-			writeFiles(repoRoot, generate(repoRoot));
-			break;
+		switch (otherArgs.mode) {
+			case 'generate': {
+				const previouslyGeneratedFiles = extractGeneratedFilenames(
+					readLines(repoRoot, warningFileName),
+				);
+				deleteRepoFiles(repoRoot, previouslyGeneratedFiles);
+				writeFiles(repoRoot, generate(repoRoot));
+				break;
+			}
+			case 'clean': {
+				const previouslyGeneratedFiles = extractGeneratedFilenames(
+					readLines(repoRoot, warningFileName),
+				);
+				deleteRepoFiles(repoRoot, previouslyGeneratedFiles);
+				break;
+			}
+			case 'seed': {
+				const seedName = otherArgs.seedName;
+
+				const entry = getSeedEntryOrThrow(seedName);
+
+				const opts = await validateFlags(
+					entry.index.argsSchema,
+					`pnpm seed ${seedName}`,
+					recordFromFlags(otherArgs.seedArgv),
+				);
+
+				runSeed(seedName, repoRoot, entry, opts);
+
+				break;
+			}
 		}
-		case 'clean': {
-			const previouslyGeneratedFiles = extractGeneratedFilenames(
-				readLines(repoRoot, warningFileName),
-			);
-			deleteRepoFiles(repoRoot, previouslyGeneratedFiles);
-			break;
-		}
-		case 'seed': {
-			const seedName = otherArgs.seedName;
-
-			const entry = getSeedEntryOrThrow(seedName);
-
-			const opts = validateFlags(
-				entry.index.argsSchema,
-				`pnpm seed ${seedName}`,
-				recordFromFlags(otherArgs.seedArgv),
-			);
-
-			runSeed(seedName, repoRoot, entry, opts);
-
-			break;
-		}
+	} catch (error) {
+		console.error(error);
+		process.exit(1);
 	}
-} catch (error) {
-	console.error(error);
-	process.exit(1);
-}
+})();

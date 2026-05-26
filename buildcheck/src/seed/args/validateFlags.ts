@@ -1,34 +1,34 @@
 import type { ZodObject, ZodRawShape, ZodTypeAny } from 'zod';
+import { parseDescription, promptForFlags } from './promptForFlags';
 
-export function validateFlags<O>(
+export async function validateFlags<O>(
 	argsSchema: ZodObject<ZodRawShape, 'strip', ZodTypeAny, O, unknown>,
 	commandPrefix: string,
 	flags: Record<string, string>,
-): O {
+): Promise<O> {
 	const parseResult = argsSchema.safeParse(flags);
 	if (parseResult.success) {
 		return parseResult.data;
 	}
+
 	const shape = argsSchema.shape;
 	const schemaProps = Object.entries(shape);
-	const failedKeys = new Set(
-		parseResult.error.errors.map((e) => e.path[0]?.toString()),
+
+	process.stderr.write(
+		`Syntax: ${commandPrefix} ${schemaProps
+			.map(([k, v]) => `--${k}=<${parseDescription(v, k).hint}>`)
+			.join(' ')}\n\n`,
 	);
-	const syntax = `Syntax: ${commandPrefix} ${schemaProps
-		.map(([k, v]) => `--${k}=<${String(v.description ?? 'value')}>`)
-		.join(' ')}`;
-	const suggested = `Suggested: ${commandPrefix} ${schemaProps
-		.map(([k, v]) => {
-			const value =
-				k in flags && !failedKeys.has(k)
-					? flags[k]
-					: `<${String(v.description ?? k)}>`;
-			return `--${k}=${value}`;
-		})
-		.join(' ')}`;
+
+	// Interactive mode when running in a TTY
+	if (process.stdin.isTTY) {
+		return await promptForFlags(argsSchema);
+	}
+
+	// Non-interactive (CI / piped): show error and exit
 	const errors = parseResult.error.errors.map(
 		(e) => `  --${e.path.join('.')}: ${e.message}`,
 	);
-	process.stderr.write([syntax, suggested, ...errors].join('\n') + '\n');
+	process.stderr.write(errors.join('\n') + '\n');
 	throw new Error('syntax error');
 }

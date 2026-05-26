@@ -1,3 +1,4 @@
+import type { ZodTypeAny } from 'zod';
 import { z } from 'zod';
 
 export function toPascalCase(name: string): string {
@@ -25,12 +26,25 @@ export function toSentenceCase(name: string): string {
 	].join(' ');
 }
 
-export const booleanFlag = z
-	.string()
-	.toLowerCase()
-	.pipe(z.enum(['y', 'yes', 'true', 'n', 'no', 'false']))
-	.transform((v) => ['y', 'yes', 'true'].includes(v))
-	.describe('Y/N');
+export const booleanFlag = (defaultValue: boolean | null) =>
+	z
+		.string()
+		.toLowerCase()
+		.pipe(
+			z.enum([
+				'y',
+				'yes',
+				'true',
+				'n',
+				'no',
+				'false',
+				...(defaultValue === null ? [] : ['']),
+			]),
+		)
+		.transform((v) =>
+			['y', 'yes', 'true', ...(defaultValue === true ? [''] : [])].includes(v),
+		)
+		.describe(defaultValue === null ? 'y/n' : defaultValue ? 'Y' : 'N');
 
 export const kebabCaseSchema = z
 	.string()
@@ -39,3 +53,7 @@ export const kebabCaseSchema = z
 		'Must be kebab-case, at least 3 characters, e.g. my-new-lambda',
 	)
 	.describe('kebab-case-string');
+
+export function withPrompt<T extends ZodTypeAny>(schema: T, prompt: string): T {
+	return schema.describe(prompt + ` (${schema.description})`);
+}
