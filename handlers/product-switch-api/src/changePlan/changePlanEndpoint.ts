@@ -9,6 +9,7 @@ import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import { ok } from '@modules/routing/apiGatewayResponses';
 import type { Stage } from '@modules/stage';
+import { SupporterProductDataRepository } from '@modules/supporter-product-data/supporterProductData';
 import { getSubscription } from '@modules/zuora/subscription';
 import type {
 	ZuoraAccount,
@@ -37,12 +38,20 @@ export class ChangePlanEndpoint {
 		private zuoraClient: ZuoraClient,
 		private originalSubscription: ZuoraSubscription,
 		private account: ZuoraAccount,
+		supporterProductDataRepository: SupporterProductDataRepository,
 	) {
-		this.doSwitchAction = new DoSwitchAction(zuoraClient, stage, today);
+		this.doSwitchAction = new DoSwitchAction(
+			zuoraClient,
+			supporterProductDataRepository,
+			today,
+			stage,
+		);
 		this.doPreviewAction = new DoPreviewAction(zuoraClient, stage, today);
 	}
 
 	static previewHandler(stage: Stage, today: dayjs.Dayjs) {
+		const supporterProductDataRepository =
+			SupporterProductDataRepository.create(stage);
 		return async (
 			body: ProductSwitchRequestBody,
 			zuoraClient: ZuoraClient,
@@ -56,6 +65,7 @@ export class ChangePlanEndpoint {
 				zuoraClient,
 				subscription,
 				account,
+				supporterProductDataRepository,
 			);
 			const response = await productSwitchEndpoint.doPreview();
 			return ok(response);
@@ -63,6 +73,8 @@ export class ChangePlanEndpoint {
 	}
 
 	static handler(stage: Stage, today: dayjs.Dayjs) {
+		const supporterProductDataRepository =
+			SupporterProductDataRepository.create(stage);
 		return async (
 			body: ProductSwitchRequestBody,
 			zuoraClient: ZuoraClient,
@@ -76,6 +88,7 @@ export class ChangePlanEndpoint {
 				zuoraClient,
 				subscription,
 				account,
+				supporterProductDataRepository,
 			);
 			const response = await productSwitchEndpoint.doSwitch();
 			return ok(response);

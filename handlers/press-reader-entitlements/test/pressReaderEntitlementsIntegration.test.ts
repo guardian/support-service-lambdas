@@ -3,6 +3,7 @@
  */
 
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
+import { SupporterProductDataRepository } from '@modules/supporter-product-data/supporterProductData';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import zuoraCatalogFixture from '../../../modules/zuora-catalog/test/fixtures/catalog-code.json';
 import { getMemberDetails } from '../src';
@@ -18,7 +19,7 @@ describe('Press Reader Entitlements Integration Tests', () => {
 			zuoraCatalogSchema.parse(zuoraCatalogFixture),
 		);
 		const memberDetails = await getLatestSubscription(
-			'CODE',
+			SupporterProductDataRepository.create('CODE'),
 			'110001137',
 			productCatalog,
 		);
