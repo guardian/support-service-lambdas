@@ -1,25 +1,70 @@
+import { getIfDefined } from '@modules/nullAndUndefined';
 import {
 	badRequest,
 	buildErrorResponse,
 	ok,
 } from '@modules/routing/apiGatewayResponses';
+import type { Stage } from '@modules/stage';
+import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
+import {
+	getSupporterRatePlan,
+	sendToSupporterProductData,
+} from '@modules/supporter-product-data/supporterProductData';
+import { zuoraDateFormat } from '@modules/zuora/utils';
+import dayjs from 'dayjs';
 import { z } from 'zod';
 import type { InvitationRepository } from './invitationRepository';
+import type { SecondaryUserRepository } from './secondaryUserRepository';
 
 export const acceptInvitationBodySchema = z.object({
 	invitationCode: z.string(),
 });
 
 export const acceptInvitationEndpoint = async (
+	stage: Stage,
 	signedInUserId: string,
 	invitationCode: string,
 	invitationRepository: InvitationRepository,
+	secondaryUserRepository: SecondaryUserRepository,
 ) => {
 	try {
 		const invitation = await invitationRepository.get(invitationCode);
 		if (signedInUserId !== invitation?.secondaryIdentityId) {
 			return badRequest('Incorrect user');
 		}
+		const today = dayjs();
+		const secondaryUserRecord = {
+			subscriptionName: invitation.subscriptionName,
+			secondaryIdentityId: invitation.secondaryIdentityId,
+			primaryIdentityId: invitation.primaryIdentityId,
+			acceptedDate: zuoraDateFormat(today),
+			expiryDate: today.add(1, 'year').unix(),
+		};
+		await secondaryUserRepository.save(secondaryUserRecord);
+
+		const parentSupporterProductDataRecord = getIfDefined(
+			await getSupporterRatePlan(
+				stage,
+				invitation.primaryIdentityId,
+				invitation.subscriptionName,
+			),
+			`Supporter rate plan record not found for ${invitation.subscriptionName} and identity ${invitation.primaryIdentityId}`,
+		);
+		const supporterProductDataRecord: SupporterRatePlanItem = {
+			subscriptionName: `${invitation.subscriptionName}-secondary-${invitation.secondaryIdentityId}`,
+			parentSubscriptionName: invitation.subscriptionName,
+			identityId: invitation.secondaryIdentityId,
+			productRatePlanId: parentSupporterProductDataRecord.productRatePlanId,
+			productRatePlanName: 'Digital Plus Secondary User',
+			contractEffectiveDate: today,
+			termEndDate: parentSupporterProductDataRecord.termEndDate,
+		};
+		await sendToSupporterProductData(stage, supporterProductDataRecord);
+
+		await invitationRepository.delete(
+			invitation.subscriptionName,
+			invitationCode,
+		);
 
 		return ok({});
 	} catch (error) {

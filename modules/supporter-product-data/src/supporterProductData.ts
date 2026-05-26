@@ -1,5 +1,8 @@
-import * as console from 'node:console';
-import { DynamoDBClient, QueryCommand } from '@aws-sdk/client-dynamodb';
+import {
+	DynamoDBClient,
+	GetItemCommand,
+	QueryCommand,
+} from '@aws-sdk/client-dynamodb';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
 import { awsConfig } from '@modules/aws/config';
 import { sendMessageToQueue } from '@modules/aws/sqs';
@@ -19,10 +22,44 @@ const supporterRatePlanItemSchema = z.object({
 	productRatePlanName: z.string(), // Name of the product in this rate plan
 	termEndDate: z.string().transform((arg) => dayjs(arg)), // Date that this subscription term ends
 	contractEffectiveDate: z.string().transform((arg) => dayjs(arg)), // Date that this subscription started
+	parentSubscriptionName: z.string().optional(), // Set for child subscriptions granted through the multiple accounts feature
 });
 export type SupporterRatePlanItem = z.infer<typeof supporterRatePlanItemSchema>;
 
-export const getSupporterProductData = async (
+export const getSupporterRatePlan = async (
+	stage: Stage,
+	identityId: string,
+	subscriptionName: string,
+): Promise<SupporterRatePlanItem | undefined> => {
+	const tableName = `SupporterProductData-${stage}`;
+	logger.log(
+		`Querying ${tableName} for identityId ${identityId} and subscriptionName ${subscriptionName}`,
+	);
+	const data = await dynamoClient.send(
+		new GetItemCommand({
+			TableName: tableName,
+			Key: {
+				identityId: { S: identityId },
+				subscriptionName: { S: subscriptionName },
+			},
+		}),
+	);
+	logger.log(`GetItem returned ${JSON.stringify(data)}`);
+	if (!data.Item) {
+		return undefined;
+	}
+	const unmarshalled = unmarshall(data.Item);
+	const parseResult = supporterRatePlanItemSchema.safeParse(unmarshalled);
+	if (!parseResult.success) {
+		logger.log(
+			`Failed to parse supporter product data: ${prettyPrint(unmarshalled)} because of error: ${prettyPrint(parseResult.error)}`,
+		);
+		throw new Error('Failed to parse supporter product data');
+	}
+	return parseResult.data;
+};
+
+export const getSupporterRatePlans = async (
 	stage: Stage,
 	identityId: string,
 ): Promise<SupporterRatePlanItem[] | undefined> => {
@@ -36,18 +73,18 @@ export const getSupporterProductData = async (
 		KeyConditionExpression: 'identityId = :v1',
 		TableName: tableName,
 	};
-	console.log(`Querying ${tableName} for identityId ${identityId}`);
+	logger.log(`Querying ${tableName} for identityId ${identityId}`);
 	const data = await dynamoClient.send(new QueryCommand(input));
-	console.log(`Query returned ${JSON.stringify(data)}`);
+	logger.log(`Query returned ${JSON.stringify(data)}`);
 
 	return data.Items?.map((item) => {
 		const unmarshalled = unmarshall(item);
 		const parseResult = supporterRatePlanItemSchema.safeParse(unmarshalled);
 		if (!parseResult.success) {
-			console.error(
+			logger.log(
 				`Failed to parse supporter product data: ${prettyPrint(unmarshalled)} because of error:`,
-				parseResult.error,
 			);
+			logger.log(prettyPrint(parseResult.error));
 			throw new Error('Failed to parse supporter product data');
 		}
 		return parseResult.data;

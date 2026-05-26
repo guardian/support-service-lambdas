@@ -21,10 +21,12 @@ import {
 	deleteInvitationPathSchema,
 } from './deleteInvitationEndpoint';
 import { InvitationRepository } from './invitationRepository';
+import { SecondaryUserRepository } from './secondaryUserRepository';
 
 const stage = stageFromEnvironment();
 const authenticate = buildAuthenticate(stage, []);
 const invitationRepository = InvitationRepository.create(stage);
+const secondaryUserRepository = SecondaryUserRepository.create(stage);
 const identityClientPromise = IdentityClient.create(
 	stage,
 	`/${stage}/support/multiple-account-api/identity-client-access-token`,
@@ -82,6 +84,7 @@ export const handler: Handler = Router([
 					maybeAuthenticatedEvent.userDetails.identityId,
 					body.invitationCode,
 					invitationRepository,
+					secondaryUserRepository,
 				);
 			},
 		),
