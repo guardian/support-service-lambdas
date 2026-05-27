@@ -38,7 +38,7 @@ data/
             ...
 ```
 
-The `.ts`  (and `.inserts` where applicable) extension on each template file is stripped when resolving the target path.
+For the templates, the `.ts`  (and `.inserts.ts`) extension on each template file is stripped when resolving the target path.
 Token substitution (e.g. `_lambdaName_`) is handled by the seed's `resolveTargetPath`.
 
 ## Editing an existing seed template
@@ -53,14 +53,18 @@ The template files are inside each seed inside [`data/seeds/`](data/seeds/) unde
 Testing changes can be tricky as the tool edits workspace files when you run it.  This is the recommended method to edit and test a change:
 
 1. commit your change locally (don't push yet)
-1. Run the seed: `pnpm seed <seed-name> --key=value ...` (see the seed's own README.md for the exact command)
+1. Run the seed: `pnpm seed <seed-name>` and respond to the prompts
 1. Review the generated output with `git diff`
 1. Roll back the generated files: `git checkout HEAD -- .`
 1. Amend your template commit and repeat until happy, then push
 
-## What a template file can return
+## Interactive prompts
 
-These have a default export — a function that takes the parsed args and returns a suitable value.
+To bypass the prompts you can pass in the responses on the command line.
+
+## Template file format
+
+Template files have a default export — either a plain value, or a function that takes the parsed args and returns a suitable value.
 
 ### Normal template files (named `FILENAME.ts`)
 
@@ -68,6 +72,11 @@ These define an entire file and return one of:
 
 **`string`** — written verbatim to the target file:
 ```ts
+// static file content
+export default `export const version = '1.0.0';\n`;
+```
+```ts
+// content is based on the input
 export default ({ lambdaName }: TemplateParams): string =>
   `export const name = '${lambdaName}';\n`;
 ```
@@ -84,7 +93,7 @@ export default ({ lambdaName }: TemplateParams) => ({
 
 ### Insertion template files (named `FILENAME.inserts.ts`)
 
-These inject content into an existing file before a named marker line, rather than creating a new file. The `.inserts` part is stripped to derive the target filename — e.g. `cdk/bin/cdk.ts.inserts.ts` targets `cdk/bin/cdk.ts`:
+These inject content into an existing file before a named marker line, rather than creating a new file:
 ```ts
 export default ({ lambdaName }: TemplateParams): InsertChunks => ({
   chunks: [
@@ -99,10 +108,10 @@ export default ({ lambdaName }: TemplateParams): InsertChunks => ({
 ## Adding a new template file to an existing seed
 
 1. Create a `.ts` file (or `.inserts.ts` for insertions) under `data/seeds/<seed-name>/templates/` at the path that mirrors where the output should be written (you can rewrite dynamic path elements using your index.ts)
-1. Export a default function returning one of the types above
+1. Export a default value or function returning one of the types above
 1. Test as per the Testing section above
 
-## Adding a new seed package
+## Adding a new seed
 
 1. Create `data/seeds/<seed-name>/index.ts` — this is the seed index file.
 It must default-export an object satisfying [`SeedIndex<T>`](types.ts):
@@ -111,8 +120,3 @@ It must default-export an object satisfying [`SeedIndex<T>`](types.ts):
    - `resolveTargetPath(path: string, opts: T): string` — filename transformations to convert placeholders to real paths (e.g. replace `_lambdaName_` with the actual name)
 1. Create a `data/seeds/<seed-name>/templates/` directory and add one or more template files as described above
 1. Test as per the Testing section above
-
-## Interactive prompts
-
-When you run `pnpm seed <seed-name>` without valid flags, buildcheck prompts you interactively
-based on the descriptions on the schema.

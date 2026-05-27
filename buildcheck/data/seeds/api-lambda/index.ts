@@ -26,20 +26,15 @@ const argsSchema = z.object({
 export type TemplateParams = z.infer<typeof argsSchema>;
 
 const postProcessCommands = (opts: TemplateParams): string[] => {
-	const expectedFiles = [
-		`cdk/lib/__snapshots__/${opts.lambdaName}.test.ts.snap`,
-		...templates.map((t) =>
-			toTargetPath(`handlers/${opts.lambdaName}/${t.relativeName}`),
-		),
-		`handlers/${opts.lambdaName}/BUILDCHECK.md`,
-	];
 	return [
 		'pnpm --filter buildcheck snapshot:update',
+		`git add ${templates.map((t) => `"${toTargetPath(`handlers/${opts.lambdaName}/${t.relativeName}`)}"`).join(' ')}`,
+		`git add "handlers/${opts.lambdaName}/BUILDCHECK.md"`,
 		'pnpm install',
 		'pnpm --filter cdk lint --fix',
 		'pnpm fix-formatting',
 		`pnpm --filter cdk test-update ${opts.lambdaName}`,
-		`git add ${expectedFiles.map((p) => `"${p}"`).join(' ')}`,
+		`git add "cdk/lib/__snapshots__/${opts.lambdaName}.test.ts.snap"`,
 	];
 };
 

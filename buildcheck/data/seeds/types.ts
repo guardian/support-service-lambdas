@@ -22,6 +22,9 @@ export type SeedIndex<T> = {
 	resolveTargetPath: (path: string, opts: T) => string;
 };
 
+/**
+ * this is the information that each seed exports to the main engine.
+ */
 export type DirConfig<T> = {
 	index: SeedIndex<T>;
 	templates: Array<AnyTemplate<T>>;
