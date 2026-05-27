@@ -1,27 +1,27 @@
 import { App } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
-import { SupporterProductDataTS } from './supporter-product-data-ts';
+import { SupporterProductDataLambdas } from './supporter-product-data-lambdas';
 
-describe('The supporter-product-data-ts stack', () => {
+describe('The supporter-product-data-lambdas stack', () => {
 	it('matches the snapshot', () => {
 		const app = new App();
-		const codeStack = new SupporterProductDataTS(
+		const codeStack = new SupporterProductDataLambdas(
 			app,
-			'supporter-product-data-ts-CODE',
+			'supporter-product-data-lambdas-CODE',
 			{
 				stack: 'support',
 				stage: 'CODE',
-				cloudFormationStackName: 'SupporterProductDataTS-CODE',
+				cloudFormationStackName: 'SupporterProductDataLambdas-CODE',
 				processItemMaxConcurrency: 30,
 			},
 		);
-		const prodStack = new SupporterProductDataTS(
+		const prodStack = new SupporterProductDataLambdas(
 			app,
-			'supporter-product-data-ts-PROD',
+			'supporter-product-data-lambdas-PROD',
 			{
 				stack: 'support',
 				stage: 'PROD',
-				cloudFormationStackName: 'SupporterProductDataTS-PROD',
+				cloudFormationStackName: 'SupporterProductDataLambdas-PROD',
 				processItemMaxConcurrency: 50,
 			},
 		);

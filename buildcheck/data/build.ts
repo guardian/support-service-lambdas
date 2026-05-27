@@ -444,13 +444,13 @@ const userSubscriptionsApi: HandlerDefinition = {
 	},
 };
 
-const supporterProductDataTs: HandlerDefinition = {
-	name: 'supporter-product-data-ts',
+const supporterProductDataLambdas: HandlerDefinition = {
+	name: 'supporter-product-data-lambdas',
 	functionNames: [
-		'supporterProductDataTSQueryZuora-',
-		'supporterProductDataTSFetchResults-',
-		'supporterProductDataTSAddToQueue-',
-		'supporterProductDataTSProcessItem-',
+		'supporterProductData-QueryZuora-',
+		'supporterProductData-FetchResults-',
+		'supporterProductData-AddToQueue-',
+		'supporterProductData-ProcessItem-',
 	],
 	entryPoints: ['src/lambdas/*.ts'],
 	dependencies: {
@@ -723,7 +723,7 @@ export const build: BuildDefinition = {
 		observerBenefitsApi,
 		contributionsOnlyCountriesApi,
 		userSubscriptionsApi,
-		supporterProductDataTs,
+		supporterProductDataLambdas,
 		// MARKER new-lambda: buildcheck-reference
 	],
 

@@ -40,7 +40,7 @@ import { SoftOptInConsentSetter } from '../lib/soft-opt-in-consent-setter';
 import { StripeDisputes } from '../lib/stripe-disputes';
 import type { StripeWebhookEndpointsProps } from '../lib/stripe-webhook-endpoints';
 import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
-import { SupporterProductDataTS } from '../lib/supporter-product-data-ts';
+import { SupporterProductDataLambdas } from '../lib/supporter-product-data-lambdas';
 import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
 import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
 import { UserBenefits } from '../lib/user-benefits';
@@ -170,16 +170,16 @@ stacks.forEach((Constructor) => {
 	});
 });
 
-new SupporterProductDataTS(app, 'supporter-product-data-ts-CODE', {
+new SupporterProductDataLambdas(app, 'supporter-product-data-lambdas-CODE', {
 	stack: 'support',
 	stage: 'CODE',
-	cloudFormationStackName: 'SupporterProductDataTS-CODE',
+	cloudFormationStackName: 'SupporterProductDataLambdas-CODE',
 	processItemMaxConcurrency: 30,
 });
-new SupporterProductDataTS(app, 'supporter-product-data-ts-PROD', {
+new SupporterProductDataLambdas(app, 'supporter-product-data-lambdas-PROD', {
 	stack: 'support',
 	stage: 'PROD',
-	cloudFormationStackName: 'SupporterProductDataTS-PROD',
+	cloudFormationStackName: 'SupporterProductDataLambdas-PROD',
 	processItemMaxConcurrency: 50,
 });
 

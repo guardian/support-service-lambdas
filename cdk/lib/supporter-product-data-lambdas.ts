@@ -26,25 +26,25 @@ import {
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 
-interface SupporterProductDataTSProps extends GuStackProps {
+interface SupporterProductDataLambdasProps extends GuStackProps {
 	processItemMaxConcurrency: number;
 }
 
-export class SupporterProductDataTS extends GuStack {
-	constructor(scope: App, id: string, props: SupporterProductDataTSProps) {
+export class SupporterProductDataLambdas extends GuStack {
+	constructor(scope: App, id: string, props: SupporterProductDataLambdasProps) {
 		super(scope, id, props);
 
 		const { processItemMaxConcurrency } = props;
 
 		const artifactBucket = Bucket.fromBucketName(
 			this,
-			'SupporterProductDataTsDistBucket',
+			'SupporterProductDataLambdasDistBucket',
 			'membership-dist',
 		);
 
 		const lambdaArtifact = Code.fromBucket(
 			artifactBucket,
-			`support/${this.stage}/supporter-product-data-ts/supporter-product-data-ts.zip`,
+			`support/${this.stage}/supporter-product-data-ts/supporter-product-data-lambdas.zip`,
 		);
 
 		const lambdaRole = new Role(this, 'SupporterProductDataLambdaRole', {
@@ -108,7 +108,7 @@ export class SupporterProductDataTS extends GuStack {
 		});
 
 		const queryZuora = new Function(this, 'QueryZuoraLambda', {
-			functionName: `supporterProductDataTSQueryZuora-${this.stage}`,
+			functionName: `supporterProductData-QueryZuora-${this.stage}`,
 			runtime: Runtime.NODEJS_22_X,
 			handler: 'queryZuoraLambda.handler',
 			code: lambdaArtifact,
@@ -119,7 +119,7 @@ export class SupporterProductDataTS extends GuStack {
 		});
 
 		const fetchResults = new Function(this, 'FetchResultsLambda', {
-			functionName: `supporterProductDataTSFetchResults-${this.stage}`,
+			functionName: `supporterProductData-FetchResults-${this.stage}`,
 			runtime: Runtime.NODEJS_22_X,
 			handler: 'fetchResultsLambda.handler',
 			code: lambdaArtifact,
@@ -138,7 +138,7 @@ export class SupporterProductDataTS extends GuStack {
 			this,
 			'AddSupporterRatePlanItemToQueueLambda',
 			{
-				functionName: `supporterProductDataTSAddToQueue-${this.stage}`,
+				functionName: `supporterProductData-AddToQueue-${this.stage}`,
 				runtime: Runtime.NODEJS_22_X,
 				handler: 'addSupporterRatePlanItemToQueueLambda.handler',
 				code: lambdaArtifact,
@@ -153,7 +153,7 @@ export class SupporterProductDataTS extends GuStack {
 			this,
 			'ProcessSupporterRatePlanItemLambda',
 			{
-				functionName: `supporterProductDataTSProcessItem-${this.stage}`,
+				functionName: `supporterProductData-ProcessItem-${this.stage}`,
 				runtime: Runtime.NODEJS_22_X,
 				handler: 'processSupporterRatePlanItemLambda.handler',
 				code: lambdaArtifact,
@@ -234,7 +234,7 @@ export class SupporterProductDataTS extends GuStack {
 			this,
 			'SupporterProductDataStateMachine',
 			{
-				stateMachineName: `supporter-product-data-ts-${this.stage}`,
+				stateMachineName: `supporter-product-data-lambdas-${this.stage}`,
 				definitionBody: DefinitionBody.fromChainable(definition),
 			},
 		);

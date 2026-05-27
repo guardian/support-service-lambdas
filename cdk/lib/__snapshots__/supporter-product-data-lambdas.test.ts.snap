@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`The supporter-product-data-ts stack matches the snapshot 1`] = `
+exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [],
@@ -15,14 +15,14 @@ exports[`The supporter-product-data-ts stack matches the snapshot 1`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "membership-dist",
-          "S3Key": "support/CODE/supporter-product-data-ts/supporter-product-data-ts.zip",
+          "S3Key": "support/CODE/supporter-product-data-ts/supporter-product-data-lambdas.zip",
         },
         "Environment": {
           "Variables": {
             "STAGE": "CODE",
           },
         },
-        "FunctionName": "supporterProductDataTSAddToQueue-CODE",
+        "FunctionName": "supporterProductData-AddToQueue-CODE",
         "Handler": "addSupporterRatePlanItemToQueueLambda.handler",
         "MemorySize": 1024,
         "Role": {
@@ -62,14 +62,14 @@ exports[`The supporter-product-data-ts stack matches the snapshot 1`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "membership-dist",
-          "S3Key": "support/CODE/supporter-product-data-ts/supporter-product-data-ts.zip",
+          "S3Key": "support/CODE/supporter-product-data-ts/supporter-product-data-lambdas.zip",
         },
         "Environment": {
           "Variables": {
             "STAGE": "CODE",
           },
         },
-        "FunctionName": "supporterProductDataTSFetchResults-CODE",
+        "FunctionName": "supporterProductData-FetchResults-CODE",
         "Handler": "fetchResultsLambda.handler",
         "MemorySize": 512,
         "Role": {
@@ -109,14 +109,14 @@ exports[`The supporter-product-data-ts stack matches the snapshot 1`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "membership-dist",
-          "S3Key": "support/CODE/supporter-product-data-ts/supporter-product-data-ts.zip",
+          "S3Key": "support/CODE/supporter-product-data-ts/supporter-product-data-lambdas.zip",
         },
         "Environment": {
           "Variables": {
             "STAGE": "CODE",
           },
         },
-        "FunctionName": "supporterProductDataTSProcessItem-CODE",
+        "FunctionName": "supporterProductData-ProcessItem-CODE",
         "Handler": "processSupporterRatePlanItemLambda.handler",
         "MemorySize": 1024,
         "Role": {
@@ -148,7 +148,7 @@ exports[`The supporter-product-data-ts stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "ProcessSupporterRatePlanItemLambdaSqsEventSourcesupporterproductdatatsCODESupporterProductDataQueue9697A9ED3C82F760": {
+    "ProcessSupporterRatePlanItemLambdaSqsEventSourcesupporterproductdatalambdasCODESupporterProductDataQueueCEB31B0C32A1DDCC": {
       "Properties": {
         "BatchSize": 10,
         "EventSourceArn": {
@@ -192,14 +192,14 @@ exports[`The supporter-product-data-ts stack matches the snapshot 1`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "membership-dist",
-          "S3Key": "support/CODE/supporter-product-data-ts/supporter-product-data-ts.zip",
+          "S3Key": "support/CODE/supporter-product-data-ts/supporter-product-data-lambdas.zip",
         },
         "Environment": {
           "Variables": {
             "STAGE": "CODE",
           },
         },
-        "FunctionName": "supporterProductDataTSQueryZuora-CODE",
+        "FunctionName": "supporterProductData-QueryZuora-CODE",
         "Handler": "queryZuoraLambda.handler",
         "MemorySize": 512,
         "Role": {
@@ -510,7 +510,7 @@ exports[`The supporter-product-data-ts stack matches the snapshot 1`] = `
             "Arn",
           ],
         },
-        "StateMachineName": "supporter-product-data-ts-CODE",
+        "StateMachineName": "supporter-product-data-lambdas-CODE",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -724,7 +724,7 @@ exports[`The supporter-product-data-ts stack matches the snapshot 1`] = `
 }
 `;
 
-exports[`The supporter-product-data-ts stack matches the snapshot 2`] = `
+exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [],
@@ -739,14 +739,14 @@ exports[`The supporter-product-data-ts stack matches the snapshot 2`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "membership-dist",
-          "S3Key": "support/PROD/supporter-product-data-ts/supporter-product-data-ts.zip",
+          "S3Key": "support/PROD/supporter-product-data-ts/supporter-product-data-lambdas.zip",
         },
         "Environment": {
           "Variables": {
             "STAGE": "PROD",
           },
         },
-        "FunctionName": "supporterProductDataTSAddToQueue-PROD",
+        "FunctionName": "supporterProductData-AddToQueue-PROD",
         "Handler": "addSupporterRatePlanItemToQueueLambda.handler",
         "MemorySize": 1024,
         "Role": {
@@ -786,14 +786,14 @@ exports[`The supporter-product-data-ts stack matches the snapshot 2`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "membership-dist",
-          "S3Key": "support/PROD/supporter-product-data-ts/supporter-product-data-ts.zip",
+          "S3Key": "support/PROD/supporter-product-data-ts/supporter-product-data-lambdas.zip",
         },
         "Environment": {
           "Variables": {
             "STAGE": "PROD",
           },
         },
-        "FunctionName": "supporterProductDataTSFetchResults-PROD",
+        "FunctionName": "supporterProductData-FetchResults-PROD",
         "Handler": "fetchResultsLambda.handler",
         "MemorySize": 512,
         "Role": {
@@ -833,14 +833,14 @@ exports[`The supporter-product-data-ts stack matches the snapshot 2`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "membership-dist",
-          "S3Key": "support/PROD/supporter-product-data-ts/supporter-product-data-ts.zip",
+          "S3Key": "support/PROD/supporter-product-data-ts/supporter-product-data-lambdas.zip",
         },
         "Environment": {
           "Variables": {
             "STAGE": "PROD",
           },
         },
-        "FunctionName": "supporterProductDataTSProcessItem-PROD",
+        "FunctionName": "supporterProductData-ProcessItem-PROD",
         "Handler": "processSupporterRatePlanItemLambda.handler",
         "MemorySize": 1024,
         "Role": {
@@ -872,7 +872,7 @@ exports[`The supporter-product-data-ts stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "ProcessSupporterRatePlanItemLambdaSqsEventSourcesupporterproductdatatsPRODSupporterProductDataQueue2A4389871BC9D32A": {
+    "ProcessSupporterRatePlanItemLambdaSqsEventSourcesupporterproductdatalambdasPRODSupporterProductDataQueueEDA9DA3E9B915495": {
       "Properties": {
         "BatchSize": 10,
         "EventSourceArn": {
@@ -916,14 +916,14 @@ exports[`The supporter-product-data-ts stack matches the snapshot 2`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "membership-dist",
-          "S3Key": "support/PROD/supporter-product-data-ts/supporter-product-data-ts.zip",
+          "S3Key": "support/PROD/supporter-product-data-ts/supporter-product-data-lambdas.zip",
         },
         "Environment": {
           "Variables": {
             "STAGE": "PROD",
           },
         },
-        "FunctionName": "supporterProductDataTSQueryZuora-PROD",
+        "FunctionName": "supporterProductData-QueryZuora-PROD",
         "Handler": "queryZuoraLambda.handler",
         "MemorySize": 512,
         "Role": {
@@ -1234,7 +1234,7 @@ exports[`The supporter-product-data-ts stack matches the snapshot 2`] = `
             "Arn",
           ],
         },
-        "StateMachineName": "supporter-product-data-ts-PROD",
+        "StateMachineName": "supporter-product-data-lambdas-PROD",
         "Tags": [
           {
             "Key": "gu:cdk:version",

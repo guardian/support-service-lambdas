@@ -1,5 +1,5 @@
 {
-  "name": "supporter-product-data-ts",
+  "name": "supporter-product-data-lambdas",
   "scripts": {
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration",
@@ -7,12 +7,12 @@
     "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
-    "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/lambdas/*.ts --sourcemap --source-root=/support-service-lambdas/handlers/supporter-product-data-ts/target/",
-    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr supporter-product-data-ts.zip ./*.js.map ./*.js",
-    "cdk:test": "pnpm --filter cdk test supporter-product-data-ts",
-    "cdk:test-update": "pnpm --filter cdk test-update supporter-product-data-ts",
-    "update-lambda": "../../update-lambda.sh \"supporter-product-data-ts\" supporterProductDataTSQueryZuora- supporterProductDataTSFetchResults- supporterProductDataTSAddToQueue- supporterProductDataTSProcessItem-",
-    "update-stack": "../../update-stack.sh \"supporter-product-data-ts\""
+    "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/lambdas/*.ts --sourcemap --source-root=/support-service-lambdas/handlers/supporter-product-data-lambdas/target/",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr supporter-product-data-lambdas.zip ./*.js.map ./*.js",
+    "cdk:test": "pnpm --filter cdk test supporter-product-data-lambdas",
+    "cdk:test-update": "pnpm --filter cdk test-update supporter-product-data-lambdas",
+    "update-lambda": "../../update-lambda.sh \"supporter-product-data-lambdas\" supporterProductData-QueryZuora- supporterProductData-FetchResults- supporterProductData-AddToQueue- supporterProductData-ProcessItem-",
+    "update-stack": "../../update-stack.sh \"supporter-product-data-lambdas\""
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
