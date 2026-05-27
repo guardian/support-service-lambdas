@@ -5,7 +5,7 @@ Buildcheck checks the content of the build files for all lambdas during CI.
 
 The expected content is defined programmatically in typescript, similar to how CDK defines cloudformation.
 
-After editing the build definition, it's easy to refresh the build files using `pnpm snapshot:update`.
+After editing the build definition, refresh the build files using `pnpm snapshot:update`.
 
 ## Quick start: How do I...?
 ### ...add a dependency
@@ -21,12 +21,6 @@ After editing the build definition, it's easy to refresh the build files using `
 1. review (if necessary update the build definition and run snapshot:update again)
 1. commit and push
 
-### ...migrate an existing handler to use buildcheck
-1. add your new handler to [data/build.ts](data/build.ts)
-1. run `pnpm snapshot:update` to overwrite the existing files
-1. review the git diff (if necessary update the build definition and run snapshot:update again)
-1. commit and push
-
 ### ...create a new lambda from scratch
 Run the seed — it will prompt you interactively if you omit flags:
 ```bash
@@ -39,17 +33,10 @@ pnpm seed api-lambda --lambdaName=my-lambda --includeApiKey=Y --includeOpenApiDo
 ```
 See [data/seeds/api-lambda/README.md](data/seeds/api-lambda/README.md) for full details.
 
-## Pros and cons of buildcheck
-The benefits and drawbacks of buildcheck are similar to CDK or SBT:
+## Why do we use buildcheck
+The benefits are similar to CDK or SBT:
 - prevent inconsistencies between lambdas/modules including dependency versions and pnpm scripts
 - have a central list of recommended dependencies (with auto complete/type checking/static analysis)
 - files can be generated where necessary e.g. adding a new handler
 - allows more fine grained modules to be manageable improving build times and organisation
 - easier to review new lambda boilerplate as it's guaranteed to be standard
-- all the usual DRY benefits
-
-The disadvantages are mainly around tooling:
-- automated PRs to bump dependencies will fail unless the dependencies.ts file is updated accordingly (although dependabot etc doesn't yet work with pnpm catalog either)
-- harder to add dependencies as you need to add them to build.ts and then run snapshot:update.
-- non standard, could surprise new people
-- extra level of abstraction, could slow down regular developers
