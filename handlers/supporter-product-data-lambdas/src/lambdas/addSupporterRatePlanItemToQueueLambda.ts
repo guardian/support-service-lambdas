@@ -15,7 +15,7 @@ const timeoutBufferInMillis = maxBatchSize * 5 * 1000;
 
 type IndexedItem = [SupporterRatePlanItem, number];
 
-interface AddToQueueDeps {
+interface AddToQueueDependencies {
 	streamCsvRows: (
 		filename: string,
 	) => AsyncIterable<Record<string, string>> | Iterable<Record<string, string>>;
@@ -25,7 +25,7 @@ interface AddToQueueDeps {
 	putLastSuccessfulQueryTime: (time: string) => Promise<void>;
 }
 
-const buildDeps = (): AddToQueueDeps => {
+const buildDependencies = (): AddToQueueDependencies => {
 	const stage = stageFromEnvironment();
 	const s3Service = new S3Service();
 	const configService = new ConfigService(stage);
@@ -64,7 +64,7 @@ const buildDeps = (): AddToQueueDeps => {
 export const addToQueue = async (
 	state: AddSupporterRatePlanItemToQueueState,
 	getRemainingTimeInMillis: () => number,
-	deps: AddToQueueDeps,
+	dependencies: AddToQueueDependencies,
 ): Promise<AddSupporterRatePlanItemToQueueState> => {
 	logger.log('Starting to add subscriptions to queue', {
 		filename: state.filename,
@@ -96,7 +96,7 @@ export const addToQueue = async (
 		}
 
 		try {
-			await deps.sendBatch(batch);
+			await dependencies.sendBatch(batch);
 			logger.log('Successfully wrote SQS batch', {
 				batchSize: batch.length,
 				firstIndex: batch[0]?.[1],
@@ -104,7 +104,7 @@ export const addToQueue = async (
 			});
 		} catch (error) {
 			logger.error('Failed to write SQS batch', error);
-			await deps.triggerSqsWriteAlarm();
+			await dependencies.triggerSqsWriteAlarm();
 		}
 
 		const highestIndex = batch[batch.length - 1]?.[1];
@@ -114,7 +114,7 @@ export const addToQueue = async (
 		batch = [];
 	};
 
-	for await (const row of deps.streamCsvRows(state.filename)) {
+	for await (const row of dependencies.streamCsvRows(state.filename)) {
 		seenAnyRow = true;
 
 		// Skip rows already processed in a previous invocation
@@ -139,7 +139,7 @@ export const addToQueue = async (
 			item = supporterRatePlanItemFromCsvRow(row, rowIndex + 2);
 		} catch (error) {
 			logger.log('Failed to decode CSV row', { rowIndex, error });
-			await deps.triggerCsvReadAlarm();
+			await dependencies.triggerCsvReadAlarm();
 			throw new Error(
 				`Failed to decode CSV row at index ${rowIndex} in file ${
 					state.filename
@@ -160,7 +160,7 @@ export const addToQueue = async (
 	await flushBatch();
 
 	if (!seenAnyRow) {
-		await deps.triggerCsvReadAlarm();
+		await dependencies.triggerCsvReadAlarm();
 		throw new Error(`The specified CSV file ${state.filename} was empty`);
 	}
 
@@ -175,7 +175,7 @@ export const addToQueue = async (
 		logger.log('All records processed, updating lastSuccessfulQueryTime', {
 			attemptedQueryTime: state.attemptedQueryTime,
 		});
-		await deps.putLastSuccessfulQueryTime(state.attemptedQueryTime);
+		await dependencies.putLastSuccessfulQueryTime(state.attemptedQueryTime);
 	}
 
 	return {
@@ -193,4 +193,4 @@ export const handler: Handler<
 	AddSupporterRatePlanItemToQueueState,
 	AddSupporterRatePlanItemToQueueState
 > = async (state, context) =>
-	addToQueue(state, fromContext(context), buildDeps());
+	addToQueue(state, fromContext(context), buildDependencies());

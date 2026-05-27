@@ -38,7 +38,7 @@ const contributionAmountFromZuoraSubscription = (
 	};
 };
 
-interface ProcessItemDeps {
+interface ProcessItemDependencies {
 	discountIds: string[];
 	contributionIds: string[];
 	getSubscription: (
@@ -48,7 +48,7 @@ interface ProcessItemDeps {
 	triggerDynamoWriteAlarm: () => Promise<void>;
 }
 
-const buildDeps = async (): Promise<ProcessItemDeps> => {
+const buildDependencies = async (): Promise<ProcessItemDependencies> => {
 	const stage = stageFromEnvironment();
 	const configService = new ConfigService(stage);
 	const config = await configService.loadZuoraConfig();
@@ -75,16 +75,21 @@ const buildDeps = async (): Promise<ProcessItemDeps> => {
 
 const addContributionAmountIfNeeded = async (
 	item: SupporterRatePlanItem,
-	deps: Pick<ProcessItemDeps, 'contributionIds' | 'getSubscription'>,
+	dependencies: Pick<
+		ProcessItemDependencies,
+		'contributionIds' | 'getSubscription'
+	>,
 ): Promise<SupporterRatePlanItem> => {
-	if (!deps.contributionIds.includes(item.productRatePlanId)) {
+	if (!dependencies.contributionIds.includes(item.productRatePlanId)) {
 		return item;
 	}
 
-	const subscription = await deps.getSubscription(item.subscriptionName);
+	const subscription = await dependencies.getSubscription(
+		item.subscriptionName,
+	);
 	const contributionAmount = contributionAmountFromZuoraSubscription(
 		subscription,
-		deps.contributionIds,
+		dependencies.contributionIds,
 	);
 
 	return {
@@ -95,7 +100,7 @@ const addContributionAmountIfNeeded = async (
 
 export const processItem = async (
 	item: SupporterRatePlanItem,
-	deps: ProcessItemDeps,
+	dependencies: ProcessItemDependencies,
 ): Promise<void> => {
 	logger.log('Processing supporter rate plan item', {
 		subscriptionName: item.subscriptionName,
@@ -105,7 +110,7 @@ export const processItem = async (
 		termEndDate: item.termEndDate,
 	});
 
-	if (deps.discountIds.includes(item.productRatePlanId)) {
+	if (dependencies.discountIds.includes(item.productRatePlanId)) {
 		logger.log('Supporter rate plan item is a discount and will be skipped', {
 			subscriptionName: item.subscriptionName,
 			productRatePlanId: item.productRatePlanId,
@@ -116,7 +121,7 @@ export const processItem = async (
 	try {
 		const itemWithContribution = await addContributionAmountIfNeeded(
 			item,
-			deps,
+			dependencies,
 		);
 
 		if (itemWithContribution.contributionAmount !== undefined) {
@@ -132,7 +137,7 @@ export const processItem = async (
 			identityId: item.identityId,
 		});
 
-		await deps.writeItem(itemWithContribution);
+		await dependencies.writeItem(itemWithContribution);
 
 		logger.log('Successfully wrote item to DynamoDB', {
 			subscriptionName: item.subscriptionName,
@@ -144,7 +149,7 @@ export const processItem = async (
 			identityId: item.identityId,
 			error,
 		});
-		await deps.triggerDynamoWriteAlarm();
+		await dependencies.triggerDynamoWriteAlarm();
 	}
 };
 
@@ -160,14 +165,14 @@ const parseItem = (body: string): SupporterRatePlanItem => {
 
 export const processEvent = async (
 	event: SQSEvent,
-	deps: ProcessItemDeps,
+	dependencies: ProcessItemDependencies,
 ): Promise<void> => {
 	logger.log('Processing SQS event', { recordCount: event.Records.length });
 
 	await Promise.all(
 		event.Records.map(async (record) => {
 			const item = parseItem(record.body);
-			await processItem(item, deps);
+			await processItem(item, dependencies);
 		}),
 	);
 
@@ -176,5 +181,5 @@ export const processEvent = async (
 	});
 };
 
-export const handler: Handler<SQSEvent, void> = (event) =>
-	buildDeps().then((deps) => processEvent(event, deps));
+export const handler: Handler<SQSEvent, void> = async (event) =>
+	processEvent(event, await buildDependencies());

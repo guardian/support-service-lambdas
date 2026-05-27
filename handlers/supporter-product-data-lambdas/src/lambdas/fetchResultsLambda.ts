@@ -12,11 +12,10 @@ import type {
 	FetchResultsState,
 } from './types';
 
-interface FetchResultsDeps {
+interface FetchResultsDependencies {
 	getResults: (jobId: string) => Promise<BatchQueryResponse>;
 	getResultFileResponse: (fileId: string) => Promise<Response>;
 	uploadToS3: (
-		stage: ReturnType<typeof stageFromEnvironment>,
 		filename: string,
 		body: Uint8Array,
 		length: number,
@@ -31,7 +30,7 @@ const getValueOrThrow = <T>(value: T | undefined, errorMessage: string): T => {
 	return value;
 };
 
-const buildDefaultDeps = async (): Promise<FetchResultsDeps> => {
+const buildDependencies = async (): Promise<FetchResultsDependencies> => {
 	const stage = stageFromEnvironment();
 	const configService = new ConfigService(stage);
 	const zuoraClient = await ZuoraClient.create(stage);
@@ -42,8 +41,8 @@ const buildDefaultDeps = async (): Promise<FetchResultsDeps> => {
 		getResults: (jobId) => zuoraService.getResults(jobId),
 		getResultFileResponse: (fileId) =>
 			zuoraService.getResultFileResponse(fileId),
-		uploadToS3: (uploadStage, filename, body, length) =>
-			s3Service.streamToS3(uploadStage, filename, body, length),
+		uploadToS3: (filename, body, length) =>
+			s3Service.streamToS3(stage, filename, body, length),
 		putLastSuccessfulQueryTime: (time) =>
 			configService.putLastSuccessfulQueryTime(time),
 	};
@@ -51,18 +50,14 @@ const buildDefaultDeps = async (): Promise<FetchResultsDeps> => {
 
 export const fetchResults = async (
 	event: FetchResultsState,
-	deps?: FetchResultsDeps,
+	dependencies: FetchResultsDependencies,
 ): Promise<AddSupporterRatePlanItemToQueueState> => {
-	const stage = stageFromEnvironment();
-	const resolvedDeps = deps ?? (await buildDefaultDeps());
-
 	logger.log('Attempting to fetch results', {
 		jobId: event.jobId,
 		attemptedQueryTime: event.attemptedQueryTime,
-		stage,
 	});
 
-	const result = await resolvedDeps.getResults(event.jobId);
+	const result = await dependencies.getResults(event.jobId);
 
 	logger.log('Received job status from Zuora', {
 		jobId: event.jobId,
@@ -99,7 +94,7 @@ export const fetchResults = async (
 
 	logger.log('Downloading result file from Zuora', { fileId, filename });
 
-	const fileResponse = await resolvedDeps.getResultFileResponse(fileId);
+	const fileResponse = await dependencies.getResultFileResponse(fileId);
 	if (!fileResponse.ok) {
 		throw new Error(
 			`File download for job with id ${event.jobId} failed with http code ${fileResponse.status}`,
@@ -118,18 +113,17 @@ export const fetchResults = async (
 	}
 
 	logger.log('Uploading result file to S3', {
-		stage,
 		filename,
 		contentLength,
 	});
 
-	await resolvedDeps.uploadToS3(stage, filename, fileBytes, contentLength);
+	await dependencies.uploadToS3(filename, fileBytes, contentLength);
 
 	if (batch.recordCount === 0) {
 		logger.log('Record count is 0, updating lastSuccessfulQueryTime', {
 			attemptedQueryTime: event.attemptedQueryTime,
 		});
-		await resolvedDeps.putLastSuccessfulQueryTime(event.attemptedQueryTime);
+		await dependencies.putLastSuccessfulQueryTime(event.attemptedQueryTime);
 	}
 
 	logger.log('Successfully wrote file to S3', {
@@ -149,4 +143,4 @@ export const fetchResults = async (
 export const handler: Handler<
 	FetchResultsState,
 	AddSupporterRatePlanItemToQueueState
-> = async (event) => fetchResults(event);
+> = async (event) => fetchResults(event, await buildDependencies());

@@ -2,7 +2,6 @@ import { fetchResults } from '../src/lambdas/fetchResultsLambda';
 import type { BatchQueryResponse } from '../src/model/zuora';
 
 type UploadToS3 = (
-	stage: 'CODE' | 'PROD',
 	filename: string,
 	body: Uint8Array,
 	length: number,
@@ -68,8 +67,7 @@ describe('fetchResults', () => {
 		});
 
 		expect(uploadToS3).toHaveBeenCalledTimes(1);
-		expect(uploadToS3.mock.calls[0]?.[0]).toBe('CODE');
-		expect(uploadToS3.mock.calls[0]?.[1]).toBe(
+		expect(uploadToS3.mock.calls[0]?.[0]).toBe(
 			'select-active-rate-plans-2026-03-09T10:30:00.000.csv',
 		);
 		expect(putLastSuccessfulQueryTime).not.toHaveBeenCalled();
