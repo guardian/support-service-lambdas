@@ -51,8 +51,8 @@ export const acceptInvitationEndpoint = async (
 			`Supporter rate plan record not found for ${invitation.subscriptionName} and identity ${invitation.primaryIdentityId}`,
 		);
 		const supporterProductDataRecord: SupporterRatePlanItem = {
-			subscriptionName: `${invitation.subscriptionName}-secondary-${invitation.secondaryIdentityId}`,
-			parentSubscriptionName: invitation.subscriptionName,
+			subscriptionName: `${invitation.subscriptionName}-${invitation.secondaryIdentityId}`,
+			parentSubscriptionName: invitation.subscriptionName, // TODO Not being written currently
 			identityId: invitation.secondaryIdentityId,
 			productRatePlanId: parentSupporterProductDataRecord.productRatePlanId,
 			productRatePlanName: 'Digital Plus Secondary User',
