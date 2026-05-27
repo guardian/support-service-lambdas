@@ -1,3 +1,4 @@
+import { logger } from '@modules/logger/logger';
 import { stageFromEnvironment } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { Handler } from 'aws-lambda';
@@ -55,7 +56,7 @@ export const fetchResults = async (
 	const stage = stageFromEnvironment();
 	const resolvedDeps = deps ?? (await buildDefaultDeps());
 
-	console.info('Attempting to fetch results', {
+	logger.log('Attempting to fetch results', {
 		jobId: event.jobId,
 		attemptedQueryTime: event.attemptedQueryTime,
 		stage,
@@ -63,7 +64,7 @@ export const fetchResults = async (
 
 	const result = await resolvedDeps.getResults(event.jobId);
 
-	console.info('Received job status from Zuora', {
+	logger.log('Received job status from Zuora', {
 		jobId: event.jobId,
 		status: result.status,
 		batchCount: result.batches.length,
@@ -80,7 +81,7 @@ export const fetchResults = async (
 		`No batches were returned in the batch query response for jobId ${event.jobId}`,
 	);
 
-	console.info('Batch details', {
+	logger.log('Batch details', {
 		jobId: event.jobId,
 		fileId: batch.fileId,
 		recordCount: batch.recordCount,
@@ -96,7 +97,7 @@ export const fetchResults = async (
 		event.attemptedQueryTime,
 	)}.csv`;
 
-	console.info('Downloading result file from Zuora', { fileId, filename });
+	logger.log('Downloading result file from Zuora', { fileId, filename });
 
 	const fileResponse = await resolvedDeps.getResultFileResponse(fileId);
 	if (!fileResponse.ok) {
@@ -108,7 +109,7 @@ export const fetchResults = async (
 	const fileBytes = new Uint8Array(await fileResponse.arrayBuffer());
 	const contentLength = fileBytes.byteLength;
 
-	console.info('Downloaded result file', { filename, contentLength });
+	logger.log('Downloaded result file', { filename, contentLength });
 
 	if (contentLength <= 0) {
 		throw new Error(
@@ -116,7 +117,7 @@ export const fetchResults = async (
 		);
 	}
 
-	console.info('Uploading result file to S3', {
+	logger.log('Uploading result file to S3', {
 		stage,
 		filename,
 		contentLength,
@@ -125,13 +126,13 @@ export const fetchResults = async (
 	await resolvedDeps.uploadToS3(stage, filename, fileBytes, contentLength);
 
 	if (batch.recordCount === 0) {
-		console.info('Record count is 0, updating lastSuccessfulQueryTime', {
+		logger.log('Record count is 0, updating lastSuccessfulQueryTime', {
 			attemptedQueryTime: event.attemptedQueryTime,
 		});
 		await resolvedDeps.putLastSuccessfulQueryTime(event.attemptedQueryTime);
 	}
 
-	console.info('Successfully wrote file to S3', {
+	logger.log('Successfully wrote file to S3', {
 		filename,
 		recordCount: batch.recordCount,
 		jobId: event.jobId,

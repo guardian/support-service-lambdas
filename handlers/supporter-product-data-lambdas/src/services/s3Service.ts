@@ -5,6 +5,7 @@ import {
 	S3Client,
 } from '@aws-sdk/client-s3';
 import { defaultProvider } from '@aws-sdk/credential-provider-node';
+import { logger } from '@modules/logger/logger';
 import type { Stage } from '@modules/stage';
 
 const bucketNameForStage = (stage: Stage): string =>
@@ -25,7 +26,7 @@ export class S3Service {
 		length: number,
 	): Promise<void> {
 		const bucket = bucketNameForStage(stage);
-		console.info('Uploading file to S3', {
+		logger.log('Uploading file to S3', {
 			bucket,
 			filename,
 			contentLength: length,
@@ -38,12 +39,12 @@ export class S3Service {
 				ContentLength: length,
 			}),
 		);
-		console.info('Successfully uploaded file to S3', { bucket, filename });
+		logger.log('Successfully uploaded file to S3', { bucket, filename });
 	}
 
 	async getObjectAsString(stage: Stage, filename: string): Promise<string> {
 		const bucket = bucketNameForStage(stage);
-		console.info('Downloading file from S3', { bucket, filename });
+		logger.log('Downloading file from S3', { bucket, filename });
 		const response = await this.s3Client.send(
 			new GetObjectCommand({
 				Bucket: bucket,
@@ -56,7 +57,7 @@ export class S3Service {
 		}
 
 		const content = await response.Body.transformToString();
-		console.info('Successfully downloaded file from S3', {
+		logger.log('Successfully downloaded file from S3', {
 			bucket,
 			filename,
 			contentLength: content.length,
@@ -69,7 +70,7 @@ export class S3Service {
 		filename: string,
 	): AsyncGenerator<string> {
 		const bucket = bucketNameForStage(stage);
-		console.info('Streaming file from S3', { bucket, filename });
+		logger.log('Streaming file from S3', { bucket, filename });
 
 		const response = await this.s3Client.send(
 			new GetObjectCommand({ Bucket: bucket, Key: filename }),

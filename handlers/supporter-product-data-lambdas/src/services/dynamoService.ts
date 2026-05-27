@@ -4,6 +4,7 @@ import {
 	type UpdateItemCommandInput,
 } from '@aws-sdk/client-dynamodb';
 import { defaultProvider } from '@aws-sdk/credential-provider-node';
+import { logger } from '@modules/logger/logger';
 import type { Stage } from '@modules/stage';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -31,7 +32,7 @@ export class DynamoService {
 	async writeItem(item: SupporterRatePlanItem): Promise<void> {
 		const expiryDate = nextDay(item.termEndDate);
 
-		console.info('Writing supporter rate plan item to DynamoDB', {
+		logger.log('Writing supporter rate plan item to DynamoDB', {
 			tableName: this.tableName,
 			identityId: item.identityId,
 			subscriptionName: item.subscriptionName,
@@ -76,7 +77,7 @@ export class DynamoService {
 			}),
 		);
 
-		console.info('Successfully wrote supporter rate plan item to DynamoDB', {
+		logger.log('Successfully wrote supporter rate plan item to DynamoDB', {
 			tableName: this.tableName,
 			identityId: item.identityId,
 			subscriptionName: item.subscriptionName,

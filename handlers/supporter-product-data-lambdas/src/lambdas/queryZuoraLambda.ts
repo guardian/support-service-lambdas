@@ -1,3 +1,4 @@
+import { logger } from '@modules/logger/logger';
 import { type Stage, stageFromEnvironment } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { Handler } from 'aws-lambda';
@@ -41,7 +42,7 @@ const buildBatchQueryRequest = (
 				config.lastSuccessfulQueryTime,
 			);
 			if (parsed === undefined) {
-				console.warn(
+				logger.log(
 					'lastSuccessfulQueryTime could not be parsed as a date, ignoring',
 					{ lastSuccessfulQueryTime: config.lastSuccessfulQueryTime },
 				);
@@ -49,13 +50,13 @@ const buildBatchQueryRequest = (
 				incrementalTime = formatZuoraDateTime(parsed);
 			}
 		} else {
-			console.warn(
+			logger.log(
 				'No lastSuccessfulQueryTime found in config, running without incrementalTime filter',
 			);
 		}
 	}
 
-	console.info('Built batch query request', {
+	logger.log('Built batch query request', {
 		queryType,
 		incrementalTime,
 		partnerId: config.partnerId,
@@ -93,12 +94,12 @@ export const queryZuora = async (
 	const zuoraClient = await ZuoraClient.create(stage);
 	const service = new ZuoraQuerierService(zuoraClient);
 
-	console.info('Attempting to submit query to Zuora', { stage, queryType });
+	logger.log('Attempting to submit query to Zuora', { stage, queryType });
 
 	const request = buildBatchQueryRequest(queryType, config);
 	const result = await service.postQuery(request);
 
-	console.info('Successfully submitted query', {
+	logger.log('Successfully submitted query', {
 		jobId: result.id,
 		queryType,
 		stage,

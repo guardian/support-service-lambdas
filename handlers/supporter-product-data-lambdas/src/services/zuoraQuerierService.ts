@@ -1,3 +1,4 @@
+import { logger } from '@modules/logger/logger';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { z } from 'zod';
 import type { BatchQueryRequest } from '../model/query';
@@ -35,14 +36,14 @@ export class ZuoraQuerierService {
 	async getResultFileResponse(fileId: string): Promise<Response> {
 		const auth = await this.zuoraClient.tokenProvider.getAuthorisation();
 		const url = `${auth.baseUrl}/v1/batch-query/file/${fileId}`;
-		console.info('Zuora API request', { method: 'GET', url });
+		logger.log('Zuora API request', { method: 'GET', url });
 
 		const response = await fetch(url, {
 			method: 'GET',
 			headers: auth.authHeaders,
 		});
 
-		console.info('Zuora API response', {
+		logger.log('Zuora API response', {
 			method: 'GET',
 			url,
 			status: response.status,

@@ -1,4 +1,5 @@
 import { putMetric } from '@modules/aws/cloudwatch';
+import { logger } from '@modules/logger/logger';
 import { type Stage, stageFromEnvironment } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { Handler, SQSEvent } from 'aws-lambda';
@@ -96,7 +97,7 @@ export const processItem = async (
 	item: SupporterRatePlanItem,
 	deps: ProcessItemDeps,
 ): Promise<void> => {
-	console.info('Processing supporter rate plan item', {
+	logger.log('Processing supporter rate plan item', {
 		subscriptionName: item.subscriptionName,
 		identityId: item.identityId,
 		productRatePlanId: item.productRatePlanId,
@@ -105,7 +106,7 @@ export const processItem = async (
 	});
 
 	if (deps.discountIds.includes(item.productRatePlanId)) {
-		console.info('Supporter rate plan item is a discount and will be skipped', {
+		logger.log('Supporter rate plan item is a discount and will be skipped', {
 			subscriptionName: item.subscriptionName,
 			productRatePlanId: item.productRatePlanId,
 		});
@@ -119,26 +120,26 @@ export const processItem = async (
 		);
 
 		if (itemWithContribution.contributionAmount !== undefined) {
-			console.info('Resolved contribution amount', {
+			logger.log('Resolved contribution amount', {
 				subscriptionName: item.subscriptionName,
 				amount: itemWithContribution.contributionAmount.amount,
 				currency: itemWithContribution.contributionAmount.currency,
 			});
 		}
 
-		console.info('Writing item to DynamoDB', {
+		logger.log('Writing item to DynamoDB', {
 			subscriptionName: item.subscriptionName,
 			identityId: item.identityId,
 		});
 
 		await deps.writeItem(itemWithContribution);
 
-		console.info('Successfully wrote item to DynamoDB', {
+		logger.log('Successfully wrote item to DynamoDB', {
 			subscriptionName: item.subscriptionName,
 			identityId: item.identityId,
 		});
 	} catch (error) {
-		console.error('Error writing item to Dynamo', {
+		logger.error('Error writing item to Dynamo', {
 			subscriptionName: item.subscriptionName,
 			identityId: item.identityId,
 			error,
@@ -161,7 +162,7 @@ export const processEvent = async (
 	event: SQSEvent,
 	deps: ProcessItemDeps,
 ): Promise<void> => {
-	console.info('Processing SQS event', { recordCount: event.Records.length });
+	logger.log('Processing SQS event', { recordCount: event.Records.length });
 
 	await Promise.all(
 		event.Records.map(async (record) => {
@@ -170,7 +171,7 @@ export const processEvent = async (
 		}),
 	);
 
-	console.info('Finished processing SQS event', {
+	logger.log('Finished processing SQS event', {
 		recordCount: event.Records.length,
 	});
 };

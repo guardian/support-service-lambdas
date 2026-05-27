@@ -1,5 +1,6 @@
 /// <reference types="node" />
 
+import { logger } from '@modules/logger/logger';
 import type { Context } from 'aws-lambda';
 import { handler } from '../lambdas/queryZuoraLambda';
 
@@ -26,7 +27,7 @@ async function main(): Promise<void> {
 		localContext,
 		() => undefined,
 	);
-	console.log(JSON.stringify(result, null, 2));
+	logger.log(JSON.stringify(result, null, 2));
 }
 
 void main();

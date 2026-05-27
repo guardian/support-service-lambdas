@@ -1,5 +1,6 @@
 import { putMetric } from '@modules/aws/cloudwatch';
 import { sendBatchMessagesToQueue } from '@modules/aws/sqs';
+import { logger } from '@modules/logger/logger';
 import { stageFromEnvironment } from '@modules/stage';
 import type { Context, Handler } from 'aws-lambda';
 import type { SupporterRatePlanItem } from '../model/supporterRatePlanItem';
@@ -65,7 +66,7 @@ export const addToQueue = async (
 	getRemainingTimeInMillis: () => number,
 	deps: AddToQueueDeps,
 ): Promise<AddSupporterRatePlanItemToQueueState> => {
-	console.info('Starting to add subscriptions to queue', {
+	logger.log('Starting to add subscriptions to queue', {
 		filename: state.filename,
 		recordCount: state.recordCount,
 		processedCount: state.processedCount,
@@ -83,7 +84,7 @@ export const addToQueue = async (
 		}
 
 		if (getRemainingTimeInMillis() < timeoutBufferInMillis) {
-			console.info('Aborting processing due to remaining lambda time', {
+			logger.log('Aborting processing due to remaining lambda time', {
 				remainingMillis: getRemainingTimeInMillis(),
 				timeoutBufferInMillis,
 				processedCount,
@@ -96,13 +97,13 @@ export const addToQueue = async (
 
 		try {
 			await deps.sendBatch(batch);
-			console.info('Successfully wrote SQS batch', {
+			logger.log('Successfully wrote SQS batch', {
 				batchSize: batch.length,
 				firstIndex: batch[0]?.[1],
 				lastIndex: batch[batch.length - 1]?.[1],
 			});
 		} catch (error) {
-			console.error('Failed to write SQS batch', error);
+			logger.error('Failed to write SQS batch', error);
 			await deps.triggerSqsWriteAlarm();
 		}
 
@@ -125,7 +126,7 @@ export const addToQueue = async (
 		// Bail out early if we're running out of time — the step function will
 		// re-invoke with the updated processedCount
 		if (getRemainingTimeInMillis() < timeoutBufferInMillis) {
-			console.info('Aborting processing due to remaining lambda time', {
+			logger.log('Aborting processing due to remaining lambda time', {
 				remainingMillis: getRemainingTimeInMillis(),
 				timeoutBufferInMillis,
 				processedCount,
@@ -137,7 +138,7 @@ export const addToQueue = async (
 		try {
 			item = supporterRatePlanItemFromCsvRow(row, rowIndex + 2);
 		} catch (error) {
-			console.warn('Failed to decode CSV row', { rowIndex, error });
+			logger.log('Failed to decode CSV row', { rowIndex, error });
 			await deps.triggerCsvReadAlarm();
 			throw new Error(
 				`Failed to decode CSV row at index ${rowIndex} in file ${
@@ -163,7 +164,7 @@ export const addToQueue = async (
 		throw new Error(`The specified CSV file ${state.filename} was empty`);
 	}
 
-	console.info('Finished writing to SQS', {
+	logger.log('Finished writing to SQS', {
 		filename: state.filename,
 		processedCount,
 		recordCount: state.recordCount,
@@ -171,7 +172,7 @@ export const addToQueue = async (
 	});
 
 	if (processedCount === state.recordCount) {
-		console.info('All records processed, updating lastSuccessfulQueryTime', {
+		logger.log('All records processed, updating lastSuccessfulQueryTime', {
 			attemptedQueryTime: state.attemptedQueryTime,
 		});
 		await deps.putLastSuccessfulQueryTime(state.attemptedQueryTime);
