@@ -15,6 +15,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.940.0",
     "zod": "catalog:",
-    "aws": "workspace:*"
+    "aws": "workspace:*",
+    "logger": "workspace:*"
   }
 }

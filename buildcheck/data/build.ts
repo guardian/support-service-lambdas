@@ -23,7 +23,7 @@ export interface ModuleDefinition {
 	tsConfigExtra?: Record<string, unknown>;
 	testTimeoutSeconds?: number;
 	jestClearMocks?: boolean;
-	moduleDeps: ModuleDefinition[];
+	moduleDependencies: ModuleDefinition[];
 }
 
 export interface BuildDefinition {
@@ -36,7 +36,7 @@ const moduleLogger: ModuleDefinition = {
 	devDependencies: {
 		...devDeps['@smithy/types'],
 	},
-	moduleDeps: [],
+	moduleDependencies: [],
 };
 
 const moduleAws: ModuleDefinition = {
@@ -51,7 +51,7 @@ const moduleAws: ModuleDefinition = {
 		...dep['@aws-sdk/lib-storage'],
 		...dep.zod,
 	},
-	moduleDeps: [moduleLogger],
+	moduleDependencies: [moduleLogger],
 };
 
 const moduleZuoraCatalog: ModuleDefinition = {
@@ -63,7 +63,7 @@ const moduleZuoraCatalog: ModuleDefinition = {
 	extraScripts: {
 		'update-catalog-fixtures': 'bash runManual/updateCatalogFixtures.sh',
 	},
-	moduleDeps: [moduleAws],
+	moduleDependencies: [moduleAws, moduleLogger],
 };
 
 const moduleInternationalisation: ModuleDefinition = {
@@ -72,7 +72,7 @@ const moduleInternationalisation: ModuleDefinition = {
 		...dep['zod'],
 	},
 	extraScripts: srcOnly,
-	moduleDeps: [],
+	moduleDependencies: [],
 };
 
 const moduleProductCatalog: ModuleDefinition = {
@@ -105,7 +105,7 @@ const moduleProductCatalog: ModuleDefinition = {
 			'pnpm run generateFiles && pnpm run validateSchemas && pnpm run buildGeneratedFiles',
 		updateSnapshots: 'jest -u --group=-integration',
 	},
-	moduleDeps: [moduleLogger, moduleZuoraCatalog],
+	moduleDependencies: [moduleLogger, moduleZuoraCatalog],
 };
 
 const modulePromotions: ModuleDefinition = {
@@ -115,7 +115,7 @@ const modulePromotions: ModuleDefinition = {
 		...dep['@aws-sdk/util-dynamodb'],
 		...dep['zod'],
 	},
-	moduleDeps: [
+	moduleDependencies: [
 		moduleAws,
 		moduleInternationalisation,
 		moduleLogger,
@@ -131,7 +131,7 @@ const moduleZuora: ModuleDefinition = {
 		...dep.dayjs,
 		...dep.zod,
 	},
-	moduleDeps: [
+	moduleDependencies: [
 		moduleAws,
 		moduleInternationalisation,
 		moduleLogger,
@@ -150,7 +150,7 @@ const moduleRouting: ModuleDefinition = {
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 	},
-	moduleDeps: [moduleAws, moduleLogger, moduleZuora],
+	moduleDependencies: [moduleAws, moduleLogger, moduleZuora],
 };
 
 const moduleBigquery: ModuleDefinition = {
@@ -167,7 +167,7 @@ const moduleBigquery: ModuleDefinition = {
 		...devDeps['jest'],
 		...devDeps['ts-jest'],
 	},
-	moduleDeps: [],
+	moduleDependencies: [],
 };
 
 const moduleEmail: ModuleDefinition = {
@@ -176,7 +176,11 @@ const moduleEmail: ModuleDefinition = {
 		...dep['@aws-sdk/client-sqs'],
 		...dep['dayjs'],
 	},
-	moduleDeps: [moduleAws, moduleInternationalisation, moduleProductCatalog],
+	moduleDependencies: [
+		moduleAws,
+		moduleInternationalisation,
+		moduleProductCatalog,
+	],
 };
 
 const moduleSecretsManager: ModuleDefinition = {
@@ -185,7 +189,7 @@ const moduleSecretsManager: ModuleDefinition = {
 		...dep['@aws-sdk/client-secrets-manager'],
 		...devDeps['aws-sdk-client-mock'],
 	},
-	moduleDeps: [moduleAws],
+	moduleDependencies: [moduleAws],
 };
 
 const moduleGuardianSubscription: ModuleDefinition = {
@@ -195,7 +199,7 @@ const moduleGuardianSubscription: ModuleDefinition = {
 		...dep['@aws-sdk/client-cloudwatch-logs'],
 		...dep['@aws-sdk/credential-providers'],
 	},
-	moduleDeps: [
+	moduleDependencies: [
 		moduleLogger,
 		moduleProductCatalog,
 		moduleZuora,
@@ -212,7 +216,7 @@ const moduleIdentity: ModuleDefinition = {
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 	},
-	moduleDeps: [moduleAws, moduleZuora],
+	moduleDependencies: [moduleAws, moduleZuora],
 };
 
 const moduleSupporterProductData: ModuleDefinition = {
@@ -226,7 +230,7 @@ const moduleSupporterProductData: ModuleDefinition = {
 	extraScripts: {
 		test: 'NODE_OPTIONS="$NODE_OPTIONS --experimental-vm-modules" jest --group=-integration',
 	},
-	moduleDeps: [moduleAws, moduleLogger, moduleZuora],
+	moduleDependencies: [moduleAws, moduleLogger, moduleZuora],
 };
 
 const moduleProductBenefits: ModuleDefinition = {
@@ -235,7 +239,7 @@ const moduleProductBenefits: ModuleDefinition = {
 		...dep['zod'],
 		...dep['dayjs'],
 	},
-	moduleDeps: [
+	moduleDependencies: [
 		moduleIdentity,
 		moduleProductCatalog,
 		moduleSupporterProductData,
@@ -252,7 +256,7 @@ const moduleSalesforce: ModuleDefinition = {
 		...devDeps['jest'],
 		...devDeps['ts-jest'],
 	},
-	moduleDeps: [moduleSecretsManager, moduleZuora],
+	moduleDependencies: [moduleSecretsManager, moduleZuora],
 };
 
 const moduleSyncSupporterProductData: ModuleDefinition = {
@@ -269,7 +273,7 @@ const moduleSyncSupporterProductData: ModuleDefinition = {
 		...srcOnly,
 		'sync-user': 'tsx ./src/syncUser.ts',
 	},
-	moduleDeps: [moduleAws, moduleProductCatalog, moduleZuora],
+	moduleDependencies: [moduleAws, moduleProductCatalog, moduleZuora],
 };
 
 const moduleTestUsers: ModuleDefinition = {
@@ -289,7 +293,7 @@ const moduleTestUsers: ModuleDefinition = {
 		cancelSubscription: 'tsx ./src/cancel.ts',
 		deleteAccount: 'tsx ./src/deleteAccount.ts',
 	},
-	moduleDeps: [moduleProductCatalog, moduleZuora],
+	moduleDependencies: [moduleProductCatalog, moduleZuora],
 };
 
 const alarmsHandler: HandlerDefinition = {
@@ -309,7 +313,7 @@ const alarmsHandler: HandlerDefinition = {
 		...devDeps['@types/aws-lambda'],
 		...dep.dayjs,
 	},
-	moduleDeps: [moduleAws, moduleRouting, moduleZuora],
+	moduleDependencies: [moduleAws, moduleRouting, moduleZuora],
 };
 
 const discountApi: HandlerDefinition = {
@@ -321,7 +325,12 @@ const discountApi: HandlerDefinition = {
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 	},
-	moduleDeps: [moduleEmail, moduleRouting, moduleZuora, moduleZuoraCatalog],
+	moduleDependencies: [
+		moduleEmail,
+		moduleRouting,
+		moduleZuora,
+		moduleZuoraCatalog,
+	],
 };
 
 const discountExpiryNotifier: HandlerDefinition = {
@@ -349,7 +358,7 @@ const discountExpiryNotifier: HandlerDefinition = {
 		...devDeps['@types/aws-lambda'],
 		...deprecatedDeps['@types/aws-sdk'],
 	},
-	moduleDeps: [moduleAws, moduleBigquery, moduleEmail, moduleZuora],
+	moduleDependencies: [moduleAws, moduleBigquery, moduleEmail, moduleZuora],
 };
 
 const generateProductCatalog: HandlerDefinition = {
@@ -358,7 +367,7 @@ const generateProductCatalog: HandlerDefinition = {
 		...dep['@aws-sdk/client-s3'],
 		...devDeps['@types/aws-lambda'],
 	},
-	moduleDeps: [moduleAws, moduleProductCatalog, moduleZuoraCatalog],
+	moduleDependencies: [moduleAws, moduleProductCatalog, moduleZuoraCatalog],
 };
 
 const imovoVoucherApi: HandlerDefinition = {
@@ -376,7 +385,7 @@ const imovoVoucherApi: HandlerDefinition = {
 	extraScripts: {
 		'run-local': 'tsx src/runLocal.ts',
 	},
-	moduleDeps: [moduleEmail],
+	moduleDependencies: [moduleEmail],
 };
 
 const metricPushApi: HandlerDefinition = {
@@ -385,7 +394,7 @@ const metricPushApi: HandlerDefinition = {
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 	},
-	moduleDeps: [moduleAws, moduleRouting],
+	moduleDependencies: [moduleAws, moduleRouting],
 };
 
 const mobilePurchasesToSupporterProductData: HandlerDefinition = {
@@ -405,7 +414,11 @@ const mobilePurchasesToSupporterProductData: HandlerDefinition = {
 	extraScripts: {
 		runFullSync: 'tsx src/fullSyncCommand.ts',
 	},
-	moduleDeps: [moduleAws, moduleProductBenefits, moduleSupporterProductData],
+	moduleDependencies: [
+		moduleAws,
+		moduleProductBenefits,
+		moduleSupporterProductData,
+	],
 };
 
 const mparticleApi: HandlerDefinition = {
@@ -429,7 +442,7 @@ const mparticleApi: HandlerDefinition = {
 		...dep['@aws-sdk/client-s3'],
 		...devDeps['tsx'],
 	},
-	moduleDeps: [moduleAws, moduleRouting],
+	moduleDependencies: [moduleAws, moduleRouting],
 };
 
 const negativeInvoicesProcessor: HandlerDefinition = {
@@ -455,7 +468,7 @@ const negativeInvoicesProcessor: HandlerDefinition = {
 		...devDeps['@types/aws-lambda'],
 		...deprecatedDeps['@types/aws-sdk'],
 	},
-	moduleDeps: [moduleAws, moduleBigquery, moduleZuora],
+	moduleDependencies: [moduleAws, moduleBigquery, moduleZuora],
 };
 
 const observerDataExport: HandlerDefinition = {
@@ -465,7 +478,7 @@ const observerDataExport: HandlerDefinition = {
 	dependencies: {
 		...devDeps['@types/aws-lambda'],
 	},
-	moduleDeps: [moduleAws],
+	moduleDependencies: [moduleAws],
 };
 
 const pressReaderEntitlements: HandlerDefinition = {
@@ -481,7 +494,7 @@ const pressReaderEntitlements: HandlerDefinition = {
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 	},
-	moduleDeps: [
+	moduleDependencies: [
 		moduleAws,
 		moduleIdentity,
 		moduleProductBenefits,
@@ -503,7 +516,7 @@ const productSwitchApi: HandlerDefinition = {
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 	},
-	moduleDeps: [
+	moduleDependencies: [
 		moduleAws,
 		moduleEmail,
 		moduleGuardianSubscription,
@@ -530,7 +543,12 @@ const promotionsLambdas: HandlerDefinition = {
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 	},
-	moduleDeps: [moduleAws, modulePromotions, moduleSalesforce, moduleZuora],
+	moduleDependencies: [
+		moduleAws,
+		modulePromotions,
+		moduleSalesforce,
+		moduleZuora,
+	],
 };
 
 const salesforceDisasterRecovery: HandlerDefinition = {
@@ -552,7 +570,7 @@ const salesforceDisasterRecovery: HandlerDefinition = {
 		...devDeps['@types/aws-lambda'],
 		...devDeps['aws-sdk-client-mock'],
 	},
-	moduleDeps: [moduleZuora],
+	moduleDependencies: [moduleZuora],
 };
 
 const salesforceDisasterRecoveryHealthCheck: HandlerDefinition = {
@@ -567,7 +585,7 @@ const salesforceDisasterRecoveryHealthCheck: HandlerDefinition = {
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 	},
-	moduleDeps: [],
+	moduleDependencies: [],
 };
 
 const stripeDisputes: HandlerDefinition = {
@@ -584,7 +602,7 @@ const stripeDisputes: HandlerDefinition = {
 		...devDeps['@types/aws-lambda'],
 		...devDeps['@types/stripe'],
 	},
-	moduleDeps: [
+	moduleDependencies: [
 		moduleEmail,
 		moduleRouting,
 		moduleSalesforce,
@@ -604,7 +622,7 @@ const ticketTailorWebhook: HandlerDefinition = {
 		...devDeps['@types/aws-lambda'],
 		...devDeps['fetch-mock'],
 	},
-	moduleDeps: [moduleAws, moduleSecretsManager],
+	moduleDependencies: [moduleAws, moduleSecretsManager],
 };
 
 const updateSupporterPlusAmount: HandlerDefinition = {
@@ -617,7 +635,7 @@ const updateSupporterPlusAmount: HandlerDefinition = {
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 	},
-	moduleDeps: [
+	moduleDependencies: [
 		moduleEmail,
 		moduleInternationalisation,
 		moduleProductCatalog,
@@ -636,7 +654,7 @@ const userBenefits: HandlerDefinition = {
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 	},
-	moduleDeps: [
+	moduleDependencies: [
 		moduleIdentity,
 		moduleProductBenefits,
 		moduleProductCatalog,
@@ -652,7 +670,7 @@ const writeOffUnpaidInvoices: HandlerDefinition = {
 		...dep['@aws-sdk/client-secrets-manager'],
 		...dep.dayjs,
 	},
-	moduleDeps: [moduleAws, moduleBigquery, moduleZuora],
+	moduleDependencies: [moduleAws, moduleBigquery, moduleZuora],
 };
 
 const zuoraSalesforceLinkRemover: HandlerDefinition = {
@@ -672,7 +690,7 @@ const zuoraSalesforceLinkRemover: HandlerDefinition = {
 		...devDeps['@types/aws-lambda'],
 		...devDeps['aws-sdk-client-mock'],
 	},
-	moduleDeps: [moduleSalesforce, moduleZuora],
+	moduleDependencies: [moduleSalesforce, moduleZuora],
 };
 
 const newSubscriptionApi: HandlerDefinition = {
@@ -683,7 +701,7 @@ const newSubscriptionApi: HandlerDefinition = {
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 	},
-	moduleDeps: [
+	moduleDependencies: [
 		moduleInternationalisation,
 		moduleProductCatalog,
 		modulePromotions,
@@ -702,7 +720,7 @@ const newsletterAcquisition: HandlerDefinition = {
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 	},
-	moduleDeps: [],
+	moduleDependencies: [],
 };
 
 const multipleAccountApi: HandlerDefinition = {
@@ -722,7 +740,7 @@ const multipleAccountApi: HandlerDefinition = {
 		...openApiScripts,
 		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr multiple-account-api.zip ./*.js.map ./*.js`,
 	},
-	moduleDeps: [
+	moduleDependencies: [
 		moduleRouting,
 		moduleLogger,
 		moduleIdentity,
@@ -749,7 +767,7 @@ const observerBenefitsApi: HandlerDefinition = {
 			'redocly build-docs openapi.yaml --output target/docs/index.html && open target/docs/index.html',
 		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr observer-benefits-api.zip ./*.js.map ./*.js`,
 	},
-	moduleDeps: [
+	moduleDependencies: [
 		moduleGuardianSubscription,
 		moduleProductCatalog,
 		moduleRouting,
@@ -766,7 +784,7 @@ const contributionsOnlyCountriesApi: HandlerDefinition = {
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 	},
-	moduleDeps: [moduleRouting, moduleLogger, moduleInternationalisation],
+	moduleDependencies: [moduleRouting, moduleLogger, moduleInternationalisation],
 };
 
 const userSubscriptionsApi: HandlerDefinition = {
@@ -783,7 +801,7 @@ const userSubscriptionsApi: HandlerDefinition = {
 		...openApiScripts,
 		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr user-subscriptions-api.zip ./*.js.map ./*.js`,
 	},
-	moduleDeps: [moduleRouting],
+	moduleDependencies: [moduleRouting],
 };
 
 // MARKER new-lambda: buildcheck-const

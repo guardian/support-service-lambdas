@@ -44,7 +44,7 @@ export function buildPackageJson(
 			...pkg.dependencies,
 			// adding the module dependencies to the package.json allows pnpm to correctly filter the modules when we do ---filter <project>... with the three dots
 			...recordFromEntries(
-				pkg.moduleDeps.map((module) => [module.name, 'workspace:*']),
+				pkg.moduleDependencies.map((module) => [module.name, 'workspace:*']),
 			),
 		},
 		devDependencies: pkg.devDependencies,

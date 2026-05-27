@@ -1200,6 +1200,9 @@ importers:
       aws:
         specifier: workspace:*
         version: link:../aws
+      logger:
+        specifier: workspace:*
+        version: link:../logger
       zod:
         specifier: 'catalog:'
         version: 3.25.76

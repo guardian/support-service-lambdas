@@ -5,7 +5,7 @@ export const collectAllDeps = (
 	pkg: ModuleDefinition,
 	visited: Set<string> = new Set(),
 ): string[] =>
-	pkg.moduleDeps.flatMap((dep) => {
+	pkg.moduleDependencies.flatMap((dep) => {
 		if (visited.has(dep.name)) {
 			return [];
 		}
