@@ -160,6 +160,15 @@ importers:
 
   handlers/contributions-only-countries-api:
     dependencies:
+      internationalisation:
+        specifier: workspace:*
+        version: link:../../modules/internationalisation
+      logger:
+        specifier: workspace:*
+        version: link:../../modules/logger
+      routing:
+        specifier: workspace:*
+        version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
         version: 3.25.76
@@ -762,6 +771,9 @@ importers:
       product-catalog:
         specifier: workspace:*
         version: link:../../modules/product-catalog
+      routing:
+        specifier: workspace:*
+        version: link:../../modules/routing
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -769,6 +781,9 @@ importers:
 
   handlers/user-subscriptions-api:
     dependencies:
+      routing:
+        specifier: workspace:*
+        version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
         version: 3.25.76

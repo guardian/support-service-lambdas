@@ -5,6 +5,30 @@
       "@modules/*": [
         "../../modules/*"
       ],
+      "@modules/routing/*": [
+        "../../modules/routing/src/*"
+      ],
+      "@modules/aws/*": [
+        "../../modules/aws/src/*"
+      ],
+      "@modules/logger/*": [
+        "../../modules/logger/src/*"
+      ],
+      "@modules/zuora/*": [
+        "../../modules/zuora/src/*"
+      ],
+      "@modules/internationalisation/*": [
+        "../../modules/internationalisation/src/*"
+      ],
+      "@modules/product-catalog/*": [
+        "../../modules/product-catalog/src/*"
+      ],
+      "@modules/zuora-catalog/*": [
+        "../../modules/zuora-catalog/src/*"
+      ],
+      "@modules/promotions/*": [
+        "../../modules/promotions/src/*"
+      ],
       "@modules/user-subscriptions-api/*": [
         "../../modules/user-subscriptions-api/src/*"
       ]

@@ -20,7 +20,8 @@
   "dependencies": {
     "identity": "workspace:*",
     "product-benefits": "workspace:*",
-    "product-catalog": "workspace:*"
+    "product-catalog": "workspace:*",
+    "routing": "workspace:*"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147"

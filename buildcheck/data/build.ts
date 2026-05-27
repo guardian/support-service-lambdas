@@ -636,7 +636,12 @@ const userBenefits: HandlerDefinition = {
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 	},
-	moduleDeps: [moduleIdentity, moduleProductBenefits, moduleProductCatalog],
+	moduleDeps: [
+		moduleIdentity,
+		moduleProductBenefits,
+		moduleProductCatalog,
+		moduleRouting,
+	],
 };
 
 const writeOffUnpaidInvoices: HandlerDefinition = {
@@ -761,7 +766,7 @@ const contributionsOnlyCountriesApi: HandlerDefinition = {
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 	},
-	moduleDeps: [],
+	moduleDeps: [moduleRouting, moduleLogger, moduleInternationalisation],
 };
 
 const userSubscriptionsApi: HandlerDefinition = {
@@ -778,7 +783,7 @@ const userSubscriptionsApi: HandlerDefinition = {
 		...openApiScripts,
 		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr user-subscriptions-api.zip ./*.js.map ./*.js`,
 	},
-	moduleDeps: [],
+	moduleDeps: [moduleRouting],
 };
 
 // MARKER new-lambda: buildcheck-const

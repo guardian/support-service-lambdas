@@ -35,6 +35,9 @@
       "@modules/supporter-product-data/*": [
         "../../modules/supporter-product-data/src/*"
       ],
+      "@modules/routing/*": [
+        "../../modules/routing/src/*"
+      ],
       "@modules/user-benefits/*": [
         "../../modules/user-benefits/src/*"
       ]
