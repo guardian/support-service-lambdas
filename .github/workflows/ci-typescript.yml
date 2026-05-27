@@ -72,7 +72,7 @@ jobs:
       - run: pnpm --filter ${{ matrix.subproject }}... lint
       - run: pnpm --filter ${{ matrix.subproject }}... check-formatting
       - run: pnpm --filter ${{ matrix.subproject }}... test
-      - run: pnpm --filter ${{ matrix.subproject }} package
+      - run: pnpm --filter ${{ matrix.subproject }} packageQuick
 
       - name: Upload to Riff-Raff
         uses: guardian/actions-riff-raff@v4.3.0

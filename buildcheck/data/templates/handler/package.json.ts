@@ -12,6 +12,13 @@ export default (pkg: HandlerDefinition) => {
 			entryPoints +
 			` --sourcemap --source-root=/support-service-lambdas/handlers/${pkg.name}/target/`,
 		package: [
+			'pnpm type-check',
+			'pnpm lint',
+			'pnpm check-formatting',
+			'pnpm test',
+			'pnpm packageQuick',
+		].join(' && '),
+		packageQuick: [
 			'pnpm build',
 			'cd target',
 			`zip -qr ${pkg.name}.zip ./*.js.map ./*.js`,

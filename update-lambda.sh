@@ -43,12 +43,8 @@ fi
 echo "Updating handler $PROJECT_NAME"
 
 if [ -n "$QUICK_MODE" ]; then
-  pnpm --filter "$PROJECT_NAME" package
+  pnpm --filter "$PROJECT_NAME" packageQuick
 else
-  pnpm --filter "$PROJECT_NAME"... type-check
-  pnpm --filter "$PROJECT_NAME"... lint
-  pnpm --filter "$PROJECT_NAME"... check-formatting
-  pnpm --filter "$PROJECT_NAME"... test
   pnpm --filter "$PROJECT_NAME" package
 fi
 

@@ -9,6 +9,7 @@
     "fix-formatting": "prettier --write \"**/*.ts\"",
     "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/index.ts --sourcemap --source-root=/support-service-lambdas/handlers/multiple-account-api/target/",
     "package": "pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr multiple-account-api.zip ./*.js.map ./*.js",
+    "packageQuick": "pnpm build && cd target && zip -qr multiple-account-api.zip ./*.js.map ./*.js",
     "cdk:test": "pnpm --filter cdk test multiple-account-api",
     "cdk:test-update": "pnpm --filter cdk test-update multiple-account-api",
     "update-lambda": "../../update-lambda.sh \"multiple-account-api\"",

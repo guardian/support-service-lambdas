@@ -889,6 +889,12 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.21
+      internationalisation:
+        specifier: workspace:*
+        version: link:../internationalisation
+      product-catalog:
+        specifier: workspace:*
+        version: link:../product-catalog
 
   modules/guardian-subscription:
     dependencies:
