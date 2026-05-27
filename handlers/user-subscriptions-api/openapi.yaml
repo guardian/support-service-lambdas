@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: user-subscriptions-api API
-  description: A test API.
+  description: API for progressively loading manage-my-account subscription data.
   version: 1.0.0
 
 servers:
@@ -14,36 +14,37 @@ security:
   - apiKey: []
 
 paths:
-  /hello:
-    post:
-      operationId: hello
-      summary: Hello endpoint
-      description: A simple endpoint that returns a greeting.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/HelloRequest'
-            example:
-              name: World
+  /me:
+    get:
+      operationId: getMeSubscriptions
+      summary: Get high-level subscription information for the signed-in user
+      description: Returns summary subscription data used for the initial manage-my-account page render.
       responses:
         '200':
-          description: Successful greeting response
+          description: Subscription summary response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HelloResponse'
+                $ref: '#/components/schemas/MeResponse'
               example:
-                message: Hello World!
-        '400':
-          description: Invalid request body
+                subscriptions:
+                  - name: A-S12345678
+                    productKey: SupporterPlus
+                    productRatePlanKey: Annual
+                    availableActions:
+                      - action: upsell
+                        target:
+                          productKey: DigitalSubscription
+                          productRatePlanKey: Annual
+                      - action: cancel
+        '401':
+          description: Missing or invalid authentication details
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
-                message: Invalid request body
+                message: Unauthorized
         '500':
           description: Unexpected server error
           content:
@@ -62,25 +63,94 @@ components:
       description: API key for authenticating requests.
 
   schemas:
-    HelloRequest:
+    MeResponse:
       type: object
+      additionalProperties: false
+      required:
+        - subscriptions
+      properties:
+        subscriptions:
+          type: array
+          description: High-level subscriptions for the current user.
+          items:
+            $ref: '#/components/schemas/Subscription'
+
+    Subscription:
+      type: object
+      additionalProperties: false
       required:
         - name
+        - productKey
+        - productRatePlanKey
+        - availableActions
       properties:
         name:
           type: string
-          description: The name to greet
-          example: World
-
-    HelloResponse:
-      type: object
-      required:
-        - message
-      properties:
-        message:
+          description: Subscription name.
+          example: A-S12345678
+        productKey:
           type: string
-          description: The greeting message
-          example: Hello World!
+          description: Internal product identifier.
+          example: SupporterPlus
+        productRatePlanKey:
+          type: string
+          description: Internal product rate plan identifier.
+          example: Annual
+        availableActions:
+          type: array
+          items:
+            $ref: '#/components/schemas/AvailableAction'
+
+    AvailableAction:
+      oneOf:
+        - $ref: '#/components/schemas/UpsellAction'
+        - $ref: '#/components/schemas/CancelAction'
+      discriminator:
+        propertyName: action
+        mapping:
+          upsell: '#/components/schemas/UpsellAction'
+          cancel: '#/components/schemas/CancelAction'
+
+    UpsellAction:
+      type: object
+      additionalProperties: false
+      required:
+        - action
+        - target
+      properties:
+        action:
+          type: string
+          enum:
+            - upsell
+        target:
+          $ref: '#/components/schemas/UpsellTarget'
+
+    UpsellTarget:
+      type: object
+      additionalProperties: false
+      required:
+        - productKey
+        - productRatePlanKey
+      properties:
+        productKey:
+          type: string
+          description: Target product key.
+          example: DigitalSubscription
+        productRatePlanKey:
+          type: string
+          description: Target product rate plan key.
+          example: Annual
+
+    CancelAction:
+      type: object
+      additionalProperties: false
+      required:
+        - action
+      properties:
+        action:
+          type: string
+          enum:
+            - cancel
 
     ErrorResponse:
       type: object
