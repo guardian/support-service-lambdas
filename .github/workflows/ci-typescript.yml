@@ -73,7 +73,7 @@ jobs:
           - observer-benefits-api
           - contributions-only-countries-api
           - user-subscriptions-api
-          - supporter-product-data-ts
+          - supporter-product-data-lambdas
           # MARKER new-lambda: github-action
     runs-on: ubuntu-latest
     permissions:

@@ -15,7 +15,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "membership-dist",
-          "S3Key": "support/CODE/supporter-product-data-ts/supporter-product-data-lambdas.zip",
+          "S3Key": "support/CODE/supporter-product-data-lambdas/supporter-product-data-lambdas.zip",
         },
         "Environment": {
           "Variables": {
@@ -62,7 +62,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "membership-dist",
-          "S3Key": "support/CODE/supporter-product-data-ts/supporter-product-data-lambdas.zip",
+          "S3Key": "support/CODE/supporter-product-data-lambdas/supporter-product-data-lambdas.zip",
         },
         "Environment": {
           "Variables": {
@@ -109,7 +109,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "membership-dist",
-          "S3Key": "support/CODE/supporter-product-data-ts/supporter-product-data-lambdas.zip",
+          "S3Key": "support/CODE/supporter-product-data-lambdas/supporter-product-data-lambdas.zip",
         },
         "Environment": {
           "Variables": {
@@ -192,7 +192,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "membership-dist",
-          "S3Key": "support/CODE/supporter-product-data-ts/supporter-product-data-lambdas.zip",
+          "S3Key": "support/CODE/supporter-product-data-lambdas/supporter-product-data-lambdas.zip",
         },
         "Environment": {
           "Variables": {
@@ -415,7 +415,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
     "SupporterProductDataQueue672ACC7A": {
       "DeletionPolicy": "Delete",
       "Properties": {
-        "QueueName": "supporter-product-data-ts-CODE",
+        "QueueName": "supporter-product-data-lambdas-CODE",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -739,7 +739,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "membership-dist",
-          "S3Key": "support/PROD/supporter-product-data-ts/supporter-product-data-lambdas.zip",
+          "S3Key": "support/PROD/supporter-product-data-lambdas/supporter-product-data-lambdas.zip",
         },
         "Environment": {
           "Variables": {
@@ -786,7 +786,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "membership-dist",
-          "S3Key": "support/PROD/supporter-product-data-ts/supporter-product-data-lambdas.zip",
+          "S3Key": "support/PROD/supporter-product-data-lambdas/supporter-product-data-lambdas.zip",
         },
         "Environment": {
           "Variables": {
@@ -833,7 +833,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "membership-dist",
-          "S3Key": "support/PROD/supporter-product-data-ts/supporter-product-data-lambdas.zip",
+          "S3Key": "support/PROD/supporter-product-data-lambdas/supporter-product-data-lambdas.zip",
         },
         "Environment": {
           "Variables": {
@@ -916,7 +916,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "membership-dist",
-          "S3Key": "support/PROD/supporter-product-data-ts/supporter-product-data-lambdas.zip",
+          "S3Key": "support/PROD/supporter-product-data-lambdas/supporter-product-data-lambdas.zip",
         },
         "Environment": {
           "Variables": {
@@ -1139,7 +1139,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
     "SupporterProductDataQueue672ACC7A": {
       "DeletionPolicy": "Delete",
       "Properties": {
-        "QueueName": "supporter-product-data-ts-PROD",
+        "QueueName": "supporter-product-data-lambdas-PROD",
         "Tags": [
           {
             "Key": "gu:cdk:version",

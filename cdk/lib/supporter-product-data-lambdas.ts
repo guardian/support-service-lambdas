@@ -44,7 +44,7 @@ export class SupporterProductDataLambdas extends GuStack {
 
 		const lambdaArtifact = Code.fromBucket(
 			artifactBucket,
-			`support/${this.stage}/supporter-product-data-ts/supporter-product-data-lambdas.zip`,
+			`support/${this.stage}/supporter-product-data-lambdas/supporter-product-data-lambdas.zip`,
 		);
 
 		const lambdaRole = new Role(this, 'SupporterProductDataLambdaRole', {
@@ -130,7 +130,7 @@ export class SupporterProductDataLambdas extends GuStack {
 		});
 
 		const queue = new Queue(this, 'SupporterProductDataQueue', {
-			queueName: `supporter-product-data-ts-${this.stage}`,
+			queueName: `supporter-product-data-lambdas-${this.stage}`,
 			visibilityTimeout: Duration.seconds(600),
 		});
 

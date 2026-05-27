@@ -34,7 +34,7 @@ const buildDeps = (): AddToQueueDeps => {
 			parseCsvStreamWithHeader(s3Service.streamObjectLines(stage, filename)),
 		sendBatch: async (batch) => {
 			await sendBatchMessagesToQueue({
-				queueName: `supporter-product-data-ts-${stage}`,
+				queueName: `supporter-product-data-lambdas-${stage}`,
 				messages: batch.map(([item, index]) => ({
 					id: index.toString(),
 					body: JSON.stringify(item),
