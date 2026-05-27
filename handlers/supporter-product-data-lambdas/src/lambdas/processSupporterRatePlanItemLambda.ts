@@ -1,4 +1,5 @@
 import { putMetric } from '@modules/aws/cloudwatch';
+import { Lazy } from '@modules/lazy';
 import { logger } from '@modules/logger/logger';
 import { type Stage, stageFromEnvironment } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
@@ -72,6 +73,11 @@ const buildDependencies = async (): Promise<ProcessItemDependencies> => {
 			),
 	};
 };
+
+const lazyDependencies = new Lazy<ProcessItemDependencies>(
+	buildDependencies,
+	'Building dependencies',
+);
 
 const addContributionAmountIfNeeded = async (
 	item: SupporterRatePlanItem,
@@ -182,4 +188,4 @@ export const processEvent = async (
 };
 
 export const handler: Handler<SQSEvent, void> = async (event) =>
-	processEvent(event, await buildDependencies());
+	processEvent(event, await lazyDependencies.get());

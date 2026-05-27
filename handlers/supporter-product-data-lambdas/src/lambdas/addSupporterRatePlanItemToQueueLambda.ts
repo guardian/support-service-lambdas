@@ -1,5 +1,6 @@
 import { putMetric } from '@modules/aws/cloudwatch';
 import { sendBatchMessagesToQueue } from '@modules/aws/sqs';
+import { Lazy } from '@modules/lazy';
 import { logger } from '@modules/logger/logger';
 import { stageFromEnvironment } from '@modules/stage';
 import type { Context, Handler } from 'aws-lambda';
@@ -60,6 +61,11 @@ const buildDependencies = (): AddToQueueDependencies => {
 			configService.putLastSuccessfulQueryTime(time),
 	};
 };
+
+const lazyDependencies = new Lazy<AddToQueueDependencies>(
+	() => Promise.resolve(buildDependencies()),
+	'Building dependencies',
+);
 
 export const addToQueue = async (
 	state: AddSupporterRatePlanItemToQueueState,
@@ -193,4 +199,4 @@ export const handler: Handler<
 	AddSupporterRatePlanItemToQueueState,
 	AddSupporterRatePlanItemToQueueState
 > = async (state, context) =>
-	addToQueue(state, fromContext(context), buildDependencies());
+	addToQueue(state, fromContext(context), await lazyDependencies.get());

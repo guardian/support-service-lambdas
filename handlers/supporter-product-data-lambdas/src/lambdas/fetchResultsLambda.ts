@@ -1,3 +1,4 @@
+import { Lazy } from '@modules/lazy';
 import { logger } from '@modules/logger/logger';
 import { stageFromEnvironment } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
@@ -47,6 +48,11 @@ const buildDependencies = async (): Promise<FetchResultsDependencies> => {
 			configService.putLastSuccessfulQueryTime(time),
 	};
 };
+
+const lazyDependencies = new Lazy<FetchResultsDependencies>(
+	buildDependencies,
+	'Building dependencies',
+);
 
 export const fetchResults = async (
 	event: FetchResultsState,
@@ -143,4 +149,4 @@ export const fetchResults = async (
 export const handler: Handler<
 	FetchResultsState,
 	AddSupporterRatePlanItemToQueueState
-> = async (event) => fetchResults(event, await buildDependencies());
+> = async (event) => fetchResults(event, await lazyDependencies.get());
