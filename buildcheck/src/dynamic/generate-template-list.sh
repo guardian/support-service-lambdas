@@ -2,6 +2,10 @@
 # Generates _generated_tsIndex.ts inside each subdir and _generated_dirIndex.ts at the top level.
 script_name=$(basename "$0")
 
+script_dir=$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")
+data_dir=$(readlink -f "$script_dir/../../data")
+repo_root=$(readlink -f "$script_dir/../../..")
+
 file_header() {
     echo "/*"
     echo " * This file is gitignored and edits will be overwritten."
@@ -39,11 +43,11 @@ write_ts_index() {
         import_name=$(to_safe_ts_identifier "$templateRel")
         kind=$(get_kind "$templateRel")
         imports+=("import $import_name from './$import_path';")
-        entries+=("  {")
-        entries+=("    relativeName: '$templateRel',")
-        entries+=("    value: $import_name,")
-        entries+=("    kind: '$kind',")
-        entries+=("  },")
+        entries+=("    {")
+        entries+=("      relativeName: '$templateRel',")
+        entries+=("      value: $import_name,")
+        entries+=("      kind: '$kind',")
+        entries+=("    },")
     done < <(find "$subdir/templates" -name "*.ts" -type f -print0 2>/dev/null | sort -fz)
 
     {
@@ -53,9 +57,12 @@ write_ts_index() {
         echo ""
         file_header
         echo ""
-        echo "export default ["
+        echo "export default {"
+        echo "  templates: ["
         for line in "${entries[@]}"; do echo "$line"; done
-        echo "] satisfies Array<TemplateEntry<TemplateParams>>;"
+        echo "  ] satisfies Array<TemplateEntry<TemplateParams>>,"
+        echo "  templateDir: '${subdir#$repo_root/}/templates',"
+        echo "}"
     } > "$out"
 
     echo "$script_name: wrote $out"
@@ -102,9 +109,6 @@ write_dir_index() {
 
 
 echo "$script_name: START generating template lists..."
-
-script_dir=$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")
-data_dir=$(readlink -f "$script_dir/../../data")
 
 # generate TS file indexes for both dirs
 for parent_dir in "$data_dir/seeds" "$data_dir/managed"; do

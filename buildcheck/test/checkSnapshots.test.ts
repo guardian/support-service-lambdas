@@ -50,7 +50,7 @@ describe('file on disk (+) contains the expected content (-)', () => {
 	const repoRoot = path.resolve(__dirname, '../..');
 	console.log('repoRoot', repoRoot);
 
-	const allFiles = generate(repoRoot);
+	const allFiles = generate();
 
 	const rootLevelFiles = allFiles.filter(
 		(generatedFile) =>

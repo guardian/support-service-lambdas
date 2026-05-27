@@ -1,11 +1,11 @@
 import { z } from 'zod';
-import { toTargetPath } from '../../../src/dynamic/templater';
-import templates from '../../managed/handler/_generated_tsIndex';
+import handlerIndex from '../../managed/handler/_generated_tsIndex';
 import {
 	booleanFlag,
 	kebabCaseSchema,
 	withPrompt,
 } from '../../snippets/string';
+import { toTargetPath } from '../../types';
 import type { SeedIndex } from '../types';
 
 const argsSchema = z.object({
@@ -28,7 +28,7 @@ export type TemplateParams = z.infer<typeof argsSchema>;
 const postProcessCommands = (opts: TemplateParams): string[] => {
 	return [
 		'pnpm --filter buildcheck snapshot:update',
-		`git add ${templates.map((t) => `"${toTargetPath(`handlers/${opts.lambdaName}/${t.relativeName}`)}"`).join(' ')}`,
+		`git add ${handlerIndex.templates.map((t) => `"${toTargetPath(`handlers/${opts.lambdaName}/${t.relativeName}`)}"`).join(' ')}`,
 		`git add "handlers/${opts.lambdaName}/BUILDCHECK.md"`,
 		'pnpm install',
 		'pnpm --filter cdk lint --fix',

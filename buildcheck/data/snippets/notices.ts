@@ -11,7 +11,7 @@ export function relativePath(filename: string) {
 
 export const notice = (filename: string) =>
 	'MANAGED FILE: to push changes see buildcheck/README.md - template: ' +
-	relativePath(filename);
+	filename;
 
 type ContentPostProcessor = {
 	prefix?: (templatePath: string) => string;

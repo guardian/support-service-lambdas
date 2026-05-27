@@ -9,7 +9,7 @@
     "fix-formatting": "prettier --write \"**/*.ts\"",
     "build": "tsc --noEmit"
   },
-  "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/managed/module/templates/package.json.ts",
+  "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: /Users/john_duffell/code/duplicates/support-service-lambdas/buildcheck/data/managed/module/templates/package.json.ts",
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
     "zod": "catalog:",

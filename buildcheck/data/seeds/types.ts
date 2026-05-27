@@ -1,5 +1,5 @@
 import type { ZodObject, ZodRawShape, ZodTypeAny } from 'zod';
-import type { AnyTemplate } from '../types';
+import type { AnyTemplate, TemplateIndex } from '../types';
 
 export type { AnyTemplate as TemplateEntry };
 
@@ -27,7 +27,5 @@ export type SeedIndex<T> = {
  */
 export type DirConfig<T> = {
 	index: SeedIndex<T>;
-	templates: Array<AnyTemplate<T>>;
+	templates: TemplateIndex<AnyTemplate<T>>;
 };
-
-export const seedsDirName = __dirname;

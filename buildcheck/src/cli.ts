@@ -21,7 +21,7 @@ void (async () => {
 					readLines(repoRoot, warningFileName),
 				);
 				deleteRepoFiles(repoRoot, previouslyGeneratedFiles);
-				writeFiles(repoRoot, generate(repoRoot));
+				writeFiles(repoRoot, generate());
 				break;
 			}
 			case 'clean': {
@@ -42,7 +42,7 @@ void (async () => {
 					recordFromFlags(otherArgs.seedArgv),
 				);
 
-				runSeed(seedName, repoRoot, entry, opts);
+				runSeed(repoRoot, entry, opts);
 
 				break;
 			}

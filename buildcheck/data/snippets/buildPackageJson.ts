@@ -1,6 +1,6 @@
 import type { ModuleDefinition } from '../build';
 import { disallowedLibs } from '../dependencies';
-import { notice } from './notices';
+import { notice, relativePath } from './notices';
 
 function assertNoDisallowedLibs(
 	name: string,
@@ -37,7 +37,7 @@ export function buildPackageJson(
 			...extraScripts,
 			...pkg.extraScripts,
 		},
-		NOTICE1: notice(filename),
+		NOTICE1: notice(relativePath(filename)),
 		NOTICE2: 'all dependencies are defined in buildcheck/data/build.ts',
 		dependencies: pkg.dependencies,
 		devDependencies: pkg.devDependencies,

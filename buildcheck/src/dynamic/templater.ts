@@ -6,6 +6,7 @@ import type {
 	InsertChunks,
 	InsertionTemplate,
 	TemplateContent,
+	TemplateIndex,
 } from '../../data/types';
 
 export interface GeneratedFile {
@@ -30,35 +31,35 @@ export interface SeedInsertionResult {
 /**
  * Evaluates all templates against `opts`, splitting results into new files and
  * injections into existing files. Null-returning templates are dropped.
- * Used by both the managed-file pipeline and the seed pipeline.
  */
 export function applyTemplates<Definition>(
 	opts: Definition,
-	groupDir: string,
-	templates: Array<AnyTemplate<Definition>>,
-	insertWarningComment: boolean = false,
+	templates: TemplateIndex<AnyTemplate<Definition>>,
 ): { files: GeneratedFile[]; insertions: SeedInsertionResult[] } {
-	const fileTemplates = templates.filter((r) => r.kind === 'file');
-	const insertionTemplates = templates.filter((r) => r.kind === 'insertion');
+	const fileTemplates = templates.templates.filter((r) => r.kind === 'file');
+	const insertionTemplates = templates.templates.filter(
+		(r) => r.kind === 'insertion',
+	);
 
 	return {
 		files: applyFileTemplates(
 			opts,
-			groupDir,
-			fileTemplates,
-			insertWarningComment,
+			{ templateDir: templates.templateDir, templates: fileTemplates },
+			false,
 		),
 		insertions: applyInsertionTemplates(opts, insertionTemplates),
 	};
 }
 
+/**
+ * as applyTemplates above but it only operates on file templates, not insertions
+ */
 export function applyFileTemplates<Definition>(
 	opts: Definition,
-	groupDir: string,
-	fileTemplates: Array<FileTemplate<Definition>>,
+	index: TemplateIndex<FileTemplate<Definition>>,
 	insertWarningComment: boolean,
-) {
-	return fileTemplates.flatMap((template) => {
+): GeneratedFile[] {
+	return index.templates.flatMap((template) => {
 		const rawContent =
 			typeof template.value === 'function'
 				? template.value(opts)
@@ -68,8 +69,11 @@ export function applyFileTemplates<Definition>(
 			return [];
 		}
 
-		const templateFilename = path.join(groupDir, template.relativeName);
-		const targetPath = toTargetPath(template.relativeName);
+		const templateFilename = path.join(
+			index.templateDir,
+			template.relativeName,
+		);
+		const targetPath = template.relativeName.slice(0, -'.ts'.length);
 		return [
 			{
 				kind: template.kind,
@@ -97,21 +101,10 @@ function applyInsertionTemplates<Definition>(
 				: template.value;
 		return {
 			kind: template.kind,
-			targetPath: toTargetPath(template.relativeName),
+			targetPath: template.relativeName.slice(0, -'.inserts.ts'.length),
 			chunks,
 		} satisfies SeedInsertionResult;
 	});
-}
-
-/** Derive the target path in the repo from a template filename (relative to templates/).
- *  e.g. `foo.json.ts`       -> `foo.json`
- *       `foo.ts.inserts.ts` -> `foo.ts`  (insertion: strip .inserts.ts)
- */
-export function toTargetPath(relPath: string): string {
-	if (relPath.endsWith('.inserts.ts')) {
-		return relPath.slice(0, -'.inserts.ts'.length);
-	}
-	return relPath.endsWith('.ts') ? relPath.slice(0, -3) : relPath;
 }
 
 function serializeContent(

@@ -8,8 +8,9 @@ export function generateWarningFile(
 	pathToRoot: string,
 ): GeneratedFile {
 	const fileList = [...generatedFileNames, warningFileName];
+	const templateFilename = relativePath(__filename);
 
-	const content = `${notice(__filename)}
+	const content = `${notice(templateFilename)}
 # Buildcheck managed file list
 	
 The files listed below are managed by buildcheck and their content is checked by the build.
@@ -28,7 +29,7 @@ ${fileList.map((name) => '- [' + name + '](' + name + ')').join('\n')}
 		kind: 'file',
 		targetPath: warningFileName,
 		content,
-		templateFilename: relativePath(__filename),
+		templateFilename,
 	} satisfies GeneratedFile;
 }
 
