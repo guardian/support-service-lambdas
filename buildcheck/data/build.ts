@@ -761,6 +761,7 @@ const contributionsOnlyCountriesApi: HandlerDefinition = {
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 	},
+	moduleDeps: [],
 };
 
 const userSubscriptionsApi: HandlerDefinition = {
@@ -777,6 +778,7 @@ const userSubscriptionsApi: HandlerDefinition = {
 		...openApiScripts,
 		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr user-subscriptions-api.zip ./*.js.map ./*.js`,
 	},
+	moduleDeps: [],
 };
 
 // MARKER new-lambda: buildcheck-const

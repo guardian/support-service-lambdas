@@ -1,3 +1,13 @@
 {
-  "extends": "../../tsconfig.json"
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@modules/*": [
+        "../../modules/*"
+      ],
+      "@modules/contributions-only-countries-api/*": [
+        "../../modules/contributions-only-countries-api/src/*"
+      ]
+    }
+  }
 }

@@ -8,7 +8,7 @@
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
     "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/index.ts --sourcemap --source-root=/support-service-lambdas/handlers/contributions-only-countries-api/target/",
-    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr contributions-only-countries-api.zip ./*.js.map ./*.js",
+    "package": "pnpm build && cd target && zip -qr contributions-only-countries-api.zip ./*.js.map ./*.js",
     "cdk:test": "pnpm --filter cdk test contributions-only-countries-api",
     "cdk:test-update": "pnpm --filter cdk test-update contributions-only-countries-api",
     "update-lambda": "../../update-lambda.sh \"contributions-only-countries-api\"",

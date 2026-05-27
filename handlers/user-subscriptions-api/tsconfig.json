@@ -1,3 +1,13 @@
 {
-  "extends": "../../tsconfig.json"
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@modules/*": [
+        "../../modules/*"
+      ],
+      "@modules/user-subscriptions-api/*": [
+        "../../modules/user-subscriptions-api/src/*"
+      ]
+    }
+  }
 }

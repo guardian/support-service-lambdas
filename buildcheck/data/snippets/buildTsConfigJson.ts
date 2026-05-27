@@ -21,6 +21,7 @@ export function buildTsConfigJson(pkg: ModuleDefinition) {
 		compilerOptions: {
 			paths: {
 				'@modules/*': ['../../modules/*'], // special case, everyone gets this for free
+				// adding the module list here instead of at the top level means we can only use declared dependencies
 				...recordFromEntries(
 					transitiveDeps.map(
 						(moduleName) =>
