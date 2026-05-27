@@ -176,7 +176,7 @@ const moduleEmail: ModuleDefinition = {
 		...dep['@aws-sdk/client-sqs'],
 		...dep['dayjs'],
 	},
-	moduleDeps: [moduleAws],
+	moduleDeps: [moduleAws, moduleInternationalisation, moduleProductCatalog],
 };
 
 const moduleSecretsManager: ModuleDefinition = {

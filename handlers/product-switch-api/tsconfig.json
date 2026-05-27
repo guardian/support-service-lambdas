@@ -14,8 +14,8 @@
       "@modules/email/*": [
         "../../modules/email/src/*"
       ],
-      "@modules/guardian-subscription/*": [
-        "../../modules/guardian-subscription/src/*"
+      "@modules/internationalisation/*": [
+        "../../modules/internationalisation/src/*"
       ],
       "@modules/product-catalog/*": [
         "../../modules/product-catalog/src/*"
@@ -23,11 +23,11 @@
       "@modules/zuora-catalog/*": [
         "../../modules/zuora-catalog/src/*"
       ],
+      "@modules/guardian-subscription/*": [
+        "../../modules/guardian-subscription/src/*"
+      ],
       "@modules/zuora/*": [
         "../../modules/zuora/src/*"
-      ],
-      "@modules/internationalisation/*": [
-        "../../modules/internationalisation/src/*"
       ],
       "@modules/promotions/*": [
         "../../modules/promotions/src/*"

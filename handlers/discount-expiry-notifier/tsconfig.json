@@ -17,9 +17,6 @@
       "@modules/email/*": [
         "../../modules/email/src/*"
       ],
-      "@modules/zuora/*": [
-        "../../modules/zuora/src/*"
-      ],
       "@modules/internationalisation/*": [
         "../../modules/internationalisation/src/*"
       ],
@@ -28,6 +25,9 @@
       ],
       "@modules/zuora-catalog/*": [
         "../../modules/zuora-catalog/src/*"
+      ],
+      "@modules/zuora/*": [
+        "../../modules/zuora/src/*"
       ],
       "@modules/promotions/*": [
         "../../modules/promotions/src/*"
