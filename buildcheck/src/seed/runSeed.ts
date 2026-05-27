@@ -2,7 +2,7 @@ import { execSync } from 'child_process';
 import type { DirConfig } from '../../data/seeds/types';
 import type { GeneratedFile } from '../dynamic/templater';
 import { applyTemplates } from '../dynamic/templater';
-import { assertFilesExist, writeFiles } from '../util/file-writer';
+import { assertFilesDoNotExist, writeFiles } from '../util/file-writer';
 import { assertMarkersPresent, insertIntoFiles } from '../util/fileInserter';
 
 export function runSeed<P>(repoRoot: string, entry: DirConfig<P>, opts: P) {
@@ -14,7 +14,7 @@ export function runSeed<P>(repoRoot: string, entry: DirConfig<P>, opts: P) {
 	}));
 
 	console.log('checking preconditions...');
-	assertFilesExist(repoRoot, resolvedFiles);
+	assertFilesDoNotExist(repoRoot, resolvedFiles);
 	assertMarkersPresent(repoRoot, insertions);
 
 	console.log('writing seed files...');

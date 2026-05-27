@@ -1,10 +1,10 @@
-import type { TemplateContent } from '../../../../../types';
+import type { MaybeTemplateContent } from '../../../../../types';
 import type { TemplateParams } from '../../../index';
 
 export default ({
 	lambdaName,
 	includeOpenApiDoc,
-}: TemplateParams): TemplateContent =>
+}: TemplateParams): MaybeTemplateContent =>
 	`# ${lambdaName} API
 
 ## URLs

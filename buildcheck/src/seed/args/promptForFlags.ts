@@ -2,9 +2,10 @@ import * as readline from 'readline';
 import type { ZodObject, ZodRawShape, ZodTypeAny } from 'zod';
 
 /**
- * Splits a description like "Enter lambda name (kebab-case-string)" into
+ * Seeds schema descriptions will be something like "Enter lambda name (kebab-case-string)"
+ * This function recovers the original prompt and hint, as well as detecting boolean fields and their default value.
+ *
  * { prompt: "Enter lambda name", hint: "kebab-case-string" }.
- * If no parenthetical suffix, hint equals the full description.
  */
 export function parseDescription(
 	schema: ZodTypeAny,
@@ -15,26 +16,22 @@ export function parseDescription(
 	isBooleanField: boolean;
 	defaultValue: string | undefined;
 } {
-	const description = schema.description ?? key;
-	const match = /^(.*)\(([^)]+)\)\s*$/.exec(description);
-	if (match !== null) {
-		const hint = match[2];
-		const isBooleanField = hint.toLowerCase() === 'y/n';
-		const defaultValue = isBooleanField
-			? hint.includes('Y')
-				? 'Y'
-				: hint.includes('N')
-					? 'N'
-					: undefined
-			: undefined;
-		return { prompt: match[1].trimEnd(), hint, isBooleanField, defaultValue };
+	const match = /^(.*)\(([^)]+)\)\s*$/.exec(schema.description ?? '');
+	if (match === null) {
+		throw new Error(
+			`schema field ${key} description ${schema.description} didn't match the pattern "prompt (hint)"`,
+		);
 	}
-	return {
-		prompt: description,
-		hint: description,
-		isBooleanField: false,
-		defaultValue: undefined,
-	};
+	const hint = match[2];
+	const isBooleanField = hint.toLowerCase() === 'y/n';
+	const defaultValue = isBooleanField
+		? hint.includes('Y')
+			? 'Y'
+			: hint.includes('N')
+				? 'N'
+				: undefined
+		: undefined;
+	return { prompt: match[1].trimEnd(), hint, isBooleanField, defaultValue };
 }
 
 /**
@@ -70,7 +67,7 @@ async function promptField(
 }
 
 /**
- * Interactively prompts for all missing or invalid fields.
+ * Interactively prompts for all fields.
  * Returns the fully parsed result via argsSchema.
  */
 export async function promptForFlags<O>(

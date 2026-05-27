@@ -26,7 +26,6 @@ ${fileList.map((name) => '- [' + name + '](' + name + ')').join('\n')}
 `;
 
 	return {
-		kind: 'file',
 		targetPath: warningFileName,
 		content,
 		templateFilename,

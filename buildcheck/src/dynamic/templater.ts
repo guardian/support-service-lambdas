@@ -10,7 +10,6 @@ import type {
 } from '../../data/types';
 
 export interface GeneratedFile {
-	readonly kind: 'file';
 	/**
 	 * relative path to the repo root
 	 */
@@ -22,8 +21,10 @@ export interface GeneratedFile {
 	templateFilename: string;
 }
 
-export interface SeedInsertionResult {
-	readonly kind: 'insertion';
+export interface ChunkInsertion {
+	/**
+	 * relative path to the repo root
+	 */
 	targetPath: string;
 	chunks: InsertChunks;
 }
@@ -35,7 +36,7 @@ export interface SeedInsertionResult {
 export function applyTemplates<Definition>(
 	opts: Definition,
 	templates: TemplateIndex<AnyTemplate<Definition>>,
-): { files: GeneratedFile[]; insertions: SeedInsertionResult[] } {
+): { files: GeneratedFile[]; insertions: ChunkInsertion[] } {
 	const fileTemplates = templates.templates.filter((r) => r.kind === 'file');
 	const insertionTemplates = templates.templates.filter(
 		(r) => r.kind === 'insertion',
@@ -76,7 +77,6 @@ export function applyFileTemplates<Definition>(
 		const targetPath = template.relativeName.slice(0, -'.ts'.length);
 		return [
 			{
-				kind: template.kind,
 				targetPath,
 				content: serializeContent(
 					rawContent,
@@ -100,10 +100,9 @@ function applyInsertionTemplates<Definition>(
 				? template.value(opts)
 				: template.value;
 		return {
-			kind: template.kind,
 			targetPath: template.relativeName.slice(0, -'.inserts.ts'.length),
 			chunks,
-		} satisfies SeedInsertionResult;
+		} satisfies ChunkInsertion;
 	});
 }
 
@@ -113,11 +112,6 @@ function serializeContent(
 	templatePath: string,
 	insertWarningComment: boolean,
 ): string {
-	if (content === null) {
-		throw new Error(
-			`serializeContent called with null content for ${templatePath} — null templates should have been filtered out`,
-		);
-	}
 	const extension = path.extname(relativePath);
 	const { prefix, write } = contentPostProcessor[extension];
 	const actualPrefix =

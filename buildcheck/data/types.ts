@@ -1,3 +1,4 @@
+export type TemplateContent = string | Record<string, unknown>;
 /**
  * The union of all values a file template function may return.
  *
@@ -7,7 +8,7 @@
  *
  * Note: insertion templates (files ending in `.inserts.ts`) return {@link InsertChunks}
  */
-export type TemplateContent = string | Record<string, unknown> | null;
+export type MaybeTemplateContent = TemplateContent | null;
 
 /**
  * One or more injections to apply to an existing file.
@@ -27,7 +28,7 @@ export type InsertChunks = Array<{
 export type FileTemplate<T> = {
 	kind: 'file';
 	relativeName: string;
-	value: TemplateContent | ((data: T) => TemplateContent);
+	value: MaybeTemplateContent | ((data: T) => MaybeTemplateContent);
 };
 
 /**

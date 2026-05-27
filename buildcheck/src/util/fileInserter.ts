@@ -1,24 +1,21 @@
 import * as fs from 'fs';
 import path from 'path';
-import type { SeedInsertionResult } from '../dynamic/templater';
+import type { ChunkInsertion } from '../dynamic/templater';
 import { safeJoin } from './safeJoin';
 
 /**
- * Applies all chunks from some {@link SeedInsertionResult} to existing files on disk.
+ * Applies all chunks from some {@link ChunkInsertion} to existing files on disk.
  * Each chunk is inserted as a new line immediately before the line containing its marker string.
  * Throws if any marker is not found in the file.
  */
 export function insertIntoFiles(
 	repoRoot: string,
-	insertions: SeedInsertionResult[],
+	insertions: ChunkInsertion[],
 ): void {
 	insertions.forEach((insertion) => insertIntoFile(repoRoot, insertion));
 }
 
-function insertIntoFile(
-	repoRoot: string,
-	insertion: SeedInsertionResult,
-): void {
+function insertIntoFile(repoRoot: string, insertion: ChunkInsertion): void {
 	const fullPath = safeJoin(repoRoot, insertion.targetPath);
 	let content = fs.readFileSync(fullPath, 'utf8');
 
@@ -40,9 +37,14 @@ function insertIntoFile(
 	fs.writeFileSync(fullPath, content);
 }
 
+/**
+ * makes sure that the files for inserts contain the right insertion comments.
+ *
+ * This ensures that the seed insertions will succeed before we start.
+ */
 export function assertMarkersPresent(
 	repoRoot: string,
-	insertions: SeedInsertionResult[],
+	insertions: ChunkInsertion[],
 ) {
 	for (const insertion of insertions) {
 		const fullPath = path.join(repoRoot, insertion.targetPath);

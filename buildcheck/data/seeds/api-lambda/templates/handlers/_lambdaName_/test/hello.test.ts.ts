@@ -1,4 +1,4 @@
-import type { TemplateContent } from '../../../../../../types';
+import type { MaybeTemplateContent } from '../../../../../../types';
 
 export default `/**
  * This is a unit test, it can be run by the \`pnpm test\` command, and will be run by the CI/CD pipeline
@@ -7,4 +7,4 @@ export default `/**
 test('my app', () => {
 	expect(1 + 1).toEqual(2);
 });
-` satisfies TemplateContent;
+` satisfies MaybeTemplateContent;

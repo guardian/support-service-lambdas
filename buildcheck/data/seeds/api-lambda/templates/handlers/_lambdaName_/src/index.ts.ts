@@ -1,4 +1,4 @@
-import type { TemplateContent } from '../../../../../../types';
+import type { MaybeTemplateContent } from '../../../../../../types';
 
 export default `import { Router } from '@modules/routing/router';
 import { withBodyParser } from '@modules/routing/withParsers';
@@ -14,4 +14,4 @@ export const handler: Handler = Router([
 		),
 	},
 ]);
-` satisfies TemplateContent;
+` satisfies MaybeTemplateContent;

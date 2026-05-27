@@ -1,8 +1,8 @@
 import { toPascalCase, toSentenceCase } from '../../../../../snippets/string';
-import type { TemplateContent } from '../../../../../types';
+import type { MaybeTemplateContent } from '../../../../../types';
 import type { TemplateParams } from '../../../index';
 
-export default ({ lambdaName }: TemplateParams): TemplateContent => {
+export default ({ lambdaName }: TemplateParams): MaybeTemplateContent => {
 	const className = toPascalCase(lambdaName);
 	return `import { App } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';

@@ -1,7 +1,9 @@
-import type { TemplateContent } from '../../../../../types';
+import type { MaybeTemplateContent } from '../../../../../types';
 import type { TemplateParams } from '../../../index';
 
-export default ({ includeOpenApiDoc }: TemplateParams): TemplateContent => {
+export default ({
+	includeOpenApiDoc,
+}: TemplateParams): MaybeTemplateContent => {
 	if (!includeOpenApiDoc) {
 		return null;
 	}

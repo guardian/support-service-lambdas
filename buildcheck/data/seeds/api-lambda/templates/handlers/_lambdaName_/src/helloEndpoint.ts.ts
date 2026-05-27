@@ -1,4 +1,4 @@
-import type { TemplateContent } from '../../../../../../types';
+import type { MaybeTemplateContent } from '../../../../../../types';
 
 export default `import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
 import type { APIGatewayProxyResult } from 'aws-lambda';
@@ -24,4 +24,4 @@ export function helloRequestEndpoint(
 		return Promise.resolve(buildErrorResponse(e));
 	}
 }
-` satisfies TemplateContent;
+` satisfies MaybeTemplateContent;

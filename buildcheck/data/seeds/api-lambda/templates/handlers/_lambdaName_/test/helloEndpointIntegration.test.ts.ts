@@ -1,4 +1,4 @@
-import type { TemplateContent } from '../../../../../../types';
+import type { MaybeTemplateContent } from '../../../../../../types';
 
 export default `/**
  * This is an integration test, the \`@group integration\` tag ensures that it will only be run by the \`pnpm it-test\`
@@ -19,4 +19,4 @@ test('helloEndpoint', async () => {
 		}),
 	});
 });
-` satisfies TemplateContent;
+` satisfies MaybeTemplateContent;
