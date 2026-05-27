@@ -4,6 +4,7 @@ import { isoCountrySchema } from '@modules/internationalisation/schemas';
 import { logger } from '@modules/logger/logger';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { getPromotion } from '@modules/promotions/v2/getPromotion';
+import { ok } from '@modules/routing/apiGatewayResponses';
 import type { Stage } from '@modules/stage';
 import { getDeliveryFields } from '@modules/zuora/createSubscription/createSubscription';
 import { createSubscriptionWithExistingPaymentMethod } from '@modules/zuora/createSubscription/createSubscriptionWithExistingPaymentMethod';
@@ -70,8 +71,5 @@ export async function createNewSubscriptionEndpoint(
 		);
 
 	logger.log('Subscription created successfully', result);
-	return {
-		statusCode: 200,
-		body: JSON.stringify(result),
-	};
+	return ok(result);
 }

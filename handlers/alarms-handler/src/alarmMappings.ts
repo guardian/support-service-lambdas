@@ -1,8 +1,8 @@
 import { objectEntries } from '@modules/objectFunctions';
 
 export type Team =
-	| 'VALUE'
-	| 'GROWTH'
+	| 'LIFECYCLE'
+	| 'MARTECH'
 	| 'PORTFOLIO'
 	| 'PLATFORM'
 	| 'SRE'
@@ -10,7 +10,7 @@ export type Team =
 	| 'PUZZLES';
 
 const teamToAppMappings: Record<Team, string[]> = {
-	GROWTH: [
+	MARTECH: [
 		'acquisition-events-api',
 		'admin-console',
 		'apps-metering',
@@ -26,9 +26,10 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'support-reminders',
 		'ticker-calculator',
 		'bandit',
-	],
-	VALUE: [
 		'apps-metering-events',
+		'publishing-alarm-stack-cdk',
+	],
+	LIFECYCLE: [
 		'cancellation-sf-cases-api',
 		'comms-sqs', // membership-workflow queues
 		'contact-us-api',
@@ -41,7 +42,6 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'mobile-purchases-soft-opt-in-acquisitions',
 		'mobile-purchases-soft-opt-in-acquisitions-dlq-processor',
 		'payment-failure-comms',
-		'publishing-alarm-stack-cdk',
 		'salesforce-case-raiser',
 		'product-switch-api',
 		'update-supporter-plus-amount',
@@ -49,6 +49,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'workflow',
 		'consent-autolapse',
 		'mparticle-api',
+		'user-subscriptions-api',
 	],
 	SRE: ['alarms-handler', 'gchat-test-app'],
 	PORTFOLIO: [

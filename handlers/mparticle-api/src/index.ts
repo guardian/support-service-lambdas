@@ -1,4 +1,5 @@
 import { logger } from '@modules/logger/logger';
+import { internalServerError } from '@modules/routing/apiGatewayResponses';
 import type {
 	APIGatewayProxyEvent,
 	APIGatewayProxyResult,
@@ -34,10 +35,7 @@ export const handlerHttp: Handler<
 		return httpRouter(mParticleDataSubjectClient, batonS3Writer)(event);
 	} catch (error) {
 		console.error('HTTP handler error:', error);
-		return {
-			statusCode: 500,
-			body: JSON.stringify({ error: 'Internal server error' }),
-		};
+		return internalServerError();
 	}
 };
 

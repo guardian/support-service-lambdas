@@ -40,8 +40,8 @@ const services: Services = {
 			DiagnosticLinks: 'lambda:product-switch-api-CODE',
 		}),
 	webhookUrls: {
-		VALUE: testWebhook,
-		GROWTH: testWebhook,
+		LIFECYCLE: testWebhook,
+		MARTECH: testWebhook,
 		SRE: testWebhook,
 		PORTFOLIO: testWebhook,
 		PLATFORM: testWebhook,

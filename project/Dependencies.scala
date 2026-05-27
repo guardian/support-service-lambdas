@@ -41,8 +41,8 @@ object Dependencies {
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.3.0"
 
   // GCP
-  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.65.0"
-  val grpcNettyOverride = "io.grpc" % "grpc-netty-shaded" % "1.80.0"
+  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.66.0"
+  val grpcNettyOverride = "io.grpc" % "grpc-netty-shaded" % "1.81.0"
 
   // Cats
   val catsCore = "org.typelevel" %% "cats-core" % catsVersion
@@ -82,7 +82,7 @@ object Dependencies {
 
   // Other
   val zio = "dev.zio" %% "zio" % "1.0.18"
-  val zio2Version = "2.1.25"
+  val zio2Version = "2.1.26"
   val zio2 = "dev.zio" %% "zio" % zio2Version
   val tapirVersion =
     "1.11.33" // stick with 1.11.33 for now as later versions indirectly pull in netty-codec-base which duplicates netty-codec content
@@ -91,8 +91,8 @@ object Dependencies {
   val stripe = "com.stripe" % "stripe-java" % "29.1.0"
   val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.2.0"
   val commonsIO = "commons-io" % "commons-io" % "2.22.0"
-  val jodaTime = "joda-time" % "joda-time" % "2.14.1"
-  val typesafeConfig = "com.typesafe" % "config" % "1.4.6"
+  val jodaTime = "joda-time" % "joda-time" % "2.14.2"
+  val typesafeConfig = "com.typesafe" % "config" % "1.4.8"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest-should" % "0.9.0" % Test
@@ -104,7 +104,7 @@ object Dependencies {
   // CVE-2026-33871: Netty HTTP/2 CONTINUATION frame flood DoS; patched in 4.1.132.Final
   // CVE-2026-33870: Netty HTTP Request Smuggling via Chunked Extension Quoted-String Parsing
   // Affects io.netty:netty-codec-http < 4.1.132.Final, pulled in transitively by async-http-client and aws-sdk netty-nio-client
-  val nettyVersion = "4.2.12.Final"
+  val nettyVersion = "4.2.13.Final"
   val nettyOverrides: Seq[ModuleID] = Seq(
     "io.netty" % "netty-buffer" % nettyVersion,
     "io.netty" % "netty-codec" % nettyVersion,

@@ -13,4 +13,10 @@ module.exports = [
 		message: 'Should I generate an API key for this lambda? (Y/n)',
 		default: 'Y',
 	},
+	{
+		type: 'input',
+		name: 'includeOpenApiDoc',
+		message: 'Should I generate an Open API description for this lambda? (Y/n)',
+		default: 'Y',
+	},
 ];

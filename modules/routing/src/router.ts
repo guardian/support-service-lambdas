@@ -1,9 +1,9 @@
 import { mapPartition, mapValues, zipAll } from '@modules/arrayFunctions';
-import { ValidationError } from '@modules/errors';
 import { getCallerInfo } from '@modules/logger/getCallerInfo';
 import { logger } from '@modules/logger/logger';
 import { objectEntries } from '@modules/objectFunctions';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { buildErrorResponse } from '@modules/routing/apiGatewayResponses';
 
 export type HttpMethod =
 	| 'GET'
@@ -121,17 +121,7 @@ export function Router(
 			}
 			return NotFoundResponse;
 		} catch (error) {
-			logger.log('Caught exception with message: ', error);
-			if (error instanceof ValidationError) {
-				return {
-					body: error.message,
-					statusCode: 400,
-				};
-			}
-			return {
-				body: 'Internal server error',
-				statusCode: 500,
-			};
+			return buildErrorResponse(error);
 		}
 	};
 

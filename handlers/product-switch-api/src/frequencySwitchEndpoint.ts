@@ -5,6 +5,7 @@ import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
+import { ok } from '@modules/routing/apiGatewayResponses';
 import type { Stage } from '@modules/stage';
 import {
 	getBillingPreview,
@@ -520,7 +521,7 @@ export const frequencySwitchHandler =
 				account,
 			);
 
-			return { statusCode: 200, body: JSON.stringify(response) };
+			return ok(response);
 		} catch (error) {
 			// Only return ValidationError messages to clients for security
 			if (error instanceof ValidationError) {

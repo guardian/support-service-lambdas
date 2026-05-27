@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # This is a handy script to test an alarm in PROD
-# Just run it with arguments value/growth/etc or all
+# Just run it with arguments lifecycle/martech/etc or all
 
 set -e
 
 # from alarm mappings file - SRE is not possible to test as it's only for unallocated alarms
-TEAM_KEYS=("growth" "value" "portfolio" "platform" "email")
+TEAM_KEYS=("martech" "lifecycle" "portfolio" "platform" "email")
 TEAM_EXAMPLE_APPS=("support-reminders" "apps-metering-events" "workers" "stripe-disputes" "alarms-handler")
 
 if [[ $# -lt 1 ]]; then

@@ -45,6 +45,8 @@ jobs:
           - newsletter-acquisition
           - multiple-account-api
           - observer-benefits-api
+          - contributions-only-countries-api
+          - user-subscriptions-api
           # MARKER new-lambda: github-action
     runs-on: ubuntu-latest
     permissions:

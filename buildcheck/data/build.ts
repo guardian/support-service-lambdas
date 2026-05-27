@@ -1,4 +1,5 @@
 import { dep, deprecatedDeps, devDeps } from './dependencies';
+import { openApiScripts, srcOnly } from './scripts';
 
 /*
 This is the main build definition for all handlers.
@@ -29,11 +30,6 @@ export interface BuildDefinition {
 	handlers: HandlerDefinition[];
 	modules: ModuleDefinition[];
 }
-
-const srcOnly = {
-	lint: "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts'",
-	test: 'jest --group=-integration --passWithNoTests',
-};
 
 const moduleLogger: ModuleDefinition = {
 	name: 'logger',
@@ -178,6 +174,7 @@ const moduleEmail: ModuleDefinition = {
 	name: 'email',
 	dependencies: {
 		...dep['@aws-sdk/client-sqs'],
+		...dep['dayjs'],
 	},
 	moduleDeps: [moduleAws],
 };
@@ -717,9 +714,7 @@ const multipleAccountApi: HandlerDefinition = {
 		...devDeps['@redocly/cli'],
 	},
 	extraScripts: {
-		'openapi:lint': 'redocly lint openapi.yaml',
-		'openapi:preview':
-			'redocly build-docs openapi.yaml --output target/docs/index.html && open target/docs/index.html',
+		...openApiScripts,
 		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr multiple-account-api.zip ./*.js.map ./*.js`,
 	},
 	moduleDeps: [
@@ -758,6 +753,32 @@ const observerBenefitsApi: HandlerDefinition = {
 	],
 };
 
+const contributionsOnlyCountriesApi: HandlerDefinition = {
+	name: 'contributions-only-countries-api',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
+};
+
+const userSubscriptionsApi: HandlerDefinition = {
+	name: 'user-subscriptions-api',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+
+		...devDeps['@redocly/cli'],
+	},
+	extraScripts: {
+		...openApiScripts,
+		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr user-subscriptions-api.zip ./*.js.map ./*.js`,
+	},
+};
+
 // MARKER new-lambda: buildcheck-const
 
 export const build: BuildDefinition = {
@@ -787,6 +808,8 @@ export const build: BuildDefinition = {
 		zuoraSalesforceLinkRemover,
 		multipleAccountApi,
 		observerBenefitsApi,
+		contributionsOnlyCountriesApi,
+		userSubscriptionsApi,
 		// MARKER new-lambda: buildcheck-reference
 	],
 

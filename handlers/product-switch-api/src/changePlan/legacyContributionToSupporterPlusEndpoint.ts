@@ -1,5 +1,6 @@
 import { ValidationError } from '@modules/errors';
 import { getIfDefined } from '@modules/nullAndUndefined';
+import { ok } from '@modules/routing/apiGatewayResponses';
 import type { Stage } from '@modules/stage';
 import type { ZuoraAccount, ZuoraSubscription } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
@@ -70,10 +71,7 @@ export function legacyContributionToSupporterPlusEndpoint(
 			subscription,
 			account,
 		);
-		return {
-			body: JSON.stringify(response),
-			statusCode: 200,
-		};
+		return ok(response);
 	};
 }
 
