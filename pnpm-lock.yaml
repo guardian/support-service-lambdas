@@ -708,35 +708,44 @@ importers:
     dependencies:
       '@aws-sdk/client-cloudwatch':
         specifier: ^3.940.0
-        version: 3.995.0
+        version: 3.1054.0
       '@aws-sdk/client-dynamodb':
         specifier: ^3.940.0
-        version: 3.995.0
+        version: 3.1054.0
       '@aws-sdk/client-s3':
         specifier: ^3.940.0
-        version: 3.995.0
+        version: 3.1054.0
       '@aws-sdk/client-secrets-manager':
         specifier: ^3.940.0
-        version: 3.995.0
+        version: 3.1054.0
       '@aws-sdk/client-sqs':
         specifier: ^3.940.0
-        version: 3.995.0
+        version: 3.1054.0
       '@aws-sdk/client-ssm':
         specifier: ^3.940.0
-        version: 3.995.0
+        version: 3.1054.0
       '@aws-sdk/credential-provider-node':
         specifier: ^3.940.0
-        version: 3.972.10
+        version: 3.972.45
       dayjs:
         specifier: ^1.11.13
-        version: 1.11.19
+        version: 1.11.21
+      internationalisation:
+        specifier: workspace:*
+        version: link:../../modules/internationalisation
+      logger:
+        specifier: workspace:*
+        version: link:../../modules/logger
       zod:
         specifier: 'catalog:'
         version: 3.25.76
+      zuora:
+        specifier: workspace:*
+        version: link:../../modules/zuora
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
-        version: 8.10.158
+        version: 8.10.161
 
   handlers/ticket-tailor-webhook:
     dependencies:
