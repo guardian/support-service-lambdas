@@ -4,10 +4,7 @@ import { logger } from '@modules/logger/logger';
 import { type Stage, stageFromEnvironment } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { Handler, SQSEvent } from 'aws-lambda';
-import type {
-	ContributionAmount,
-	SupporterRatePlanItem,
-} from '../model/supporterRatePlanItem';
+import type { SupporterRatePlanItem } from '../model/supporterRatePlanItem';
 import { supporterRatePlanItemSchema } from '../model/supporterRatePlanItem';
 import { ConfigService } from '../services/configService';
 import { DynamoService } from '../services/dynamoService';
@@ -24,7 +21,7 @@ const contributionIdsForStage = (stage: Stage): string[] =>
 const contributionAmountFromZuoraSubscription = (
 	subscription: MinimalZuoraSubscription,
 	contributionIds: string[],
-): ContributionAmount | undefined => {
+) => {
 	const contributionRatePlan = subscription.ratePlans.find((ratePlan) =>
 		contributionIds.includes(ratePlan.id),
 	);

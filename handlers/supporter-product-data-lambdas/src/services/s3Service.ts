@@ -42,29 +42,6 @@ export class S3Service {
 		logger.log('Successfully uploaded file to S3', { bucket, filename });
 	}
 
-	async getObjectAsString(stage: Stage, filename: string): Promise<string> {
-		const bucket = bucketNameForStage(stage);
-		logger.log('Downloading file from S3', { bucket, filename });
-		const response = await this.s3Client.send(
-			new GetObjectCommand({
-				Bucket: bucket,
-				Key: filename,
-			}),
-		);
-
-		if (response.Body === undefined) {
-			throw new Error(`Missing S3 body for ${filename}`);
-		}
-
-		const content = await response.Body.transformToString();
-		logger.log('Successfully downloaded file from S3', {
-			bucket,
-			filename,
-			contentLength: content.length,
-		});
-		return content;
-	}
-
 	async *streamObjectLines(
 		stage: Stage,
 		filename: string,

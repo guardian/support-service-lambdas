@@ -1,10 +1,10 @@
-export interface ZoqlExportQuery {
+export type ZoqlExportQuery = {
 	name: string;
 	query: string;
 	type: 'zoqlexport';
-}
+};
 
-export interface BatchQueryRequest {
+export type BatchQueryRequest = {
 	partner: string;
 	incrementalTime?: string;
 	name: string;
@@ -15,4 +15,4 @@ export interface BatchQueryRequest {
 	encrypted: 'none';
 	useQueryLabels: 'true';
 	dateTimeUtc: 'true';
-}
+};

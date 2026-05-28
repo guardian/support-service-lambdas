@@ -1,5 +1,5 @@
 import { fetchResults } from '../src/lambdas/fetchResultsLambda';
-import type { BatchQueryResponse } from '../src/model/zuora';
+import type { BatchQueryResponse } from '../src/services/zuoraQuerierService';
 
 type UploadToS3 = (
 	filename: string,

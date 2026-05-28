@@ -9,8 +9,6 @@ const contributionAmountSchema = z.object({
 	currency: z.string(),
 });
 
-export type ContributionAmount = z.infer<typeof contributionAmountSchema>;
-
 export const supporterRatePlanItemSchema = z.object({
 	subscriptionName: z.string(),
 	identityId: z.string(),

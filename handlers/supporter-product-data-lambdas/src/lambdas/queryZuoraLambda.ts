@@ -1,3 +1,4 @@
+import { Lazy } from '@modules/lazy';
 import { logger } from '@modules/logger/logger';
 import { type Stage, stageFromEnvironment } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
@@ -22,6 +23,28 @@ import { ZuoraQuerierService } from '../services/zuoraQuerierService';
 import type { FetchResultsState, QueryType, QueryZuoraState } from './types';
 
 dayjs.extend(utc);
+
+type QueryZuoraDependencies = {
+	loadConfig: () => Promise<ZuoraQuerierConfig>;
+	postQuery: (request: BatchQueryRequest) => Promise<{ id: string }>;
+};
+
+const buildDependencies = async (): Promise<QueryZuoraDependencies> => {
+	const stage = stageFromEnvironment();
+	const configService = new ConfigService(stage);
+	const zuoraClient = await ZuoraClient.create(stage);
+	const service = new ZuoraQuerierService(zuoraClient);
+
+	return {
+		loadConfig: () => configService.loadZuoraConfig(),
+		postQuery: (request) => service.postQuery(request),
+	};
+};
+
+const lazyDependencies = new Lazy<QueryZuoraDependencies>(
+	buildDependencies,
+	'Building dependencies',
+);
 
 const localIsoForQueryName = (date: dayjs.Dayjs): string =>
 	date.utc().toISOString().replace('Z', '');
@@ -88,16 +111,14 @@ const buildBatchQueryRequest = (
 export const queryZuora = async (
 	stage: Stage,
 	queryType: QueryType,
+	dependencies: QueryZuoraDependencies,
 ): Promise<FetchResultsState> => {
-	const configService = new ConfigService(stage);
-	const config = await configService.loadZuoraConfig();
-	const zuoraClient = await ZuoraClient.create(stage);
-	const service = new ZuoraQuerierService(zuoraClient);
+	const config = await dependencies.loadConfig();
 
 	logger.log('Attempting to submit query to Zuora', { stage, queryType });
 
 	const request = buildBatchQueryRequest(queryType, config);
-	const result = await service.postQuery(request);
+	const result = await dependencies.postQuery(request);
 
 	logger.log('Successfully submitted query', {
 		jobId: result.id,
@@ -113,4 +134,9 @@ export const queryZuora = async (
 
 export const handler: Handler<QueryZuoraState, FetchResultsState> = async (
 	event,
-) => queryZuora(stageFromEnvironment(), event.queryType);
+) =>
+	queryZuora(
+		stageFromEnvironment(),
+		event.queryType,
+		await lazyDependencies.get(),
+	);

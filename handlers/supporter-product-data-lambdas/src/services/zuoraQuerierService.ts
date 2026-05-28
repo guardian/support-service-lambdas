@@ -2,7 +2,6 @@ import { logger } from '@modules/logger/logger';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { z } from 'zod';
 import type { BatchQueryRequest } from '../model/query';
-import type { BatchQueryResponse } from '../model/zuora';
 
 const batchQueryItemSchema = z.object({
 	name: z.string(),
@@ -22,6 +21,8 @@ const batchQueryResponseSchema = z.object({
 	]),
 	batches: z.array(batchQueryItemSchema),
 });
+
+export type BatchQueryResponse = z.infer<typeof batchQueryResponseSchema>;
 
 export class ZuoraQuerierService {
 	constructor(private readonly zuoraClient: ZuoraClient) {}

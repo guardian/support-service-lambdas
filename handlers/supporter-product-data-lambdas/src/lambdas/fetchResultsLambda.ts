@@ -3,11 +3,13 @@ import { logger } from '@modules/logger/logger';
 import { stageFromEnvironment } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { Handler } from 'aws-lambda';
-import type { BatchQueryResponse } from '../model/zuora';
 import { ConfigService } from '../services/configService';
 import { toIsoLocalDateTimeUtc } from '../services/dateTimeService';
 import { S3Service } from '../services/s3Service';
-import { ZuoraQuerierService } from '../services/zuoraQuerierService';
+import {
+	type BatchQueryResponse,
+	ZuoraQuerierService,
+} from '../services/zuoraQuerierService';
 import type {
 	AddSupporterRatePlanItemToQueueState,
 	FetchResultsState,

@@ -32,30 +32,6 @@ const parseCsvLine = (line: string): string[] => {
 
 export { parseCsvLine };
 
-export const parseCsvWithHeader = (
-	csvContent: string,
-): Array<Record<string, string>> => {
-	const lines = csvContent
-		.split(/\r?\n/)
-		.map((line) => line.trim())
-		.filter((line) => line.length > 0);
-
-	if (lines.length === 0) {
-		return [];
-	}
-
-	const header = parseCsvLine(lines[0] ?? '');
-	const dataLines = lines.slice(1);
-
-	return dataLines.map((line) => {
-		const values = parseCsvLine(line);
-		return header.reduce<Record<string, string>>((acc, key, index) => {
-			acc[key] = values[index] ?? '';
-			return acc;
-		}, {});
-	});
-};
-
 /**
  * Parses a CSV from an async line generator, yielding one decoded row object at
  * a time. The first line is treated as the header. Keeps only a single row in

@@ -1,17 +1,17 @@
 export type QueryType = 'incremental' | 'full';
 
-export interface QueryZuoraState {
+export type QueryZuoraState = {
 	queryType: QueryType;
-}
+};
 
-export interface FetchResultsState {
+export type FetchResultsState = {
 	jobId: string;
 	attemptedQueryTime: string;
-}
+};
 
-export interface AddSupporterRatePlanItemToQueueState {
+export type AddSupporterRatePlanItemToQueueState = {
 	filename: string;
 	recordCount: number;
 	processedCount: number;
 	attemptedQueryTime: string;
-}
+};
