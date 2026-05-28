@@ -4,20 +4,12 @@ import { z } from 'zod';
 
 dayjs.extend(utc);
 
-export interface ContributionAmount {
-	amount: string;
-	currency: string;
-}
+const contributionAmountSchema = z.object({
+	amount: z.number(),
+	currency: z.string(),
+});
 
-export interface SupporterRatePlanItem {
-	subscriptionName: string;
-	identityId: string;
-	productRatePlanId: string;
-	productRatePlanName: string;
-	termEndDate: string;
-	contractEffectiveDate: string;
-	contributionAmount?: ContributionAmount;
-}
+export type ContributionAmount = z.infer<typeof contributionAmountSchema>;
 
 export const supporterRatePlanItemSchema = z.object({
 	subscriptionName: z.string(),
@@ -26,13 +18,10 @@ export const supporterRatePlanItemSchema = z.object({
 	productRatePlanName: z.string(),
 	termEndDate: z.string(),
 	contractEffectiveDate: z.string(),
-	contributionAmount: z
-		.object({
-			amount: z.string(),
-			currency: z.string(),
-		})
-		.optional(),
+	contributionAmount: contributionAmountSchema.optional(),
 });
+
+export type SupporterRatePlanItem = z.infer<typeof supporterRatePlanItemSchema>;
 
 const toIsoDate = (value: string): string => {
 	const parsed = dayjs.utc(value);

@@ -56,7 +56,7 @@ export class DynamoService {
 
 		if (item.contributionAmount !== undefined) {
 			expressionValues[':contributionAmount'] = {
-				N: item.contributionAmount.amount,
+				N: item.contributionAmount.amount.toString(),
 			};
 			expressionValues[':contributionCurrency'] = {
 				S: item.contributionAmount.currency,

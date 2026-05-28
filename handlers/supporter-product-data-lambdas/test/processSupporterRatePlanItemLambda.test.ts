@@ -38,7 +38,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 						ratePlans: [
 							{
 								id: 'contrib-id',
-								ratePlanCharges: [{ price: '10.00', currency: 'GBP' }],
+								ratePlanCharges: [{ price: 10.0, currency: 'GBP' }],
 							},
 						],
 					}),
@@ -50,7 +50,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 		expect(writeItem).toHaveBeenCalledWith({
 			...item,
 			productRatePlanId: 'contrib-id',
-			contributionAmount: { amount: '10.00', currency: 'GBP' },
+			contributionAmount: { amount: 10.0, currency: 'GBP' },
 		});
 	});
 });
