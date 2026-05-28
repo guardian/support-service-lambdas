@@ -8,7 +8,8 @@
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
     "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/lambdas/*.ts --sourcemap --source-root=/support-service-lambdas/handlers/supporter-product-data-lambdas/target/",
-    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr supporter-product-data-lambdas.zip ./*.js.map ./*.js",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm packageQuick",
+    "packageQuick": "pnpm build && cd target && zip -qr supporter-product-data-lambdas.zip ./*.js.map ./*.js",
     "cdk:test": "pnpm --filter cdk test supporter-product-data-lambdas",
     "cdk:test-update": "pnpm --filter cdk test-update supporter-product-data-lambdas",
     "update-lambda": "../../update-lambda.sh \"supporter-product-data-lambdas\" supporterProductData-QueryZuora- supporterProductData-FetchResults- supporterProductData-AddToQueue- supporterProductData-ProcessItem-",
@@ -25,7 +26,10 @@
     "@aws-sdk/client-secrets-manager": "^3.940.0",
     "@aws-sdk/credential-provider-node": "^3.940.0",
     "dayjs": "^1.11.13",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "logger": "workspace:*",
+    "zuora": "workspace:*",
+    "internationalisation": "workspace:*"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147"

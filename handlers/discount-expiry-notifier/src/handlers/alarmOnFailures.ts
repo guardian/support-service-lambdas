@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/require-await -- this is required to ensure the lambda returns a value*/
 import { z } from 'zod';
+import type { DiscountProcessingAttempt } from '../types';
 import {
 	BigQueryRecordSchema,
 	DiscountProcessingAttemptSchema,
 } from '../types';
-import type { DiscountProcessingAttempt } from '../types';
 
 export const AlarmOnFailuresInputSchema = z
 	.object({

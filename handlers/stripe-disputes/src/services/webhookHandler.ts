@@ -3,13 +3,13 @@ import { getIfDefined } from '@modules/nullAndUndefined';
 import { internalServerError, ok } from '@modules/routing/apiGatewayResponses';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import AWS from 'aws-sdk';
-import {
-	listenDisputeClosedInputSchema,
-	listenDisputeCreatedInputSchema,
-} from '../dtos';
 import type {
 	ListenDisputeClosedRequestBody,
 	ListenDisputeCreatedRequestBody,
+} from '../dtos';
+import {
+	listenDisputeClosedInputSchema,
+	listenDisputeCreatedInputSchema,
 } from '../dtos';
 
 const sqs = new AWS.SQS();

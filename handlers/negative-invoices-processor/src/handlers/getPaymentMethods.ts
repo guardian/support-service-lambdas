@@ -1,15 +1,15 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { getPaymentMethods } from '@modules/zuora/paymentMethod';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import {
-	GetPaymentMethodsInputSchema,
-	PaymentMethodResponseSchema,
-} from '../types';
 import type {
 	GetPaymentMethodsInput,
 	GetPaymentMethodsOutput,
 	PaymentMethod,
 	PaymentMethodResponse,
+} from '../types';
+import {
+	GetPaymentMethodsInputSchema,
+	PaymentMethodResponseSchema,
 } from '../types';
 
 export const handler = async (

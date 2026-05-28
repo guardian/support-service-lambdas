@@ -8,7 +8,8 @@
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
     "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/handlers/*.ts --sourcemap --source-root=/support-service-lambdas/handlers/zuora-salesforce-link-remover/target/",
-    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr zuora-salesforce-link-remover.zip ./*.js.map ./*.js",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm packageQuick",
+    "packageQuick": "pnpm build && cd target && zip -qr zuora-salesforce-link-remover.zip ./*.js.map ./*.js",
     "cdk:test": "pnpm --filter cdk test zuora-salesforce-link-remover",
     "cdk:test-update": "pnpm --filter cdk test-update zuora-salesforce-link-remover",
     "update-lambda": "../../update-lambda.sh \"zuora-salesforce-link-remover\" zuora-salesforce-link-remover-get-billing-accounts- zuora-salesforce-link-remover-update-zuora-billing-account- zuora-salesforce-link-remover-update-sf-billing-accounts-",
@@ -18,7 +19,9 @@
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.940.0",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "salesforce": "workspace:*",
+    "zuora": "workspace:*"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147",

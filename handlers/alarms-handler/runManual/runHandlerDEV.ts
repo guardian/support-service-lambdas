@@ -2,9 +2,11 @@ import { logger } from '@modules/logger/logger';
 import type { SQSEvent } from 'aws-lambda';
 import { getEnv } from '../../../modules/routing/src/lambdaHandler';
 import type { Services } from '../src';
-import { GoogleChatSendMessage } from '../src';
-import { GoogleChatClient } from '../src';
-import { handlerWithStage } from '../src';
+import {
+	GoogleChatClient,
+	GoogleChatSendMessage,
+	handlerWithStage,
+} from '../src';
 
 // to run this, get credentials for membership
 // and set TEST_WEBHOOK to your chat link
