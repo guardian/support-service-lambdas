@@ -1,5 +1,3 @@
-import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
-import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import {
@@ -13,16 +11,8 @@ import {
 import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import { Rule, RuleTargetInput, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
-import {
-	Effect,
-	PolicyDocument,
-	PolicyStatement,
-	Role,
-	ServicePrincipal,
-} from 'aws-cdk-lib/aws-iam';
-import { Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
-import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import {
@@ -35,110 +25,21 @@ import {
 	WaitTime,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
+import { AllowZuoraOAuthSecretsPolicy } from './cdk/policies';
+import { SrLambda } from './cdk/SrLambda';
 import { SrLambdaAlarm } from './cdk/SrLambdaAlarm';
+import type { SrStackProps } from './cdk/SrStack';
+import { SrStack } from './cdk/SrStack';
 
-type SupporterProductDataLambdasProps = GuStackProps & {
+type SupporterProductDataLambdasProps = SrStackProps & {
 	processItemMaxConcurrency: number;
 };
 
-export class SupporterProductDataLambdas extends GuStack {
-	constructor(scope: App, id: string, props: SupporterProductDataLambdasProps) {
-		super(scope, id, props);
+export class SupporterProductDataLambdas extends SrStack {
+	constructor(scope: App, props: SupporterProductDataLambdasProps) {
+		super(scope, props);
 
 		const { processItemMaxConcurrency } = props;
-
-		const artifactBucket = Bucket.fromBucketName(
-			this,
-			'SupporterProductDataLambdasDistBucket',
-			'membership-dist',
-		);
-
-		const lambdaArtifact = Code.fromBucket(
-			artifactBucket,
-			`support/${this.stage}/supporter-product-data-lambdas/supporter-product-data-lambdas.zip`,
-		);
-
-		const lambdaRole = new Role(this, 'SupporterProductDataLambdaRole', {
-			assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
-			inlinePolicies: {
-				LambdaPermissions: new PolicyDocument({
-					statements: [
-						new PolicyStatement({
-							effect: Effect.ALLOW,
-							actions: [
-								'logs:CreateLogGroup',
-								'logs:CreateLogStream',
-								'logs:PutLogEvents',
-							],
-							resources: ['*'],
-						}),
-						new PolicyStatement({
-							effect: Effect.ALLOW,
-							actions: [
-								'ssm:GetParametersByPath',
-								'ssm:GetParameter',
-								'ssm:PutParameter',
-							],
-							resources: [
-								`arn:aws:ssm:${this.region}:${this.account}:parameter/supporter-product-data/${this.stage}/*`,
-							],
-						}),
-						new PolicyStatement({
-							effect: Effect.ALLOW,
-							actions: ['s3:PutObject', 's3:GetObject'],
-							resources: [
-								`arn:aws:s3:::supporter-product-data-export-${this.stage.toLowerCase()}/*`,
-							],
-						}),
-						new PolicyStatement({
-							effect: Effect.ALLOW,
-							actions: [
-								'dynamodb:UpdateItem',
-								'dynamodb:PutItem',
-								'dynamodb:GetItem',
-							],
-							resources: [
-								`arn:aws:dynamodb:${this.region}:${this.account}:table/SupporterProductData-${this.stage}`,
-							],
-						}),
-						new PolicyStatement({
-							effect: Effect.ALLOW,
-							actions: ['cloudwatch:PutMetricData'],
-							resources: ['*'],
-						}),
-						new PolicyStatement({
-							effect: Effect.ALLOW,
-							actions: ['secretsmanager:GetSecretValue'],
-							resources: [
-								`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas*`,
-							],
-						}),
-					],
-				}),
-			},
-		});
-
-		const queryZuora = new Function(this, 'QueryZuoraLambda', {
-			functionName: `supporterProductData-QueryZuora-${this.stage}`,
-			runtime: Runtime.NODEJS_22_X,
-			handler: 'queryZuoraLambda.handler',
-			code: lambdaArtifact,
-			timeout: Duration.minutes(5),
-			memorySize: 512,
-			role: lambdaRole,
-			environment: { STAGE: this.stage },
-		});
-
-		const fetchResults = new Function(this, 'FetchResultsLambda', {
-			functionName: `supporterProductData-FetchResults-${this.stage}`,
-			runtime: Runtime.NODEJS_22_X,
-			handler: 'fetchResultsLambda.handler',
-			code: lambdaArtifact,
-			timeout: Duration.minutes(5),
-			memorySize: 512,
-			role: lambdaRole,
-			environment: { STAGE: this.stage },
-		});
 
 		const queue = new Queue(this, 'SupporterProductDataQueue', {
 			queueName: `supporter-product-data-lambdas-${this.stage}`,
@@ -151,35 +52,87 @@ export class SupporterProductDataLambdas extends GuStack {
 			},
 		});
 
-		const addToQueue = new Function(
+		// Policies shared across all lambdas — applied after lambda creation via addToRolePolicy
+		const ssmPolicy = new PolicyStatement({
+			effect: Effect.ALLOW,
+			actions: ['ssm:GetParametersByPath', 'ssm:GetParameter', 'ssm:PutParameter'],
+			// Non-standard path used by this app — not covered by the GuCDK auto-policy (which uses /${stage}/${stack}/${app})
+			resources: [`arn:aws:ssm:${this.region}:${this.account}:parameter/supporter-product-data/${this.stage}/*`],
+		});
+		const s3Policy = new PolicyStatement({
+			effect: Effect.ALLOW,
+			actions: ['s3:PutObject', 's3:GetObject'],
+			resources: [`arn:aws:s3:::supporter-product-data-export-${this.stage.toLowerCase()}/*`],
+		});
+		const dynamoPolicy = new PolicyStatement({
+			effect: Effect.ALLOW,
+			actions: ['dynamodb:UpdateItem', 'dynamodb:PutItem', 'dynamodb:GetItem'],
+			resources: [`arn:aws:dynamodb:${this.region}:${this.account}:table/SupporterProductData-${this.stage}`],
+		});
+		const cloudwatchPolicy = new PolicyStatement({
+			effect: Effect.ALLOW,
+			actions: ['cloudwatch:PutMetricData'],
+			resources: ['*'],
+		});
+		const zuoraPolicy = new AllowZuoraOAuthSecretsPolicy(this);
+
+		const addSharedPolicies = (lambda: SrLambda) => {
+			lambda.addToRolePolicy(ssmPolicy);
+			lambda.addToRolePolicy(s3Policy);
+			lambda.addToRolePolicy(dynamoPolicy);
+			lambda.addToRolePolicy(cloudwatchPolicy);
+			lambda.addPolicies(zuoraPolicy);
+		};
+
+		const queryZuora = new SrLambda(this, 'QueryZuoraLambda', {
+			legacyId: `supporterProductData-QueryZuora-${this.stage}`,
+			lambdaOverrides: {
+				timeout: Duration.minutes(5),
+				memorySize: 512,
+				environment: { STAGE: this.stage },
+				description:
+					'A lambda that queries Zuora for new or updated subscriptions since the last successful run, and writes the results to S3',
+			},
+		});
+		addSharedPolicies(queryZuora);
+
+		const fetchResults = new SrLambda(this, 'FetchResultsLambda', {
+			legacyId: `supporterProductData-FetchResults-${this.stage}`,
+			lambdaOverrides: {
+				timeout: Duration.minutes(5),
+				memorySize: 512,
+				environment: { STAGE: this.stage },
+			},
+		});
+		addSharedPolicies(fetchResults);
+
+		const addToQueue = new SrLambda(
 			this,
 			'AddSupporterRatePlanItemToQueueLambda',
 			{
-				functionName: `supporterProductData-AddToQueue-${this.stage}`,
-				runtime: Runtime.NODEJS_22_X,
-				handler: 'addSupporterRatePlanItemToQueueLambda.handler',
-				code: lambdaArtifact,
-				timeout: Duration.minutes(10),
-				memorySize: 1024,
-				role: lambdaRole,
-				environment: { STAGE: this.stage },
+				legacyId: `supporterProductData-AddToQueue-${this.stage}`,
+				lambdaOverrides: {
+					timeout: Duration.minutes(10),
+					memorySize: 1024,
+					environment: { STAGE: this.stage },
+				},
 			},
 		);
+		addSharedPolicies(addToQueue);
 
-		const processItem = new Function(
+		const processItem = new SrLambda(
 			this,
 			'ProcessSupporterRatePlanItemLambda',
 			{
-				functionName: `supporterProductData-ProcessItem-${this.stage}`,
-				runtime: Runtime.NODEJS_22_X,
-				handler: 'processSupporterRatePlanItemLambda.handler',
-				code: lambdaArtifact,
-				timeout: Duration.minutes(10),
-				memorySize: 1024,
-				role: lambdaRole,
-				environment: { STAGE: this.stage },
+				legacyId: `supporterProductData-ProcessItem-${this.stage}`,
+				lambdaOverrides: {
+					timeout: Duration.minutes(10),
+					memorySize: 1024,
+					environment: { STAGE: this.stage },
+				},
 			},
 		);
+		addSharedPolicies(processItem);
 
 		queue.grantSendMessages(addToQueue);
 		queue.grantConsumeMessages(processItem);

@@ -170,16 +170,14 @@ stacks.forEach((Constructor) => {
 	});
 });
 
-new SupporterProductDataLambdas(app, 'supporter-product-data-lambdas-CODE', {
-	stack: 'support',
+new SupporterProductDataLambdas(app, {
 	stage: 'CODE',
-	cloudFormationStackName: 'SupporterProductDataLambdas-CODE',
+	app: 'supporter-product-data-lambdas',
 	processItemMaxConcurrency: 30,
 });
-new SupporterProductDataLambdas(app, 'supporter-product-data-lambdas-PROD', {
-	stack: 'support',
+new SupporterProductDataLambdas(app, {
 	stage: 'PROD',
-	cloudFormationStackName: 'SupporterProductDataLambdas-PROD',
+	app: 'supporter-product-data-lambdas',
 	processItemMaxConcurrency: 50,
 });
 
