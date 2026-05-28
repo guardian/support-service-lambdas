@@ -9,4 +9,4 @@ async function run() {
 	return getSubscription(zuoraClient, validSubscriptionId);
 }
 
-run().then(console.log);
+run().then(console.log).catch(console.error);

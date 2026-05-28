@@ -1,4 +1,4 @@
-type DistributedKeyof<T> = T extends unknown ? keyof T : never;
+export type DistributedKeyof<T> = T extends unknown ? keyof T : never;
 export function objectKeys<O extends object>(
 	libs: O,
 ): Array<DistributedKeyof<O>> {
@@ -26,14 +26,14 @@ export function objectValues<T extends object>(
 	return Object.values(libs) as Array<NonUndefined<DistributedValues<T>>>;
 }
 
-export function objectFromEntries<K extends string, V>(
+export function objectFromEntries<K extends PropertyKey, V>(
 	libs: Array<readonly [K, V]>,
 ): Record<K, V> {
 	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- allowed in utility function - get back type lost by Object.keys
 	return Object.fromEntries(libs) as Record<K, V>;
 }
 
-type NonUndefined<T> = T extends undefined ? never : T;
+export type NonUndefined<T> = T extends undefined ? never : T;
 
 export function objectEntries<T extends object>(
 	theMappings: T,
@@ -52,6 +52,17 @@ export function objectEntries<T extends object>(
 			}[keyof T]
 		>
 	>;
+}
+
+export function filterEntries<T extends object>(
+	obj: T,
+	predicate: ([key, value]: {
+		[K in keyof T]: [K, T[K]];
+	}[keyof T]) => boolean,
+) {
+	const filtered = objectFromEntries(objectEntries(obj).filter(predicate));
+	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- utility function
+	return filtered as Partial<T>;
 }
 
 /**
