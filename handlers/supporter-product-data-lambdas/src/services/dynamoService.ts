@@ -54,7 +54,7 @@ export class DynamoService {
 		let updateExpression =
 			'SET productRatePlanId = :productRatePlanId, productRatePlanName = :productRatePlanName, termEndDate = :termEndDate, contractEffectiveDate = :contractEffectiveDate, expiryDate = :expiryDate';
 
-		if (item.contributionAmount !== undefined) {
+		if (item.contributionAmount) {
 			expressionValues[':contributionAmount'] = {
 				N: item.contributionAmount.amount.toString(),
 			};

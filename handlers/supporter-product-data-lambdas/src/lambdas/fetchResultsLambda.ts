@@ -13,7 +13,7 @@ import type {
 	FetchResultsState,
 } from './types';
 
-interface FetchResultsDependencies {
+type FetchResultsDependencies = {
 	getResults: (jobId: string) => Promise<BatchQueryResponse>;
 	getResultFileResponse: (fileId: string) => Promise<Response>;
 	uploadToS3: (
@@ -22,7 +22,7 @@ interface FetchResultsDependencies {
 		length: number,
 	) => Promise<void>;
 	putLastSuccessfulQueryTime: (time: string) => Promise<void>;
-}
+};
 
 const getValueOrThrow = <T>(value: T | undefined, errorMessage: string): T => {
 	if (value === undefined) {

@@ -16,7 +16,7 @@ const timeoutBufferInMillis = maxBatchSize * 5 * 1000;
 
 type IndexedItem = [SupporterRatePlanItem, number];
 
-interface AddToQueueDependencies {
+type AddToQueueDependencies = {
 	streamCsvRows: (
 		filename: string,
 	) => AsyncIterable<Record<string, string>> | Iterable<Record<string, string>>;
@@ -24,7 +24,7 @@ interface AddToQueueDependencies {
 	triggerCsvReadAlarm: () => Promise<void>;
 	triggerSqsWriteAlarm: () => Promise<void>;
 	putLastSuccessfulQueryTime: (time: string) => Promise<void>;
-}
+};
 
 const buildDependencies = (): AddToQueueDependencies => {
 	const stage = stageFromEnvironment();

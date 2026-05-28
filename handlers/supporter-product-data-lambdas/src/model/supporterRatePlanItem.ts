@@ -18,7 +18,7 @@ export const supporterRatePlanItemSchema = z.object({
 	productRatePlanName: z.string(),
 	termEndDate: z.string(),
 	contractEffectiveDate: z.string(),
-	contributionAmount: contributionAmountSchema.optional(),
+	contributionAmount: contributionAmountSchema.nullish(),
 });
 
 export type SupporterRatePlanItem = z.infer<typeof supporterRatePlanItemSchema>;

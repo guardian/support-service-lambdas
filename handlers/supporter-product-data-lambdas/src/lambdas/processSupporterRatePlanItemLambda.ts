@@ -39,7 +39,7 @@ const contributionAmountFromZuoraSubscription = (
 	};
 };
 
-interface ProcessItemDependencies {
+type ProcessItemDependencies = {
 	discountIds: string[];
 	contributionIds: string[];
 	getSubscription: (
@@ -47,7 +47,7 @@ interface ProcessItemDependencies {
 	) => Promise<MinimalZuoraSubscription>;
 	writeItem: (item: SupporterRatePlanItem) => Promise<void>;
 	triggerDynamoWriteAlarm: () => Promise<void>;
-}
+};
 
 const buildDependencies = async (): Promise<ProcessItemDependencies> => {
 	const stage = stageFromEnvironment();
@@ -130,7 +130,7 @@ export const processItem = async (
 			dependencies,
 		);
 
-		if (itemWithContribution.contributionAmount !== undefined) {
+		if (itemWithContribution.contributionAmount) {
 			logger.log('Resolved contribution amount', {
 				subscriptionName: item.subscriptionName,
 				amount: itemWithContribution.contributionAmount.amount,
