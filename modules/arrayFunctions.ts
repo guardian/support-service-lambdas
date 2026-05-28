@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { objectEntries, objectFromEntries } from '@modules/objectFunctions';
+import { objectEntries, objectFromEntries } from './objectFunctions';
 
 export function isInList<T extends string>(values: readonly [T, ...T[]]) {
 	return (productKey: string): productKey is T => {

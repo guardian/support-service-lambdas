@@ -1,7 +1,7 @@
 import * as console from 'node:console';
 import { mapOption } from '@modules/nullAndUndefined';
-import { getCallerInfo } from '@modules/logger/getCallerInfo';
-import { prettyPrint } from '@modules/logger/prettyPrint';
+import { getCallerInfo } from './getCallerInfo';
+import { prettyPrint } from './prettyPrint';
 
 type LoggableInput = {
 	logOnEntryAndExit?: string;

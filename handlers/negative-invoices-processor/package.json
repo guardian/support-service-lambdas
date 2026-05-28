@@ -8,7 +8,8 @@
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
     "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/handlers/*.ts --sourcemap --source-root=/support-service-lambdas/handlers/negative-invoices-processor/target/",
-    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr negative-invoices-processor.zip ./*.js.map ./*.js",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm packageQuick",
+    "packageQuick": "pnpm build && cd target && zip -qr negative-invoices-processor.zip ./*.js.map ./*.js",
     "cdk:test": "pnpm --filter cdk test negative-invoices-processor",
     "cdk:test-update": "pnpm --filter cdk test-update negative-invoices-processor",
     "update-lambda": "../../update-lambda.sh \"negative-invoices-processor\" negative-invoices-processor-get-invoices- negative-invoices-processor-check-for-active-sub- negative-invoices-processor-get-payment-methods- negative-invoices-processor-apply-credit-to-account-balance- negative-invoices-processor-do-credit-balance-refund- negative-invoices-processor-save-results- negative-invoices-processor-detect-failures-",
@@ -21,7 +22,10 @@
     "aws-sdk": "^2.1692.0",
     "dayjs": "^1.11.13",
     "google-auth-library": "^9.15.0",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "aws": "workspace:*",
+    "bigquery": "workspace:*",
+    "zuora": "workspace:*"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147",

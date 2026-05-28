@@ -3,8 +3,8 @@ import { doQuery } from '@modules/zuora/query';
 import { createQueryResponseSchema } from '@modules/zuora/types';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { z } from 'zod';
-import { CheckForActiveSubInputSchema } from '../types';
 import type { CheckForActiveSubInput, CheckForActiveSubOutput } from '../types';
+import { CheckForActiveSubInputSchema } from '../types';
 
 export const handler = async (
 	event: CheckForActiveSubInput,

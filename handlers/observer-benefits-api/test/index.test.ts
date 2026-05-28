@@ -3,8 +3,7 @@ import { getSinglePlanFlattenedSubscriptionOrThrow } from '@modules/guardian-sub
 import { getAccount } from '@modules/zuora/account';
 import { ZuoraError } from '@modules/zuora/errors/zuoraError';
 import { getSubscription } from '@modules/zuora/subscription';
-import type { ZuoraAccount } from '@modules/zuora/types';
-import type { ZuoraSubscription } from '@modules/zuora/types';
+import type { ZuoraAccount, ZuoraSubscription } from '@modules/zuora/types';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { handler } from '../src/index';
 import type { ResponseBody } from '../src/schemas';

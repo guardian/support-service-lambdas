@@ -13,6 +13,9 @@
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
     "@aws-sdk/client-sqs": "^3.940.0",
-    "dayjs": "^1.11.13"
+    "dayjs": "^1.11.13",
+    "aws": "workspace:*",
+    "internationalisation": "workspace:*",
+    "product-catalog": "workspace:*"
   }
 }

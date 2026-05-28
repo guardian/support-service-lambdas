@@ -1,6 +1,6 @@
-import { getCallerInfo } from '@modules/logger/getCallerInfo';
-import { Logger } from '@modules/logger/logger';
-import { prettyPrint } from '@modules/logger/prettyPrint';
+import { getCallerInfo } from '../src/getCallerInfo';
+import { Logger } from '../src/logger';
+import { prettyPrint } from '../src/prettyPrint';
 
 // If you reformat this section of the file, you will need to update the expected line numbers
 function getMessage(logger: Logger) {

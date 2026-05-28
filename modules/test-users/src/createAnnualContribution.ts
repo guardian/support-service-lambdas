@@ -1,7 +1,7 @@
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
-import { createAccountAndSubscription } from '@modules/test-users/src/create';
+import { createAccountAndSubscription } from '@modules/test-users/create';
 
 void (async () => {
 	const amount = process.argv[2];
