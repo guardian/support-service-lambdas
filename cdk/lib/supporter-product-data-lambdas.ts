@@ -2,6 +2,15 @@ import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
+import {
+	Alarm,
+	ComparisonOperator,
+	MathExpression,
+	Metric,
+	TreatMissingData,
+	Unit,
+} from 'aws-cdk-lib/aws-cloudwatch';
+import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import { Rule, RuleTargetInput, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import {
@@ -14,6 +23,7 @@ import {
 import { Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
+import { Topic } from 'aws-cdk-lib/aws-sns';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import {
 	Choice,
@@ -25,10 +35,11 @@ import {
 	WaitTime,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
+import { SrLambdaAlarm } from './cdk/SrLambdaAlarm';
 
-interface SupporterProductDataLambdasProps extends GuStackProps {
+type SupporterProductDataLambdasProps = GuStackProps & {
 	processItemMaxConcurrency: number;
-}
+};
 
 export class SupporterProductDataLambdas extends GuStack {
 	constructor(scope: App, id: string, props: SupporterProductDataLambdasProps) {
@@ -132,6 +143,12 @@ export class SupporterProductDataLambdas extends GuStack {
 		const queue = new Queue(this, 'SupporterProductDataQueue', {
 			queueName: `supporter-product-data-lambdas-${this.stage}`,
 			visibilityTimeout: Duration.seconds(600),
+			deadLetterQueue: {
+				queue: new Queue(this, 'SupporterProductDataDeadLetterQueue', {
+					queueName: `dead-letters-supporter-product-data-lambdas-${this.stage}`,
+				}),
+				maxReceiveCount: 10,
+			},
 		});
 
 		const addToQueue = new Function(
@@ -169,6 +186,7 @@ export class SupporterProductDataLambdas extends GuStack {
 		processItem.addEventSource(
 			new SqsEventSource(queue, {
 				batchSize: 10,
+				maxBatchingWindow: Duration.seconds(5),
 				// Limit the number of concurrent Lambda invocations consuming from the
 				// queue to avoid hitting the account-level Lambda concurrency limit
 				// when there are hundreds of thousands of records to process.
@@ -250,5 +268,115 @@ export class SupporterProductDataLambdas extends GuStack {
 				}),
 			],
 		});
+
+		// Alarms — PROD only
+		const alarmsTopic = Topic.fromTopicArn(
+			this,
+			'AlarmsHandlerTopic',
+			`arn:aws:sns:${this.region}:${this.account}:alarms-handler-topic-${this.stage}`,
+		);
+		const addAlarmAction = (alarm: Alarm) => {
+			if (this.stage === 'PROD') {
+				alarm.addAlarmAction(new SnsAction(alarmsTopic));
+			}
+		};
+
+		// Step function execution failure — suppresses alarms between 00:00-06:00 UTC
+		// when Zuora is slow and failures are expected
+		const executionFailuresMetric = new Metric({
+			namespace: 'AWS/States',
+			metricName: 'ExecutionsFailed',
+			dimensionsMap: { StateMachineArn: stateMachine.stateMachineArn },
+			statistic: 'Sum',
+			period: Duration.seconds(60),
+			unit: Unit.COUNT,
+		});
+		const executionFailureAlarm = new Alarm(this, 'ExecutionFailureAlarm', {
+			alarmName: `Supporter Product Data step function Failure in ${this.stage}`,
+			alarmDescription: `The supporter-product-data-lambdas-${this.stage} step function has failed. Check the Step Functions console for details.`,
+			metric: new MathExpression({
+				expression: 'IF(HOUR(errors) > 5, errors)',
+				usingMetrics: { errors: executionFailuresMetric },
+				period: Duration.seconds(60),
+			}),
+			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+			threshold: 1,
+			evaluationPeriods: 1,
+			treatMissingData: TreatMissingData.NOT_BREACHING,
+		});
+		addAlarmAction(executionFailureAlarm);
+
+		// DLQ — messages appearing means a record failed processing after all retries
+		const dlq = queue.deadLetterQueue!.queue;
+		const dlqAlarm = new Alarm(this, 'UnprocessedRecordAlarm', {
+			alarmName: `There was a failure processing a supporter record in the ProcessSupporterRatePlanItemLambda lambda in ${this.stage}`,
+			alarmDescription:
+				`Check the ${dlq.queueName} SQS dead-letter queue for details of the record which failed, ` +
+				`and the ProcessSupporterRatePlanItemLambda CloudWatch logs for what went wrong.`,
+			metric: new Metric({
+				namespace: 'AWS/SQS',
+				metricName: 'ApproximateNumberOfMessagesVisible',
+				dimensionsMap: { QueueName: dlq.queueName },
+				statistic: 'Average',
+				period: Duration.seconds(60),
+			}),
+			comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
+			threshold: 1,
+			evaluationPeriods: 60,
+			treatMissingData: TreatMissingData.NOT_BREACHING,
+		});
+		addAlarmAction(dlqAlarm);
+
+		// Custom metric alarms from the lambdas themselves
+		const customMetricAlarm = (
+			id: string,
+			alarmName: string,
+			alarmDescription: string,
+			metricName: string,
+			lambdaFunctionName: string,
+		) =>
+			new SrLambdaAlarm(this, id, {
+				app: 'supporter-product-data-lambdas',
+				alarmName,
+				alarmDescription,
+				metric: new Metric({
+					namespace: 'supporter-product-data',
+					metricName,
+					dimensionsMap: { Stage: this.stage },
+					statistic: 'Average',
+					period: Duration.seconds(60),
+				}),
+				comparisonOperator:
+					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+				threshold: 1,
+				evaluationPeriods: 1,
+				treatMissingData: TreatMissingData.NOT_BREACHING,
+				lambdaFunctionNames: lambdaFunctionName,
+			});
+
+		customMetricAlarm(
+			'CsvReadAlarm',
+			'There was a csv read failure when loading supporter product data into DynamoDB',
+			`Search for 'CSV read failure' in the ${addToQueue.functionName} CloudWatch logs.`,
+			'CsvReadFailure',
+			addToQueue.functionName,
+		);
+
+		customMetricAlarm(
+			'DynamoWriteAlarm',
+			'There was a DynamoDB write failure when writing supporter product data into DynamoDB',
+			`Impact: one or more subscribers will not get their digital benefits. ` +
+				`Search for 'Error writing item to Dynamo' in the ${processItem.functionName} CloudWatch logs.`,
+			'DynamoWriteFailure',
+			processItem.functionName,
+		);
+
+		customMetricAlarm(
+			'SqsWriteAlarm',
+			`There was a failure when trying to write supporter data to the supporter-product-data-lambdas-${this.stage} SQS queue`,
+			`Search for 'Failed to write SQS batch' in the ${addToQueue.functionName} CloudWatch logs.`,
+			'SqsWriteFailure',
+			addToQueue.functionName,
+		);
 	}
 }

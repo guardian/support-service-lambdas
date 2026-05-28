@@ -1,0 +1,515 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Product data information for supporters."
+
+Parameters:
+  Stage:
+    Description: Stage name
+    Type: String
+    AllowedValues:
+      - PROD
+      - CODE
+    Default: CODE
+
+Conditions:
+  CreateProdResources: !Equals [!Ref "Stage", "PROD"]
+
+Mappings:
+  StageVariables:
+    CODE:
+      S3Bucket: supporter-product-data-export-code
+      CatalogBucket: arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-CODE/catalog.json
+      # Run once at 6am Mon-Fri
+      scheduleRate: "cron(0 6 ? * MON-FRI *)"
+      lambdaConcurrency: 30
+    PROD:
+      S3Bucket: supporter-product-data-export-prod
+      CatalogBucket: arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-PROD/catalog.json
+      # Every 5 mins
+      scheduleRate: "cron(*/5 * ? * * *)"
+      lambdaConcurrency: 50 # May need to reduce this number if we see downstream systems getting overwhelmed during a full refresh, I've tested with 30 and that was fine
+
+Resources:
+
+  SupporterProductExportBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName:
+        !FindInMap [StageVariables, !Ref Stage, S3Bucket]
+      AccessControl: Private
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteAllOldFiles
+            Status: Enabled
+            ExpirationInDays: 14
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 1
+
+  SupporterProductDataLambdaRole:
+    Type: AWS::IAM::Role
+    DependsOn: SupporterProductExportBucket
+    Properties:
+      RoleName: !Sub SupportProductData-${Stage}
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: LambdaPolicy
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - lambda:InvokeFunction
+                  - cloudwatch:PutMetricData
+                Resource: "*"
+        - PolicyName: WorkBucket
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:AbortMultipartUpload
+                  - s3:DeleteObject
+                  - s3:GetObject
+                  - s3:GetObjectAcl
+                  - s3:GetBucketAcl
+                  - s3:ListBucket
+                  - s3:PutObject
+                  - s3:GetObjectVersion
+                  - s3:DeleteObjectVersion
+                Resource: !Sub arn:aws:s3:::${SupporterProductExportBucket}/*
+        - PolicyName: ListWorkBucket
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource: !Sub arn:aws:s3:::${SupporterProductExportBucket}
+        - PolicyName: LoadCatalog
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource: !FindInMap [StageVariables, !Ref Stage, CatalogBucket]
+        - PolicyName: SSMConfigParams
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssm:GetParametersByPath
+                  - ssm:PutParameter
+                Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/supporter-product-data/*
+        - PolicyName: DynamoTable
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:PutItem
+                - dynamodb:GetItem
+                - dynamodb:UpdateItem
+                - dynamodb:DeleteItem
+                - dynamodb:BatchGetItem
+                - dynamodb:DescribeTable
+              Resource:
+                Fn::ImportValue:
+                  !Sub supporter-product-data-tables-${Stage}-SupporterProductDataTable
+        - PolicyName: SQSReceiveAndDelete
+          PolicyDocument:
+            Statement:
+            - Effect: Allow
+              Action:
+                - sqs:GetQueueUrl
+                - sqs:GetQueueAttributes
+                - sqs:SendMessage
+                - sqs:ReceiveMessage
+                - sqs:DeleteMessage
+              Resource: !GetAtt [ SupporterProductDataQueue, Arn ]
+
+  QueryZuoraLambda:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      FunctionName:
+        !Sub support-SupporterProductDataQueryZuora-${Stage}
+      Description: "Trigger zuora export"
+      Handler: "com.gu.lambdas.QueryZuoraLambda::handleRequest"
+      Role: !GetAtt [ SupporterProductDataLambdaRole, Arn ]
+      Code:
+        S3Bucket: supporter-product-data-dist
+        S3Key: !Sub support/${Stage}/supporter-product-data/supporter-product-data.jar
+      MemorySize: 512
+      Runtime: "java21"
+      Timeout: 300
+      Environment:
+        Variables:
+          'Stage': !Sub ${Stage}
+
+  FetchResultsLambda:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      FunctionName:
+        !Sub support-SupporterProductDataFetchResults-${Stage}
+      Description: "Fetch zuora export results"
+      Handler: "com.gu.lambdas.FetchResultsLambda::handleRequest"
+      Role: !GetAtt [ SupporterProductDataLambdaRole, Arn ]
+      Code:
+        S3Bucket: supporter-product-data-dist
+        S3Key: !Sub support/${Stage}/supporter-product-data/supporter-product-data.jar
+      MemorySize: 512
+      Runtime: "java21"
+      Timeout: 300
+      Environment:
+        Variables:
+          'Stage': !Sub ${Stage}
+
+  AddSupporterRatePlanItemToQueueLambda:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      FunctionName:
+        !Sub support-SupporterProductDataAddSupporterRatePlanItemToQueue-${Stage}
+      Description: "Update DynamoDB with the results of the Zuora query"
+      Handler: "com.gu.lambdas.AddSupporterRatePlanItemToQueueLambda::handleRequest"
+      Role: !GetAtt [ SupporterProductDataLambdaRole, Arn ]
+      Code:
+        S3Bucket: supporter-product-data-dist
+        S3Key: !Sub support/${Stage}/supporter-product-data/supporter-product-data.jar
+      MemorySize: 4096
+      Runtime: "java21"
+      Timeout: 600
+      Environment:
+        Variables:
+          'Stage': !Sub ${Stage}
+
+  ProcessSupporterRatePlanItemLambda:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      FunctionName:
+        !Sub support-SupporterProductDataProcessSupporterRatePlanItem-${Stage}
+      Description: "Process new subscriptions from the SQS queue"
+      Handler: "com.gu.lambdas.ProcessSupporterRatePlanItemLambda::handleRequest"
+      Role: !GetAtt [ SupporterProductDataLambdaRole, Arn ]
+      Code:
+        S3Bucket: supporter-product-data-dist
+        S3Key: !Sub support/${Stage}/supporter-product-data/supporter-product-data.jar
+      MemorySize: 4096
+      Runtime: "java21"
+      Timeout: 600
+      ReservedConcurrentExecutions: !FindInMap [StageVariables, !Ref Stage, lambdaConcurrency]
+      Environment:
+        Variables:
+          'Stage': !Sub ${Stage}
+
+  StatesExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: "Allow"
+          Principal:
+            Service: !Sub states.${AWS::Region}.amazonaws.com
+          Action: "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        - PolicyName: StatesExecutionPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "lambda:InvokeFunction"
+                Resource: "*"
+
+  SupporterProductData:
+    Type: "AWS::StepFunctions::StateMachine"
+    Properties:
+      StateMachineName: !Sub supporter-product-data-${Stage}
+      DefinitionString:
+        !Sub
+        - |-
+          {
+            "StartAt": "QueryZuora",
+            "States": {
+              "QueryZuora": {
+                "Type": "Task",
+                "Resource": "${querierArn}",
+                "Next": "WaitSomeTime",
+                "Retry": [
+                   {
+                    "ErrorEquals": ["States.ALL"],
+                    "IntervalSeconds": 30,
+                    "MaxAttempts": 3
+                  }]
+              },
+              "WaitSomeTime": {
+                "Type": "Wait",
+                "Seconds": 30,
+                "Next": "FetchResults"
+              },
+              "FetchResults": {
+                "Type": "Task",
+                "Resource": "${fetcherArn}",
+                "Next": "CheckForNewSubscriptions",
+                "Retry": [
+                   {
+                    "ErrorEquals": ["States.ALL"],
+                    "IntervalSeconds": 60,
+                    "MaxAttempts": 20,
+                    "BackoffRate": 1.0
+                  }]
+              },
+              "CheckForNewSubscriptions": {
+                "Type": "Choice",
+                "Choices": [
+                  {
+                      "Variable": "$.recordCount",
+                      "NumericEquals": 0,
+                      "Next": "NoNewSubscriptions"
+                  }
+                ],
+                "Default": "AddSupporterRatePlanItemToQueue"
+              },
+              "NoNewSubscriptions": {
+                "Type": "Pass",
+                "End": true
+              },
+              "AddSupporterRatePlanItemToQueue": {
+                "Type": "Task",
+                "Resource": "${dynamoArn}",
+                "Next": "CheckProcessingComplete",
+                "Retry": [
+                   {
+                    "ErrorEquals": ["States.ALL"],
+                    "IntervalSeconds": 30,
+                    "MaxAttempts": 3,
+                    "BackoffRate": 1.0
+                  }]
+              },
+              "CheckProcessingComplete": {
+                "Type": "Choice",
+                "Choices": [
+                  {
+                      "Variable": "$.recordCount",
+                      "NumericGreaterThanPath": "$.processedCount",
+                      "Next": "AddSupporterRatePlanItemToQueue"
+                  }
+                ],
+                "Default": "ProcessingComplete"
+              },
+              "ProcessingComplete": {
+                "Type": "Pass",
+                "End": true
+              }
+            }
+          }
+        - {
+          querierArn: !GetAtt [ QueryZuoraLambda, Arn ],
+          fetcherArn: !GetAtt [ FetchResultsLambda, Arn ],
+          dynamoArn: !GetAtt [ AddSupporterRatePlanItemToQueueLambda, Arn ]
+        }
+      RoleArn: !GetAtt [ StatesExecutionRole, Arn ]
+
+  SupporterProductDataScheduledRule:
+    Type: "AWS::Events::Rule"
+    Properties:
+      Description: "Trigger regular data synchronisation from Zuora"
+      ScheduleExpression: !FindInMap [StageVariables, !Ref Stage, scheduleRate]
+      State: "ENABLED"
+      Targets:
+        -
+          Arn: !Ref SupporterProductData
+          Id: !Sub trigger_supporter_product_data_state_machine-${Stage}
+          Input: |
+            {
+              "queryType":"incremental"
+            }
+          RoleArn: !GetAtt [ SupporterProductDataTriggerRole, Arn ]
+
+  SupporterProductDataTriggerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - events.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: TriggerStateMchine
+          PolicyDocument:
+            Version : "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - states:StartExecution
+                Resource: !Ref SupporterProductData
+
+  SupporterProductDataDeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub dead-letters-supporter-product-data-${Stage}
+      Tags:
+        - Key: Stage
+          Value: !Ref Stage
+
+  SupporterProductDataQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub supporter-product-data-${Stage}
+      RedrivePolicy:
+        deadLetterTargetArn:
+          Fn::GetAtt:
+            - "SupporterProductDataDeadLetterQueue"
+            - "Arn"
+        maxReceiveCount: 10
+      VisibilityTimeout: 3000
+      Tags:
+        - Key: Stage
+          Value: !Ref Stage
+
+  SQSTrigger:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      BatchSize: 10
+      MaximumBatchingWindowInSeconds: 5
+      Enabled: true
+      EventSourceArn: !GetAtt SupporterProductDataQueue.Arn
+      FunctionName: !Ref ProcessSupporterRatePlanItemLambda
+    DependsOn:
+      - SupporterProductDataQueue
+      - ProcessSupporterRatePlanItemLambda
+
+  ExecutionFailureAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: CreateProdResources
+    Properties:
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-${Stage}
+      AlarmName: !Sub Supporter Product Data step function Failure in ${Stage}
+      AlarmDescription: !Sub The supporter-product-data-${Stage} step function has failed. Check https://eu-west-1.console.aws.amazon.com/states/home?region=eu-west-1#/statemachines/view/arn:aws:states:eu-west-1:865473395570:stateMachine:supporter-product-data-${Stage}?statusFilter=FAILED for details.
+      Metrics:
+        - Id: errorsOutsideZuoraSlowHours
+          # Do not alarm between 00:00 and 06:00 because Zuora is very slow and we often have failures during these hours
+          Expression: "IF(HOUR(errors) > 5, errors)"
+        - Id: errors
+          ReturnData: false
+          MetricStat:
+            Metric:
+              Namespace: AWS/States
+              MetricName: ExecutionsFailed
+              Dimensions:
+                - Name: StateMachineArn
+                  Value: !Ref SupporterProductData
+            Stat: Sum
+            Period: 60
+            Unit: Count
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Threshold: 1
+      EvaluationPeriods: 1
+    DependsOn: SupporterProductData
+
+  UnprocessedSupporterProductDataRecordAlarm:
+    Type: 'AWS::CloudWatch::Alarm'
+    Condition: CreateProdResources
+    Properties:
+      AlarmName: There was a failure processing a supporter record in the ProcessSupporterRatePlanItemLambda lambda
+      AlarmDescription: >
+        Check the dead-letters-direct-mail-PROD SQS queue for details of the record which failed:
+        https://eu-west-1.console.aws.amazon.com/sqs/v2/home?region=eu-west-1#/queues/https%3A%2F%2Fsqs.eu-west-1.amazonaws.com%2F865473395570%2Fsupporter-product-data-PROD
+
+        And the ProcessSupporterRatePlanItemLambda Cloudwatch logs for details of what went wrong:
+        https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fsupport-SupporterProductDataProcessSupporterRatePlanItem-PROD
+      Namespace: AWS/SQS
+      Dimensions:
+        - Name: QueueName
+          Value: !Ref SupporterProductDataDeadLetterQueue
+      MetricName: ApproximateNumberOfMessagesVisible
+      Statistic: Average
+      ComparisonOperator: GreaterThanThreshold
+      Threshold: '1'
+      Period: '60'
+      EvaluationPeriods: '60'
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-${Stage}
+    DependsOn:
+      - SupporterProductDataDeadLetterQueue
+
+  CsvReadAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: CreateProdResources
+    Properties:
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-${Stage}
+      AlarmName: There was a csv read failure when loading supporter product data into DynamoDB
+      AlarmDescription: >
+        Search for 'CSV read failure' in the AddSupporterRatePlanItemToQueueLambda Cloudwatch logs:
+        https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fsupport-SupporterProductDataAddSupporterRatePlanItemToQueue-PROD
+      MetricName: CsvReadFailure
+      Namespace: supporter-product-data
+      Dimensions:
+        - Name: Environment
+          Value: PROD
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Threshold: 1
+      Period: 60
+      EvaluationPeriods: 1
+      Statistic: Average
+
+  DynamoWriteAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: CreateProdResources
+    Properties:
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-${Stage}
+      AlarmName: There was a DynamoDB write failure when writing supporter product data into DynamoDB
+      AlarmDescription: >
+        Impact - On or more subscriber will not get their digital benefits
+        For details of the record which failed search for 'Error writing item to Dynamo' in the ProcessSupporterRatePlanItemLambda Cloudwatch logs:
+        https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fsupport-SupporterProductDataProcessSupporterRatePlanItem-CODE
+      MetricName: DynamoWriteFailure
+      Namespace: supporter-product-data
+      Dimensions:
+        - Name: Environment
+          Value: PROD
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Threshold: 1
+      Period: 60
+      EvaluationPeriods: 1
+      Statistic: Average
+
+  SQSWriteAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: CreateProdResources
+    Properties:
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-${Stage}
+      AlarmName: There was a failure when trying to write supporter data to the supporter-product-data-PROD sqs queue
+      AlarmDescription: >
+        Search for the term 'Error writing to the queue' in the AddSupporterRatePlanItemToQueueLambda cloudwatch logs
+        https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fsupport-SupporterProductDataAddSupporterRatePlanItemToQueue-PROD
+        to see details of the failures
+      MetricName: SqsWriteFailure
+      Namespace: supporter-product-data
+      Dimensions:
+        - Name: Environment
+          Value: PROD
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Threshold: 1
+      Period: 60
+      EvaluationPeriods: 1
+      Statistic: Average
