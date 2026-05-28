@@ -43,7 +43,7 @@ export class SupporterProductDataLambdas extends SrStack {
 
 		const queue = new Queue(this, 'SupporterProductDataQueue', {
 			queueName: `supporter-product-data-lambdas-${this.stage}`,
-			visibilityTimeout: Duration.seconds(600),
+			visibilityTimeout: Duration.minutes(10),
 			deadLetterQueue: {
 				queue: new Queue(this, 'SupporterProductDataDeadLetterQueue', {
 					queueName: `dead-letters-supporter-product-data-lambdas-${this.stage}`,
@@ -55,19 +55,29 @@ export class SupporterProductDataLambdas extends SrStack {
 		// Policies shared across all lambdas — applied after lambda creation via addToRolePolicy
 		const ssmPolicy = new PolicyStatement({
 			effect: Effect.ALLOW,
-			actions: ['ssm:GetParametersByPath', 'ssm:GetParameter', 'ssm:PutParameter'],
+			actions: [
+				'ssm:GetParametersByPath',
+				'ssm:GetParameter',
+				'ssm:PutParameter',
+			],
 			// Non-standard path used by this app — not covered by the GuCDK auto-policy (which uses /${stage}/${stack}/${app})
-			resources: [`arn:aws:ssm:${this.region}:${this.account}:parameter/supporter-product-data/${this.stage}/*`],
+			resources: [
+				`arn:aws:ssm:${this.region}:${this.account}:parameter/supporter-product-data/${this.stage}/*`,
+			],
 		});
 		const s3Policy = new PolicyStatement({
 			effect: Effect.ALLOW,
 			actions: ['s3:PutObject', 's3:GetObject'],
-			resources: [`arn:aws:s3:::supporter-product-data-export-${this.stage.toLowerCase()}/*`],
+			resources: [
+				`arn:aws:s3:::supporter-product-data-export-${this.stage.toLowerCase()}/*`,
+			],
 		});
 		const dynamoPolicy = new PolicyStatement({
 			effect: Effect.ALLOW,
 			actions: ['dynamodb:UpdateItem', 'dynamodb:PutItem', 'dynamodb:GetItem'],
-			resources: [`arn:aws:dynamodb:${this.region}:${this.account}:table/SupporterProductData-${this.stage}`],
+			resources: [
+				`arn:aws:dynamodb:${this.region}:${this.account}:table/SupporterProductData-${this.stage}`,
+			],
 		});
 		const cloudwatchPolicy = new PolicyStatement({
 			effect: Effect.ALLOW,
