@@ -12,13 +12,19 @@ import { z } from 'zod';
 
 const dynamoClient = new DynamoDBClient(awsConfig);
 
-const supporterRatePlanItemSchema = z.object({
+const contributionAmountSchema = z.object({
+	amount: z.number(),
+	currency: z.string(),
+});
+
+export const supporterRatePlanItemSchema = z.object({
 	subscriptionName: z.string(), // Unique identifier for the subscription
 	identityId: z.string(), // Unique identifier for user
 	productRatePlanId: z.string(), // Unique identifier for the product in this rate plan
 	productRatePlanName: z.string(), // Name of the product in this rate plan
 	termEndDate: z.string().transform((arg) => dayjs(arg)), // Date that this subscription term ends
 	contractEffectiveDate: z.string().transform((arg) => dayjs(arg)), // Date that this subscription started
+	contributionAmount: contributionAmountSchema.nullish(),
 });
 export type SupporterRatePlanItem = z.infer<typeof supporterRatePlanItemSchema>;
 

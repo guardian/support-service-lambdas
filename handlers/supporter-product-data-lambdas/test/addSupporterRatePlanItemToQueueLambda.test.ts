@@ -1,5 +1,6 @@
-//import { addToQueue } from '../src/lambdas/addSupporterRatePlanItemToQueueLambda';
-import type { SupporterRatePlanItem } from '../src/model/supporterRatePlanItem';
+import { SqsSendError } from '@modules/aws/sqs';
+import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
+import { CsvDecodeError } from '../src/model/supporterRatePlanItem';
 import { addToQueue } from '../src/services/addItemsToQueue';
 import { parseCsvStreamWithHeader } from '../src/services/csvService';
 
@@ -49,9 +50,7 @@ describe('addSupporterRatePlanItemToQueueLambda', () => {
 			() => 120000,
 			{
 				streamCsvRows: () => streamCsvRows(csv),
-				sendBatch,
-				triggerCsvReadAlarm: noopAsync,
-				triggerSqsWriteAlarm: noopAsync,
+				sendMessagesToQueue: sendBatch,
 				putLastSuccessfulQueryTime,
 			},
 		);
@@ -64,8 +63,6 @@ describe('addSupporterRatePlanItemToQueueLambda', () => {
 	});
 
 	test('throws and triggers alarm for empty CSV', async () => {
-		const triggerCsvReadAlarm = jest.fn((): Promise<void> => Promise.resolve());
-
 		await expect(
 			addToQueue(
 				{
@@ -77,15 +74,11 @@ describe('addSupporterRatePlanItemToQueueLambda', () => {
 				() => 120000,
 				{
 					streamCsvRows: () => streamCsvRows(''),
-					sendBatch: noopAsync as never,
-					triggerCsvReadAlarm,
-					triggerSqsWriteAlarm: noopAsync,
+					sendMessagesToQueue: noopAsync as never,
 					putLastSuccessfulQueryTime: noopAsync as never,
 				},
 			),
 		).rejects.toThrow('was empty');
-
-		expect(triggerCsvReadAlarm).toHaveBeenCalledTimes(1);
 	});
 
 	test('skips already-processed rows and resumes from processedCount', async () => {
@@ -110,9 +103,7 @@ describe('addSupporterRatePlanItemToQueueLambda', () => {
 			() => 120000,
 			{
 				streamCsvRows: () => streamCsvRows(csv),
-				sendBatch,
-				triggerCsvReadAlarm: noopAsync,
-				triggerSqsWriteAlarm: noopAsync,
+				sendMessagesToQueue: sendBatch,
 				putLastSuccessfulQueryTime: noopAsync as never,
 			},
 		);
@@ -157,14 +148,62 @@ describe('addSupporterRatePlanItemToQueueLambda', () => {
 			getRemainingTime,
 			{
 				streamCsvRows: () => streamCsvRows(csv),
-				sendBatch,
-				triggerCsvReadAlarm: noopAsync,
-				triggerSqsWriteAlarm: noopAsync,
+				sendMessagesToQueue: sendBatch,
 				putLastSuccessfulQueryTime: noopAsync as never,
 			},
 		);
 
 		// Should not have processed all 6 rows
 		expect(result.processedCount).toBeLessThan(6);
+	});
+
+	test('throws CsvDecodeError for invalid CSV row', async () => {
+		const csv = [csvHeader, 'bad-row-missing-fields'].join('\n');
+
+		await expect(
+			addToQueue(
+				{
+					filename: 'file.csv',
+					recordCount: 1,
+					processedCount: 0,
+					attemptedQueryTime: '2026-03-01T00:00:00.000Z',
+				},
+				() => 120000,
+				{
+					streamCsvRows: () => streamCsvRows(csv),
+					sendMessagesToQueue: noopAsync as never,
+					putLastSuccessfulQueryTime: noopAsync as never,
+				},
+			),
+		).rejects.toBeInstanceOf(CsvDecodeError);
+	});
+
+	test('throws SqsSendError when SQS send fails', async () => {
+		const csv = [
+			csvHeader,
+			'sub-1,id-1,prp-1,plan-1,2026-03-01,2026-02-01',
+			'sub-2,id-2,prp-2,plan-2,2026-03-02,2026-02-02',
+			'sub-3,id-3,prp-3,plan-3,2026-03-03,2026-02-03',
+			'sub-4,id-4,prp-4,plan-4,2026-03-04,2026-02-04',
+			'sub-5,id-5,prp-5,plan-5,2026-03-05,2026-02-05',
+		].join('\n');
+
+		await expect(
+			addToQueue(
+				{
+					filename: 'file.csv',
+					recordCount: 5,
+					processedCount: 0,
+					attemptedQueryTime: '2026-03-01T00:00:00.000Z',
+				},
+				() => 120000,
+				{
+					streamCsvRows: () => streamCsvRows(csv),
+					sendMessagesToQueue: () =>
+						Promise.reject(new SqsSendError('SQS unavailable')),
+					putLastSuccessfulQueryTime: noopAsync as never,
+				},
+			),
+		).rejects.toBeInstanceOf(SqsSendError);
 	});
 });

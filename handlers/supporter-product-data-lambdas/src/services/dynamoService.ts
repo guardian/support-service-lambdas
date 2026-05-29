@@ -6,17 +6,16 @@ import {
 import { defaultProvider } from '@aws-sdk/credential-provider-node';
 import { logger } from '@modules/logger/logger';
 import type { Stage } from '@modules/stage';
+import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
+import { zuoraDateFormat } from '@modules/zuora/utils';
+import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import type { SupporterRatePlanItem } from '../model/supporterRatePlanItem';
 
 dayjs.extend(utc);
 
-const epochSecondFromIsoDate = (isoDate: string): string =>
-	dayjs.utc(isoDate).unix().toString();
-
-const nextDay = (isoDate: string): string =>
-	dayjs.utc(isoDate).add(1, 'day').format('YYYY-MM-DD');
+const nextDay = (isoDate: Dayjs): string =>
+	isoDate.add(1, 'day').format('YYYY-MM-DD');
 
 export class DynamoService {
 	constructor(
@@ -46,9 +45,11 @@ export class DynamoService {
 		> = {
 			':productRatePlanId': { S: item.productRatePlanId },
 			':productRatePlanName': { S: item.productRatePlanName },
-			':termEndDate': { S: item.termEndDate },
-			':contractEffectiveDate': { S: item.contractEffectiveDate },
-			':expiryDate': { N: epochSecondFromIsoDate(expiryDate) },
+			':termEndDate': { S: zuoraDateFormat(item.termEndDate) },
+			':contractEffectiveDate': {
+				S: zuoraDateFormat(item.contractEffectiveDate),
+			},
+			':expiryDate': { N: item.termEndDate.unix().toString() },
 		};
 
 		let updateExpression =

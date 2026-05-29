@@ -1,13 +1,14 @@
+import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
+import dayjs from 'dayjs';
 import { processItem } from '../src/lambdas/processSupporterRatePlanItemLambda';
-import type { SupporterRatePlanItem } from '../src/model/supporterRatePlanItem';
 
 const item: SupporterRatePlanItem = {
 	subscriptionName: 'sub-1',
 	identityId: 'id-1',
 	productRatePlanId: 'prp-1',
 	productRatePlanName: 'plan-1',
-	termEndDate: '2026-03-01',
-	contractEffectiveDate: '2026-02-01',
+	termEndDate: dayjs('2026-03-01'),
+	contractEffectiveDate: dayjs('2026-02-01'),
 };
 
 describe('processSupporterRatePlanItemLambda', () => {

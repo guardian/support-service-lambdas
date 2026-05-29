@@ -1,56 +1,32 @@
+import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import { z } from 'zod';
 
-dayjs.extend(utc);
-
-const contributionAmountSchema = z.object({
-	amount: z.number(),
-	currency: z.string(),
-});
-
-export const supporterRatePlanItemSchema = z.object({
-	subscriptionName: z.string(),
-	identityId: z.string(),
-	productRatePlanId: z.string(),
-	productRatePlanName: z.string(),
-	termEndDate: z.string(),
-	contractEffectiveDate: z.string(),
-	contributionAmount: contributionAmountSchema.nullish(),
-});
-
-export type SupporterRatePlanItem = z.infer<typeof supporterRatePlanItemSchema>;
-
-const toIsoDate = (value: string): string => {
-	const parsed = dayjs.utc(value);
-	if (!parsed.isValid()) {
-		return value;
+export class CsvDecodeError extends Error {
+	constructor(cause: unknown) {
+		super(`Failed to decode CSV row: ${String(cause)}`);
+		this.name = 'CsvDecodeError';
 	}
-	return parsed.format('YYYY-MM-DD');
-};
+}
 
-const csvValue = (
-	row: Record<string, string>,
-	key: string,
-	lineNumber: number,
-): string => {
+const csvValue = (row: Record<string, string>, key: string): string => {
 	const value = row[key];
 	if (value === undefined || value === '') {
-		throw new Error(`Missing required column ${key} on line ${lineNumber}`);
+		throw new CsvDecodeError(`Missing required column ${key}`);
 	}
 	return value;
 };
 
 export const supporterRatePlanItemFromCsvRow = (
 	row: Record<string, string>,
-	lineNumber: number,
-): SupporterRatePlanItem => ({
-	subscriptionName: csvValue(row, 'Subscription.Name', lineNumber),
-	identityId: csvValue(row, 'Account.IdentityId__c', lineNumber),
-	productRatePlanId: csvValue(row, 'ProductRatePlan.Id', lineNumber),
-	productRatePlanName: csvValue(row, 'ProductRatePlan.Name', lineNumber),
-	termEndDate: toIsoDate(csvValue(row, 'Subscription.TermEndDate', lineNumber)),
-	contractEffectiveDate: toIsoDate(
-		csvValue(row, 'Subscription.ContractEffectiveDate', lineNumber),
-	),
-});
+): SupporterRatePlanItem => {
+	return {
+		subscriptionName: csvValue(row, 'Subscription.Name'),
+		identityId: csvValue(row, 'Account.IdentityId__c'),
+		productRatePlanId: csvValue(row, 'ProductRatePlan.Id'),
+		productRatePlanName: csvValue(row, 'ProductRatePlan.Name'),
+		termEndDate: dayjs(csvValue(row, 'Subscription.TermEndDate')),
+		contractEffectiveDate: dayjs(
+			csvValue(row, 'Subscription.ContractEffectiveDate'),
+		),
+	};
+};

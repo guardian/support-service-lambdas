@@ -26,6 +26,9 @@
       "@modules/promotions/*": [
         "../../modules/promotions/src/*"
       ],
+      "@modules/supporter-product-data/*": [
+        "../../modules/supporter-product-data/src/*"
+      ],
       "@modules/supporter-product-data-lambdas/*": [
         "../../modules/supporter-product-data-lambdas/src/*"
       ]

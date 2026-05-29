@@ -29,7 +29,8 @@
     "zod": "catalog:",
     "logger": "workspace:*",
     "zuora": "workspace:*",
-    "internationalisation": "workspace:*"
+    "internationalisation": "workspace:*",
+    "supporter-product-data": "workspace:*"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147"

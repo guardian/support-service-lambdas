@@ -2,10 +2,10 @@ import { putMetric } from '@modules/aws/cloudwatch';
 import { Lazy } from '@modules/lazy';
 import { logger } from '@modules/logger/logger';
 import { type Stage, stageFromEnvironment } from '@modules/stage';
+import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
+import { supporterRatePlanItemSchema } from '@modules/supporter-product-data/supporterProductData';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { Handler, SQSEvent } from 'aws-lambda';
-import type { SupporterRatePlanItem } from '../model/supporterRatePlanItem';
-import { supporterRatePlanItemSchema } from '../model/supporterRatePlanItem';
 import { ConfigService } from '../services/configService';
 import { DynamoService } from '../services/dynamoService';
 import {

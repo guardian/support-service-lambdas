@@ -827,7 +827,12 @@ const supporterProductDataLambdas: HandlerDefinition = {
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 	},
-	moduleDependencies: [moduleLogger, moduleZuora, moduleInternationalisation],
+	moduleDependencies: [
+		moduleLogger,
+		moduleZuora,
+		moduleInternationalisation,
+		moduleSupporterProductData,
+	],
 };
 
 // MARKER new-lambda: buildcheck-const
