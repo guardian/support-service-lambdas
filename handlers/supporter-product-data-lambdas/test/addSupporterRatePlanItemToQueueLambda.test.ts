@@ -1,5 +1,6 @@
-import { addToQueue } from '../src/lambdas/addSupporterRatePlanItemToQueueLambda';
+//import { addToQueue } from '../src/lambdas/addSupporterRatePlanItemToQueueLambda';
 import type { SupporterRatePlanItem } from '../src/model/supporterRatePlanItem';
+import { addToQueue } from '../src/services/addItemsToQueue';
 import { parseCsvStreamWithHeader } from '../src/services/csvService';
 
 const csvHeader =
@@ -32,14 +33,18 @@ describe('addSupporterRatePlanItemToQueueLambda', () => {
 			csvHeader,
 			'sub-1,id-1,prp-1,plan-1,2026-03-01,2026-02-01',
 			'sub-2,id-2,prp-2,plan-2,2026-03-02,2026-02-02',
+			'sub-3,id-3,prp-3,plan-3,2026-03-03,2026-02-03',
+			'sub-4,id-4,prp-4,plan-4,2026-03-04,2026-02-04',
+			'sub-5,id-5,prp-5,plan-5,2026-03-05,2026-02-05',
+			'sub-6,id-6,prp-6,plan-6,2026-03-06,2026-02-06',
 		].join('\n');
 
 		const result = await addToQueue(
 			{
 				filename: 'file.csv',
-				recordCount: 2,
+				recordCount: 6,
 				processedCount: 0,
-				attemptedQueryTime: '2026-03-01T00:00:00.000Z',
+				attemptedQueryTime: '2026-03-06T00:00:00.000Z',
 			},
 			() => 120000,
 			{
@@ -51,10 +56,10 @@ describe('addSupporterRatePlanItemToQueueLambda', () => {
 			},
 		);
 
-		expect(sendBatch).toHaveBeenCalledTimes(1);
-		expect(result.processedCount).toBe(2);
+		expect(sendBatch).toHaveBeenCalledTimes(2);
+		expect(result.processedCount).toBe(6);
 		expect(putLastSuccessfulQueryTime).toHaveBeenCalledWith(
-			'2026-03-01T00:00:00.000Z',
+			'2026-03-06T00:00:00.000Z',
 		);
 	});
 

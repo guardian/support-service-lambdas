@@ -16,7 +16,7 @@ const timeoutBufferInMillis = maxBatchSize * 5 * 1000;
 
 type IndexedItem = [SupporterRatePlanItem, number];
 
-type AddToQueueDependencies = {
+export type AddToQueueDependencies = {
 	streamCsvRows: (
 		filename: string,
 	) => AsyncIterable<Record<string, string>> | Iterable<Record<string, string>>;
