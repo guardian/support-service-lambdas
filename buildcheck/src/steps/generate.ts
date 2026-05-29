@@ -1,25 +1,23 @@
 import * as path from 'path';
 import { build } from '../../data/build';
+import handler_index from '../../data/managed/handler/_generated_tsIndex';
+import module_index from '../../data/managed/module/_generated_tsIndex';
 import { generateWarningFile } from '../../data/snippets/BUILDCHECK.md';
-import {
-	handlerTemplates,
-	moduleTemplates,
-} from '../dynamic/generated/generatedMappings';
-import { applyTemplates } from '../dynamic/templater';
-import type { GeneratedFile } from './generatedFile';
+import type { GeneratedFile } from '../dynamic/templater';
+import { applyFileTemplates } from '../dynamic/templater';
 
 // generates files across the whole repository
 export function generate(): GeneratedFile[] {
 	const handlersFiles = build.handlers.flatMap((pkg) => {
 		const handlerFiles = withWarningFile(
-			applyTemplates(pkg, handlerTemplates),
+			applyFileTemplates(pkg, handler_index),
 			'../..',
 		);
 		return prependToTargetPath(handlerFiles, ['handlers', pkg.name]);
 	});
 	const modulesFiles = build.modules.flatMap((pkg) => {
 		const moduleFiles = withWarningFile(
-			applyTemplates(pkg, moduleTemplates),
+			applyFileTemplates(pkg, module_index),
 			'../..',
 		);
 		return prependToTargetPath(moduleFiles, ['modules', pkg.name]);
