@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import type { GeneratedFile } from '../steps/generatedFile';
+import type { GeneratedFile } from '../dynamic/templater';
+import { safeJoin } from './safeJoin';
 
 export function writeFiles(rootPath: string, files: GeneratedFile[]): void {
 	files.forEach((file) => {
@@ -11,20 +12,6 @@ export function writeFiles(rootPath: string, files: GeneratedFile[]): void {
 		console.log(`${scriptName}: writing: ${file.targetPath}`);
 		fs.writeFileSync(fullPath, file.content);
 	});
-}
-
-function safeJoin(basePath: string, relativePath: string): string {
-	const fullPath = path.join(basePath, relativePath);
-	const resolvedBase = path.resolve(basePath);
-	const resolvedTarget = path.resolve(fullPath);
-
-	if (!resolvedTarget.startsWith(resolvedBase + path.sep)) {
-		throw new Error(
-			`Path traversal detected: ${relativePath} escapes base directory ${basePath}`,
-		);
-	}
-
-	return fullPath;
 }
 
 function ensureDirectoryExists(dirPath: string): void {

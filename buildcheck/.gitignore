@@ -2,3 +2,4 @@ node_modules/
 dist/
 *.log
 /src/dynamic/generated/
+/data/**/_generated_tsIndex.ts

@@ -1,5 +1,5 @@
-import type { HandlerDefinition } from '../../build';
-import { buildPackageJson } from '../../snippets/buildPackageJson';
+import type { HandlerDefinition } from '../../../build';
+import { buildPackageJson } from '../../../snippets/buildPackageJson';
 
 export default (pkg: HandlerDefinition) => {
 	const entryPoints = pkg.entryPoints
