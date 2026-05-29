@@ -3,7 +3,7 @@ import { Lazy } from '@modules/lazy';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { Router } from '@modules/routing/router';
 import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
-import { withBodyParser, withPathParser } from '@modules/routing/withParsers';
+import { withBodyParser } from '@modules/routing/withParsers';
 import { stageFromEnvironment } from '@modules/stage';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 import type { Handler } from 'aws-lambda';
