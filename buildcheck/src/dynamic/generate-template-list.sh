@@ -43,11 +43,7 @@ write_ts_index() {
         import_name=$(to_safe_ts_identifier "$templateRel")
         kind=$(get_kind "$templateRel")
         imports+=("import $import_name from './$import_path';")
-        entries+=("    {")
-        entries+=("      relativeName: '$templateRel',")
-        entries+=("      value: $import_name,")
-        entries+=("      kind: '$kind',")
-        entries+=("    },")
+        entries+=("    { relativeName: '$templateRel', value: $import_name, kind: '$kind' },")
     done < <(find "$subdir/templates" -name "*.ts" -type f -print0 2>/dev/null | sort -fz)
 
     {
@@ -117,6 +113,11 @@ for parent_dir in "$data_dir/seeds" "$data_dir/managed"; do
         write_ts_index "$subdir"
     done < <(find "$parent_dir" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
 done
+# generate TS file indexes for managed/*/
+while IFS= read -r -d '' subdir; do
+    [[ "$(basename "$subdir")" == _* ]] && continue
+    write_ts_index "$subdir"
+done < <(find "$managed_dir" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
 
 # seeds index only needed for seeds
 write_dir_index "$data_dir/seeds"
