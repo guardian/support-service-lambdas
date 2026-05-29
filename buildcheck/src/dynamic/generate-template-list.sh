@@ -39,10 +39,7 @@ write_ts_index() {
         local import_name
         import_name=$(to_safe_ts_identifier "$templateRel")
         imports+=("import $import_name from './$import_path';")
-        entries+=("    {")
-        entries+=("      relativeName: '$templateRel',")
-        entries+=("      value: $import_name,")
-        entries+=("    },")
+        entries+=("    { relativeName: '$templateRel', value: $import_name },")
     done < <(find "$subdir/templates" -name "*.ts" -type f -print0 2>/dev/null | sort -fz)
 
     {
@@ -66,11 +63,10 @@ write_ts_index() {
 
 echo "$script_name: START generating template lists..."
 
-# generate TS file indexes for both dirs
+# generate TS file indexes for managed/*/
 while IFS= read -r -d '' subdir; do
     [[ "$(basename "$subdir")" == _* ]] && continue
     write_ts_index "$subdir"
 done < <(find "$managed_dir" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
-
 
 echo "$script_name: FINISH"
