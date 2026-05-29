@@ -1,7 +1,6 @@
 import * as path from 'path';
 import { contentPostProcessor } from '../../data/snippets/notices';
 import type { FileTemplate, TemplateIndex } from '../../data/types';
-import { toTargetPath } from '../../data/types';
 
 export type TemplateContent = string | Record<string, unknown>;
 
@@ -37,9 +36,7 @@ export function applyFileTemplates<Definition>(
 			index.templateDir,
 			template.relativeName,
 		);
-		const targetPath = toTargetPath(
-			template.relativeName.slice(0, -'.ts'.length),
-		);
+		const targetPath = template.relativeName.slice(0, -'.ts'.length);
 		return {
 			targetPath,
 			content: serializeContent(rawContent, targetPath, templateFilename),
