@@ -3,7 +3,7 @@ import { Lazy } from '@modules/lazy';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { Router } from '@modules/routing/router';
 import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
-import { withBodyParser } from '@modules/routing/withParsers';
+import { withBodyParser, withPathParser } from '@modules/routing/withParsers';
 import { stageFromEnvironment } from '@modules/stage';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 import type { Handler } from 'aws-lambda';
@@ -11,6 +11,10 @@ import {
 	createInvitationBodySchema,
 	createInvitationEndpoint,
 } from './createInvitationEndpoint';
+import {
+	deleteInvitationBodySchema,
+	deleteInvitationEndpoint,
+} from './deleteInvitationEndpoint';
 import { InvitationRepository } from './invitationRepository';
 
 const stage = stageFromEnvironment();
@@ -44,6 +48,20 @@ export const handler: Handler = Router([
 						await lazyZuoraCatalog.get(),
 						await lazyProductCatalog.get(),
 					)(body, zuoraClient, subscription, account);
+				},
+				({ body }) => body.subscriptionName,
+			),
+		),
+	},
+	{
+		httpMethod: 'DELETE',
+		path: '/invitation',
+		handler: withBodyParser(
+			deleteInvitationBodySchema,
+			withMMAIdentityCheck(
+				stage,
+				async (body) => {
+					return deleteInvitationEndpoint(invitationRepository)(body);
 				},
 				({ body }) => body.subscriptionName,
 			),
