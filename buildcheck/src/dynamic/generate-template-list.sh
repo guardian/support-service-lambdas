@@ -113,11 +113,6 @@ for parent_dir in "$data_dir/seeds" "$data_dir/managed"; do
         write_ts_index "$subdir"
     done < <(find "$parent_dir" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
 done
-# generate TS file indexes for managed/*/
-while IFS= read -r -d '' subdir; do
-    [[ "$(basename "$subdir")" == _* ]] && continue
-    write_ts_index "$subdir"
-done < <(find "$managed_dir" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
 
 # seeds index only needed for seeds
 write_dir_index "$data_dir/seeds"
