@@ -1,4 +1,4 @@
-# MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/riff-raff.yaml.ts
+# MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/managed/handler/templates/riff-raff.yaml.ts
 stacks:
   - membership
 regions:
