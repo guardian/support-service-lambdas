@@ -51,14 +51,3 @@ export type TemplateIndex<TemplateType> = {
 	templates: TemplateType[];
 	templateDir: string;
 };
-
-/** Derive the target path in the repo from a template filename (relative to templates/).
- *  e.g. `foo.json.ts`       -> `foo.json`
- *       `foo.ts.inserts.ts` -> `foo.ts`  (insertion: strip .inserts.ts)
- */
-export function toTargetPath(relPath: string): string {
-	if (relPath.endsWith('.inserts.ts')) {
-		return relPath.slice(0, -'.inserts.ts'.length);
-	}
-	return relPath.endsWith('.ts') ? relPath.slice(0, -3) : relPath;
-}
