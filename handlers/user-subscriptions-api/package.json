@@ -9,6 +9,7 @@
     "fix-formatting": "prettier --write \"**/*.ts\"",
     "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/index.ts --sourcemap --source-root=/support-service-lambdas/handlers/user-subscriptions-api/target/",
     "package": "pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr user-subscriptions-api.zip ./*.js.map ./*.js",
+    "packageQuick": "pnpm build && cd target && zip -qr user-subscriptions-api.zip ./*.js.map ./*.js",
     "cdk:test": "pnpm --filter cdk test user-subscriptions-api",
     "cdk:test-update": "pnpm --filter cdk test-update user-subscriptions-api",
     "update-lambda": "../../update-lambda.sh \"user-subscriptions-api\"",
@@ -19,7 +20,8 @@
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/managed/handler/templates/package.json.ts",
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "routing": "workspace:*"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147",

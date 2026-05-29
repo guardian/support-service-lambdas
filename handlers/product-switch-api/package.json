@@ -8,7 +8,8 @@
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
     "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/index.ts --sourcemap --source-root=/support-service-lambdas/handlers/product-switch-api/target/",
-    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr product-switch-api.zip ./*.js.map ./*.js",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm packageQuick",
+    "packageQuick": "pnpm build && cd target && zip -qr product-switch-api.zip ./*.js.map ./*.js",
     "cdk:test": "pnpm --filter cdk test product-switch-api",
     "cdk:test-update": "pnpm --filter cdk test-update product-switch-api",
     "update-lambda": "../../update-lambda.sh \"product-switch-api\"",
@@ -19,7 +20,16 @@
   "dependencies": {
     "@aws-sdk/client-sqs": "^3.940.0",
     "dayjs": "^1.11.13",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "aws": "workspace:*",
+    "email": "workspace:*",
+    "guardian-subscription": "workspace:*",
+    "internationalisation": "workspace:*",
+    "product-catalog": "workspace:*",
+    "routing": "workspace:*",
+    "supporter-product-data": "workspace:*",
+    "zuora": "workspace:*",
+    "zuora-catalog": "workspace:*"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147"

@@ -19,6 +19,7 @@
     "@aws-sdk/client-ssm": "^3.940.0",
     "@aws-sdk/credential-provider-node": "^3.940.0",
     "@aws-sdk/lib-storage": "^3.940.0",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "logger": "workspace:*"
   }
 }

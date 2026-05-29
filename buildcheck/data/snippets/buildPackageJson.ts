@@ -1,3 +1,4 @@
+import { recordFromEntries } from '../../src/util/dependencyMapper';
 import type { ModuleDefinition } from '../build';
 import { disallowedLibs } from '../dependencies';
 import { notice, relativePath } from './notices';
@@ -39,7 +40,13 @@ export function buildPackageJson(
 		},
 		NOTICE1: notice(relativePath(filename)),
 		NOTICE2: 'all dependencies are defined in buildcheck/data/build.ts',
-		dependencies: pkg.dependencies,
+		dependencies: {
+			...pkg.dependencies,
+			// adding the module dependencies to the package.json allows pnpm to correctly filter the modules when we do ---filter <project>... with the three dots
+			...recordFromEntries(
+				pkg.moduleDependencies.map((module) => [module.name, 'workspace:*']),
+			),
+		},
 		devDependencies: pkg.devDependencies,
 	};
 }

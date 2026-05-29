@@ -1,12 +1,10 @@
-import { ConfigSchema } from '../src/services/config';
 import { loadConfig } from '@modules/aws/appConfig';
-import { MParticleClient } from '../src/services/mparticleClient';
+import type { BatonSarEventStatusResponse } from '../src/routers/baton/access/handleStatus';
+import { handleSarStatus } from '../src/routers/baton/access/handleStatus';
+import type { InitiationReference } from '../src/routers/baton/initiationReference';
 import { BatonS3WriterImpl } from '../src/services/batonS3Writer';
-import { InitiationReference } from '../src/routers/baton/initiationReference';
-import {
-	BatonSarEventStatusResponse,
-	handleSarStatus,
-} from '../src/routers/baton/access/handleStatus';
+import { ConfigSchema } from '../src/services/config';
+import { MParticleClient } from '../src/services/mparticleClient';
 
 /*
  **************************************************************************

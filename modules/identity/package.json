@@ -13,7 +13,9 @@
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
     "@okta/jwt-verifier": "^4.0.1",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "aws": "workspace:*",
+    "zuora": "workspace:*"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147"

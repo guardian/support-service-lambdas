@@ -2,7 +2,7 @@
 	"name": "salesforce-event-bus",
 	"description": "An Eventbridge event bus to receive and send message to and from Salesforce",
 	"scripts": {
-		"package": "mkdir target && touch target/salesforce-event-bus.zip"
+		"packageQuick": "mkdir target && touch target/salesforce-event-bus.zip"
 	},
 	"dependencies": {}
 }
