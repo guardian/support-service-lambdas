@@ -133,9 +133,6 @@ jobs:
           configPath: ./handlers/${{ matrix.subproject }}/riff-raff.yaml
           commentingEnabled: 'false'
           contentDirectories: |
-            ${{ matrix.subproject }}-cloudformation:
-              - ./cdk/cdk.out/${{ matrix.subproject }}-CODE.template.json
-              - ./cdk/cdk.out/${{ matrix.subproject }}-PROD.template.json
             ${{ matrix.subproject }}:
               - ./handlers/${{ matrix.subproject }}/target/scala-2.13/${{ matrix.subproject }}.jar
 
