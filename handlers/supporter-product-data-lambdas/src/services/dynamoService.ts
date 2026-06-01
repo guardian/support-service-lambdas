@@ -17,6 +17,13 @@ dayjs.extend(utc);
 const nextDay = (isoDate: Dayjs): string =>
 	isoDate.add(1, 'day').format('YYYY-MM-DD');
 
+export class DynamoWriteError extends Error {
+	constructor(cause: unknown) {
+		super(`Failed to write to Dynamo: ${String(cause)}`);
+		this.name = 'DynamoWriteError';
+	}
+}
+
 export class DynamoService {
 	constructor(
 		stage: Stage,
@@ -66,17 +73,21 @@ export class DynamoService {
 				', contributionAmount = :contributionAmount, contributionCurrency = :contributionCurrency';
 		}
 
-		await this.client.send(
-			new UpdateItemCommand({
-				TableName: this.tableName,
-				Key: {
-					identityId: { S: item.identityId },
-					subscriptionName: { S: item.subscriptionName },
-				},
-				UpdateExpression: updateExpression,
-				ExpressionAttributeValues: expressionValues,
-			}),
-		);
+		try {
+			await this.client.send(
+				new UpdateItemCommand({
+					TableName: this.tableName,
+					Key: {
+						identityId: { S: item.identityId },
+						subscriptionName: { S: item.subscriptionName },
+					},
+					UpdateExpression: updateExpression,
+					ExpressionAttributeValues: expressionValues,
+				}),
+			);
+		} catch (error) {
+			throw new DynamoWriteError(error);
+		}
 
 		logger.log('Successfully wrote supporter rate plan item to DynamoDB', {
 			tableName: this.tableName,

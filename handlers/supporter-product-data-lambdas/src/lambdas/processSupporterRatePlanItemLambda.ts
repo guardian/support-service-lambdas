@@ -1,73 +1,51 @@
-import { putMetric } from '@modules/aws/cloudwatch';
 import { Lazy } from '@modules/lazy';
 import { logger } from '@modules/logger/logger';
-import { type Stage, stageFromEnvironment } from '@modules/stage';
+import { stageFromEnvironment } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import { supporterRatePlanItemSchema } from '@modules/supporter-product-data/supporterProductData';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { Handler, SQSEvent } from 'aws-lambda';
-import { ConfigService } from '../services/configService';
+import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
+import type { Handler, SQSEvent, SQSRecord } from 'aws-lambda';
+import {
+	addContributionAmountIfNeeded,
+	contributionIdsForStage,
+} from '../services/contributions';
+import {
+	getDiscountProductRatePlanIds,
+	isDiscountProductRatePlanItem,
+} from '../services/discounts';
 import { DynamoService } from '../services/dynamoService';
 import {
 	type MinimalZuoraSubscription,
 	ZuoraSubscriptionService,
 } from '../services/zuoraSubscriptionService';
 
-const contributionIdsForStage = (stage: Stage): string[] =>
-	stage === 'PROD'
-		? ['2c92a0fc5aacfadd015ad24db4ff5e97', '2c92a0fc5e1dc084015e37f58c200eea']
-		: ['2c92c0f85a6b134e015a7fcd9f0c7855', '2c92c0f85e2d19af015e3896e824092c'];
-
-const contributionAmountFromZuoraSubscription = (
-	subscription: MinimalZuoraSubscription,
-	contributionIds: string[],
-) => {
-	const contributionRatePlan = subscription.ratePlans.find((ratePlan) =>
-		contributionIds.includes(ratePlan.id),
-	);
-	const firstCharge = contributionRatePlan?.ratePlanCharges[0];
-	if (firstCharge?.price === undefined) {
-		return undefined;
-	}
-
-	return {
-		amount: firstCharge.price,
-		currency: firstCharge.currency,
-	};
-};
-
-type ProcessItemDependencies = {
-	discountIds: string[];
+export type ProcessItemDependencies = {
+	isDiscountRatePlanItem: (item: SupporterRatePlanItem) => boolean;
 	contributionIds: string[];
 	getSubscription: (
 		subscriptionName: string,
 	) => Promise<MinimalZuoraSubscription>;
 	writeItem: (item: SupporterRatePlanItem) => Promise<void>;
-	triggerDynamoWriteAlarm: () => Promise<void>;
 };
 
 const buildDependencies = async (): Promise<ProcessItemDependencies> => {
 	const stage = stageFromEnvironment();
-	const configService = new ConfigService(stage);
-	const config = await configService.loadZuoraConfig();
 
 	const zuoraClient = await ZuoraClient.create(stage);
 	const subscriptionService = new ZuoraSubscriptionService(zuoraClient);
 	const dynamoService = new DynamoService(stage);
 
+	const zuoraCatalog = await getZuoraCatalogFromS3(stage);
+	const discountIds = getDiscountProductRatePlanIds(zuoraCatalog);
+
 	return {
-		discountIds: config.discountProductRatePlanIds,
+		isDiscountRatePlanItem: (item: SupporterRatePlanItem) =>
+			isDiscountProductRatePlanItem(discountIds, item),
 		contributionIds: contributionIdsForStage(stage),
 		getSubscription: (subscriptionName) =>
 			subscriptionService.getSubscription(subscriptionName),
 		writeItem: (item) => dynamoService.writeItem(item),
-		triggerDynamoWriteAlarm: () =>
-			putMetric(
-				'DynamoWriteFailure',
-				stage,
-				[{ Name: 'Stage', Value: stage }],
-				'supporter-product-data',
-			),
 	};
 };
 
@@ -75,31 +53,6 @@ const lazyDependencies = new Lazy<ProcessItemDependencies>(
 	buildDependencies,
 	'Building dependencies',
 );
-
-const addContributionAmountIfNeeded = async (
-	item: SupporterRatePlanItem,
-	dependencies: Pick<
-		ProcessItemDependencies,
-		'contributionIds' | 'getSubscription'
-	>,
-): Promise<SupporterRatePlanItem> => {
-	if (!dependencies.contributionIds.includes(item.productRatePlanId)) {
-		return item;
-	}
-
-	const subscription = await dependencies.getSubscription(
-		item.subscriptionName,
-	);
-	const contributionAmount = contributionAmountFromZuoraSubscription(
-		subscription,
-		dependencies.contributionIds,
-	);
-
-	return {
-		...item,
-		contributionAmount,
-	};
-};
 
 export const processItem = async (
 	item: SupporterRatePlanItem,
@@ -109,60 +62,36 @@ export const processItem = async (
 	logger.mutableAddContext(item.subscriptionName);
 	logger.log('Processing supporter rate plan item', item);
 
-	if (dependencies.discountIds.includes(item.productRatePlanId)) {
+	if (dependencies.isDiscountRatePlanItem(item)) {
 		logger.log('Supporter rate plan item is a discount and will be skipped');
 		return;
 	}
 
-	try {
-		const itemWithContribution = await addContributionAmountIfNeeded(
-			item,
-			dependencies,
-		);
+	const itemWithContribution = await addContributionAmountIfNeeded(
+		item,
+		dependencies,
+	);
 
-		if (itemWithContribution.contributionAmount) {
-			logger.log('Resolved contribution amount');
-		}
-
-		logger.log('Writing item to DynamoDB');
-		await dependencies.writeItem(itemWithContribution);
-
-	} catch (error) {
-		logger.error('Error writing item to Dynamo', {
-			identityId: item.identityId,
-			error,
-		});
-		await dependencies.triggerDynamoWriteAlarm();
-	}
-};
-
-const parseItem = (body: string): SupporterRatePlanItem => {
-	try {
-		return supporterRatePlanItemSchema.parse(JSON.parse(body));
-	} catch {
-		throw new Error(
-			`Couldn't decode a SupporterRatePlanItem with body: ${body}`,
-		);
-	}
+	await dependencies.writeItem(itemWithContribution);
 };
 
 export const processEvent = async (
-	event: SQSEvent,
+	records: SQSRecord[],
 	dependencies: ProcessItemDependencies,
 ): Promise<void> => {
-	logger.log('Processing SQS event', { recordCount: event.Records.length });
-
+	logger.log('Processing SQS event', { recordCount: records.length });
 	await Promise.all(
-		event.Records.map(async (record) => {
-			const item = parseItem(record.body);
+		records.map(async (record) => {
+			const item = supporterRatePlanItemSchema.parse(JSON.parse(record.body));
 			await processItem(item, dependencies);
 		}),
 	);
-
 	logger.log('Finished processing SQS event', {
-		recordCount: event.Records.length,
+		recordCount: records.length,
 	});
 };
 
-export const handler: Handler<SQSEvent, void> = async (event) =>
-	processEvent(event, await lazyDependencies.get());
+export const handler: Handler<SQSEvent, void> = async (event) => {
+	const dependencies = await lazyDependencies.get();
+	return await processEvent(event.Records, dependencies);
+};
