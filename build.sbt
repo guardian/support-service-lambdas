@@ -363,6 +363,7 @@ def lambdaProject(
       description := projectDescription,
       assemblyJarName := s"$projectName.jar",
       assemblyMergeStrategyDiscardModuleInfo,
+      assembly / assemblyOutputPath := file("/tmp") / (assembly/assemblyJarName).value,
       riffRaffAwsRegion := "eu-west-1",
       riffRaffPackageType := assembly.value,
       riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
