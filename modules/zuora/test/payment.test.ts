@@ -36,7 +36,7 @@ describe('payment', () => {
 			mockZuoraClient.post = jest.fn().mockImplementation(() => {
 				throw new ZuoraError(
 					'An error occurred while creating the payment',
-					123,
+					{ status: 123, responseBody: '', responseHeaders: {} },
 					[],
 				);
 			});

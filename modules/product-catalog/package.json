@@ -8,7 +8,7 @@
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
     "build": "tsc --noEmit",
-    "generateFiles": "tsx -r tsconfig-paths/register --project ../../tsconfig.json src/generateSchemaCommand.ts",
+    "generateFiles": "tsx src/generateSchemaCommand.ts",
     "validateSchema": "prettier --write src/productCatalogSchema.ts && pnpm run sortSchemaKeys",
     "sortSchemaKeys": "for i in {1..3}; do eslint --fix src/productCatalogSchema.ts; done",
     "validateBillingPeriods": "prettier --write src/productBillingPeriods.ts && pnpm run sortBillingPeriodKeys",
@@ -16,12 +16,16 @@
     "validateProductPurchaseSchema": "prettier --write src/productPurchaseSchema.ts && pnpm run sortProductPurchaseKeys",
     "sortProductPurchaseKeys": "for i in {1..2}; do eslint --fix src/productPurchaseSchema.ts; done",
     "validateSchemas": "pnpm run validateSchema && pnpm run validateBillingPeriods && pnpm run validateProductPurchaseSchema",
-    "buildGeneratedFiles": "tsc --noEmit --skipLibCheck --project tsconfig-for-generated-files.json",
+    "buildGeneratedFiles": "tsc --noEmit --skipLibCheck",
     "generateSchema": "pnpm run generateFiles && pnpm run validateSchemas && pnpm run buildGeneratedFiles",
     "updateSnapshots": "jest -u --group=-integration"
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/module/package.json.ts",
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
+  "dependencies": {
+    "logger": "workspace:*",
+    "zuora-catalog": "workspace:*"
+  },
   "devDependencies": {
     "tsx": "^4.21.0",
     "tsconfig-paths": "catalog:",

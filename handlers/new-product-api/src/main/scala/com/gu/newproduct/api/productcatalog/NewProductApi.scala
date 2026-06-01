@@ -44,8 +44,7 @@ object NewProductApi {
         new DigitalPackPlans(today).planInfo ++
         new GuardianWeeklyPlans(getStartDateFromFulfilmentFiles).planInfo ++
         new DigitalVoucherPlans(getStartDateFromFulfilmentFiles).planInfo ++
-        new NationalDeliveryPlans(getStartDateFromFulfilmentFiles).planInfo ++
-        new TierThreePlans(getStartDateFromFulfilmentFiles).planInfo
+        new NationalDeliveryPlans(getStartDateFromFulfilmentFiles).planInfo
 
     allProducts
       .map({ case (planId, planDescription, startDateRules, billingPeriod) =>

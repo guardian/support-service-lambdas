@@ -1,8 +1,8 @@
 import { Lazy } from '@modules/lazy';
+import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
 import { inAppPurchaseProductRatePlanId } from '@modules/product-benefits/inAppPurchase';
-import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import { stageFromEnvironment } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
@@ -84,8 +84,8 @@ export const fetchSubscriptionAndDoUpdate = async (
 		subscriptionName: subscription.subscriptionId,
 		productRatePlanId: inAppPurchaseProductRatePlanId,
 		productRatePlanName: subscription.productId,
-		termEndDate: subscription.to.toISOString(),
-		contractEffectiveDate: subscription.from.toISOString(),
+		termEndDate: subscription.to,
+		contractEffectiveDate: subscription.from,
 	};
 	await sendToSupporterProductData(stage, supporterProductDataItem);
 	logger.log(

@@ -1,4 +1,4 @@
-import { logger } from '@modules/routing/logger';
+import { logger } from '@modules/logger/logger';
 import type { Stage } from '@modules/stage';
 import type { ZodTypeDef } from 'zod';
 import { z } from 'zod';
@@ -47,11 +47,14 @@ export class ZuoraClient extends RestClient {
 				let parsedBody: unknown;
 				try {
 					parsedBody = JSON.parse(e.responseBody);
-				} catch (parseError) {
+				} catch {
 					// we're not going to be able to extract anything useful from non-json
 					throw e;
 				}
-				throw generateZuoraError(parsedBody, e);
+				const customError = generateZuoraError(parsedBody, e);
+				if (customError !== undefined) {
+					throw customError;
+				}
 			}
 			throw new Error('unexpected error thrown during REST call', { cause: e });
 		}

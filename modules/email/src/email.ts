@@ -28,6 +28,7 @@ export type EmailPayload = {
 };
 export const DataExtensionNames = {
 	recurringContributionToSupporterPlusSwitch: 'SV_RCtoSP_Switch',
+	supporterPlusToDigitalPlusSwitch: 'SV_SPtoDP_SwitchConfirmation',
 	subscriptionCancelledEmail: 'subscription-cancelled-email',
 	updateSupporterPlusAmount: 'payment-amount-changed-email',
 	cancellationDiscountConfirmation: 'cancellation-discount-confirmation-email',
@@ -40,24 +41,43 @@ export const DataExtensionNames = {
 		'supporter-plus-annual-discount-confirmation-email',
 	discountExpiryNotificationEmail: 'discount-expiry-email',
 	stripeDisputeCancellation: 'stripe-dispute-cancellation',
+	imovoVoucherReward: 'imovo-voucher-reward',
 	supporterPlusFrequencySwitchConfirmation:
 		'SV_MonthlyToAnnualSwitchConfirmation',
-	// Day 0 thank you emails, sent by support-workers
-	supporterPlusDay0Email: 'supporter-plus', // SV_SP_WelcomeDay0
-	recurringContributionDay0Email: 'regular-contribution-thank-you', // SV_RC_WelcomeDay0
-	digitalSubscriptionDay0Email: 'digipack', // SV_DP_WelcomeDay0v2 (PROD), SV_DP_WelcomeDay0 (CODE)
-	guardianAdLiteDay0Email: 'guardian-ad-lite', // SV_CorP_WelcomeDay0
-	guardianWeeklyDay0Email: 'guardian-weekly', // SV_GW_WelcomeDay0
-	homeDeliveryObserverDay0Email: 'sunday-paper-delivery', // SV_HD_ObserverWelcomeDay0
-	homeDeliveryDay0Email: 'paper-delivery', // SV_HD_WelcomeDay0
-	subscriptionCardObserverDay0Email: 'sunday-paper-subscription-card', // SV_SC_ObserverWelcomeDay0
-	subscriptionCardDay0Email: 'paper-subscription-card', // SV_SC_WelcomeDay0
-	nationalDeliveryDay0Email: 'paper-national-delivery', // SV_ND_WelcomeDay0
-	tierThreeDay0Email: 'tier-three', // SV_T3_WelcomeDay0
+	day0Emails: {
+		// Day 0 thank you emails, sent by support-workers
+		supporterPlus: 'supporter-plus', // SV_SP_WelcomeDay0
+		recurringContribution: 'regular-contribution-thank-you', // SV_RC_WelcomeDay0
+		digitalSubscription: 'digipack', // SV_DP_WelcomeDay0v2 (PROD), SV_DP_WelcomeDay0 (CODE)
+		guardianAdLite: 'guardian-ad-lite', // SV_CorP_WelcomeDay0
+		guardianWeekly: 'guardian-weekly', // SV_GW_WelcomeDay0
+		guardianWeeklyPlus: 'guardian-weekly-plus', // SV_GW_WelcomeDay0v2
+		homeDelivery: 'paper-delivery', // SV_HD_WelcomeDay0
+		homeDeliveryObserver: 'sunday-paper-delivery', // SV_HD_ObserverWelcomeDay0
+		subscriptionCard: 'paper-subscription-card', // SV_SC_WelcomeDay0
+		subscriptionCardObserver: 'sunday-paper-subscription-card', // SV_SC_ObserverWelcomeDay0
+		nationalDelivery: 'paper-national-delivery', // SV_ND_WelcomeDay0
+		tierThree: 'tier-three', // SV_T3_WelcomeDay0
+	},
+	failedCheckoutEmails: {
+		// Failed checkout emails, sent by support-workers
+		supporterPlus: 'supporter-plus-failed',
+		recurringContribution: 'contribution-failed',
+		digitalSubscription: 'digipack-failed',
+		guardianAdLite: 'guardian-ad-lite-failed',
+		guardianWeekly: 'guardian-weekly-failed',
+		paper: 'paper-failed',
+		tierThree: 'tier-three-failed',
+	},
 } as const;
 
-export type DataExtensionName =
-	(typeof DataExtensionNames)[keyof typeof DataExtensionNames];
+// This type extracts all possible string values from nested objects, to support eg.
+// const a: DataExtensionName = DataExtensionNames.day0Emails.homeDeliveryObserver;
+type RecursiveValues<T> = T extends object
+	? { [K in keyof T]: RecursiveValues<T[K]> }[keyof T]
+	: T;
+
+export type DataExtensionName = RecursiveValues<typeof DataExtensionNames>;
 
 export const sendEmail = async (
 	stage: Stage,

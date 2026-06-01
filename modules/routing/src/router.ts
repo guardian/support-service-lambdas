@@ -1,7 +1,9 @@
 import { mapPartition, mapValues, zipAll } from '@modules/arrayFunctions';
-import { ValidationError } from '@modules/errors';
+import { getCallerInfo } from '@modules/logger/getCallerInfo';
+import { logger } from '@modules/logger/logger';
+import { objectEntries } from '@modules/objectFunctions';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { logger } from '@modules/routing/logger';
+import { buildErrorResponse } from '@modules/routing/apiGatewayResponses';
 
 export type HttpMethod =
 	| 'GET'
@@ -91,6 +93,7 @@ function matchPath(
 export function Router(
 	routes: ReadonlyArray<Route<Record<string, string>, string | null>>,
 ) {
+	const callerInfo = getCallerInfo();
 	const httpRouter = async (
 		event: APIGatewayProxyEvent,
 	): Promise<APIGatewayProxyResult> => {
@@ -118,26 +121,40 @@ export function Router(
 			}
 			return NotFoundResponse;
 		} catch (error) {
-			console.log('Caught exception with message: ', error);
-			if (error instanceof ValidationError) {
-				console.log(`Validation failure: ${error.message}`);
-				return {
-					body: error.message,
-					statusCode: 400,
-				};
-			}
-			return {
-				body: 'Internal server error',
-				statusCode: 500,
-			};
+			return buildErrorResponse(error);
 		}
 	};
 
-	return logger.wrapRouter(
-		httpRouter,
+	return logger.withContext(
+		logger.wrapFn(
+			httpRouter,
+			undefined,
+			callerInfo,
+			([
+				{
+					httpMethod,
+					path,
+					pathParameters,
+					queryStringParameters,
+					body,
+					headers,
+				},
+			]) => ({
+				logOnEntryAndExit: `${httpMethod} ${path}`,
+				logOnEntryOnly: [
+					{
+						pathParameters,
+						body,
+						queryStringParameters,
+						headers: objectEntries(headers).filter(
+							([key]) =>
+								!key.startsWith('CloudFront-') && !key.startsWith('X-Amz-'),
+						),
+					},
+				],
+			}),
+		),
 		undefined,
-		undefined,
-		0,
-		logger.getCallerInfo(),
+		true,
 	);
 }

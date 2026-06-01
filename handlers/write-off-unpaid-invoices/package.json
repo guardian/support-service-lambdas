@@ -7,8 +7,9 @@
     "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
-    "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/handlers/*.ts --sourcemap",
-    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr write-off-unpaid-invoices.zip ./*.js.map ./*.js",
+    "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/handlers/*.ts --sourcemap --source-root=/support-service-lambdas/handlers/write-off-unpaid-invoices/target/",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm packageQuick",
+    "packageQuick": "pnpm build && cd target && zip -qr write-off-unpaid-invoices.zip ./*.js.map ./*.js",
     "cdk:test": "pnpm --filter cdk test write-off-unpaid-invoices",
     "cdk:test-update": "pnpm --filter cdk test-update write-off-unpaid-invoices",
     "update-lambda": "../../update-lambda.sh \"write-off-unpaid-invoices\" get-unpaid-invoices- write-off-invoices-",
@@ -18,6 +19,9 @@
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.940.0",
-    "dayjs": "^1.11.13"
+    "dayjs": "^1.11.13",
+    "aws": "workspace:*",
+    "bigquery": "workspace:*",
+    "zuora": "workspace:*"
   }
 }

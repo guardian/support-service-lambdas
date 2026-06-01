@@ -27,8 +27,9 @@ describe('generateZuoraError', () => {
 
 		expect(error).toBeInstanceOf(ZuoraError);
 
-		expect(error.message).toBe(errorMessage);
-		expect(error.zuoraErrorDetails).toHaveLength(1);
+		expect(error?.message).toBe(errorMessage);
+		expect(error?.zuoraErrorDetails).toHaveLength(1);
+		expect(error?.cause).toBe(response);
 	});
 
 	it('parses upperCaseZuoraErrorSchema format', () => {
@@ -46,8 +47,9 @@ describe('generateZuoraError', () => {
 		const response = mockResponse(400, body);
 		const error = generateZuoraError(body, response);
 
-		expect(error.message).toBe(errorMessage);
-		expect(error.zuoraErrorDetails[0]?.code).toBe('INVALID_VALUE');
+		expect(error?.message).toBe(errorMessage);
+		expect(error?.zuoraErrorDetails[0]?.code).toBe('INVALID_VALUE');
+		expect(error?.cause).toBe(response);
 	});
 
 	it('parses faultCodeAndMessageSchema format', () => {
@@ -59,8 +61,9 @@ describe('generateZuoraError', () => {
 		const response = mockResponse(400, body);
 		const error = generateZuoraError(body, response);
 
-		expect(error.message).toBe(errorMessage);
-		expect(error.zuoraErrorDetails[0]?.code).toBe('INVALID_FIELD');
+		expect(error?.message).toBe(errorMessage);
+		expect(error?.zuoraErrorDetails[0]?.code).toBe('INVALID_FIELD');
+		expect(error?.cause).toBe(response);
 	});
 
 	it('parses codeAndMessageSchema format', () => {
@@ -72,16 +75,16 @@ describe('generateZuoraError', () => {
 		const response = mockResponse(400, body);
 		const error = generateZuoraError(body, response);
 
-		expect(error.message).toBe(errorMessage);
-		expect(error.zuoraErrorDetails[0]?.code).toBe('ClientError');
+		expect(error?.message).toBe(errorMessage);
+		expect(error?.zuoraErrorDetails[0]?.code).toBe('ClientError');
+		expect(error?.cause).toBe(response);
 	});
 
-	it('returns default error if no schema matches', () => {
+	it('returns undefined if no schema matches', () => {
 		const json = { unexpected: 'data' };
 		const response = mockResponse(418, "I'm a teapot");
 		const error = generateZuoraError(json, response);
 
-		expect(error.message).toBe('Zuora API Error');
-		expect(error.zuoraErrorDetails).toEqual([]);
+		expect(error).toBeUndefined();
 	});
 });

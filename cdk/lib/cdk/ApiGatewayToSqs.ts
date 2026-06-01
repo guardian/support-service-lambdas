@@ -4,6 +4,8 @@ import type { Queue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
 import { SrApiGateway5xxAlarm } from './SrApiGateway5xxAlarm';
 import type { SrMonitoring } from './SrLambdaAlarm';
+import { SrRestDomain } from './SrRestDomain';
+import { type SrRestDomainProps } from './SrRestDomain';
 import type { SrStack } from './SrStack';
 
 type ApiGatewayToSqsProps = {
@@ -12,6 +14,11 @@ type ApiGatewayToSqsProps = {
 	 * do we want to disable standard SrCDK 5xx alarm or override any properties?
 	 */
 	monitoring: SrMonitoring;
+	/**
+	 * By default, you get a ssl enabled url e.g. https://discount-api.support.guardianapis.com/, but you can override aspects
+	 * of it here or add a public facing fastly enabled domain.
+	 */
+	srRestDomainProps?: SrRestDomainProps;
 };
 
 function iterateParam(targetName: string, sourceName: string) {
@@ -36,6 +43,8 @@ function insertSingleProp(targetName: string, sourceName: string) {
  * Useful for webhooks etc.
  */
 export class ApiGatewayToSqs extends Construct {
+	readonly domain: SrRestDomain;
+
 	constructor(scope: SrStack, id: string, props: ApiGatewayToSqsProps) {
 		super(scope, id);
 
@@ -111,5 +120,7 @@ export class ApiGatewayToSqs extends Construct {
 					},
 				],
 			});
+
+		this.domain = new SrRestDomain(scope, apiGateway, props.srRestDomainProps);
 	}
 }

@@ -61,7 +61,6 @@ class SendConfirmationEmailTest extends AsyncFlatSpec with Matchers {
   val testVoucherData = PaperEmailData(
     plan = Plan(VoucherSunday, PlanDescription("Sunday"), testStartDateRules),
     firstPaymentDate = LocalDate.of(2018, 9, 24),
-    firstPaperDate = LocalDate.of(2018, 9, 23),
     subscriptionName = SubscriptionName("subName"),
     contacts = TestData.contacts,
     paymentMethod = TestData.directDebitPaymentMethod,

@@ -1,4 +1,4 @@
-import type { Logger } from '@modules/routing/logger';
+import type { Logger } from '@modules/logger/logger';
 import { writeOffInvoice } from '@modules/zuora/invoice';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { writeOffInvoiceService } from '../../src/services/writeOffInvoiceService';
@@ -110,6 +110,26 @@ describe('writeOffInvoiceService', () => {
 
 		expect(mockLogger.log).toHaveBeenCalledWith(
 			'Writing off invoice: INV-12345',
+		);
+	});
+
+	it('should use custom comment when provided', async () => {
+		const mockResponse = { Success: true, Id: 'writeoff_custom' };
+		(writeOffInvoice as jest.Mock).mockResolvedValue(mockResponse);
+
+		const result = await writeOffInvoiceService(
+			mockLogger,
+			mockZuoraClient,
+			'INV-NEG-001',
+			'du_test456',
+			'Negative invoice write-off due to Stripe dispute cancellation',
+		);
+
+		expect(result).toBe(true);
+		expect(writeOffInvoice).toHaveBeenCalledWith(
+			mockZuoraClient,
+			'INV-NEG-001',
+			'Negative invoice write-off due to Stripe dispute cancellation',
 		);
 	});
 

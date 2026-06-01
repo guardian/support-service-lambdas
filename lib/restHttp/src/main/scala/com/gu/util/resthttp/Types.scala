@@ -64,6 +64,14 @@ object Types {
       if (self) Some(value) else None
   }
 
+  def traverse[A, B](as: List[A])(f: A => ClientFailableOp[B]): ClientFailableOp[List[B]] =
+    as.foldRight[ClientFailableOp[List[B]]](ClientSuccess(Nil)) { (a, acc) =>
+      for {
+        b <- f(a)
+        bs <- acc
+      } yield b :: bs
+    }
+
   implicit val clientFailableOpM: Monad[ClientFailableOp] = {
 
     type ClientDisjunction[A] = Either[ClientFailure, A]

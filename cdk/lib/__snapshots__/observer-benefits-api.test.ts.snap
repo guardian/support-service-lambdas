@@ -1,0 +1,1895 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`The Observer benefits api stack matches the snapshot 1`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [
+      "GuDistributionBucketParameter",
+    ],
+    "gu:cdk:version": "TEST",
+  },
+  "Outputs": {
+    "LambdaRestApiEndpoint7EDBC694": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "LambdaRestApi687C4D83",
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region",
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "DistributionBucketName": {
+      "Default": "/account/services/artifact.bucket",
+      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "BasePathMapping": {
+      "Properties": {
+        "DomainName": {
+          "Ref": "DomainName",
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+        "Stage": {
+          "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
+        },
+      },
+      "Type": "AWS::ApiGateway::BasePathMapping",
+    },
+    "DNSRecord": {
+      "Properties": {
+        "HostedZoneId": "Z3KO35ELNWZMSX",
+        "Name": "observer-benefits-api-code.support.guardianapis.com",
+        "ResourceRecords": [
+          {
+            "Fn::GetAtt": [
+              "DomainName",
+              "RegionalDomainName",
+            ],
+          },
+        ],
+        "TTL": "120",
+        "Type": "CNAME",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "DomainName": {
+      "Properties": {
+        "DomainName": "observer-benefits-api-code.support.guardianapis.com",
+        "EndpointConfiguration": {
+          "Types": [
+            "REGIONAL",
+          ],
+        },
+        "RegionalCertificateArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:acm:eu-west-1:",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
+            ],
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "observer-benefits-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::DomainName",
+    },
+    "FastlyCname": {
+      "Properties": {
+        "Name": "observer-benefits-api.code.dev-guardianapis.com",
+        "RecordType": "CNAME",
+        "ResourceRecords": [
+          "dualstack.guardian.map.fastly.net",
+        ],
+        "Stage": "CODE",
+        "TTL": 3600,
+      },
+      "Type": "Guardian::DNS::RecordSet",
+    },
+    "LambdaD247545B": {
+      "DependsOn": [
+        "LambdaServiceRoleDefaultPolicyDAE46E21",
+        "LambdaServiceRoleA8ED4D3B",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/CODE/observer-benefits-api/observer-benefits-api.zip",
+        },
+        "Description": "Handles API requests for observer benefits",
+        "Environment": {
+          "Variables": {
+            "APP": "observer-benefits-api",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
+            "STAGE": "CODE",
+          },
+        },
+        "FunctionName": "observer-benefits-api-CODE",
+        "Handler": "index.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaServiceRoleA8ED4D3B",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs22.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "observer-benefits-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "LambdaRestApi687C4D83": {
+      "Properties": {
+        "ApiKeySourceType": "HEADER",
+        "Description": "API Gateway created by CDK",
+        "Name": "observer-benefits-api-CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "observer-benefits-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "LambdaRestApiANYApiPermissionTestobserverbenefitsapiCODELambdaRestApi6A069F08ANY0C9A394C": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/test-invoke-stage/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiANYApiPermissionobserverbenefitsapiCODELambdaRestApi6A069F08ANY9D25BBDA": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/",
+              {
+                "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
+              },
+              "/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiANYC3C9D364": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "LambdaD247545B",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "LambdaRestApi687C4D83",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "LambdaRestApiAccount4E23441E": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "LambdaRestApi687C4D83",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "LambdaRestApiCloudWatchRole73082DF6",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "LambdaRestApiApiKeyB5CCCA11": {
+      "Properties": {
+        "Enabled": true,
+        "Name": "observer-benefits-api-key-CODE",
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "LambdaRestApi687C4D83",
+            },
+            "StageName": {
+              "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "observer-benefits-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
+    },
+    "LambdaRestApiCloudWatchRole73082DF6": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "observer-benefits-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "LambdaRestApiDeployment953190892f389e6404bc2ce3718756a66fd5299c": {
+      "DependsOn": [
+        "LambdaRestApiproxyANY486C4D1F",
+        "LambdaRestApiproxy22103CFD",
+        "LambdaRestApiANYC3C9D364",
+      ],
+      "Properties": {
+        "Description": "API Gateway created by CDK",
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "LambdaRestApiDeploymentStageCODECCF2AEE8": {
+      "DependsOn": [
+        "LambdaRestApiAccount4E23441E",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "LambdaRestApiDeployment953190892f389e6404bc2ce3718756a66fd5299c",
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+        "StageName": "CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "observer-benefits-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "LambdaRestApiUsagePlanD8F7DB8D": {
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "LambdaRestApi687C4D83",
+            },
+            "Stage": {
+              "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
+            },
+            "Throttle": {},
+          },
+        ],
+        "Description": "REST endpoints for observer-benefits-api",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "observer-benefits-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Throttle": {
+          "BurstLimit": 10,
+          "RateLimit": 20,
+        },
+        "UsagePlanName": "observer-benefits-api-CODE",
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
+    },
+    "LambdaRestApiUsagePlanUsagePlanKeyResourceobserverbenefitsapiCODELambdaRestApiApiKey119A1D73A0C6FCE6": {
+      "Properties": {
+        "KeyId": {
+          "Ref": "LambdaRestApiApiKeyB5CCCA11",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "LambdaRestApiUsagePlanD8F7DB8D",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
+    },
+    "LambdaRestApiproxy22103CFD": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "LambdaRestApi687C4D83",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "LambdaRestApiproxyANY486C4D1F": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "LambdaD247545B",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "LambdaRestApiproxy22103CFD",
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "LambdaRestApiproxyANYApiPermissionTestobserverbenefitsapiCODELambdaRestApi6A069F08ANYproxyF59F7AE3": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/test-invoke-stage/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiproxyANYApiPermissionobserverbenefitsapiCODELambdaRestApi6A069F08ANYproxy69FC1F1E": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/",
+              {
+                "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
+              },
+              "/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaServiceRoleA8ED4D3B": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "observer-benefits-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "LambdaServiceRoleDefaultPolicyDAE46E21": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/CODE/observer-benefits-api/observer-benefits-api.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/observer-benefits-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/observer-benefits-api/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "LambdaServiceRoleDefaultPolicyDAE46E21",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "S3catalogreadpolicyE18911B4": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-CODE/*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "S3catalogreadpolicyE18911B4",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "ZuoraOAuthSecretsManagerpolicy5448D99B": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:CODE/Zuora-OAuth/SupportServiceLambdas-*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "ZuoraOAuthSecretsManagerpolicy5448D99B",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+  },
+}
+`;
+
+exports[`The Observer benefits api stack matches the snapshot 2`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [
+      "GuDistributionBucketParameter",
+    ],
+    "gu:cdk:version": "TEST",
+  },
+  "Outputs": {
+    "LambdaRestApiEndpoint7EDBC694": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "LambdaRestApi687C4D83",
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region",
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "DistributionBucketName": {
+      "Default": "/account/services/artifact.bucket",
+      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "ApiGateway5XXAlarmCDK11905206": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "observer-benefits-api returned a 5XX response. Search the logs below for "error" for more information. Impact: An eligible user may not be getting Observer digital benefits",
+        "AlarmName": "observer-benefits-api-PROD 5XX errors",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "ApiName",
+            "Value": "observer-benefits-api-PROD",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "5XXError",
+        "Namespace": "AWS/ApiGateway",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "observer-benefits-api",
+          },
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "LambdaD247545B",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "BasePathMapping": {
+      "Properties": {
+        "DomainName": {
+          "Ref": "DomainName",
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+        "Stage": {
+          "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
+        },
+      },
+      "Type": "AWS::ApiGateway::BasePathMapping",
+    },
+    "DNSRecord": {
+      "Properties": {
+        "HostedZoneId": "Z3KO35ELNWZMSX",
+        "Name": "observer-benefits-api.support.guardianapis.com",
+        "ResourceRecords": [
+          {
+            "Fn::GetAtt": [
+              "DomainName",
+              "RegionalDomainName",
+            ],
+          },
+        ],
+        "TTL": "120",
+        "Type": "CNAME",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "DomainName": {
+      "Properties": {
+        "DomainName": "observer-benefits-api.support.guardianapis.com",
+        "EndpointConfiguration": {
+          "Types": [
+            "REGIONAL",
+          ],
+        },
+        "RegionalCertificateArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:acm:eu-west-1:",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
+            ],
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "observer-benefits-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::DomainName",
+    },
+    "FastlyCname": {
+      "Properties": {
+        "Name": "observer-benefits-api.guardianapis.com",
+        "RecordType": "CNAME",
+        "ResourceRecords": [
+          "dualstack.guardian.map.fastly.net",
+        ],
+        "Stage": "PROD",
+        "TTL": 3600,
+      },
+      "Type": "Guardian::DNS::RecordSet",
+    },
+    "LambdaD247545B": {
+      "DependsOn": [
+        "LambdaServiceRoleDefaultPolicyDAE46E21",
+        "LambdaServiceRoleA8ED4D3B",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/PROD/observer-benefits-api/observer-benefits-api.zip",
+        },
+        "Description": "Handles API requests for observer benefits",
+        "Environment": {
+          "Variables": {
+            "APP": "observer-benefits-api",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
+            "STAGE": "PROD",
+          },
+        },
+        "FunctionName": "observer-benefits-api-PROD",
+        "Handler": "index.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaServiceRoleA8ED4D3B",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs22.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "observer-benefits-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "LambdaRestApi687C4D83": {
+      "Properties": {
+        "ApiKeySourceType": "HEADER",
+        "Description": "API Gateway created by CDK",
+        "Name": "observer-benefits-api-PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "observer-benefits-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "LambdaRestApiANYApiPermissionTestobserverbenefitsapiPRODLambdaRestApi8053B184ANYA1513E29": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/test-invoke-stage/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiANYApiPermissionobserverbenefitsapiPRODLambdaRestApi8053B184ANYBB38889C": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/",
+              {
+                "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
+              },
+              "/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiANYC3C9D364": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "LambdaD247545B",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "LambdaRestApi687C4D83",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "LambdaRestApiAccount4E23441E": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "LambdaRestApi687C4D83",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "LambdaRestApiCloudWatchRole73082DF6",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "LambdaRestApiApiKeyB5CCCA11": {
+      "Properties": {
+        "Enabled": true,
+        "Name": "observer-benefits-api-key-PROD",
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "LambdaRestApi687C4D83",
+            },
+            "StageName": {
+              "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "observer-benefits-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
+    },
+    "LambdaRestApiCloudWatchRole73082DF6": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "observer-benefits-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "LambdaRestApiDeployment953190898405e480a0e78f2f971d8de6660ea123": {
+      "DependsOn": [
+        "LambdaRestApiproxyANY486C4D1F",
+        "LambdaRestApiproxy22103CFD",
+        "LambdaRestApiANYC3C9D364",
+      ],
+      "Properties": {
+        "Description": "API Gateway created by CDK",
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "LambdaRestApiDeploymentStagePROD95065FBD": {
+      "DependsOn": [
+        "LambdaRestApiAccount4E23441E",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "LambdaRestApiDeployment953190898405e480a0e78f2f971d8de6660ea123",
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+        "StageName": "PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "observer-benefits-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "LambdaRestApiUsagePlanD8F7DB8D": {
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "LambdaRestApi687C4D83",
+            },
+            "Stage": {
+              "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
+            },
+            "Throttle": {},
+          },
+        ],
+        "Description": "REST endpoints for observer-benefits-api",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "observer-benefits-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Throttle": {
+          "BurstLimit": 10,
+          "RateLimit": 20,
+        },
+        "UsagePlanName": "observer-benefits-api-PROD",
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
+    },
+    "LambdaRestApiUsagePlanUsagePlanKeyResourceobserverbenefitsapiPRODLambdaRestApiApiKey63CE10D384F477B4": {
+      "Properties": {
+        "KeyId": {
+          "Ref": "LambdaRestApiApiKeyB5CCCA11",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "LambdaRestApiUsagePlanD8F7DB8D",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
+    },
+    "LambdaRestApiproxy22103CFD": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "LambdaRestApi687C4D83",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "LambdaRestApiproxyANY486C4D1F": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "LambdaD247545B",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "LambdaRestApiproxy22103CFD",
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "LambdaRestApiproxyANYApiPermissionTestobserverbenefitsapiPRODLambdaRestApi8053B184ANYproxy459023E8": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/test-invoke-stage/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiproxyANYApiPermissionobserverbenefitsapiPRODLambdaRestApi8053B184ANYproxyA4FEF3E9": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/",
+              {
+                "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
+              },
+              "/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaServiceRoleA8ED4D3B": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "observer-benefits-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "LambdaServiceRoleDefaultPolicyDAE46E21": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/PROD/observer-benefits-api/observer-benefits-api.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/observer-benefits-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/observer-benefits-api/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "LambdaServiceRoleDefaultPolicyDAE46E21",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "S3catalogreadpolicyE18911B4": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-PROD/*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "S3catalogreadpolicyE18911B4",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "ZuoraOAuthSecretsManagerpolicy5448D99B": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:PROD/Zuora-OAuth/SupportServiceLambdas-*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "ZuoraOAuthSecretsManagerpolicy5448D99B",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+  },
+}
+`;

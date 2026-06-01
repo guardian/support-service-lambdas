@@ -5,14 +5,6 @@ export type SfConnectedAppAuth = {
 	clientSecret: string;
 };
 
-export type SfApiUserAuth = {
-	url: string;
-	grant_type: string;
-	username: string;
-	password: string;
-	token: string;
-};
-
 const SalesforceAuthResponseSchema = z.object({
 	access_token: z.string(),
 	instance_url: z.string().url(),
@@ -23,42 +15,37 @@ const SalesforceAuthResponseSchema = z.object({
 });
 export type SfAuthResponse = z.infer<typeof SalesforceAuthResponseSchema>;
 
-export async function doSfAuth(
-	sfApiUserAuth: SfApiUserAuth,
-	sfConnectedAppAuth: SfConnectedAppAuth,
+export async function authenticateSalesforce(
+	authUrl: string,
+	body: URLSearchParams,
 ): Promise<SfAuthResponse> {
 	console.log('authenticating with Salesforce...');
 
 	try {
-		const options = {
+		const response = await fetch(authUrl, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-			body: buildBody(sfApiUserAuth, sfConnectedAppAuth),
-		};
-
-		const response = await fetch(sfApiUserAuth.url, options);
+			body: body.toString(),
+		});
 
 		if (!response.ok) {
 			const errorText = await response.text();
-			const errorMessage = `Error response from Salesforce: ${errorText}`;
-
-			throw new Error(errorMessage);
+			throw new Error(`Salesforce authentication failed: ${errorText}`);
 		}
+
 		console.log('successfully authenticated with Salesforce');
 
-		// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo use zod
-		const sfAuthResponse = (await response.json()) as SfAuthResponse;
+		const parsedResponse = SalesforceAuthResponseSchema.safeParse(
+			await response.json(),
+		);
 
-		const parseResponse =
-			SalesforceAuthResponseSchema.safeParse(sfAuthResponse);
-
-		if (!parseResponse.success) {
+		if (!parsedResponse.success) {
 			throw new Error(
-				`Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`,
+				`Error parsing response from Salesforce: ${JSON.stringify(parsedResponse.error.format())}`,
 			);
 		}
 
-		return parseResponse.data;
+		return parsedResponse.data;
 	} catch (error) {
 		const errorTextBase = 'Error authenticating with Salesforce';
 		const errorText =
@@ -67,17 +54,4 @@ export async function doSfAuth(
 				: errorTextBase;
 		throw new Error(errorText);
 	}
-}
-
-function buildBody(
-	sfApiUserAuth: SfApiUserAuth,
-	sfConnectedAppAuth: SfConnectedAppAuth,
-): string {
-	return (
-		`grant_type=password` +
-		`&client_id=${sfConnectedAppAuth.clientId}` +
-		`&client_secret=${sfConnectedAppAuth.clientSecret}` +
-		`&username=${sfApiUserAuth.username}` +
-		`&password=${sfApiUserAuth.password}${sfApiUserAuth.token}`
-	);
 }

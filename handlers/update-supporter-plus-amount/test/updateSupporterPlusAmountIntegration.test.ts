@@ -41,6 +41,7 @@ test('We can carry out an amount change', async () => {
 		productCatalog,
 		subscriptionNumber,
 		newPaymentAmount,
+		dayjs('2026-03-04'),
 	);
 
 	expect(result.newAmount).toEqual(newPaymentAmount);

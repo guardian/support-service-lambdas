@@ -1,8 +1,8 @@
 import { CloudWatchClient } from '@aws-sdk/client-cloudwatch';
 import { awsConfig } from '@modules/aws/config';
-import { getAllAlarmsInAlarm } from '../src/cloudwatch';
+import { getAllAlarmsInAlarm } from '../src/cloudwatch/getAllAlarmsInAlarm';
 
 //should be able to extract the alarms from AWS if you have membership credentials
-getAllAlarmsInAlarm({ defaultClient: new CloudWatchClient(awsConfig) }).then(
-	console.log,
-);
+getAllAlarmsInAlarm({ defaultClient: new CloudWatchClient(awsConfig) })
+	.then(console.log)
+	.catch(console.error);

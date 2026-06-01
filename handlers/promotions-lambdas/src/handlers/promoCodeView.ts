@@ -5,14 +5,15 @@ import {
 } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { awsConfig } from '@modules/aws/config';
+import { logger } from '@modules/logger/logger';
 import { promoCampaignSchema } from '@modules/promotions/v2/schema';
-import { logger } from '@modules/routing/logger';
 import type {
 	AttributeValue,
 	DynamoDBBatchResponse,
 	DynamoDBRecord,
 	DynamoDBStreamEvent,
 } from 'aws-lambda';
+import type { PromoCodeViewItem } from '../lib/promoCodeViewSchema';
 
 const getString = (attr: AttributeValue | undefined): string | undefined =>
 	attr?.S;
@@ -49,21 +50,9 @@ const extractCampaignCodes = (records: DynamoDBRecord[]): Set<string> => {
 	return campaignCodes;
 };
 
-interface PromoViewItem {
-	promo_code: string;
-	campaign_code: string;
-	promotion_name: string;
-	campaign_name: string;
-	product_family: string;
-	promotion_type: string;
-	discount_percent: number;
-	discount_months: number;
-	channel_name: string;
-}
-
 type PutRequest = {
 	PutRequest: {
-		Item: PromoViewItem;
+		Item: PromoCodeViewItem;
 	};
 };
 

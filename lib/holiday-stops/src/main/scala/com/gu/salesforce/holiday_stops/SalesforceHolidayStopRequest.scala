@@ -165,6 +165,7 @@ object SalesforceHolidayStopRequest extends Logging {
       End_Date__c: HolidayStopRequestEndDate,
       SF_Subscription__c: SFSubscriptionId, // TODO attempt to reinstate the __r with SubscriptionNameLookup approach (so it can be reused in back-fill without sep. lookup call first
       Bulk_Suspension_Reason__c: Option[BulkSuspensionReason],
+      Last_Modified_By__c: Option[String],
       Holiday_Stop_Request_Detail__r: RecordsWrapperCaseClass[CompositeTreeHolidayStopRequestsDetail],
       attributes: CompositeAttributes =
         CompositeAttributes(holidayStopRequestSfObjectRef, holidayStopRequestSfObjectRef),
@@ -205,6 +206,7 @@ object SalesforceHolidayStopRequest extends Logging {
         issuesData: List[IssueData],
         sfSubscription: MatchingSubscription,
         bulkSuspensionReason: Option[BulkSuspensionReason],
+        userId: Option[String],
     ) = {
       RecordsWrapperCaseClass(
         List(
@@ -213,6 +215,7 @@ object SalesforceHolidayStopRequest extends Logging {
             End_Date__c = HolidayStopRequestEndDate(endDate),
             SF_Subscription__c = sfSubscription.Id,
             Bulk_Suspension_Reason__c = bulkSuspensionReason,
+            Last_Modified_By__c = userId,
             Holiday_Stop_Request_Detail__r = RecordsWrapperCaseClass(
               issuesData.map { issuesData =>
                 CompositeTreeHolidayStopRequestsDetail(
@@ -273,6 +276,7 @@ object SalesforceHolidayStopRequest extends Logging {
     case class AmendHolidayStopRequestItselfBody(
         Start_Date__c: HolidayStopRequestStartDate,
         End_Date__c: HolidayStopRequestEndDate,
+        Last_Modified_By__c: Option[String],
     )
 
     case class AddHolidayStopRequestDetailBody(
@@ -288,6 +292,7 @@ object SalesforceHolidayStopRequest extends Logging {
         endDate: LocalDate,
         issuesData: List[IssueData],
         existingPublicationsThatWereToBeStopped: List[HolidayStopRequestsDetail],
+        userId: Option[String],
     ): Either[String, CompositeRequest] = {
 
       val masterRecordToBePatched = CompositePart(
@@ -298,6 +303,7 @@ object SalesforceHolidayStopRequest extends Logging {
           AmendHolidayStopRequestItselfBody(
             Start_Date__c = HolidayStopRequestStartDate(startDate),
             End_Date__c = HolidayStopRequestEndDate(endDate),
+            Last_Modified_By__c = userId,
           ),
         )(Json.writes[AmendHolidayStopRequestItselfBody]),
       )
@@ -388,16 +394,20 @@ object SalesforceHolidayStopRequest extends Logging {
   }
 
   object WithdrawHolidayStopRequest {
-    case class WithdrawnTimePatch(Withdrawn_Time__c: ZonedDateTime)
+    case class WithdrawnTimePatch(Withdrawn_Time__c: ZonedDateTime, Last_Modified_By__c: Option[String])
 
     implicit val writes = Json.writes[WithdrawnTimePatch]
   }
 
   class WithdrawHolidayStopRequest(sfPatch: HttpOp[RestRequestMaker.PatchRequest, Unit]) {
-    def run(withdrawlTime: ZonedDateTime, holidayStopRequestId: HolidayStopRequestId): ClientFailableOp[Unit] =
+    def run(
+        withdrawlTime: ZonedDateTime,
+        holidayStopRequestId: HolidayStopRequestId,
+        userId: Option[String],
+    ): ClientFailableOp[Unit] =
       sfPatch.runRequest(
         PatchRequest(
-          WithdrawnTimePatch(withdrawlTime),
+          WithdrawnTimePatch(withdrawlTime, userId),
           RelativePath(s"$holidayStopRequestSfObjectsBaseUrl/${holidayStopRequestId.value}"),
         ),
       )

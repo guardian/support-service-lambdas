@@ -1,13 +1,11 @@
+import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { Dayjs } from 'dayjs';
 import { zuoraDateFormat } from '@modules/zuora/utils';
-import {
-	catalog,
-	sandboxProductRatePlanChargeIds,
-} from '../../../../../handlers/discount-api/src/productToDiscountMapping';
 import type { ContributionTestAdditionalOptions } from '../../it-helpers/createGuardianSubscription';
 
 export const contributionSubscribeBody = (
 	subscriptionDate: Dayjs,
+	productCatalog: ProductCatalog,
 	additionOptions?: ContributionTestAdditionalOptions,
 ) => {
 	const paymentOptions = {
@@ -31,7 +29,7 @@ export const contributionSubscribeBody = (
 			CreditCardExpirationYear: 2029,
 			CreditCardType: 'Visa',
 			Type: 'CreditCardReferenceTransaction',
-			PaymentGateway: 'Stripe Gateway 1',
+			PaymentGateway: 'Stripe PaymentIntents GNM Membership',
 		},
 	};
 	const billingPeriod = additionOptions?.billingPeriod ?? 'Annual';
@@ -46,7 +44,6 @@ export const contributionSubscribeBody = (
 					PaymentGateway:
 						paymentOptions[additionOptions?.paymentMethod ?? 'directDebit']
 							.PaymentGateway,
-					CreatedRequestId__c: '17d9e675-4198-c0b0-0000-00000001280e',
 					BillCycleDay: 0,
 					AutoPay: true,
 					PaymentTerm: 'Due Upon Receipt',
@@ -69,16 +66,18 @@ export const contributionSubscribeBody = (
 						{
 							RatePlan: {
 								ProductRatePlanId:
-									catalog.CODE.recurringContribution[billingPeriod],
+									productCatalog.Contribution.ratePlans[
+										billingPeriod === 'Month' ? 'Monthly' : billingPeriod
+									].id,
 							},
 							RatePlanChargeData: [
 								{
 									RatePlanCharge: {
 										Price: additionOptions?.price ?? 100,
 										ProductRatePlanChargeId:
-											sandboxProductRatePlanChargeIds.recurringContribution[
-												billingPeriod
-											],
+											productCatalog.Contribution.ratePlans[
+												billingPeriod === 'Month' ? 'Monthly' : billingPeriod
+											].charges.Contribution.id,
 										EndDateCondition: 'SubscriptionEnd',
 									},
 								},
@@ -92,11 +91,10 @@ export const contributionSubscribeBody = (
 						TermStartDate: zuoraDateFormat(subscriptionDate),
 						AutoRenew: true,
 						InitialTermPeriodType: 'Month',
-						InitialTerm: 12,
-						RenewalTerm: 12,
+						InitialTerm: additionOptions?.termLength ?? 12,
+						RenewalTerm: additionOptions?.termLength ?? 12,
 						TermType: 'TERMED',
 						ReaderType__c: 'Direct',
-						CreatedRequestId__c: '17d9e675-4198-c0b0-0000-00000001280e',
 					},
 				},
 				SubscribeOptions: { GenerateInvoice: true, ProcessPayments: true },

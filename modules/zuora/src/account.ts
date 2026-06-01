@@ -1,3 +1,5 @@
+import type { PaymentGateway } from '@modules/zuora/orders/paymentGateways';
+import type { PaymentMethod } from '@modules/zuora/orders/paymentMethods';
 import type { ZuoraAccount } from './types';
 import { voidSchema, zuoraAccountSchema } from './types';
 import type { ZuoraClient } from './zuoraClient';
@@ -24,6 +26,9 @@ export const updateAccount = async (
 	payload: {
 		crmId?: string;
 		sfContactId__c?: string;
+		defaultPaymentMethodId?: string;
+		paymentGateway?: PaymentGateway<PaymentMethod>;
+		autoPay?: boolean;
 	},
 ): Promise<void> => {
 	const path = `/v1/accounts/${accountNumber}`;

@@ -1,12 +1,34 @@
-import type { Stage } from '@modules/stage';
+import type { BearerTokenProvider } from '@modules/zuora/auth';
 import { RestClient } from '@modules/zuora/restClient';
-import { SfBearerTokenProvider } from '@modules/salesforce/auth/sfBearerTokenProvider';
-import { getSfOauthCredentials } from '@modules/salesforce/auth/sfOAuthCredentials';
+import {
+	getSfClientCredentials,
+	SfClientCredentialsTokenProvider,
+} from '@modules/salesforce/auth/sfClientCredentialsTokenProvider';
+import {
+	getSfPasswordFlowCredentials,
+	SfPasswordFlowTokenProvider,
+} from '@modules/salesforce/auth/sfPasswordFlowTokenProvider';
+import type { SecretNames } from '@modules/salesforce/secrets';
 
 export class SfClient extends RestClient {
-	static async create(stage: Stage) {
-		const credentials = await getSfOauthCredentials(stage);
-		const tokenProvider = new SfBearerTokenProvider(credentials);
+	constructor(tokenProvider: BearerTokenProvider) {
+		super(tokenProvider);
+	}
+
+	/**
+	 * @deprecated Use createWithClientCredentials instead, for grant_type: client_credentials
+	 */
+	static async createWithPasswordFlow(secretNames: SecretNames) {
+		const credentials = await getSfPasswordFlowCredentials(secretNames);
+		const tokenProvider = new SfPasswordFlowTokenProvider(credentials);
+		return new SfClient(tokenProvider);
+	}
+
+	static async createWithClientCredentials(
+		secretName: string,
+	): Promise<SfClient> {
+		const credentials = await getSfClientCredentials(secretName);
+		const tokenProvider = new SfClientCredentialsTokenProvider(credentials);
 		return new SfClient(tokenProvider);
 	}
 }

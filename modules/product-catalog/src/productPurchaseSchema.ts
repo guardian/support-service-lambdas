@@ -6,7 +6,7 @@
 import { z } from 'zod';
 import type { ProductKey } from '@modules/product-catalog/productCatalog';
 
-const deliveryContactSchema = z.object({
+export const deliveryContactSchema = z.object({
 	address1: z.string(),
 	address2: z.string().nullish(),
 	city: z.string(),
@@ -18,10 +18,7 @@ const deliveryContactSchema = z.object({
 	workEmail: z.string(),
 });
 
-const dateOrDateStringSchema = z.preprocess(
-	(input) => (typeof input === 'string' ? new Date(input) : input),
-	z.date(),
-);
+const dateOrDateStringSchema = z.coerce.date();
 
 export const productPurchaseSchema = z.discriminatedUnion('product', [
 	z.object({
@@ -48,6 +45,9 @@ export const productPurchaseSchema = z.discriminatedUnion('product', [
 		firstDeliveryDate: dateOrDateStringSchema,
 		product: z.literal('GuardianWeeklyDomestic'),
 		ratePlan: z.union([
+			z.literal('AnnualPlus'),
+			z.literal('MonthlyPlus'),
+			z.literal('QuarterlyPlus'),
 			z.literal('OneYearGift'),
 			z.literal('ThreeMonthGift'),
 			z.literal('Annual'),
@@ -60,6 +60,9 @@ export const productPurchaseSchema = z.discriminatedUnion('product', [
 		firstDeliveryDate: dateOrDateStringSchema,
 		product: z.literal('GuardianWeeklyRestOfWorld'),
 		ratePlan: z.union([
+			z.literal('AnnualPlus'),
+			z.literal('MonthlyPlus'),
+			z.literal('QuarterlyPlus'),
 			z.literal('OneYearGift'),
 			z.literal('ThreeMonthGift'),
 			z.literal('Annual'),

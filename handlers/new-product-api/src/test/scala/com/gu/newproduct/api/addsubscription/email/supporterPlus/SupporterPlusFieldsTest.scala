@@ -6,8 +6,30 @@ import com.gu.newproduct.api.addsubscription.{DiscountMessage, ZuoraAccountId}
 import com.gu.newproduct.api.addsubscription.email.SupporterPlusEmailData
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.email.serialisers.SupporterPlusEmailDataSerialiser._
-import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{Address1, Address2, BillToAddress, BillToContact, City, Contacts, Email, FirstName, LastName, Postcode, SoldToAddress, SoldToContact, State, Title}
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, NonDirectDebitMethod, SortCode}
+import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{
+  Address1,
+  Address2,
+  BillToAddress,
+  BillToContact,
+  City,
+  Contacts,
+  Email,
+  FirstName,
+  LastName,
+  Postcode,
+  SoldToAddress,
+  SoldToContact,
+  State,
+  Title,
+}
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{
+  BankAccountName,
+  BankAccountNumberMask,
+  DirectDebit,
+  MandateId,
+  NonDirectDebitMethod,
+  SortCode,
+}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.CreditCard
 import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, Plan, PlanDescription}
@@ -64,10 +86,10 @@ class SupporterPlusFieldsTest extends AnyFlatSpec with Matchers {
       MandateId("mandateId"),
     ),
     amountMinorUnits = AmountMinorUnits(1212),
-    firstPaymentDate = LocalDate.of(2024, 03, 1),
+    firstPaymentDate = LocalDate.of(2024, 3, 1),
     plan = Plan(id = MonthlySupporterPlus, description = PlanDescription("monthly"), testStartDateRules),
     contacts = testContacts,
-    created = LocalDate.of(2024, 03, 1),
+    created = LocalDate.of(2024, 3, 1),
     subscriptionName = SubscriptionName("A-S000SubId"),
     discountMessage = None,
   )
@@ -83,35 +105,31 @@ class SupporterPlusFieldsTest extends AnyFlatSpec with Matchers {
       MandateId("mandateId"),
     ),
     amountMinorUnits = AmountMinorUnits(20000),
-    firstPaymentDate = LocalDate.of(2024, 03, 1),
+    firstPaymentDate = LocalDate.of(2024, 3, 1),
     plan = Plan(id = MonthlySupporterPlus, description = PlanDescription("monthly"), testStartDateRules),
     contacts = testContacts,
-    created = LocalDate.of(2024, 03, 1),
+    created = LocalDate.of(2024, 3, 1),
     subscriptionName = SubscriptionName("A-S000SubId"),
     discountMessage = Some(DiscountMessage("164.76 GBP for the next  12 months. Then 200 GBP per year")),
   )
 
   it should "serialise  direct debit supporterPlus Email to json" in {
 
-
     val actualJson = Json.toJson(directDebitSupporterPlusData)
     val expected =
       """
         |{
-        | "ZuoraSubscriberId":"A-S000SubId",
+        | "subscriber_id":"A-S000SubId",
         | "name":"firstBill",
-        | "account name":"someAccountName",
-        | "Mandate ID":"mandateId",
-        | "sort code":"12-34-56",
-        | "payment method": "Direct Debit",
-        | "first payment date":"Friday, 1 March 2024",
-        | "edition":"GB","amount":"12.12",
+        | "account_holder":"someAccountName",
+        | "mandate_id":"mandateId",
+        | "bank_sort_code":"12-34-56",
+        | "payment_method": "Direct Debit",
+        | "first_payment_date":"Friday, 1 March 2024",
+        | "amount":"12.12",
         | "currency":"£",
-        | "account number":"*****mask",
-        | "EmailAddress":"bill@contact.com",
-        | "created":"2024-03-01",
-        | "product":"monthly-supporter-plus",
-        | "subscription details":""
+        | "bank_account_no":"*****mask",
+        | "subscription_rate":""
         |}
       """.stripMargin
     actualJson shouldBe Json.parse(expected)
@@ -126,17 +144,13 @@ class SupporterPlusFieldsTest extends AnyFlatSpec with Matchers {
     val expected =
       """
         |{
-        | "ZuoraSubscriberId":"A-S000SubId",
-        | "EmailAddress":"bill@contact.com",
-        | "created":"2024-03-01",
+        | "subscriber_id":"A-S000SubId",
         | "amount":"12.12",
         | "currency":"£",
-        | "edition":"GB",
         | "name":"firstBill",
-        | "product":"monthly-supporter-plus",
-        | "payment method": "Credit/Debit Card",
-        | "first payment date":"Friday, 1 March 2024",
-        | "subscription details":""
+        | "payment_method": "Credit/Debit Card",
+        | "first_payment_date":"Friday, 1 March 2024",
+        | "subscription_rate":""
         | }
         """.stripMargin
     Json.toJson(nonDirectDebitData) shouldBe Json.parse(expected)
@@ -145,31 +159,25 @@ class SupporterPlusFieldsTest extends AnyFlatSpec with Matchers {
 
   it should "serialise  direct debit supporterPlus Email  with Discount to json" in {
 
-
     val actualJson = Json.toJson(directDebitSupporterPlusDataWithDiscount)
     val expected =
       """
         |{
-        | "ZuoraSubscriberId":"A-S000SubId",
+        | "subscriber_id":"A-S000SubId",
         | "name":"firstBill",
-        | "account name":"someAccountName",
-        | "Mandate ID":"mandateId",
-        | "sort code":"12-34-56",
-        | "payment method": "Direct Debit",
-        | "first payment date":"Friday, 1 March 2024",
-        | "edition":"GB",
+        | "account_holder":"someAccountName",
+        | "mandate_id":"mandateId",
+        | "bank_sort_code":"12-34-56",
+        | "payment_method": "Direct Debit",
+        | "first_payment_date":"Friday, 1 March 2024",
         | "amount":"200.00",
         | "currency":"£",
-        | "account number":"*****mask",
-        | "EmailAddress":"bill@contact.com",
-        | "created":"2024-03-01",
-        | "product":"monthly-supporter-plus",
-        | "subscription details":"164.76 GBP for the next  12 months. Then 200 GBP per year"
+        | "bank_account_no":"*****mask",
+        | "subscription_rate":"164.76 GBP for the next  12 months. Then 200 GBP per year"
         |}
       """.stripMargin
     actualJson shouldBe Json.parse(expected)
 
   }
-
 
 }

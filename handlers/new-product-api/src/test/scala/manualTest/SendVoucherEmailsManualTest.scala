@@ -88,7 +88,6 @@ object SendVoucherEmailsManualTest {
         Map(GBP -> PaymentPlan(GBP, AmountMinorUnits(3112), Monthly, "GBP 32.12 every month")),
       ),
       firstPaymentDate = LocalDate.of(2018, 12, 12),
-      firstPaperDate = LocalDate.of(2018, 11, 12),
       subscriptionName = SubscriptionName(randomSubName),
       contacts = contacts,
       paymentMethod = DirectDebit(

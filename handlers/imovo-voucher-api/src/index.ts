@@ -1,0 +1,39 @@
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
+import { stageFromEnvironment } from '@modules/stage';
+import type { SQSEvent } from 'aws-lambda';
+import { BrazeEmailSender } from './adapters/brazeEmailSender';
+import { DynamoVoucherRepository } from './adapters/dynamoVoucherRepository';
+import { ImovoVoucherProvider } from './adapters/imovoVoucherProvider';
+import { handleSqsEvent } from './domain/handleSqsEvent';
+import type { Dependencies } from './domain/ports';
+
+const dynamoClient = new DynamoDBClient({});
+const secretsClient = new SecretsManagerClient({});
+
+function getEnvVar(name: string): string {
+	const value = process.env[name];
+	if (!value) {
+		throw new Error(`Missing environment variable: ${name}`);
+	}
+	return value;
+}
+
+function buildDependencies(): Dependencies {
+	const stage = stageFromEnvironment();
+	const baseUrl = getEnvVar('IMOVO_API_BASE_URL');
+	const tableName = getEnvVar('VOUCHER_TABLE_NAME');
+	const voucherBaseUrl = getEnvVar('IMOVO_VOUCHER_BASE_URL');
+
+	return {
+		voucherProvider: new ImovoVoucherProvider(secretsClient, stage, baseUrl),
+		voucherRepository: new DynamoVoucherRepository(dynamoClient, tableName),
+		emailSender: new BrazeEmailSender(stage, voucherBaseUrl),
+	};
+}
+
+export const handler = async (event: SQSEvent): Promise<void> => {
+	const deps = buildDependencies();
+	const campaignCode = getEnvVar('IMOVO_CAMPAIGN_CODE');
+	await handleSqsEvent(event, deps, campaignCode);
+};

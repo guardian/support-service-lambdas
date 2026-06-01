@@ -6,7 +6,7 @@ import sbtassembly.PathList
 
 object Dependencies {
 
-  val awsSdkVersion = "2.40.2"
+  val awsSdkVersion = "2.42.41"
 
   val circeVersion = "0.14.13"
   val sttpVersion = "3.11.0"
@@ -15,7 +15,7 @@ object Dependencies {
   val catsEffectVersion = "2.5.5"
 
   val logging: Seq[ModuleID] = Seq(
-    "ch.qos.logback" % "logback-classic" % "1.5.23",
+    "ch.qos.logback" % "logback-classic" % "1.5.32",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
   )
 
@@ -41,8 +41,8 @@ object Dependencies {
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.3.0"
 
   // GCP
-  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.57.1"
-  val grpcNettyOverride = "io.grpc" % "grpc-netty-shaded" % "1.76.2"
+  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.66.0"
+  val grpcNettyOverride = "io.grpc" % "grpc-netty-shaded" % "1.81.0"
 
   // Cats
   val catsCore = "org.typelevel" %% "cats-core" % catsVersion
@@ -52,7 +52,7 @@ object Dependencies {
   val circe = "io.circe" %% "circe-generic" % circeVersion
   val circeParser = "io.circe" %% "circe-parser" % circeVersion
   val circeConfig = "io.circe" %% "circe-config" % "0.10.1"
-  val playJson = "org.playframework" %% "play-json" % "3.0.4"
+  val playJson = "org.playframework" %% "play-json" % "3.0.6"
 
   // upickle here is a temporary redundancy of circe while we are migrating to it
   val upickle = "com.lihaoyi" %% "upickle" % "3.1.0"
@@ -76,32 +76,51 @@ object Dependencies {
   val http4sCore = "org.http4s" %% "http4s-core" % http4sVersion
 
   // Guardian
-  val simpleConfig = "com.gu" %% "simple-configuration-ssm" % "6.1.0"
+  val simpleConfig = "com.gu" %% "simple-configuration-ssm" % "10.0.1"
   val supportInternationalisation =
     "com.gu" %% "support-internationalisation" % "0.16"
 
   // Other
   val zio = "dev.zio" %% "zio" % "1.0.18"
-  val zio2Version = "2.1.18"
+  val zio2Version = "2.1.26"
   val zio2 = "dev.zio" %% "zio" % zio2Version
   val tapirVersion =
     "1.11.33" // stick with 1.11.33 for now as later versions indirectly pull in netty-codec-base which duplicates netty-codec content
-  val enumeratum = "com.beachape" %% "enumeratum" % "1.9.2"
+  val enumeratum = "com.beachape" %% "enumeratum" % "1.9.7"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.4.0"
   val stripe = "com.stripe" % "stripe-java" % "29.1.0"
   val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.2.0"
-  val commonsIO = "commons-io" % "commons-io" % "2.19.0"
-  val jodaTime = "joda-time" % "joda-time" % "2.14.0"
-  val typesafeConfig = "com.typesafe" % "config" % "1.4.3"
+  val commonsIO = "commons-io" % "commons-io" % "2.22.0"
+  val jodaTime = "joda-time" % "joda-time" % "2.14.2"
+  val typesafeConfig = "com.typesafe" % "config" % "1.4.8"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest-should" % "0.9.0" % Test
-  val scalatest = "org.scalatest" %% "scalatest" % "3.2.19" % Test
+  val scalatest = "org.scalatest" %% "scalatest" % "3.2.20" % Test
   val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.18.1" % Test
   val scalaMock = "org.scalamock" %% "scalamock" % "7.3.2" % Test
-  val mockito = "org.mockito" % "mockito-core" % "5.21.0" % Test
+  val mockito = "org.mockito" % "mockito-core" % "5.23.0" % Test
+
+  // CVE-2026-33871: Netty HTTP/2 CONTINUATION frame flood DoS; patched in 4.1.132.Final
+  // CVE-2026-33870: Netty HTTP Request Smuggling via Chunked Extension Quoted-String Parsing
+  // Affects io.netty:netty-codec-http < 4.1.132.Final, pulled in transitively by async-http-client and aws-sdk netty-nio-client
+  val nettyVersion = "4.2.14.Final"
+  val nettyOverrides: Seq[ModuleID] = Seq(
+    "io.netty" % "netty-buffer" % nettyVersion,
+    "io.netty" % "netty-codec" % nettyVersion,
+    "io.netty" % "netty-codec-http" % nettyVersion,
+    "io.netty" % "netty-codec-http2" % nettyVersion,
+    "io.netty" % "netty-common" % nettyVersion,
+    "io.netty" % "netty-handler" % nettyVersion,
+    "io.netty" % "netty-resolver" % nettyVersion,
+    "io.netty" % "netty-transport" % nettyVersion,
+    "io.netty" % "netty-transport-classes-epoll" % nettyVersion,
+    "io.netty" % "netty-transport-native-epoll" % nettyVersion,
+    "io.netty" % "netty-transport-native-unix-common" % nettyVersion,
+  )
+
   // play-json still uses an old version of jackson-core which has a vulnerability - https://security.snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-7569538
-  val jacksonVersion = "2.17.3"
+  val jacksonVersion = "2.18.6"
 
   val jacksonDependencies: Seq[ModuleID] = Seq(
     "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,

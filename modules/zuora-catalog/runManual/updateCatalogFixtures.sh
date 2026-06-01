@@ -18,7 +18,8 @@ JQ_FILTER='
     .productRatePlans |= (sort_by(.name) | map(
       .productRatePlanCharges |= (sort_by(.name) | map(
         .pricing |= sort_by(.currency) |
-        .pricingSummary |= sort
+        .pricingSummary |= sort |
+        .productDiscountApplyDetails |= sort_by(.appliedProductRatePlanId)
       ))
     ))
   ))

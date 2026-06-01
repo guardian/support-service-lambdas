@@ -1,4 +1,4 @@
-# support-service-lambdas [![Codacy Badge](https://api.codacy.com/project/badge/Grade/df83c14325bc4c29aeae7e529f49f8a9)](https://app.codacy.com/app/johnduffell/support-service-lambdas?utm_source=github.com&utm_medium=referral&utm_content=guardian/support-service-lambdas&utm_campaign=badger)
+        # support-service-lambdas [![Codacy Badge](https://api.codacy.com/project/badge/Grade/df83c14325bc4c29aeae7e529f49f8a9)](https://app.codacy.com/app/johnduffell/support-service-lambdas?utm_source=github.com&utm_medium=referral&utm_content=guardian/support-service-lambdas&utm_campaign=badger)
 
 This is the reader revenue lambda API/orchestration layer. It is made up of lambdas, defined in the `/handlers` directory and
 libraries defined in the `/libs` directory. Code in the repo is mostly Scala but for new lambdas prefer to use Typescript 

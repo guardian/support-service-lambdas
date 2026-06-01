@@ -1,10 +1,11 @@
 import { ValidationError } from '@modules/errors';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { isoCurrencySchema } from '@modules/internationalisation/schemas';
+import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
-import { logger } from '@modules/routing/logger';
+import { ok } from '@modules/routing/apiGatewayResponses';
 import type { Stage } from '@modules/stage';
 import {
 	getBillingPreview,
@@ -19,10 +20,7 @@ import type {
 	OrderRequest,
 	PreviewOrderRequest,
 } from '@modules/zuora/orders/orderRequests';
-import {
-	executeOrderRequest,
-	previewOrderRequest,
-} from '@modules/zuora/orders/orderRequests';
+import { executeOrderRequest } from '@modules/zuora/orders/orderRequests';
 import type { ZuoraAccount } from '@modules/zuora/types';
 import type {
 	RatePlan,
@@ -33,6 +31,9 @@ import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { EligibilityChecker } from '../../discount-api/src/eligibilityChecker';
+import { zuoraSwitchResponseSchema } from './changePlan/schemas';
+import type { ZuoraPreviewResponse } from './doPreviewInvoices';
+import { doPreviewInvoices } from './doPreviewInvoices';
 import { sendFrequencySwitchConfirmationEmail } from './frequencySwitchEmail';
 import type {
 	FrequencySwitchErrorResponse,
@@ -40,11 +41,6 @@ import type {
 	FrequencySwitchRequestBody,
 	FrequencySwitchSuccessResponse,
 } from './frequencySwitchSchemas';
-import type { ZuoraPreviewResponse } from './schemas';
-import {
-	zuoraPreviewResponseSchema,
-	zuoraSwitchResponseSchema,
-} from './schemas';
 
 /**
  * Validation requirements for frequency switch eligibility.
@@ -286,7 +282,7 @@ function prepareFrequencySwitchInfo(
 		type: 'ChangePlan',
 		triggerDates,
 		changePlan: {
-			productRatePlanId: currentRatePlan.productRatePlanId,
+			ratePlanId: currentRatePlan.id,
 			subType: 'Upgrade',
 			newProductRatePlan: {
 				productRatePlanId: targetRatePlanId,
@@ -325,10 +321,9 @@ export async function previewFrequencySwitch(
 		...baseOrderRequest,
 	};
 
-	const zuoraPreview: ZuoraPreviewResponse = await previewOrderRequest(
+	const zuoraPreview: ZuoraPreviewResponse = await doPreviewInvoices(
 		zuoraClient,
 		orderRequest,
-		zuoraPreviewResponseSchema,
 	);
 
 	logger.log('Orders preview returned successful response', zuoraPreview);
@@ -526,7 +521,7 @@ export const frequencySwitchHandler =
 				account,
 			);
 
-			return { statusCode: 200, body: JSON.stringify(response) };
+			return ok(response);
 		} catch (error) {
 			// Only return ValidationError messages to clients for security
 			if (error instanceof ValidationError) {

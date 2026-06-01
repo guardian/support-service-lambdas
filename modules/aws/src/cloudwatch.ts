@@ -14,12 +14,14 @@ export const metricNamespace = 'support-service-lambdas';
 export async function putMetric(
 	metricName: string,
 	stage: string,
+	dimensionsOverride?: Dimension[],
+	namespaceOverride?: string,
 ): Promise<void> {
 	const cloudwatch = new CloudWatchClient({
 		region: process.env.AWS_REGION ?? 'eu-west-1',
 	});
 
-	const dimensions: Dimension[] = [
+	const dimensions: Dimension[] = dimensionsOverride ?? [
 		{
 			Name: 'App',
 			Value: process.env.APP,
@@ -31,7 +33,7 @@ export async function putMetric(
 	];
 
 	const params: PutMetricDataCommandInput = {
-		Namespace: metricNamespace,
+		Namespace: namespaceOverride ?? metricNamespace,
 		MetricData: [
 			{
 				MetricName: metricName,

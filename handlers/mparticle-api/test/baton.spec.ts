@@ -168,7 +168,6 @@ describe('mparticle-api Baton tests', () => {
 			requestId,
 		);
 
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- we want to exclude message from this check
 		const { message, ...resultWithoutMessage } = result;
 		expect(resultWithoutMessage).toEqual({
 			requestType: 'SAR',

@@ -19,6 +19,7 @@ export const digitalSubscriptionBenefits = supporterPlusBenefits.concat([
 	'newspaperEdition',
 	'guardianWeeklyEdition',
 	'newspaperArchive',
+	'multipleAccounts',
 ]);
 
 export const productBenefitMapping: Record<
@@ -37,18 +38,18 @@ export const productBenefitMapping: Record<
 	PartnerMembership: ['liveApp', 'feastApp', 'hideSupportMessaging'],
 	PatronMembership: digitalSubscriptionBenefits,
 	GuardianPatron: digitalSubscriptionBenefits,
-	GuardianWeeklyDomestic: ['hideSupportMessaging'],
-	GuardianWeeklyRestOfWorld: ['hideSupportMessaging'],
-	GuardianWeeklyZoneA: ['hideSupportMessaging'],
-	GuardianWeeklyZoneB: ['hideSupportMessaging'],
-	GuardianWeeklyZoneC: ['hideSupportMessaging'],
+	GuardianWeeklyDomestic: digitalSubscriptionBenefits,
+	GuardianWeeklyRestOfWorld: digitalSubscriptionBenefits,
+	GuardianWeeklyZoneA: digitalSubscriptionBenefits,
+	GuardianWeeklyZoneB: digitalSubscriptionBenefits,
+	GuardianWeeklyZoneC: digitalSubscriptionBenefits,
 	Contribution: ['hideSupportMessaging'],
 	OneTimeContribution: ['hideSupportMessaging'],
 	InAppPurchase: ['hideSupportMessaging'],
 };
 
 const itemIsLessThanThreeMonthsOld = (item: SupporterRatePlanItem) =>
-	dayjs(item.contractEffectiveDate).add(3, 'month').isAfter(dayjs());
+	item.contractEffectiveDate.add(3, 'month').isAfter(dayjs());
 
 export const itemIsValidForProduct = (
 	item: SupporterRatePlanItem,

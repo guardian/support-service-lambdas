@@ -2,8 +2,8 @@ import { getSSMParam } from '@modules/aws/ssm';
 import { buildAuthClient, runQuery } from '@modules/bigquery/bigquery';
 import { stageFromEnvironment } from '@modules/stage';
 import { CODEDataMockQueryResponse } from '../../test/handlers/data/CODEDataMockQueryResponse';
-import { InvoiceRecordsArraySchema } from '../types';
 import type { GetInvoicesOutput, InvoiceRecord } from '../types';
+import { InvoiceRecordsArraySchema } from '../types';
 
 export const handler = async (): Promise<GetInvoicesOutput> => {
 	try {

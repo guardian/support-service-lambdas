@@ -103,13 +103,10 @@ class GuardianWeeklyEmailDataTest extends AnyFlatSpec with Matchers {
   it should "generate email fields with direct debit fields" in {
     GuardianWeeklyFields.serialise(directDebitEmailData) should equal(
       Map(
-        "EmailAddress" -> "bill@contact.com",
-        "ZuoraSubscriberId" -> "A-S000SubId",
         "subscriber_id" -> "A-S000SubId",
         "first_name" -> "FirstSold",
         "last_name" -> "lastSold",
-        "date_of_first_paper" -> "Saturday, 1 December 2018",
-        "date_of_first_payment" -> "Saturday, 1 December 2018",
+        "first_payment_date" -> "Saturday, 1 December 2018",
         "subscription_rate" -> "GBP 12.25 every month",
         "payment_method" -> "Direct Debit",
         "bank_sort_code" -> "12-34-56",
@@ -135,13 +132,10 @@ class GuardianWeeklyEmailDataTest extends AnyFlatSpec with Matchers {
   it should "generate email fields with direct debit fields and a discount is available" in {
     GuardianWeeklyFields.serialise(directDebitEmailDataWithDiscount) should equal(
       Map(
-        "EmailAddress" -> "bill@contact.com",
-        "ZuoraSubscriberId" -> "A-S000SubId",
         "subscriber_id" -> "A-S000SubId",
         "first_name" -> "FirstSold",
         "last_name" -> "lastSold",
-        "date_of_first_paper" -> "Saturday, 1 December 2018",
-        "date_of_first_payment" -> "Saturday, 1 December 2018",
+        "first_payment_date" -> "Saturday, 1 December 2018",
         "subscription_rate" -> "GBP 10 for first two months, then GBP 12.25 every month",
         "payment_method" -> "Direct Debit",
         "bank_sort_code" -> "12-34-56",

@@ -19,6 +19,7 @@ class IdentityBackfillStepsTest extends AnyFlatSpec with Matchers {
       _ => ClientSuccess(IdentityId("123")),
       (_, _) => ContinueProcessing(()),
       (_, _) => ContinueProcessing(()),
+      (_, _) => ContinueProcessing(()),
     )(DomainRequest(EmailAddress("test@gu.com"), dryRun = false))
 
     statusCode shouldBe "200"
@@ -28,6 +29,7 @@ class IdentityBackfillStepsTest extends AnyFlatSpec with Matchers {
     val ApiResponse(statusCode, _, _) = IdentityBackfillSteps.apply(
       _ => ReturnWithResponse(ApiResponse("400", "")),
       _ => fail(),
+      (_, _) => fail(),
       (_, _) => fail(),
       (_, _) => fail(),
     )(DomainRequest(EmailAddress("test@gu.com"), dryRun = false))

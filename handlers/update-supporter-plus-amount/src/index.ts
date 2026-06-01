@@ -1,5 +1,6 @@
 import { sendEmail } from '@modules/email/email';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
+import { ok } from '@modules/routing/apiGatewayResponses';
 import { Router } from '@modules/routing/router';
 import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
 import { withParsers } from '@modules/routing/withParsers';
@@ -10,6 +11,7 @@ import type {
 } from '@modules/zuora/types/objects';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyResult, Handler } from 'aws-lambda';
+import dayjs from 'dayjs';
 import { z } from 'zod';
 import type { RequestBody } from './schema';
 import { requestBodySchema } from './schema';
@@ -61,10 +63,8 @@ async function handleUpdateAmount(
 		productCatalog,
 		subscriptionNumber,
 		requestBody.newPaymentAmount,
+		dayjs(),
 	);
 	await sendEmail(stage, createThankYouEmail(emailFields));
-	return {
-		body: JSON.stringify({ message: 'Success' }),
-		statusCode: 200,
-	};
+	return ok({ message: 'Success' });
 }

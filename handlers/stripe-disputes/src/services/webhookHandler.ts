@@ -1,14 +1,15 @@
+import type { Logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
-import type { Logger } from '@modules/routing/logger';
+import { internalServerError, ok } from '@modules/routing/apiGatewayResponses';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import AWS from 'aws-sdk';
-import {
-	listenDisputeClosedInputSchema,
-	listenDisputeCreatedInputSchema,
-} from '../dtos';
 import type {
 	ListenDisputeClosedRequestBody,
 	ListenDisputeCreatedRequestBody,
+} from '../dtos';
+import {
+	listenDisputeClosedInputSchema,
+	listenDisputeCreatedInputSchema,
 } from '../dtos';
 
 const sqs = new AWS.SQS();
@@ -30,23 +31,14 @@ export function handleStripeWebhook(
 
 			logger.log(`${eventType} webhook successfully queued for processing`);
 
-			return {
-				statusCode: 200,
-				body: JSON.stringify({
-					message: `${eventType} webhook received and queued for processing`,
-					disputeId: webhookData.data.object.id,
-				}),
-			};
+			return ok({
+				message: `${eventType} webhook received and queued for processing`,
+				disputeId: webhookData.data.object.id,
+			});
 		} catch (error) {
 			logger.error(`Error processing ${eventType} webhook:`, error);
 
-			return {
-				statusCode: 500,
-				body: JSON.stringify({
-					error: 'Internal server error',
-					message: 'Failed to process webhook',
-				}),
-			};
+			return internalServerError();
 		}
 	};
 }

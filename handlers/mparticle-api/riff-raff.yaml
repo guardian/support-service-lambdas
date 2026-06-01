@@ -23,5 +23,6 @@ deployments:
       functionNames:
         - mparticle-api-http-
         - mparticle-api-baton-
+        - mparticle-api-mma-user-deletion-
     dependencies:
       - mparticle-api-cloudformation

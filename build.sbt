@@ -1,5 +1,8 @@
 import Dependencies.*
 
+// CVE-2026-33871: force patched Netty across all subprojects
+ThisBuild / dependencyOverrides ++= nettyOverrides
+
 val scala2Settings = Seq(
   ThisBuild / scalaVersion := "2.13.18",
   version := "0.0.1",
@@ -276,6 +279,7 @@ lazy val `google-bigquery` = library(
 )
   .settings(
     libraryDependencies ++= Seq(googleBigQuery, grpcNettyOverride, playJson) ++ logging,
+    dependencyOverrides ++= jacksonDependencies,
   )
 
 lazy val `zuora-baton` = library(
@@ -366,6 +370,7 @@ def lambdaProject(
       riffRaffManifestProjectName := s"support-service-lambdas::$projectName",
       riffRaffArtifactResources += (file(s"handlers/$projectName/$cfName"), s"cfn/$cfName"),
       dependencyOverrides ++= jacksonDependencies,
+      dependencyOverrides ++= nettyOverrides,
       libraryDependencies ++= externalDependencies ++ logging,
       Test / test := ((Test / test) dependsOn (projectDependencies.map(_.project / Test / test) *)).value,
       Test / testOnly := ((Test / testOnly) dependsOn (projectDependencies.map(_.project / Test / test) *)).evaluated,
@@ -378,6 +383,7 @@ lazy val `zuora-callout-apis` = lambdaProject(
   "Handles auto-cancellations for membership and subscriptions",
   Seq(
     awsLambda,
+    awsEvents,
     okhttp3,
     scalatest,
     stripe,
@@ -392,9 +398,11 @@ lazy val `identity-backfill` = lambdaProject(
   Seq(supportInternationalisation),
   Seq(
     zuora,
+    `zuora-core`,
     `salesforce-client` % "compile->compile;test->test",
     handler,
     effectsDepIncludingTestFolder,
+    `effects-sqs`,
     testDep,
   ),
 )

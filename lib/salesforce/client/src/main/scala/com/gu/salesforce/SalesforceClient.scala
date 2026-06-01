@@ -49,22 +49,6 @@ object SalesforceClient extends LazyLogging {
     builderWithHeaders.url(url).build()
   }
 
-  def withAlternateAccessTokenIfPresentInHeaderList(
-      headers: Option[Map[String, String]],
-  ): StringHttpRequest => StringHttpRequest =
-    withMaybeAlternateAccessToken(headers.flatMap(_.get("X-Ephemeral-Salesforce-Access-Token")))
-
-  def withMaybeAlternateAccessToken(
-      maybeAlternateAccessToken: Option[String],
-  )(requestInfo: StringHttpRequest): StringHttpRequest =
-    maybeAlternateAccessToken
-      .map { alternateAccessToken =>
-        val nonAuthHeaders =
-          requestInfo.headers.filterNot(header => AuthHeaderNames.map(_.toLowerCase).contains(header.name.toLowerCase))
-        requestInfo.copy(headers = nonAuthHeaders ++ getAuthHeaders(alternateAccessToken))
-      }
-      .getOrElse(requestInfo)
-
   case class SalesforceErrorResponseBody(message: String, errorCode: String) {
     override def toString = s"${errorCode} : ${message}"
   }

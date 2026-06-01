@@ -6,7 +6,7 @@ describe('getTeam', () => {
 
 		const team = prodAppToTeams(app);
 
-		expect(team).toEqual(['GROWTH']);
+		expect(team).toEqual(['MARTECH']);
 	});
 
 	it('returns SRE if the app does not have a team owner', () => {

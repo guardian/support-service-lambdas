@@ -1,3 +1,40 @@
 {
-  "extends": "../../tsconfig.json"
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@modules/*": [
+        "../../modules/*"
+      ],
+      "@modules/aws/*": [
+        "../../modules/aws/src/*"
+      ],
+      "@modules/logger/*": [
+        "../../modules/logger/src/*"
+      ],
+      "@modules/bigquery/*": [
+        "../../modules/bigquery/src/*"
+      ],
+      "@modules/email/*": [
+        "../../modules/email/src/*"
+      ],
+      "@modules/internationalisation/*": [
+        "../../modules/internationalisation/src/*"
+      ],
+      "@modules/product-catalog/*": [
+        "../../modules/product-catalog/src/*"
+      ],
+      "@modules/zuora-catalog/*": [
+        "../../modules/zuora-catalog/src/*"
+      ],
+      "@modules/zuora/*": [
+        "../../modules/zuora/src/*"
+      ],
+      "@modules/promotions/*": [
+        "../../modules/promotions/src/*"
+      ],
+      "@modules/discount-expiry-notifier/*": [
+        "../../modules/discount-expiry-notifier/src/*"
+      ]
+    }
+  }
 }

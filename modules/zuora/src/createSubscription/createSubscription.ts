@@ -5,33 +5,36 @@ import type {
 	ProductKey,
 } from '@modules/product-catalog/productCatalog';
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
-import { getDiscountRatePlanFromCatalog } from '@modules/promotions/v1/getPromotions';
-import type {
-	AppliedPromotion,
-	Promotion,
-} from '@modules/promotions/v1/schema';
-import type { ValidatedPromotion } from '@modules/promotions/v1/validatePromotion';
-import { validatePromotion } from '@modules/promotions/v1/validatePromotion';
+import { getDiscountRatePlanFromCatalog } from '@modules/promotions/v2/getPromotion';
+import type { AppliedPromotion, Promo } from '@modules/promotions/v2/schema';
+import type { ValidatedPromotion } from '@modules/promotions/v2/validatePromotion';
+import { validatePromotion } from '@modules/promotions/v2/validatePromotion';
 import dayjs from 'dayjs';
+import type { Dayjs } from 'dayjs';
 import { z } from 'zod';
 import { getChargeOverride } from '@modules/zuora/createSubscription/chargeOverride';
+import type { ClonedPaymentMethod } from '@modules/zuora/createSubscription/clonePaymentMethod';
 import { getProductRatePlan } from '@modules/zuora/createSubscription/getProductRatePlan';
 import type { GiftRecipient } from '@modules/zuora/createSubscription/giftRecipient';
 import { ReaderType } from '@modules/zuora/createSubscription/readerType';
 import { getSubscriptionDates } from '@modules/zuora/createSubscription/subscriptionDates';
 import type { Contact } from '@modules/zuora/orders/newAccount';
 import { buildNewAccountObject } from '@modules/zuora/orders/newAccount';
-import { buildCreateSubscriptionOrderAction } from '@modules/zuora/orders/orderActions';
+import {
+	buildCreateSubscriptionOrderAction,
+	type CreateSubscriptionOrderAction,
+} from '@modules/zuora/orders/orderActions';
 import type { CreateOrderRequest } from '@modules/zuora/orders/orderRequests';
 import { executeOrderRequest } from '@modules/zuora/orders/orderRequests';
+import type { PaymentGateway } from '@modules/zuora/orders/paymentGateways';
 import type {
-	PaymentGateway,
+	AnyPaymentMethod,
 	PaymentMethod,
 } from '@modules/zuora/orders/paymentMethods';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
-const createSubscriptionResponseSchema = z.object({
+export const createSubscriptionResponseSchema = z.object({
 	orderNumber: z.string(),
 	accountNumber: z.string(),
 	subscriptionNumbers: z.array(z.string()),
@@ -52,13 +55,16 @@ export type CreateSubscriptionInputFields<T extends PaymentMethod> = {
 	identityId: string;
 	currency: IsoCurrency;
 	paymentGateway: PaymentGateway<T>;
-	paymentMethod: T;
+	paymentMethod: T | ClonedPaymentMethod;
 	billToContact: Contact;
 	productPurchase: ProductPurchase;
 	giftRecipient?: GiftRecipient;
 	appliedPromotion?: AppliedPromotion;
 	runBilling?: boolean;
 	collectPayment?: boolean;
+	acquisitionCase?: string;
+	acquisitionSource?: string;
+	createdByCSR?: string;
 };
 
 export type PromotionInputFields = {
@@ -69,13 +75,13 @@ export type PromotionInputFields = {
 
 export function getPromotionInputFields(
 	appliedPromotion: AppliedPromotion | undefined,
-	promotions: Promotion[],
+	promotion: Promo | undefined,
 	productRatePlanId: string,
 	productCatalog: ProductCatalog,
 	productKey: ProductKey,
 ): PromotionInputFields | undefined {
 	const validatedPromotion = appliedPromotion
-		? validatePromotion(promotions, appliedPromotion, productRatePlanId)
+		? validatePromotion(promotion, appliedPromotion, productRatePlanId)
 		: undefined;
 
 	if (!validatedPromotion) {
@@ -96,12 +102,116 @@ export function getPromotionInputFields(
 	};
 }
 
+export function getReaderType(
+	giftRecipient: GiftRecipient | undefined,
+	appliedPromotion: AppliedPromotion | undefined,
+): ReaderType {
+	if (giftRecipient) {
+		return ReaderType.Gift;
+	}
+	if (appliedPromotion?.promoCode.endsWith('PATRON')) {
+		return ReaderType.Patron;
+	}
+	return ReaderType.Direct;
+}
+
+// Used by createSubscription and createSubscriptionWithExistingPaymentMethod.
+export function buildSubscriptionOrderAction(
+	productCatalog: ProductCatalog,
+	productPurchase: ProductPurchase,
+	currency: IsoCurrency,
+	appliedPromotion: AppliedPromotion | undefined,
+	promotion: Promo | undefined,
+): {
+	contractEffectiveDate: Dayjs;
+	customerAcceptanceDate: Dayjs;
+	createSubscriptionOrderAction: CreateSubscriptionOrderAction;
+} {
+	const { contractEffectiveDate, customerAcceptanceDate } =
+		getSubscriptionDates(dayjs(), productPurchase);
+	const chargeOverride = getChargeOverride(
+		productCatalog,
+		productPurchase,
+		currency,
+	);
+	const productRatePlan = getProductRatePlan(productCatalog, productPurchase);
+	const promotionInputFields = getPromotionInputFields(
+		appliedPromotion,
+		promotion,
+		productRatePlan.id,
+		productCatalog,
+		productPurchase.product,
+	);
+	const createSubscriptionOrderAction = buildCreateSubscriptionOrderAction({
+		productRatePlanId: productRatePlan.id,
+		contractEffectiveDate,
+		customerAcceptanceDate,
+		chargeOverride,
+		promotionInputFields,
+		termType: productRatePlan.termType,
+		termLengthInMonths: productRatePlan.termLengthInMonths,
+	});
+	return {
+		contractEffectiveDate,
+		customerAcceptanceDate,
+		createSubscriptionOrderAction,
+	};
+}
+
+type DeliveryFields = {
+	deliveryContact: Contact | undefined;
+	deliveryAgent: number | undefined;
+	deliveryInstructions: string | undefined;
+};
+
+export function getDeliveryFields(
+	productPurchase: ProductPurchase,
+): DeliveryFields {
+	switch (productPurchase.product) {
+		case 'NationalDelivery':
+			return {
+				deliveryContact: productPurchase.deliveryContact,
+				deliveryAgent: productPurchase.deliveryAgent,
+				deliveryInstructions: productPurchase.deliveryInstructions,
+			};
+		case 'HomeDelivery':
+			return {
+				deliveryContact: productPurchase.deliveryContact,
+				deliveryAgent: undefined,
+				deliveryInstructions: productPurchase.deliveryInstructions,
+			};
+		case 'SubscriptionCard':
+		case 'NewspaperVoucher':
+		case 'GuardianWeeklyDomestic':
+		case 'GuardianWeeklyRestOfWorld':
+		case 'GuardianWeeklyZoneA':
+		case 'GuardianWeeklyZoneB':
+		case 'GuardianWeeklyZoneC':
+		case 'TierThree':
+			return {
+				deliveryContact: productPurchase.deliveryContact,
+				deliveryAgent: undefined,
+				deliveryInstructions: undefined,
+			};
+		case 'Contribution':
+		case 'DigitalSubscription':
+		case 'GuardianAdLite':
+		case 'PartnerMembership':
+		case 'PatronMembership':
+		case 'SupporterMembership':
+		case 'SupporterPlus':
+			return {
+				deliveryContact: undefined,
+				deliveryAgent: undefined,
+				deliveryInstructions: undefined,
+			};
+	}
+}
+
 export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 	productCatalog: ProductCatalog,
-	promotions: Promotion[],
 	{
 		accountName,
-		createdRequestId,
 		salesforceAccountId,
 		salesforceContactId,
 		identityId,
@@ -114,68 +224,56 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		appliedPromotion,
 		runBilling,
 		collectPayment,
+		createdByCSR,
+		acquisitionCase,
+		acquisitionSource,
 	}: CreateSubscriptionInputFields<T>,
+	promotion: Promo | undefined,
 ): CreateOrderRequest {
-	const { deliveryContact, deliveryAgent, deliveryInstructions } = {
-		deliveryContact: undefined,
-		deliveryAgent: '',
-		deliveryInstructions: undefined,
-		...productPurchase,
-	};
+	const { deliveryContact, deliveryAgent, deliveryInstructions } =
+		getDeliveryFields(productPurchase);
 
-	const newAccount = buildNewAccountObject({
+	const paymentFields =
+		paymentMethod.type === 'ExistingPaymentMethod'
+			? {
+					// The hpmCreditCardPaymentMethodId parameter is passed in at the same level as
+					// the paymentMethod parameter not nested underneath
+					hpmCreditCardPaymentMethodId:
+						paymentMethod.hpmCreditCardPaymentMethodId,
+				}
+			: { paymentMethod };
+
+	const newAccount = buildNewAccountObject<AnyPaymentMethod>({
 		accountName: accountName,
-		createdRequestId: createdRequestId,
 		salesforceAccountId: salesforceAccountId,
 		salesforceContactId: salesforceContactId,
 		identityId: identityId,
 		currency: currency,
 		paymentGateway: paymentGateway,
-		paymentMethod: paymentMethod,
 		billToContact: billToContact,
 		soldToContact: deliveryContact,
 		deliveryInstructions: deliveryInstructions,
+		...paymentFields,
 	});
-	const { contractEffectiveDate, customerAcceptanceDate } =
-		getSubscriptionDates(dayjs(), productPurchase);
 
-	const chargeOverride = getChargeOverride(
-		productCatalog,
-		productPurchase,
-		currency,
-	);
-	const readerType = giftRecipient
-		? ReaderType.Gift
-		: appliedPromotion?.promoCode.endsWith('PATRON')
-			? ReaderType.Patron
-			: ReaderType.Direct;
-
-	const productRatePlan = getProductRatePlan(productCatalog, productPurchase);
-	const promotionInputFields = getPromotionInputFields(
-		appliedPromotion,
-		promotions,
-		productRatePlan.id,
-		productCatalog,
-		productPurchase.product,
-	);
-
-	const createSubscriptionOrderAction = buildCreateSubscriptionOrderAction({
-		productRatePlanId: productRatePlan.id,
-		contractEffectiveDate: contractEffectiveDate,
-		customerAcceptanceDate: customerAcceptanceDate,
-		chargeOverride: chargeOverride,
-		promotionInputFields: promotionInputFields,
-		termType: productRatePlan.termType,
-		termLengthInMonths: productRatePlan.termLengthInMonths,
-	});
+	const { contractEffectiveDate, createSubscriptionOrderAction } =
+		buildSubscriptionOrderAction(
+			productCatalog,
+			productPurchase,
+			currency,
+			appliedPromotion,
+			promotion,
+		);
 
 	const customFields = {
-		DeliveryAgent__c: deliveryAgent.toString(),
-		ReaderType__c: readerType,
+		DeliveryAgent__c: deliveryAgent?.toString(),
+		ReaderType__c: getReaderType(giftRecipient, appliedPromotion),
 		LastPlanAddedDate__c: zuoraDateFormat(contractEffectiveDate),
 		InitialPromotionCode__c: appliedPromotion?.promoCode,
 		PromotionCode__c: appliedPromotion?.promoCode,
-		CreatedRequestId__c: createdRequestId,
+		AcquisitionCase__c: acquisitionCase,
+		AcquisitionSource__c: acquisitionSource,
+		CreatedByCSR__c: createdByCSR,
 	};
 	return {
 		newAccount: newAccount,
@@ -193,15 +291,16 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		},
 	};
 }
+
 export const createSubscription = async <T extends PaymentMethod>(
 	zuoraClient: ZuoraClient,
 	productCatalog: ProductCatalog,
-	promotions: Promotion[],
 	inputFields: CreateSubscriptionInputFields<T>,
+	promotion: Promo | undefined,
 ): Promise<CreateSubscriptionResponse> => {
 	return executeOrderRequest(
 		zuoraClient,
-		buildCreateSubscriptionRequest(productCatalog, promotions, inputFields),
+		buildCreateSubscriptionRequest(productCatalog, inputFields, promotion),
 		createSubscriptionResponseSchema,
 		inputFields.createdRequestId,
 	);

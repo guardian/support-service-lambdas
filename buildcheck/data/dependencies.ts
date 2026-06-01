@@ -8,10 +8,11 @@ import {
 export const dep = separateDepRecords({
 	// base libraries for general use
 	dayjs: '^1.11.13',
+	nanoid: '^3.3.12',
 	// parsers
 	zod: 'catalog:',
 	'csv-parse': '^5.6.0',
-	'fast-xml-parser': '^4.5.0',
+	'fast-xml-parser': '^5.5.8',
 	// signature validation
 	'@peculiar/x509': '^1.12.3',
 	'@okta/jwt-verifier': '^4.0.1',
@@ -33,6 +34,7 @@ export const dep = separateDepRecords({
 		'client-lambda',
 		'credential-provider-node',
 		'lib-storage',
+		'client-cloudwatch-logs',
 	]),
 });
 
@@ -43,6 +45,7 @@ export const devDeps = separateDepRecords({
 	'@types/stripe': '^8.0.417',
 	'@types/aws-lambda': '^8.10.147',
 	'@types/jest': '^29.5.14',
+	'@smithy/types': '4.12.0',
 	// dev - for running locally
 	tsx: '^4.21.0',
 	'tsconfig-paths': 'catalog:',
@@ -54,6 +57,7 @@ export const devDeps = separateDepRecords({
 	'ts-jest': '^29.3.2',
 	// linting
 	'eslint-plugin-sort-keys-fix': '^1.1.2',
+	'@redocly/cli': '2.30.5',
 });
 
 // do not use, migrate away

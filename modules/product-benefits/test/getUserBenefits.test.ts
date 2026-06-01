@@ -1,6 +1,6 @@
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
-import { zuoraDateFormat } from '@modules/zuora/utils';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
 import {
 	digitalSubscriptionBenefits,
@@ -12,7 +12,9 @@ import {
 } from '@modules/product-benefits/userBenefits';
 import codeZuoraCatalog from '../../zuora-catalog/test/fixtures/catalog-code.json';
 
-const codeProductCatalog = generateProductCatalog(codeZuoraCatalog);
+const codeProductCatalog = generateProductCatalog(
+	zuoraCatalogSchema.parse(codeZuoraCatalog),
+);
 const codeCatalogHelper = new ProductCatalogHelper(codeProductCatalog);
 
 describe('getUserProductsFromSupporterProductDataItems', () => {
@@ -27,8 +29,8 @@ describe('getUserProductsFromSupporterProductDataItems', () => {
 					subscriptionName: '123',
 					productRatePlanId: '2c92c0f94c510a0d014c569ba8eb45f7',
 					productRatePlanName: 'Non Founder Supporter - monthly',
-					contractEffectiveDate: '2017-01-19',
-					termEndDate: '2017-02-19',
+					contractEffectiveDate: dayjs('2017-01-19'),
+					termEndDate: dayjs('2017-02-19'),
 					identityId: '123',
 				},
 			]),
@@ -42,10 +44,8 @@ describe('getUserProductsFromSupporterProductDataItems', () => {
 					subscriptionName: '123',
 					productRatePlanId: '2c92c0f94c510a0d014c569ba8eb45f7',
 					productRatePlanName: 'Non Founder Supporter - monthly',
-					contractEffectiveDate: zuoraDateFormat(
-						dayjs().subtract(1, 'month').startOf('day'),
-					),
-					termEndDate: zuoraDateFormat(dayjs().startOf('day')),
+					contractEffectiveDate: dayjs().subtract(1, 'month').startOf('day'),
+					termEndDate: dayjs().startOf('day'),
 					identityId: '123',
 				},
 			]).length,
@@ -59,8 +59,8 @@ describe('getUserProductsFromSupporterProductDataItems', () => {
 					subscriptionName: '123',
 					productRatePlanId: 'single_contribution',
 					productRatePlanName: 'Single Contribution',
-					contractEffectiveDate: zuoraDateFormat(dayjs().subtract(2, 'months')),
-					termEndDate: '2099-04-01',
+					contractEffectiveDate: dayjs().subtract(2, 'months'),
+					termEndDate: dayjs('2099-04-01'),
 					identityId: '123',
 				},
 			]),
@@ -74,8 +74,8 @@ describe('getUserProductsFromSupporterProductDataItems', () => {
 					subscriptionName: '123',
 					productRatePlanId: 'single_contribution',
 					productRatePlanName: 'Single Contribution',
-					contractEffectiveDate: '2021-01-01',
-					termEndDate: '2099-04-01',
+					contractEffectiveDate: dayjs('2021-01-01'),
+					termEndDate: dayjs('2099-04-01'),
 					identityId: '123',
 				},
 			]),
@@ -96,9 +96,9 @@ test('getUserBenefitsFromUserProducts', () => {
 	expect(getUserBenefitsFromUserProducts(['TierThree'])).toEqual(
 		digitalSubscriptionBenefits,
 	);
-	expect(getUserBenefitsFromUserProducts(['GuardianWeeklyDomestic'])).toEqual([
-		'hideSupportMessaging',
-	]);
+	expect(getUserBenefitsFromUserProducts(['GuardianWeeklyDomestic'])).toEqual(
+		digitalSubscriptionBenefits,
+	);
 	expect(getUserBenefitsFromUserProducts([])).toEqual([]);
 });
 
@@ -110,9 +110,6 @@ test('getUserBenefitsFromUserProducts returns distinct benefits', () => {
 
 test('getUserBenefitsFromUserProducts returns the union of two benefit sets', () => {
 	expect(
-		getUserBenefitsFromUserProducts([
-			'GuardianAdLite',
-			'GuardianWeeklyDomestic',
-		]),
-	).toEqual(['allowRejectAll', 'hideSupportMessaging']);
+		getUserBenefitsFromUserProducts(['GuardianAdLite', 'SupporterMembership']),
+	).toEqual(['allowRejectAll', 'liveApp', 'feastApp', 'hideSupportMessaging']);
 });

@@ -26,7 +26,7 @@ import play.api.libs.json.Json
 import java.time.LocalDate
 class ContributionsFieldsTest extends AnyFlatSpec with Matchers {
 
-  val billto = BillToContact(
+  private val billto = BillToContact(
     None,
     FirstName("firstBill"),
     LastName("lastBill"),
@@ -41,7 +41,7 @@ class ContributionsFieldsTest extends AnyFlatSpec with Matchers {
     ),
   )
 
-  val soldto = SoldToContact(
+  private val soldto = SoldToContact(
     Some(Title("SoldToTitle")),
     FirstName("FirstSold"),
     LastName("lastSold"),
@@ -55,9 +55,9 @@ class ContributionsFieldsTest extends AnyFlatSpec with Matchers {
       Some(Postcode("soldToPostcode")),
     ),
   )
-  val testContacts = Contacts(billto, soldto)
+  private val testContacts = Contacts(billto, soldto)
 
-  val directDebitContributionsData = ContributionsEmailData(
+  private val directDebitContributionsData = ContributionsEmailData(
     accountId = ZuoraAccountId("accountId"),
     currency = GBP,
     paymentMethod = DirectDebit(
@@ -79,19 +79,15 @@ class ContributionsFieldsTest extends AnyFlatSpec with Matchers {
     val expected =
       """
         |{
-        | "EmailAddress": "bill@contact.com",
-        | "created": "2018-11-01",
         | "amount": "12.12",
         | "currency": "£",
-        | "edition": "GB",
-        | "name": "firstBill",
-        | "product": "monthly-contribution",
-        | "account name": "someAccountName",
-        | "account number": "*****mask",
-        | "sort code": "12-34-56",
-        | "Mandate ID": "mandateId",
-        | "first payment date": "Saturday, 1 December 2018",
-        | "payment method" : "Direct Debit"
+        | "first_name": "firstBill",
+        | "account_holder": "someAccountName",
+        | "bank_account_no": "*****mask",
+        | "bank_sort_code": "12-34-56",
+        | "mandate_id": "mandateId",
+        | "first_payment_date": "Saturday, 1 December 2018",
+        | "payment_method" : "Direct Debit"
         |}
       """.stripMargin
     Json.toJson(directDebitContributionsData) shouldBe Json.parse(expected)
@@ -106,13 +102,10 @@ class ContributionsFieldsTest extends AnyFlatSpec with Matchers {
     val expected =
       """
           |{
-          | "EmailAddress": "bill@contact.com",
-          | "created": "2018-11-01",
           | "amount": "12.12",
           | "currency": "£",
-          | "edition": "GB",
-          | "name": "firstBill",
-          | "product": "monthly-contribution"
+          | "first_name": "firstBill",
+          | "payment_method" : "credit / debit card"
           |}
         """.stripMargin
     Json.toJson(nonDirectDebitData) shouldBe Json.parse(expected)
