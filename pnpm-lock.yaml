@@ -736,6 +736,9 @@ importers:
       logger:
         specifier: workspace:*
         version: link:../../modules/logger
+      supporter-product-data:
+        specifier: workspace:*
+        version: link:../../modules/supporter-product-data
       zod:
         specifier: 'catalog:'
         version: 3.25.76
