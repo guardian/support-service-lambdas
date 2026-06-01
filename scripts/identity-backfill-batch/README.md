@@ -32,7 +32,6 @@ pnpm --filter identity-backfill-batch run -- \
   --stage CODE \
   --csv ~/Downloads/missing_identity.csv \
   --rps 5 \
-  --filter has-identity-id \
   --dry-run-only \
   --limit 10
 ```
@@ -44,13 +43,8 @@ pnpm --filter identity-backfill-batch run -- \
 | `--stage CODE\|PROD` | yes | - | Selects which env vars are read |
 | `--csv <path>` | yes | - | CSV with the columns produced by the BQ query |
 | `--rps <n>` | no | `5` | Max requests per second (1-20) |
-| `--filter <mode>` | no | `has-identity-id` | `has-identity-id`, `no-identity-id`, or `all` |
 | `--dry-run-only` | no | off | If set, the tool only sends `dryRun: true` requests (no mutations) |
 | `--limit <n>` | no | none | Process only the first N matching rows |
-
-`--filter no-identity-id` includes both `Has Identity ID` and `No Identity ID`
-rows. The latter trigger a guest account creation in Identity, so use carefully
-in PROD.
 
 ## Output
 

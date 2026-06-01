@@ -276,21 +276,6 @@ const moduleSyncSupporterProductData: ModuleDefinition = {
 	moduleDependencies: [moduleAws, moduleProductCatalog, moduleZuora],
 };
 
-const moduleIdentityBackfillBatch: ModuleDefinition = {
-	name: 'identity-backfill-batch',
-	dependencies: {
-		...dep['zod'],
-	},
-	devDependencies: {
-		...dep['dayjs'],
-		...devDeps['tsx'],
-	},
-	extraScripts: {
-		...srcOnly,
-		'backfill-batch': 'tsx ./src/run.ts',
-	},
-};
-
 const moduleTestUsers: ModuleDefinition = {
 	name: 'test-users',
 	devDependencies: {
@@ -869,7 +854,6 @@ export const build: BuildDefinition = {
 		moduleSecretsManager,
 		moduleSupporterProductData,
 		moduleSyncSupporterProductData,
-		moduleIdentityBackfillBatch,
 		moduleTestUsers,
 		moduleZuora,
 		moduleZuoraCatalog,
