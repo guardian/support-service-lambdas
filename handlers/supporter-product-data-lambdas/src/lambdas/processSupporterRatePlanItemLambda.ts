@@ -105,19 +105,12 @@ export const processItem = async (
 	item: SupporterRatePlanItem,
 	dependencies: ProcessItemDependencies,
 ): Promise<void> => {
-	logger.log('Processing supporter rate plan item', {
-		subscriptionName: item.subscriptionName,
-		identityId: item.identityId,
-		productRatePlanId: item.productRatePlanId,
-		productRatePlanName: item.productRatePlanName,
-		termEndDate: item.termEndDate,
-	});
+	logger.resetContext();
+	logger.mutableAddContext(item.subscriptionName);
+	logger.log('Processing supporter rate plan item', item);
 
 	if (dependencies.discountIds.includes(item.productRatePlanId)) {
-		logger.log('Supporter rate plan item is a discount and will be skipped', {
-			subscriptionName: item.subscriptionName,
-			productRatePlanId: item.productRatePlanId,
-		});
+		logger.log('Supporter rate plan item is a discount and will be skipped');
 		return;
 	}
 
@@ -128,27 +121,14 @@ export const processItem = async (
 		);
 
 		if (itemWithContribution.contributionAmount) {
-			logger.log('Resolved contribution amount', {
-				subscriptionName: item.subscriptionName,
-				amount: itemWithContribution.contributionAmount.amount,
-				currency: itemWithContribution.contributionAmount.currency,
-			});
+			logger.log('Resolved contribution amount');
 		}
 
-		logger.log('Writing item to DynamoDB', {
-			subscriptionName: item.subscriptionName,
-			identityId: item.identityId,
-		});
-
+		logger.log('Writing item to DynamoDB');
 		await dependencies.writeItem(itemWithContribution);
 
-		logger.log('Successfully wrote item to DynamoDB', {
-			subscriptionName: item.subscriptionName,
-			identityId: item.identityId,
-		});
 	} catch (error) {
 		logger.error('Error writing item to Dynamo', {
-			subscriptionName: item.subscriptionName,
 			identityId: item.identityId,
 			error,
 		});
