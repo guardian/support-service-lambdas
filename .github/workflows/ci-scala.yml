@@ -74,31 +74,55 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        subproject:
-          - catalog-service
-          - contact-us-api
-          - delivery-problem-credit-processor
-          - delivery-records-api
-          - dev-env-cleaner
-          - digital-subscription-expiry
-          - digital-voucher-api
-          - digital-voucher-cancellation-processor
-          - digital-voucher-suspension-processor
-          - fulfilment-date-calculator
-          - holiday-stop-api
-          - holiday-stop-processor
-          - identity-backfill
-          - identity-retention
-          - product-move-api
-          - sf-api-user-credentials-setter
-          - sf-contact-merge
-          - sf-datalake-export
-          - sf-emails-to-s3-exporter
-          - sf-gocardless-sync
-          - sf-move-subscriptions-api
-          - zuora-datalake-export
-          - zuora-rer
-          - zuora-sar
+        include:
+          - subproject: catalog-service
+            scala-version: 2.13
+          - subproject: contact-us-api
+            scala-version: 2.13
+          - subproject: delivery-problem-credit-processor
+            scala-version: 2.13
+          - subproject: delivery-records-api
+            scala-version: 2.13
+          - subproject: dev-env-cleaner
+            scala-version: 2.13
+          - subproject: digital-subscription-expiry
+            scala-version: 2.13
+          - subproject: digital-voucher-api
+            scala-version: 2.13
+          - subproject: digital-voucher-cancellation-processor
+            scala-version: 2.13
+          - subproject: digital-voucher-suspension-processor
+            scala-version: 2.13
+          - subproject: fulfilment-date-calculator
+            scala-version: 2.13
+          - subproject: holiday-stop-api
+            scala-version: 2.13
+          - subproject: holiday-stop-processor
+            scala-version: 2.13
+          - subproject: identity-backfill
+            scala-version: 2.13
+          - subproject: identity-retention
+            scala-version: 2.13
+          - subproject: product-move-api
+            scala-version: 3.7.2
+          - subproject: sf-api-user-credentials-setter
+            scala-version: 2.13
+          - subproject: sf-contact-merge
+            scala-version: 2.13
+          - subproject: sf-datalake-export
+            scala-version: 2.13
+          - subproject: sf-emails-to-s3-exporter
+            scala-version: 2.13
+          - subproject: sf-gocardless-sync
+            scala-version: 2.13
+          - subproject: sf-move-subscriptions-api
+            scala-version: 2.13
+          - subproject: zuora-datalake-export
+            scala-version: 2.13
+          - subproject: zuora-rer
+            scala-version: 2.13
+          - subproject: zuora-sar
+            scala-version: 2.13
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -134,7 +158,7 @@ jobs:
           commentingEnabled: 'false'
           contentDirectories: |
             ${{ matrix.subproject }}:
-              - ./handlers/${{ matrix.subproject }}/target/scala-2.13/${{ matrix.subproject }}.jar
+              - ./handlers/${{ matrix.subproject }}/target/scala-${{ matrix.scala-version }}/${{ matrix.subproject }}.jar
 
 
   zuora-callout-apis:
