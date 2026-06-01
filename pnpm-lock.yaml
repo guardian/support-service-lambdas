@@ -1215,7 +1215,7 @@ importers:
     devDependencies:
       dayjs:
         specifier: ^1.11.13
-        version: 1.11.19
+        version: 1.11.21
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
