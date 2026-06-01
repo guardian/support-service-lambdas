@@ -121,7 +121,24 @@ jobs:
         run: |
           LAST_TEAMCITY_BUILD=6410
           export GITHUB_RUN_NUMBER=$(( $GITHUB_RUN_NUMBER + $LAST_TEAMCITY_BUILD ))
-          sbt "project ${{ matrix.subproject }}" riffRaffUpload
+          sbt "project ${{ matrix.subproject }}" assembly
+
+      - name: Upload to Riff-Raff
+        uses: guardian/actions-riff-raff@v4.3.0
+        with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
+          projectName: support-service-lambdas::${{ matrix.subproject }}
+          buildNumberOffset: 6410
+          configPath: ./handlers/${{ matrix.subproject }}/riff-raff.yaml
+          commentingEnabled: 'false'
+          contentDirectories: |
+            ${{ matrix.subproject }}-cloudformation:
+              - ./cdk/cdk.out/${{ matrix.subproject }}-CODE.template.json
+              - ./cdk/cdk.out/${{ matrix.subproject }}-PROD.template.json
+            ${{ matrix.subproject }}:
+              - ./handlers/${{ matrix.subproject }}/target/scala-2.13/${{ matrix.subproject }}.jar
+
 
   zuora-callout-apis:
     name: build (zuora-callout-apis)
