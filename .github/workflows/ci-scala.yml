@@ -134,7 +134,7 @@ jobs:
           commentingEnabled: 'false'
           contentDirectories: |
             ${{ matrix.subproject }}:
-              - ./handlers/${{ matrix.subproject }}/target/scala-3.7.2/${{ matrix.subproject }}.jar
+              - ./handlers/${{ matrix.subproject }}/target/scala-2.13/${{ matrix.subproject }}.jar
 
 
   zuora-callout-apis:
