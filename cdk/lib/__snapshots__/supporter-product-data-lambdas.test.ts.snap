@@ -16,180 +16,6 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
-    "CsvReadAlarmDE9B2CA3": {
-      "Properties": {
-        "ActionsEnabled": false,
-        "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-CODE",
-              ],
-            ],
-          },
-        ],
-        "AlarmDescription": {
-          "Fn::Join": [
-            "",
-            [
-              "Search for 'CSV read failure' in the ",
-              {
-                "Ref": "supporterProductDataAddToQueueCODE55758B0D",
-              },
-              " CloudWatch logs.",
-            ],
-          ],
-        },
-        "AlarmName": "There was a csv read failure when loading supporter product data into DynamoDB",
-        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
-        "Dimensions": [
-          {
-            "Name": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "CsvReadFailure",
-        "Namespace": "supporter-product-data",
-        "Period": 60,
-        "Statistic": "Average",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "supporter-product-data-lambdas",
-          },
-          {
-            "Key": "DiagnosticLinks",
-            "Value": {
-              "Fn::Join": [
-                "",
-                [
-                  "lambda:",
-                  {
-                    "Ref": "supporterProductDataAddToQueueCODE55758B0D",
-                  },
-                ],
-              ],
-            },
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "Threshold": 1,
-        "TreatMissingData": "notBreaching",
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
-    "DynamoWriteAlarmB1C3D5D8": {
-      "Properties": {
-        "ActionsEnabled": false,
-        "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-CODE",
-              ],
-            ],
-          },
-        ],
-        "AlarmDescription": {
-          "Fn::Join": [
-            "",
-            [
-              "Impact: one or more subscribers will not get their digital benefits. Search for 'Error writing item to Dynamo' in the ",
-              {
-                "Ref": "supporterProductDataProcessItemCODEA1DBC9D5",
-              },
-              " CloudWatch logs.",
-            ],
-          ],
-        },
-        "AlarmName": "There was a DynamoDB write failure when writing supporter product data into DynamoDB",
-        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
-        "Dimensions": [
-          {
-            "Name": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "DynamoWriteFailure",
-        "Namespace": "supporter-product-data",
-        "Period": 60,
-        "Statistic": "Average",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "supporter-product-data-lambdas",
-          },
-          {
-            "Key": "DiagnosticLinks",
-            "Value": {
-              "Fn::Join": [
-                "",
-                [
-                  "lambda:",
-                  {
-                    "Ref": "supporterProductDataProcessItemCODEA1DBC9D5",
-                  },
-                ],
-              ],
-            },
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "Threshold": 1,
-        "TreatMissingData": "notBreaching",
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
     "ExecutionFailureAlarm65D8EF83": {
       "Properties": {
         "AlarmDescription": "The supporter-product-data-lambdas-CODE step function has failed. Check the Step Functions console for details.",
@@ -250,7 +76,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
-    "SqsWriteAlarmCF10061A": {
+    "ProcessItemLambdaErrorsAlarmA6C33ADA": {
       "Properties": {
         "ActionsEnabled": false,
         "AlarmActions": [
@@ -275,27 +101,38 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
           "Fn::Join": [
             "",
             [
-              "Search for 'Failed to write SQS batch' in the ",
               {
-                "Ref": "supporterProductDataAddToQueueCODE55758B0D",
+                "Ref": "supporterProductDataProcessItemCODEA1DBC9D5",
               },
-              " CloudWatch logs.",
+              " failed. Search the logs below for "error" for more information. Impact: Supporter product data may not be up to date in DynamoDB",
             ],
           ],
         },
-        "AlarmName": "There was a failure when trying to write supporter data to the supporter-product-data-lambdas-CODE SQS queue",
+        "AlarmName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "supporterProductDataProcessItemCODEA1DBC9D5",
+              },
+              " Lambda has failed",
+            ],
+          ],
+        },
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
-            "Name": "Stage",
-            "Value": "CODE",
+            "Name": "FunctionName",
+            "Value": {
+              "Ref": "supporterProductDataProcessItemCODEA1DBC9D5",
+            },
           },
         ],
         "EvaluationPeriods": 1,
-        "MetricName": "SqsWriteFailure",
-        "Namespace": "supporter-product-data",
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
         "Period": 60,
-        "Statistic": "Average",
+        "Statistic": "Sum",
         "Tags": [
           {
             "Key": "App",
@@ -309,7 +146,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
                 [
                   "lambda:",
                   {
-                    "Ref": "supporterProductDataAddToQueueCODE55758B0D",
+                    "Ref": "supporterProductDataProcessItemCODEA1DBC9D5",
                   },
                 ],
               ],
@@ -730,7 +567,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
             },
           },
         ],
-        "EvaluationPeriods": 60,
+        "EvaluationPeriods": 1,
         "MetricName": "ApproximateNumberOfMessagesVisible",
         "Namespace": "AWS/SQS",
         "Period": 60,
@@ -1991,180 +1828,6 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
-    "CsvReadAlarmDE9B2CA3": {
-      "Properties": {
-        "ActionsEnabled": true,
-        "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-PROD",
-              ],
-            ],
-          },
-        ],
-        "AlarmDescription": {
-          "Fn::Join": [
-            "",
-            [
-              "Search for 'CSV read failure' in the ",
-              {
-                "Ref": "supporterProductDataAddToQueuePROD968AA295",
-              },
-              " CloudWatch logs.",
-            ],
-          ],
-        },
-        "AlarmName": "There was a csv read failure when loading supporter product data into DynamoDB",
-        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
-        "Dimensions": [
-          {
-            "Name": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "CsvReadFailure",
-        "Namespace": "supporter-product-data",
-        "Period": 60,
-        "Statistic": "Average",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "supporter-product-data-lambdas",
-          },
-          {
-            "Key": "DiagnosticLinks",
-            "Value": {
-              "Fn::Join": [
-                "",
-                [
-                  "lambda:",
-                  {
-                    "Ref": "supporterProductDataAddToQueuePROD968AA295",
-                  },
-                ],
-              ],
-            },
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "Threshold": 1,
-        "TreatMissingData": "notBreaching",
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
-    "DynamoWriteAlarmB1C3D5D8": {
-      "Properties": {
-        "ActionsEnabled": true,
-        "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-PROD",
-              ],
-            ],
-          },
-        ],
-        "AlarmDescription": {
-          "Fn::Join": [
-            "",
-            [
-              "Impact: one or more subscribers will not get their digital benefits. Search for 'Error writing item to Dynamo' in the ",
-              {
-                "Ref": "supporterProductDataProcessItemPROD99FAC1AD",
-              },
-              " CloudWatch logs.",
-            ],
-          ],
-        },
-        "AlarmName": "There was a DynamoDB write failure when writing supporter product data into DynamoDB",
-        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
-        "Dimensions": [
-          {
-            "Name": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "DynamoWriteFailure",
-        "Namespace": "supporter-product-data",
-        "Period": 60,
-        "Statistic": "Average",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "supporter-product-data-lambdas",
-          },
-          {
-            "Key": "DiagnosticLinks",
-            "Value": {
-              "Fn::Join": [
-                "",
-                [
-                  "lambda:",
-                  {
-                    "Ref": "supporterProductDataProcessItemPROD99FAC1AD",
-                  },
-                ],
-              ],
-            },
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "Threshold": 1,
-        "TreatMissingData": "notBreaching",
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
     "ExecutionFailureAlarm65D8EF83": {
       "Properties": {
         "AlarmActions": [
@@ -2243,10 +1906,26 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
-    "SqsWriteAlarmCF10061A": {
+    "ProcessItemLambdaErrorsAlarmA6C33ADA": {
       "Properties": {
         "ActionsEnabled": true,
         "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
           {
             "Fn::Join": [
               "",
@@ -2268,27 +1947,38 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
           "Fn::Join": [
             "",
             [
-              "Search for 'Failed to write SQS batch' in the ",
               {
-                "Ref": "supporterProductDataAddToQueuePROD968AA295",
+                "Ref": "supporterProductDataProcessItemPROD99FAC1AD",
               },
-              " CloudWatch logs.",
+              " failed. Search the logs below for "error" for more information. Impact: Supporter product data may not be up to date in DynamoDB",
             ],
           ],
         },
-        "AlarmName": "There was a failure when trying to write supporter data to the supporter-product-data-lambdas-PROD SQS queue",
+        "AlarmName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "supporterProductDataProcessItemPROD99FAC1AD",
+              },
+              " Lambda has failed",
+            ],
+          ],
+        },
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
-            "Name": "Stage",
-            "Value": "PROD",
+            "Name": "FunctionName",
+            "Value": {
+              "Ref": "supporterProductDataProcessItemPROD99FAC1AD",
+            },
           },
         ],
         "EvaluationPeriods": 1,
-        "MetricName": "SqsWriteFailure",
-        "Namespace": "supporter-product-data",
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
         "Period": 60,
-        "Statistic": "Average",
+        "Statistic": "Sum",
         "Tags": [
           {
             "Key": "App",
@@ -2302,7 +1992,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
                 [
                   "lambda:",
                   {
-                    "Ref": "supporterProductDataAddToQueuePROD968AA295",
+                    "Ref": "supporterProductDataProcessItemPROD99FAC1AD",
                   },
                 ],
               ],
@@ -2741,7 +2431,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
             },
           },
         ],
-        "EvaluationPeriods": 60,
+        "EvaluationPeriods": 1,
         "MetricName": "ApproximateNumberOfMessagesVisible",
         "Namespace": "AWS/SQS",
         "Period": 60,

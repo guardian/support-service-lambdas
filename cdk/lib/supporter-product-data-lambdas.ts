@@ -27,7 +27,7 @@ import {
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { AllowZuoraOAuthSecretsPolicy } from './cdk/policies';
 import { SrLambda } from './cdk/SrLambda';
-import { SrLambdaAlarm } from './cdk/SrLambdaAlarm';
+import { SrLambdaErrorAlarm } from './cdk/SrLambdaErrorAlarm';
 import type { SrStackProps } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
 
@@ -285,61 +285,19 @@ export class SupporterProductDataLambdas extends SrStack {
 			}),
 			comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
 			threshold: 1,
-			evaluationPeriods: 60,
+			evaluationPeriods: 1,
 			treatMissingData: TreatMissingData.NOT_BREACHING,
 		});
 		addAlarmAction(dlqAlarm);
 
-		// Custom metric alarms from the lambdas themselves
-		const customMetricAlarm = (
-			id: string,
-			alarmName: string,
-			alarmDescription: string,
-			metricName: string,
-			lambdaFunctionName: string,
-		) =>
-			new SrLambdaAlarm(this, id, {
-				app: 'supporter-product-data-lambdas',
-				alarmName,
-				alarmDescription,
-				metric: new Metric({
-					namespace: 'supporter-product-data',
-					metricName,
-					dimensionsMap: { Stage: this.stage },
-					statistic: 'Average',
-					period: Duration.seconds(60),
-				}),
-				comparisonOperator:
-					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-				threshold: 1,
-				evaluationPeriods: 1,
-				treatMissingData: TreatMissingData.NOT_BREACHING,
-				lambdaFunctionNames: lambdaFunctionName,
-			});
-
-		customMetricAlarm(
-			'CsvReadAlarm',
-			'There was a csv read failure when loading supporter product data into DynamoDB',
-			`Search for 'CSV read failure' in the ${addToQueue.functionName} CloudWatch logs.`,
-			'CsvReadFailure',
-			addToQueue.functionName,
+		const processItemErrorsAlarm = new SrLambdaErrorAlarm(
+			this,
+			'ProcessItemLambdaErrorsAlarm',
+			{
+				lambdaFunctionName: processItem.functionName,
+				errorImpact: 'Supporter product data may not be up to date in DynamoDB',
+			},
 		);
-
-		customMetricAlarm(
-			'DynamoWriteAlarm',
-			'There was a DynamoDB write failure when writing supporter product data into DynamoDB',
-			`Impact: one or more subscribers will not get their digital benefits. ` +
-				`Search for 'Error writing item to Dynamo' in the ${processItem.functionName} CloudWatch logs.`,
-			'DynamoWriteFailure',
-			processItem.functionName,
-		);
-
-		customMetricAlarm(
-			'SqsWriteAlarm',
-			`There was a failure when trying to write supporter data to the supporter-product-data-lambdas-${this.stage} SQS queue`,
-			`Search for 'Failed to write SQS batch' in the ${addToQueue.functionName} CloudWatch logs.`,
-			'SqsWriteFailure',
-			addToQueue.functionName,
-		);
+		addAlarmAction(processItemErrorsAlarm);
 	}
 }
