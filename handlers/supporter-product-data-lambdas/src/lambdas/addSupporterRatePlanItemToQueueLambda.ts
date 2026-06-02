@@ -29,7 +29,7 @@ const buildDependencies = (): AddToQueueDependencies => {
 			parseCsvStreamWithHeader(s3Service.streamObjectLines(stage, filename)),
 		sendMessagesToQueue: async (items) => {
 			await sendBatchMessagesToQueue({
-				queueName: `supporter-product-data-lambdas-${stage}`,
+				queueName: `supporter-product-data-${stage}`,
 				messages: items.map(([item, index]) => ({
 					id: index.toString(),
 					body: JSON.stringify(item),
