@@ -1,8 +1,11 @@
-export type QueryType = 'incremental' | 'full';
+import { z } from 'zod';
 
-export type QueryZuoraState = {
-	queryType: QueryType;
-};
+export const queryZuoraStateSchema = z.object({
+	queryType: z.enum(['incremental', 'full']),
+});
+
+export type QueryType = z.infer<typeof queryZuoraStateSchema>['queryType'];
+export type QueryZuoraState = z.infer<typeof queryZuoraStateSchema>;
 
 export type FetchResultsState = {
 	jobId: string;

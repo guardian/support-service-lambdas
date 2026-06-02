@@ -16,8 +16,5 @@ describe('ConfigService', () => {
 
 		expect(send).toHaveBeenCalledTimes(1);
 		expect(config.partnerId).toBe('partner');
-		expect(config.discountProductRatePlanIds).toEqual([
-			'2c92c0f852f2ebb20152f9269f067819',
-		]);
 	});
 });

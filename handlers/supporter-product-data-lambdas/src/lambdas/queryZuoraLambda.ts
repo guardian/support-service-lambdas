@@ -1,7 +1,8 @@
 import { Lazy } from '@modules/lazy';
 import { logger } from '@modules/logger/logger';
-import { type Stage, stageFromEnvironment } from '@modules/stage';
+import { stageFromEnvironment } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 import type { Handler } from 'aws-lambda';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -15,17 +16,20 @@ import {
 	formatZuoraDateTime,
 	parseLastSuccessfulQueryTime,
 } from '../services/dateTimeService';
+import { getDiscountProductRatePlanIds } from '../services/discounts';
 import {
 	buildSelectActiveRatePlansQuery,
 	selectActiveRatePlansQueryName,
 } from '../services/selectActiveRatePlansQuery';
 import { ZuoraQuerierService } from '../services/zuoraQuerierService';
 import type { FetchResultsState, QueryType, QueryZuoraState } from './types';
+import { queryZuoraStateSchema } from './types';
 
 dayjs.extend(utc);
 
 type QueryZuoraDependencies = {
-	loadConfig: () => Promise<ZuoraQuerierConfig>;
+	config: ZuoraQuerierConfig;
+	discountProductRatePlanIds: string[];
 	postQuery: (request: BatchQueryRequest) => Promise<{ id: string }>;
 };
 
@@ -34,9 +38,14 @@ const buildDependencies = async (): Promise<QueryZuoraDependencies> => {
 	const configService = new ConfigService(stage);
 	const zuoraClient = await ZuoraClient.create(stage);
 	const service = new ZuoraQuerierService(zuoraClient);
+	const [config, zuoraCatalog] = await Promise.all([
+		configService.loadZuoraConfig(),
+		getZuoraCatalogFromS3(stage),
+	]);
 
 	return {
-		loadConfig: () => configService.loadZuoraConfig(),
+		config,
+		discountProductRatePlanIds: getDiscountProductRatePlanIds(zuoraCatalog),
 		postQuery: (request) => service.postQuery(request),
 	};
 };
@@ -52,6 +61,7 @@ const localIsoForQueryName = (date: dayjs.Dayjs): string =>
 const buildBatchQueryRequest = (
 	queryType: QueryType,
 	config: ZuoraQuerierConfig,
+	discountProductRatePlanIds: string[],
 ): BatchQueryRequest => {
 	const now = dayjs.utc();
 
@@ -83,13 +93,13 @@ const buildBatchQueryRequest = (
 		queryType,
 		incrementalTime,
 		partnerId: config.partnerId,
-		discountProductRatePlanIdCount: config.discountProductRatePlanIds.length,
+		discountProductRatePlanIdCount: discountProductRatePlanIds.length,
 	});
 
 	const queries: ZoqlExportQuery[] = [
 		{
 			name: `${selectActiveRatePlansQueryName}-${localIsoForQueryName(now)}`,
-			query: buildSelectActiveRatePlansQuery(config.discountProductRatePlanIds),
+			query: buildSelectActiveRatePlansQuery(discountProductRatePlanIds),
 			type: 'zoqlexport',
 		},
 	];
@@ -109,21 +119,23 @@ const buildBatchQueryRequest = (
 };
 
 export const queryZuora = async (
-	stage: Stage,
 	queryType: QueryType,
 	dependencies: QueryZuoraDependencies,
 ): Promise<FetchResultsState> => {
-	const config = await dependencies.loadConfig();
+	const config = dependencies.config;
 
-	logger.log('Attempting to submit query to Zuora', { stage, queryType });
+	logger.log('Attempting to submit query to Zuora', { queryType });
 
-	const request = buildBatchQueryRequest(queryType, config);
+	const request = buildBatchQueryRequest(
+		queryType,
+		config,
+		dependencies.discountProductRatePlanIds,
+	);
 	const result = await dependencies.postQuery(request);
 
 	logger.log('Successfully submitted query', {
 		jobId: result.id,
 		queryType,
-		stage,
 	});
 
 	return {
@@ -135,6 +147,7 @@ export const queryZuora = async (
 export const handler: Handler<QueryZuoraState, FetchResultsState> = async (
 	event,
 ) => {
+	const { queryType } = queryZuoraStateSchema.parse(event);
 	const dependencies = await lazyDependencies.get();
-	return queryZuora(stageFromEnvironment(), event.queryType, dependencies);
+	return queryZuora(queryType, dependencies);
 };

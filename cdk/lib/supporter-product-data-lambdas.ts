@@ -97,6 +97,7 @@ export class SupporterProductDataLambdas extends SrStack {
 		});
 
 		const zuoraOAuthPolicy = new AllowZuoraOAuthSecretsPolicy(this);
+		const zuoraCatalogS3Policy = new AllowS3CatalogReadPolicy(this);
 
 		// Lambdas
 		const queryZuora = new SrLambda(this, 'QueryZuoraLambda', {
@@ -110,6 +111,7 @@ export class SupporterProductDataLambdas extends SrStack {
 			},
 		});
 		queryZuora.addToRolePolicy(ssmConfigPolicy);
+		queryZuora.addPolicies(zuoraCatalogS3Policy);
 		queryZuora.addPolicies(zuoraOAuthPolicy);
 
 		const fetchResults = new SrLambda(this, 'FetchResultsLambda', {
@@ -151,7 +153,7 @@ export class SupporterProductDataLambdas extends SrStack {
 				},
 			},
 		);
-		processItem.addPolicies(new AllowS3CatalogReadPolicy(this));
+		processItem.addPolicies(zuoraCatalogS3Policy);
 		processItem.addToRolePolicy(dynamoWritePolicy);
 		processItem.addPolicies(zuoraOAuthPolicy);
 

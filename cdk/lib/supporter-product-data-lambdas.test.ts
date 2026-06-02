@@ -7,13 +7,11 @@ describe('The supporter-product-data-lambdas stack', () => {
 		const app = new App();
 		const codeStack = new SupporterProductDataLambdas(app, {
 			app: 'supporter-product-data-lambdas',
-			stack: 'support',
 			stage: 'CODE',
 			processItemMaxConcurrency: 30,
 		});
 		const prodStack = new SupporterProductDataLambdas(app, {
 			app: 'supporter-product-data-lambdas',
-			stack: 'support',
 			stage: 'PROD',
 			processItemMaxConcurrency: 50,
 		});

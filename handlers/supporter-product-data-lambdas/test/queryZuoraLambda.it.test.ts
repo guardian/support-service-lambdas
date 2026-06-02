@@ -10,9 +10,19 @@ jest.mock('../src/services/configService', () => ({
 			partnerId: 'partner',
 			lastSuccessfulQueryTime:
 				'2026-03-23T05:20:27.281403501-07:00[America/Los_Angeles]',
-			discountProductRatePlanIds: [],
 		}),
 	})),
+}));
+
+jest.mock('@modules/zuora-catalog/S3', () => ({
+	getZuoraCatalogFromS3: jest.fn().mockResolvedValue({
+		products: [
+			{
+				name: 'Discounts',
+				productRatePlans: [{ id: 'discount-rate-plan-id-1' }],
+			},
+		],
+	}),
 }));
 
 jest.mock('@modules/zuora/zuoraClient', () => ({

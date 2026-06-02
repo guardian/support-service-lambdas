@@ -1251,6 +1251,9 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
         "PolicyName": "S3catalogreadpolicyE18911B4",
         "Roles": [
           {
+            "Ref": "QueryZuoraLambdaServiceRole15E67B58",
+          },
+          {
             "Ref": "ProcessSupporterRatePlanItemLambdaServiceRole75C90F89",
           },
         ],
@@ -2923,6 +2926,9 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
         },
         "PolicyName": "S3catalogreadpolicyE18911B4",
         "Roles": [
+          {
+            "Ref": "QueryZuoraLambdaServiceRole15E67B58",
+          },
           {
             "Ref": "ProcessSupporterRatePlanItemLambdaServiceRole75C90F89",
           },
