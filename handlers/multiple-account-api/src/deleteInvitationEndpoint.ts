@@ -1,25 +1,47 @@
 import { logger } from '@modules/logger/logger';
+import {
+	internalServerError,
+	notFound,
+} from '@modules/routing/apiGatewayResponses';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
 import { type InvitationRepository } from './invitationRepository';
 
-export const deleteInvitationBodySchema = z.object({
+export const deleteInvitationPathSchema = z.object({
 	invitationCode: z.string(),
-	subscriptionName: z.string(),
 });
 
-export type DeleteInvitationBody = z.infer<typeof deleteInvitationBodySchema>;
+export type DeleteInvitationPath = z.infer<typeof deleteInvitationPathSchema>;
 
 export const deleteInvitationEndpoint =
 	(invitationRepository: InvitationRepository) =>
-	async (body: DeleteInvitationBody): Promise<APIGatewayProxyResult> => {
-		const { subscriptionName, invitationCode } = body;
-		logger.mutableAddContext(subscriptionName);
+	async (path: DeleteInvitationPath): Promise<APIGatewayProxyResult> => {
+		const { invitationCode } = path;
+		logger.mutableAddContext(invitationCode);
+
+		const invitation =
+			await invitationRepository.getByInvitationCode(invitationCode);
+
+		if (invitation.length > 1) {
+			logger.error(
+				`Multiple invitations found for invitation code ${invitationCode}`,
+				{ invitationCount: invitation.length },
+			);
+			return internalServerError();
+		}
+
+		const [invitationToDelete] = invitation;
+
+		if (!invitationToDelete) {
+			return notFound();
+		}
+
+		const { subscriptionName } = invitationToDelete;
 
 		await invitationRepository.delete(subscriptionName, invitationCode);
 
 		return {
-			body: 'DELETED',
+			body: JSON.stringify({ message: 'Deleted' }),
 			statusCode: 204,
 		};
 	};

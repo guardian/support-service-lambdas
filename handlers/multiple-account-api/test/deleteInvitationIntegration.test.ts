@@ -1,6 +1,7 @@
 /**
  * This is an integration test, the `@group integration` tag ensures that it will only be run by the `pnpm it-test`
  * command and will not be run during continuous integration.
+ * This makes it useful for testing things that require credentials which are available locally but not on the CI server.
  *
  * @group integration
  */
@@ -15,33 +16,71 @@ import {
 } from '../src/invitationRepository';
 
 const stage: Stage = 'CODE';
-const tableName = `multiple-account-invitation-${stage}`;
-const repository = new InvitationRepository(
+const repo = new InvitationRepository(
 	new DynamoDBClient(getAwsConfig('membership')),
-	tableName,
+	`multiple-account-invitation-${stage}`,
 );
 
-const buildInvitationRecord = (suffix: string): InvitationRecord => ({
-	subscriptionName: 'A-S00099999',
-	invitationCode: `it-delete-${suffix}`,
+const recordsToCleanup: InvitationRecord[] = [];
+
+const buildRecord = (
+	subscriptionName: string,
+	invitationCode: string,
+): InvitationRecord => ({
+	subscriptionName,
+	invitationCode,
 	primaryIdentityId: '12345678',
 	secondaryIdentityId: '87654321',
 	invitedDate: new Date().toISOString(),
 	expiryDate: dayjs().add(10, 'seconds').toDate().getTime(),
 });
 
-test('deleteInvitationEndpoint deletes the invitation and returns 204', async () => {
-	const record = buildInvitationRecord(Date.now().toString());
-	await repository.save(record);
+const saveRecord = async (record: InvitationRecord): Promise<void> => {
+	await repo.save(record);
+	recordsToCleanup.push(record);
+};
 
-	const endpoint = deleteInvitationEndpoint(repository);
-	const result = await endpoint({
-		subscriptionName: record.subscriptionName,
-		invitationCode: record.invitationCode,
-	});
+afterEach(async () => {
+	await Promise.all(
+		recordsToCleanup
+			.splice(0)
+			.map((record) =>
+				repo.delete(record.subscriptionName, record.invitationCode),
+			),
+	);
+});
+
+test('deleteInvitationEndpoint deletes invitation and returns 204', async () => {
+	const invitationCode = `it-delete-${Date.now()}`;
+	const record = buildRecord('A-S00099999', invitationCode);
+	await saveRecord(record);
+
+	const endpoint = deleteInvitationEndpoint(repo);
+	const result = await endpoint({ invitationCode });
 
 	expect(result.statusCode).toBe(204);
+	expect(result.body).toBe('DELETED');
 	await expect(
-		repository.get(record.subscriptionName, record.invitationCode),
+		repo.get(record.subscriptionName, record.invitationCode),
 	).resolves.toBeUndefined();
+});
+
+test('deleteInvitationEndpoint returns 404 when invitation is not found', async () => {
+	const endpoint = deleteInvitationEndpoint(repo);
+	const result = await endpoint({ invitationCode: `it-missing-${Date.now()}` });
+
+	expect(result.statusCode).toBe(404);
+	expect(result.body).toBe('NOT_FOUND');
+});
+
+test('deleteInvitationEndpoint returns 500 when multiple invitations share a code', async () => {
+	const invitationCode = `it-duplicate-${Date.now()}`;
+	await saveRecord(buildRecord('A-S00090001', invitationCode));
+	await saveRecord(buildRecord('A-S00090002', invitationCode));
+
+	const endpoint = deleteInvitationEndpoint(repo);
+	const result = await endpoint({ invitationCode });
+
+	expect(result.statusCode).toBe(500);
+	expect(result.body).toBe('INTERNAL_SERVER_ERROR');
 });

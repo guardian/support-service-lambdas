@@ -61,6 +61,24 @@ export class InvitationRepository {
 		return invitationRecordSchema.parse(unmarshall(result.Item));
 	}
 
+	async getByInvitationCode(
+		invitationCode: string,
+	): Promise<InvitationRecord[]> {
+		const result = await this.client.send(
+			new QueryCommand({
+				TableName: this.tableName,
+				IndexName: 'invitationCode-index',
+				KeyConditionExpression: 'invitationCode = :invitationCode',
+				ExpressionAttributeValues: {
+					':invitationCode': { S: invitationCode },
+				},
+			}),
+		);
+		return (result.Items ?? []).map((item) =>
+			invitationRecordSchema.parse(unmarshall(item)),
+		);
+	}
+
 	async list(subscriptionName: string): Promise<InvitationRecord[]> {
 		const result = await this.client.send(
 			new QueryCommand({
