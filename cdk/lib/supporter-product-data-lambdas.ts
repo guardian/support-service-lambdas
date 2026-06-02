@@ -79,18 +79,12 @@ export class SupporterProductDataLambdas extends SrStack {
 				`arn:aws:dynamodb:${this.region}:${this.account}:table/SupporterProductData-${this.stage}`,
 			],
 		});
-		const cloudwatchPolicy = new PolicyStatement({
-			effect: Effect.ALLOW,
-			actions: ['cloudwatch:PutMetricData'],
-			resources: ['*'],
-		});
 		const zuoraPolicy = new AllowZuoraOAuthSecretsPolicy(this);
 
 		const addSharedPolicies = (lambda: SrLambda) => {
 			lambda.addToRolePolicy(ssmPolicy);
 			lambda.addToRolePolicy(s3Policy);
 			lambda.addToRolePolicy(dynamoPolicy);
-			lambda.addToRolePolicy(cloudwatchPolicy);
 			lambda.addPolicies(zuoraPolicy);
 		};
 

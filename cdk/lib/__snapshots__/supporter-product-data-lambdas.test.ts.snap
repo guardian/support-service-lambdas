@@ -901,11 +901,6 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
               },
             },
             {
-              "Action": "cloudwatch:PutMetricData",
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-            {
               "Action": [
                 "sqs:SendMessage",
                 "sqs:GetQueueAttributes",
@@ -1133,11 +1128,6 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
                   ],
                 ],
               },
-            },
-            {
-              "Action": "cloudwatch:PutMetricData",
-              "Effect": "Allow",
-              "Resource": "*",
             },
           ],
           "Version": "2012-10-17",
@@ -1459,11 +1449,6 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
                   ],
                 ],
               },
-            },
-            {
-              "Action": "cloudwatch:PutMetricData",
-              "Effect": "Allow",
-              "Resource": "*",
             },
             {
               "Action": [
@@ -1790,11 +1775,6 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
                   ],
                 ],
               },
-            },
-            {
-              "Action": "cloudwatch:PutMetricData",
-              "Effect": "Allow",
-              "Resource": "*",
             },
           ],
           "Version": "2012-10-17",
@@ -2765,11 +2745,6 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
               },
             },
             {
-              "Action": "cloudwatch:PutMetricData",
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-            {
               "Action": [
                 "sqs:SendMessage",
                 "sqs:GetQueueAttributes",
@@ -3051,11 +3026,6 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
                 ],
               },
             },
-            {
-              "Action": "cloudwatch:PutMetricData",
-              "Effect": "Allow",
-              "Resource": "*",
-            },
           ],
           "Version": "2012-10-17",
         },
@@ -3323,11 +3293,6 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
                   ],
                 ],
               },
-            },
-            {
-              "Action": "cloudwatch:PutMetricData",
-              "Effect": "Allow",
-              "Resource": "*",
             },
             {
               "Action": [
@@ -3654,11 +3619,6 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
                   ],
                 ],
               },
-            },
-            {
-              "Action": "cloudwatch:PutMetricData",
-              "Effect": "Allow",
-              "Resource": "*",
             },
           ],
           "Version": "2012-10-17",
