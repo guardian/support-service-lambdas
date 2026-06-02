@@ -635,9 +635,6 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
             "Ref": "supporterProductDataFetchResultsCODEServiceRoleF87C8605",
           },
           {
-            "Ref": "supporterProductDataAddToQueueCODEServiceRole16B4FDD9",
-          },
-          {
             "Ref": "supporterProductDataProcessItemCODEServiceRole1C94556D",
           },
         ],
@@ -878,30 +875,6 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
             },
             {
               "Action": [
-                "dynamodb:UpdateItem",
-                "dynamodb:PutItem",
-                "dynamodb:GetItem",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:dynamodb:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":table/SupporterProductData-CODE",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
                 "sqs:SendMessage",
                 "sqs:GetQueueAttributes",
                 "sqs:GetQueueUrl",
@@ -1104,30 +1077,6 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
               ],
               "Effect": "Allow",
               "Resource": "arn:aws:s3:::supporter-product-data-export-code/*",
-            },
-            {
-              "Action": [
-                "dynamodb:UpdateItem",
-                "dynamodb:PutItem",
-                "dynamodb:GetItem",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:dynamodb:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":table/SupporterProductData-CODE",
-                  ],
-                ],
-              },
             },
           ],
           "Version": "2012-10-17",
@@ -1395,36 +1344,9 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
               },
             },
             {
-              "Action": [
-                "ssm:GetParametersByPath",
-                "ssm:GetParameter",
-                "ssm:PutParameter",
-              ],
+              "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/supporter-product-data/CODE/*",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "s3:PutObject",
-                "s3:GetObject",
-              ],
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3:::supporter-product-data-export-code/*",
+              "Resource": "arn:aws:s3:::gu-zuora-catalog/*",
             },
             {
               "Action": [
@@ -1740,38 +1662,6 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
                       "Ref": "AWS::AccountId",
                     },
                     ":parameter/supporter-product-data/CODE/*",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "s3:PutObject",
-                "s3:GetObject",
-              ],
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3:::supporter-product-data-export-code/*",
-            },
-            {
-              "Action": [
-                "dynamodb:UpdateItem",
-                "dynamodb:PutItem",
-                "dynamodb:GetItem",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:dynamodb:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":table/SupporterProductData-CODE",
                   ],
                 ],
               },
@@ -2479,9 +2369,6 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
             "Ref": "supporterProductDataFetchResultsPRODServiceRoleD5AC37D2",
           },
           {
-            "Ref": "supporterProductDataAddToQueuePRODServiceRole95DB9B3A",
-          },
-          {
             "Ref": "supporterProductDataProcessItemPRODServiceRoleB740D192",
           },
         ],
@@ -2719,30 +2606,6 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
               ],
               "Effect": "Allow",
               "Resource": "arn:aws:s3:::supporter-product-data-export-prod/*",
-            },
-            {
-              "Action": [
-                "dynamodb:UpdateItem",
-                "dynamodb:PutItem",
-                "dynamodb:GetItem",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:dynamodb:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":table/SupporterProductData-PROD",
-                  ],
-                ],
-              },
             },
             {
               "Action": [
@@ -3002,30 +2865,6 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
               "Effect": "Allow",
               "Resource": "arn:aws:s3:::supporter-product-data-export-prod/*",
             },
-            {
-              "Action": [
-                "dynamodb:UpdateItem",
-                "dynamodb:PutItem",
-                "dynamodb:GetItem",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:dynamodb:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":table/SupporterProductData-PROD",
-                  ],
-                ],
-              },
-            },
           ],
           "Version": "2012-10-17",
         },
@@ -3239,36 +3078,9 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
               },
             },
             {
-              "Action": [
-                "ssm:GetParametersByPath",
-                "ssm:GetParameter",
-                "ssm:PutParameter",
-              ],
+              "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/supporter-product-data/PROD/*",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "s3:PutObject",
-                "s3:GetObject",
-              ],
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3:::supporter-product-data-export-prod/*",
+              "Resource": "arn:aws:s3:::gu-zuora-catalog/*",
             },
             {
               "Action": [
@@ -3584,38 +3396,6 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
                       "Ref": "AWS::AccountId",
                     },
                     ":parameter/supporter-product-data/PROD/*",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "s3:PutObject",
-                "s3:GetObject",
-              ],
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3:::supporter-product-data-export-prod/*",
-            },
-            {
-              "Action": [
-                "dynamodb:UpdateItem",
-                "dynamodb:PutItem",
-                "dynamodb:GetItem",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:dynamodb:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":table/SupporterProductData-PROD",
                   ],
                 ],
               },
