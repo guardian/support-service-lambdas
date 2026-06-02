@@ -16,7 +16,7 @@ import { z } from 'zod';
 import type { InvitationRepository } from './invitationRepository';
 import type { SecondaryUserRepository } from './secondaryUserRepository';
 
-export const acceptInvitationBodySchema = z.object({
+export const acceptInvitationPathSchema = z.object({
 	invitationCode: z.string(),
 });
 

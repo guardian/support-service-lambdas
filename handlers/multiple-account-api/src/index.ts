@@ -9,7 +9,7 @@ import { stageFromEnvironment } from '@modules/stage';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 import type { Handler } from 'aws-lambda';
 import {
-	acceptInvitationBodySchema,
+	acceptInvitationPathSchema,
 	acceptInvitationEndpoint,
 } from './acceptInvitationEndpoint';
 import {
@@ -70,23 +70,21 @@ export const handler: Handler = Router([
 	},
 	{
 		httpMethod: 'PUT',
-		path: '/invitation',
-		handler: withBodyParser(
-			acceptInvitationBodySchema,
-			async (event, path, body) => {
-				const maybeAuthenticatedEvent = await authenticate(event);
+		path: '/invitation/{invitationCode}',
+		handler: withPathParser(acceptInvitationPathSchema, async (event, path) => {
+			const maybeAuthenticatedEvent = await authenticate(event);
 
-				if (maybeAuthenticatedEvent.type === 'failure') {
-					return maybeAuthenticatedEvent.response;
-				}
+			if (maybeAuthenticatedEvent.type === 'failure') {
+				return maybeAuthenticatedEvent.response;
+			}
 
-				return acceptInvitationEndpoint(
-					maybeAuthenticatedEvent.userDetails.identityId,
-					body.invitationCode,
-					invitationRepository,
-					secondaryUserRepository,
-				);
-			},
-		),
+			return acceptInvitationEndpoint(
+				stage,
+				maybeAuthenticatedEvent.userDetails.identityId,
+				path.invitationCode,
+				invitationRepository,
+				secondaryUserRepository,
+			);
+		}),
 	},
 ]);
