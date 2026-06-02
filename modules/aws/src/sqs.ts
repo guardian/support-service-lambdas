@@ -8,8 +8,8 @@ import {
 	SendMessageCommand,
 	SQSClient,
 } from '@aws-sdk/client-sqs';
-import { awsConfig } from '@modules/aws/config';
 import { logger } from '@modules/logger/logger';
+import { awsConfig } from '@modules/aws/config';
 
 export class SqsSendError extends Error {
 	constructor(cause: unknown) {
