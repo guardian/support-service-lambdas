@@ -134,9 +134,7 @@ export const queryZuora = async (
 
 export const handler: Handler<QueryZuoraState, FetchResultsState> = async (
 	event,
-) =>
-	queryZuora(
-		stageFromEnvironment(),
-		event.queryType,
-		await lazyDependencies.get(),
-	);
+) => {
+	const dependencies = await lazyDependencies.get();
+	return queryZuora(stageFromEnvironment(), event.queryType, dependencies);
+};

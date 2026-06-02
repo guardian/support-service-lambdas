@@ -93,5 +93,5 @@ export const processEvent = async (
 
 export const handler: Handler<SQSEvent, void> = async (event) => {
 	const dependencies = await lazyDependencies.get();
-	return await processEvent(event.Records, dependencies);
+	return processEvent(event.Records, dependencies);
 };

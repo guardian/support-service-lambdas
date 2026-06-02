@@ -151,4 +151,7 @@ export const fetchResults = async (
 export const handler: Handler<
 	FetchResultsState,
 	AddSupporterRatePlanItemToQueueState
-> = async (event) => fetchResults(event, await lazyDependencies.get());
+> = async (event) => {
+	const dependencies = await lazyDependencies.get();
+	return fetchResults(event, dependencies);
+};
