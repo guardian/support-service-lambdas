@@ -37,7 +37,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
           },
         },
         "FunctionName": "supporterProductData-AddToQueue-CODE",
-        "Handler": "index.handler",
+        "Handler": "addSupporterRatePlanItemToQueueLambda.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
         },
@@ -365,7 +365,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
           },
         },
         "FunctionName": "supporterProductData-FetchResults-CODE",
-        "Handler": "index.handler",
+        "Handler": "fetchResultsLambda.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
         },
@@ -707,7 +707,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
           },
         },
         "FunctionName": "supporterProductData-ProcessItem-CODE",
-        "Handler": "index.handler",
+        "Handler": "processSupporterRatePlanItemLambda.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
         },
@@ -1021,7 +1021,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
           },
         },
         "FunctionName": "supporterProductData-QueryZuora-CODE",
-        "Handler": "index.handler",
+        "Handler": "queryZuoraLambda.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
         },
@@ -1676,7 +1676,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
           },
         },
         "FunctionName": "supporterProductData-AddToQueue-PROD",
-        "Handler": "index.handler",
+        "Handler": "addSupporterRatePlanItemToQueueLambda.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
         },
@@ -2022,7 +2022,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
           },
         },
         "FunctionName": "supporterProductData-FetchResults-PROD",
-        "Handler": "index.handler",
+        "Handler": "fetchResultsLambda.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
         },
@@ -2380,7 +2380,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
           },
         },
         "FunctionName": "supporterProductData-ProcessItem-PROD",
-        "Handler": "index.handler",
+        "Handler": "processSupporterRatePlanItemLambda.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
         },
@@ -2694,7 +2694,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
           },
         },
         "FunctionName": "supporterProductData-QueryZuora-PROD",
-        "Handler": "index.handler",
+        "Handler": "queryZuoraLambda.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
         },

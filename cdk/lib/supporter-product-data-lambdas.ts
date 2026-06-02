@@ -102,6 +102,7 @@ export class SupporterProductDataLambdas extends SrStack {
 		const queryZuora = new SrLambda(this, 'QueryZuoraLambda', {
 			lambdaOverrides: {
 				functionName: `supporterProductData-QueryZuora-${this.stage}`,
+				handler: 'queryZuoraLambda.handler',
 				timeout: Duration.minutes(5),
 				environment: { STAGE: this.stage },
 				description:
@@ -114,6 +115,7 @@ export class SupporterProductDataLambdas extends SrStack {
 		const fetchResults = new SrLambda(this, 'FetchResultsLambda', {
 			lambdaOverrides: {
 				functionName: `supporterProductData-FetchResults-${this.stage}`,
+				handler: 'fetchResultsLambda.handler',
 				timeout: Duration.minutes(5),
 				environment: { STAGE: this.stage },
 			},
@@ -128,6 +130,7 @@ export class SupporterProductDataLambdas extends SrStack {
 			{
 				lambdaOverrides: {
 					functionName: `supporterProductData-AddToQueue-${this.stage}`,
+					handler: 'addSupporterRatePlanItemToQueueLambda.handler',
 					timeout: Duration.minutes(10),
 					environment: { STAGE: this.stage },
 				},
@@ -142,6 +145,7 @@ export class SupporterProductDataLambdas extends SrStack {
 			{
 				lambdaOverrides: {
 					functionName: `supporterProductData-ProcessItem-${this.stage}`,
+					handler: 'processSupporterRatePlanItemLambda.handler',
 					timeout: Duration.minutes(10),
 					environment: { STAGE: this.stage },
 				},
