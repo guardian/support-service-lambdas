@@ -56,7 +56,7 @@ export class SupporterProductDataLambdas extends SrStack {
 		});
 
 		// Non-standard SSM path used by ConfigService — not covered by the GuCDK auto-policy (which uses /${stage}/${stack}/${app})
-		const ssmPolicy = new PolicyStatement({
+		const ssmConfigPolicy = new PolicyStatement({
 			effect: Effect.ALLOW,
 			actions: [
 				'ssm:GetParametersByPath',
@@ -68,7 +68,7 @@ export class SupporterProductDataLambdas extends SrStack {
 			],
 		});
 		// Read/write the supporter-product-data-export S3 bucket (used by fetchResults and addToQueue)
-		const supporterProductDataS3Policy = new PolicyStatement({
+		const s3DataExportBucketPolicy = new PolicyStatement({
 			effect: Effect.ALLOW,
 			actions: ['s3:PutObject', 's3:GetObject'],
 			resources: [
@@ -76,40 +76,39 @@ export class SupporterProductDataLambdas extends SrStack {
 			],
 		});
 
-		const dynamoPolicy = new PolicyStatement({
+		const dynamoWritePolicy = new PolicyStatement({
 			effect: Effect.ALLOW,
 			actions: ['dynamodb:UpdateItem', 'dynamodb:PutItem', 'dynamodb:GetItem'],
 			resources: [
 				`arn:aws:dynamodb:${this.region}:${this.account}:table/SupporterProductData-${this.stage}`,
 			],
 		});
-		const zuoraPolicy = new AllowZuoraOAuthSecretsPolicy(this);
+
+		const zuoraOAuthPolicy = new AllowZuoraOAuthSecretsPolicy(this);
 
 		// Lambdas
 		const queryZuora = new SrLambda(this, 'QueryZuoraLambda', {
 			legacyId: `supporterProductData-QueryZuora-${this.stage}`,
 			lambdaOverrides: {
 				timeout: Duration.minutes(5),
-				memorySize: 512,
 				environment: { STAGE: this.stage },
 				description:
 					'A lambda that queries Zuora for new or updated subscriptions since the last successful run, and writes the results to S3',
 			},
 		});
-		queryZuora.addToRolePolicy(ssmPolicy);
-		queryZuora.addPolicies(zuoraPolicy);
+		queryZuora.addToRolePolicy(ssmConfigPolicy);
+		queryZuora.addPolicies(zuoraOAuthPolicy);
 
 		const fetchResults = new SrLambda(this, 'FetchResultsLambda', {
 			legacyId: `supporterProductData-FetchResults-${this.stage}`,
 			lambdaOverrides: {
 				timeout: Duration.minutes(5),
-				memorySize: 512,
 				environment: { STAGE: this.stage },
 			},
 		});
-		fetchResults.addToRolePolicy(ssmPolicy);
-		fetchResults.addToRolePolicy(supporterProductDataS3Policy);
-		fetchResults.addPolicies(zuoraPolicy);
+		fetchResults.addToRolePolicy(ssmConfigPolicy);
+		fetchResults.addToRolePolicy(s3DataExportBucketPolicy);
+		fetchResults.addPolicies(zuoraOAuthPolicy);
 
 		const addToQueue = new SrLambda(
 			this,
@@ -118,13 +117,12 @@ export class SupporterProductDataLambdas extends SrStack {
 				legacyId: `supporterProductData-AddToQueue-${this.stage}`,
 				lambdaOverrides: {
 					timeout: Duration.minutes(10),
-					memorySize: 1024,
 					environment: { STAGE: this.stage },
 				},
 			},
 		);
-		addToQueue.addToRolePolicy(ssmPolicy);
-		addToQueue.addToRolePolicy(supporterProductDataS3Policy);
+		addToQueue.addToRolePolicy(ssmConfigPolicy);
+		addToQueue.addToRolePolicy(s3DataExportBucketPolicy);
 
 		const processItem = new SrLambda(
 			this,
@@ -133,14 +131,13 @@ export class SupporterProductDataLambdas extends SrStack {
 				legacyId: `supporterProductData-ProcessItem-${this.stage}`,
 				lambdaOverrides: {
 					timeout: Duration.minutes(10),
-					memorySize: 1024,
 					environment: { STAGE: this.stage },
 				},
 			},
 		);
 		processItem.addPolicies(new AllowS3CatalogReadPolicy(this));
-		processItem.addToRolePolicy(dynamoPolicy);
-		processItem.addPolicies(zuoraPolicy);
+		processItem.addToRolePolicy(dynamoWritePolicy);
+		processItem.addPolicies(zuoraOAuthPolicy);
 
 		queue.grantSendMessages(addToQueue);
 		queue.grantConsumeMessages(processItem);
