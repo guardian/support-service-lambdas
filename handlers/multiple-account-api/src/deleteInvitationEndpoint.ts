@@ -41,7 +41,7 @@ export const deleteInvitationEndpoint =
 		await invitationRepository.delete(subscriptionName, invitationCode);
 
 		return {
-			body: JSON.stringify({ message: 'Deleted' }),
+			body: '',
 			statusCode: 204,
 		};
 	};

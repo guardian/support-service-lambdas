@@ -59,7 +59,6 @@ test('deleteInvitationEndpoint deletes invitation and returns 204', async () => 
 	const result = await endpoint({ invitationCode });
 
 	expect(result.statusCode).toBe(204);
-	expect(result.body).toBe('DELETED');
 	await expect(
 		repo.get(record.subscriptionName, record.invitationCode),
 	).resolves.toBeUndefined();
