@@ -1,13 +1,20 @@
 import { logger } from '@modules/logger/logger';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
-import type { AddToQueueDependencies } from '../lambdas/addSupporterRatePlanItemToQueueLambda';
 import type { AddSupporterRatePlanItemToQueueState } from '../lambdas/types';
 import { supporterRatePlanItemFromCsvRow } from '../model/supporterRatePlanItem';
 
+export type IndexedItem = [SupporterRatePlanItem, number];
+
+export type AddToQueueDependencies = {
+	streamCsvRows: (
+		filename: string,
+	) => AsyncIterable<Record<string, string>> | Iterable<Record<string, string>>;
+	sendMessagesToQueue: (items: IndexedItem[]) => Promise<void>;
+	putLastSuccessfulQueryTime: (time: string) => Promise<void>;
+};
+
 const maxBatchSize = 5;
 const timeoutBufferInMillis = maxBatchSize * 5 * 1000;
-
-export type IndexedItem = [SupporterRatePlanItem, number];
 
 function getFirstItemIndex(batch: IndexedItem[]) {
 	return batch[0]![1];
