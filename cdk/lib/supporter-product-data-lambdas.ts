@@ -100,8 +100,8 @@ export class SupporterProductDataLambdas extends SrStack {
 
 		// Lambdas
 		const queryZuora = new SrLambda(this, 'QueryZuoraLambda', {
-			legacyId: `supporterProductData-QueryZuora-${this.stage}`,
 			lambdaOverrides: {
+				functionName: `supporterProductData-QueryZuora-${this.stage}`,
 				timeout: Duration.minutes(5),
 				environment: { STAGE: this.stage },
 				description:
@@ -112,8 +112,8 @@ export class SupporterProductDataLambdas extends SrStack {
 		queryZuora.addPolicies(zuoraOAuthPolicy);
 
 		const fetchResults = new SrLambda(this, 'FetchResultsLambda', {
-			legacyId: `supporterProductData-FetchResults-${this.stage}`,
 			lambdaOverrides: {
+				functionName: `supporterProductData-FetchResults-${this.stage}`,
 				timeout: Duration.minutes(5),
 				environment: { STAGE: this.stage },
 			},
@@ -126,8 +126,8 @@ export class SupporterProductDataLambdas extends SrStack {
 			this,
 			'AddSupporterRatePlanItemToQueueLambda',
 			{
-				legacyId: `supporterProductData-AddToQueue-${this.stage}`,
 				lambdaOverrides: {
+					functionName: `supporterProductData-AddToQueue-${this.stage}`,
 					timeout: Duration.minutes(10),
 					environment: { STAGE: this.stage },
 				},
@@ -140,8 +140,8 @@ export class SupporterProductDataLambdas extends SrStack {
 			this,
 			'ProcessSupporterRatePlanItemLambda',
 			{
-				legacyId: `supporterProductData-ProcessItem-${this.stage}`,
 				lambdaOverrides: {
+					functionName: `supporterProductData-ProcessItem-${this.stage}`,
 					timeout: Duration.minutes(10),
 					environment: { STAGE: this.stage },
 				},
