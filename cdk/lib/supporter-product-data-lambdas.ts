@@ -44,16 +44,28 @@ export class SupporterProductDataLambdas extends SrStack {
 
 		const { processItemMaxConcurrency } = props;
 
-		const queue = new Queue(this, 'SupporterProductDataQueue', {
-			queueName: `supporter-product-data-lambdas-${this.stage}`,
-			visibilityTimeout: Duration.minutes(10),
-			deadLetterQueue: {
-				queue: new Queue(this, 'SupporterProductDataDeadLetterQueue', {
-					queueName: `dead-letters-supporter-product-data-lambdas-${this.stage}`,
-				}),
-				maxReceiveCount: 10,
-			},
+		// Reference the existing SQS queue by ARN rather than creating a new one.
+		// The queue was originally created by the Scala implementation of this stack.
+		// To safely migrate:
+		//   1. Set RemovalPolicy.RETAIN on the queue in the Scala stack and deploy that change.
+		//   2. Delete the Scala stack — the queue is retained (not deleted).
+		//   3. This stack already references the queue by ARN so nothing changes at that point.
+		// Optionally, use CloudFormation resource import afterwards to bring the queue
+		// under full management of this stack.
+		const queueName = `supporter-product-data-${this.stage}`;
+		const dlqName = `dead-letters-supporter-product-data-${this.stage}`;
+		const queue = Queue.fromQueueAttributes(this, 'SupporterProductDataQueue', {
+			queueArn: `arn:aws:sqs:${this.region}:${this.account}:${queueName}`,
+			queueName,
 		});
+		const dlq = Queue.fromQueueAttributes(
+			this,
+			'SupporterProductDataDeadLetterQueue',
+			{
+				queueArn: `arn:aws:sqs:${this.region}:${this.account}:${dlqName}`,
+				queueName: dlqName,
+			},
+		);
 
 		// Non-standard SSM path used by ConfigService — not covered by the GuCDK auto-policy (which uses /${stage}/${stack}/${app})
 		const ssmConfigPolicy = new PolicyStatement({
@@ -265,7 +277,6 @@ export class SupporterProductDataLambdas extends SrStack {
 		addAlarmAction(executionFailureAlarm);
 
 		// DLQ — messages appearing means a record failed processing after all retries
-		const dlq = queue.deadLetterQueue!.queue;
 		const dlqAlarm = new Alarm(this, 'UnprocessedRecordAlarm', {
 			alarmName: `There was a failure processing a supporter record in the ProcessSupporterRatePlanItemLambda lambda in ${this.stage}`,
 			alarmDescription:
