@@ -14,9 +14,6 @@ import utc from 'dayjs/plugin/utc';
 
 dayjs.extend(utc);
 
-const nextDay = (isoDate: Dayjs): string =>
-	isoDate.add(1, 'day').format('YYYY-MM-DD');
-
 export class DynamoWriteError extends Error {
 	constructor(cause: unknown) {
 		super(`Failed to write to Dynamo: ${String(cause)}`);
@@ -35,16 +32,16 @@ export class DynamoService {
 		}),
 	) {}
 
-	async writeItem(item: SupporterRatePlanItem): Promise<void> {
-		const expiryDate = nextDay(item.termEndDate);
+	formatAsTTL(date: Dayjs) {
+		// Add a day because the user's entitlements last till the end of the day
+		return date.add(1, 'day').unix().toString();
+	}
 
+	async writeItem(item: SupporterRatePlanItem): Promise<void> {
 		logger.log('Writing supporter rate plan item to DynamoDB', {
-			tableName: this.tableName,
 			identityId: item.identityId,
 			subscriptionName: item.subscriptionName,
-			termEndDate: item.termEndDate,
-			expiryDate,
-			hasContributionAmount: item.contributionAmount !== undefined,
+			productRatePlanName: item.productRatePlanName,
 		});
 
 		const expressionValues: NonNullable<
@@ -56,7 +53,7 @@ export class DynamoService {
 			':contractEffectiveDate': {
 				S: zuoraDateFormat(item.contractEffectiveDate),
 			},
-			':expiryDate': { N: item.termEndDate.unix().toString() },
+			':expiryDate': { N: this.formatAsTTL(item.termEndDate) },
 		};
 
 		let updateExpression =
@@ -90,7 +87,6 @@ export class DynamoService {
 		}
 
 		logger.log('Successfully wrote supporter rate plan item to DynamoDB', {
-			tableName: this.tableName,
 			identityId: item.identityId,
 			subscriptionName: item.subscriptionName,
 		});
