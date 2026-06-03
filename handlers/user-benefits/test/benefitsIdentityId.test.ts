@@ -1,6 +1,6 @@
 import { getUserBenefitsExcludingStaff } from '@modules/product-benefits/userBenefits';
 import type { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
-import type { SupporterProductDataRepository } from '@modules/supporter-product-data/supporterProductData';
+import type { Stage } from '@modules/stage';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { benefitsIdentityIdHandler } from '../src/benefitsIdentityId';
 
@@ -11,7 +11,7 @@ const goodIdentityId = 'good-identity-id';
 jest.mock('@modules/product-benefits/userBenefits', () => ({
 	getUserBenefitsExcludingStaff: jest.fn(
 		(
-			supporterProductDataRepository: SupporterProductDataRepository,
+			stage: Stage,
 			productCatalogHelper: ProductCatalogHelper,
 			identityId: string,
 		) => {
@@ -56,7 +56,7 @@ describe('benefitsIdentityIdHandler', () => {
 
 		expect(response.statusCode).toEqual(200);
 		expect(getUserBenefitsExcludingStaff).toHaveBeenCalledWith(
-			expect.anything(),
+			'CODE',
 			expect.anything(),
 			goodIdentityId,
 		);

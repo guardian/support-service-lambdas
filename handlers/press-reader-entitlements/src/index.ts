@@ -7,7 +7,6 @@ import { Router } from '@modules/routing/router';
 import type { Stage } from '@modules/stage';
 import { stageFromEnvironment } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
-import { SupporterProductDataRepository } from '@modules/supporter-product-data/supporterProductData';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import type {
 	APIGatewayProxyEvent,
@@ -29,8 +28,6 @@ const lazyIdentityClientAccessToken = new Lazy(
 	async () => await getClientAccessToken(stage),
 	'Get identity client access token',
 );
-const supporterProductDataRepository =
-	SupporterProductDataRepository.create(stage);
 
 export const handler: Handler = Router([
 	{
@@ -74,7 +71,7 @@ export async function getMemberDetails(
 		});
 	}
 	const latestSubscription = await getLatestSubscription(
-		supporterProductDataRepository,
+		stage,
 		userDetails.identityId,
 		await lazyProductCatalog.get(),
 	);

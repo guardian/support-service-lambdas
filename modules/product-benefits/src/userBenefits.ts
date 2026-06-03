@@ -4,8 +4,9 @@ import type {
 	ProductCatalogHelper,
 	ProductKey,
 } from '@modules/product-catalog/productCatalog';
+import type { Stage } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
-import type { SupporterProductDataRepository } from '@modules/supporter-product-data/supporterProductData';
+import { getSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
 import dayjs from 'dayjs';
 import {
 	inAppPurchaseProductKey,
@@ -20,12 +21,14 @@ import {
 import type { ProductBenefit } from '@modules/product-benefits/schemas';
 
 export const getUserProducts = async (
-	supporterProductDataRepository: SupporterProductDataRepository,
+	stage: Stage,
 	productCatalogHelper: ProductCatalogHelper,
 	identityId: string,
 ): Promise<Array<ProductKey | InAppPurchaseProductKey>> => {
-	const supporterProductDataItems =
-		await supporterProductDataRepository.get(identityId);
+	const supporterProductDataItems = await getSupporterProductData(
+		stage,
+		identityId,
+	);
 	if (supporterProductDataItems === undefined) {
 		console.log('No supporter product data found');
 		return [];
@@ -60,20 +63,21 @@ export const userHasGuardianEmail = (email: string): boolean =>
 	email.endsWith('@theguardian.com') || email.endsWith('@guardian.co.uk');
 
 export const getUserBenefitsExcludingStaff = async (
-	supporterProductDataRepository: SupporterProductDataRepository,
+	stage: Stage,
 	productCatalogHelper: ProductCatalogHelper,
 	identityId: string,
 ): Promise<ProductBenefit[]> => {
 	const userProducts = await getUserProducts(
-		supporterProductDataRepository,
+		stage,
 		productCatalogHelper,
 		identityId,
 	);
+
 	return getUserBenefitsFromUserProducts(userProducts);
 };
 
 export const getUserBenefits = (
-	supporterProductDataRepository: SupporterProductDataRepository,
+	stage: Stage,
 	productCatalogHelper: ProductCatalogHelper,
 	userDetails: IdentityUserDetails,
 ): Promise<ProductBenefit[]> => {
@@ -81,7 +85,7 @@ export const getUserBenefits = (
 		return Promise.resolve(allProductBenefits);
 	}
 	return getUserBenefitsExcludingStaff(
-		supporterProductDataRepository,
+		stage,
 		productCatalogHelper,
 		userDetails.identityId,
 	);

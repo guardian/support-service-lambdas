@@ -2,17 +2,20 @@ import { sortBy } from '@modules/arrayFunctions';
 import { productBenefitMapping } from '@modules/product-benefits/productBenefit';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
+import type { Stage } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
-import type { SupporterProductDataRepository } from '@modules/supporter-product-data/supporterProductData';
+import { getSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 
 export async function getLatestSubscription(
-	supporterProductDataRepository: SupporterProductDataRepository,
+	stage: Stage,
 	identityId: string,
 	productCatalog: ProductCatalog,
 ): Promise<SupporterRatePlanItem | undefined> {
-	const supporterProductDataItems =
-		await supporterProductDataRepository.get(identityId);
+	const supporterProductDataItems = await getSupporterProductData(
+		stage,
+		identityId,
+	);
 
 	if (supporterProductDataItems) {
 		return getLatestValidSubscription(

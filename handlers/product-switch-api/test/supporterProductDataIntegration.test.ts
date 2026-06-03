@@ -3,7 +3,7 @@
  */
 
 import { DataExtensionNames } from '@modules/email/email';
-import { SupporterProductDataRepository } from '@modules/supporter-product-data/supporterProductData';
+import { sendToSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
 import dayjs from 'dayjs';
 import type { SwitchInformation } from '../src/changePlan/prepare/switchInformation';
 import { supporterRatePlanItemFromSwitchInformation } from '../src/supporterProductData';
@@ -43,7 +43,8 @@ test('supporter product data', async () => {
 		},
 	};
 
-	const result = await SupporterProductDataRepository.create('CODE').send(
+	const result = await sendToSupporterProductData(
+		'CODE',
 		supporterRatePlanItemFromSwitchInformation(now, switchInformation),
 	);
 

@@ -2,7 +2,6 @@ import { ValidationError } from '@modules/errors';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { ok } from '@modules/routing/apiGatewayResponses';
 import type { Stage } from '@modules/stage';
-import { SupporterProductDataRepository } from '@modules/supporter-product-data/supporterProductData';
 import type { ZuoraAccount, ZuoraSubscription } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type dayjs from 'dayjs';
@@ -30,7 +29,6 @@ export async function legacyContributionToSupporterPlus(
 		zuoraClient,
 		subscription,
 		account,
-		SupporterProductDataRepository.create(stage),
 	);
 
 	if (body.preview) {

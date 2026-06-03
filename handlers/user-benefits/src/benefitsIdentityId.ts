@@ -7,8 +7,8 @@ import {
 	badRequest,
 	buildErrorResponse,
 } from '@modules/routing/apiGatewayResponses';
+import type { Stage } from '@modules/stage';
 import { stageFromEnvironment } from '@modules/stage';
-import { SupporterProductDataRepository } from '@modules/supporter-product-data/supporterProductData';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { buildHttpResponse } from './response';
 import { getTrialInformation } from './trials';
@@ -18,22 +18,24 @@ const productCatalogHelper = new Lazy(
 	async () => new ProductCatalogHelper(await getProductCatalogFromApi(stage)),
 	'Get product catalog helper',
 );
-const supporterProductDataRepository =
-	SupporterProductDataRepository.create(stage);
 
 const getUserBenefitsResponse = async (
+	stage: Stage,
 	productCatalogHelper: ProductCatalogHelper,
 	identityId: string,
 ): Promise<UserBenefitsResponse> => {
 	const benefits = await getUserBenefitsExcludingStaff(
-		supporterProductDataRepository,
+		stage,
 		productCatalogHelper,
 		identityId,
 	);
 	console.log(`Benefits for user ${identityId} are: `, benefits);
 	const trials = getTrialInformation(benefits);
 	console.log(`Trials for user ${identityId} are: `, trials);
-	return { benefits, trials };
+	return {
+		benefits,
+		trials,
+	};
 };
 
 export const benefitsIdentityIdHandler = async (
@@ -47,6 +49,7 @@ export const benefitsIdentityIdHandler = async (
 		}
 
 		const userBenefitsResponse = await getUserBenefitsResponse(
+			stage,
 			await productCatalogHelper.get(),
 			identityId,
 		);
