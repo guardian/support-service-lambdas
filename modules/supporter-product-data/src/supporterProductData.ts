@@ -1,4 +1,5 @@
 import {
+	DeleteItemCommand,
 	DynamoDBClient,
 	GetItemCommand,
 	QueryCommand,
@@ -102,7 +103,28 @@ const supporterRatePlanDateReplacer = (key: string, value: unknown) => {
 	return value;
 };
 
-// We insert into the SupporterProductData table via an SQS queue to keep all the logic around formatting and TTLs in one place
+export const deleteSupporterRatePlan = async (
+	stage: Stage,
+	identityId: string,
+	subscriptionName: string,
+): Promise<void> => {
+	const tableName = `SupporterProductData-${stage}`;
+	logger.log(
+		`Deleting from ${tableName} for identityId ${identityId} and subscriptionName ${subscriptionName}`,
+	);
+	const response = await dynamoClient.send(
+		new DeleteItemCommand({
+			TableName: tableName,
+			Key: {
+				identityId: { S: identityId },
+				subscriptionName: { S: subscriptionName },
+			},
+		}),
+	);
+	logger.log(`DeleteItem returned ${JSON.stringify(response)}`);
+};
+
+// We insert into the SupporterProductData table via an SQS queue
 // This is the lambda that ultimately does the writing:
 // https://github.com/guardian/support-frontend/blob/main/supporter-product-data/src/main/scala/com/gu/lambdas/ProcessSupporterRatePlanItemLambda.scala#L24
 export const sendToSupporterProductData = async (

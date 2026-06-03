@@ -14,7 +14,10 @@ import { acceptInvitationEndpoint } from '../src/acceptInvitationEndpoint';
 import { createInvitationEndpoint } from '../src/createInvitationEndpoint';
 import { InvitationRepository } from '../src/invitationRepository';
 import { SecondaryUserRepository } from '../src/secondaryUserRepository';
-import { getSupporterRatePlans } from '@modules/supporter-product-data/supporterProductData';
+import {
+	deleteSupporterRatePlan,
+	getSupporterRatePlans,
+} from '@modules/supporter-product-data/supporterProductData';
 
 const stage = 'CODE';
 const subscriptionName = 'A-S00974337';
@@ -74,7 +77,11 @@ afterEach(async () => {
 
 	// Clean up the secondary user record created by acceptInvitationEndpoint
 	await secondaryUserRepository.delete(subscriptionName, secondaryIdentityId);
-	// TODO: delete supporter product data child record
+	await deleteSupporterRatePlan(
+		stage,
+		secondaryIdentityId,
+		`${subscriptionName}-${secondaryIdentityId}`,
+	);
 });
 
 test('acceptInvitationEndpoint accepts an invitation and creates a secondary user record', async () => {
@@ -87,6 +94,10 @@ test('acceptInvitationEndpoint accepts an invitation and creates a secondary use
 	);
 
 	expect(result.statusCode).toBe(200);
+
+	// Wait for a second to allow the async creation of the supporter product
+	// data record to complete
+	await new Promise((resolve) => setTimeout(resolve, 10000));
 
 	// The invitation should have been deleted as part of accepting
 	const invitation = await invitationRepository.get(invitationCode);
@@ -113,5 +124,4 @@ test('acceptInvitationEndpoint accepts an invitation and creates a secondary use
 	expect(supporterProductDataRecords[0]?.subscriptionName).toBe(
 		`${subscriptionName}-${secondaryIdentityId}`,
 	);
-
-});
+}, 15000);
