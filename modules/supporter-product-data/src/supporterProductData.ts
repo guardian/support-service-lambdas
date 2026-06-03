@@ -22,7 +22,7 @@ const supporterRatePlanItemSchema = z.object({
 	productRatePlanName: z.string(), // Name of the product in this rate plan
 	termEndDate: z.string().transform((arg) => dayjs(arg)), // Date that this subscription term ends
 	contractEffectiveDate: z.string().transform((arg) => dayjs(arg)), // Date that this subscription started
-	parentSubscriptionName: z.string().optional(), // Set for child subscriptions granted through the multiple accounts feature
+	primarySubscriptionName: z.string().optional(), // Set for secondary subscriptions granted through the multiple accounts feature
 });
 export type SupporterRatePlanItem = z.infer<typeof supporterRatePlanItemSchema>;
 

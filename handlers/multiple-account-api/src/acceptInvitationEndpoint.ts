@@ -52,7 +52,7 @@ export const acceptInvitationEndpoint = async (
 		);
 		const supporterProductDataRecord: SupporterRatePlanItem = {
 			subscriptionName: `${invitation.subscriptionName}-${invitation.secondaryIdentityId}`,
-			parentSubscriptionName: invitation.subscriptionName, // TODO Not being written currently
+			primarySubscriptionName: invitation.subscriptionName, // TODO Not being written currently
 			identityId: invitation.secondaryIdentityId,
 			productRatePlanId: parentSupporterProductDataRecord.productRatePlanId,
 			productRatePlanName: 'Digital Plus Secondary User',
@@ -66,6 +66,7 @@ export const acceptInvitationEndpoint = async (
 			invitationCode,
 		);
 
+		// TODO: email?
 		return ok({});
 	} catch (error) {
 		return buildErrorResponse(error);
