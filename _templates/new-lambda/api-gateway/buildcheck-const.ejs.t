@@ -20,4 +20,5 @@ const <%= h.changeCase.camel(lambdaName) %>: HandlerDefinition = {
         package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr <%= lambdaName %>.zip ./*.js.map ./*.js`,
     <% } %>
     },
+	moduleDependencies: [],
 };
