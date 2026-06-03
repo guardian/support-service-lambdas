@@ -8,6 +8,9 @@
       "@modules/logger/*": [
         "../../modules/logger/src/*"
       ],
+	  "@modules/routing/*": [
+        "../../modules/routing/src/*"
+      ],
       "@modules/sales-tax-api/*": [
         "../../modules/sales-tax-api/src/*"
       ]
