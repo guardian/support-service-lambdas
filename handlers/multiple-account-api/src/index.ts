@@ -9,8 +9,8 @@ import { stageFromEnvironment } from '@modules/stage';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 import type { Handler } from 'aws-lambda';
 import {
-	acceptInvitationPathSchema,
 	acceptInvitationEndpoint,
+	acceptInvitationPathSchema,
 } from './acceptInvitationEndpoint';
 import {
 	createInvitationBodySchema,
