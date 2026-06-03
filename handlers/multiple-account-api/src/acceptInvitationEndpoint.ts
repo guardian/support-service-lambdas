@@ -38,7 +38,6 @@ export const acceptInvitationEndpoint = async (
 			secondaryIdentityId: invitation.secondaryIdentityId,
 			primaryIdentityId: invitation.primaryIdentityId,
 			acceptedDate: zuoraDateFormat(today),
-			expiryDate: today.add(1, 'year').unix(),
 		};
 		await secondaryUserRepository.save(secondaryUserRecord);
 

@@ -13,7 +13,6 @@ const secondaryUserRecordSchema = z.object({
 	secondaryIdentityId: z.string(),
 	primaryIdentityId: z.string(),
 	acceptedDate: z.string(),
-	expiryDate: z.number(),
 });
 
 export type SecondaryUserRecord = z.infer<typeof secondaryUserRecordSchema>;
