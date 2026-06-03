@@ -27,7 +27,10 @@ const repo = new SecondaryUserRepository(
 );
 
 afterEach(async () => {
-	await repo.delete(testRecord.subscriptionName, testRecord.secondaryIdentityId);
+	await repo.delete(
+		testRecord.subscriptionName,
+		testRecord.secondaryIdentityId,
+	);
 });
 
 test('SecondaryUserRepository saves and retrieves a record from DynamoDB', async () => {
@@ -37,4 +40,3 @@ test('SecondaryUserRepository saves and retrieves a record from DynamoDB', async
 
 	expect(saved).toEqual([testRecord]);
 });
-
