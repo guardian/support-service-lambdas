@@ -21,7 +21,8 @@
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
     "zod": "catalog:",
-    "logger": "workspace:*"
+    "logger": "workspace:*",
+    "routing": "workspace:*"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147",
