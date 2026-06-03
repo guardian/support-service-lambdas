@@ -132,7 +132,7 @@ exports[`The Sales tax api stack matches the snapshot 1`] = `
           },
           "S3Key": "support/CODE/sales-tax-api/sales-tax-api.zip",
         },
-        "Description": "A lambda that enables the addition of discounts to existing subscriptions",
+        "Description": "Handles API requests for state or province sales tax",
         "Environment": {
           "Variables": {
             "APP": "sales-tax-api",
@@ -905,7 +905,7 @@ exports[`The Sales tax api stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "sales-tax-api returned a 5XX response. Search the logs below for "error" for more information. Impact: an eligible user may not have been offered a discount during the cancellation flow",
+        "AlarmDescription": "sales-tax-api returned a 5XX response. Search the logs below for "error" for more information. Impact: An eligible state or province may not get sales tax",
         "AlarmName": "sales-tax-api-PROD 5XX errors",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
@@ -1048,7 +1048,7 @@ exports[`The Sales tax api stack matches the snapshot 2`] = `
           },
           "S3Key": "support/PROD/sales-tax-api/sales-tax-api.zip",
         },
-        "Description": "A lambda that enables the addition of discounts to existing subscriptions",
+        "Description": "Handles API requests for state or province sales tax",
         "Environment": {
           "Variables": {
             "APP": "sales-tax-api",
