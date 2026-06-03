@@ -5,6 +5,9 @@
       "@modules/*": [
         "../../modules/*"
       ],
+      "@modules/logger/*": [
+        "../../modules/logger/src/*"
+      ],
       "@modules/acquisitions-braze-suppression-sync/*": [
         "../../modules/acquisitions-braze-suppression-sync/src/*"
       ]

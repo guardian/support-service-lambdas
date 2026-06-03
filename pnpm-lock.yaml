@@ -132,6 +132,9 @@ importers:
 
   handlers/acquisitions-braze-suppression-sync:
     dependencies:
+      logger:
+        specifier: workspace:*
+        version: link:../../modules/logger
       zod:
         specifier: 'catalog:'
         version: 3.25.76
