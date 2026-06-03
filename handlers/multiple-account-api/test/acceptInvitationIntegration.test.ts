@@ -14,6 +14,7 @@ import { acceptInvitationEndpoint } from '../src/acceptInvitationEndpoint';
 import { createInvitationEndpoint } from '../src/createInvitationEndpoint';
 import { InvitationRepository } from '../src/invitationRepository';
 import { SecondaryUserRepository } from '../src/secondaryUserRepository';
+import { getSupporterRatePlans } from '@modules/supporter-product-data/supporterProductData';
 
 const stage = 'CODE';
 const subscriptionName = 'A-S00974337';
@@ -96,4 +97,21 @@ test('acceptInvitationEndpoint accepts an invitation and creates a secondary use
 	expect(secondaryUsers).toHaveLength(1);
 	expect(secondaryUsers[0]?.subscriptionName).toBe(subscriptionName);
 	expect(secondaryUsers[0]?.secondaryIdentityId).toBe(secondaryIdentityId);
+
+	// A secondary subscription record should have been created
+	const supporterProductDataRecords =
+		(await getSupporterRatePlans(stage, secondaryIdentityId)) ?? [];
+	expect(supporterProductDataRecords.length).toBeGreaterThan(0);
+	// Won't work until supporter product data lambdas are updated
+	// expect(supporterProductDataRecords[0]?.primarySubscriptionName).toBe(
+	// 	subscriptionName,
+	// );
+	expect(supporterProductDataRecords[0]?.identityId).toBe(secondaryIdentityId);
+	expect(supporterProductDataRecords[0]?.productRatePlanName).toBe(
+		'Digital Plus Secondary User',
+	);
+	expect(supporterProductDataRecords[0]?.subscriptionName).toBe(
+		`${subscriptionName}-${secondaryIdentityId}`,
+	);
+
 });
