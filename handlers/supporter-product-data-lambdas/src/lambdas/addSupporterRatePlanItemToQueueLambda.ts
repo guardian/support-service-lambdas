@@ -11,9 +11,8 @@ import { parseCsvStreamWithHeader } from '../services/csvService';
 import { S3Service } from '../services/s3Service';
 import type { AddSupporterRatePlanItemToQueueState } from './types';
 
-const stage = stageFromEnvironment();
-
 const buildDependencies = (): AddToQueueDependencies => {
+	const stage = stageFromEnvironment();
 	const s3Service = new S3Service();
 	const configService = new ConfigService(stage);
 
