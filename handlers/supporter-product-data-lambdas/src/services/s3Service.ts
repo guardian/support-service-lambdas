@@ -22,7 +22,7 @@ export class S3Service {
 	async streamToS3(
 		stage: Stage,
 		filename: string,
-		body: Uint8Array,
+		body: ReadableStream<Uint8Array>,
 		length: number,
 	): Promise<void> {
 		const bucket = bucketNameForStage(stage);

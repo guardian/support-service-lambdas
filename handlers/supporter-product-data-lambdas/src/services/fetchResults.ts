@@ -11,8 +11,8 @@ export type FetchResultsDependencies = {
 	getResultFileResponse: (fileId: string) => Promise<Response>;
 	uploadToS3: (
 		filename: string,
-		body: Uint8Array,
-		length: number,
+		body: ReadableStream<Uint8Array>,
+		contentLength: number,
 	) => Promise<void>;
 	putLastSuccessfulQueryTime: (time: string) => Promise<void>;
 };
@@ -77,10 +77,16 @@ export const fetchResults = async (
 		);
 	}
 
-	const fileBytes = new Uint8Array(await fileResponse.arrayBuffer());
-	const contentLength = fileBytes.byteLength;
+	if (!fileResponse.body) {
+		throw new Error(
+			`Response body was null for file download for job with id ${event.jobId}`,
+		);
+	}
 
-	logger.log('Downloaded result file', { filename, contentLength });
+	const contentLengthHeader = fileResponse.headers.get('content-length');
+	const contentLength = contentLengthHeader
+		? parseInt(contentLengthHeader, 10)
+		: 0;
 
 	if (contentLength <= 0) {
 		throw new Error(
@@ -88,12 +94,9 @@ export const fetchResults = async (
 		);
 	}
 
-	logger.log('Uploading result file to S3', {
-		filename,
-		contentLength,
-	});
+	logger.log('Streaming result file to S3', { filename, contentLength });
 
-	await dependencies.uploadToS3(filename, fileBytes, contentLength);
+	await dependencies.uploadToS3(filename, fileResponse.body, contentLength);
 
 	if (batch.recordCount === 0) {
 		logger.log('Record count is 0, updating lastSuccessfulQueryTime', {

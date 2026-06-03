@@ -3,7 +3,7 @@ import type { BatchQueryResponse } from '../src/services/zuoraQuerierService';
 
 type UploadToS3 = (
 	filename: string,
-	body: Uint8Array,
+	body: ReadableStream<Uint8Array>,
 	length: number,
 ) => Promise<void>;
 
