@@ -6,9 +6,11 @@ const isRedeemedDSGift =
 const excludeDiscountProductRatePlans = (
 	discountProductRatePlanIds: string[],
 ): string =>
-	discountProductRatePlanIds
-		.map((id) => `ProductRatePlan.Id != '${id}'`)
-		.join(' AND\n');
+	discountProductRatePlanIds.length === 0
+		? '1 = 1'
+		: discountProductRatePlanIds
+				.map((id) => `ProductRatePlan.Id != '${id}'`)
+				.join(' AND\n');
 
 export const selectActiveRatePlansQueryName = 'select-active-rate-plans';
 
