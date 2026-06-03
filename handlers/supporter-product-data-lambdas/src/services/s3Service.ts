@@ -4,20 +4,15 @@ import {
 	PutObjectCommand,
 	S3Client,
 } from '@aws-sdk/client-s3';
-import { defaultProvider } from '@aws-sdk/credential-provider-node';
 import { logger } from '@modules/logger/logger';
 import type { Stage } from '@modules/stage';
+import { awsConfig } from '@modules/aws/config';
 
 const bucketNameForStage = (stage: Stage): string =>
 	`supporter-product-data-export-${stage.toLowerCase()}`;
 
 export class S3Service {
-	constructor(
-		private readonly s3Client = new S3Client({
-			region: 'eu-west-1',
-			credentials: defaultProvider(),
-		}),
-	) {}
+	constructor(private readonly s3Client = new S3Client(awsConfig)) {}
 
 	async streamToS3(
 		stage: Stage,
