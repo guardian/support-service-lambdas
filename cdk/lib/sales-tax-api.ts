@@ -9,12 +9,10 @@ export class SalesTaxApi extends SrStack {
 
 		new SrApiLambda(this, 'Lambda', {
 			lambdaOverrides: {
-				description:
-					'A lambda that enables the addition of discounts to existing subscriptions',
+				description: 'Handles API requests for state or province sales tax',
 			},
 			monitoring: {
-				errorImpact:
-					'an eligible user may not have been offered a discount during the cancellation flow',
+				errorImpact: 'An eligible state or province may not get sales tax',
 			},
 			throttle: {
 				rateLimit: 20,
