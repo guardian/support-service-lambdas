@@ -3,7 +3,7 @@ import {
 	PutParameterCommand,
 	SSMClient,
 } from '@aws-sdk/client-ssm';
-import { defaultProvider } from '@aws-sdk/credential-provider-node';
+import { awsConfig } from '@modules/aws/config';
 import type { Stage } from '@modules/stage';
 import { z } from 'zod';
 
@@ -19,10 +19,7 @@ const pathToKey = (name: string): string => name.split('/').pop() ?? name;
 export class ConfigService {
 	constructor(
 		private readonly stage: Stage,
-		private readonly ssmClient = new SSMClient({
-			region: 'eu-west-1',
-			credentials: defaultProvider(),
-		}),
+		private readonly ssmClient = new SSMClient(awsConfig),
 	) {}
 
 	async loadZuoraConfig(): Promise<ZuoraQuerierConfig> {

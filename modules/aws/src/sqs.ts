@@ -13,7 +13,7 @@ import { awsConfig } from '@modules/aws/config';
 
 export class SqsSendError extends Error {
 	constructor(cause: unknown) {
-		super(`Failed to send message to SQS: ${String(cause)}`);
+		super(`Failed to send message to SQS: ${String(cause)}`, { cause });
 		this.name = 'SqsSendError';
 	}
 }

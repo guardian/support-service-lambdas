@@ -4,9 +4,9 @@ import {
 	PutObjectCommand,
 	S3Client,
 } from '@aws-sdk/client-s3';
+import { awsConfig } from '@modules/aws/config';
 import { logger } from '@modules/logger/logger';
 import type { Stage } from '@modules/stage';
-import { awsConfig } from '@modules/aws/config';
 
 const bucketNameForStage = (stage: Stage): string =>
 	`supporter-product-data-export-${stage.toLowerCase()}`;

@@ -3,7 +3,7 @@ import {
 	UpdateItemCommand,
 	type UpdateItemCommandInput,
 } from '@aws-sdk/client-dynamodb';
-import { defaultProvider } from '@aws-sdk/credential-provider-node';
+import { awsConfig } from '@modules/aws/config';
 import { logger } from '@modules/logger/logger';
 import type { Stage } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
@@ -16,7 +16,7 @@ dayjs.extend(utc);
 
 export class DynamoWriteError extends Error {
 	constructor(cause: unknown) {
-		super(`Failed to write to Dynamo: ${String(cause)}`);
+		super(`Failed to write to Dynamo: ${String(cause)}`, { cause });
 		this.name = 'DynamoWriteError';
 	}
 }
@@ -26,10 +26,7 @@ export class DynamoService {
 		stage: Stage,
 		private readonly tableName = process.env
 			.SUPPORTER_PRODUCT_DATA_TABLE_NAME ?? `SupporterProductData-${stage}`,
-		private readonly client = new DynamoDBClient({
-			region: 'eu-west-1',
-			credentials: defaultProvider(),
-		}),
+		private readonly client = new DynamoDBClient(awsConfig),
 	) {}
 
 	formatAsTTL(date: Dayjs) {
