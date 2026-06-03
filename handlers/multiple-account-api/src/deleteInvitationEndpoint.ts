@@ -19,29 +19,24 @@ export const deleteInvitationEndpoint =
 		const { invitationCode } = path;
 		logger.mutableAddContext(invitationCode);
 
-		const invitation =
-			await invitationRepository.getByInvitationCode(invitationCode);
+		try {
+			const invitation = await invitationRepository.get(invitationCode);
 
-		if (invitation.length > 1) {
-			logger.error(
-				`Multiple invitations found for invitation code ${invitationCode}`,
-				{ invitationCount: invitation.length },
+			if (!invitation) {
+				return notFound();
+			}
+
+			await invitationRepository.delete(
+				invitation.subscriptionName,
+				invitationCode,
 			);
+
+			return {
+				body: '',
+				statusCode: 204,
+			};
+		} catch (error) {
+			logger.error('Error deleting invitation', error);
 			return internalServerError();
 		}
-
-		const [invitationToDelete] = invitation;
-
-		if (!invitationToDelete) {
-			return notFound();
-		}
-
-		const { subscriptionName } = invitationToDelete;
-
-		await invitationRepository.delete(subscriptionName, invitationCode);
-
-		return {
-			body: '',
-			statusCode: 204,
-		};
 	};
