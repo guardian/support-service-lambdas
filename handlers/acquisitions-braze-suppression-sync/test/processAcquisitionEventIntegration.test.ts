@@ -36,5 +36,7 @@ function buildEvent(identityId: string | undefined) {
 }
 
 test('processAcquisitionEvent handles a guest event end-to-end', async () => {
-	await expect(processAcquisitionEvent(buildEvent(undefined))).resolves.toBeUndefined();
+	await expect(
+		processAcquisitionEvent(buildEvent(undefined)),
+	).resolves.toBeUndefined();
 });

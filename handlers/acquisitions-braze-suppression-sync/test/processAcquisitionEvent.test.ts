@@ -52,7 +52,10 @@ describe('processAcquisitionEvent', () => {
 			sendToBraze: jest.fn(),
 		};
 
-		await processAcquisitionEvent(buildEvent({ identityId: undefined }), services);
+		await processAcquisitionEvent(
+			buildEvent({ identityId: undefined }),
+			services,
+		);
 
 		expect(logSpy).toHaveBeenCalledWith(
 			'Skipping event for guest account without identityId; execution is skipped',

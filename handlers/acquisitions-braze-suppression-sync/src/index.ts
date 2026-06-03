@@ -31,7 +31,9 @@ const placeholderServices: ProcessingServices = {
 		return undefined;
 	},
 	sendToBraze: () => {
-		logger.log('Placeholder: sending transformed event to Braze is not implemented');
+		logger.log(
+			'Placeholder: sending transformed event to Braze is not implemented',
+		);
 		return Promise.resolve();
 	},
 };
@@ -65,7 +67,9 @@ export async function processAcquisitionEvent(
 			brazeUuid,
 		);
 		if (!brazePayload) {
-			logger.log('Skipping event because Braze payload transform placeholder is empty');
+			logger.log(
+				'Skipping event because Braze payload transform placeholder is empty',
+			);
 			return;
 		}
 
