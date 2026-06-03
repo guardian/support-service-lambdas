@@ -635,6 +635,9 @@ importers:
       logger:
         specifier: workspace:*
         version: link:../../modules/logger
+      routing:
+        specifier: workspace:*
+        version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
         version: 3.25.76
