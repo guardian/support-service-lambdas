@@ -845,7 +845,7 @@ const supporterProductDataLambdas: HandlerDefinition = {
 		...dep['@aws-sdk/credential-provider-node'],
 		...dep['@aws-sdk/lib-storage'],
 		...dep.dayjs,
-		...dep.zod,
+			...dep.zod,
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
@@ -858,6 +858,21 @@ const supporterProductDataLambdas: HandlerDefinition = {
 	],
 };
 
+const acquisitionsBrazeSuppressionSync: HandlerDefinition = {
+	name: 'acquisitions-braze-suppression-sync',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+		...devDeps['@redocly/cli'],
+	},
+	extraScripts: {
+		...openApiScripts,
+		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr acquisitions-braze-suppression-sync.zip ./*.js.map ./*.js`,
+	},
+	moduleDependencies: [],
+};
 // MARKER new-lambda: buildcheck-const
 
 export const build: BuildDefinition = {
@@ -891,6 +906,7 @@ export const build: BuildDefinition = {
 		userSubscriptionsApi,
 		salesTaxApi,
 		supporterProductDataLambdas,
+		acquisitionsBrazeSuppressionSync,
 		// MARKER new-lambda: buildcheck-reference
 	],
 
