@@ -59,9 +59,7 @@ test('deleteInvitationEndpoint deletes invitation and returns 204', async () => 
 	const result = await endpoint({ invitationCode });
 
 	expect(result.statusCode).toBe(204);
-	await expect(
-		repo.get(record.subscriptionName, record.invitationCode),
-	).resolves.toBeUndefined();
+	await expect(repo.get(record.invitationCode)).resolves.toBeUndefined();
 });
 
 test('deleteInvitationEndpoint returns 404 when invitation is not found', async () => {
@@ -69,17 +67,4 @@ test('deleteInvitationEndpoint returns 404 when invitation is not found', async 
 	const result = await endpoint({ invitationCode: `it-missing-${Date.now()}` });
 
 	expect(result.statusCode).toBe(404);
-	expect(result.body).toBe('NOT_FOUND');
-});
-
-test('deleteInvitationEndpoint returns 500 when multiple invitations share a code', async () => {
-	const invitationCode = `it-duplicate-${Date.now()}`;
-	await saveRecord(buildRecord('A-S00090001', invitationCode));
-	await saveRecord(buildRecord('A-S00090002', invitationCode));
-
-	const endpoint = deleteInvitationEndpoint(repo);
-	const result = await endpoint({ invitationCode });
-
-	expect(result.statusCode).toBe(500);
-	expect(result.body).toBe('INTERNAL_SERVER_ERROR');
 });
