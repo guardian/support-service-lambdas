@@ -1,4 +1,7 @@
+import { getUserByIdentityId } from '@modules/identity/idapi';
+import { IdentityClient } from '@modules/identity/identityClient';
 import { logger } from '@modules/logger/logger';
+import { stageFromEnvironment } from '@modules/stage';
 import type { Handler } from 'aws-lambda';
 import {
 	type AcquisitionDataRow,
@@ -7,6 +10,23 @@ import {
 } from './acquisitionEvent';
 
 type BrazePayload = Record<string, unknown>;
+
+// Fields need review: these are initial suggestions and may need to be adjusted based on what Braze
+export type AcquisitionBrazeAttributes = {
+	has_active_product: boolean;
+	latest_product_type: string;
+	latest_acquisition_date: string;
+};
+
+export function transformEventForBrazeAttributes(
+	event: AcquisitionsEventBridgeEvent,
+): AcquisitionBrazeAttributes {
+	return {
+		has_active_product: true, // hardcoded for now
+		latest_product_type: JSON.stringify(event.detail.product),
+		latest_acquisition_date: event.detail.eventTimeStamp,
+	};
+}
 
 type ProcessingServices = {
 	getBrazeUuidFromIdapi: (identityId: string) => Promise<string | undefined>;
@@ -17,12 +37,31 @@ type ProcessingServices = {
 	sendToBraze: (payload: BrazePayload) => Promise<void>;
 };
 
+const getIdentityClient = (): ReturnType<typeof IdentityClient.create> => {
+	const stage = stageFromEnvironment();
+	return IdentityClient.create(
+		stage,
+		`/${stage}/***/identity-client-access-token`, //token needs to be created
+	);
+};
+
 const placeholderServices: ProcessingServices = {
-	getBrazeUuidFromIdapi: (identityId) => {
-		logger.log(
-			`Placeholder: IDAPI lookup for identityId ${identityId} is not implemented`,
-		);
-		return Promise.resolve(undefined);
+	getBrazeUuidFromIdapi: async (identityId) => {
+		const identityClient = await getIdentityClient();
+		const user = await getUserByIdentityId(identityClient, identityId);
+		if (!user) {
+			logger.log(
+				`No user found in IDAPI for identityId ${identityId}; cannot get Braze UUID`,
+			);
+			return undefined;
+		}
+		if (!user.privateFields['braze-uuid']) {
+			logger.log(
+				`User found in IDAPI for identityId ${identityId} does not have a Braze UUID`,
+			);
+			return undefined;
+		}
+		return user.privateFields['braze-uuid'];
 	},
 	transformEventForBraze: () => {
 		logger.log(

@@ -132,6 +132,9 @@ importers:
 
   handlers/acquisitions-braze-suppression-sync:
     dependencies:
+      identity:
+        specifier: workspace:*
+        version: link:../../modules/identity
       logger:
         specifier: workspace:*
         version: link:../../modules/logger
