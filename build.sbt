@@ -352,7 +352,6 @@ def lambdaProject(
     projectDependencies: Seq[ClasspathDependency] = Nil,
     scalaSettings: SettingsDefinition = scala2Settings,
 ) = {
-  val cfName = "cfn.yaml"
   Project(projectName, file(s"handlers/$projectName"))
     .configs(EffectsTest, HealthCheckTest)
     .dependsOn(projectDependencies *)
