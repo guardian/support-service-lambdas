@@ -1,20 +1,10 @@
 import {
-	GetParametersByPathCommand,
+	GetParameterCommand,
 	PutParameterCommand,
 	SSMClient,
 } from '@aws-sdk/client-ssm';
 import { awsConfig } from '@modules/aws/config';
 import type { Stage } from '@modules/stage';
-import { z } from 'zod';
-
-const zuoraConfigSchema = z.object({
-	partnerId: z.string().min(1),
-	lastSuccessfulQueryTime: z.string().optional(),
-});
-
-export type ZuoraQuerierConfig = z.infer<typeof zuoraConfigSchema>;
-
-const pathToKey = (name: string): string => name.split('/').pop() ?? name;
 
 export class ConfigService {
 	constructor(
@@ -22,24 +12,36 @@ export class ConfigService {
 		private readonly ssmClient = new SSMClient(awsConfig),
 	) {}
 
-	async loadZuoraConfig(): Promise<ZuoraQuerierConfig> {
-		const rootPath = `/supporter-product-data/${this.stage}/zuora-config/`;
-		const parameters = await this.ssmClient.send(
-			new GetParametersByPathCommand({
-				Path: rootPath,
-				Recursive: false,
+	async getPartnerId(): Promise<string> {
+		const fullPath = `/supporter-product-data/${this.stage}/zuora-config/partnerId`;
+		const parameter = await this.ssmClient.send(
+			new GetParameterCommand({
+				Name: fullPath,
 				WithDecryption: true,
 			}),
 		);
 
-		const values = Object.fromEntries(
-			(parameters.Parameters ?? []).map((parameter) => [
-				pathToKey(parameter.Name ?? ''),
-				parameter.Value ?? '',
-			]),
+		if (!parameter.Parameter?.Value) {
+			throw new Error(`Parameter ${fullPath} not found`);
+		}
+
+		return parameter.Parameter.Value;
+	}
+
+	async getLastSuccessfulQueryTime(): Promise<string | undefined> {
+		const fullPath = `/supporter-product-data/${this.stage}/zuora-config/lastSuccessfulQueryTime`;
+		const parameter = await this.ssmClient.send(
+			new GetParameterCommand({
+				Name: fullPath,
+				WithDecryption: true,
+			}),
 		);
 
-		return zuoraConfigSchema.parse(values);
+		if (!parameter.Parameter?.Value) {
+			throw new Error(`Parameter ${fullPath} not found`);
+		}
+
+		return parameter.Parameter.Value;
 	}
 
 	async putLastSuccessfulQueryTime(time: string): Promise<void> {

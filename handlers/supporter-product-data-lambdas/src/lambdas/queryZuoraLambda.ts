@@ -18,13 +18,12 @@ const buildDependencies = async (): Promise<QueryZuoraDependencies> => {
 	const configService = new ConfigService(stage);
 	const zuoraClient = await ZuoraClient.create(stage);
 	const service = new ZuoraQuerierService(zuoraClient);
-	const [config, zuoraCatalog] = await Promise.all([
-		configService.loadZuoraConfig(),
-		getZuoraCatalogFromS3(stage),
-	]);
+	const zuoraCatalog = await getZuoraCatalogFromS3(stage);
 
 	return {
-		config,
+		partnerId: await configService.getPartnerId(),
+		getLastSuccessfulQueryTime: () =>
+			configService.getLastSuccessfulQueryTime(),
 		discountProductRatePlanIds: getDiscountProductRatePlanIds(zuoraCatalog),
 		postQuery: (request) => service.postQuery(request),
 	};

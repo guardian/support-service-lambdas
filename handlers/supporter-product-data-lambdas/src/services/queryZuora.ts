@@ -3,12 +3,11 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import type { FetchResultsState, QueryType } from '../lambdas/types';
 import type { BatchQueryRequest, ZoqlExportQuery } from '../model/query';
-import type { ZuoraQuerierConfig } from './configService';
 import {
+	currentAttemptedQueryTime,
 	formatZuoraDateTime,
 	parseLastSuccessfulQueryTime,
 } from './dateTimeService';
-import { currentAttemptedQueryTime } from './dateTimeService';
 import {
 	buildSelectActiveRatePlansQuery,
 	selectActiveRatePlansQueryName,
@@ -17,7 +16,10 @@ import {
 dayjs.extend(utc);
 
 export type QueryZuoraDependencies = {
-	config: ZuoraQuerierConfig;
+	partnerId: string;
+	// This needs to be a function rather than a value because the dependencies
+	// are cached at the lambda level but we need the fresh value of this
+	getLastSuccessfulQueryTime: () => Promise<string | undefined>;
 	discountProductRatePlanIds: string[];
 	postQuery: (request: BatchQueryRequest) => Promise<{ id: string }>;
 };
@@ -25,11 +27,10 @@ export type QueryZuoraDependencies = {
 const localIsoForQueryName = (date: dayjs.Dayjs): string =>
 	date.utc().toISOString().replace('Z', '');
 
-const buildBatchQueryRequest = (
+const buildBatchQueryRequest = async (
 	queryType: QueryType,
-	config: ZuoraQuerierConfig,
-	discountProductRatePlanIds: string[],
-): BatchQueryRequest => {
+	dependencies: QueryZuoraDependencies,
+): Promise<BatchQueryRequest> => {
 	const now = dayjs.utc();
 
 	let incrementalTime: string | undefined;
@@ -37,14 +38,14 @@ const buildBatchQueryRequest = (
 	if (queryType === 'full') {
 		incrementalTime = formatZuoraDateTime(now.subtract(20, 'year'));
 	} else {
-		if (config.lastSuccessfulQueryTime !== undefined) {
-			const parsed = parseLastSuccessfulQueryTime(
-				config.lastSuccessfulQueryTime,
-			);
+		const lastSuccessfulQueryTime =
+			await dependencies.getLastSuccessfulQueryTime();
+		if (lastSuccessfulQueryTime !== undefined) {
+			const parsed = parseLastSuccessfulQueryTime(lastSuccessfulQueryTime);
 			if (parsed === undefined) {
 				logger.log(
 					'lastSuccessfulQueryTime could not be parsed as a date, ignoring',
-					{ lastSuccessfulQueryTime: config.lastSuccessfulQueryTime },
+					{ lastSuccessfulQueryTime },
 				);
 			} else {
 				incrementalTime = formatZuoraDateTime(parsed);
@@ -59,20 +60,23 @@ const buildBatchQueryRequest = (
 	logger.log('Built batch query request', {
 		queryType,
 		incrementalTime,
-		partnerId: config.partnerId,
-		discountProductRatePlanIdCount: discountProductRatePlanIds.length,
+		partnerId: dependencies.partnerId,
+		discountProductRatePlanIdCount:
+			dependencies.discountProductRatePlanIds.length,
 	});
 
 	const queries: ZoqlExportQuery[] = [
 		{
 			name: `${selectActiveRatePlansQueryName}-${localIsoForQueryName(now)}`,
-			query: buildSelectActiveRatePlansQuery(discountProductRatePlanIds),
+			query: buildSelectActiveRatePlansQuery(
+				dependencies.discountProductRatePlanIds,
+			),
 			type: 'zoqlexport',
 		},
 	];
 
 	return {
-		partner: config.partnerId,
+		partner: dependencies.partnerId,
 		incrementalTime,
 		name: 'supporter-product-data',
 		queries,
@@ -91,11 +95,7 @@ export const queryZuora = async (
 ): Promise<FetchResultsState> => {
 	logger.log('Attempting to submit query to Zuora', { queryType });
 
-	const request = buildBatchQueryRequest(
-		queryType,
-		dependencies.config,
-		dependencies.discountProductRatePlanIds,
-	);
+	const request = await buildBatchQueryRequest(queryType, dependencies);
 	const result = await dependencies.postQuery(request);
 
 	logger.log('Successfully submitted query', {
