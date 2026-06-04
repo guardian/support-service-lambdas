@@ -10,6 +10,7 @@ import {
 } from 'aws-cdk-lib/aws-dynamodb';
 import {
 	AllowS3CatalogReadPolicy,
+	AllowSupporterProductDataQueryPolicy,
 	AllowZuoraOAuthSecretsPolicy,
 } from './cdk/policies';
 import { SrApiLambda } from './cdk/SrApiLambda';
@@ -43,6 +44,7 @@ export class MultipleAccountApi extends SrStack {
 
 		lambda.addPolicies(new AllowZuoraOAuthSecretsPolicy(this));
 		lambda.addPolicies(new AllowS3CatalogReadPolicy(this));
+		lambda.addPolicies(new AllowSupporterProductDataQueryPolicy(this));
 
 		const invitationTable = new Table(this, 'InvitationTable', {
 			tableName: `${app}-invitation-${this.stage}`,
