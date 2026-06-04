@@ -31,7 +31,7 @@ function buildHandlerConstDefinition(
 		...devDeps['@types/aws-lambda'],
 		${includeOpenApiDoc ? "\t\t...devDeps['@redocly/cli']," : ''}
 	},
-	moduleDependencies: [moduleLogger],
+	moduleDependencies: [moduleLogger, moduleRouting],
 	${includeOpenApiDoc ? openApiScripts(lambdaName) : ''}
 };
 `;
