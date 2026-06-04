@@ -6,6 +6,10 @@
  */
 import { IdentityClient } from '@modules/identity/identityClient';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
+import {
+	deleteSupporterRatePlan,
+	getSupporterRatePlans,
+} from '@modules/supporter-product-data/supporterProductData';
 import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
@@ -14,10 +18,6 @@ import { acceptInvitationEndpoint } from '../src/acceptInvitationEndpoint';
 import { createInvitationEndpoint } from '../src/createInvitationEndpoint';
 import { InvitationRepository } from '../src/invitationRepository';
 import { SecondaryUserRepository } from '../src/secondaryUserRepository';
-import {
-	deleteSupporterRatePlan,
-	getSupporterRatePlans,
-} from '@modules/supporter-product-data/supporterProductData';
 
 const stage = 'CODE';
 const subscriptionName = 'A-S00974337';
