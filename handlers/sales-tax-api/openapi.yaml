@@ -44,6 +44,13 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
                 message: Invalid request body
+        '404':
+          description: No matching route
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: Not Found
         '500':
           description: Unexpected server error
           content:
@@ -90,4 +97,3 @@ components:
         message:
           type: string
           description: Human-readable error message
-
