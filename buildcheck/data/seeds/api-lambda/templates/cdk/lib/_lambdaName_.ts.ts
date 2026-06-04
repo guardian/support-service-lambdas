@@ -1,5 +1,5 @@
+import type { MaybeTemplateContent } from '@buildcheck/types';
 import { toPascalCase } from '../../../../../snippets/string';
-import type { MaybeTemplateContent } from '../../../../../types';
 import type { TemplateParams } from '../../../index';
 
 export default ({

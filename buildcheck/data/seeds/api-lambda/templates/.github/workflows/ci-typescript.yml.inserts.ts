@@ -1,4 +1,4 @@
-import type { InsertChunks } from '../../../../../types';
+import type { InsertChunks } from '@buildcheck/types';
 import type { TemplateParams } from '../../../index';
 
 export default ({ lambdaName }: TemplateParams): InsertChunks => [

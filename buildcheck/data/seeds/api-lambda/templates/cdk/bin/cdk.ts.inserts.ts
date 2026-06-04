@@ -1,5 +1,5 @@
+import type { InsertChunks } from '@buildcheck/types';
 import { toPascalCase } from '../../../../../snippets/string';
-import type { InsertChunks } from '../../../../../types';
 import type { TemplateParams } from '../../../index';
 
 export default ({ lambdaName }: TemplateParams): InsertChunks => [

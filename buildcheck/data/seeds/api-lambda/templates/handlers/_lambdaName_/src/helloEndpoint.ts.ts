@@ -1,4 +1,4 @@
-import type { MaybeTemplateContent } from '../../../../../../types';
+import type { MaybeTemplateContent } from '@buildcheck/types';
 
 export default `import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
 import type { APIGatewayProxyResult } from 'aws-lambda';

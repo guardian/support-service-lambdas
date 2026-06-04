@@ -1,5 +1,5 @@
+import type { InsertChunks } from '@buildcheck/types';
 import { toCamelCase } from '../../../../../snippets/string';
-import type { InsertChunks } from '../../../../../types';
 import type { TemplateParams } from '../../../index';
 
 export default ({

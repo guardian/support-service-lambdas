@@ -1,4 +1,4 @@
-import type { MaybeTemplateContent } from '../../../../../../types';
+import type { MaybeTemplateContent } from '@buildcheck/types';
 
 export default `import { Router } from '@modules/routing/router';
 import { withBodyParser } from '@modules/routing/withParsers';

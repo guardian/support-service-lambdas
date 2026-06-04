@@ -1,4 +1,4 @@
-import type { MaybeTemplateContent } from '../../../../../../types';
+import type { MaybeTemplateContent } from '@buildcheck/types';
 
 export default `/**
  * This is an integration test, the \`@group integration\` tag ensures that it will only be run by the \`pnpm it-test\`
