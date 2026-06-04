@@ -1,6 +1,6 @@
+import type { TemplateParams } from '@buildcheck/seeds/api-lambda/index';
+import { toPascalCase } from '@buildcheck/snippets/string';
 import type { MaybeTemplateContent } from '@buildcheck/types';
-import { toPascalCase } from '../../../../../snippets/string';
-import type { TemplateParams } from '../../../index';
 
 export default ({
 	lambdaName,

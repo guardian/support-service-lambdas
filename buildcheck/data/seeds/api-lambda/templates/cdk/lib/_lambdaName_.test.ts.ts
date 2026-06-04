@@ -1,6 +1,6 @@
+import type { TemplateParams } from '@buildcheck/seeds/api-lambda/index';
+import { toPascalCase, toSentenceCase } from '@buildcheck/snippets/string';
 import type { MaybeTemplateContent } from '@buildcheck/types';
-import { toPascalCase, toSentenceCase } from '../../../../../snippets/string';
-import type { TemplateParams } from '../../../index';
 
 export default ({ lambdaName }: TemplateParams): MaybeTemplateContent => {
 	const className = toPascalCase(lambdaName);

@@ -1,5 +1,5 @@
+import type { TemplateParams } from '@buildcheck/seeds/api-lambda/index';
 import type { MaybeTemplateContent } from '@buildcheck/types';
-import type { TemplateParams } from '../../../index';
 
 export default ({
 	lambdaName,

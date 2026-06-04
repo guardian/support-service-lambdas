@@ -1,3 +1,3 @@
-import { buildTsConfigJson } from '../../../snippets/buildTsConfigJson';
+import { buildTsConfigJson } from '@buildcheck/snippets/buildTsConfigJson';
 
 export default buildTsConfigJson;

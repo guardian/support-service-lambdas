@@ -1,6 +1,6 @@
+import type { TemplateParams } from '@buildcheck/seeds/api-lambda/index';
+import { toCamelCase } from '@buildcheck/snippets/string';
 import type { InsertChunks } from '@buildcheck/types';
-import { toCamelCase } from '../../../../../snippets/string';
-import type { TemplateParams } from '../../../index';
 
 export default ({
 	lambdaName,

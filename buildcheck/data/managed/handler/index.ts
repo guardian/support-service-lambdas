@@ -12,4 +12,13 @@ In order to get compile time safety, the generated file expects the correct
 type to be exported from this file as `TemplateParams`.
 
 */
-export type { HandlerDefinition as TemplateParams } from '../../build';
+import type { ModuleDefinition } from '@buildcheck/managed/module';
+
+export interface HandlerDefinition extends ModuleDefinition {
+	stack?: 'support' | 'membership';
+	functionNames?: string[];
+	entryPoints?: string[];
+	extraStages?: Array<'CSBX'>;
+}
+
+export type { HandlerDefinition as TemplateParams };
