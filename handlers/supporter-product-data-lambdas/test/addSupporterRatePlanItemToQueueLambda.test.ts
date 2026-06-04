@@ -108,11 +108,18 @@ describe('addSupporterRatePlanItemToQueueLambda', () => {
 			},
 		);
 
-		// Only rows 1 and 2 (indices 1 and 2) should be sent
+		// Only rows 1 and 2 (indices 1 and 2 in the input CSV) should be sent
 		const sentItems = sendBatch.mock.calls.flatMap((call) => call[0]);
 		expect(sentItems).toHaveLength(2);
-		expect(sentItems[0]?.[1]).toBe(1); // index 1
-		expect(sentItems[1]?.[1]).toBe(2); // index 2
+
+		const sentItemOne = sentItems[0];
+		expect(sentItemOne?.[1]).toBe(1); // index 1 (ie. the second record) in the original batch of records
+		expect(sentItemOne?.[0].subscriptionName).toBe('sub-2');
+
+		const sentItemTwo = sentItems[1];
+		expect(sentItemTwo?.[1]).toBe(2); // index 2 (ie. the third record) in the original batch of records
+		expect(sentItemTwo?.[0].subscriptionName).toBe('sub-3');
+
 		expect(result.processedCount).toBe(3);
 	});
 
