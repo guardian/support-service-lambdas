@@ -1,7 +1,7 @@
 import { logger } from '@modules/logger/logger';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import type { FetchResultsState } from '../lambdas/types';
+import type { FetchResultsState, QueryType } from '../lambdas/types';
 import type { BatchQueryRequest, ZoqlExportQuery } from '../model/query';
 import type { ZuoraQuerierConfig } from './configService';
 import {
@@ -26,7 +26,7 @@ const localIsoForQueryName = (date: dayjs.Dayjs): string =>
 	date.utc().toISOString().replace('Z', '');
 
 const buildBatchQueryRequest = (
-	queryType: string,
+	queryType: QueryType,
 	config: ZuoraQuerierConfig,
 	discountProductRatePlanIds: string[],
 ): BatchQueryRequest => {
@@ -86,7 +86,7 @@ const buildBatchQueryRequest = (
 };
 
 export const queryZuora = async (
-	queryType: string,
+	queryType: QueryType,
 	dependencies: QueryZuoraDependencies,
 ): Promise<FetchResultsState> => {
 	logger.log('Attempting to submit query to Zuora', { queryType });
