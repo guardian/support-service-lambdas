@@ -233,6 +233,7 @@ export class SupporterProductDataLambdas extends SrStack {
 			},
 		);
 
+		// Every 5 minutes 24/7 in PROD, once a day Mon-Fri at 9am UTC in CODE
 		const scheduleExpression =
 			this.stage === 'PROD' ? 'cron(*/5 * ? * * *)' : 'cron(0 9 ? * MON-FRI *)';
 
@@ -257,8 +258,7 @@ export class SupporterProductDataLambdas extends SrStack {
 			}
 		};
 
-		// Step function execution failure — suppresses alarms between 00:00-06:00 UTC
-		// when Zuora is slow and failures are expected
+		// Step function execution failure alarm
 		const executionFailuresMetric = new Metric({
 			namespace: 'AWS/States',
 			metricName: 'ExecutionsFailed',
@@ -270,6 +270,7 @@ export class SupporterProductDataLambdas extends SrStack {
 		const executionFailureAlarm = new Alarm(this, 'ExecutionFailureAlarm', {
 			alarmName: `Supporter Product Data step function Failure in ${this.stage}`,
 			alarmDescription: `The supporter-product-data-lambdas-${this.stage} step function has failed. Check the Step Functions console for details.`,
+			// Suppress alarms between 00:00-06:00 UTC when Zuora is slow and failures are expected
 			metric: new MathExpression({
 				expression: 'IF(HOUR(errors) > 5, errors)',
 				usingMetrics: { errors: executionFailuresMetric },
