@@ -135,6 +135,8 @@ jobs:
           contentDirectories: |
             ${{ matrix.subproject }}:
               - /tmp/${{ matrix.subproject }}.jar
+            cfn:
+              - handlers/${{ matrix.subproject }}/cfn.yaml
 
 
   zuora-callout-apis:
