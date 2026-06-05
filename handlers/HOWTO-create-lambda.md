@@ -39,7 +39,6 @@ You can then go ahead and write your lambda in `my-new-lambda\index.ts`
 
 ### Next steps
 - set up CD to PROD as per the "Important" section at the top.
-- make the new build a "required" check under https://github.com/guardian/support-service-lambdas/settings/branch_protection_rules/11637137
 - go to the alarms handler and make sure the alarms are assigned to your team by editing https://github.com/guardian/support-service-lambdas/blob/main/handlers/alarms-handler/src/alarmMappings.ts
 
 
