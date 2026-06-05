@@ -51,10 +51,11 @@ jobs:
       - run: pnpm --filter "./buildcheck" check-formatting
       - run: pnpm --filter "./buildcheck" lint
       - run: pnpm --filter "./buildcheck" snapshot:assert 'ROOT|modules|handlers/${{ matrix.subproject }}'
-      - run: pnpm --filter cdk package ${{ matrix.subproject }}
-      - run: pnpm --filter ${{ matrix.subproject }}... --parallel --aggregate-output '/^(type-check|lint|check-formatting)$/'
+      - run: pnpm --filter ${{ matrix.subproject }}... --filter cdk --parallel --aggregate-output '/^(type-check|lint|check-formatting)$/'
       - run: pnpm --filter ${{ matrix.subproject }}... test
+      - run: pnpm --filter cdk test ${{ matrix.subproject }}
       - run: pnpm --filter ${{ matrix.subproject }} packageQuick
+      - run: pnpm --filter cdk synth
 
       - name: Upload to Riff-Raff
         uses: guardian/actions-riff-raff@v4.3.0
