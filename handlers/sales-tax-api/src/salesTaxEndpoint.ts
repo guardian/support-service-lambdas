@@ -47,15 +47,15 @@ function getTaxRate({
 		productKey,
 	);
 	if (!validProductKey) {
-		throw new ValidationError(`invalid productKey ${productKey}`);
+		throw new ValidationError(`invalid productKey:${productKey}`);
 	}
 	const validCountry = ['CA'].includes(country);
 	if (!validCountry) {
-		throw new ValidationError(`invalid country ${validCountry}`);
+		throw new ValidationError(`invalid country:${country}`);
 	}
 	const validState = ['ON'].includes(state);
 	if (!validState) {
-		throw new ValidationError(`invalid country ${validCountry}`);
+		throw new ValidationError(`invalid state:${state}`);
 	}
 
 	return { taxRate: 0.13 };
