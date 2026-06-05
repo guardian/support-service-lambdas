@@ -2,6 +2,7 @@ import * as path from 'path';
 import { build } from '../../data/build';
 import handlerIndex from '../../data/managed/handler/_generated_tsIndex';
 import moduleIndex from '../../data/managed/module/_generated_tsIndex';
+import rootIndex from '../../data/managed/root/_generated_tsIndex';
 import { generateWarningFile } from '../../data/snippets/BUILDCHECK.md';
 import type { GeneratedFile } from '../dynamic/templater';
 import { applyFileTemplates } from '../dynamic/templater';
@@ -22,7 +23,11 @@ export function generate(): GeneratedFile[] {
 		);
 		return prependToTargetPath(moduleFiles, ['modules', pkg.name]);
 	});
-	return withWarningFile([...handlersFiles, ...modulesFiles], '.');
+	const rootFiles = applyFileTemplates(build, rootIndex);
+	return withWarningFile(
+		[...handlersFiles, ...modulesFiles, ...rootFiles],
+		'.',
+	);
 }
 
 function prependToTargetPath(

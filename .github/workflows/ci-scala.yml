@@ -135,6 +135,8 @@ jobs:
           contentDirectories: |
             ${{ matrix.subproject }}:
               - /tmp/${{ matrix.subproject }}.jar
+            cfn:
+              - handlers/${{ matrix.subproject }}/cfn.yaml
 
 
   zuora-callout-apis:
@@ -187,3 +189,21 @@ jobs:
               - ./cdk/cdk.out/zuora-auto-cancel-PROD.template.json
             zuora-callout-apis:
               - /tmp/zuora-callout-apis.jar
+
+  # for branch protection - only passes if all builds pass
+  ci-scala-all:
+    name: ci-scala-all
+    runs-on: ubuntu-latest
+    permissions: {}
+    if: ${{ always() }}
+    needs:
+      - gu-cdk-build
+      - build
+      - zuora-callout-apis
+    steps:
+      - name: Fail unless all Scala CI jobs succeeded
+        run: |
+          [ "${{ needs.gu-cdk-build.result }}" = "success" ]
+          [ "${{ needs.build.result }}" = "success" ]
+          [ "${{ needs.zuora-callout-apis.result }}" = "success" ]
+
