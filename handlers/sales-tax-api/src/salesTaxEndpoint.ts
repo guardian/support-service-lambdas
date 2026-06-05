@@ -15,6 +15,7 @@ export type SalesTaxRequest = z.infer<typeof salesTaxRequestSchema>;
 const salesTaxResponseSchema = z.object({
 	taxRate: z.number(),
 });
+type SalesTaxResponse = z.infer<typeof salesTaxResponseSchema>;
 
 export function salesTaxRequestEndpoint({
 	productKey,
@@ -27,9 +28,34 @@ export function salesTaxRequestEndpoint({
 			country,
 			state,
 		});
-		return Promise.resolve(ok({ taxRate: 0.13 }, salesTaxResponseSchema));
+		return Promise.resolve(
+			ok(getTaxRate({ productKey, country, state }), salesTaxResponseSchema),
+		);
 	} catch (error) {
 		logger.error('Error fetching sales tax', error);
 		return Promise.resolve(buildErrorResponse(error));
 	}
+}
+
+function getTaxRate({
+	productKey,
+	country,
+	state,
+}: SalesTaxRequest): SalesTaxResponse {
+	const validProductKey = ['SupporterPlus', 'DigitalSubscription'].includes(
+		productKey,
+	);
+	if (!validProductKey) {
+		throw new Error(`invalid productKey ${productKey}`);
+	}
+	const validCountry = ['CA'].includes(country);
+	if (!validCountry) {
+		throw new Error(`invalid country ${validCountry}`);
+	}
+	const validState = ['ON'].includes(state);
+	if (!validState) {
+		throw new Error(`invalid country ${validCountry}`);
+	}
+
+	return { taxRate: 0.13 };
 }
