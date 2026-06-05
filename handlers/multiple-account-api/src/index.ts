@@ -70,7 +70,7 @@ export const handler: Handler = Router([
 	},
 	{
 		httpMethod: 'POST',
-		path: '/invitation/{invitationCode}',
+		path: '/invitation/{invitationCode}/accept',
 		handler: withPathParser(acceptInvitationPathSchema, async (event, path) => {
 			const maybeAuthenticatedEvent = await authenticate(event);
 
