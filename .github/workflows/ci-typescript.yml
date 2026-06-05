@@ -16,6 +16,7 @@ concurrency:
 jobs:
   load-matrix:
     runs-on: ubuntu-latest
+    permissions: {}
     outputs:
       subprojects: ${{ steps.read-matrix.outputs.subprojects }}
     steps:
