@@ -49,12 +49,16 @@ export const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
 	'Digital Pack Quarterly': 'Quarterly',
 	'Digital Subscription One Year Fixed - One Time Charge': 'OneYearGift',
 	'Digital Subscription Three Month Fixed - One Time Charge': 'ThreeMonthGift',
+	'Digital Pack Monthly - Tax Exclusive': 'MonthlyTaxExclusive',
+	'Digital Pack Annual - Tax Exclusive': 'MonthlyTaxExclusive',
 	// Supporter Plus rate plans
 	'Supporter Plus Monthly': 'V1DeprecatedMonthly',
 	'Supporter Plus Annual': 'V1DeprecatedAnnual',
 	'Supporter Plus V2 - Monthly': 'Monthly',
 	'Supporter Plus V2 - Annual': 'Annual',
 	'Supporter Plus - One Year Student': 'OneYearStudent',
+	'Supporter Plus - Monthly - Tax Exclusive': 'MonthlyTaxExclusive',
+	'Supporter Plus - Annual - Tax Exclusive': 'AnnualTaxExclusive',
 	// Tier Three rate plans
 	'Supporter Plus V2 & Guardian Weekly ROW - Monthly':
 		'GuardianWeeklyRestOfWorldMonthly',
