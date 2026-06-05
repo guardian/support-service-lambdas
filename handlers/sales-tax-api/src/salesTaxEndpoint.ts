@@ -1,11 +1,13 @@
+import { isoCountrySchema } from '@modules/internationalisation/schemas';
 import { logger } from '@modules/logger/logger';
+import { productKeySchema } from '@modules/product-catalog/productCatalogSchema';
 import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
 
 export const salesTaxRequestSchema = z.object({
-	productKey: z.string(),
-	country: z.string(),
+	productKey: productKeySchema,
+	country: isoCountrySchema,
 	state: z.string(),
 });
 export type SalesTaxRequest = z.infer<typeof salesTaxRequestSchema>;

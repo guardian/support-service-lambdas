@@ -814,7 +814,12 @@ const salesTaxApi: HandlerDefinition = {
 
 		...devDeps['@redocly/cli'],
 	},
-	moduleDependencies: [moduleLogger, moduleRouting],
+	moduleDependencies: [
+		moduleLogger,
+		moduleRouting,
+		moduleProductCatalog,
+		moduleInternationalisation,
+	],
 	extraScripts: {
 		...openApiScripts,
 		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr sales-tax-api.zip ./*.js.map ./*.js`,
