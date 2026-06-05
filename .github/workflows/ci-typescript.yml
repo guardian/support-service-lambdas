@@ -14,40 +14,23 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  load-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      subprojects: ${{ steps.read-matrix.outputs.subprojects }}
+    steps:
+      - uses: actions/checkout@v6.0.1
+      - id: read-matrix
+        run: |
+          echo "subprojects=$(jq -c '.subproject' .github/workflows/handlerNames.managed.json)" >> "$GITHUB_OUTPUT"
+
   gu-cdk-build:
+    needs:
+      - load-matrix
     strategy:
       fail-fast: false
       matrix:
-        subproject:
-          - imovo-voucher-api
-          - promotions-lambdas
-          - user-benefits
-          - press-reader-entitlements
-          - ticket-tailor-webhook
-          - update-supporter-plus-amount
-          - product-switch-api
-          - generate-product-catalog
-          - alarms-handler
-          - discount-api
-          - stripe-disputes
-          - discount-expiry-notifier
-          - salesforce-disaster-recovery
-          - salesforce-disaster-recovery-health-check
-          - salesforce-event-bus
-          - zuora-salesforce-link-remover
-          - metric-push-api
-          - observer-data-export
-          - negative-invoices-processor
-          - write-off-unpaid-invoices
-          - mparticle-api
-          - mobile-purchases-to-supporter-product-data
-          - new-subscription-api
-          - newsletter-acquisition
-          - multiple-account-api
-          - observer-benefits-api
-          - contributions-only-countries-api
-          - user-subscriptions-api
-          # MARKER new-lambda: github-action
+        subproject: ${{ fromJson(needs.load-matrix.outputs.subprojects) }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write
