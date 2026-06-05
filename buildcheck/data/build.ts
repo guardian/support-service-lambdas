@@ -627,13 +627,20 @@ const ticketTailorWebhook: HandlerDefinition = {
 
 const updateSupporterPlusAmount: HandlerDefinition = {
 	name: 'update-supporter-plus-amount',
+	extraScripts: {
+		local: 'STAGE=CODE HOST=127.0.0.1 PORT=8787 tsx src/local.ts',
+	},
 	dependencies: {
 		...dep['@aws-sdk/client-sqs'],
+		...dep['@hono/node-server'],
+		...dep['@hono/zod-openapi'],
 		...dep.dayjs,
+		...dep.hono,
 		...dep.zod,
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
+		...devDeps['tsx'],
 	},
 	moduleDependencies: [
 		moduleEmail,
