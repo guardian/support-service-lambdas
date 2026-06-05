@@ -26,7 +26,7 @@ done < <(find "$template_dir" -name "*.ts" -type f -print0 | sort -z)
 echo -n "" > "$output_file" # empty the file
 
 # Generate imports
-echo "import type { HandlerDefinition, ModuleDefinition } from '../../../data/build';" >> "$output_file"
+echo "import type { HandlerDefinition, ModuleDefinition, BuildDefinition as RootDefinition } from '../../../data/build';" >> "$output_file"
 for name_without_ext in "${template_files[@]}"; do
     import_name=$(echo "$name_without_ext" | sed 's/[^a-zA-Z0-9]/_/g')
     echo "import $import_name from '../../../data/templates/$name_without_ext';"
