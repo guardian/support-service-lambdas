@@ -194,6 +194,7 @@ jobs:
   ci-scala-all:
     name: ci-scala-all
     runs-on: ubuntu-latest
+    permissions: {}
     if: ${{ always() }}
     needs:
       - gu-cdk-build

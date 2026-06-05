@@ -94,6 +94,7 @@ jobs:
   ci-typescript-all:
     name: ci-typescript-all
     runs-on: ubuntu-latest
+    permissions: {}
     if: ${{ always() }}
     needs:
       - gu-cdk-build
