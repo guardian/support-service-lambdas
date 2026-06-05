@@ -1,14 +1,13 @@
 import * as path from 'path';
 import { contentPostProcessor } from '../../data/snippets/notices';
-import type { FileTemplate, TemplateIndex } from '../../data/types';
-
-export type TemplateContent = string | Record<string, unknown>;
-
-export interface Template<Definition> {
-	targetPath: string;
-	value: TemplateContent | ((data: Definition) => TemplateContent);
-	templateFilename: string;
-}
+import type {
+	AnyTemplate,
+	FileTemplate,
+	InsertChunks,
+	InsertionTemplate,
+	TemplateContent,
+	TemplateIndex,
+} from '../../data/types';
 
 export interface GeneratedFile {
 	/**
@@ -22,26 +21,88 @@ export interface GeneratedFile {
 	templateFilename: string;
 }
 
+export interface ChunkInsertion {
+	/**
+	 * relative path to the repo root
+	 */
+	targetPath: string;
+	chunks: InsertChunks;
+}
+
+/**
+ * Evaluates all templates against `opts`, splitting results into new files and
+ * injections into existing files. Null-returning templates are dropped.
+ */
+export function applyTemplates<Definition>(
+	opts: Definition,
+	templates: TemplateIndex<AnyTemplate<Definition>>,
+): { files: GeneratedFile[]; insertions: ChunkInsertion[] } {
+	const fileTemplates = templates.templates.filter((r) => r.kind === 'file');
+	const insertionTemplates = templates.templates.filter(
+		(r) => r.kind === 'insertion',
+	);
+
+	return {
+		files: applyFileTemplates(
+			opts,
+			{ templateDir: templates.templateDir, templates: fileTemplates },
+			false,
+		),
+		insertions: applyInsertionTemplates(opts, insertionTemplates),
+	};
+}
+
+/**
+ * as applyTemplates above but it only operates on file templates, not insertions
+ */
 export function applyFileTemplates<Definition>(
 	opts: Definition,
 	index: TemplateIndex<FileTemplate<Definition>>,
+	insertWarningComment: boolean,
 ): GeneratedFile[] {
-	return index.templates.map((template) => {
+	return index.templates.flatMap((template) => {
 		const rawContent =
 			typeof template.value === 'function'
 				? template.value(opts)
 				: template.value;
+
+		if (rawContent === null) {
+			return [];
+		}
 
 		const templateFilename = path.join(
 			index.templateDir,
 			template.relativeName,
 		);
 		const targetPath = template.relativeName.slice(0, -'.ts'.length);
+		return [
+			{
+				targetPath,
+				content: serializeContent(
+					rawContent,
+					targetPath,
+					templateFilename,
+					insertWarningComment,
+				),
+				templateFilename,
+			} satisfies GeneratedFile,
+		];
+	});
+}
+
+function applyInsertionTemplates<Definition>(
+	opts: Definition,
+	insertionTemplates: Array<InsertionTemplate<Definition>>,
+) {
+	return insertionTemplates.map((template) => {
+		const chunks =
+			typeof template.value === 'function'
+				? template.value(opts)
+				: template.value;
 		return {
-			targetPath,
-			content: serializeContent(rawContent, targetPath, templateFilename),
-			templateFilename,
-		} satisfies GeneratedFile;
+			targetPath: template.relativeName.slice(0, -'.inserts.ts'.length),
+			chunks,
+		} satisfies ChunkInsertion;
 	});
 }
 
@@ -49,10 +110,12 @@ function serializeContent(
 	content: TemplateContent,
 	relativePath: string,
 	templatePath: string,
+	insertWarningComment: boolean,
 ): string {
 	const extension = path.extname(relativePath);
 	const { prefix, write } = contentPostProcessor[extension];
-	const actualPrefix = prefix ? prefix(templatePath) : '';
+	const actualPrefix =
+		insertWarningComment && prefix ? prefix(templatePath) : '';
 	if (typeof content === 'string') {
 		return actualPrefix + content;
 	} else {

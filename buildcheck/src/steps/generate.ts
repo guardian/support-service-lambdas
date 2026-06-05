@@ -11,19 +11,19 @@ import { applyFileTemplates } from '../dynamic/templater';
 export function generate(): GeneratedFile[] {
 	const handlersFiles = build.handlers.flatMap((pkg) => {
 		const handlerFiles = withWarningFile(
-			applyFileTemplates(pkg, handlerIndex),
+			applyFileTemplates(pkg, handlerIndex, true),
 			'../..',
 		);
 		return prependToTargetPath(handlerFiles, ['handlers', pkg.name]);
 	});
 	const modulesFiles = build.modules.flatMap((pkg) => {
 		const moduleFiles = withWarningFile(
-			applyFileTemplates(pkg, moduleIndex),
+			applyFileTemplates(pkg, moduleIndex, true),
 			'../..',
 		);
 		return prependToTargetPath(moduleFiles, ['modules', pkg.name]);
 	});
-	const rootFiles = applyFileTemplates(build, rootIndex);
+	const rootFiles = applyFileTemplates(build, rootIndex, true);
 	return withWarningFile(
 		[...handlersFiles, ...modulesFiles, ...rootFiles],
 		'.',

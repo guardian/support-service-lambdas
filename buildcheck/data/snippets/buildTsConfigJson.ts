@@ -1,5 +1,5 @@
+import type { ModuleDefinition } from '@buildcheck/managed/module';
 import { recordFromEntries } from '../../src/util/dependencyMapper';
-import type { ModuleDefinition } from '../build';
 
 export const collectAllDeps = (
 	pkg: ModuleDefinition,

@@ -21,6 +21,18 @@ After editing the build definition, refresh the build files using `pnpm snapshot
 1. review (if necessary update the build definition and run snapshot:update again)
 1. commit and push
 
+### ...create a new lambda from scratch
+Run the seed — it will prompt you interactively if you omit flags:
+```bash
+cd buildcheck
+pnpm seed api-lambda
+```
+Or supply flags directly to skip the prompts:
+```bash
+pnpm seed api-lambda --lambdaName=my-lambda --includeApiKey=Y --includeOpenApiDoc=N
+```
+See [data/seeds/api-lambda/README.md](data/seeds/api-lambda/README.md) for full details.
+
 ## Why do we use buildcheck
 The benefits are similar to CDK or SBT:
 - prevent inconsistencies between lambdas/modules including dependency versions and pnpm scripts

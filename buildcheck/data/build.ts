@@ -1,3 +1,5 @@
+import type { HandlerDefinition } from '@buildcheck/managed/handler';
+import type { ModuleDefinition } from '@buildcheck/managed/module';
 import { dep, deprecatedDeps, devDeps } from './dependencies';
 import { openApiScripts, srcOnly } from './scripts';
 
@@ -6,30 +8,7 @@ This is the main build definition for all handlers.
 
 Each record defines one handler and contains anything unique compared with the
 assumed build structure.
- */
-
-export interface HandlerDefinition extends ModuleDefinition {
-	stack?: 'support' | 'membership';
-	functionNames?: string[];
-	entryPoints?: string[];
-	extraStages?: Array<'CSBX'>;
-}
-
-export interface ModuleDefinition {
-	name: string;
-	extraScripts?: Record<string, string>;
-	dependencies?: Record<string, string>;
-	devDependencies?: Record<string, string>;
-	tsConfigExtra?: Record<string, unknown>;
-	testTimeoutSeconds?: number;
-	jestClearMocks?: boolean;
-	moduleDependencies: ModuleDefinition[];
-}
-
-export interface BuildDefinition {
-	handlers: HandlerDefinition[];
-	modules: ModuleDefinition[];
-}
+*/
 
 const moduleLogger: ModuleDefinition = {
 	name: 'logger',
@@ -805,6 +784,11 @@ const userSubscriptionsApi: HandlerDefinition = {
 };
 
 // MARKER new-lambda: buildcheck-const
+
+export interface BuildDefinition {
+	handlers: HandlerDefinition[];
+	modules: ModuleDefinition[];
+}
 
 export const build: BuildDefinition = {
 	handlers: [

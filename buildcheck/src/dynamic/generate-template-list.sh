@@ -1,11 +1,10 @@
 #!/bin/bash -e
-# This is an internally used script to automatically produce an index of managed templates
+# Generates _generated_tsIndex.ts inside each subdir and _generated_dirIndex.ts at the top level.
 script_name=$(basename "$0")
 
 script_dir=$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")
 data_dir=$(readlink -f "$script_dir/../../data")
 repo_root=$(readlink -f "$script_dir/../../..")
-managed_dir="$data_dir/managed"
 
 file_header() {
     echo "/*"
@@ -22,6 +21,10 @@ to_safe_ts_identifier() {
     echo "$without_ext" | sed 's/[^a-zA-Z0-9]/_/g'
 }
 
+get_kind() {
+    if [[ "$1" == *.inserts.ts ]]; then echo "insertion"; else echo "file"; fi
+}
+
 
 # Write _generated_tsIndex.ts for a single subdir.
 # Scans subdir/templates/, imports each .ts file, exports a typed array.
@@ -36,10 +39,11 @@ write_ts_index() {
         local importRel="${file#$subdir/}"
         local import_path="${importRel%.ts}"
         local templateRel="${importRel#templates/}"
-        local import_name
+        local import_name kind
         import_name=$(to_safe_ts_identifier "$templateRel")
+        kind=$(get_kind "$templateRel")
         imports+=("import $import_name from './$import_path';")
-        entries+=("    { relativeName: '$templateRel', value: $import_name },")
+        entries+=("    { relativeName: '$templateRel', value: $import_name, kind: '$kind' },")
     done < <(find "$subdir/templates" -name "*.ts" -type f -print0 2>/dev/null | sort -fz)
 
     {
@@ -61,12 +65,56 @@ write_ts_index() {
 }
 
 
+# Write _generated_dirIndex.ts at the top level of a data dir.
+# Each entry is per-entry satisfies DirConfig<SeedTemplateParams>.
+write_dir_index() {
+    local parent_dir="$1"
+    local out="$parent_dir/_generated_dirIndex.ts"
+
+    local subdirs=()
+    while IFS= read -r -d '' subdir; do
+        subdirs+=("$(basename "$subdir")")
+    done < <(find "$parent_dir" -mindepth 1 -maxdepth 1 -type d -not -name '_*' -print0 | sort -z)
+
+    {
+        for name in "${subdirs[@]}"; do
+            local const_name
+            const_name=$(to_safe_ts_identifier "$name")
+            echo "import ${const_name}_templates from './$name/_generated_tsIndex';"
+            echo "import ${const_name}_index from './$name/index';"
+            echo "import type { TemplateParams as ${const_name}_TemplateParams } from './$name/index';"
+        done
+        echo "import type { DirConfig } from './types';"
+        echo ""
+        file_header
+        echo ""
+        echo "export default {"
+        for name in "${subdirs[@]}"; do
+            local const_name
+            const_name=$(to_safe_ts_identifier "$name")
+            echo "  '$name': {"
+            echo "    index: ${const_name}_index,"
+            echo "    templates: ${const_name}_templates,"
+            echo "  } satisfies DirConfig<${const_name}_TemplateParams>,"
+        done
+        echo "};"
+    } > "$out"
+
+    echo "$script_name: wrote $out"
+}
+
+
 echo "$script_name: START generating template lists..."
 
-# generate TS file indexes for managed/*/
-while IFS= read -r -d '' subdir; do
-    [[ "$(basename "$subdir")" == _* ]] && continue
-    write_ts_index "$subdir"
-done < <(find "$managed_dir" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
+# generate TS file indexes for both dirs
+for parent_dir in "$data_dir/seeds" "$data_dir/managed"; do
+    while IFS= read -r -d '' subdir; do
+        [[ "$(basename "$subdir")" == _* ]] && continue
+        write_ts_index "$subdir"
+    done < <(find "$parent_dir" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
+done
+
+# seeds index only needed for seeds
+write_dir_index "$data_dir/seeds"
 
 echo "$script_name: FINISH"

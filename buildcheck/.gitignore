@@ -3,3 +3,4 @@ dist/
 *.log
 /src/dynamic/generated/
 /data/**/_generated_tsIndex.ts
+/data/**/_generated_dirIndex.ts

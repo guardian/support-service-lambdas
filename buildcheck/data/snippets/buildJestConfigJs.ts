@@ -1,4 +1,4 @@
-import type { ModuleDefinition } from '../build';
+import type { ModuleDefinition } from '@buildcheck/managed/module';
 
 export function buildJestConfigJs(pkg: ModuleDefinition) {
 	return `/** @type {import('ts-jest').JestConfigWithTsJest} */

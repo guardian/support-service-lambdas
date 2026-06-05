@@ -12,4 +12,15 @@ In order to get compile time safety, the generated file expects the correct
 type to be exported from this file as `TemplateParams`.
 
 */
-export type { ModuleDefinition as TemplateParams } from '../../build';
+export interface ModuleDefinition {
+	name: string;
+	extraScripts?: Record<string, string>;
+	dependencies?: Record<string, string>;
+	devDependencies?: Record<string, string>;
+	tsConfigExtra?: Record<string, unknown>;
+	testTimeoutSeconds?: number;
+	jestClearMocks?: boolean;
+	moduleDependencies: ModuleDefinition[];
+}
+
+export type { ModuleDefinition as TemplateParams };

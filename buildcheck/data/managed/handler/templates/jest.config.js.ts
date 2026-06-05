@@ -1,3 +1,3 @@
-import { buildJestConfigJs } from '../../../snippets/buildJestConfigJs';
+import { buildJestConfigJs } from '@buildcheck/snippets/buildJestConfigJs';
 
 export default buildJestConfigJs;

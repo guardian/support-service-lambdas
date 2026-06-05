@@ -1,5 +1,4 @@
-import { recordFromEntries } from '../../../../src/util/dependencyMapper';
-import type { HandlerDefinition } from '../../../build';
+import type { HandlerDefinition } from '@buildcheck/managed/handler/index';
 
 const stage =
 	(pkg: HandlerDefinition) =>
@@ -19,7 +18,7 @@ export default (pkg: HandlerDefinition) => {
 				type: 'cloud-formation',
 				app: pkg.name,
 				parameters: {
-					templateStagePaths: recordFromEntries(allowedStages.map(stage(pkg))),
+					templateStagePaths: Object.fromEntries(allowedStages.map(stage(pkg))),
 				},
 			},
 			[pkg.name]: {

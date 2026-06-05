@@ -45,3 +45,23 @@ export function deleteRepoFiles(
 		}
 	});
 }
+
+/**
+ * makes sure that files that will be written don't already exist
+ *
+ * This prevents seed mode from accidentally overwriting existing code.
+ */
+export function assertFilesDoNotExist(
+	repoRoot: string,
+	files: GeneratedFile[],
+) {
+	for (const file of files) {
+		const fullPath = path.join(repoRoot, file.targetPath);
+		if (fs.existsSync(fullPath)) {
+			throw new Error(
+				`Seed file already exists: ${file.targetPath}\n` +
+					`Check for uncommitted changes, resolve any issues, and try again.`,
+			);
+		}
+	}
+}

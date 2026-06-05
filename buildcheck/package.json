@@ -6,6 +6,7 @@
 	"scripts": {
 		"snapshot:update": "pnpm generate && REPO_ROOT=\"$(pwd | sed 's|/buildcheck.*||')\" && tsx src/cli.ts \"$REPO_ROOT\" --generate",
 		"snapshot:clean": "pnpm generate && REPO_ROOT=\"$(pwd | sed 's|/buildcheck.*||')\" && tsx src/cli.ts \"$REPO_ROOT\" --clean",
+		"seed": "pnpm generate && REPO_ROOT=\"$(pwd | sed 's|/buildcheck.*||')\" && tsx src/cli.ts \"$REPO_ROOT\" --seed \"$@\"",
 		"snapshot:assert": "pnpm generate && REPO_ROOT=\"$(pwd | sed 's|/buildcheck.*||')\" && bash -c 'jest --testNamePattern=\"$*\"' -- \"$@\"",
 		"clean": "rm -rf src/dynamic/generated dist",
 		"generate": "bash src/dynamic/generate-template-list.sh",
