@@ -785,7 +785,7 @@ const userSubscriptionsApi: HandlerDefinition = {
 
 // MARKER new-lambda: buildcheck-const
 
-interface BuildDefinition {
+export interface BuildDefinition {
 	handlers: HandlerDefinition[];
 	modules: ModuleDefinition[];
 }

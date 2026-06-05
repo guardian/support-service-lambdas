@@ -23,7 +23,7 @@ export function generate(): GeneratedFile[] {
 		);
 		return prependToTargetPath(moduleFiles, ['modules', pkg.name]);
 	});
-	const rootFiles = applyFileTemplates(build, rootIndex);
+	const rootFiles = applyFileTemplates(build, rootIndex, true);
 	return withWarningFile(
 		[...handlersFiles, ...modulesFiles, ...rootFiles],
 		'.',
