@@ -52,10 +52,8 @@ jobs:
       - run: pnpm --filter "./buildcheck" lint
       - run: pnpm --filter "./buildcheck" snapshot:assert 'ROOT|modules|handlers/${{ matrix.subproject }}'
       - run: pnpm --filter cdk package ${{ matrix.subproject }}
-      - run: pnpm --filter ${{ matrix.subproject }}... --parallel --aggregate-output type-check
-      - run: pnpm --filter ${{ matrix.subproject }}... --parallel --aggregate-output lint
-      - run: pnpm --filter ${{ matrix.subproject }}... --parallel --aggregate-output check-formatting
-      - run: pnpm --filter ${{ matrix.subproject }}... --parallel --aggregate-output test
+      - run: pnpm --filter ${{ matrix.subproject }}... --parallel --aggregate-output '/^(type-check|lint|check-formatting)$/'
+      - run: pnpm --filter ${{ matrix.subproject }}... test
       - run: pnpm --filter ${{ matrix.subproject }} packageQuick
 
       - name: Upload to Riff-Raff
