@@ -1,0 +1,33 @@
+{
+  "NOTICE": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/managed/root/templates/.github/workflows/handlerNames.managed.json.ts",
+  "subproject": [
+    "alarms-handler",
+    "contributions-only-countries-api",
+    "discount-api",
+    "discount-expiry-notifier",
+    "generate-product-catalog",
+    "imovo-voucher-api",
+    "metric-push-api",
+    "mobile-purchases-to-supporter-product-data",
+    "mparticle-api",
+    "multiple-account-api",
+    "negative-invoices-processor",
+    "new-subscription-api",
+    "newsletter-acquisition",
+    "observer-benefits-api",
+    "observer-data-export",
+    "press-reader-entitlements",
+    "product-switch-api",
+    "promotions-lambdas",
+    "salesforce-disaster-recovery",
+    "salesforce-disaster-recovery-health-check",
+    "salesforce-event-bus",
+    "stripe-disputes",
+    "ticket-tailor-webhook",
+    "update-supporter-plus-amount",
+    "user-benefits",
+    "user-subscriptions-api",
+    "write-off-unpaid-invoices",
+    "zuora-salesforce-link-remover"
+  ]
+}
