@@ -89,3 +89,17 @@ jobs:
               - ./cdk/cdk.out/${{ matrix.subproject }}-PROD.template.json
             ${{ matrix.subproject }}:
               - ./handlers/${{ matrix.subproject }}/target/${{ matrix.subproject }}.zip
+
+  # for branch protection - only passes if all builds pass
+  ci-typescript-all:
+    name: ci-typescript-all
+    runs-on: ubuntu-latest
+    permissions: {}
+    if: ${{ always() }}
+    needs:
+      - gu-cdk-build
+    steps:
+      - name: Fail unless all matrix jobs succeeded
+        run: |
+          [ "${{ needs.gu-cdk-build.result }}" = "success" ]
+
