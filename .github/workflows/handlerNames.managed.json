@@ -21,6 +21,7 @@
     "promotions-lambdas",
     "salesforce-disaster-recovery",
     "salesforce-disaster-recovery-health-check",
+    "salesforce-event-bus",
     "stripe-disputes",
     "ticket-tailor-webhook",
     "update-supporter-plus-amount",
