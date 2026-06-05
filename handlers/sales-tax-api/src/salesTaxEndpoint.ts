@@ -1,3 +1,4 @@
+import { ValidationError } from '@modules/errors';
 import { isoCountrySchema } from '@modules/internationalisation/schemas';
 import { logger } from '@modules/logger/logger';
 import { productKeySchema } from '@modules/product-catalog/productCatalogSchema';
@@ -46,15 +47,15 @@ function getTaxRate({
 		productKey,
 	);
 	if (!validProductKey) {
-		throw new Error(`invalid productKey ${productKey}`);
+		throw new ValidationError(`invalid productKey ${productKey}`);
 	}
 	const validCountry = ['CA'].includes(country);
 	if (!validCountry) {
-		throw new Error(`invalid country ${validCountry}`);
+		throw new ValidationError(`invalid country ${validCountry}`);
 	}
 	const validState = ['ON'].includes(state);
 	if (!validState) {
-		throw new Error(`invalid country ${validCountry}`);
+		throw new ValidationError(`invalid country ${validCountry}`);
 	}
 
 	return { taxRate: 0.13 };
