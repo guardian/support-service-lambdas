@@ -25,7 +25,7 @@ export function salesTaxRequestEndpoint({
 			country,
 			state,
 		});
-		return Promise.resolve(ok({ taxRate: 0 }, salesTaxResponseSchema));
+		return Promise.resolve(ok({ taxRate: 0.13 }, salesTaxResponseSchema));
 	} catch (error) {
 		logger.error('Error fetching sales tax', error);
 		return Promise.resolve(buildErrorResponse(error));
