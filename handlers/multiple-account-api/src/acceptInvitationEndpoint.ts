@@ -2,6 +2,7 @@ import { getIfDefined } from '@modules/nullAndUndefined';
 import {
 	badRequest,
 	buildErrorResponse,
+	notFound,
 	ok,
 } from '@modules/routing/apiGatewayResponses';
 import type { Stage } from '@modules/stage';
@@ -29,7 +30,10 @@ export const acceptInvitationEndpoint = async (
 ) => {
 	try {
 		const invitation = await invitationRepository.get(invitationCode);
-		if (signedInUserId !== invitation?.secondaryIdentityId) {
+		if (!invitation) {
+			return notFound();
+		}
+		if (signedInUserId !== invitation.secondaryIdentityId) {
 			return badRequest('Incorrect user');
 		}
 		const today = dayjs();

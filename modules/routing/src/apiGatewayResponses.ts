@@ -25,6 +25,13 @@ export function internalServerError(): APIGatewayProxyResult {
 	};
 }
 
+export function notFound() {
+	return {
+		body: JSON.stringify({ message: 'Not Found' }),
+		statusCode: 404,
+	};
+}
+
 /**
  * Return a 200 OK response with the provided body.
  * @param body
