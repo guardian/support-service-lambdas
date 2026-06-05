@@ -27,4 +27,32 @@ describe('handler', () => {
 
 		expect(response.statusCode).toEqual(400);
 	});
+	it('returns 400 for an invalid country', async () => {
+		const requestEvent = {
+			path: '/tax-rate',
+			httpMethod: 'POST',
+			headers: {},
+			body: JSON.stringify({
+				country: 'XX',
+			}),
+		} as unknown as APIGatewayProxyEvent;
+
+		const response = await handler(requestEvent);
+
+		expect(response.statusCode).toEqual(400);
+	});
+	it('returns 400 for an invalid state', async () => {
+		const requestEvent = {
+			path: '/tax-rate',
+			httpMethod: 'POST',
+			headers: {},
+			body: JSON.stringify({
+				state: 'XX',
+			}),
+		} as unknown as APIGatewayProxyEvent;
+
+		const response = await handler(requestEvent);
+
+		expect(response.statusCode).toEqual(400);
+	});
 });
