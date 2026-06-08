@@ -44,6 +44,61 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
     },
   },
   "Resources": {
+    "AcquisitionsToBrazeRule07701D88": {
+      "Properties": {
+        "EventBusName": "acquisitions-bus-CODE",
+        "EventPattern": {
+          "detail-type": [
+            "AcquisitionsEvent",
+          ],
+        },
+        "Name": "acquisitions-braze-suppression-sync-CODE",
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "LambdaD247545B",
+                "Arn",
+              ],
+            },
+            "DeadLetterConfig": {
+              "Arn": {
+                "Fn::GetAtt": [
+                  "EventBridgeToLambdaDlqCFE42382",
+                  "Arn",
+                ],
+              },
+            },
+            "Id": "Target0",
+            "RetryPolicy": {
+              "MaximumEventAgeInSeconds": 7200,
+              "MaximumRetryAttempts": 3,
+            },
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "AcquisitionsToBrazeRuleAllowEventRuleacquisitionsbrazesuppressionsyncCODELambda12E32584780944FE": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "AcquisitionsToBrazeRule07701D88",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
     "BasePathMapping": {
       "Properties": {
         "DomainName": {
@@ -120,6 +175,157 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
+    "EventBridgeDlqAlarm92E57E36": {
+      "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-CODE",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "EventBridge could not invoke acquisitions-braze-suppression-sync lambda after retries. Quick triage: inspect DLQ message attributes for invoke failure reason, confirm rule event pattern matches AcquisitionsEvent payload shape, verify lambda permissions from EventBridge, and redrive once root cause is fixed.",
+        "AlarmName": "CODE acquisitions-braze-suppression-sync eventbridge dlq has messages",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::GetAtt": [
+                "EventBridgeToLambdaDlqCFE42382",
+                "QueueName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Period": 300,
+        "Statistic": "Maximum",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "acquisitions-braze-suppression-sync",
+          },
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "LambdaD247545B",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "EventBridgeToLambdaDlqCFE42382": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "acquisitions-braze-suppression-sync-eventbridge-dlq-CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "acquisitions-braze-suppression-sync",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "EventBridgeToLambdaDlqPolicy9EBC52AA": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "AcquisitionsToBrazeRule07701D88",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "EventBridgeToLambdaDlqCFE42382",
+                  "Arn",
+                ],
+              },
+              "Sid": "AllowEventRuleacquisitionsbrazesuppressionsyncCODEAcquisitionsToBrazeRuleE8E8FE88",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "EventBridgeToLambdaDlqCFE42382",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
     "LambdaD247545B": {
       "DependsOn": [
         "LambdaServiceRoleDefaultPolicyDAE46E21",
@@ -132,7 +338,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
           },
           "S3Key": "support/CODE/acquisitions-braze-suppression-sync/acquisitions-braze-suppression-sync.zip",
         },
-        "Description": "A lambda that enables the addition of discounts to existing subscriptions",
+        "Description": "A lambda that enriches acquisitions events with Braze UUID and posts to Braze users/track",
         "Environment": {
           "Variables": {
             "APP": "acquisitions-braze-suppression-sync",
@@ -176,9 +382,87 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
             "Value": "CODE",
           },
         ],
-        "Timeout": 300,
+        "Timeout": 30,
       },
       "Type": "AWS::Lambda::Function",
+    },
+    "LambdaErrorAlarm646BFA4C": {
+      "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-CODE",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "acquisitions-braze-suppression-sync failed. Quick triage: inspect lambda logs for error stack and identityId context, check IDAPI lookup result for missing braze-uuid, and confirm Braze /users/track request and response payloads. Impact: an eligible user may not have suppression-related Braze updates applied to their profile, which may result in them receiving marketing communications they should not receive",
+        "AlarmName": "CODE acquisitions-braze-suppression-sync lambda errors",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": {
+              "Ref": "LambdaD247545B",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "acquisitions-braze-suppression-sync",
+          },
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "LambdaD247545B",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
     },
     "LambdaRestApi687C4D83": {
       "Properties": {
@@ -884,6 +1168,61 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
     },
   },
   "Resources": {
+    "AcquisitionsToBrazeRule07701D88": {
+      "Properties": {
+        "EventBusName": "acquisitions-bus-PROD",
+        "EventPattern": {
+          "detail-type": [
+            "AcquisitionsEvent",
+          ],
+        },
+        "Name": "acquisitions-braze-suppression-sync-PROD",
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "LambdaD247545B",
+                "Arn",
+              ],
+            },
+            "DeadLetterConfig": {
+              "Arn": {
+                "Fn::GetAtt": [
+                  "EventBridgeToLambdaDlqCFE42382",
+                  "Arn",
+                ],
+              },
+            },
+            "Id": "Target0",
+            "RetryPolicy": {
+              "MaximumEventAgeInSeconds": 7200,
+              "MaximumRetryAttempts": 3,
+            },
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "AcquisitionsToBrazeRuleAllowEventRuleacquisitionsbrazesuppressionsyncPRODLambda8C559CC594752E6F": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "AcquisitionsToBrazeRule07701D88",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
     "ApiGateway5XXAlarmCDK11905206": {
       "Properties": {
         "ActionsEnabled": true,
@@ -905,7 +1244,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
             ],
           },
         ],
-        "AlarmDescription": "acquisitions-braze-suppression-sync returned a 5XX response. Search the logs below for "error" for more information. Impact: an eligible user may not have been offered a discount during the cancellation flow",
+        "AlarmDescription": "acquisitions-braze-suppression-sync returned a 5XX response. Quick triage: check API Gateway 5XX metrics for spike window, inspect lambda logs for the same timestamp, validate IDAPI response includes braze-uuid, and verify Braze /users/track response status and body.",
         "AlarmName": "acquisitions-braze-suppression-sync-PROD 5XX errors",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
@@ -1036,6 +1375,157 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
+    "EventBridgeDlqAlarm92E57E36": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "EventBridge could not invoke acquisitions-braze-suppression-sync lambda after retries. Quick triage: inspect DLQ message attributes for invoke failure reason, confirm rule event pattern matches AcquisitionsEvent payload shape, verify lambda permissions from EventBridge, and redrive once root cause is fixed.",
+        "AlarmName": "PROD acquisitions-braze-suppression-sync eventbridge dlq has messages",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::GetAtt": [
+                "EventBridgeToLambdaDlqCFE42382",
+                "QueueName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Period": 300,
+        "Statistic": "Maximum",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "acquisitions-braze-suppression-sync",
+          },
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "LambdaD247545B",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "EventBridgeToLambdaDlqCFE42382": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "acquisitions-braze-suppression-sync-eventbridge-dlq-PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "acquisitions-braze-suppression-sync",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "EventBridgeToLambdaDlqPolicy9EBC52AA": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "AcquisitionsToBrazeRule07701D88",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "EventBridgeToLambdaDlqCFE42382",
+                  "Arn",
+                ],
+              },
+              "Sid": "AllowEventRuleacquisitionsbrazesuppressionsyncPRODAcquisitionsToBrazeRuleDD82F6CB",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "EventBridgeToLambdaDlqCFE42382",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
     "LambdaD247545B": {
       "DependsOn": [
         "LambdaServiceRoleDefaultPolicyDAE46E21",
@@ -1048,7 +1538,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
           },
           "S3Key": "support/PROD/acquisitions-braze-suppression-sync/acquisitions-braze-suppression-sync.zip",
         },
-        "Description": "A lambda that enables the addition of discounts to existing subscriptions",
+        "Description": "A lambda that enriches acquisitions events with Braze UUID and posts to Braze users/track",
         "Environment": {
           "Variables": {
             "APP": "acquisitions-braze-suppression-sync",
@@ -1092,9 +1582,87 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
             "Value": "PROD",
           },
         ],
-        "Timeout": 300,
+        "Timeout": 30,
       },
       "Type": "AWS::Lambda::Function",
+    },
+    "LambdaErrorAlarm646BFA4C": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "acquisitions-braze-suppression-sync failed. Quick triage: inspect lambda logs for error stack and identityId context, check IDAPI lookup result for missing braze-uuid, and confirm Braze /users/track request and response payloads. Impact: an eligible user may not have suppression-related Braze updates applied to their profile, which may result in them receiving marketing communications they should not receive",
+        "AlarmName": "PROD acquisitions-braze-suppression-sync lambda errors",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": {
+              "Ref": "LambdaD247545B",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "acquisitions-braze-suppression-sync",
+          },
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "LambdaD247545B",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
     },
     "LambdaRestApi687C4D83": {
       "Properties": {

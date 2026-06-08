@@ -1,6 +1,7 @@
 import { logger } from '@modules/logger/logger';
 import type { AcquisitionsEventBridgeEvent } from '../src/acquisitionEvent';
 import { processAcquisitionEvent } from '../src/index';
+import { transformEventForBrazePayload } from '../src/transform';
 
 function buildEvent(
 	detailOverrides: Partial<AcquisitionsEventBridgeEvent['detail']> = {},
@@ -16,17 +17,9 @@ function buildEvent(
 		resources: [],
 		detail: {
 			eventTimeStamp: '2026-06-03T12:00:00Z',
-			product: 'Contribution',
-			amount: 10,
-			country: 'GB',
+			product: 'CONTRIBUTION',
 			currency: 'GBP',
-			abTests: [],
-			paymentFrequency: 'OneOff',
-			labels: [],
-			reusedExistingPaymentMethod: false,
-			readerType: 'Direct',
-			acquisitionType: 'Contribution',
-			queryParameters: [],
+			paymentFrequency: 'ONE_OFF',
 			...detailOverrides,
 		},
 	};
@@ -48,7 +41,6 @@ describe('processAcquisitionEvent', () => {
 	it('skips processing for events without identityId (guest contributions)', async () => {
 		const services = {
 			getBrazeUuidFromIdapi: jest.fn(),
-			transformEventForBraze: jest.fn(),
 			sendToBraze: jest.fn(),
 		};
 
@@ -63,7 +55,53 @@ describe('processAcquisitionEvent', () => {
 		expect(addContextSpy).not.toHaveBeenCalled();
 		expect(dropContextSpy).not.toHaveBeenCalled();
 		expect(services.getBrazeUuidFromIdapi).not.toHaveBeenCalled();
-		expect(services.transformEventForBraze).not.toHaveBeenCalled();
 		expect(services.sendToBraze).not.toHaveBeenCalled();
+	});
+
+	it('processes event with identityId and sends transformed payload', async () => {
+		const services = {
+			getBrazeUuidFromIdapi: jest.fn().mockResolvedValue('braze-uuid-1'),
+			sendToBraze: jest.fn().mockResolvedValue(undefined),
+		};
+
+		const event = buildEvent({ identityId: 'identity-123' });
+
+		await processAcquisitionEvent(event, services);
+
+		expect(addContextSpy).toHaveBeenCalledWith('identity-123');
+		expect(services.getBrazeUuidFromIdapi).toHaveBeenCalledWith('identity-123');
+		expect(services.sendToBraze).toHaveBeenCalledWith(
+			transformEventForBrazePayload(event.detail, 'braze-uuid-1'),
+		);
+		expect(dropContextSpy).toHaveBeenCalledWith('identity-123');
+	});
+
+	it('creates Braze payload with expected event properties', () => {
+		const event = buildEvent({
+			product: 'SUPPORTER_PLUS',
+			paymentFrequency: 'MONTHLY',
+			currency: 'GBP',
+			eventTimeStamp: '2026-06-03T12:00:00Z',
+			promoCode: 'PROMO123',
+		});
+
+		expect(transformEventForBrazePayload(event.detail, 'external-user-123'))
+			.toEqual({
+				events: [
+					{
+						external_id: 'external-user-123',
+						name: 'acquisition',
+						time: '2026-06-03T12:00:00Z',
+						_update_existing_only: true,
+						properties: {
+							product_name: 'SUPPORTER_PLUS',
+							currency: 'GBP',
+							promo_code: 'PROMO123',
+							payment_frequency: 'MONTHLY',
+							transaction_value: 'contribution',
+						},
+					},
+				],
+			});
 	});
 });

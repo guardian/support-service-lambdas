@@ -7,7 +7,9 @@
  */
 import { processAcquisitionEvent } from '../src/index';
 
-function buildEvent(identityId: string | undefined) {
+function buildEvent(
+	identityId: string | undefined,
+): Parameters<typeof processAcquisitionEvent>[0] {
 	return {
 		version: '0',
 		id: 'integration-event-id',
@@ -19,17 +21,9 @@ function buildEvent(identityId: string | undefined) {
 		resources: [],
 		detail: {
 			eventTimeStamp: '2026-06-03T12:00:00Z',
-			product: 'Contribution',
-			amount: 10,
-			country: 'GB',
+			product: 'CONTRIBUTION',
 			currency: 'GBP',
-			abTests: [],
-			paymentFrequency: 'OneOff',
-			labels: [],
-			reusedExistingPaymentMethod: false,
-			readerType: 'Direct',
-			acquisitionType: 'Contribution',
-			queryParameters: [],
+			paymentFrequency: 'ONE_OFF',
 			identityId,
 		},
 	};
