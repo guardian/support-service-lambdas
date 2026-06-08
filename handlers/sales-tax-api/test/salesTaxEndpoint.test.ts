@@ -1,6 +1,7 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { handler } from '../src/index';
-import { countryStates, type SalesTaxResponse } from '../src/salesTaxEndpoint';
+import { countryStates } from '../src/salesTaxEndpoint';
+import type { SalesTaxResponse } from '../src/schemas';
 
 describe('handler', () => {
 	it('returns 400 for an empty body', async () => {

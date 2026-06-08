@@ -1,11 +1,10 @@
 import { ValidationError } from '@modules/errors';
 import type { IsoCountry } from '@modules/internationalisation/country';
-import { isoCountrySchema } from '@modules/internationalisation/schemas';
 import { logger } from '@modules/logger/logger';
-import { productKeySchema } from '@modules/product-catalog/productCatalogSchema';
 import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
 import type { APIGatewayProxyResult } from 'aws-lambda';
-import { z } from 'zod';
+import type { SalesTaxRequest, SalesTaxResponse } from './schemas';
+import { salesTaxResponseSchema } from './schemas';
 
 export const countryStates: Partial<
 	Record<IsoCountry, Record<string, number>>
@@ -26,18 +25,6 @@ export const countryStates: Partial<
 		YT: 0.05,
 	},
 };
-
-export const salesTaxRequestSchema = z.object({
-	productKey: productKeySchema,
-	country: isoCountrySchema,
-	state: z.string(),
-});
-export type SalesTaxRequest = z.infer<typeof salesTaxRequestSchema>;
-
-const salesTaxResponseSchema = z.object({
-	taxRate: z.number(),
-});
-export type SalesTaxResponse = z.infer<typeof salesTaxResponseSchema>;
 
 export function salesTaxRequestEndpoint({
 	productKey,

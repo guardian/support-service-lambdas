@@ -1,10 +1,8 @@
 import { logger } from '@modules/logger/logger';
 import { Router } from '@modules/routing/router';
 import { withBodyParser } from '@modules/routing/withParsers';
-import {
-	salesTaxRequestEndpoint,
-	salesTaxRequestSchema,
-} from './salesTaxEndpoint';
+import { salesTaxRequestEndpoint } from './salesTaxEndpoint';
+import { salesTaxRequestSchema } from './schemas';
 
 export const handler = Router([
 	{
