@@ -160,6 +160,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	ObserverBenefitsApi,
 	ContributionsOnlyCountriesApi,
 	UserSubscriptionsApi,
+	SupporterProductDataLambdas,
 	// MARKER new-lambda: cdk-bin
 ];
 
@@ -168,17 +169,6 @@ stacks.forEach((Constructor) => {
 	stages.forEach((stage) => {
 		new Constructor(app, stage);
 	});
-});
-
-new SupporterProductDataLambdas(app, {
-	stage: 'CODE',
-	app: 'supporter-product-data-lambdas',
-	processItemMaxConcurrency: 30,
-});
-new SupporterProductDataLambdas(app, {
-	stage: 'PROD',
-	app: 'supporter-product-data-lambdas',
-	processItemMaxConcurrency: 50,
 });
 
 new SalesforceDisasterRecovery(app, 'salesforce-disaster-recovery-CODE', {

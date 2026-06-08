@@ -5,16 +5,8 @@ import { SupporterProductDataLambdas } from './supporter-product-data-lambdas';
 describe('The supporter-product-data-lambdas stack', () => {
 	it('matches the snapshot', () => {
 		const app = new App();
-		const codeStack = new SupporterProductDataLambdas(app, {
-			app: 'supporter-product-data-lambdas',
-			stage: 'CODE',
-			processItemMaxConcurrency: 30,
-		});
-		const prodStack = new SupporterProductDataLambdas(app, {
-			app: 'supporter-product-data-lambdas',
-			stage: 'PROD',
-			processItemMaxConcurrency: 50,
-		});
+		const codeStack = new SupporterProductDataLambdas(app, 'CODE');
+		const prodStack = new SupporterProductDataLambdas(app, 'PROD');
 
 		expect(Template.fromStack(codeStack).toJSON()).toMatchSnapshot();
 		expect(Template.fromStack(prodStack).toJSON()).toMatchSnapshot();

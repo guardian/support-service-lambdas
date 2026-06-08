@@ -31,18 +31,12 @@ import {
 } from './cdk/policies';
 import { SrLambda } from './cdk/SrLambda';
 import { SrLambdaErrorAlarm } from './cdk/SrLambdaErrorAlarm';
-import type { SrStackProps } from './cdk/SrStack';
+import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
 
-type SupporterProductDataLambdasProps = SrStackProps & {
-	processItemMaxConcurrency: number;
-};
-
 export class SupporterProductDataLambdas extends SrStack {
-	constructor(scope: App, props: SupporterProductDataLambdasProps) {
-		super(scope, props);
-
-		const { processItemMaxConcurrency } = props;
+	constructor(scope: App, stage: SrStageNames) {
+		super(scope, { stage, app: 'supporter-product-data-lambdas' });
 
 		// Reference the existing SQS queue by ARN rather than creating a new one.
 		// The queue was originally created by the Scala implementation of this stack.
@@ -66,6 +60,7 @@ export class SupporterProductDataLambdas extends SrStack {
 				queueName: dlqName,
 			},
 		);
+		const processItemMaxConcurrency = stage === 'PROD' ? 50 : 30;
 
 		// Non-standard SSM path used by ConfigService — not covered by the GuCDK auto-policy (which uses /${stage}/${stack}/${app})
 		const ssmConfigPolicy = new PolicyStatement({
@@ -233,9 +228,10 @@ export class SupporterProductDataLambdas extends SrStack {
 			},
 		);
 
-		// Every 5 minutes 24/7 in PROD, once a day Mon-Fri at 9am UTC in CODE
+		const every5Minutes = 'cron(*/5 * ? * * *)';
+		const weekdays9am = 'cron(0 9 ? * MON-FRI *)';
 		const scheduleExpression =
-			this.stage === 'PROD' ? 'cron(*/5 * ? * * *)' : 'cron(0 9 ? * MON-FRI *)';
+			this.stage === 'PROD' ? every5Minutes : weekdays9am;
 
 		new Rule(this, 'SupporterProductDataSchedule', {
 			schedule: Schedule.expression(scheduleExpression),
