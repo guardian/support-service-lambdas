@@ -34,10 +34,13 @@ afterEach(async () => {
 test('InvitationRepository saves and retrieves a record from DynamoDB', async () => {
 	await repo.save(testRecord);
 
-	const saved = await repo.get(
-		testRecord.subscriptionName,
-		testRecord.invitationCode,
-	);
+	const saved = await repo.get(testRecord.invitationCode);
 
 	expect(saved).toEqual(testRecord);
+});
+
+test('InvitationRepository returns undefined when invitation code does not exist', async () => {
+	const result = await repo.get('it-nonexistent-code');
+
+	expect(result).toBeUndefined();
 });
