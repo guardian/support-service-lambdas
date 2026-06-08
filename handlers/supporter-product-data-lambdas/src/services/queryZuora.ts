@@ -24,38 +24,40 @@ export type QueryZuoraDependencies = {
 	postQuery: (request: BatchQueryRequest) => Promise<{ id: string }>;
 };
 
-const localIsoForQueryName = (date: dayjs.Dayjs): string =>
-	date.utc().toISOString().replace('Z', '');
+const getIncrementalTime = async (
+	queryType: QueryType,
+	getLastSuccessfulQueryTime: () => Promise<string | undefined>,
+) => {
+	const now = dayjs.utc();
+	if (queryType === 'full') {
+		// To run a full sync we just query from a date in the far past, to
+		// include all subscriptions in Zuora
+		return formatZuoraDateTime(now.subtract(20, 'year'));
+	}
+
+	const lastSuccessfulQueryTime = await getLastSuccessfulQueryTime();
+	if (lastSuccessfulQueryTime === undefined) {
+		throw new Error(
+			'Unable to retrieve a last successful query time for an incremental query',
+		);
+	}
+	const parsed = parseLastSuccessfulQueryTime(lastSuccessfulQueryTime);
+	if (parsed === undefined) {
+		throw new Error(
+			`lastSuccessfulQueryTime could not be parsed as a date - ${lastSuccessfulQueryTime}`,
+		);
+	}
+	return formatZuoraDateTime(parsed);
+};
 
 const buildBatchQueryRequest = async (
 	queryType: QueryType,
 	dependencies: QueryZuoraDependencies,
 ): Promise<BatchQueryRequest> => {
-	const now = dayjs.utc();
-
-	let incrementalTime: string | undefined;
-
-	if (queryType === 'full') {
-		incrementalTime = formatZuoraDateTime(now.subtract(20, 'year'));
-	} else {
-		const lastSuccessfulQueryTime =
-			await dependencies.getLastSuccessfulQueryTime();
-		if (lastSuccessfulQueryTime !== undefined) {
-			const parsed = parseLastSuccessfulQueryTime(lastSuccessfulQueryTime);
-			if (parsed === undefined) {
-				logger.log(
-					'lastSuccessfulQueryTime could not be parsed as a date, ignoring',
-					{ lastSuccessfulQueryTime },
-				);
-			} else {
-				incrementalTime = formatZuoraDateTime(parsed);
-			}
-		} else {
-			logger.log(
-				'No lastSuccessfulQueryTime found in config, running without incrementalTime filter',
-			);
-		}
-	}
+	const incrementalTime = await getIncrementalTime(
+		queryType,
+		dependencies.getLastSuccessfulQueryTime,
+	);
 
 	logger.log('Built batch query request', {
 		queryType,
@@ -67,7 +69,7 @@ const buildBatchQueryRequest = async (
 
 	const queries: ZoqlExportQuery[] = [
 		{
-			name: `${selectActiveRatePlansQueryName}-${localIsoForQueryName(now)}`,
+			name: `${selectActiveRatePlansQueryName}-${incrementalTime}`,
 			query: buildSelectActiveRatePlansQuery(
 				dependencies.discountProductRatePlanIds,
 			),
