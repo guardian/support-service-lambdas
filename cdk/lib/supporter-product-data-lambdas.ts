@@ -1,19 +1,17 @@
+import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import {
-	Alarm,
 	ComparisonOperator,
 	MathExpression,
 	Metric,
 	TreatMissingData,
 	Unit,
 } from 'aws-cdk-lib/aws-cloudwatch';
-import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import { Rule, RuleTargetInput, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
-import { Topic } from 'aws-cdk-lib/aws-sns';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import {
 	Choice,
@@ -34,9 +32,11 @@ import { SrLambdaErrorAlarm } from './cdk/SrLambdaErrorAlarm';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
 
+const app = 'supporter-product-data-lambdas';
+
 export class SupporterProductDataLambdas extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
-		super(scope, { stage, app: 'supporter-product-data-lambdas' });
+		super(scope, { stage, app });
 
 		// Reference the existing SQS queue by ARN rather than creating a new one.
 		// The queue was originally created by the Scala implementation of this stack.
@@ -223,7 +223,7 @@ export class SupporterProductDataLambdas extends SrStack {
 			this,
 			'SupporterProductDataStateMachine',
 			{
-				stateMachineName: `supporter-product-data-lambdas-${this.stage}`,
+				stateMachineName: `${app}-${this.stage}`,
 				definitionBody: DefinitionBody.fromChainable(definition),
 			},
 		);
@@ -242,18 +242,6 @@ export class SupporterProductDataLambdas extends SrStack {
 			],
 		});
 
-		// Alarms — PROD only
-		const alarmsTopic = Topic.fromTopicArn(
-			this,
-			'AlarmsHandlerTopic',
-			`arn:aws:sns:${this.region}:${this.account}:alarms-handler-topic-${this.stage}`,
-		);
-		const addAlarmAction = (alarm: Alarm) => {
-			if (this.stage === 'PROD') {
-				alarm.addAlarmAction(new SnsAction(alarmsTopic));
-			}
-		};
-
 		// Step function execution failure alarm
 		const executionFailuresMetric = new Metric({
 			namespace: 'AWS/States',
@@ -263,9 +251,10 @@ export class SupporterProductDataLambdas extends SrStack {
 			period: Duration.minutes(1),
 			unit: Unit.COUNT,
 		});
-		const executionFailureAlarm = new Alarm(this, 'ExecutionFailureAlarm', {
+
+		new GuAlarm(this, 'ExecutionFailureAlarm', {
 			alarmName: `Supporter Product Data step function Failure in ${this.stage}`,
-			alarmDescription: `The supporter-product-data-lambdas-${this.stage} step function has failed. Check the Step Functions console for details.`,
+			alarmDescription: `The ${app}-${this.stage} step function has failed. Check the Step Functions console for details.`,
 			// Suppress alarms between 00:00-06:00 UTC when Zuora is slow and failures are expected
 			metric: new MathExpression({
 				expression: 'IF(HOUR(errors) > 5, errors)',
@@ -276,11 +265,13 @@ export class SupporterProductDataLambdas extends SrStack {
 			threshold: 0,
 			evaluationPeriods: 1,
 			treatMissingData: TreatMissingData.NOT_BREACHING,
+			snsTopicName: `alarms-handler-topic-${stage}`,
+			actionsEnabled: stage == 'PROD',
+			app,
 		});
-		addAlarmAction(executionFailureAlarm);
 
 		// DLQ — messages appearing means a record failed processing after all retries
-		const dlqAlarm = new Alarm(this, 'UnprocessedRecordAlarm', {
+		new GuAlarm(this, 'UnprocessedRecordAlarm', {
 			alarmName: `There was a failure processing a supporter record in the ProcessSupporterRatePlanItemLambda lambda in ${this.stage}`,
 			alarmDescription:
 				`Check the ${dlq.queueName} SQS dead-letter queue for details of the record which failed, ` +
@@ -293,17 +284,14 @@ export class SupporterProductDataLambdas extends SrStack {
 			threshold: 0,
 			evaluationPeriods: 1,
 			treatMissingData: TreatMissingData.NOT_BREACHING,
+			snsTopicName: `alarms-handler-topic-${stage}`,
+			actionsEnabled: stage == 'PROD',
+			app,
 		});
-		addAlarmAction(dlqAlarm);
 
-		const processItemErrorsAlarm = new SrLambdaErrorAlarm(
-			this,
-			'ProcessItemLambdaErrorsAlarm',
-			{
-				lambdaFunctionName: processItem.functionName,
-				errorImpact: 'Supporter product data may not be up to date in DynamoDB',
-			},
-		);
-		addAlarmAction(processItemErrorsAlarm);
+		new SrLambdaErrorAlarm(this, 'ProcessItemLambdaErrorsAlarm', {
+			lambdaFunctionName: processItem.functionName,
+			errorImpact: 'Supporter product data may not be up to date in DynamoDB',
+		});
 	}
 }

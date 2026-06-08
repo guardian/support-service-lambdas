@@ -5,6 +5,8 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
+      "GuAlarm",
+      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -286,6 +288,25 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
     },
     "ExecutionFailureAlarm65D8EF83": {
       "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-CODE",
+              ],
+            ],
+          },
+        ],
         "AlarmDescription": "The supporter-product-data-lambdas-CODE step function has failed. Check the Step Functions console for details.",
         "AlarmName": "Supporter Product Data step function Failure in CODE",
         "ComparisonOperator": "GreaterThanThreshold",
@@ -1555,6 +1576,25 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
     },
     "UnprocessedRecordAlarm406379E1": {
       "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-CODE",
+              ],
+            ],
+          },
+        ],
         "AlarmDescription": "Check the dead-letters-supporter-product-data-CODE SQS dead-letter queue for details of the record which failed, and the ProcessSupporterRatePlanItemLambda CloudWatch logs for what went wrong.",
         "AlarmName": "There was a failure processing a supporter record in the ProcessSupporterRatePlanItemLambda lambda in CODE",
         "ComparisonOperator": "GreaterThanThreshold",
@@ -1647,6 +1687,8 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
+      "GuAlarm",
+      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -1928,6 +1970,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
     },
     "ExecutionFailureAlarm65D8EF83": {
       "Properties": {
+        "ActionsEnabled": true,
         "AlarmActions": [
           {
             "Fn::Join": [
@@ -2252,22 +2295,6 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
       "Properties": {
         "ActionsEnabled": true,
         "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-PROD",
-              ],
-            ],
-          },
           {
             "Fn::Join": [
               "",
@@ -3231,6 +3258,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
     },
     "UnprocessedRecordAlarm406379E1": {
       "Properties": {
+        "ActionsEnabled": true,
         "AlarmActions": [
           {
             "Fn::Join": [
