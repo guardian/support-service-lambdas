@@ -33,7 +33,7 @@ export type SalesTaxRequest = z.infer<typeof salesTaxRequestSchema>;
 const salesTaxResponseSchema = z.object({
 	taxRate: z.number(),
 });
-type SalesTaxResponse = z.infer<typeof salesTaxResponseSchema>;
+export type SalesTaxResponse = z.infer<typeof salesTaxResponseSchema>;
 
 export function salesTaxRequestEndpoint({
 	productKey,
