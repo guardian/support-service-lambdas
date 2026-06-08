@@ -30,7 +30,9 @@ export function buildPackageJson(
 		name: `${pkg.name}`,
 		scripts: {
 			test: 'jest --group=-integration',
-			'it-test': 'jest --group=integration',
+			'it-test':
+				'NODE_OPTIONS="$NODE_OPTIONS --experimental-vm-modules" jest --group=integration',
+
 			'type-check': 'tsc --noEmit',
 			lint: "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
 			'check-formatting': 'prettier --check "**/*.ts"',
