@@ -45,7 +45,7 @@ export const acceptInvitationEndpoint = async (
 			`Supporter rate plan record not found for ${invitation.subscriptionName} and identity ${invitation.primaryIdentityId}`,
 		);
 		const today = dayjs();
-		
+
 		const secondaryUserRecord = {
 			subscriptionName: invitation.subscriptionName,
 			secondaryIdentityId: invitation.secondaryIdentityId,
