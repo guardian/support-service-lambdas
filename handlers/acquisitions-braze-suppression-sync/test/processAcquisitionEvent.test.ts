@@ -85,23 +85,24 @@ describe('processAcquisitionEvent', () => {
 			promoCode: 'PROMO123',
 		});
 
-		expect(transformEventForBrazePayload(event.detail, 'external-user-123'))
-			.toEqual({
-				events: [
-					{
-						external_id: 'external-user-123',
-						name: 'acquisition',
-						time: '2026-06-03T12:00:00Z',
-						_update_existing_only: true,
-						properties: {
-							product_name: 'SUPPORTER_PLUS',
-							currency: 'GBP',
-							promo_code: 'PROMO123',
-							payment_frequency: 'MONTHLY',
-							transaction_value: 'contribution',
-						},
+		expect(
+			transformEventForBrazePayload(event.detail, 'external-user-123'),
+		).toEqual({
+			events: [
+				{
+					external_id: 'external-user-123',
+					name: 'acquisition',
+					time: '2026-06-03T12:00:00Z',
+					_update_existing_only: true,
+					properties: {
+						product_name: 'SUPPORTER_PLUS',
+						currency: 'GBP',
+						promo_code: 'PROMO123',
+						payment_frequency: 'MONTHLY',
+						transaction_value: 'contribution',
 					},
-				],
-			});
+				},
+			],
+		});
 	});
 });

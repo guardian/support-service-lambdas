@@ -38,7 +38,9 @@ export class BrazeClient {
 	) {}
 
 	async updateUserAttributes(payload: BrazeTrackPayload): Promise<void> {
-		logger.log(`Sending Braze /users/track request: ${JSON.stringify(payload)}`);
+		logger.log(
+			`Sending Braze /users/track request: ${JSON.stringify(payload)}`,
+		);
 
 		const response = await this.fetchFn(`${this.apiUrl}/users/track`, {
 			method: 'POST',
