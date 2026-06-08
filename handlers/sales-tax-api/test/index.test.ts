@@ -18,6 +18,26 @@ describe('SalesTax API', () => {
 
 			expect(response.statusCode).toEqual(400);
 		});
+		it('returns 400 when body not valid JSON', async () => {
+			const requestEvent = {
+				...baseEvent,
+				body: 'inValidJSON',
+			} as unknown as APIGatewayProxyEvent;
+
+			const response = await handler(requestEvent);
+			expect(response.statusCode).toEqual(400);
+		});
+		it('returns 400 when body is missing required fields', async () => {
+			const requestEvent = {
+				...baseEvent,
+				body: JSON.stringify({
+					invalidKey: 'X',
+				}),
+			} as unknown as APIGatewayProxyEvent;
+
+			const response = await handler(requestEvent);
+			expect(response.statusCode).toEqual(400);
+		});
 		it('returns 400 for an invalid productKey', async () => {
 			const requestEvent = {
 				...baseEvent,
@@ -50,6 +70,16 @@ describe('SalesTax API', () => {
 
 			const response = await handler(requestEvent);
 			expect(response.statusCode).toEqual(400);
+		});
+		it('returns 404 for wrong HTTP method', async () => {
+			const requestEvent = {
+				path: '/tax-rate',
+				httpMethod: 'GET',
+				headers: {},
+			} as unknown as APIGatewayProxyEvent;
+
+			const response = await handler(requestEvent);
+			expect(response.statusCode).toEqual(404);
 		});
 	});
 
