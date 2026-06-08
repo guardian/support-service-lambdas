@@ -1,5 +1,5 @@
 # supporter-product-data-lambdas
-Moves the Supporter Product Data sync pipeline into this repo from support-frontend. It runs a Step Functions state machine to:
+This project contains the Supporter Product Data sync pipeline. It runs a Step Functions state machine to:
 1) query Zuora for changed subscriptions (incremental or full)
 2) upload the export to S3
 3) enqueue rate plan items to SQS
