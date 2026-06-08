@@ -143,7 +143,7 @@ export class SupporterProductDataLambdas extends SrStack {
 				lambdaOverrides: {
 					functionName: `supporterProductData-ProcessItem-${this.stage}`,
 					handler: 'processSupporterRatePlanItemLambda.handler',
-					timeout: Duration.minutes(10),
+					timeout: Duration.minutes(15),
 					environment: { STAGE: this.stage },
 				},
 			},
