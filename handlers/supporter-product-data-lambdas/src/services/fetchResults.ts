@@ -1,4 +1,5 @@
 import { logger } from '@modules/logger/logger';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import type {
 	AddSupporterRatePlanItemToQueueState,
 	FetchResultsState,
@@ -15,13 +16,6 @@ export type FetchResultsDependencies = {
 		contentLength: number,
 	) => Promise<void>;
 	putLastSuccessfulQueryTime: (time: string) => Promise<void>;
-};
-
-const getValueOrThrow = <T>(value: T | undefined, errorMessage: string): T => {
-	if (value === undefined) {
-		throw new Error(errorMessage);
-	}
-	return value;
 };
 
 export const fetchResults = async (
@@ -47,7 +41,7 @@ export const fetchResults = async (
 		);
 	}
 
-	const batch = getValueOrThrow(
+	const batch = getIfDefined(
 		result.batches[0],
 		`No batches were returned in the batch query response for jobId ${event.jobId}`,
 	);
@@ -59,7 +53,7 @@ export const fetchResults = async (
 		full: batch.full,
 	});
 
-	const fileId = getValueOrThrow(
+	const fileId = getIfDefined(
 		batch.fileId,
 		`Batch.fileId was missing in jobId ${event.jobId}`,
 	);
