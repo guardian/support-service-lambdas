@@ -36,15 +36,6 @@ export const acceptInvitationEndpoint = async (
 		if (signedInUserId !== invitation.secondaryIdentityId) {
 			return badRequest('Incorrect user');
 		}
-		const today = dayjs();
-		const secondaryUserRecord = {
-			subscriptionName: invitation.subscriptionName,
-			secondaryIdentityId: invitation.secondaryIdentityId,
-			primaryIdentityId: invitation.primaryIdentityId,
-			acceptedDate: zuoraDateFormat(today),
-		};
-		await secondaryUserRepository.save(secondaryUserRecord);
-
 		const parentSupporterProductDataRecord = getIfDefined(
 			await getSupporterRatePlan(
 				stage,
@@ -53,6 +44,16 @@ export const acceptInvitationEndpoint = async (
 			),
 			`Supporter rate plan record not found for ${invitation.subscriptionName} and identity ${invitation.primaryIdentityId}`,
 		);
+		const today = dayjs();
+		
+		const secondaryUserRecord = {
+			subscriptionName: invitation.subscriptionName,
+			secondaryIdentityId: invitation.secondaryIdentityId,
+			primaryIdentityId: invitation.primaryIdentityId,
+			acceptedDate: zuoraDateFormat(today),
+		};
+		await secondaryUserRepository.save(secondaryUserRecord);
+
 		const supporterProductDataRecord: SupporterRatePlanItem = {
 			subscriptionName: `${invitation.subscriptionName}-${invitation.secondaryIdentityId}`,
 			primarySubscriptionName: invitation.subscriptionName, // TODO Not being written currently
