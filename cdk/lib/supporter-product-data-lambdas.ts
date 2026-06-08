@@ -212,7 +212,7 @@ export class SupporterProductDataLambdas extends SrStack {
 					payloadResponseOnly: true,
 				}).addRetry({
 					errors: ['States.ALL'],
-					interval: Duration.seconds(60),
+					interval: Duration.minutes(1),
 					maxAttempts: 20,
 					backoffRate: 1,
 				}),
@@ -260,7 +260,7 @@ export class SupporterProductDataLambdas extends SrStack {
 			metricName: 'ExecutionsFailed',
 			dimensionsMap: { StateMachineArn: stateMachine.stateMachineArn },
 			statistic: 'Sum',
-			period: Duration.seconds(60),
+			period: Duration.minutes(1),
 			unit: Unit.COUNT,
 		});
 		const executionFailureAlarm = new Alarm(this, 'ExecutionFailureAlarm', {
@@ -270,10 +270,10 @@ export class SupporterProductDataLambdas extends SrStack {
 			metric: new MathExpression({
 				expression: 'IF(HOUR(errors) > 5, errors)',
 				usingMetrics: { errors: executionFailuresMetric },
-				period: Duration.seconds(60),
+				period: Duration.minutes(1),
 			}),
-			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-			threshold: 1,
+			comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
+			threshold: 0,
 			evaluationPeriods: 1,
 			treatMissingData: TreatMissingData.NOT_BREACHING,
 		});
@@ -285,15 +285,12 @@ export class SupporterProductDataLambdas extends SrStack {
 			alarmDescription:
 				`Check the ${dlq.queueName} SQS dead-letter queue for details of the record which failed, ` +
 				`and the ProcessSupporterRatePlanItemLambda CloudWatch logs for what went wrong.`,
-			metric: new Metric({
-				namespace: 'AWS/SQS',
-				metricName: 'ApproximateNumberOfMessagesVisible',
-				dimensionsMap: { QueueName: dlq.queueName },
+			metric: dlq.metric('ApproximateNumberOfMessagesVisible').with({
 				statistic: 'Average',
-				period: Duration.seconds(60),
+				period: Duration.minutes(1),
 			}),
 			comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
-			threshold: 1,
+			threshold: 0,
 			evaluationPeriods: 1,
 			treatMissingData: TreatMissingData.NOT_BREACHING,
 		});

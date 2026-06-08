@@ -288,7 +288,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
       "Properties": {
         "AlarmDescription": "The supporter-product-data-lambdas-CODE step function has failed. Check the Step Functions console for details.",
         "AlarmName": "Supporter Product Data step function Failure in CODE",
-        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "ComparisonOperator": "GreaterThanThreshold",
         "EvaluationPeriods": 1,
         "Metrics": [
           {
@@ -339,7 +339,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
             "Value": "CODE",
           },
         ],
-        "Threshold": 1,
+        "Threshold": 0,
         "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
@@ -1591,7 +1591,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
             "Value": "CODE",
           },
         ],
-        "Threshold": 1,
+        "Threshold": 0,
         "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
@@ -1948,7 +1948,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
         ],
         "AlarmDescription": "The supporter-product-data-lambdas-PROD step function has failed. Check the Step Functions console for details.",
         "AlarmName": "Supporter Product Data step function Failure in PROD",
-        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "ComparisonOperator": "GreaterThanThreshold",
         "EvaluationPeriods": 1,
         "Metrics": [
           {
@@ -1999,7 +1999,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
             "Value": "PROD",
           },
         ],
-        "Threshold": 1,
+        "Threshold": 0,
         "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
@@ -3285,7 +3285,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
             "Value": "PROD",
           },
         ],
-        "Threshold": 1,
+        "Threshold": 0,
         "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
