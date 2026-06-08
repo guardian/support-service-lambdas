@@ -1,6 +1,6 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { handler } from '../src/index';
-import type { SalesTaxResponse } from '../src/salesTaxEndpoint';
+import { type SalesTaxResponse, stateCAD } from '../src/salesTaxEndpoint';
 
 describe('handler', () => {
 	it('returns 400 for an empty body', async () => {
@@ -57,6 +57,7 @@ describe('handler', () => {
 		expect(response.statusCode).toEqual(400);
 	});
 	it('returns 200 for a valid country, state, product', async () => {
+		const province = 'ON';
 		const requestEvent = {
 			path: '/tax-rate',
 			httpMethod: 'POST',
@@ -64,7 +65,7 @@ describe('handler', () => {
 			body: JSON.stringify({
 				productKey: 'SupporterPlus',
 				country: 'CA',
-				state: 'ON',
+				state: province,
 			}),
 		} as unknown as APIGatewayProxyEvent;
 
@@ -72,6 +73,6 @@ describe('handler', () => {
 		expect(response.statusCode).toEqual(200);
 
 		const salesTaxResponse = JSON.parse(response.body) as SalesTaxResponse;
-		expect(salesTaxResponse.taxRate).toEqual(0.13);
+		expect(salesTaxResponse.taxRate).toEqual(stateCAD[province]);
 	});
 });

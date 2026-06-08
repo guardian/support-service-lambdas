@@ -7,7 +7,7 @@ import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
 
-const stateCAD: Record<string, number> = {
+export const stateCAD: Record<string, number> = {
 	AB: 0.05,
 	BC: 0.12,
 	MB: 0.12,
