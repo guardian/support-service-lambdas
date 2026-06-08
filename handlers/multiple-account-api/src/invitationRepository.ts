@@ -1,7 +1,6 @@
 import {
 	DeleteItemCommand,
 	DynamoDBClient,
-	GetItemCommand,
 	PutItemCommand,
 	QueryCommand,
 } from '@aws-sdk/client-dynamodb';
@@ -42,23 +41,32 @@ export class InvitationRepository {
 		);
 	}
 
-	async get(
-		subscriptionName: string,
-		invitationCode: string,
-	): Promise<InvitationRecord | undefined> {
+	async get(invitationCode: string): Promise<InvitationRecord | undefined> {
 		const result = await this.client.send(
-			new GetItemCommand({
+			new QueryCommand({
 				TableName: this.tableName,
-				Key: {
-					subscriptionName: { S: subscriptionName },
-					invitationCode: { S: invitationCode },
+				IndexName: 'invitationCode-index',
+				KeyConditionExpression: 'invitationCode = :invitationCode',
+				ExpressionAttributeValues: {
+					':invitationCode': { S: invitationCode },
 				},
 			}),
 		);
-		if (!result.Item) {
+		const items = result.Items ?? [];
+
+		if (items.length > 1) {
+			throw new Error(
+				`Multiple invitations found for invitation code ${invitationCode}`,
+			);
+		}
+
+		const [invitation] = items;
+
+		if (!invitation) {
 			return undefined;
 		}
-		return invitationRecordSchema.parse(unmarshall(result.Item));
+
+		return invitationRecordSchema.parse(unmarshall(invitation));
 	}
 
 	async list(subscriptionName: string): Promise<InvitationRecord[]> {
