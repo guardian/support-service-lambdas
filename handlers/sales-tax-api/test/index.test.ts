@@ -83,7 +83,7 @@ describe('SalesTax API', () => {
 		});
 	});
 
-	describe('saleTaxEndpoint', () => {
+	describe('salesTaxEndpoint', () => {
 		it('returns 200 for a valid country, state, product', async () => {
 			const country = 'CA';
 			const province = 'ON';
