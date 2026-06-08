@@ -55,4 +55,20 @@ describe('handler', () => {
 
 		expect(response.statusCode).toEqual(400);
 	});
+	it('returns 200 for an valid country, state, product', async () => {
+		const requestEvent = {
+			path: '/tax-rate',
+			httpMethod: 'POST',
+			headers: {},
+			body: JSON.stringify({
+				productKey: 'SupporterPlus',
+				country: 'CA',
+				state: 'ON',
+			}),
+		} as unknown as APIGatewayProxyEvent;
+
+		const response = await handler(requestEvent);
+
+		expect(response.statusCode).toEqual(200);
+	});
 });
