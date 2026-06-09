@@ -1,3 +1,4 @@
+import type { TransactWriteItem } from '@aws-sdk/client-dynamodb';
 import {
 	DeleteItemCommand,
 	DynamoDBClient,
@@ -122,6 +123,23 @@ export const deleteSupporterRatePlan = async (
 		}),
 	);
 	logger.log(`DeleteItem returned ${JSON.stringify(response)}`);
+};
+
+export const getDeleteSupporterRatePlanTransaction = (
+	stage: Stage,
+	identityId: string,
+	subscriptionName: string,
+): TransactWriteItem => {
+	const tableName = `SupporterProductData-${stage}`;
+	return {
+		Delete: {
+			TableName: tableName,
+			Key: {
+				subscriptionName: { S: subscriptionName },
+				identityId: { S: identityId },
+			},
+		},
+	};
 };
 
 // We insert into the SupporterProductData table via an SQS queue
