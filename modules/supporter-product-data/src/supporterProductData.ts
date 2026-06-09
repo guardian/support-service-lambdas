@@ -73,7 +73,7 @@ const supporterRatePlanDateReplacer = (key: string, value: unknown) => {
 
 // We insert into the SupporterProductData table via an SQS queue to keep all the logic around formatting and TTLs in one place
 // This is the lambda that ultimately does the writing:
-// https://github.com/guardian/support-frontend/blob/main/supporter-product-data/src/main/scala/com/gu/lambdas/ProcessSupporterRatePlanItemLambda.scala#L24
+// handlers/supporter-product-data-lambdas/src/handlers/processSupporterRatePlanItemLambda.ts
 export const sendToSupporterProductData = async (
 	stage: Stage,
 	supporterRatePlanItem: SupporterRatePlanItem,
