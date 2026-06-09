@@ -14,7 +14,7 @@ export const contributionAmountFromZuoraSubscription = (
 	contributionIds: string[],
 ) => {
 	const contributionRatePlan = subscription.ratePlans.find((ratePlan) =>
-		contributionIds.includes(ratePlan.id),
+		contributionIds.includes(ratePlan.productRatePlanId),
 	);
 	const firstCharge = contributionRatePlan?.ratePlanCharges[0];
 	if (firstCharge?.price === undefined) {

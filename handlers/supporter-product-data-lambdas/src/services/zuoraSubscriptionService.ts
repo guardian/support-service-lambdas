@@ -9,6 +9,7 @@ const ratePlanChargeSchema = z.object({
 
 const ratePlanSchema = z.object({
 	id: z.string(),
+	productRatePlanId: z.string(),
 	ratePlanCharges: z.array(ratePlanChargeSchema),
 });
 

@@ -29,15 +29,16 @@ describe('processSupporterRatePlanItemLambda', () => {
 		const writeItem = jest.fn(() => Promise.resolve());
 
 		await processItem(
-			{ ...item, productRatePlanId: 'contrib-id' },
+			{ ...item, productRatePlanId: 'contribution-product-rate-plan-id' },
 			{
 				isDiscountRatePlanItem: () => false,
-				contributionIds: ['contrib-id'],
+				contributionIds: ['contribution-product-rate-plan-id'],
 				getSubscription: () =>
 					Promise.resolve({
 						ratePlans: [
 							{
-								id: 'contrib-id',
+								id: 'rate-plan-id',
+								productRatePlanId: 'contribution-product-rate-plan-id',
 								ratePlanCharges: [{ price: 10.0, currency: 'GBP' }],
 							},
 						],
@@ -48,7 +49,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 
 		expect(writeItem).toHaveBeenCalledWith({
 			...item,
-			productRatePlanId: 'contrib-id',
+			productRatePlanId: 'contribution-product-rate-plan-id',
 			contributionAmount: { amount: 10.0, currency: 'GBP' },
 		});
 	});
