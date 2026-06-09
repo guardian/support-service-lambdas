@@ -47,7 +47,6 @@ jobs:
           - observer-benefits-api
           - contributions-only-countries-api
           - user-subscriptions-api
-          - sales-tax-api
           # MARKER new-lambda: github-action
     runs-on: ubuntu-latest
     permissions:
@@ -61,8 +60,8 @@ jobs:
         shell: bash
       - uses: actions/setup-node@v6
         with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
       - run: pnpm install
       - run: pnpm --filter "./buildcheck" type-check
       - run: pnpm --filter "./buildcheck" check-formatting
@@ -83,7 +82,7 @@ jobs:
           projectName: support-service-lambdas::${{ matrix.subproject }}
           buildNumberOffset: 7000
           configPath: ./handlers/${{ matrix.subproject }}/riff-raff.yaml
-          commentingEnabled: 'false'
+          commentingEnabled: "false"
           contentDirectories: |
             ${{ matrix.subproject }}-cloudformation:
               - ./cdk/cdk.out/${{ matrix.subproject }}-CODE.template.json
