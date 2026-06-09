@@ -22,6 +22,10 @@ import {
 	deleteInvitationEndpoint,
 	deleteInvitationPathSchema,
 } from './deleteInvitationEndpoint';
+import {
+	deleteSecondaryUserBodySchema,
+	deleteSecondaryUserEndpoint,
+} from './deleteSecondaryUserEndpoint';
 import { InvitationRepository } from './invitationRepository';
 import {
 	listInvitationsEndpoint,
@@ -98,6 +102,23 @@ export const handler: Handler = Router([
 				dynamoClient,
 			);
 		}),
+	},
+	{
+		httpMethod: 'DELETE',
+		path: '/secondaryUser',
+		handler: withBodyParser(
+			deleteSecondaryUserBodySchema,
+			withMMAIdentityCheck(
+				stage,
+				async (body) =>
+					deleteSecondaryUserEndpoint(
+						stage,
+						secondaryUserRepository,
+						dynamoClient,
+					)(body),
+				({ body }) => body.subscriptionName,
+			),
+		),
 	},
 	{
 		httpMethod: 'GET',
