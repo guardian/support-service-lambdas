@@ -18,7 +18,8 @@ describe('processSupporterRatePlanItemLambda', () => {
 		await processItem(item, {
 			isDiscountRatePlanItem: (item) => item.productRatePlanId === 'prp-1',
 			contributionIds: [],
-			getSubscription: () => Promise.resolve({ ratePlans: [] }),
+			getSubscription: () =>
+				Promise.resolve({ subscriptionNumber: 'sub-number', ratePlans: [] }),
 			writeItem,
 		});
 
@@ -35,6 +36,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 				contributionIds: ['contribution-product-rate-plan-id'],
 				getSubscription: () =>
 					Promise.resolve({
+						subscriptionNumber: 'sub-number',
 						ratePlans: [
 							{
 								id: 'rate-plan-id',

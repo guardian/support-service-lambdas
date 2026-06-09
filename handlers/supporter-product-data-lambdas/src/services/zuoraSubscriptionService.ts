@@ -3,7 +3,7 @@ import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { z } from 'zod';
 
 const ratePlanChargeSchema = z.object({
-	price: z.number().optional(),
+	price: z.number().nullable(),
 	currency: isoCurrencySchema,
 });
 
@@ -14,6 +14,7 @@ const ratePlanSchema = z.object({
 });
 
 const minimalZuoraSubscriptionSchema = z.object({
+	subscriptionNumber: z.string(),
 	ratePlans: z.array(ratePlanSchema),
 });
 

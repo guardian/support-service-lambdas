@@ -1,4 +1,5 @@
 import { logger } from '@modules/logger/logger';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import type { ProcessItemDependencies } from '../handlers/processSupporterRatePlanItem';
@@ -16,13 +17,17 @@ export const contributionAmountFromZuoraSubscription = (
 	const contributionRatePlan = subscription.ratePlans.find((ratePlan) =>
 		contributionIds.includes(ratePlan.productRatePlanId),
 	);
-	const firstCharge = contributionRatePlan?.ratePlanCharges[0];
-	if (firstCharge?.price === undefined) {
-		return undefined;
-	}
+
+	const firstCharge = getIfDefined(
+		contributionRatePlan?.ratePlanCharges[0],
+		`No charge on contribution rate plan for subscription ${subscription.subscriptionNumber}`,
+	);
 
 	return {
-		amount: firstCharge.price,
+		amount: getIfDefined(
+			firstCharge.price,
+			`No price on contribution rate plan for subscription ${subscription.subscriptionNumber}`,
+		),
 		currency: firstCharge.currency,
 	};
 };
