@@ -4,6 +4,7 @@ import { generateWarningFile } from '../../data/snippets/BUILDCHECK.md';
 import {
 	handlerTemplates,
 	moduleTemplates,
+	rootTemplates,
 } from '../dynamic/generated/generatedMappings';
 import { applyTemplates } from '../dynamic/templater';
 import type { GeneratedFile } from './generatedFile';
@@ -24,7 +25,11 @@ export function generate(): GeneratedFile[] {
 		);
 		return prependToTargetPath(moduleFiles, ['modules', pkg.name]);
 	});
-	return withWarningFile([...handlersFiles, ...modulesFiles], '.');
+	const rootFiles = applyTemplates(build, rootTemplates);
+	return withWarningFile(
+		[...handlersFiles, ...modulesFiles, ...rootFiles],
+		'.',
+	);
 }
 
 function prependToTargetPath(
