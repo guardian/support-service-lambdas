@@ -3,8 +3,10 @@ import {
 	DynamoDBClient,
 	PutItemCommand,
 	QueryCommand,
+	type TransactWriteItem,
 } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
+import { getMaybeSingleOrThrow } from '@modules/arrayFunctions';
 import type { Stage } from '@modules/stage';
 import { z } from 'zod';
 
@@ -52,21 +54,18 @@ export class InvitationRepository {
 				},
 			}),
 		);
-		const items = result.Items ?? [];
 
-		if (items.length > 1) {
-			throw new Error(
-				`Multiple invitations found for invitation code ${invitationCode}`,
-			);
-		}
-
-		const [invitation] = items;
-
-		if (!invitation) {
+		const item = getMaybeSingleOrThrow(
+			result.Items ?? [],
+			() =>
+				new Error(
+					`Multiple invitations found with the invitationCode ${invitationCode}`,
+				),
+		);
+		if (!item) {
 			return undefined;
 		}
-
-		return invitationRecordSchema.parse(unmarshall(invitation));
+		return invitationRecordSchema.parse(unmarshall(item));
 	}
 
 	async list(subscriptionName: string): Promise<InvitationRecord[]> {
@@ -97,5 +96,20 @@ export class InvitationRepository {
 				},
 			}),
 		);
+	}
+
+	getDeleteTransaction(
+		subscriptionName: string,
+		invitationCode: string,
+	): TransactWriteItem {
+		return {
+			Delete: {
+				TableName: this.tableName,
+				Key: {
+					subscriptionName: { S: subscriptionName },
+					invitationCode: { S: invitationCode },
+				},
+			},
+		};
 	}
 }

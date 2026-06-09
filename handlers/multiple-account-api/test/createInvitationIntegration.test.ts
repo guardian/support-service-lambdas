@@ -11,7 +11,10 @@ import { getSubscription } from '@modules/zuora/subscription';
 import { zuoraSubscriptionSchema } from '@modules/zuora/types';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
-import { createInvitationEndpoint } from '../src/createInvitationEndpoint';
+import {
+	createInvitationEndpoint,
+	createInvitationResponseBodySchema,
+} from '../src/createInvitationEndpoint';
 import { InvitationRepository } from '../src/invitationRepository';
 import weekendSub from './fixtures/weekend-subscription.json';
 
@@ -26,6 +29,7 @@ test('createInvitationEndpoint saves invitation data and returns invitation code
 		stage,
 		`/${stage}/support/multiple-account-api/identity-client-access-token`,
 	);
+	const subscriptionName = 'A-S00974337';
 
 	const endpoint = createInvitationEndpoint(
 		invitationRepository,
@@ -40,7 +44,7 @@ test('createInvitationEndpoint saves invitation data and returns invitation code
 
 	const result = await endpoint(
 		{
-			subscriptionName: 'A-S00974337',
+			subscriptionName,
 			secondaryUserEmail: 'integration-test2+multiple-account@theguardian.com',
 		},
 		undefined as never,
@@ -49,4 +53,12 @@ test('createInvitationEndpoint saves invitation data and returns invitation code
 	);
 
 	expect(result.statusCode).toBe(201);
+	const resultBody = createInvitationResponseBodySchema.parse(
+		JSON.parse(result.body),
+	);
+	expect(resultBody.invitationCode).toBeDefined();
+	await invitationRepository.delete(
+		subscriptionName,
+		resultBody.invitationCode,
+	);
 });

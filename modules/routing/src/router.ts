@@ -119,6 +119,7 @@ export function Router(
 					);
 				}
 			}
+			logger.log(`No route found for ${event.httpMethod} ${event.path}`);
 			return NotFoundResponse;
 		} catch (error) {
 			return buildErrorResponse(error);

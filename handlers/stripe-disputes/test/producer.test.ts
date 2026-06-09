@@ -202,6 +202,7 @@ describe('Producer Handler', () => {
 				'Missing Stripe-Signature header',
 			);
 			expect(result).toEqual({
+				headers: { 'Content-Type': 'application/json' },
 				statusCode: 400,
 				body: JSON.stringify({ message: 'Missing Stripe-Signature header' }),
 			});
@@ -220,6 +221,7 @@ describe('Producer Handler', () => {
 
 			expect(mockLogger.error).toHaveBeenCalledWith('Missing request body');
 			expect(result).toEqual({
+				headers: { 'Content-Type': 'application/json' },
 				statusCode: 400,
 				body: JSON.stringify({ message: 'Missing request body' }),
 			});
