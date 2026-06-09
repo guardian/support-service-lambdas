@@ -10,7 +10,7 @@ describe('getTeam', () => {
 	});
 
 	it('routes acquisitions braze suppression sync alarms to MARTECH', () => {
-		const app = 'acquisitions-braze-suppression-sync';
+		const app = 'braze-acquisition-events-sync';
 
 		const team = prodAppToTeams(app);
 

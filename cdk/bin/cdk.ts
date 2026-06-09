@@ -1,8 +1,8 @@
 import 'source-map-support/register';
 import { App } from 'aws-cdk-lib';
-import { AcquisitionsBrazeSuppressionSync } from '../lib/acquisitions-braze-suppression-sync';
 import { AlarmsHandler } from '../lib/alarms-handler';
 import { BatchEmailSender } from '../lib/batch-email-sender';
+import { BrazeAcquisitionEventsSync } from '../lib/braze-acquisition-events-sync';
 import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
 import type { SrStageNames } from '../lib/cdk/SrStack';
 import { stages } from '../lib/cdk/SrStack';
@@ -164,7 +164,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	UserSubscriptionsApi,
 	SalesTaxApi,
 	SupporterProductDataLambdas,
-	AcquisitionsBrazeSuppressionSync,
+	BrazeAcquisitionEventsSync,
 	// MARKER new-lambda: cdk-bin
 ];
 

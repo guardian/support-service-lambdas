@@ -1,5 +1,5 @@
 {
-  "name": "acquisitions-braze-suppression-sync",
+  "name": "braze-acquisition-events-sync",
   "scripts": {
     "test": "jest --group=-integration",
     "it-test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --group=integration",
@@ -7,13 +7,13 @@
     "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
-    "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/index.ts --sourcemap --source-root=/support-service-lambdas/handlers/acquisitions-braze-suppression-sync/target/",
-    "package": "pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr acquisitions-braze-suppression-sync.zip ./*.js.map ./*.js",
-    "packageQuick": "pnpm build && cd target && zip -qr acquisitions-braze-suppression-sync.zip ./*.js.map ./*.js",
-    "cdk:test": "pnpm --filter cdk test acquisitions-braze-suppression-sync",
-    "cdk:test-update": "pnpm --filter cdk test-update acquisitions-braze-suppression-sync",
-    "update-lambda": "../../update-lambda.sh \"acquisitions-braze-suppression-sync\"",
-    "update-stack": "../../update-stack.sh \"acquisitions-braze-suppression-sync\"",
+    "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/index.ts --sourcemap --source-root=/support-service-lambdas/handlers/braze-acquisition-events-sync/target/",
+    "package": "pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr braze-acquisition-events-sync.zip ./*.js.map ./*.js",
+    "packageQuick": "pnpm build && cd target && zip -qr braze-acquisition-events-sync.zip ./*.js.map ./*.js",
+    "cdk:test": "pnpm --filter cdk test braze-acquisition-events-sync",
+    "cdk:test-update": "pnpm --filter cdk test-update braze-acquisition-events-sync",
+    "update-lambda": "../../update-lambda.sh \"braze-acquisition-events-sync\"",
+    "update-stack": "../../update-stack.sh \"braze-acquisition-events-sync\"",
     "openapi:lint": "redocly lint openapi.yaml",
     "openapi:preview": "redocly build-docs openapi.yaml --output target/docs/index.html && open target/docs/index.html"
   },

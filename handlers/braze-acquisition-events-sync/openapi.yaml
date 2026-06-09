@@ -1,13 +1,13 @@
 openapi: 3.0.3
 info:
-  title: acquisitions-braze-suppression-sync API
+  title: braze-acquisition-events-sync API
   description: A test API.
   version: 1.0.0
 
 servers:
-  - url: https://acquisitions-braze-suppression-sync-code.support.guardianapis.com
+  - url: https://braze-acquisition-events-sync-code.support.guardianapis.com
     description: CODE
-  - url: https://acquisitions-braze-suppression-sync.support.guardianapis.com
+  - url: https://braze-acquisition-events-sync.support.guardianapis.com
     description: PROD
 
 security:

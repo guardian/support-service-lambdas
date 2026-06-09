@@ -29,8 +29,8 @@
       "@modules/promotions/*": [
         "../../modules/promotions/src/*"
       ],
-      "@modules/acquisitions-braze-suppression-sync/*": [
-        "../../modules/acquisitions-braze-suppression-sync/src/*"
+      "@modules/braze-acquisition-events-sync/*": [
+        "../../modules/braze-acquisition-events-sync/src/*"
       ]
     }
   }

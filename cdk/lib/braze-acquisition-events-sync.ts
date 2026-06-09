@@ -12,9 +12,9 @@ import { SrLambdaAlarm } from './cdk/SrLambdaAlarm';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
 
-export class AcquisitionsBrazeSuppressionSync extends SrStack {
+export class BrazeAcquisitionEventsSync extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
-		super(scope, { stage, app: 'acquisitions-braze-suppression-sync' });
+		super(scope, { stage, app: 'braze-acquisition-events-sync' });
 
 		const lambda = new SrApiLambda(this, 'Lambda', {
 			lambdaOverrides: {
@@ -26,7 +26,7 @@ export class AcquisitionsBrazeSuppressionSync extends SrStack {
 				errorImpact:
 					'a user missing Braze UUID in their attributes will not have their acquisition event synced to Braze',
 				alarmDescription:
-					'acquisitions-braze-suppression-sync returned a 5XX response. Quick triage: check API Gateway 5XX metrics for spike window, inspect lambda logs for the same timestamp, validate IDAPI response includes braze-uuid, and verify Braze /users/track response status and body.',
+					'braze-acquisition-events-sync returned a 5XX response. Quick triage: check API Gateway 5XX metrics for spike window, inspect lambda logs for the same timestamp, validate IDAPI response includes braze-uuid, and verify Braze /users/track response status and body.',
 			},
 			throttle: {
 				rateLimit: 20,
@@ -44,12 +44,12 @@ export class AcquisitionsBrazeSuppressionSync extends SrStack {
 		);
 
 		const eventBridgeToLambdaDlq = new Queue(this, 'EventBridgeToLambdaDlq', {
-			queueName: `acquisitions-braze-suppression-sync-eventbridge-dlq-${this.stage}`,
+			queueName: `braze-acquisition-events-sync-eventbridge-dlq-${this.stage}`,
 			retentionPeriod: Duration.days(14),
 		});
 
 		const acquisitionsToBrazeRule = new Rule(this, 'AcquisitionsToBrazeRule', {
-			ruleName: `acquisitions-braze-suppression-sync-${this.stage}`,
+			ruleName: `braze-acquisition-events-sync-${this.stage}`,
 			eventBus: acquisitionsBus,
 			eventPattern: {
 				detailType: [detailType],
@@ -68,9 +68,9 @@ export class AcquisitionsBrazeSuppressionSync extends SrStack {
 
 		new SrLambdaAlarm(this, 'LambdaErrorAlarm', {
 			app: this.app,
-			alarmName: `${this.stage} acquisitions-braze-suppression-sync lambda errors`,
+			alarmName: `${this.stage} braze-acquisition-events-sync lambda errors`,
 			alarmDescription:
-				'acquisitions-braze-suppression-sync failed. Quick triage: inspect lambda logs for error stack and identityId context, check IDAPI lookup result for missing braze-uuid, and confirm Braze /users/track request and response payloads. Impact: an eligible user may not have suppression-related Braze updates applied to their profile, which may result in them receiving marketing communications they should not receive',
+				'braze-acquisition-events-sync failed. Quick triage: inspect lambda logs for error stack and identityId context, check IDAPI lookup result for missing braze-uuid, and confirm Braze /users/track request and response payloads. Impact: an eligible user may not have suppression-related Braze updates applied to their profile, which may result in them receiving marketing communications they should not receive',
 			lambdaFunctionNames: lambda.functionName,
 			metric: lambda.metricErrors({
 				period: Duration.minutes(5),
@@ -85,9 +85,9 @@ export class AcquisitionsBrazeSuppressionSync extends SrStack {
 
 		new SrLambdaAlarm(this, 'EventBridgeDlqAlarm', {
 			app: this.app,
-			alarmName: `${this.stage} acquisitions-braze-suppression-sync eventbridge dlq has messages`,
+			alarmName: `${this.stage} braze-acquisition-events-sync eventbridge dlq has messages`,
 			alarmDescription:
-				'EventBridge could not invoke acquisitions-braze-suppression-sync lambda after retries. Quick triage: inspect DLQ message attributes for invoke failure reason, confirm rule event pattern matches AcquisitionsEvent payload shape, verify lambda permissions from EventBridge, and redrive once root cause is fixed.',
+				'EventBridge could not invoke braze-acquisition-events-sync lambda after retries. Quick triage: inspect DLQ message attributes for invoke failure reason, confirm rule event pattern matches AcquisitionsEvent payload shape, verify lambda permissions from EventBridge, and redrive once root cause is fixed.',
 			lambdaFunctionNames: lambda.functionName,
 			metric: eventBridgeToLambdaDlq.metricApproximateNumberOfMessagesVisible({
 				period: Duration.minutes(5),

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] = `
+exports[`The braze acquisition events sync stack matches the snapshot 1`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
@@ -52,7 +52,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
             "AcquisitionsEvent",
           ],
         },
-        "Name": "acquisitions-braze-suppression-sync-CODE",
+        "Name": "braze-acquisition-events-sync-CODE",
         "State": "ENABLED",
         "Targets": [
           {
@@ -80,7 +80,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
       },
       "Type": "AWS::Events::Rule",
     },
-    "AcquisitionsToBrazeRuleAllowEventRuleacquisitionsbrazesuppressionsyncCODELambda12E32584780944FE": {
+    "AcquisitionsToBrazeRuleAllowEventRulebrazeacquisitioneventssyncCODELambdaB7CEE5D46DB22E88": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -116,7 +116,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
     "DNSRecord": {
       "Properties": {
         "HostedZoneId": "Z3KO35ELNWZMSX",
-        "Name": "acquisitions-braze-suppression-sync-code.support.guardianapis.com",
+        "Name": "braze-acquisition-events-sync-code.support.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -132,7 +132,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
     },
     "DomainName": {
       "Properties": {
-        "DomainName": "acquisitions-braze-suppression-sync-code.support.guardianapis.com",
+        "DomainName": "braze-acquisition-events-sync-code.support.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -153,7 +153,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisitions-braze-suppression-sync",
+            "Value": "braze-acquisition-events-sync",
           },
           {
             "Key": "gu:cdk:version",
@@ -196,8 +196,8 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
             ],
           },
         ],
-        "AlarmDescription": "EventBridge could not invoke acquisitions-braze-suppression-sync lambda after retries. Quick triage: inspect DLQ message attributes for invoke failure reason, confirm rule event pattern matches AcquisitionsEvent payload shape, verify lambda permissions from EventBridge, and redrive once root cause is fixed.",
-        "AlarmName": "CODE acquisitions-braze-suppression-sync eventbridge dlq has messages",
+        "AlarmDescription": "EventBridge could not invoke braze-acquisition-events-sync lambda after retries. Quick triage: inspect DLQ message attributes for invoke failure reason, confirm rule event pattern matches AcquisitionsEvent payload shape, verify lambda permissions from EventBridge, and redrive once root cause is fixed.",
+        "AlarmName": "CODE braze-acquisition-events-sync eventbridge dlq has messages",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
@@ -218,7 +218,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisitions-braze-suppression-sync",
+            "Value": "braze-acquisition-events-sync",
           },
           {
             "Key": "DiagnosticLinks",
@@ -260,11 +260,11 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
       "DeletionPolicy": "Delete",
       "Properties": {
         "MessageRetentionPeriod": 1209600,
-        "QueueName": "acquisitions-braze-suppression-sync-eventbridge-dlq-CODE",
+        "QueueName": "braze-acquisition-events-sync-eventbridge-dlq-CODE",
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisitions-braze-suppression-sync",
+            "Value": "braze-acquisition-events-sync",
           },
           {
             "Key": "gu:cdk:version",
@@ -313,7 +313,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
                   "Arn",
                 ],
               },
-              "Sid": "AllowEventRuleacquisitionsbrazesuppressionsyncCODEAcquisitionsToBrazeRuleE8E8FE88",
+              "Sid": "AllowEventRulebrazeacquisitioneventssyncCODEAcquisitionsToBrazeRule51037FDF",
             },
           ],
           "Version": "2012-10-17",
@@ -336,18 +336,18 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "support/CODE/acquisitions-braze-suppression-sync/acquisitions-braze-suppression-sync.zip",
+          "S3Key": "support/CODE/braze-acquisition-events-sync/braze-acquisition-events-sync.zip",
         },
         "Description": "A lambda that enriches acquisitions events with Braze UUID and posts to Braze users/track",
         "Environment": {
           "Variables": {
-            "APP": "acquisitions-braze-suppression-sync",
+            "APP": "braze-acquisition-events-sync",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
           },
         },
-        "FunctionName": "acquisitions-braze-suppression-sync-CODE",
+        "FunctionName": "braze-acquisition-events-sync-CODE",
         "Handler": "index.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
@@ -363,7 +363,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisitions-braze-suppression-sync",
+            "Value": "braze-acquisition-events-sync",
           },
           {
             "Key": "gu:cdk:version",
@@ -407,8 +407,8 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
             ],
           },
         ],
-        "AlarmDescription": "acquisitions-braze-suppression-sync failed. Quick triage: inspect lambda logs for error stack and identityId context, check IDAPI lookup result for missing braze-uuid, and confirm Braze /users/track request and response payloads. Impact: an eligible user may not have suppression-related Braze updates applied to their profile, which may result in them receiving marketing communications they should not receive",
-        "AlarmName": "CODE acquisitions-braze-suppression-sync lambda errors",
+        "AlarmDescription": "braze-acquisition-events-sync failed. Quick triage: inspect lambda logs for error stack and identityId context, check IDAPI lookup result for missing braze-uuid, and confirm Braze /users/track request and response payloads. Impact: an eligible user may not have suppression-related Braze updates applied to their profile, which may result in them receiving marketing communications they should not receive",
+        "AlarmName": "CODE braze-acquisition-events-sync lambda errors",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
@@ -426,7 +426,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisitions-braze-suppression-sync",
+            "Value": "braze-acquisition-events-sync",
           },
           {
             "Key": "DiagnosticLinks",
@@ -468,11 +468,11 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
       "Properties": {
         "ApiKeySourceType": "HEADER",
         "Description": "API Gateway created by CDK",
-        "Name": "acquisitions-braze-suppression-sync-CODE",
+        "Name": "braze-acquisition-events-sync-CODE",
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisitions-braze-suppression-sync",
+            "Value": "braze-acquisition-events-sync",
           },
           {
             "Key": "gu:cdk:version",
@@ -494,7 +494,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
       },
       "Type": "AWS::ApiGateway::RestApi",
     },
-    "LambdaRestApiANYApiPermissionTestacquisitionsbrazesuppressionsyncCODELambdaRestApi5F6EA924ANY5651C3E7": {
+    "LambdaRestApiANYApiPermissionTestbrazeacquisitioneventssyncCODELambdaRestApiAEB2CA7BANY07AE5E81": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -531,7 +531,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "LambdaRestApiANYApiPermissionacquisitionsbrazesuppressionsyncCODELambdaRestApi5F6EA924ANY7F36314C": {
+    "LambdaRestApiANYApiPermissionbrazeacquisitioneventssyncCODELambdaRestApiAEB2CA7BANYB8BBEB52": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -635,7 +635,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
     "LambdaRestApiApiKeyB5CCCA11": {
       "Properties": {
         "Enabled": true,
-        "Name": "acquisitions-braze-suppression-sync-key-CODE",
+        "Name": "braze-acquisition-events-sync-key-CODE",
         "StageKeys": [
           {
             "RestApiId": {
@@ -649,7 +649,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisitions-braze-suppression-sync",
+            "Value": "braze-acquisition-events-sync",
           },
           {
             "Key": "gu:cdk:version",
@@ -703,7 +703,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisitions-braze-suppression-sync",
+            "Value": "braze-acquisition-events-sync",
           },
           {
             "Key": "gu:cdk:version",
@@ -726,7 +726,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "LambdaRestApiDeployment9531908912000292c9f3316f1ee2bac0f92b7ee1": {
+    "LambdaRestApiDeployment95319089be5a55c29de939eed6509da87100ea97": {
       "DependsOn": [
         "LambdaRestApiproxyANY486C4D1F",
         "LambdaRestApiproxy22103CFD",
@@ -746,7 +746,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "LambdaRestApiDeployment9531908912000292c9f3316f1ee2bac0f92b7ee1",
+          "Ref": "LambdaRestApiDeployment95319089be5a55c29de939eed6509da87100ea97",
         },
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",
@@ -755,7 +755,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisitions-braze-suppression-sync",
+            "Value": "braze-acquisition-events-sync",
           },
           {
             "Key": "gu:cdk:version",
@@ -790,11 +790,11 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
             "Throttle": {},
           },
         ],
-        "Description": "REST endpoints for acquisitions-braze-suppression-sync",
+        "Description": "REST endpoints for braze-acquisition-events-sync",
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisitions-braze-suppression-sync",
+            "Value": "braze-acquisition-events-sync",
           },
           {
             "Key": "gu:cdk:version",
@@ -817,11 +817,11 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
           "BurstLimit": 10,
           "RateLimit": 20,
         },
-        "UsagePlanName": "acquisitions-braze-suppression-sync-CODE",
+        "UsagePlanName": "braze-acquisition-events-sync-CODE",
       },
       "Type": "AWS::ApiGateway::UsagePlan",
     },
-    "LambdaRestApiUsagePlanUsagePlanKeyResourceacquisitionsbrazesuppressionsyncCODELambdaRestApiApiKey35E9A082A99AE1A3": {
+    "LambdaRestApiUsagePlanUsagePlanKeyResourcebrazeacquisitioneventssyncCODELambdaRestApiApiKey289F0ECCA2A39F7C": {
       "Properties": {
         "KeyId": {
           "Ref": "LambdaRestApiApiKeyB5CCCA11",
@@ -889,7 +889,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
       },
       "Type": "AWS::ApiGateway::Method",
     },
-    "LambdaRestApiproxyANYApiPermissionTestacquisitionsbrazesuppressionsyncCODELambdaRestApi5F6EA924ANYproxy5030E25F": {
+    "LambdaRestApiproxyANYApiPermissionTestbrazeacquisitioneventssyncCODELambdaRestApiAEB2CA7BANYproxyD92978DD": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -926,7 +926,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "LambdaRestApiproxyANYApiPermissionacquisitionsbrazesuppressionsyncCODELambdaRestApi5F6EA924ANYproxy13F489B1": {
+    "LambdaRestApiproxyANYApiPermissionbrazeacquisitioneventssyncCODELambdaRestApiAEB2CA7BANYproxy8E5D5F7D": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -998,7 +998,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisitions-braze-suppression-sync",
+            "Value": "braze-acquisition-events-sync",
           },
           {
             "Key": "gu:cdk:version",
@@ -1059,7 +1059,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/support/CODE/acquisitions-braze-suppression-sync/acquisitions-braze-suppression-sync.zip",
+                      "/support/CODE/braze-acquisition-events-sync/braze-acquisition-events-sync.zip",
                     ],
                   ],
                 },
@@ -1080,7 +1080,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/support/acquisitions-braze-suppression-sync",
+                    ":parameter/CODE/support/braze-acquisition-events-sync",
                   ],
                 ],
               },
@@ -1103,7 +1103,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/support/acquisitions-braze-suppression-sync/*",
+                    ":parameter/CODE/support/braze-acquisition-events-sync/*",
                   ],
                 ],
               },
@@ -1124,7 +1124,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 1`] 
 }
 `;
 
-exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] = `
+exports[`The braze acquisition events sync stack matches the snapshot 2`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
@@ -1176,7 +1176,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
             "AcquisitionsEvent",
           ],
         },
-        "Name": "acquisitions-braze-suppression-sync-PROD",
+        "Name": "braze-acquisition-events-sync-PROD",
         "State": "ENABLED",
         "Targets": [
           {
@@ -1204,7 +1204,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
       },
       "Type": "AWS::Events::Rule",
     },
-    "AcquisitionsToBrazeRuleAllowEventRuleacquisitionsbrazesuppressionsyncPRODLambda8C559CC594752E6F": {
+    "AcquisitionsToBrazeRuleAllowEventRulebrazeacquisitioneventssyncPRODLambda38CFFA907FBD7D62": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -1244,13 +1244,13 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
             ],
           },
         ],
-        "AlarmDescription": "acquisitions-braze-suppression-sync returned a 5XX response. Quick triage: check API Gateway 5XX metrics for spike window, inspect lambda logs for the same timestamp, validate IDAPI response includes braze-uuid, and verify Braze /users/track response status and body.",
-        "AlarmName": "acquisitions-braze-suppression-sync-PROD 5XX errors",
+        "AlarmDescription": "braze-acquisition-events-sync returned a 5XX response. Quick triage: check API Gateway 5XX metrics for spike window, inspect lambda logs for the same timestamp, validate IDAPI response includes braze-uuid, and verify Braze /users/track response status and body.",
+        "AlarmName": "braze-acquisition-events-sync-PROD 5XX errors",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
             "Name": "ApiName",
-            "Value": "acquisitions-braze-suppression-sync-PROD",
+            "Value": "braze-acquisition-events-sync-PROD",
           },
         ],
         "EvaluationPeriods": 1,
@@ -1261,7 +1261,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisitions-braze-suppression-sync",
+            "Value": "braze-acquisition-events-sync",
           },
           {
             "Key": "DiagnosticLinks",
@@ -1316,7 +1316,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
     "DNSRecord": {
       "Properties": {
         "HostedZoneId": "Z3KO35ELNWZMSX",
-        "Name": "acquisitions-braze-suppression-sync.support.guardianapis.com",
+        "Name": "braze-acquisition-events-sync.support.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -1332,7 +1332,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
     },
     "DomainName": {
       "Properties": {
-        "DomainName": "acquisitions-braze-suppression-sync.support.guardianapis.com",
+        "DomainName": "braze-acquisition-events-sync.support.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -1353,7 +1353,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisitions-braze-suppression-sync",
+            "Value": "braze-acquisition-events-sync",
           },
           {
             "Key": "gu:cdk:version",
@@ -1396,8 +1396,8 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
             ],
           },
         ],
-        "AlarmDescription": "EventBridge could not invoke acquisitions-braze-suppression-sync lambda after retries. Quick triage: inspect DLQ message attributes for invoke failure reason, confirm rule event pattern matches AcquisitionsEvent payload shape, verify lambda permissions from EventBridge, and redrive once root cause is fixed.",
-        "AlarmName": "PROD acquisitions-braze-suppression-sync eventbridge dlq has messages",
+        "AlarmDescription": "EventBridge could not invoke braze-acquisition-events-sync lambda after retries. Quick triage: inspect DLQ message attributes for invoke failure reason, confirm rule event pattern matches AcquisitionsEvent payload shape, verify lambda permissions from EventBridge, and redrive once root cause is fixed.",
+        "AlarmName": "PROD braze-acquisition-events-sync eventbridge dlq has messages",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
@@ -1418,7 +1418,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisitions-braze-suppression-sync",
+            "Value": "braze-acquisition-events-sync",
           },
           {
             "Key": "DiagnosticLinks",
@@ -1460,11 +1460,11 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
       "DeletionPolicy": "Delete",
       "Properties": {
         "MessageRetentionPeriod": 1209600,
-        "QueueName": "acquisitions-braze-suppression-sync-eventbridge-dlq-PROD",
+        "QueueName": "braze-acquisition-events-sync-eventbridge-dlq-PROD",
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisitions-braze-suppression-sync",
+            "Value": "braze-acquisition-events-sync",
           },
           {
             "Key": "gu:cdk:version",
@@ -1513,7 +1513,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
                   "Arn",
                 ],
               },
-              "Sid": "AllowEventRuleacquisitionsbrazesuppressionsyncPRODAcquisitionsToBrazeRuleDD82F6CB",
+              "Sid": "AllowEventRulebrazeacquisitioneventssyncPRODAcquisitionsToBrazeRuleA2FFED98",
             },
           ],
           "Version": "2012-10-17",
@@ -1536,18 +1536,18 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "support/PROD/acquisitions-braze-suppression-sync/acquisitions-braze-suppression-sync.zip",
+          "S3Key": "support/PROD/braze-acquisition-events-sync/braze-acquisition-events-sync.zip",
         },
         "Description": "A lambda that enriches acquisitions events with Braze UUID and posts to Braze users/track",
         "Environment": {
           "Variables": {
-            "APP": "acquisitions-braze-suppression-sync",
+            "APP": "braze-acquisition-events-sync",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",
           },
         },
-        "FunctionName": "acquisitions-braze-suppression-sync-PROD",
+        "FunctionName": "braze-acquisition-events-sync-PROD",
         "Handler": "index.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
@@ -1563,7 +1563,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisitions-braze-suppression-sync",
+            "Value": "braze-acquisition-events-sync",
           },
           {
             "Key": "gu:cdk:version",
@@ -1607,8 +1607,8 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
             ],
           },
         ],
-        "AlarmDescription": "acquisitions-braze-suppression-sync failed. Quick triage: inspect lambda logs for error stack and identityId context, check IDAPI lookup result for missing braze-uuid, and confirm Braze /users/track request and response payloads. Impact: an eligible user may not have suppression-related Braze updates applied to their profile, which may result in them receiving marketing communications they should not receive",
-        "AlarmName": "PROD acquisitions-braze-suppression-sync lambda errors",
+        "AlarmDescription": "braze-acquisition-events-sync failed. Quick triage: inspect lambda logs for error stack and identityId context, check IDAPI lookup result for missing braze-uuid, and confirm Braze /users/track request and response payloads. Impact: an eligible user may not have suppression-related Braze updates applied to their profile, which may result in them receiving marketing communications they should not receive",
+        "AlarmName": "PROD braze-acquisition-events-sync lambda errors",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
@@ -1626,7 +1626,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisitions-braze-suppression-sync",
+            "Value": "braze-acquisition-events-sync",
           },
           {
             "Key": "DiagnosticLinks",
@@ -1668,11 +1668,11 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
       "Properties": {
         "ApiKeySourceType": "HEADER",
         "Description": "API Gateway created by CDK",
-        "Name": "acquisitions-braze-suppression-sync-PROD",
+        "Name": "braze-acquisition-events-sync-PROD",
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisitions-braze-suppression-sync",
+            "Value": "braze-acquisition-events-sync",
           },
           {
             "Key": "gu:cdk:version",
@@ -1694,7 +1694,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
       },
       "Type": "AWS::ApiGateway::RestApi",
     },
-    "LambdaRestApiANYApiPermissionTestacquisitionsbrazesuppressionsyncPRODLambdaRestApiDEA0A090ANYF876FAAC": {
+    "LambdaRestApiANYApiPermissionTestbrazeacquisitioneventssyncPRODLambdaRestApi1C2D6EB2ANY6AF31A9A": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -1731,7 +1731,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "LambdaRestApiANYApiPermissionacquisitionsbrazesuppressionsyncPRODLambdaRestApiDEA0A090ANYADDA4D4F": {
+    "LambdaRestApiANYApiPermissionbrazeacquisitioneventssyncPRODLambdaRestApi1C2D6EB2ANY50C44D47": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -1835,7 +1835,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
     "LambdaRestApiApiKeyB5CCCA11": {
       "Properties": {
         "Enabled": true,
-        "Name": "acquisitions-braze-suppression-sync-key-PROD",
+        "Name": "braze-acquisition-events-sync-key-PROD",
         "StageKeys": [
           {
             "RestApiId": {
@@ -1849,7 +1849,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisitions-braze-suppression-sync",
+            "Value": "braze-acquisition-events-sync",
           },
           {
             "Key": "gu:cdk:version",
@@ -1903,7 +1903,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisitions-braze-suppression-sync",
+            "Value": "braze-acquisition-events-sync",
           },
           {
             "Key": "gu:cdk:version",
@@ -1926,7 +1926,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "LambdaRestApiDeployment95319089bf5f549fce5e43d7488f0352d0de2db1": {
+    "LambdaRestApiDeployment95319089ad62b4f7c79c34adbc8c368b44acb5ba": {
       "DependsOn": [
         "LambdaRestApiproxyANY486C4D1F",
         "LambdaRestApiproxy22103CFD",
@@ -1946,7 +1946,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "LambdaRestApiDeployment95319089bf5f549fce5e43d7488f0352d0de2db1",
+          "Ref": "LambdaRestApiDeployment95319089ad62b4f7c79c34adbc8c368b44acb5ba",
         },
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",
@@ -1955,7 +1955,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisitions-braze-suppression-sync",
+            "Value": "braze-acquisition-events-sync",
           },
           {
             "Key": "gu:cdk:version",
@@ -1990,11 +1990,11 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
             "Throttle": {},
           },
         ],
-        "Description": "REST endpoints for acquisitions-braze-suppression-sync",
+        "Description": "REST endpoints for braze-acquisition-events-sync",
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisitions-braze-suppression-sync",
+            "Value": "braze-acquisition-events-sync",
           },
           {
             "Key": "gu:cdk:version",
@@ -2017,11 +2017,11 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
           "BurstLimit": 10,
           "RateLimit": 20,
         },
-        "UsagePlanName": "acquisitions-braze-suppression-sync-PROD",
+        "UsagePlanName": "braze-acquisition-events-sync-PROD",
       },
       "Type": "AWS::ApiGateway::UsagePlan",
     },
-    "LambdaRestApiUsagePlanUsagePlanKeyResourceacquisitionsbrazesuppressionsyncPRODLambdaRestApiApiKey38DAFAD8924A5363": {
+    "LambdaRestApiUsagePlanUsagePlanKeyResourcebrazeacquisitioneventssyncPRODLambdaRestApiApiKeyEF95C865C0369E78": {
       "Properties": {
         "KeyId": {
           "Ref": "LambdaRestApiApiKeyB5CCCA11",
@@ -2089,7 +2089,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
       },
       "Type": "AWS::ApiGateway::Method",
     },
-    "LambdaRestApiproxyANYApiPermissionTestacquisitionsbrazesuppressionsyncPRODLambdaRestApiDEA0A090ANYproxyE3AE7621": {
+    "LambdaRestApiproxyANYApiPermissionTestbrazeacquisitioneventssyncPRODLambdaRestApi1C2D6EB2ANYproxyC3972C24": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -2126,7 +2126,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "LambdaRestApiproxyANYApiPermissionacquisitionsbrazesuppressionsyncPRODLambdaRestApiDEA0A090ANYproxyEAACCDFA": {
+    "LambdaRestApiproxyANYApiPermissionbrazeacquisitioneventssyncPRODLambdaRestApi1C2D6EB2ANYproxyB5F31074": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -2198,7 +2198,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
         "Tags": [
           {
             "Key": "App",
-            "Value": "acquisitions-braze-suppression-sync",
+            "Value": "braze-acquisition-events-sync",
           },
           {
             "Key": "gu:cdk:version",
@@ -2259,7 +2259,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/support/PROD/acquisitions-braze-suppression-sync/acquisitions-braze-suppression-sync.zip",
+                      "/support/PROD/braze-acquisition-events-sync/braze-acquisition-events-sync.zip",
                     ],
                   ],
                 },
@@ -2280,7 +2280,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/support/acquisitions-braze-suppression-sync",
+                    ":parameter/PROD/support/braze-acquisition-events-sync",
                   ],
                 ],
               },
@@ -2303,7 +2303,7 @@ exports[`The Acquisitions braze suppression sync stack matches the snapshot 2`] 
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/support/acquisitions-braze-suppression-sync/*",
+                    ":parameter/PROD/support/braze-acquisition-events-sync/*",
                   ],
                 ],
               },

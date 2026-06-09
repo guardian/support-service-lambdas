@@ -130,7 +130,7 @@ importers:
         specifier: ^4.21.0
         version: 4.21.0
 
-  handlers/acquisitions-braze-suppression-sync:
+  handlers/braze-acquisition-events-sync:
     dependencies:
       identity:
         specifier: workspace:*

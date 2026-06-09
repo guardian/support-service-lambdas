@@ -858,8 +858,8 @@ const supporterProductDataLambdas: HandlerDefinition = {
 	],
 };
 
-const acquisitionsBrazeSuppressionSync: HandlerDefinition = {
-	name: 'acquisitions-braze-suppression-sync',
+const brazeAcquisitionEventsSync: HandlerDefinition = {
+	name: 'braze-acquisition-events-sync',
 	dependencies: {
 		...dep.zod,
 	},
@@ -869,7 +869,7 @@ const acquisitionsBrazeSuppressionSync: HandlerDefinition = {
 	},
 	extraScripts: {
 		...openApiScripts,
-		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr acquisitions-braze-suppression-sync.zip ./*.js.map ./*.js`,
+		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr braze-acquisition-events-sync.zip ./*.js.map ./*.js`,
 	},
 	moduleDependencies: [moduleLogger, moduleIdentity],
 };
@@ -906,7 +906,7 @@ export const build: BuildDefinition = {
 		userSubscriptionsApi,
 		salesTaxApi,
 		supporterProductDataLambdas,
-		acquisitionsBrazeSuppressionSync,
+		brazeAcquisitionEventsSync,
 		// MARKER new-lambda: buildcheck-reference
 	],
 
