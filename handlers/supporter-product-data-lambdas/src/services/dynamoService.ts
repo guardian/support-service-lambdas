@@ -24,8 +24,7 @@ export class DynamoWriteError extends Error {
 export class DynamoService {
 	constructor(
 		stage: Stage,
-		private readonly tableName = process.env
-			.SUPPORTER_PRODUCT_DATA_TABLE_NAME ?? `SupporterProductData-${stage}`,
+		private readonly tableName = `SupporterProductData-${stage}`,
 		private readonly client = new DynamoDBClient(awsConfig),
 	) {}
 
