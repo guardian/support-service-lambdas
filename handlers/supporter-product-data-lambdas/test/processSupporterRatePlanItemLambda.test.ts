@@ -1,6 +1,6 @@
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import dayjs from 'dayjs';
-import { processItem } from '../src/services/processSupporterRatePlanItem';
+import { processItem } from '../src/handlers/processSupporterRatePlanItem';
 
 const item: SupporterRatePlanItem = {
 	subscriptionName: 'sub-1',

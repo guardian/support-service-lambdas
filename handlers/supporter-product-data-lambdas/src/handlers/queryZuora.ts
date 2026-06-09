@@ -1,17 +1,17 @@
 import { logger } from '@modules/logger/logger';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import type { FetchResultsState, QueryType } from '../lambdas/types';
 import type { BatchQueryRequest, ZoqlExportQuery } from '../model/query';
 import {
 	currentAttemptedQueryTime,
 	formatZuoraDateTime,
 	parseLastSuccessfulQueryTime,
-} from './dateTimeService';
+} from '../services/dateTimeService';
 import {
 	buildSelectActiveRatePlansQuery,
 	selectActiveRatePlansQueryName,
-} from './selectActiveRatePlansQuery';
+} from '../services/selectActiveRatePlansQuery';
+import type { FetchResultsState, QueryType } from './types';
 
 dayjs.extend(utc);
 
@@ -19,14 +19,14 @@ export type QueryZuoraDependencies = {
 	partnerId: string;
 	// This needs to be a function rather than a value because the dependencies
 	// are cached at the lambda level but we need the fresh value of this
-	getLastSuccessfulQueryTime: () => Promise<string | undefined>;
+	getLastSuccessfulQueryTime: () => Promise<string>;
 	discountProductRatePlanIds: string[];
 	postQuery: (request: BatchQueryRequest) => Promise<{ id: string }>;
 };
 
 const getIncrementalTime = async (
 	queryType: QueryType,
-	getLastSuccessfulQueryTime: () => Promise<string | undefined>,
+	getLastSuccessfulQueryTime: () => Promise<string>,
 ) => {
 	const now = dayjs.utc();
 	if (queryType === 'full') {
@@ -36,17 +36,7 @@ const getIncrementalTime = async (
 	}
 
 	const lastSuccessfulQueryTime = await getLastSuccessfulQueryTime();
-	if (lastSuccessfulQueryTime === undefined) {
-		throw new Error(
-			'Unable to retrieve a last successful query time for an incremental query',
-		);
-	}
 	const parsed = parseLastSuccessfulQueryTime(lastSuccessfulQueryTime);
-	if (parsed === undefined) {
-		throw new Error(
-			`lastSuccessfulQueryTime could not be parsed as a date - ${lastSuccessfulQueryTime}`,
-		);
-	}
 	return formatZuoraDateTime(parsed);
 };
 

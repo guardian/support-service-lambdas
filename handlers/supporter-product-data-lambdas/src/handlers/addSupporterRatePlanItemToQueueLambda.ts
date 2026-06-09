@@ -2,13 +2,10 @@ import { sendBatchMessagesToQueue } from '@modules/aws/sqs';
 import { Lazy } from '@modules/lazy';
 import { stageFromEnvironment } from '@modules/stage';
 import type { Handler } from 'aws-lambda';
-import {
-	addToQueue,
-	type AddToQueueDependencies,
-} from '../services/addItemsToQueue';
 import { ConfigService } from '../services/configService';
 import { parseCsvStreamWithHeader } from '../services/csvService';
 import { S3Service } from '../services/s3Service';
+import { addToQueue, type AddToQueueDependencies } from './addItemsToQueue';
 import type { AddSupporterRatePlanItemToQueueState } from './types';
 
 const buildDependencies = (): AddToQueueDependencies => {

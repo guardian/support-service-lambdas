@@ -24,7 +24,7 @@ describe('dateTimeService', () => {
 			expect(parsed).toBeDefined();
 			// The UTC equivalent of 05:29:27.281-07:00 is 12:29:27.281Z
 			// (dayjs preserves milliseconds but drops sub-millisecond precision)
-			expect(parsed!.toISOString()).toBe('2026-03-23T12:29:27.281Z');
+			expect(parsed.toISOString()).toBe('2026-03-23T12:29:27.281Z');
 		});
 
 		test('parses TypeScript-format LA timestamp (offset only, no zone-id suffix)', () => {
@@ -32,11 +32,13 @@ describe('dateTimeService', () => {
 
 			expect(parsed).toBeDefined();
 			// The UTC equivalent of 05:29:27-07:00 is 12:29:27Z
-			expect(parsed!.toISOString()).toBe('2026-03-23T12:29:27.000Z');
+			expect(parsed.toISOString()).toBe('2026-03-23T12:29:27.000Z');
 		});
 
-		test('returns undefined for an invalid date string', () => {
-			expect(parseLastSuccessfulQueryTime('not-a-date')).toBeUndefined();
+		test('throws for an invalid date string', () => {
+			expect(() => parseLastSuccessfulQueryTime('not-a-date')).toThrow(
+				'lastSuccessfulQueryTime could not be parsed as a date',
+			);
 		});
 	});
 
@@ -54,7 +56,7 @@ describe('dateTimeService', () => {
 			const reparsed = parseLastSuccessfulQueryTime(result);
 
 			expect(reparsed).toBeDefined();
-			expect(reparsed!.isValid()).toBe(true);
+			expect(reparsed.isValid()).toBe(true);
 		});
 	});
 
@@ -95,7 +97,7 @@ describe('dateTimeService', () => {
 			// Step 3: The written value can be re-parsed by parseLastSuccessfulQueryTime
 			const reParsed = parseLastSuccessfulQueryTime(tsWritten);
 			expect(reParsed).toBeDefined();
-			expect(reParsed!.isValid()).toBe(true);
+			expect(reParsed.isValid()).toBe(true);
 		});
 	});
 
@@ -117,7 +119,7 @@ describe('dateTimeService', () => {
 			// After parsing (→ UTC) and re-formatting for Zuora we should get the same LA wall-clock back.
 			const parsed = parseLastSuccessfulQueryTime(tsFormatLaTime); // 05:29:27 LA
 			expect(parsed).toBeDefined();
-			expect(formatZuoraDateTime(parsed!)).toBe('2026-03-23 05:29:27');
+			expect(formatZuoraDateTime(parsed)).toBe('2026-03-23 05:29:27');
 		});
 	});
 });

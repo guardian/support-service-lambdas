@@ -2,7 +2,7 @@
 
 import { logger } from '@modules/logger/logger';
 import type { Context } from 'aws-lambda';
-import { handler } from '../lambdas/queryZuoraLambda';
+import { handler } from '../handlers/queryZuoraLambda';
 
 process.env.STAGE = process.env.STAGE ?? 'CODE';
 

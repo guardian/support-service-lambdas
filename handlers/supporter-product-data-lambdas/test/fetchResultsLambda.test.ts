@@ -1,4 +1,4 @@
-import { fetchResults } from '../src/services/fetchResults';
+import { fetchResults } from '../src/handlers/fetchResults';
 import type { BatchQueryResponse } from '../src/services/zuoraQuerierService';
 
 type UploadToS3 = (

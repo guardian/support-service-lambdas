@@ -1,7 +1,7 @@
 import { logger } from '@modules/logger/logger';
 import type { Stage } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
-import type { ProcessItemDependencies } from './processSupporterRatePlanItem';
+import type { ProcessItemDependencies } from '../handlers/processSupporterRatePlanItem';
 import type { MinimalZuoraSubscription } from './zuoraSubscriptionService';
 
 export const contributionIdsForStage = (stage: Stage): string[] =>

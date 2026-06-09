@@ -1,11 +1,11 @@
 import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
+import { toIsoLocalDateTimeUtc } from '../services/dateTimeService';
+import type { BatchQueryResponse } from '../services/zuoraQuerierService';
 import type {
 	AddSupporterRatePlanItemToQueueState,
 	FetchResultsState,
-} from '../lambdas/types';
-import { toIsoLocalDateTimeUtc } from './dateTimeService';
-import type { BatchQueryResponse } from './zuoraQuerierService';
+} from './types';
 
 export type FetchResultsDependencies = {
 	getResults: (jobId: string) => Promise<BatchQueryResponse>;

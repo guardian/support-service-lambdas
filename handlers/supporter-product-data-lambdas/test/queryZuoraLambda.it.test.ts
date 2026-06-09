@@ -2,7 +2,7 @@
  * @group integration
  */
 
-import { handler } from '../src/lambdas/queryZuoraLambda';
+import { handler } from '../src/handlers/queryZuoraLambda';
 
 jest.mock('../src/services/configService', () => ({
 	ConfigService: jest.fn().mockImplementation(() => ({

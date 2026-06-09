@@ -28,7 +28,7 @@ export class ConfigService {
 		return parameter.Parameter.Value;
 	}
 
-	async getLastSuccessfulQueryTime(): Promise<string | undefined> {
+	async getLastSuccessfulQueryTime(): Promise<string> {
 		const fullPath = `/supporter-product-data/${this.stage}/zuora-config/lastSuccessfulQueryTime`;
 		const parameter = await this.ssmClient.send(
 			new GetParameterCommand({

@@ -3,12 +3,9 @@ import { stageFromEnvironment } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { Handler } from 'aws-lambda';
 import { ConfigService } from '../services/configService';
-import {
-	fetchResults,
-	type FetchResultsDependencies,
-} from '../services/fetchResults';
 import { S3Service } from '../services/s3Service';
 import { ZuoraQuerierService } from '../services/zuoraQuerierService';
+import { fetchResults, type FetchResultsDependencies } from './fetchResults';
 import type {
 	AddSupporterRatePlanItemToQueueState,
 	FetchResultsState,

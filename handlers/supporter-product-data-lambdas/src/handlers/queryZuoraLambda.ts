@@ -5,11 +5,8 @@ import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 import type { Handler } from 'aws-lambda';
 import { ConfigService } from '../services/configService';
 import { getDiscountProductRatePlanIds } from '../services/discounts';
-import {
-	queryZuora,
-	type QueryZuoraDependencies,
-} from '../services/queryZuora';
 import { ZuoraQuerierService } from '../services/zuoraQuerierService';
+import { queryZuora, type QueryZuoraDependencies } from './queryZuora';
 import type { FetchResultsState, QueryZuoraState } from './types';
 import { queryZuoraStateSchema } from './types';
 

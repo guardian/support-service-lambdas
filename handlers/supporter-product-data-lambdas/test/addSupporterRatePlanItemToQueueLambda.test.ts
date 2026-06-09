@@ -1,7 +1,7 @@
 import { SqsSendError } from '@modules/aws/sqs';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
+import { addToQueue } from '../src/handlers/addItemsToQueue';
 import { CsvDecodeError } from '../src/model/supporterRatePlanItem';
-import { addToQueue } from '../src/services/addItemsToQueue';
 import { parseCsvStreamWithHeader } from '../src/services/csvService';
 
 const csvHeader =

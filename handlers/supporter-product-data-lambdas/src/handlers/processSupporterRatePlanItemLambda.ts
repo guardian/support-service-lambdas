@@ -9,11 +9,11 @@ import {
 	isDiscountProductRatePlanItem,
 } from '../services/discounts';
 import { DynamoService } from '../services/dynamoService';
+import { ZuoraSubscriptionService } from '../services/zuoraSubscriptionService';
 import {
 	processEvent,
 	type ProcessItemDependencies,
-} from '../services/processSupporterRatePlanItem';
-import { ZuoraSubscriptionService } from '../services/zuoraSubscriptionService';
+} from './processSupporterRatePlanItem';
 
 const buildDependencies = async (): Promise<ProcessItemDependencies> => {
 	const stage = stageFromEnvironment();

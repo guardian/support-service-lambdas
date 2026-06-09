@@ -13,14 +13,17 @@ const laTimezone = 'America/Los_Angeles';
  * and the TypeScript format (e.g. '2026-03-23T05:29:27-07:00').
  * Returns a UTC dayjs instance, or undefined if the string cannot be parsed.
  */
-export const parseLastSuccessfulQueryTime = (
-	value: string,
-): dayjs.Dayjs | undefined => {
+export const parseLastSuccessfulQueryTime = (value: string): dayjs.Dayjs => {
 	// Strip the IANA zone-id suffix (e.g. [America/Los_Angeles]) written by the Scala
 	// version's ISO_DATE_TIME formatter — dayjs doesn't understand that part
 	const normalised = value.replace(/\[.*]$/, '');
 	const parsed = dayjs.utc(normalised);
-	return parsed.isValid() ? parsed : undefined;
+	if (!parsed.isValid()) {
+		throw new Error(
+			`lastSuccessfulQueryTime could not be parsed as a date - ${value}`,
+		);
+	}
+	return parsed;
 };
 
 /**

@@ -1,7 +1,7 @@
 import { logger } from '@modules/logger/logger';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
-import type { AddSupporterRatePlanItemToQueueState } from '../lambdas/types';
 import { supporterRatePlanItemFromCsvRow } from '../model/supporterRatePlanItem';
+import type { AddSupporterRatePlanItemToQueueState } from './types';
 
 export type IndexedItem = [SupporterRatePlanItem, number];
 
