@@ -26,28 +26,26 @@ export const countryStates: Partial<
 	},
 };
 
-export function salesTaxRequestEndpoint({
+export const salesTaxRequestEndpoint = async ({
 	productKey,
 	country,
 	state,
-}: SalesTaxRequest): Promise<APIGatewayProxyResult> {
+}: SalesTaxRequest): Promise<APIGatewayProxyResult> => {
 	try {
 		logger.log('Checking sales tax for', {
 			productKey,
 			country,
 			state,
 		});
-		return Promise.resolve(
-			ok(
-				getSalesTaxRate({ productKey, country, state }),
-				salesTaxResponseSchema,
-			),
+		return ok(
+			getSalesTaxRate({ productKey, country, state }),
+			salesTaxResponseSchema,
 		);
 	} catch (error) {
 		logger.error('Error fetching sales tax', error);
 		return Promise.resolve(buildErrorResponse(error));
 	}
-}
+};
 
 function getSalesTaxRate({
 	productKey,
