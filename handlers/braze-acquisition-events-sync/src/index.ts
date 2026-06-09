@@ -12,6 +12,7 @@ export async function processAcquisitionEvent(
 	deps: RuntimeDeps = defaultDeps,
 ): Promise<void> {
 	const parsedEvent = acquisitionsEventSchema.parse(event);
+	console.log('parsedEvent', JSON.stringify(parsedEvent, null, 2));
 	const identityId = parsedEvent.detail.identityId?.trim();
 
 	if (!identityId) {
