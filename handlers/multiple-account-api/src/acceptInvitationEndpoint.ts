@@ -87,6 +87,7 @@ export const acceptInvitationEndpoint = async (
 
 		// TODO: email?
 		return ok({
+			identityId: invitation.secondaryIdentityId,
 			secondarySubscriptionName,
 		});
 	} catch (error) {
