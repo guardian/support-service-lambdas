@@ -639,7 +639,7 @@ exports[`The New Subscription API stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "newsubscriptionapilambdanewsubscriptionapiCODEDeploymentB92207D9f32fea4a0a02d865c8c86f9a8af308be": {
+    "newsubscriptionapilambdanewsubscriptionapiCODEDeploymentB92207D9279fde1ba61abf7b64b25e19e285330c": {
       "DependsOn": [
         "newsubscriptionapilambdanewsubscriptionapiCODEproxyANY323BC2DD",
         "newsubscriptionapilambdanewsubscriptionapiCODEproxyBFBD1BEA",
@@ -659,7 +659,7 @@ exports[`The New Subscription API stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "newsubscriptionapilambdanewsubscriptionapiCODEDeploymentB92207D9f32fea4a0a02d865c8c86f9a8af308be",
+          "Ref": "newsubscriptionapilambdanewsubscriptionapiCODEDeploymentB92207D9279fde1ba61abf7b64b25e19e285330c",
         },
         "RestApiId": {
           "Ref": "newsubscriptionapilambdanewsubscriptionapiCODE2838767B",
@@ -1604,7 +1604,7 @@ exports[`The New Subscription API stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "newsubscriptionapilambdanewsubscriptionapiPRODDeployment238790AA78fdac29400c6794f5fc86f1d27735ae": {
+    "newsubscriptionapilambdanewsubscriptionapiPRODDeployment238790AA0296a38f7d3115a598ce3a0e2a42c46c": {
       "DependsOn": [
         "newsubscriptionapilambdanewsubscriptionapiPRODproxyANYB0FD8929",
         "newsubscriptionapilambdanewsubscriptionapiPRODproxy906EE08E",
@@ -1624,7 +1624,7 @@ exports[`The New Subscription API stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "newsubscriptionapilambdanewsubscriptionapiPRODDeployment238790AA78fdac29400c6794f5fc86f1d27735ae",
+          "Ref": "newsubscriptionapilambdanewsubscriptionapiPRODDeployment238790AA0296a38f7d3115a598ce3a0e2a42c46c",
         },
         "RestApiId": {
           "Ref": "newsubscriptionapilambdanewsubscriptionapiPRODF2C9BF91",
