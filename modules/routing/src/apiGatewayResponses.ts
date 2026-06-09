@@ -11,6 +11,13 @@ export function badRequest(message: string): APIGatewayProxyResult {
 	};
 }
 
+export function notFound(): APIGatewayProxyResult {
+	return {
+		body: JSON.stringify({ message: 'Not Found' }),
+		statusCode: 404,
+	};
+}
+
 export function internalServerError(): APIGatewayProxyResult {
 	return {
 		body: JSON.stringify({ message: 'Internal server error' }),
