@@ -3,6 +3,7 @@ import {
 	DynamoDBClient,
 	PutItemCommand,
 	QueryCommand,
+	type TransactWriteItem,
 } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import type { Stage } from '@modules/stage';
@@ -83,5 +84,14 @@ export class SecondaryUserRepository {
 				},
 			}),
 		);
+	}
+
+	getPutTransaction(record: SecondaryUserRecord): TransactWriteItem {
+		return {
+			Put: {
+				TableName: this.tableName,
+				Item: marshall(record),
+			},
+		};
 	}
 }

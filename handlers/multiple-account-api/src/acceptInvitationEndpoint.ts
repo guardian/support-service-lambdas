@@ -1,3 +1,5 @@
+import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
+import type { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import {
 	badRequest,
@@ -27,6 +29,7 @@ export const acceptInvitationEndpoint = async (
 	invitationCode: string,
 	invitationRepository: InvitationRepository,
 	secondaryUserRepository: SecondaryUserRepository,
+	dynamoClient: DynamoDBClient,
 ) => {
 	try {
 		const invitation = await invitationRepository.get(invitationCode);
@@ -52,7 +55,20 @@ export const acceptInvitationEndpoint = async (
 			primaryIdentityId: invitation.primaryIdentityId,
 			acceptedDate: zuoraDateFormat(today),
 		};
-		await secondaryUserRepository.save(secondaryUserRecord);
+
+		// Carry out the secondary user creation and deletion of the invitation
+		// in a transaction to keep them atomic
+		await dynamoClient.send(
+			new TransactWriteItemsCommand({
+				TransactItems: [
+					secondaryUserRepository.getPutTransaction(secondaryUserRecord),
+					invitationRepository.getDeleteTransaction(
+						invitation.subscriptionName,
+						invitationCode,
+					),
+				],
+			}),
+		);
 
 		const supporterProductDataRecord: SupporterRatePlanItem = {
 			subscriptionName: `${invitation.subscriptionName}-${invitation.secondaryIdentityId}`,
@@ -63,12 +79,10 @@ export const acceptInvitationEndpoint = async (
 			contractEffectiveDate: today,
 			termEndDate: parentSupporterProductDataRecord.termEndDate,
 		};
-		await sendToSupporterProductData(stage, supporterProductDataRecord);
 
-		await invitationRepository.delete(
-			invitation.subscriptionName,
-			invitationCode,
-		);
+		// This record is not part of the transaction because it is sent via an SQS queue
+		// If there is an issue with it it will be debugged and retried there
+		await sendToSupporterProductData(stage, supporterProductDataRecord);
 
 		// TODO: email?
 		return ok({});

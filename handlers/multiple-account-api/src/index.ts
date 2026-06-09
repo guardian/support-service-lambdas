@@ -1,3 +1,5 @@
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { awsConfig } from '@modules/aws/config';
 import { buildAuthenticate } from '@modules/identity/apiGateway';
 import { IdentityClient } from '@modules/identity/identityClient';
 import { Lazy } from '@modules/lazy';
@@ -25,6 +27,7 @@ import { SecondaryUserRepository } from './secondaryUserRepository';
 
 const stage = stageFromEnvironment();
 const authenticate = buildAuthenticate(stage, []);
+const dynamoClient = new DynamoDBClient(awsConfig);
 const invitationRepository = InvitationRepository.create(stage);
 const secondaryUserRepository = SecondaryUserRepository.create(stage);
 const identityClientPromise = IdentityClient.create(
@@ -84,6 +87,7 @@ export const handler: Handler = Router([
 				path.invitationCode,
 				invitationRepository,
 				secondaryUserRepository,
+				dynamoClient,
 			);
 		}),
 	},

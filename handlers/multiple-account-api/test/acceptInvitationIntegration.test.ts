@@ -4,6 +4,7 @@
  *
  * @group integration
  */
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { IdentityClient } from '@modules/identity/identityClient';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import {
@@ -28,6 +29,7 @@ let secondaryIdentityId: string;
 
 const invitationRepository = InvitationRepository.create(stage);
 const secondaryUserRepository = SecondaryUserRepository.create(stage);
+const dynamoClient = new DynamoDBClient({});
 
 beforeEach(async () => {
 	const zuoraClient = await ZuoraClient.create(stage);
@@ -91,6 +93,7 @@ test('acceptInvitationEndpoint accepts an invitation and creates a secondary use
 		invitationCode,
 		invitationRepository,
 		secondaryUserRepository,
+		dynamoClient,
 	);
 
 	expect(result.statusCode).toBe(200);
