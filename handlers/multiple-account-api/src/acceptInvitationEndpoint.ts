@@ -70,8 +70,9 @@ export const acceptInvitationEndpoint = async (
 			}),
 		);
 
+		const secondarySubscriptionName = `${invitation.subscriptionName}-${invitation.secondaryIdentityId}`;
 		const supporterProductDataRecord: SupporterRatePlanItem = {
-			subscriptionName: `${invitation.subscriptionName}-${invitation.secondaryIdentityId}`,
+			subscriptionName: secondarySubscriptionName,
 			primarySubscriptionName: invitation.subscriptionName, // TODO Not being written currently
 			identityId: invitation.secondaryIdentityId,
 			productRatePlanId: parentSupporterProductDataRecord.productRatePlanId,
@@ -85,7 +86,9 @@ export const acceptInvitationEndpoint = async (
 		await sendToSupporterProductData(stage, supporterProductDataRecord);
 
 		// TODO: email?
-		return ok({});
+		return ok({
+			secondarySubscriptionName,
+		});
 	} catch (error) {
 		return buildErrorResponse(error);
 	}
