@@ -34,7 +34,6 @@ export class BrazeAcquisitionEventsSync extends SrStack {
 			},
 		});
 
-		const detailType = 'AcquisitionsEvent';
 		const eventBusArn = `arn:aws:events:eu-west-1:865473395570:event-bus/acquisitions-bus-${this.stage}`;
 
 		const acquisitionsBus = EventBus.fromEventBusArn(
@@ -52,7 +51,7 @@ export class BrazeAcquisitionEventsSync extends SrStack {
 			ruleName: `braze-acquisition-events-sync-${this.stage}`,
 			eventBus: acquisitionsBus,
 			eventPattern: {
-				detailType: [detailType],
+				source: [`support-workers.1`],
 			},
 		});
 
