@@ -1,30 +1,23 @@
 import { ValidationError } from '@modules/errors';
 import type { IsoCountry } from '@modules/internationalisation/country';
 import { logger } from '@modules/logger/logger';
+import type { productKeySchema } from '@modules/product-catalog/productCatalogSchema';
 import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
+import { getZuoraTaxCodes, getZuoraTaxRates } from '@modules/zuora/tax';
+import type {
+	ZuoraTaxCode,
+	ZuoraTaxRate,
+} from '@modules/zuora/types/objects/tax';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyResult } from 'aws-lambda';
+import type z from 'zod';
 import type { SalesTaxRequest, SalesTaxResponse } from './schemas';
 import { salesTaxResponseSchema } from './schemas';
 
-export const countryStates: Partial<
-	Record<IsoCountry, Record<string, number>>
-> = {
-	CA: {
-		AB: 0.05,
-		BC: 0.12,
-		MB: 0.12,
-		NB: 0.15,
-		NL: 0.15,
-		NT: 0.15,
-		NS: 0.15,
-		NU: 0.05,
-		ON: 0.13,
-		PE: 0.15,
-		QC: 0.1498,
-		SK: 0.11,
-		YT: 0.05,
-	},
+export type ProductKey = z.infer<typeof productKeySchema>;
+const taxExclusiveZuoraTaxCodes: Partial<Record<ProductKey, string>> = {
+	SupporterPlus: `Supporter Plus Global Tax`,
+	DigitalSubscription: `Digital Pack Global Tax`,
 };
 
 export const salesTaxRequestEndpoint = async (
@@ -38,7 +31,9 @@ export const salesTaxRequestEndpoint = async (
 			state,
 		});
 		return ok(
-			getSalesTaxRate(zuoraClient, { productKey, country, state }),
+			await Promise.resolve(
+				getSalesTaxRate(zuoraClient, { productKey, country, state }),
+			),
 			salesTaxResponseSchema,
 		);
 	} catch (error) {
@@ -47,26 +42,63 @@ export const salesTaxRequestEndpoint = async (
 	}
 };
 
-function getSalesTaxRate(
+async function getSalesTaxRate(
 	zuoraClient: ZuoraClient,
 	{ productKey, country, state }: SalesTaxRequest,
-): SalesTaxResponse {
-	const validProductKey = ['SupporterPlus', 'DigitalSubscription'].includes(
+): Promise<SalesTaxResponse> {
+	const zuoraTaxCodes = await getZuoraTaxCodes(zuoraClient);
+	const exclusiveZuoraTaxId = findTaxExclusiveProductZuoraTaxId(
 		productKey,
+		zuoraTaxCodes.taxCodes,
 	);
-	if (!validProductKey) {
+	if (!exclusiveZuoraTaxId) {
 		throw new ValidationError(`invalid productKey:${productKey}`);
 	}
-	return { taxRate: getLocationSalesTax(country, state) };
+	const exclusiveZuoraTaxRates = await getZuoraTaxRates(
+		zuoraClient,
+		exclusiveZuoraTaxId.id,
+	);
+
+	if (findCountryZuoraTaxRate(country, exclusiveZuoraTaxRates.taxRates)) {
+		const zuoraTaxRate = findStateZuoraTaxRate(
+			country,
+			state,
+			exclusiveZuoraTaxRates.taxRates,
+		);
+		if (zuoraTaxRate) {
+			return { taxRate: zuoraTaxRate.taxRate1 };
+		} else {
+			throw new ValidationError(`invalid state:${state}`);
+		}
+	} else {
+		throw new ValidationError(`invalid country:${country}`);
+	}
 }
 
-function getLocationSalesTax(country: IsoCountry, state: string) {
-	const salesTaxRate = countryStates[country]?.[state];
-	if (!salesTaxRate) {
-		const message = ['CA'].includes(country)
-			? `invalid state:${state}`
-			: `invalid country:${country}`;
-		throw new ValidationError(message);
-	}
-	return salesTaxRate;
+function findTaxExclusiveProductZuoraTaxId(
+	productKey: ProductKey,
+	zuoraTaxCodes: ZuoraTaxCode[],
+) {
+	return zuoraTaxCodes.find(
+		(zuoraTaxCode) =>
+			zuoraTaxCode.name === taxExclusiveZuoraTaxCodes[productKey],
+	);
+}
+
+function findCountryZuoraTaxRate(
+	country: IsoCountry,
+	zuoraTaxRates: ZuoraTaxRate[],
+) {
+	return zuoraTaxRates.find((zuoraTaxRate) => zuoraTaxRate.country === country);
+}
+
+function findStateZuoraTaxRate(
+	country: IsoCountry,
+	state: string,
+	zuoraTaxRates: ZuoraTaxRate[],
+) {
+	return zuoraTaxRates.find(
+		(zuoraTaxRate) =>
+			zuoraTaxRate.country === country && zuoraTaxRate.state === state,
+	);
 }
