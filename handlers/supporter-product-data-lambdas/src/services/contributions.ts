@@ -51,7 +51,7 @@ export const addContributionAmountIfNeeded = async (
 		dependencies.contributionIds,
 	);
 
-	logger.log('Resolved contribution amount');
+	logger.log('Resolved contribution amount', contributionAmount);
 	return {
 		...item,
 		contributionAmount,
