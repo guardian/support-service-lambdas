@@ -16,7 +16,12 @@ import { z } from 'zod';
 
 const dynamoClient = new DynamoDBClient(awsConfig);
 
-const supporterRatePlanItemSchema = z.object({
+const contributionAmountSchema = z.object({
+	amount: z.number(),
+	currency: z.string(),
+});
+
+export const supporterRatePlanItemSchema = z.object({
 	subscriptionName: z.string(), // Unique identifier for the subscription
 	identityId: z.string(), // Unique identifier for user
 	productRatePlanId: z.string(), // Unique identifier for the product in this rate plan
@@ -24,6 +29,7 @@ const supporterRatePlanItemSchema = z.object({
 	termEndDate: z.string().transform((arg) => dayjs(arg)), // Date that this subscription term ends
 	contractEffectiveDate: z.string().transform((arg) => dayjs(arg)), // Date that this subscription started
 	primarySubscriptionName: z.string().optional(), // Set for secondary subscriptions granted through the multiple accounts feature
+	contributionAmount: contributionAmountSchema.nullish(),
 });
 export type SupporterRatePlanItem = z.infer<typeof supporterRatePlanItemSchema>;
 
@@ -126,7 +132,7 @@ export const deleteSupporterRatePlan = async (
 
 // We insert into the SupporterProductData table via an SQS queue
 // This is the lambda that ultimately does the writing:
-// https://github.com/guardian/support-frontend/blob/main/supporter-product-data/src/main/scala/com/gu/lambdas/ProcessSupporterRatePlanItemLambda.scala#L24
+// handlers/supporter-product-data-lambdas/src/handlers/processSupporterRatePlanItemLambda.ts
 export const sendToSupporterProductData = async (
 	stage: Stage,
 	supporterRatePlanItem: SupporterRatePlanItem,
