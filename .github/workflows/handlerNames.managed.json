@@ -23,6 +23,7 @@
     "salesforce-disaster-recovery-health-check",
     "salesforce-event-bus",
     "stripe-disputes",
+    "supporter-product-data-lambdas",
     "ticket-tailor-webhook",
     "update-supporter-plus-amount",
     "user-benefits",
