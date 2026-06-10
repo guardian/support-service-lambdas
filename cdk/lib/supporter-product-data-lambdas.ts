@@ -60,7 +60,7 @@ export class SupporterProductDataLambdas extends SrStack {
 				queueName: dlqName,
 			},
 		);
-		const processItemMaxConcurrency = stage === 'PROD' ? 50 : 30;
+		const processItemMaxConcurrency = stage === 'PROD' ? 30 : 20;
 
 		// Non-standard SSM path used by ConfigService — not covered by the GuCDK auto-policy (which uses /${stage}/${stack}/${app})
 		const ssmConfigPolicy = new PolicyStatement({
