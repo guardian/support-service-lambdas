@@ -1,9 +1,9 @@
 import { Lazy } from '@modules/lazy';
+import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { stageFromEnvironment } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 import type { Handler, SQSEvent } from 'aws-lambda';
-import { contributionIdsForStage } from '../services/contributions';
 import {
 	getDiscountProductRatePlanIds,
 	isDiscountProductRatePlanItem,
@@ -23,12 +23,16 @@ const buildDependencies = async (): Promise<ProcessItemDependencies> => {
 	const dynamoService = new DynamoService(stage);
 
 	const zuoraCatalog = await getZuoraCatalogFromS3(stage);
+	const productCatalog = await getProductCatalogFromApi(stage);
 	const discountIds = getDiscountProductRatePlanIds(zuoraCatalog);
 
 	return {
 		isDiscountRatePlanItem: (item) =>
 			isDiscountProductRatePlanItem(discountIds, item),
-		contributionIds: contributionIdsForStage(stage),
+		contributionIds: [
+			productCatalog.Contribution.ratePlans.Annual.id,
+			productCatalog.Contribution.ratePlans.Monthly.id,
+		],
 		getSubscription: (subscriptionName) =>
 			subscriptionService.getSubscription(subscriptionName),
 		writeItem: (item) => dynamoService.writeItem(item),

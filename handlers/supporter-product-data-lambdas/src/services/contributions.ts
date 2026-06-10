@@ -1,14 +1,8 @@
 import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
-import type { Stage } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import type { ProcessItemDependencies } from '../handlers/processSupporterRatePlanItem';
 import type { MinimalZuoraSubscription } from './zuoraSubscriptionService';
-
-export const contributionIdsForStage = (stage: Stage): string[] =>
-	stage === 'PROD'
-		? ['2c92a0fc5aacfadd015ad24db4ff5e97', '2c92a0fc5e1dc084015e37f58c200eea']
-		: ['2c92c0f85a6b134e015a7fcd9f0c7855', '2c92c0f85e2d19af015e3896e824092c'];
 
 export const contributionAmountFromZuoraSubscription = (
 	subscription: MinimalZuoraSubscription,
