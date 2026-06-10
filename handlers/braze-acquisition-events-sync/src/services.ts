@@ -18,7 +18,7 @@ const getIdentityClient = (): ReturnType<typeof IdentityClient.create> => {
 		const stage = stageFromEnvironment();
 		identityClientPromise = IdentityClient.create(
 			stage,
-			`/${stage}/support/braze-acquisition-events-sync/identity-client-access-token`, //token needs to be created
+			`/${stage}/support/braze-acquisition-events-sync/identity-client-access-token`,
 		);
 	}
 

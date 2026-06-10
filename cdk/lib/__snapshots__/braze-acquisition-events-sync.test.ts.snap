@@ -48,8 +48,8 @@ exports[`The braze acquisition events sync stack matches the snapshot 1`] = `
       "Properties": {
         "EventBusName": "acquisitions-bus-CODE",
         "EventPattern": {
-          "source": [
-            "support-workers.1",
+          "detail-type": [
+            "AcquisitionsEvent",
           ],
         },
         "Name": "braze-acquisition-events-sync-CODE",
@@ -1172,8 +1172,8 @@ exports[`The braze acquisition events sync stack matches the snapshot 2`] = `
       "Properties": {
         "EventBusName": "acquisitions-bus-PROD",
         "EventPattern": {
-          "source": [
-            "support-workers.1",
+          "detail-type": [
+            "AcquisitionsEvent",
           ],
         },
         "Name": "braze-acquisition-events-sync-PROD",

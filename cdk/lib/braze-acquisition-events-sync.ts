@@ -51,7 +51,7 @@ export class BrazeAcquisitionEventsSync extends SrStack {
 			ruleName: `braze-acquisition-events-sync-${this.stage}`,
 			eventBus: acquisitionsBus,
 			eventPattern: {
-				source: [`support-workers.1`],
+				detailType: ['AcquisitionsEvent'],
 			},
 		});
 
