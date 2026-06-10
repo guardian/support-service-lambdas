@@ -32,6 +32,12 @@ export const contributionAmountFromZuoraSubscription = (
 	};
 };
 
+/**
+ * If the provided supporter rate plan item is a contribution, fetch the contribution
+ * amount from Zuora
+ * @param item
+ * @param dependencies
+ */
 export const addContributionAmountIfNeeded = async (
 	item: SupporterRatePlanItem,
 	dependencies: Pick<
