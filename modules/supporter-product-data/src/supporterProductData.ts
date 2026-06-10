@@ -16,11 +16,6 @@ import { z } from 'zod';
 
 const dynamoClient = new DynamoDBClient(awsConfig);
 
-const contributionAmountSchema = z.object({
-	amount: z.number(),
-	currency: z.string(),
-});
-
 export const supporterRatePlanItemSchema = z.object({
 	subscriptionName: z.string(), // Unique identifier for the subscription
 	identityId: z.string(), // Unique identifier for user
@@ -29,7 +24,8 @@ export const supporterRatePlanItemSchema = z.object({
 	termEndDate: z.string().transform((arg) => dayjs(arg)), // Date that this subscription term ends
 	contractEffectiveDate: z.string().transform((arg) => dayjs(arg)), // Date that this subscription started
 	primarySubscriptionName: z.string().optional(), // Set for secondary subscriptions granted through the multiple accounts feature
-	contributionAmount: contributionAmountSchema.nullish(),
+	contributionAmount: z.number().nullish(),
+	contributionCurrency: z.string().nullish(),
 });
 export type SupporterRatePlanItem = z.infer<typeof supporterRatePlanItemSchema>;
 

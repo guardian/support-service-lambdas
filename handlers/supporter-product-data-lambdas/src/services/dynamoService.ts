@@ -55,12 +55,12 @@ export class DynamoService {
 		let updateExpression =
 			'SET productRatePlanId = :productRatePlanId, productRatePlanName = :productRatePlanName, termEndDate = :termEndDate, contractEffectiveDate = :contractEffectiveDate, expiryDate = :expiryDate';
 
-		if (item.contributionAmount) {
+		if (item.contributionAmount && item.contributionCurrency) {
 			expressionValues[':contributionAmount'] = {
-				N: item.contributionAmount.amount.toString(),
+				N: item.contributionAmount.toString(),
 			};
 			expressionValues[':contributionCurrency'] = {
-				S: item.contributionAmount.currency,
+				S: item.contributionCurrency,
 			};
 			updateExpression +=
 				', contributionAmount = :contributionAmount, contributionCurrency = :contributionCurrency';
