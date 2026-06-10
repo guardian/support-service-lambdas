@@ -54,6 +54,7 @@ export const addContributionAmountIfNeeded = async (
 	logger.log('Resolved contribution amount', contributionAmount);
 	return {
 		...item,
-		contributionAmount,
+		contributionAmount: contributionAmount.amount,
+		contributionCurrency: contributionAmount.currency,
 	};
 };

@@ -52,7 +52,8 @@ describe('processSupporterRatePlanItemLambda', () => {
 		expect(writeItem).toHaveBeenCalledWith({
 			...item,
 			productRatePlanId: 'contribution-product-rate-plan-id',
-			contributionAmount: { amount: 10.0, currency: 'GBP' },
+			contributionAmount: 10.0,
+			contributionCurrency: 'GBP',
 		});
 	});
 });
