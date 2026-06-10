@@ -2,8 +2,8 @@ import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supp
 import dayjs from 'dayjs';
 
 export class CsvDecodeError extends Error {
-	constructor(cause: unknown) {
-		super(`Failed to decode CSV row: ${String(cause)}`);
+	constructor(message: unknown) {
+		super(`Failed to decode CSV row: ${String(message)}`);
 		this.name = 'CsvDecodeError';
 	}
 }
