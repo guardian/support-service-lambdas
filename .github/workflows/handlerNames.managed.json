@@ -19,6 +19,7 @@
     "press-reader-entitlements",
     "product-switch-api",
     "promotions-lambdas",
+    "sales-tax-api",
     "salesforce-disaster-recovery",
     "salesforce-disaster-recovery-health-check",
     "salesforce-event-bus",

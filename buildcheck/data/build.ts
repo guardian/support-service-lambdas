@@ -804,6 +804,23 @@ const userSubscriptionsApi: HandlerDefinition = {
 	moduleDependencies: [moduleRouting],
 };
 
+const salesTaxApi: HandlerDefinition = {
+	name: 'sales-tax-api',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+
+		...devDeps['@redocly/cli'],
+	},
+	moduleDependencies: [moduleLogger, moduleRouting],
+	extraScripts: {
+		...openApiScripts,
+		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr sales-tax-api.zip ./*.js.map ./*.js`,
+	},
+};
+
 const supporterProductDataLambdas: HandlerDefinition = {
 	name: 'supporter-product-data-lambdas',
 	functionNames: [
@@ -867,6 +884,7 @@ export const build: BuildDefinition = {
 		observerBenefitsApi,
 		contributionsOnlyCountriesApi,
 		userSubscriptionsApi,
+		salesTaxApi,
 		supporterProductDataLambdas,
 		// MARKER new-lambda: buildcheck-reference
 	],

@@ -29,6 +29,7 @@ import { ObserverDataExport } from '../lib/observer-data-export';
 import { PressReaderEntitlements } from '../lib/press-reader-entitlements';
 import { ProductSwitchApi } from '../lib/product-switch-api';
 import { PromotionsLambdas } from '../lib/promotions-lambdas';
+import { SalesTaxApi } from '../lib/sales-tax-api';
 import { SalesforceDisasterRecovery } from '../lib/salesforce-disaster-recovery';
 import { SalesforceDisasterRecoveryHealthCheck } from '../lib/salesforce-disaster-recovery-health-check';
 import { SalesforceEventBus } from '../lib/salesforce-event-bus';
@@ -160,6 +161,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	ObserverBenefitsApi,
 	ContributionsOnlyCountriesApi,
 	UserSubscriptionsApi,
+	SalesTaxApi,
 	SupporterProductDataLambdas,
 	// MARKER new-lambda: cdk-bin
 ];
