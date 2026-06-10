@@ -11,9 +11,11 @@ const identityUserSchema = z.object({
 
 const identityUserWithPrivateFieldsSchema = z.object({
 	id: z.string(),
-	primaryEmailAddress: z.string(),
+	primaryEmailAddress: z.string().optional(),
 	publicFields: z.object({ displayName: z.string() }),
-	privateFields: z.object({ 'braze-uuid': z.string() }),
+	privateFields: z.object({
+		brazeUuid: z.string().optional(),
+	}),
 });
 
 type IdentityUser = z.infer<typeof identityUserSchema>;

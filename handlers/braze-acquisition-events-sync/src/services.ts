@@ -2,8 +2,13 @@ import { getUserByIdentityId } from '@modules/identity/idapi';
 import { IdentityClient } from '@modules/identity/identityClient';
 import { logger } from '@modules/logger/logger';
 import { stageFromEnvironment } from '@modules/stage';
+import { z } from 'zod';
 import { BrazeClient, type BrazeTrackPayload } from './brazeClient';
 import { getAppConfig } from './config';
+
+const privateFieldsSchema = z.object({
+	brazeUuid: z.string().optional(),
+});
 
 export type RuntimeDeps = {
 	getBrazeUuidFromIdapi: (identityId: string) => Promise<string | undefined>;
@@ -44,13 +49,27 @@ export const defaultDeps: RuntimeDeps = {
 			);
 			return undefined;
 		}
-		if (!user.privateFields['braze-uuid']) {
+		const parsedPrivateFields = privateFieldsSchema.safeParse(
+			user.privateFields,
+		);
+		if (!parsedPrivateFields.success) {
+			logger.log(
+				`User found in IDAPI for identityId ${identityId} has unexpected privateFields format`,
+			);
+			return undefined;
+		}
+
+		const brazeUuidFromResponse = parsedPrivateFields.data.brazeUuid;
+		if (
+			typeof brazeUuidFromResponse !== 'string' ||
+			brazeUuidFromResponse.length === 0
+		) {
 			logger.log(
 				`User found in IDAPI for identityId ${identityId} does not have a Braze UUID`,
 			);
 			return undefined;
 		}
-		return user.privateFields['braze-uuid'];
+		return brazeUuidFromResponse;
 	},
 	sendToBraze: async (payload) => {
 		const brazeClient = await getBrazeClient();
