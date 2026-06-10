@@ -812,7 +812,7 @@ const supporterProductDataLambdas: HandlerDefinition = {
 		'supporterProductData-AddToQueue-',
 		'supporterProductData-ProcessItem-',
 	],
-	entryPoints: ['src/lambdas/*.ts'],
+	entryPoints: ['src/handlers/*.ts'],
 	dependencies: {
 		...dep['@aws-sdk/client-cloudwatch'],
 		...dep['@aws-sdk/client-dynamodb'],
