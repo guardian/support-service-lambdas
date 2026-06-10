@@ -13,7 +13,6 @@ export type FetchResultsDependencies = {
 	uploadToS3: (
 		filename: string,
 		body: ReadableStream<Uint8Array>,
-		contentLength: number,
 	) => Promise<void>;
 	putLastSuccessfulQueryTime: (time: string) => Promise<void>;
 };
@@ -77,20 +76,9 @@ export const fetchResults = async (
 		);
 	}
 
-	const contentLengthHeader = fileResponse.headers.get('content-length');
-	const contentLength = contentLengthHeader
-		? parseInt(contentLengthHeader, 10)
-		: 0;
+	logger.log('Streaming result file to S3', { filename });
 
-	if (contentLength <= 0) {
-		throw new Error(
-			`Content length of the file for job with id ${event.jobId} is not > 0`,
-		);
-	}
-
-	logger.log('Streaming result file to S3', { filename, contentLength });
-
-	await dependencies.uploadToS3(filename, fileResponse.body, contentLength);
+	await dependencies.uploadToS3(filename, fileResponse.body);
 
 	if (batch.recordCount === 0) {
 		logger.log('Record count is 0, updating lastSuccessfulQueryTime', {

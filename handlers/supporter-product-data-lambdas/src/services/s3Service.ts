@@ -1,9 +1,7 @@
 import { Readable } from 'stream';
-import {
-	GetObjectCommand,
-	PutObjectCommand,
-	S3Client,
-} from '@aws-sdk/client-s3';
+import { S3Client } from '@aws-sdk/client-s3';
+import { GetObjectCommand } from '@aws-sdk/client-s3';
+import { Upload } from '@aws-sdk/lib-storage';
 import { awsConfig } from '@modules/aws/config';
 import { logger } from '@modules/logger/logger';
 import type { Stage } from '@modules/stage';
@@ -18,22 +16,17 @@ export class S3Service {
 		stage: Stage,
 		filename: string,
 		body: ReadableStream<Uint8Array>,
-		length: number,
 	): Promise<void> {
 		const bucket = bucketNameForStage(stage);
-		logger.log('Uploading file to S3', {
-			bucket,
-			filename,
-			contentLength: length,
-		});
-		await this.s3Client.send(
-			new PutObjectCommand({
+		logger.log('Uploading file to S3', { bucket, filename });
+		await new Upload({
+			client: this.s3Client,
+			params: {
 				Bucket: bucket,
 				Key: filename,
 				Body: body,
-				ContentLength: length,
-			}),
-		);
+			},
+		}).done();
 		logger.log('Successfully uploaded file to S3', { bucket, filename });
 	}
 

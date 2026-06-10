@@ -821,6 +821,7 @@ const supporterProductDataLambdas: HandlerDefinition = {
 		...dep['@aws-sdk/client-ssm'],
 		...dep['@aws-sdk/client-secrets-manager'],
 		...dep['@aws-sdk/credential-provider-node'],
+		...dep['@aws-sdk/lib-storage'],
 		...dep.dayjs,
 		...dep.zod,
 	},

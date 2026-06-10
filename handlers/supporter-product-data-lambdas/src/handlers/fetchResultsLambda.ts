@@ -22,8 +22,7 @@ const buildDependencies = async (): Promise<FetchResultsDependencies> => {
 		getResults: (jobId) => zuoraService.getResults(jobId),
 		getResultFileResponse: (fileId) =>
 			zuoraService.getResultFileResponse(fileId),
-		uploadToS3: (filename, body, length) =>
-			s3Service.streamToS3(stage, filename, body, length),
+		uploadToS3: (filename, body) => s3Service.streamToS3(stage, filename, body),
 		putLastSuccessfulQueryTime: (time) =>
 			configService.putLastSuccessfulQueryTime(time),
 	};

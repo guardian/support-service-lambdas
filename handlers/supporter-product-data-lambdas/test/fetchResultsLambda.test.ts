@@ -4,7 +4,6 @@ import type { BatchQueryResponse } from '../src/services/zuoraQuerierService';
 type UploadToS3 = (
 	filename: string,
 	body: ReadableStream<Uint8Array>,
-	length: number,
 ) => Promise<void>;
 
 const makeGetResults =
@@ -12,11 +11,10 @@ const makeGetResults =
 		Promise.resolve(response);
 
 const makeGetResultFileResponse =
-	(body: string | null, contentLength: string) => (): Promise<Response> =>
+	(body: string | null) => (): Promise<Response> =>
 		Promise.resolve(
 			new Response(body, {
 				status: 200,
-				headers: { 'content-length': contentLength },
 			}),
 		);
 
@@ -53,7 +51,7 @@ describe('fetchResults', () => {
 						},
 					],
 				}),
-				getResultFileResponse: makeGetResultFileResponse('csv-data', '8'),
+				getResultFileResponse: makeGetResultFileResponse('csv-data'),
 				uploadToS3,
 				putLastSuccessfulQueryTime,
 			},
@@ -96,7 +94,7 @@ describe('fetchResults', () => {
 						},
 					],
 				}),
-				getResultFileResponse: makeGetResultFileResponse('csv-data', '8'),
+				getResultFileResponse: makeGetResultFileResponse('csv-data'),
 				uploadToS3: noopAsync as never,
 				putLastSuccessfulQueryTime,
 			},
@@ -120,7 +118,7 @@ describe('fetchResults', () => {
 						status: 'executing',
 						batches: [],
 					}),
-					getResultFileResponse: makeGetResultFileResponse(null, '1'),
+					getResultFileResponse: makeGetResultFileResponse(null),
 					uploadToS3: noopAsync as never,
 					putLastSuccessfulQueryTime: noopAsync as never,
 				},
