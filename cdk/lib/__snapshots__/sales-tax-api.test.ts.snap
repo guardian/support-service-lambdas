@@ -905,7 +905,7 @@ exports[`The Sales tax api stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "sales-tax-api returned a 5XX response. Search the logs below for "error" for more information. Impact: An eligible state or province may not get sales tax",
+        "AlarmDescription": "sales-tax-api returned a 5XX response. Search the logs below for "error" for more information. Impact: We may not be able to display tax information to users",
         "AlarmName": "sales-tax-api-PROD 5XX errors",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
