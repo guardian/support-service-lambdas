@@ -26,9 +26,7 @@ export async function processAcquisitionEvent(
 	try {
 		const brazeUuid = await deps.getBrazeUuidFromIdapi(identityId);
 		if (!brazeUuid) {
-			logger.log(
-				'Skipping event because Braze UUID was not found from IDAPI placeholder',
-			);
+			logger.log('Skipping event because Braze UUID was not found from IDAPI');
 			return;
 		}
 
