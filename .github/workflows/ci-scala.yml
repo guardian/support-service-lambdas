@@ -41,7 +41,7 @@ jobs:
           cache: 'sbt'
 
       - name: Setup SBT
-        uses: sbt/setup-sbt@v1
+        uses: sbt/setup-sbt@v1.2.0
 
       - name: Run tests and build subproject JAR
         run: sbt "project ${{ matrix.subproject }}" test assembly
@@ -56,7 +56,7 @@ jobs:
       - run: pnpm --filter cdk package
 
       - name: Upload to Riff-Raff
-        uses: guardian/actions-riff-raff@v4.3.0
+        uses: guardian/actions-riff-raff@v4.3.3
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
@@ -115,16 +115,13 @@ jobs:
           cache: 'sbt'
 
       - name: Setup SBT
-        uses: sbt/setup-sbt@v1
+        uses: sbt/setup-sbt@v1.2.0
 
-      - name: Build
-        run: |
-          LAST_TEAMCITY_BUILD=6410
-          export GITHUB_RUN_NUMBER=$(( $GITHUB_RUN_NUMBER + $LAST_TEAMCITY_BUILD ))
-          sbt "project ${{ matrix.subproject }}" assembly
+      - name: run tests and Build jar
+        run: sbt "project ${{ matrix.subproject }}" test assembly
 
       - name: Upload to Riff-Raff
-        uses: guardian/actions-riff-raff@v4.3.0
+        uses: guardian/actions-riff-raff@v4.3.3
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
@@ -135,6 +132,8 @@ jobs:
           contentDirectories: |
             ${{ matrix.subproject }}:
               - /tmp/${{ matrix.subproject }}.jar
+            cfn:
+              - handlers/${{ matrix.subproject }}/cfn.yaml
 
 
   zuora-callout-apis:
@@ -155,7 +154,7 @@ jobs:
           cache: 'sbt'
 
       - name: Setup SBT
-        uses: sbt/setup-sbt@v1
+        uses: sbt/setup-sbt@v1.2.0
 
       - name: Run tests and build subproject JAR
         run: sbt "project zuora-callout-apis" test assembly
@@ -171,7 +170,7 @@ jobs:
       - run: pnpm --filter cdk package
 
       - name: Upload to Riff-Raff
-        uses: guardian/actions-riff-raff@v4.3.0
+        uses: guardian/actions-riff-raff@v4.3.3
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
@@ -187,3 +186,21 @@ jobs:
               - ./cdk/cdk.out/zuora-auto-cancel-PROD.template.json
             zuora-callout-apis:
               - /tmp/zuora-callout-apis.jar
+
+  # for branch protection - only passes if all builds pass
+  ci-scala-all:
+    name: ci-scala-all
+    runs-on: ubuntu-latest
+    permissions: {}
+    if: ${{ always() }}
+    needs:
+      - gu-cdk-build
+      - build
+      - zuora-callout-apis
+    steps:
+      - name: Fail unless all Scala CI jobs succeeded
+        run: |
+          [ "${{ needs.gu-cdk-build.result }}" = "success" ]
+          [ "${{ needs.build.result }}" = "success" ]
+          [ "${{ needs.zuora-callout-apis.result }}" = "success" ]
+

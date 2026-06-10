@@ -9,38 +9,34 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { getAwsConfig } from '@modules/aws/config';
 import type { Stage } from '@modules/stage';
 import dayjs from 'dayjs';
-import { InvitationRepository } from '../src/invitationRepository';
+import { SecondaryUserRepository } from '../src/secondaryUserRepository';
 
 const stage: Stage = 'CODE';
 
 const testRecord = {
 	subscriptionName: 'A-S00099999',
-	invitationCode: 'it-test-code',
+	secondaryIdentityId: 'it-test-secondary-identity-id',
 	primaryIdentityId: '12345678',
-	secondaryIdentityId: '87654321',
-	invitedDate: new Date().toISOString(),
+	acceptedDate: new Date().toISOString(),
 	expiryDate: dayjs().add(10, 'seconds').toDate().getTime(),
 };
 
-const repo = new InvitationRepository(
+const repo = new SecondaryUserRepository(
 	new DynamoDBClient(getAwsConfig('membership')),
-	`multiple-account-invitation-${stage}`,
+	`multiple-account-secondary-user-${stage}`,
 );
 
 afterEach(async () => {
-	await repo.delete(testRecord.subscriptionName, testRecord.invitationCode);
+	await repo.delete(
+		testRecord.subscriptionName,
+		testRecord.secondaryIdentityId,
+	);
 });
 
-test('InvitationRepository saves and retrieves a record from DynamoDB', async () => {
+test('SecondaryUserRepository saves and retrieves a record from DynamoDB', async () => {
 	await repo.save(testRecord);
 
-	const saved = await repo.get(testRecord.invitationCode);
+	const saved = await repo.get(testRecord.secondaryIdentityId);
 
-	expect(saved).toEqual(testRecord);
-});
-
-test('InvitationRepository returns undefined when invitation code does not exist', async () => {
-	const result = await repo.get('it-nonexistent-code');
-
-	expect(result).toBeUndefined();
+	expect(saved).toEqual([testRecord]);
 });
