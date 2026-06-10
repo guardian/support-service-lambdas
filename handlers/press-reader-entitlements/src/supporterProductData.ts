@@ -4,7 +4,7 @@ import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
-import { getSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
+import { getSupporterRatePlans } from '@modules/supporter-product-data/supporterProductData';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 
 export async function getLatestSubscription(
@@ -12,7 +12,7 @@ export async function getLatestSubscription(
 	identityId: string,
 	productCatalog: ProductCatalog,
 ): Promise<SupporterRatePlanItem | undefined> {
-	const supporterProductDataItems = await getSupporterProductData(
+	const supporterProductDataItems = await getSupporterRatePlans(
 		stage,
 		identityId,
 	);

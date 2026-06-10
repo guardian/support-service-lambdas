@@ -12,7 +12,7 @@ export class SalesTaxApi extends SrStack {
 				description: 'Handles API requests for state or province sales tax',
 			},
 			monitoring: {
-				errorImpact: 'An eligible state or province may not get sales tax',
+				errorImpact: 'We may not be able to display tax information to users',
 			},
 			throttle: {
 				rateLimit: 20,

@@ -1,3 +1,6 @@
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { awsConfig } from '@modules/aws/config';
+import { buildAuthenticate } from '@modules/identity/apiGateway';
 import { IdentityClient } from '@modules/identity/identityClient';
 import { Lazy } from '@modules/lazy';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
@@ -8,6 +11,10 @@ import { stageFromEnvironment } from '@modules/stage';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 import type { Handler } from 'aws-lambda';
 import {
+	acceptInvitationEndpoint,
+	acceptInvitationPathSchema,
+} from './acceptInvitationEndpoint';
+import {
 	createInvitationBodySchema,
 	createInvitationEndpoint,
 } from './createInvitationEndpoint';
@@ -16,9 +23,13 @@ import {
 	deleteInvitationPathSchema,
 } from './deleteInvitationEndpoint';
 import { InvitationRepository } from './invitationRepository';
+import { SecondaryUserRepository } from './secondaryUserRepository';
 
 const stage = stageFromEnvironment();
+const authenticate = buildAuthenticate(stage, []);
+const dynamoClient = new DynamoDBClient(awsConfig);
 const invitationRepository = InvitationRepository.create(stage);
+const secondaryUserRepository = SecondaryUserRepository.create(stage);
 const identityClientPromise = IdentityClient.create(
 	stage,
 	`/${stage}/support/multiple-account-api/identity-client-access-token`,
@@ -59,5 +70,25 @@ export const handler: Handler = Router([
 		handler: withPathParser(deleteInvitationPathSchema, async (_event, path) =>
 			deleteInvitationEndpoint(invitationRepository)(path),
 		),
+	},
+	{
+		httpMethod: 'POST',
+		path: '/invitation/{invitationCode}/accept',
+		handler: withPathParser(acceptInvitationPathSchema, async (event, path) => {
+			const maybeAuthenticatedEvent = await authenticate(event);
+
+			if (maybeAuthenticatedEvent.type === 'failure') {
+				return maybeAuthenticatedEvent.response;
+			}
+
+			return acceptInvitationEndpoint(
+				stage,
+				maybeAuthenticatedEvent.userDetails.identityId,
+				path.invitationCode,
+				invitationRepository,
+				secondaryUserRepository,
+				dynamoClient,
+			);
+		}),
 	},
 ]);
