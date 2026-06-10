@@ -3,6 +3,14 @@ import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { handler } from '../src/index';
 import type { SalesTaxResponse } from '../src/schemas';
 
+jest.mock('@modules/stage', () => ({
+	stageFromEnvironment: () => 'CODE',
+}));
+
+jest.mock('@modules/zuora/zuoraClient', () => ({
+	ZuoraClient: { create: jest.fn().mockResolvedValue({}) },
+}));
+
 const countryStates: Partial<Record<IsoCountry, Record<string, number>>> = {
 	CA: {
 		AB: 0.05,
