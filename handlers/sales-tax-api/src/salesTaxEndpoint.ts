@@ -2,6 +2,7 @@ import { ValidationError } from '@modules/errors';
 import type { IsoCountry } from '@modules/internationalisation/country';
 import { logger } from '@modules/logger/logger';
 import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import type { SalesTaxRequest, SalesTaxResponse } from './schemas';
 import { salesTaxResponseSchema } from './schemas';
@@ -26,11 +27,10 @@ export const countryStates: Partial<
 	},
 };
 
-export const salesTaxRequestEndpoint = async ({
-	productKey,
-	country,
-	state,
-}: SalesTaxRequest): Promise<APIGatewayProxyResult> => {
+export const salesTaxRequestEndpoint = async (
+	zuoraClient: ZuoraClient,
+	{ productKey, country, state }: SalesTaxRequest,
+): Promise<APIGatewayProxyResult> => {
 	try {
 		logger.log('Checking sales tax for', {
 			productKey,
@@ -38,7 +38,7 @@ export const salesTaxRequestEndpoint = async ({
 			state,
 		});
 		return ok(
-			getSalesTaxRate({ productKey, country, state }),
+			getSalesTaxRate(zuoraClient, { productKey, country, state }),
 			salesTaxResponseSchema,
 		);
 	} catch (error) {
@@ -47,11 +47,10 @@ export const salesTaxRequestEndpoint = async ({
 	}
 };
 
-function getSalesTaxRate({
-	productKey,
-	country,
-	state,
-}: SalesTaxRequest): SalesTaxResponse {
+function getSalesTaxRate(
+	zuoraClient: ZuoraClient,
+	{ productKey, country, state }: SalesTaxRequest,
+): SalesTaxResponse {
 	const validProductKey = ['SupporterPlus', 'DigitalSubscription'].includes(
 		productKey,
 	);
