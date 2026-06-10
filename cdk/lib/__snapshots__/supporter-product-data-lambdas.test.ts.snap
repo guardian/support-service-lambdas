@@ -308,7 +308,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
           },
         ],
         "AlarmDescription": "The supporter-product-data-lambdas-CODE step function has failed. Check the Step Functions console for details.",
-        "AlarmName": "Supporter Product Data step function Failure in CODE",
+        "AlarmName": "Supporter Product Data lambdas step function Failure in CODE",
         "ComparisonOperator": "GreaterThanThreshold",
         "EvaluationPeriods": 1,
         "Metrics": [
@@ -993,7 +993,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
         },
         "MaximumBatchingWindowInSeconds": 5,
         "ScalingConfig": {
-          "MaximumConcurrency": 30,
+          "MaximumConcurrency": 20,
         },
         "Tags": [
           {
@@ -1990,7 +1990,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
           },
         ],
         "AlarmDescription": "The supporter-product-data-lambdas-PROD step function has failed. Check the Step Functions console for details.",
-        "AlarmName": "Supporter Product Data step function Failure in PROD",
+        "AlarmName": "Supporter Product Data lambdas step function Failure in PROD",
         "ComparisonOperator": "GreaterThanThreshold",
         "EvaluationPeriods": 1,
         "Metrics": [
@@ -2675,7 +2675,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
         },
         "MaximumBatchingWindowInSeconds": 5,
         "ScalingConfig": {
-          "MaximumConcurrency": 50,
+          "MaximumConcurrency": 30,
         },
         "Tags": [
           {

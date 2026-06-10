@@ -253,7 +253,7 @@ export class SupporterProductDataLambdas extends SrStack {
 		});
 
 		new GuAlarm(this, 'ExecutionFailureAlarm', {
-			alarmName: `Supporter Product Data step function Failure in ${this.stage}`,
+			alarmName: `Supporter Product Data lambdas step function Failure in ${this.stage}`,
 			alarmDescription: `The ${app}-${this.stage} step function has failed. Check the Step Functions console for details.`,
 			// Suppress alarms between 00:00-06:00 UTC when Zuora is slow and failures are expected
 			metric: new MathExpression({
