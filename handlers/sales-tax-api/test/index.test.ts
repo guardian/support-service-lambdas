@@ -1,4 +1,9 @@
 import type { IsoCountry } from '@modules/internationalisation/country';
+import { getZuoraTaxCodes, getZuoraTaxRates } from '@modules/zuora/tax';
+import type {
+	ZuoraTaxCodes,
+	ZuoraTaxRates,
+} from '@modules/zuora/types/objects/tax';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { handler } from '../src/index';
 import type { SalesTaxResponse } from '../src/schemas';
@@ -9,6 +14,14 @@ jest.mock('@modules/stage', () => ({
 
 jest.mock('@modules/zuora/zuoraClient', () => ({
 	ZuoraClient: { create: jest.fn().mockResolvedValue({}) },
+}));
+
+jest.mock('@modules/zuora/tax', () => ({
+	getZuoraTaxCodes: jest.fn(),
+}));
+
+jest.mock('@modules/zuora/tax', () => ({
+	getZuoraTaxRates: jest.fn(),
 }));
 
 const countryStates: Partial<Record<IsoCountry, Record<string, number>>> = {
@@ -30,11 +43,66 @@ const countryStates: Partial<Record<IsoCountry, Record<string, number>>> = {
 };
 
 describe('SalesTax API', () => {
+	const country = 'CA';
+	const province = 'ON';
+
+	const mockGetZuoraTaxCodes = jest.mocked(getZuoraTaxCodes);
+	const mockZuoraTaxCodes = {
+		taxCodes: [
+			{
+				id: '897689',
+				taxEngineId: '',
+				active: true,
+				name: 'Supporter Plus Global Tax',
+				description: '',
+			},
+		],
+	} as unknown as ZuoraTaxCodes;
+
+	const mockGetZuoraTaxRates = jest.mocked(getZuoraTaxRates);
+	const mockZuoraTaxRates = {
+		taxRates: [
+			{
+				id: '897689',
+				taxRatePeriodId: '',
+				country: country,
+				state: province,
+				county: null,
+				city: null,
+				postalCode: null,
+				taxRegion: null,
+				taxRate1: countryStates[country]?.[province],
+				taxRateType1: null,
+				taxName1: null,
+				taxJursdiction1: null,
+				taxLocationCode1: null,
+				taxRateDescription1: null,
+				taxRate2: 0.0,
+				taxRateType2: null,
+				taxName2: null,
+				taxJursdiction2: null,
+				taxLocationCode2: null,
+				taxRateDescription2: null,
+				taxRate3: 0.0,
+				taxRateType3: null,
+				taxName3: null,
+				taxJursdiction3: null,
+				taxLocationCode3: null,
+				taxRateDescription3: null,
+			},
+		],
+	} as unknown as ZuoraTaxRates;
+
 	const baseEvent: Partial<APIGatewayProxyEvent> = {
 		path: '/tax-rate',
 		httpMethod: 'POST',
 		headers: {},
 	};
+
+	beforeEach(() => {
+		mockGetZuoraTaxCodes.mockResolvedValue(mockZuoraTaxCodes);
+		mockGetZuoraTaxRates.mockResolvedValue(mockZuoraTaxRates);
+	});
 
 	describe('routing and body parsing', () => {
 		it('returns 400 for an empty body', async () => {
@@ -111,8 +179,6 @@ describe('SalesTax API', () => {
 
 	describe('salesTaxEndpoint', () => {
 		it('returns 200 for a valid country, state, product', async () => {
-			const country = 'CA';
-			const province = 'ON';
 			const requestEvent = {
 				...baseEvent,
 				body: JSON.stringify({
