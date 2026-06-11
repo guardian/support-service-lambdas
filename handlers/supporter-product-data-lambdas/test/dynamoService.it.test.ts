@@ -156,7 +156,7 @@ describe('DynamoService integration', () => {
 		expect(result.Item?.contributionCurrency).toBeUndefined();
 	});
 
-	test('does not clear optional fields from a previous write when they are absent in an update', async () => {
+	test('removes optional fields from a previous write when they are absent in an update', async () => {
 		// First write includes primarySubscriptionName
 		await service.writeItem(staleFieldTestItem);
 
@@ -176,12 +176,6 @@ describe('DynamoService integration', () => {
 			}),
 		);
 
-		// The field is NOT removed by a subsequent write that omits it — DynamoDB
-		// UpdateItemCommand only sets the fields included in the expression, leaving
-		// all others untouched. This test documents that behaviour so it is not
-		// accidentally relied upon to clear values.
-		expect(result.Item?.primarySubscriptionName).toEqual({
-			S: staleFieldTestItem.primarySubscriptionName,
-		});
+		expect(result.Item?.primarySubscriptionName).toBeUndefined();
 	});
 });

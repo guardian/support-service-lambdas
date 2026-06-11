@@ -55,6 +55,10 @@ export class DynamoService {
 		let updateExpression =
 			'SET productRatePlanId = :productRatePlanId, productRatePlanName = :productRatePlanName, termEndDate = :termEndDate, contractEffectiveDate = :contractEffectiveDate, expiryDate = :expiryDate';
 
+		// This is to prevent stale data in the data store if for instance the first
+		// version of a record contains optional fields but a later version does not
+		const fieldsToRemove: string[] = [];
+
 		if (item.contributionAmount && item.contributionCurrency) {
 			expressionValues[':contributionAmount'] = {
 				N: item.contributionAmount.toString(),
@@ -64,6 +68,8 @@ export class DynamoService {
 			};
 			updateExpression +=
 				', contributionAmount = :contributionAmount, contributionCurrency = :contributionCurrency';
+		} else {
+			fieldsToRemove.push('contributionAmount', 'contributionCurrency');
 		}
 
 		if (item.primarySubscriptionName) {
@@ -72,6 +78,12 @@ export class DynamoService {
 			};
 			updateExpression +=
 				', primarySubscriptionName = :primarySubscriptionName';
+		} else {
+			fieldsToRemove.push('primarySubscriptionName');
+		}
+
+		if (fieldsToRemove.length > 0) {
+			updateExpression += ` REMOVE ${fieldsToRemove.join(', ')}`;
 		}
 
 		try {
