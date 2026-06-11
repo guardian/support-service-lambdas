@@ -1,5 +1,8 @@
 import { ValidationError } from '@modules/errors';
-import type { IsoCountry } from '@modules/internationalisation/country';
+import type {
+	CaState,
+	IsoCountry,
+} from '@modules/internationalisation/country';
 import { logger } from '@modules/logger/logger';
 import type { productKeySchema } from '@modules/product-catalog/productCatalogSchema';
 import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';

@@ -826,6 +826,38 @@ const salesTaxApi: HandlerDefinition = {
 	},
 };
 
+const supporterProductDataLambdas: HandlerDefinition = {
+	name: 'supporter-product-data-lambdas',
+	functionNames: [
+		'supporterProductData-QueryZuora-',
+		'supporterProductData-FetchResults-',
+		'supporterProductData-AddToQueue-',
+		'supporterProductData-ProcessItem-',
+	],
+	entryPoints: ['src/handlers/*.ts'],
+	dependencies: {
+		...dep['@aws-sdk/client-cloudwatch'],
+		...dep['@aws-sdk/client-dynamodb'],
+		...dep['@aws-sdk/client-s3'],
+		...dep['@aws-sdk/client-sqs'],
+		...dep['@aws-sdk/client-ssm'],
+		...dep['@aws-sdk/client-secrets-manager'],
+		...dep['@aws-sdk/credential-provider-node'],
+		...dep['@aws-sdk/lib-storage'],
+		...dep.dayjs,
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
+	moduleDependencies: [
+		moduleLogger,
+		moduleZuora,
+		moduleInternationalisation,
+		moduleSupporterProductData,
+	],
+};
+
 // MARKER new-lambda: buildcheck-const
 
 export const build: BuildDefinition = {
@@ -858,6 +890,7 @@ export const build: BuildDefinition = {
 		contributionsOnlyCountriesApi,
 		userSubscriptionsApi,
 		salesTaxApi,
+		supporterProductDataLambdas,
 		// MARKER new-lambda: buildcheck-reference
 	],
 
