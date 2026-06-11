@@ -93,6 +93,19 @@ export class AllowSupporterProductDataQueryPolicy extends GuAllowPolicy {
 	}
 }
 
+export class AllowSupporterProductDataDeletePolicy extends GuAllowPolicy {
+	constructor(scope: GuStack) {
+		super(scope, 'SupporterProductDataTable delete access', {
+			actions: ['dynamodb:DeleteItem'],
+			resources: [
+				Fn.importValue(
+					`supporter-product-data-tables-${scope.stage}-SupporterProductDataTable`,
+				),
+			],
+		});
+	}
+}
+
 export class AllowPromoCodeTableQueryPolicy extends GuAllowPolicy {
 	constructor(scope: GuStack) {
 		super(scope, 'Promo code table query access', {
