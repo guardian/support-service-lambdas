@@ -1,5 +1,8 @@
 import { ValidationError } from '@modules/errors';
-import type { IsoCountry } from '@modules/internationalisation/country';
+import type {
+	CaState,
+	IsoCountry,
+} from '@modules/internationalisation/country';
 import { logger } from '@modules/logger/logger';
 import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
 import type { APIGatewayProxyResult } from 'aws-lambda';
@@ -7,7 +10,7 @@ import type { SalesTaxRequest, SalesTaxResponse } from './schemas';
 import { salesTaxResponseSchema } from './schemas';
 
 export const countryStates: Partial<
-	Record<IsoCountry, Record<string, number>>
+	Record<IsoCountry, Record<CaState, number>>
 > = {
 	CA: {
 		AB: 0.05,
