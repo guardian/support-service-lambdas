@@ -1,4 +1,5 @@
 import {
+	caStates,
 	getCountryNameByIsoCode,
 	type IsoCountry,
 } from '@modules/internationalisation/country';
@@ -67,7 +68,7 @@ describe('SalesTax API', () => {
 				id: '897689',
 				taxRatePeriodId: '',
 				country: getCountryNameByIsoCode(country),
-				state: province,
+				state: caStates[province],
 				county: null,
 				city: null,
 				postalCode: null,

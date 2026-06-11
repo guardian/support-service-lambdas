@@ -1,5 +1,6 @@
 import { ValidationError } from '@modules/errors';
 import {
+	caStates,
 	getCountryNameByIsoCode,
 	type IsoCountry,
 } from '@modules/internationalisation/country';
@@ -105,6 +106,6 @@ function findStateZuoraTaxRate(
 	return zuoraTaxRates.find(
 		(zuoraTaxRate) =>
 			zuoraTaxRate.country === getCountryNameByIsoCode(country) &&
-			zuoraTaxRate.state === state,
+			zuoraTaxRate.state === caStates[state],
 	);
 }
