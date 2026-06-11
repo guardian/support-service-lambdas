@@ -1,5 +1,8 @@
 import { ValidationError } from '@modules/errors';
-import type { IsoCountry } from '@modules/internationalisation/country';
+import {
+	getCountryNameByIsoCode,
+	type IsoCountry,
+} from '@modules/internationalisation/country';
 import { logger } from '@modules/logger/logger';
 import type { productKeySchema } from '@modules/product-catalog/productCatalogSchema';
 import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
@@ -89,7 +92,9 @@ function findCountryZuoraTaxRate(
 	country: IsoCountry,
 	zuoraTaxRates: ZuoraTaxRate[],
 ) {
-	return zuoraTaxRates.find((zuoraTaxRate) => zuoraTaxRate.country === country);
+	return zuoraTaxRates.find(
+		(zuoraTaxRate) => zuoraTaxRate.country === getCountryNameByIsoCode(country),
+	);
 }
 
 function findStateZuoraTaxRate(
@@ -99,6 +104,7 @@ function findStateZuoraTaxRate(
 ) {
 	return zuoraTaxRates.find(
 		(zuoraTaxRate) =>
-			zuoraTaxRate.country === country && zuoraTaxRate.state === state,
+			zuoraTaxRate.country === getCountryNameByIsoCode(country) &&
+			zuoraTaxRate.state === state,
 	);
 }

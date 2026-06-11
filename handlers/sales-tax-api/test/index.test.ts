@@ -1,4 +1,7 @@
-import type { IsoCountry } from '@modules/internationalisation/country';
+import {
+	getCountryNameByIsoCode,
+	type IsoCountry,
+} from '@modules/internationalisation/country';
 import { getZuoraTaxCodes, getZuoraTaxRates } from '@modules/zuora/tax';
 import type {
 	ZuoraTaxCodes,
@@ -63,7 +66,7 @@ describe('SalesTax API', () => {
 			{
 				id: '897689',
 				taxRatePeriodId: '',
-				country: country,
+				country: getCountryNameByIsoCode(country),
 				state: province,
 				county: null,
 				city: null,
