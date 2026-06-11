@@ -66,6 +66,14 @@ export class DynamoService {
 				', contributionAmount = :contributionAmount, contributionCurrency = :contributionCurrency';
 		}
 
+		if (item.primarySubscriptionName) {
+			expressionValues[':primarySubscriptionName'] = {
+				S: item.primarySubscriptionName,
+			};
+			updateExpression +=
+				', primarySubscriptionName = :primarySubscriptionName';
+		}
+
 		try {
 			await this.client.send(
 				new UpdateItemCommand({

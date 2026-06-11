@@ -73,7 +73,7 @@ export const acceptInvitationEndpoint = async (
 		const secondarySubscriptionName = `${invitation.subscriptionName}-${invitation.secondaryIdentityId}`;
 		const supporterProductDataRecord: SupporterRatePlanItem = {
 			subscriptionName: secondarySubscriptionName,
-			primarySubscriptionName: invitation.subscriptionName, // TODO Not being written currently
+			primarySubscriptionName: invitation.subscriptionName,
 			identityId: invitation.secondaryIdentityId,
 			productRatePlanId: parentSupporterProductDataRecord.productRatePlanId,
 			productRatePlanName: 'Digital Plus Secondary User',
