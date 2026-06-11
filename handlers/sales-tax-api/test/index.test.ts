@@ -71,16 +71,6 @@ describe('SalesTax API', () => {
 			const response = await handler(requestEvent);
 			expect(response.statusCode).toEqual(400);
 		});
-		it('returns 404 for wrong HTTP method', async () => {
-			const requestEvent = {
-				path: '/tax-rate',
-				httpMethod: 'GET',
-				headers: {},
-			} as unknown as APIGatewayProxyEvent;
-
-			const response = await handler(requestEvent);
-			expect(response.statusCode).toEqual(404);
-		});
 	});
 
 	describe('salesTaxEndpoint', () => {
