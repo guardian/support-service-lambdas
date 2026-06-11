@@ -1127,6 +1127,29 @@ exports[`The Multiple account api stack matches the snapshot 1`] = `
       "Type": "AWS::DynamoDB::Table",
       "UpdateReplacePolicy": "Delete",
     },
+    "SupporterProductDataTabledeleteaccess55563630": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "dynamodb:DeleteItem",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "supporter-product-data-tables-CODE-SupporterProductDataTable",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SupporterProductDataTabledeleteaccess55563630",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "SupporterProductDataTablequeryaccess7665F484": {
       "Properties": {
         "PolicyDocument": {
@@ -2395,6 +2418,29 @@ exports[`The Multiple account api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::DynamoDB::Table",
       "UpdateReplacePolicy": "Retain",
+    },
+    "SupporterProductDataTabledeleteaccess55563630": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "dynamodb:DeleteItem",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "supporter-product-data-tables-PROD-SupporterProductDataTable",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SupporterProductDataTabledeleteaccess55563630",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
     "SupporterProductDataTablequeryaccess7665F484": {
       "Properties": {
