@@ -65,12 +65,12 @@ function getSalesTaxRate({
 }
 
 function getLocationSalesTax(country: IsoCountry, state: string) {
+	if (!['CA'].includes(country)) {
+		throw new ValidationError(`invalid country:${country}`);
+	}
 	const salesTaxRate = countryStates[country]?.[state];
 	if (!salesTaxRate) {
-		const message = ['CA'].includes(country)
-			? `invalid state:${state}`
-			: `invalid country:${country}`;
-		throw new ValidationError(message);
+		throw new ValidationError(`invalid state:${state}`);
 	}
 	return salesTaxRate;
 }
