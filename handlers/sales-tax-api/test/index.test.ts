@@ -6,7 +6,6 @@ import type {
 } from '@modules/zuora/types/objects/tax';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { handler } from '../src/index';
-import { countryStates } from '../src/salesTaxEndpoint';
 import type { SalesTaxResponse, TaxRatesResponse } from '../src/schemas';
 import { cadStates } from '../src/taxRatesEndpoint';
 
@@ -95,7 +94,7 @@ describe('SalesTax API', () => {
 		],
 	} as unknown as ZuoraTaxRates;
 
-	const baseSalesTaxEvent: Partial<APIGatewayProxyEvent> = {t
+	const baseSalesTaxEvent: Partial<APIGatewayProxyEvent> = {
 		path: '/tax-rate',
 		httpMethod: 'POST',
 		headers: {},
