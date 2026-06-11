@@ -845,7 +845,7 @@ const supporterProductDataLambdas: HandlerDefinition = {
 		...dep['@aws-sdk/credential-provider-node'],
 		...dep['@aws-sdk/lib-storage'],
 		...dep.dayjs,
-			...dep.zod,
+		...dep.zod,
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],

@@ -17,8 +17,8 @@ try {
 
 	switch (mode) {
 		case 'generate': {
-			const files = generate();
 			deleteRepoFiles(repoRoot, previouslyGeneratedFiles);
+			const files = generate();
 			writeFiles(repoRoot, files);
 			break;
 		}
