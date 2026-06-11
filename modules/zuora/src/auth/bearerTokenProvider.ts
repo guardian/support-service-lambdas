@@ -1,3 +1,4 @@
+import { logger } from '@modules/logger/logger';
 import type { OAuthClientCredentials, ZuoraBearerToken } from '../types';
 import { zuoraBearerTokenSchema } from '../types';
 import { zuoraServerUrl } from '../utils';
@@ -40,7 +41,7 @@ export class ZuoraBearerTokenProvider implements BearerTokenProvider {
 	}
 
 	private fetchZuoraBearerToken = async (): Promise<ZuoraBearerToken> => {
-		console.log(`fetching zuora bearer token for stage: ${this.stage}`);
+		logger.log(`fetching zuora bearer token for stage: ${this.stage}`);
 		const url = `${zuoraServerUrl(this.stage)}/oauth/token`;
 
 		// Use URLSearchParams to encode the body of the request
@@ -58,7 +59,14 @@ export class ZuoraBearerTokenProvider implements BearerTokenProvider {
 
 		const json = await response.json();
 
-		return zuoraBearerTokenSchema.parse(json);
+		const parseResult = zuoraBearerTokenSchema.safeParse(json);
+		if (!parseResult.success) {
+			logger.log('Zuora bearer token response:', json);
+			throw new Error(
+				`Failed to fetch Zuora bearer token: ${JSON.stringify(parseResult.error.issues)}`,
+			);
+		}
+		return parseResult.data;
 	};
 
 	public async getAuthorisation() {

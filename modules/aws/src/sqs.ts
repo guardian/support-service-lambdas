@@ -11,6 +11,13 @@ import {
 import { logger } from '@modules/logger/logger';
 import { awsConfig } from '@modules/aws/config';
 
+export class SqsSendError extends Error {
+	constructor(cause: unknown) {
+		super(`Failed to send message to SQS: ${String(cause)}`, { cause });
+		this.name = 'SqsSendError';
+	}
+}
+
 const defaultClient = new SQSClient(awsConfig);
 
 export const sendMessageToQueue = async ({
@@ -41,7 +48,7 @@ export const sendMessageToQueue = async ({
 		return response;
 	} catch (error) {
 		logger.log('Error sending message to SQS: ' + queueName, error);
-		throw error;
+		throw new SqsSendError(error);
 	}
 };
 
@@ -74,6 +81,6 @@ export const sendBatchMessagesToQueue = async ({
 		return await (send ?? defaultClient.send.bind(defaultClient))(command);
 	} catch (error) {
 		logger.log('Error sending batch to SQS', { queueName, error });
-		throw error;
+		throw new SqsSendError(error);
 	}
 };
