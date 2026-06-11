@@ -19,9 +19,6 @@ jest.mock('@modules/zuora/zuoraClient', () => ({
 
 jest.mock('@modules/zuora/tax', () => ({
 	getZuoraTaxCodes: jest.fn(),
-}));
-
-jest.mock('@modules/zuora/tax', () => ({
 	getZuoraTaxRates: jest.fn(),
 }));
 
