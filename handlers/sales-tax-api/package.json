@@ -22,7 +22,9 @@
   "dependencies": {
     "zod": "catalog:",
     "logger": "workspace:*",
-    "routing": "workspace:*"
+    "routing": "workspace:*",
+    "product-catalog": "workspace:*",
+    "internationalisation": "workspace:*"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147",

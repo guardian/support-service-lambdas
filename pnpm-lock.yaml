@@ -632,9 +632,15 @@ importers:
 
   handlers/sales-tax-api:
     dependencies:
+      internationalisation:
+        specifier: workspace:*
+        version: link:../../modules/internationalisation
       logger:
         specifier: workspace:*
         version: link:../../modules/logger
+      product-catalog:
+        specifier: workspace:*
+        version: link:../../modules/product-catalog
       routing:
         specifier: workspace:*
         version: link:../../modules/routing
