@@ -10,8 +10,7 @@ import type {
 } from '@modules/zuora/types/objects/tax';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { handler } from '../src/index';
-// import type { TaxRatesResponse } from '../src/schemas';
-// import { cadStates } from '../src/taxRatesEndpoint';
+import type { TaxRatesResponse } from '../src/schemas';
 
 jest.mock('@modules/stage', () => ({
 	stageFromEnvironment: () => 'CODE',
@@ -55,7 +54,7 @@ describe('SalesTax API', () => {
 				id: '897689',
 				taxEngineId: '',
 				active: true,
-				name: 'Supporter Plus Global Tax',
+				name: 'Supporter Plus',
 				description: '',
 			},
 		],
@@ -158,22 +157,24 @@ describe('SalesTax API', () => {
 		});
 	});
 
-	// describe('taxRatesZuoraEndpoint', () => {
-	// 	it('returns 200 for a valid country, product', async () => {
-	// 		const country = 'CA';
-	// 		const requestEvent = {
-	// 			...baseZuoraTaxRatesEvent,
-	// 			body: JSON.stringify({
-	// 				productKey: 'SupporterPlus',
-	// 				country: country,
-	// 			}),
-	// 		} as unknown as APIGatewayProxyEvent;
+	describe('taxRatesZuoraEndpoint', () => {
+		it('returns 200 for a valid country, product', async () => {
+			const country = 'CA';
+			const requestEvent = {
+				...baseTaxRatesEvent,
+				body: JSON.stringify({
+					productKey: 'SupporterPlus',
+					country: country,
+				}),
+			} as unknown as APIGatewayProxyEvent;
 
-	// 		const response = await handler(requestEvent);
-	// 		expect(response.statusCode).toEqual(200);
+			const response = await handler(requestEvent);
+			expect(response.statusCode).toEqual(200);
 
-	// 		const taxRatesResponse = JSON.parse(response.body) as TaxRatesResponse;
-	// 		expect(taxRatesResponse).toEqual(cadStates);
-	// 	});
-	// });
+			const taxRatesResponse = JSON.parse(response.body) as TaxRatesResponse;
+			expect(taxRatesResponse[province]).toEqual(
+				countryStates[country]?.[province],
+			);
+		});
+	});
 });
