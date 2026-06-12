@@ -105,6 +105,11 @@ describe('SalesTax API', () => {
 		httpMethod: 'POST',
 		headers: {},
 	};
+	const baseZuoraTaxRatesEvent: Partial<APIGatewayProxyEvent> = {
+		path: '/tax-zuora-rates',
+		httpMethod: 'POST',
+		headers: {},
+	};
 
 	beforeEach(() => {
 		mockGetZuoraTaxCodes.mockResolvedValue(mockZuoraTaxCodes);
@@ -252,6 +257,25 @@ describe('SalesTax API', () => {
 			const country = 'CA';
 			const requestEvent = {
 				...baseTaxRatesEvent,
+				body: JSON.stringify({
+					productKey: 'SupporterPlus',
+					country: country,
+				}),
+			} as unknown as APIGatewayProxyEvent;
+
+			const response = await handler(requestEvent);
+			expect(response.statusCode).toEqual(200);
+
+			const taxRatesResponse = JSON.parse(response.body) as TaxRatesResponse;
+			expect(taxRatesResponse).toEqual(cadStates);
+		});
+	});
+
+	describe('taxRatesZuoraEndpoint', () => {
+		it('returns 200 for a valid country, product', async () => {
+			const country = 'CA';
+			const requestEvent = {
+				...baseZuoraTaxRatesEvent,
 				body: JSON.stringify({
 					productKey: 'SupporterPlus',
 					country: country,
