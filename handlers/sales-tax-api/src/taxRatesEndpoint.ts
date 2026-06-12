@@ -4,7 +4,10 @@ import { logger } from '@modules/logger/logger';
 import type { productKeySchema } from '@modules/product-catalog/productCatalogSchema';
 import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
 import { getZuoraTaxCodes, getZuoraTaxRates } from '@modules/zuora/tax';
-import { type ZuoraTaxCode } from '@modules/zuora/types/objects/tax';
+import {
+	type ZuoraTaxCode,
+	zuoraTaxCodeSchema,
+} from '@modules/zuora/types/objects/tax';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import type z from 'zod';
@@ -50,6 +53,18 @@ export const cadStates: TaxRatesResponse = {
 	QC: 0.1498,
 	SK: 0.11,
 	YT: 0.05,
+};
+
+export const zuoraTaxCodesEndpoint = async (
+	zuoraClient: ZuoraClient,
+): Promise<APIGatewayProxyResult> => {
+	try {
+		logger.log('Retrieving Zuora codes');
+		return ok(await getZuoraTaxCodes(zuoraClient), zuoraTaxCodeSchema);
+	} catch (error) {
+		logger.error('Error fetching Zuora codes', error);
+		return Promise.resolve(buildErrorResponse(error));
+	}
 };
 
 export const zuoraTaxRatesEndpoint = async (

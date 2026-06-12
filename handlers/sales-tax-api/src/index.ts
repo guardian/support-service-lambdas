@@ -5,7 +5,10 @@ import { withBodyParser } from '@modules/routing/withParsers';
 import { stageFromEnvironment } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { taxRatesRequestSchema } from './schemas';
-import { zuoraTaxRatesEndpoint } from './taxRatesEndpoint';
+import {
+	zuoraTaxCodesEndpoint,
+	zuoraTaxRatesEndpoint,
+} from './taxRatesEndpoint';
 
 const stage = stageFromEnvironment();
 const lazyZuoraClient = new Lazy(
@@ -14,6 +17,17 @@ const lazyZuoraClient = new Lazy(
 );
 
 export const handler = Router([
+	{
+		httpMethod: 'POST',
+		path: '/tax-zuora-codes',
+		handler: withBodyParser(
+			taxRatesRequestSchema,
+			async (event, path, body) => {
+				logger.log('Received POST /tax-zuora-codes request', body);
+				return zuoraTaxCodesEndpoint(await lazyZuoraClient.get(), body);
+			},
+		),
+	},
 	{
 		httpMethod: 'POST',
 		path: '/tax-rates',
