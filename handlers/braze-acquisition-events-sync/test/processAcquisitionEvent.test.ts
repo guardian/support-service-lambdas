@@ -83,6 +83,7 @@ describe('processAcquisitionEvent', () => {
 			currency: 'GBP',
 			eventTimeStamp: '2026-06-03T12:00:00Z',
 			promoCode: 'PROMO123',
+			amount: 15,
 		});
 
 		expect(
@@ -99,7 +100,7 @@ describe('processAcquisitionEvent', () => {
 						currency: 'GBP',
 						promo_code: 'PROMO123',
 						payment_frequency: 'MONTHLY',
-						transaction_value: 'contribution',
+						transaction_value: 15,
 					},
 				},
 			],

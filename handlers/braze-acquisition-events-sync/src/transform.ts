@@ -17,7 +17,7 @@ export function transformEventForBrazePayload(
 					currency: event.currency,
 					promo_code: event.promoCode,
 					payment_frequency: event.paymentFrequency,
-					transaction_value: 'contribution',
+					transaction_value: event.amount,
 				},
 			},
 		],

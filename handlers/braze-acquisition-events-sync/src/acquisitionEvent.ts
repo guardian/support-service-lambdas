@@ -30,6 +30,7 @@ export type PaymentFrequency = (typeof paymentFrequencyValues)[number];
 export const acquisitionDataRowSchema = z.object({
 	eventTimeStamp: z.string(),
 	product: z.enum(acquisitionProductValues),
+	amount: z.number().nullable().optional(),
 	currency: z.string(),
 	paymentFrequency: z.enum(paymentFrequencyValues),
 	identityId: z.string().nullable().optional(),
@@ -49,6 +50,7 @@ export interface AcquisitionDataRow {
 	paymentFrequency: PaymentFrequency;
 	identityId?: string | null;
 	promoCode?: string | null;
+	amount?: number | null;
 }
 
 export type AcquisitionsEventBridgeEvent = EventBridgeEvent<
