@@ -9,7 +9,7 @@
 import type { IsoCountry } from '@modules/internationalisation/country';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { taxRatesResponseSchema } from '../src/schemas';
-import { zuoraTaxRatesEndpoint } from '../src/taxRatesEndpoint';
+import { taxRatesEndpoint } from '../src/taxRatesEndpoint';
 
 const countryStates: Partial<Record<IsoCountry, Record<string, number>>> = {
 	CA: {
@@ -36,7 +36,7 @@ describe('SalesTax API Integration', () => {
 	test('we can retreive tax rates from Zuora', async () => {
 		const zuoraClient = await ZuoraClient.create(stage);
 
-		const result = await zuoraTaxRatesEndpoint(zuoraClient, {
+		const result = await taxRatesEndpoint(zuoraClient, {
 			productKey: 'SupporterPlus',
 			country,
 		});

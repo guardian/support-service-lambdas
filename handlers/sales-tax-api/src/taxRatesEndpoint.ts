@@ -67,7 +67,7 @@ export const zuoraTaxCodesEndpoint = async (
 	}
 };
 
-export const zuoraTaxRatesEndpoint = async (
+export const taxRatesEndpoint = async (
 	zuoraClient: ZuoraClient,
 	{ productKey, country }: TaxRatesRequest,
 ): Promise<APIGatewayProxyResult> => {
