@@ -23,6 +23,14 @@ import {
 	deleteInvitationPathSchema,
 } from './deleteInvitationEndpoint';
 import { InvitationRepository } from './invitationRepository';
+import {
+	listInvitationsBodySchema,
+	listInvitationsEndpoint,
+} from './listInvitationsEndpoint';
+import {
+	listSecondaryUsersBodySchema,
+	listSecondaryUsersEndpoint,
+} from './listSecondaryUsersEndpoint';
 import { SecondaryUserRepository } from './secondaryUserRepository';
 
 const stage = stageFromEnvironment();
@@ -44,6 +52,18 @@ const lazyZuoraCatalog = new Lazy(
 );
 
 export const handler: Handler = Router([
+	{
+		httpMethod: 'GET',
+		path: '/invitation',
+		handler: withBodyParser(
+			listInvitationsBodySchema,
+			withMMAIdentityCheck(
+				stage,
+				async (body) => listInvitationsEndpoint(invitationRepository)(body),
+				({ body }) => body.subscriptionName,
+			),
+		),
+	},
 	{
 		httpMethod: 'POST',
 		path: '/invitation',
@@ -90,5 +110,18 @@ export const handler: Handler = Router([
 				dynamoClient,
 			);
 		}),
+	},
+	{
+		httpMethod: 'GET',
+		path: '/secondaryUser',
+		handler: withBodyParser(
+			listSecondaryUsersBodySchema,
+			withMMAIdentityCheck(
+				stage,
+				async (body) =>
+					listSecondaryUsersEndpoint(secondaryUserRepository)(body),
+				({ body }) => body.subscriptionName,
+			),
+		),
 	},
 ]);

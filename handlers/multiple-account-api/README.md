@@ -57,3 +57,51 @@ Headers: 'x-identity-id' - the identity id of the user creating the invitation
 - The subscription must be an active subscription with the `multipleAccounts` benefit (eg. Digital Plus, Newspaper etc.) and must belong to the user creating the invitation
 - The number of existing invitations for the subscription must be less than the maximum allowed (currently 5)
 - There must not be an existing invitation for the same secondary user email and subscription
+
+### List invitations for a primary subscription
+
+#### Request:
+
+GET /subscriptions/{subscriptionName}/invitations
+
+Headers: 'x-identity-id' - the identity id of the primary user
+
+#### Response:
+
+```JSON
+{
+  "invitations": [
+    {
+      "subscriptionName": "A-S00974337",
+      "invitationCode": "RpwR62kMnAxe",
+      "primaryIdentityId": "20012345",
+      "secondaryIdentityId": "30067890",
+      "invitedDate": "2026-06-12",
+      "expiryDate": 1781222400000
+    }
+  ]
+}
+```
+
+### List secondary users for a primary subscription
+
+#### Request:
+
+GET /subscriptions/{subscriptionName}/secondary-users
+
+Headers: 'x-identity-id' - the identity id of the primary user
+
+#### Response:
+
+```JSON
+{
+  "secondaryUsers": [
+    {
+      "subscriptionName": "A-S00974337",
+      "secondaryIdentityId": "30067890",
+      "primaryIdentityId": "20012345",
+      "acceptedDate": "2026-06-12"
+    }
+  ]
+}
+```

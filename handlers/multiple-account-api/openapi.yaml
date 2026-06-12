@@ -65,6 +65,98 @@ paths:
               schema:
                 type: string
                 example: Internal server error
+  /subscriptions/{subscriptionName}/invitations:
+    get:
+      operationId: listInvitations
+      summary: List invitations
+      description: Lists all invitations for a given primary subscription.
+      security:
+        - identityId: []
+        - apiKey: []
+      parameters:
+        - name: subscriptionName
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Zuora subscription number for the primary user.
+          example: A-S00974337
+      responses:
+        '200':
+          description: Invitations listed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListInvitationsResponse'
+        '400':
+          description: Invalid request or validation failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParserError'
+            text/plain:
+              schema:
+                type: string
+        '404':
+          description: Route not found.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Not Found
+        '500':
+          description: Internal server error.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Internal server error
+  /subscriptions/{subscriptionName}/secondary-users:
+    get:
+      operationId: listSecondaryUsers
+      summary: List secondary users
+      description: Lists all secondary users associated with a primary subscription.
+      security:
+        - identityId: []
+        - apiKey: []
+      parameters:
+        - name: subscriptionName
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Zuora subscription number for the primary user.
+          example: A-S00974337
+      responses:
+        '200':
+          description: Secondary users listed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListSecondaryUsersResponse'
+        '400':
+          description: Invalid request or validation failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParserError'
+            text/plain:
+              schema:
+                type: string
+        '404':
+          description: Route not found.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Not Found
+        '500':
+          description: Internal server error.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Internal server error
   /invitation/{invitationCode}:
     delete:
       operationId: deleteInvitation
@@ -233,6 +325,76 @@ components:
         message:
           type: string
           example: Deleted
+    Invitation:
+      type: object
+      additionalProperties: false
+      required:
+        - subscriptionName
+        - invitationCode
+        - primaryIdentityId
+        - secondaryIdentityId
+        - invitedDate
+        - expiryDate
+      properties:
+        subscriptionName:
+          type: string
+          example: A-S00974337
+        invitationCode:
+          type: string
+          example: RpwR62kMnAxe
+        primaryIdentityId:
+          type: string
+          example: 20012345
+        secondaryIdentityId:
+          type: string
+          example: 30067890
+        invitedDate:
+          type: string
+          example: '2026-06-12'
+        expiryDate:
+          type: number
+          example: 1781222400000
+    ListInvitationsResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - invitations
+      properties:
+        invitations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Invitation'
+    SecondaryUser:
+      type: object
+      additionalProperties: false
+      required:
+        - subscriptionName
+        - secondaryIdentityId
+        - primaryIdentityId
+        - acceptedDate
+      properties:
+        subscriptionName:
+          type: string
+          example: A-S00974337
+        secondaryIdentityId:
+          type: string
+          example: 30067890
+        primaryIdentityId:
+          type: string
+          example: 20012345
+        acceptedDate:
+          type: string
+          example: '2026-06-12'
+    ListSecondaryUsersResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - secondaryUsers
+      properties:
+        secondaryUsers:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecondaryUser'
     ParserError:
       type: object
       additionalProperties: true
