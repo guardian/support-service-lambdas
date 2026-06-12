@@ -1,7 +1,7 @@
 import {
+	type AttributeValue,
 	DynamoDBClient,
 	UpdateItemCommand,
-	type UpdateItemCommandInput,
 } from '@aws-sdk/client-dynamodb';
 import { awsConfig } from '@modules/aws/config';
 import { logger } from '@modules/logger/logger';
@@ -40,31 +40,52 @@ export class DynamoService {
 			productRatePlanName: item.productRatePlanName,
 		});
 
-		const expressionValues: NonNullable<
-			UpdateItemCommandInput['ExpressionAttributeValues']
-		> = {
-			':productRatePlanId': { S: item.productRatePlanId },
-			':productRatePlanName': { S: item.productRatePlanName },
-			':termEndDate': { S: zuoraDateFormat(item.termEndDate) },
-			':contractEffectiveDate': {
-				S: zuoraDateFormat(item.contractEffectiveDate),
+		const setFields: Array<{ name: string; value: AttributeValue }> = [
+			{ name: 'productRatePlanId', value: { S: item.productRatePlanId } },
+			{ name: 'productRatePlanName', value: { S: item.productRatePlanName } },
+			{ name: 'termEndDate', value: { S: zuoraDateFormat(item.termEndDate) } },
+			{
+				name: 'contractEffectiveDate',
+				value: { S: zuoraDateFormat(item.contractEffectiveDate) },
 			},
-			':expiryDate': { N: this.formatAsTTL(item.termEndDate) },
-		};
+			{ name: 'expiryDate', value: { N: this.formatAsTTL(item.termEndDate) } },
+		];
 
-		let updateExpression =
-			'SET productRatePlanId = :productRatePlanId, productRatePlanName = :productRatePlanName, termEndDate = :termEndDate, contractEffectiveDate = :contractEffectiveDate, expiryDate = :expiryDate';
+		// This is to prevent stale data in the data store if for instance the first
+		// version of a record contains optional fields but a later version does not
+		const fieldsToRemove: string[] = [];
 
 		if (item.contributionAmount && item.contributionCurrency) {
-			expressionValues[':contributionAmount'] = {
-				N: item.contributionAmount.toString(),
-			};
-			expressionValues[':contributionCurrency'] = {
-				S: item.contributionCurrency,
-			};
-			updateExpression +=
-				', contributionAmount = :contributionAmount, contributionCurrency = :contributionCurrency';
+			setFields.push(
+				{
+					name: 'contributionAmount',
+					value: { N: item.contributionAmount.toString() },
+				},
+				{
+					name: 'contributionCurrency',
+					value: { S: item.contributionCurrency },
+				},
+			);
+		} else {
+			fieldsToRemove.push('contributionAmount', 'contributionCurrency');
 		}
+
+		if (item.primarySubscriptionName) {
+			setFields.push({
+				name: 'primarySubscriptionName',
+				value: { S: item.primarySubscriptionName },
+			});
+		} else {
+			fieldsToRemove.push('primarySubscriptionName');
+		}
+
+		const expressionValues = Object.fromEntries(
+			setFields.map(({ name, value }) => [`:${name}`, value]),
+		);
+		const setClause = `SET ${setFields.map(({ name }) => `${name} = :${name}`).join(', ')}`;
+		const removeClause =
+			fieldsToRemove.length > 0 ? ` REMOVE ${fieldsToRemove.join(', ')}` : '';
+		const updateExpression = setClause + removeClause;
 
 		try {
 			await this.client.send(
