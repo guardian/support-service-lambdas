@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import {
 	orderActionItemSchema,
 	orderItemSchema,
@@ -6,7 +7,6 @@ import type {
 	ObjectQueryExpandRegistry,
 	ObjectQueryQueryableFields,
 } from '@modules/zuora/objectQuery/queries/types';
-import { z } from 'zod';
 import { ObjectQueryBuilder } from '../objectQueryBuilder';
 
 /*

@@ -1,5 +1,5 @@
-import type { ObjectQueryFieldRegistry } from '@modules/zuora/objectQuery/queries/types';
 import z from 'zod';
+import type { ObjectQueryFieldRegistry } from '@modules/zuora/objectQuery/queries/types';
 
 export const orderActionItemSchema = z.object({
 	/** The reason the order action was taken. */

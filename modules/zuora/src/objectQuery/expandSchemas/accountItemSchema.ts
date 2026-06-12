@@ -1,5 +1,5 @@
-import type { ObjectQueryFieldRegistry } from '@modules/zuora/objectQuery/queries/types';
 import z from 'zod';
+import type { ObjectQueryFieldRegistry } from '@modules/zuora/objectQuery/queries/types';
 
 /**
  * https://developer.zuora.com/v1-api-reference/api/object-queries/queryaccountbykey

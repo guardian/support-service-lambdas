@@ -1,8 +1,8 @@
 import { groupMap } from '@modules/arrayFunctions';
 import { getCallerInfo } from '@modules/logger/getCallerInfo';
 import { logger } from '@modules/logger/logger';
+import type { z, ZodType, ZodTypeDef } from 'zod';
 import type { BearerTokenProvider } from '@modules/zuora/auth';
-import type { ZodType, ZodTypeDef } from 'zod';
 
 export class RestClientError extends Error implements RestResult {
 	public status: number;
@@ -27,11 +27,11 @@ export type RestResult = {
 export abstract class RestClient {
 	public constructor(readonly tokenProvider: BearerTokenProvider) {}
 
-	public async get<T>(
+	public async get<S extends ZodType<unknown, ZodTypeDef, unknown>>(
 		path: string,
-		schema: ZodType<T, ZodTypeDef, unknown>,
+		schema: S,
 		urlSearchParams?: URLSearchParams,
-	): Promise<T> {
+	): Promise<z.infer<S>> {
 		return await this.fetchWithLogging(getCallerInfo(1))(
 			path,
 			'GET',
@@ -42,12 +42,12 @@ export abstract class RestClient {
 		);
 	}
 
-	public async post<T>(
+	public async post<S extends ZodType<unknown, ZodTypeDef, unknown>>(
 		path: string,
 		body: string,
-		schema: ZodType<T, ZodTypeDef, unknown>,
+		schema: S,
 		headers?: Record<string, string>,
-	): Promise<T> {
+	): Promise<z.infer<S>> {
 		return await this.fetchWithLogging(getCallerInfo(1))(
 			path,
 			'POST',
@@ -57,12 +57,12 @@ export abstract class RestClient {
 		);
 	}
 
-	public async put<T>(
+	public async put<S extends ZodType<unknown, ZodTypeDef, unknown>>(
 		path: string,
 		body: string,
-		schema: ZodType<T, ZodTypeDef, unknown>,
+		schema: S,
 		headers?: Record<string, string>,
-	): Promise<T> {
+	): Promise<z.infer<S>> {
 		return await this.fetchWithLogging(getCallerInfo(1))(
 			path,
 			'PUT',
@@ -72,12 +72,12 @@ export abstract class RestClient {
 		);
 	}
 
-	public async patch<T>(
+	public async patch<S extends ZodType<unknown, ZodTypeDef, unknown>>(
 		path: string,
 		body: string,
-		schema: ZodType<T, ZodTypeDef, unknown>,
+		schema: S,
 		headers?: Record<string, string>,
-	): Promise<T> {
+	): Promise<z.infer<S>> {
 		return await this.fetchWithLogging(getCallerInfo(1))(
 			path,
 			'PATCH',
@@ -87,10 +87,10 @@ export abstract class RestClient {
 		);
 	}
 
-	public async delete<T>(
+	public async delete<S extends ZodType<unknown, ZodTypeDef, unknown>>(
 		path: string,
-		schema: ZodType<T, ZodTypeDef, unknown>,
-	): Promise<T> {
+		schema: S,
+	): Promise<z.infer<S>> {
 		return await this.fetchWithLogging(getCallerInfo(1))(
 			path,
 			'DELETE',
@@ -126,14 +126,14 @@ export abstract class RestClient {
 			}),
 		);
 
-	protected async fetch<T>(
+	protected async fetch<S extends ZodType<unknown, ZodTypeDef, unknown>>(
 		path: string,
 		method: string,
-		schema: ZodType<T, ZodTypeDef, unknown>,
+		schema: S,
 		body?: string,
 		headers?: Record<string, string>,
 		params?: URLSearchParams,
-	): Promise<T> {
+	): Promise<z.infer<S>> {
 		const authorisation = await this.tokenProvider.getAuthorisation();
 		const pathWithoutLeadingSlash = path.replace(/^\//, '');
 		const url = `${authorisation.baseUrl}/${pathWithoutLeadingSlash}${params === undefined ? '' : '?' + params.toString()}`;

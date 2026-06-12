@@ -2,9 +2,9 @@ import { logger } from '@modules/logger/logger';
 import type { Stage } from '@modules/stage';
 import type { ZodType, ZodTypeDef } from 'zod';
 import { z } from 'zod';
-import { RestClient, RestClientError } from '@modules/zuora/restClient';
 import { getOAuthClientCredentials, ZuoraBearerTokenProvider } from './auth';
 import { generateZuoraError } from './errors';
+import { RestClient, RestClientError } from './restClient';
 import { zuoraErrorSchema, zuoraSuccessSchema } from './types/httpResponse';
 
 export class ZuoraClient extends RestClient {
@@ -21,20 +21,20 @@ export class ZuoraClient extends RestClient {
 	 * a normal RestClient throws non-2xx responses as Errors.  For Zuora, there are an extra layer of errors that
 	 * come back as 200 responses, and thus need their own special errors thrown.
 	 */
-	override async fetch<T>(
+	override async fetch<S extends ZodType<unknown, ZodTypeDef, unknown>>(
 		path: string,
 		method: string,
-		schema: ZodType<T, ZodTypeDef, unknown>,
+		schema: S,
 		body?: string,
 		headers?: Record<string, string>,
 		params?: URLSearchParams,
-	): Promise<T> {
+	): Promise<z.infer<S>> {
 		try {
 			/*
 			 * since zuora returns a wide variety of unsuccessful responses inside of 200 statuses, we need to check for
 			 * failure and fail parsing if we detect one.  Then handleZuoraFailure will throw a suitable detailed exception.
 			 */
-			const successSchema: ZodType<T, ZodTypeDef, unknown> = z
+			const successSchema: ZodType<z.infer<S>, ZodTypeDef, unknown> = z
 				.any()
 				.refine(isLogicalSuccess)
 				.pipe(schema);

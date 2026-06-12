@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { accountItemSchema } from '@modules/zuora/objectQuery/expandSchemas/accountItemSchema';
 import { invoiceItemSchema } from '@modules/zuora/objectQuery/expandSchemas/invoiceItemSchema';
 import {
@@ -9,7 +10,6 @@ import type {
 	ObjectQueryExpandRegistry,
 	ObjectQueryQueryableFields,
 } from '@modules/zuora/objectQuery/queries/types';
-import { z } from 'zod';
 import { ObjectQueryBuilder } from '../objectQueryBuilder';
 
 /*
