@@ -74,19 +74,23 @@ export class Logger {
 	 * @param argsToLoggable
 	 * @param responseToLoggable
 	 */
-	wrapFn<TArgs extends unknown[], TReturn>(
-		fn: AsyncFunction<TArgs, TReturn>,
+	wrapFn<TFn extends (...args: never[]) => Promise<unknown>>(
+		fn: TFn,
 		functionName: string | (() => string) = fn.name,
 		callerInfo: string = getCallerInfo(),
-		argsToLoggable: (args: TArgs) => LoggableInput,
-		responseToLoggable: (result: TReturn) => unknown = (result) => result,
-	): AsyncFunction<TArgs, TReturn> {
+		argsToLoggable: (args: Parameters<TFn>) => LoggableInput,
+		responseToLoggable: (result: Awaited<ReturnType<TFn>>) => unknown = (
+			result,
+		) => result,
+	): TFn {
 		const prefix =
 			'TRACE ' +
 			(typeof functionName === 'function' ? functionName() : functionName) +
 			' ';
-
-		return async (...args: TArgs): Promise<TReturn> => {
+		const wrapped: AsyncFunction<
+			Parameters<TFn>,
+			Awaited<ReturnType<TFn>>
+		> = async (...args: Parameters<TFn>): Promise<Awaited<ReturnType<TFn>>> => {
 			const { logOnEntryAndExit, logOnEntryOnly } = argsToLoggable(args);
 
 			const prettyArgsArray = [
@@ -104,7 +108,8 @@ export class Logger {
 
 			try {
 				// actually call the function
-				const result = await fn(...args);
+				// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- required because generic function implementations erase concrete return typing
+				const result = (await fn(...args)) as Awaited<ReturnType<TFn>>;
 
 				this.logExit(
 					responseToLoggable(result),
@@ -113,6 +118,7 @@ export class Logger {
 					callerInfo,
 				);
 
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-return -- generic implementation preserves type via the cast above
 				return result;
 			} catch (error) {
 				this.logError(error, prefix, shortPrettyArgs, callerInfo);
@@ -120,6 +126,9 @@ export class Logger {
 				throw error;
 			}
 		};
+
+		// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- required to preserve the exact original function type (including generics)
+		return wrapped as unknown as TFn;
 	}
 
 	private logError(
