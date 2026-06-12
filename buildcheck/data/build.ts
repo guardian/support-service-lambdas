@@ -794,14 +794,14 @@ const userSubscriptionsApi: HandlerDefinition = {
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
-
 		...devDeps['@redocly/cli'],
+		...devDeps['tsx'],
 	},
 	extraScripts: {
 		...openApiScripts,
 		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr user-subscriptions-api.zip ./*.js.map ./*.js`,
 	},
-	moduleDependencies: [moduleRouting],
+	moduleDependencies: [moduleRouting, moduleZuora],
 };
 
 const salesTaxApi: HandlerDefinition = {

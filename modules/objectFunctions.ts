@@ -55,6 +55,19 @@ export function objectEntries<T extends object>(
 }
 
 /**
+ * Returns a new object containing only the specified keys, preserving per-key value types.
+ */
+export function pickKeys<O extends Record<string, unknown>, K extends keyof O>(
+	obj: O,
+	keys: readonly K[],
+): { [P in K]: O[P] } {
+	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- allowed in utility function - get back type lost by Object.fromEntries
+	return Object.fromEntries(keys.map((k) => [k, obj[k]])) as {
+		[P in K]: O[P];
+	};
+}
+
+/**
  * joins two objects by their keys, throwing away any entries that don't exist in both
  * @param l
  * @param r
