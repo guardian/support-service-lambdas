@@ -17,7 +17,7 @@ export const zuoraTaxRate = z.object({
 	id: z.string(),
 	taxRatePeriodId: z.string(),
 	country: z.string(),
-	state: z.string().nullable(),
+	state: z.string(),
 	county: z.string().nullable(),
 	city: z.string().nullable(),
 	postalCode: z.string().nullable(),
