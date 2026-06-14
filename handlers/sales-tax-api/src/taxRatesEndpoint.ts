@@ -7,10 +7,12 @@ import { getZuoraTaxCodes, getZuoraTaxRates } from '@modules/zuora/tax';
 import {
 	type ZuoraTaxCode,
 	zuoraTaxCodeSchema,
+	zuoraTaxRateSchema,
 } from '@modules/zuora/types/objects/tax';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import type z from 'zod';
+import type { ZuoraGetRatesPath } from './schemas';
 import {
 	type TaxRatesRequest,
 	type TaxRatesResponse,
@@ -66,6 +68,22 @@ export const zuoraTaxCodesEndpoint = async (
 		);
 	} catch (error) {
 		logger.error('Error fetching Zuora codes', error);
+		return Promise.resolve(buildErrorResponse(error));
+	}
+};
+
+export const zuoraTaxRatesEndpoint = async (
+	zuoraClient: ZuoraClient,
+	path: ZuoraGetRatesPath,
+): Promise<APIGatewayProxyResult> => {
+	try {
+		logger.log('Retrieving Zuora rates');
+		return ok(
+			await Promise.resolve(getZuoraTaxRates(zuoraClient, path.id)),
+			zuoraTaxRateSchema,
+		);
+	} catch (error) {
+		logger.error('Error fetching Zuora rates', error);
 		return Promise.resolve(buildErrorResponse(error));
 	}
 };
