@@ -33,4 +33,15 @@ export const handler = Router([
 			},
 		),
 	},
+	{
+		httpMethod: 'POST',
+		path: '/tax-rates-test',
+		handler: withBodyParser(
+			taxRatesRequestSchema,
+			async (event, path, body) => {
+				logger.log('Received POST /tax-zuora-rates request', body);
+				return taxRatesEndpoint(await lazyZuoraClient.get(), body);
+			},
+		),
+	},
 ]);
