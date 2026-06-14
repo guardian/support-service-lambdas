@@ -7,6 +7,7 @@
  */
 
 import type { IsoCountry } from '@modules/internationalisation/country';
+// import type { ZuoraTaxRate } from '@modules/zuora/types/objects/tax';
 import {
 	type ZuoraTaxCode,
 	zuoraTaxCodeSchema,
@@ -16,6 +17,7 @@ import { taxRatesResponseSchema } from '../src/schemas';
 import {
 	taxRatesEndpoint,
 	zuoraTaxCodesEndpoint,
+	zuoraTaxRatesEndpoint,
 } from '../src/taxRatesEndpoint';
 
 const countryStates: Partial<Record<IsoCountry, Record<string, number>>> = {
@@ -35,13 +37,42 @@ const countryStates: Partial<Record<IsoCountry, Record<string, number>>> = {
 		YT: 0.05,
 	},
 };
+const supporterPlusTaxId = '8ad0887181de06d70181de659fb63b57';
 const zuoraTaxCodeSupporterPlus: ZuoraTaxCode = {
-	id: '8ad0887181de06d70181de659fb63b57',
+	id: supporterPlusTaxId,
 	taxEngineId: '2c92c0f94568f996014570f746f75c52',
 	active: true,
 	name: 'Supporter Plus',
 	description: '',
 };
+// const zuoraTaxRateSupporterPlus: ZuoraTaxRate = {
+// 	id: supporterPlusTaxId,
+// 	taxRatePeriodId: 'Monthly',
+// 	country: 'Canada',
+// 	state: 'Ontario',
+// 	county: null,
+// 	city: null,
+// 	postalCode: null,
+// 	taxRegion: null,
+// 	taxRate1: 0.13,
+// 	taxRateType1: null,
+// 	taxName1: null,
+// 	taxJursdiction1: null,
+// 	taxLocationCode1: null,
+// 	taxRateDescription1: null,
+// 	taxRate2: 0,
+// 	taxRateType2: null,
+// 	taxName2: null,
+// 	taxJursdiction2: null,
+// 	taxLocationCode2: null,
+// 	taxRateDescription2: null,
+// 	taxRate3: 0,
+// 	taxRateType3: null,
+// 	taxName3: null,
+// 	taxJursdiction3: null,
+// 	taxLocationCode3: null,
+// 	taxRateDescription3: null,
+// };
 
 describe('SalesTax API Integration', () => {
 	const country = 'CA';
@@ -65,16 +96,20 @@ describe('SalesTax API Integration', () => {
 		const result = await zuoraTaxCodesEndpoint(zuoraClient);
 
 		expect(result.statusCode).toEqual(200);
+
 		const body = zuoraTaxCodeSchema.parse(JSON.parse(result.body));
 		expect(body.taxCodes).toContainEqual(zuoraTaxCodeSupporterPlus);
 	});
-	// test('we can retreive SupporterPlus tax rates from Zuora', async () => {
-	// 	const zuoraClient = await ZuoraClient.create(stage);
+	test('we can retreive SupporterPlus tax rates from Zuora', async () => {
+		const zuoraClient = await ZuoraClient.create(stage);
 
-	// 	const result = await zuoraTaxRatesEndpoint(zuoraClient, {
-	// 		id: '8ad0887181de06d70181de659fb63b57',
-	// 	});
+		const result = await zuoraTaxRatesEndpoint(zuoraClient, {
+			id: supporterPlusTaxId,
+		});
 
-	// 	expect(result.statusCode).toEqual(200);
-	// });
+		expect(result.statusCode).toEqual(200);
+
+		// const body = zuoraTaxRateSchema.parse(JSON.parse(result.body));
+		// expect(body.taxRates).toContainEqual(zuoraTaxRateSupporterPlus);
+	});
 });
