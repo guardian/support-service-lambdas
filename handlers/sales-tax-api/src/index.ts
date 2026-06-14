@@ -17,13 +17,10 @@ export const handler = Router([
 	{
 		httpMethod: 'POST',
 		path: '/tax-zuora-codes',
-		handler: withBodyParser(
-			taxRatesRequestSchema,
-			async (event, path, body) => {
-				logger.log('Received POST /tax-zuora-codes request', body);
-				return zuoraTaxCodesEndpoint(await lazyZuoraClient.get());
-			},
-		),
+		handler: async () => {
+			logger.log('Received POST /tax-zuora-codes request');
+			return zuoraTaxCodesEndpoint(await lazyZuoraClient.get());
+		},
 	},
 	{
 		httpMethod: 'POST',
