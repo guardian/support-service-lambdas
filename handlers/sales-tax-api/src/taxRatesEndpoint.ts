@@ -60,7 +60,10 @@ export const zuoraTaxCodesEndpoint = async (
 ): Promise<APIGatewayProxyResult> => {
 	try {
 		logger.log('Retrieving Zuora codes');
-		return ok(await getZuoraTaxCodes(zuoraClient), zuoraTaxCodeSchema);
+		return ok(
+			await Promise.resolve(getZuoraTaxCodes(zuoraClient)),
+			zuoraTaxCodeSchema,
+		);
 	} catch (error) {
 		logger.error('Error fetching Zuora codes', error);
 		return Promise.resolve(buildErrorResponse(error));

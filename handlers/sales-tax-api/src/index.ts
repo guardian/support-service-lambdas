@@ -40,7 +40,7 @@ export const handler = Router([
 			taxRatesRequestSchema,
 			async (event, path, body) => {
 				logger.log('Received POST /tax-zuora-rates request', body);
-				return taxRatesEndpoint(await lazyZuoraClient.get(), body);
+				return zuoraTaxCodesEndpoint(await lazyZuoraClient.get());
 			},
 		),
 	},
