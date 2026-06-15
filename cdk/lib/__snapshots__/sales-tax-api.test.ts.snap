@@ -442,7 +442,7 @@ exports[`The Sales tax api stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "LambdaRestApiDeployment9531908990e8da67731a596c9de799d6bad48ba8": {
+    "LambdaRestApiDeployment953190892b008b853640bca72b70e2f5f8936fc3": {
       "DependsOn": [
         "LambdaRestApiproxyANY486C4D1F",
         "LambdaRestApiproxy22103CFD",
@@ -462,7 +462,7 @@ exports[`The Sales tax api stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "LambdaRestApiDeployment9531908990e8da67731a596c9de799d6bad48ba8",
+          "Ref": "LambdaRestApiDeployment953190892b008b853640bca72b70e2f5f8936fc3",
         },
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",
@@ -1358,7 +1358,7 @@ exports[`The Sales tax api stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "LambdaRestApiDeployment95319089d6c534b528ac0947e32ae0fa56dd78b3": {
+    "LambdaRestApiDeployment95319089a104e6d27cc4e14072744396ffa693fb": {
       "DependsOn": [
         "LambdaRestApiproxyANY486C4D1F",
         "LambdaRestApiproxy22103CFD",
@@ -1378,7 +1378,7 @@ exports[`The Sales tax api stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "LambdaRestApiDeployment95319089d6c534b528ac0947e32ae0fa56dd78b3",
+          "Ref": "LambdaRestApiDeployment95319089a104e6d27cc4e14072744396ffa693fb",
         },
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",
