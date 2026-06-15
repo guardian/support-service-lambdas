@@ -24,8 +24,11 @@ export const createInvitationBodySchema = z.object({
 	subscriptionName: z.string(),
 	secondaryUserEmail: z.string().email(),
 });
-
 export type CreateInvitationBody = z.infer<typeof createInvitationBodySchema>;
+
+export const createInvitationResponseBodySchema = z.object({
+	invitationCode: z.string(),
+});
 
 const generateInvitationCode = customAlphabet(
 	'123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz',
@@ -79,5 +82,8 @@ export const createInvitationEndpoint =
 
 		// TODO: trigger the invite email
 
-		return created({ invitationCode });
+		return created(
+			{ invitationCode },
+			{ schema: createInvitationResponseBodySchema },
+		);
 	};

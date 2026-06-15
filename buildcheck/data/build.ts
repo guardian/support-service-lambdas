@@ -804,6 +804,60 @@ const userSubscriptionsApi: HandlerDefinition = {
 	moduleDependencies: [moduleRouting],
 };
 
+const salesTaxApi: HandlerDefinition = {
+	name: 'sales-tax-api',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+
+		...devDeps['@redocly/cli'],
+	},
+	moduleDependencies: [
+		moduleLogger,
+		moduleRouting,
+		moduleProductCatalog,
+		moduleInternationalisation,
+	],
+	extraScripts: {
+		...openApiScripts,
+		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr sales-tax-api.zip ./*.js.map ./*.js`,
+	},
+};
+
+const supporterProductDataLambdas: HandlerDefinition = {
+	name: 'supporter-product-data-lambdas',
+	functionNames: [
+		'supporterProductData-QueryZuora-',
+		'supporterProductData-FetchResults-',
+		'supporterProductData-AddToQueue-',
+		'supporterProductData-ProcessItem-',
+	],
+	entryPoints: ['src/handlers/*.ts'],
+	dependencies: {
+		...dep['@aws-sdk/client-cloudwatch'],
+		...dep['@aws-sdk/client-dynamodb'],
+		...dep['@aws-sdk/client-s3'],
+		...dep['@aws-sdk/client-sqs'],
+		...dep['@aws-sdk/client-ssm'],
+		...dep['@aws-sdk/client-secrets-manager'],
+		...dep['@aws-sdk/credential-provider-node'],
+		...dep['@aws-sdk/lib-storage'],
+		...dep.dayjs,
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
+	moduleDependencies: [
+		moduleLogger,
+		moduleZuora,
+		moduleInternationalisation,
+		moduleSupporterProductData,
+	],
+};
+
 // MARKER new-lambda: buildcheck-const
 
 export const build: BuildDefinition = {
@@ -835,6 +889,8 @@ export const build: BuildDefinition = {
 		observerBenefitsApi,
 		contributionsOnlyCountriesApi,
 		userSubscriptionsApi,
+		salesTaxApi,
+		supporterProductDataLambdas,
 		// MARKER new-lambda: buildcheck-reference
 	],
 
