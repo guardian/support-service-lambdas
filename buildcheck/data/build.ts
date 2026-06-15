@@ -862,10 +862,10 @@ const supporterProductDataLambdas: HandlerDefinition = {
 
 export const build: BuildDefinition = {
 	handlers: [
+		generateProductCatalog,
 		alarmsHandler,
 		discountApi,
 		discountExpiryNotifier,
-		generateProductCatalog,
 		imovoVoucherApi,
 		metricPushApi,
 		mobilePurchasesToSupporterProductData,
