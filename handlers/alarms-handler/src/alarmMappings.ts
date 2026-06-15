@@ -77,6 +77,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'press-reader-entitlements',
 		'user-benefits',
 		'mobile-purchases-to-supporter-product-data',
+		'supporter-product-data-lambdas',
 	],
 	PLATFORM: [
 		// fulfilment
