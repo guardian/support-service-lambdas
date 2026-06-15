@@ -13,6 +13,18 @@ export const zuoraTaxCodeSchema = z.object({
 export type ZuoraTaxCode = z.infer<typeof zuoraTaxCode>;
 export type ZuoraTaxCodes = z.infer<typeof zuoraTaxCodeSchema>;
 
+export const zuoraTaxPeriod = z.object({
+	id: z.string(),
+	startDate: z.date(),
+	endDate: z.date().nullable(),
+	taxCodeId: z.string(),
+});
+export const zuoraTaxPeriodsSchema = z.object({
+	taxRatePeriods: z.array(zuoraTaxPeriod),
+});
+export type ZuoraTaxPeriod = z.infer<typeof zuoraTaxPeriod>;
+export type ZuoraTaxPeriods = z.infer<typeof zuoraTaxPeriodsSchema>;
+
 export const zuoraTaxRate = z.object({
 	id: z.string(),
 	taxRatePeriodId: z.string(),

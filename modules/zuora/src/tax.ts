@@ -1,5 +1,9 @@
 import type { z } from 'zod';
-import { zuoraTaxCodeSchema, zuoraTaxRateSchema } from './types/objects/tax';
+import {
+	zuoraTaxCodeSchema,
+	zuoraTaxPeriodsSchema,
+	zuoraTaxRateSchema,
+} from './types/objects/tax';
 import type { ZuoraClient } from './zuoraClient';
 
 export const getZuoraTaxCodes = async <
@@ -9,6 +13,15 @@ export const getZuoraTaxCodes = async <
 ): Promise<z.infer<T>> => {
 	const path = `settings/tax-codes`;
 	return zuoraClient.get(path, zuoraTaxCodeSchema);
+};
+
+export const getZuoraTaxPeriods = async <
+	T extends z.ZodType = typeof zuoraTaxPeriodsSchema,
+>(
+	zuoraClient: ZuoraClient,
+): Promise<z.infer<T>> => {
+	const path = `settings/tax-rate-periods`;
+	return zuoraClient.get(path, zuoraTaxPeriodsSchema);
 };
 
 export const getZuoraTaxRates = async <

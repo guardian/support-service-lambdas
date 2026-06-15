@@ -3,9 +3,14 @@ import {
 	getCountryNameByIsoCode,
 	type IsoCountry,
 } from '@modules/internationalisation/country';
-import { getZuoraTaxCodes, getZuoraTaxRates } from '@modules/zuora/tax';
+import {
+	getZuoraTaxCodes,
+	// getZuoraTaxPeriods,
+	getZuoraTaxRates,
+} from '@modules/zuora/tax';
 import type {
 	ZuoraTaxCodes,
+	// ZuoraTaxPeriods,
 	ZuoraTaxRates,
 } from '@modules/zuora/types/objects/tax';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
@@ -60,12 +65,24 @@ describe('SalesTax API', () => {
 		],
 	} as unknown as ZuoraTaxCodes;
 
+	// const mockGetZuoraTaxPeriods = jest.mocked(getZuoraTaxPeriods);
+	// const mockZuoraTaxPeriods = {
+	// 	taxRatePeriods: [
+	// 		{
+	// 			id: '897689',
+	// 			startDate: '2015-01-01',
+	// 			endDate: null,
+	// 			taxCodeId: '2c92c0f9458d03c30145a6f15360249c',
+	// 		},
+	// 	],
+	// } as unknown as ZuoraTaxPeriods;
+
 	const mockGetZuoraTaxRates = jest.mocked(getZuoraTaxRates);
 	const mockZuoraTaxRates = {
 		taxRates: [
 			{
 				id: '897689',
-				taxRatePeriodId: '',
+				taxRatePeriodId: '2c92c0f9458d03c30145a6f15360249c',
 				country: getCountryNameByIsoCode(country),
 				state: caStates[province],
 				county: null,

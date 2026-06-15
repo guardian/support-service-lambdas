@@ -8,6 +8,7 @@ import { taxRatesRequestSchema, zuoraGetRatesPathSchema } from './schemas';
 import {
 	taxRatesEndpoint,
 	zuoraTaxCodesEndpoint,
+	zuoraTaxPeriodsEndpoint,
 	zuoraTaxRatesEndpoint,
 } from './taxRatesEndpoint';
 
@@ -24,6 +25,14 @@ export const handler = Router([
 		handler: async () => {
 			logger.log('Received POST /tax-zuora-codes request');
 			return zuoraTaxCodesEndpoint(await lazyZuoraClient.get());
+		},
+	},
+	{
+		httpMethod: 'POST',
+		path: '/tax-zuora-periods',
+		handler: async () => {
+			logger.log('Received POST /tax-zuora-periods request');
+			return zuoraTaxPeriodsEndpoint(await lazyZuoraClient.get());
 		},
 	},
 	{

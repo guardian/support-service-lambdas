@@ -3,10 +3,15 @@ import { getCountryNameByIsoCode } from '@modules/internationalisation/country';
 import { logger } from '@modules/logger/logger';
 import type { productKeySchema } from '@modules/product-catalog/productCatalogSchema';
 import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
-import { getZuoraTaxCodes, getZuoraTaxRates } from '@modules/zuora/tax';
+import {
+	getZuoraTaxCodes,
+	getZuoraTaxPeriods,
+	getZuoraTaxRates,
+} from '@modules/zuora/tax';
 import {
 	type ZuoraTaxCode,
 	zuoraTaxCodeSchema,
+	zuoraTaxPeriodsSchema,
 	zuoraTaxRateSchema,
 } from '@modules/zuora/types/objects/tax';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
@@ -68,6 +73,21 @@ export const zuoraTaxCodesEndpoint = async (
 		);
 	} catch (error) {
 		logger.error('Error fetching Zuora codes', error);
+		return Promise.resolve(buildErrorResponse(error));
+	}
+};
+
+export const zuoraTaxPeriodsEndpoint = async (
+	zuoraClient: ZuoraClient,
+): Promise<APIGatewayProxyResult> => {
+	try {
+		logger.log('Retrieving Zuora periods');
+		return ok(
+			await Promise.resolve(getZuoraTaxPeriods(zuoraClient)),
+			zuoraTaxPeriodsSchema,
+		);
+	} catch (error) {
+		logger.error('Error fetching Zuora periods', error);
 		return Promise.resolve(buildErrorResponse(error));
 	}
 };
