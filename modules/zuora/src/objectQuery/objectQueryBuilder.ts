@@ -1,6 +1,7 @@
 import { pickKeys } from '@modules/objectFunctions';
-import type { ZodType, ZodTypeDef } from 'zod';
 import { z } from 'zod';
+import type { ZodType, ZodTypeDef } from 'zod';
+import type { DoesNotHaveDuplicateResponseKey } from '@modules/zuora/objectQuery/doesNotHaveDuplicateResponseKey';
 import type {
 	ExpandRegistryEntry,
 	ObjectQueryExpandRegistry,
@@ -43,52 +44,6 @@ type ExpandShape<
 	TRegistry extends Record<string, ExpandRegistryEntry>,
 	TExpands extends keyof TRegistry,
 > = UnionToIntersection<TRegistry[TExpands]>;
-
-/** The responseKey(s) that a given expand entry maps to (its object key). */
-type ResponseKeyOf<
-	TRegistry extends Record<string, ExpandRegistryEntry>,
-	E extends keyof TRegistry,
-> = E extends keyof TRegistry ? keyof TRegistry[E] : never;
-
-/** Branded error surfaced when duplicate responseKeys are detected. */
-type HasDuplicateResponseKey = {
-	__error: 'Two expand keys map to the same responseKey - remove the redundant one';
-};
-
-/** True when key `K`'s responseKey is also produced by another chosen key. */
-type KeyHasResponseKeyTwin<
-	TRegistry extends Record<string, ExpandRegistryEntry>,
-	TAll extends keyof TRegistry,
-	K extends keyof TRegistry,
-> = [Exclude<TAll, K>] extends [never]
-	? false
-	: ResponseKeyOf<TRegistry, K> extends ResponseKeyOf<
-				TRegistry,
-				Exclude<TAll, K>
-		  >
-		? true
-		: false;
-
-/**
- * Homomorphic mapped type over the chosen expand-key tuple. Each element keeps
- * its literal key type unless its responseKey collides with another chosen key,
- * in which case the element type becomes `HasDuplicateResponseKey` so the
- * offending array entry fails to type-check exactly at the call site. Being
- * homomorphic over the tuple (`[I in keyof TKeys]`), it preserves inference of
- * the chosen keys.
- */
-type DoesNotHaveDuplicateResponseKey<
-	TRegistry extends Record<string, ExpandRegistryEntry>,
-	TKeys extends ReadonlyArray<keyof TRegistry>,
-> = {
-	[I in keyof TKeys]: KeyHasResponseKeyTwin<
-		TRegistry,
-		TKeys[number],
-		Extract<TKeys[I], keyof TRegistry>
-	> extends true
-		? HasDuplicateResponseKey
-		: TKeys[I];
-};
 
 /** Merges the selected expand entries into a single zod shape fragment. */
 export function pickExpands<
