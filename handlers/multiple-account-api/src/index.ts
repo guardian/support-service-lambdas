@@ -112,7 +112,7 @@ export const handler: Handler = Router([
 	},
 	{
 		httpMethod: 'DELETE',
-		path: '/secondaryUser',
+		path: '/secondary-users',
 		handler: withBodyParser(
 			deleteSecondaryUserBodySchema,
 			withMMAIdentityCheck(
