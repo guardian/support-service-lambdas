@@ -42,7 +42,8 @@ describe('generateProductCatalog function', () => {
 		expect(result).toEqual(prodProductCatalog);
 		expect(result.OneTimeContribution.billingSystem).toBe('stripe');
 		expect(
-			Object.keys(result.TierThree.ratePlans.DomesticAnnualV2.charges).length,
+			Object.keys(result.TierThree.ratePlans.DomesticAnnualV2?.charges ?? {})
+				.length,
 		).toBe(3);
 	});
 });
