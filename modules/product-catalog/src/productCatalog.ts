@@ -192,7 +192,7 @@ export class ProductCatalogHelper {
 						zuoraProduct: productKey,
 						billingSystem: product.billingSystem,
 						productRatePlan: productRatePlanKey,
-						id: productRatePlan.id,
+						id: productRatePlan?.id,
 					}),
 				),
 		);

@@ -119,7 +119,7 @@ const generateProductRatePlanSchema = (
 		${getBillingPeriodForRatePlan(productRatePlan)}
 		termType: termTypeSchema,
 		termLengthInMonths: z.number(),
-	})`;
+	}).optional()`;
 };
 
 const generatePricingSchema = (productRatePlan: ZuoraProductRatePlan) => {
