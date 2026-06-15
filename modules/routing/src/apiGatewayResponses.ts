@@ -4,25 +4,23 @@ import { stringify } from '@modules/stringify';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import type { z } from 'zod';
 
-export function badRequest(message: string): APIGatewayProxyResult {
+function jsonResponse(message: string, statusCode: number) {
 	return {
+		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ message }),
-		statusCode: 400,
+		statusCode,
 	};
 }
-
-export function notFound(): APIGatewayProxyResult {
-	return {
-		body: JSON.stringify({ message: 'Not Found' }),
-		statusCode: 404,
-	};
+export function badRequest(message: string): APIGatewayProxyResult {
+	return jsonResponse(message, 400);
 }
 
 export function internalServerError(): APIGatewayProxyResult {
-	return {
-		body: JSON.stringify({ message: 'Internal server error' }),
-		statusCode: 500,
-	};
+	return jsonResponse('Internal server error', 500);
+}
+
+export function notFound(): APIGatewayProxyResult {
+	return jsonResponse('Not Found', 404);
 }
 
 /**

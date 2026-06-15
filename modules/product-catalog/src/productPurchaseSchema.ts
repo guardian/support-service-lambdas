@@ -30,7 +30,9 @@ export const productPurchaseSchema = z.discriminatedUnion('product', [
 		product: z.literal('DigitalSubscription'),
 		ratePlan: z.union([
 			z.literal('Annual'),
+			z.literal('AnnualTaxExclusive'),
 			z.literal('Monthly'),
+			z.literal('MonthlyTaxExclusive'),
 			z.literal('Quarterly'),
 			z.literal('OneYearGift'),
 			z.literal('ThreeMonthGift'),
@@ -188,6 +190,8 @@ export const productPurchaseSchema = z.discriminatedUnion('product', [
 		amount: z.number(),
 		product: z.literal('SupporterPlus'),
 		ratePlan: z.union([
+			z.literal('AnnualTaxExclusive'),
+			z.literal('MonthlyTaxExclusive'),
 			z.literal('OneYearStudent'),
 			z.literal('V1DeprecatedAnnual'),
 			z.literal('V1DeprecatedMonthly'),

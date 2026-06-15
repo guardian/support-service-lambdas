@@ -4,12 +4,12 @@
 
 import dayjs from 'dayjs';
 import {
-	getSupporterProductData,
+	getSupporterRatePlans,
 	sendToSupporterProductData,
 } from '@modules/supporter-product-data/supporterProductData';
 
 test('Dynamo Integration', async () => {
-	const supporterData = await getSupporterProductData('CODE', '110001137');
+	const supporterData = await getSupporterRatePlans('CODE', '110001137');
 	expect(supporterData?.length).toEqual(4);
 	expect(supporterData?.[0]?.contractEffectiveDate.year()).toEqual(2024);
 });

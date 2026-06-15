@@ -104,6 +104,82 @@ paths:
               schema:
                 type: string
                 example: Internal server error
+  /invitation/{invitationCode}/accept:
+    post:
+      operationId: acceptInvitation
+      summary: Accept invitation
+      description: Accepts an invitation for the signed-in secondary user, linking them to the subscription.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: invitationCode
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 12
+            maxLength: 12
+            pattern: '^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{12}$'
+          description: 12-character Base58 invitation code.
+          example: RpwR62kMnAxe
+      responses:
+        '200':
+          description: Invitation accepted.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+        '400':
+          description: Invalid request or the signed-in user does not match the invited user.
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                incorrectUser:
+                  value: Incorrect user
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParserError'
+        '401':
+          description: Missing, expired, or invalid Okta token.
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                noToken:
+                  value: No Authorization header provided
+                expired:
+                  value: Token has expired
+                invalid:
+                  value: Token is invalid
+                signingKey:
+                  value: Unable to find a signing key for the token
+        '403':
+          description: Token does not have the required scopes.
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                invalidScopes:
+                  value: Token does not have the required scopes
+        '404':
+          description: Route not found.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Not Found
+        '500':
+          description: Internal server error.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Internal server error
 components:
   securitySchemes:
     identityId:
@@ -114,6 +190,11 @@ components:
       type: apiKey
       in: header
       name: x-api-key
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Okta JWT token passed in the Authorization header.
   schemas:
     CreateInvitationRequest:
       type: object

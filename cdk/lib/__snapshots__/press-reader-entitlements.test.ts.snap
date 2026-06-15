@@ -308,7 +308,10 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "dynamodb:Query",
+              "Action": [
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+              ],
               "Effect": "Allow",
               "Resource": {
                 "Fn::ImportValue": "supporter-product-data-tables-CODE-SupporterProductDataTable",
@@ -1350,7 +1353,10 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "dynamodb:Query",
+              "Action": [
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+              ],
               "Effect": "Allow",
               "Resource": {
                 "Fn::ImportValue": "supporter-product-data-tables-PROD-SupporterProductDataTable",
