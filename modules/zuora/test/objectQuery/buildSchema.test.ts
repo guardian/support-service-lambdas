@@ -1,8 +1,6 @@
+import { mergeValues, pickKeys } from '@modules/objectFunctions';
 import { z } from 'zod';
-import {
-	objectQueryResponseSchema,
-	pickExpands,
-} from '@modules/zuora/objectQuery/objectQueryBuilder';
+import { objectQueryResponseSchema } from '@modules/zuora/objectQuery/objectQueryBuilder';
 import {
 	accountExpandRegistry,
 	accountObjectQuery,
@@ -12,7 +10,7 @@ import testData from './singleAccountWithLimit2.json';
 
 test('expands deserialiser', () => {
 	const schema = z.object(
-		pickExpands(accountExpandRegistry, ['subscriptions.rateplans']),
+		mergeValues(pickKeys(accountExpandRegistry, ['subscriptions.rateplans'])),
 	);
 	const actual = schema.parse(testData);
 	expect(actual.subscriptions[0]?.ratePlans[0]?.name).toEqual(

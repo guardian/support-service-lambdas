@@ -1,20 +1,25 @@
-import { pickKeys } from '@modules/objectFunctions';
-import { z } from 'zod';
+import { mergeValues, pickKeys } from '@modules/objectFunctions';
 import type { ZodType, ZodTypeDef } from 'zod';
+import { z } from 'zod';
 import type { DoesNotHaveDuplicateResponseKey } from '@modules/zuora/objectQuery/doesNotHaveDuplicateResponseKey';
 import type {
-	ExpandRegistryEntry,
 	ObjectQueryExpandRegistry,
 	ObjectQueryFieldRegistry,
 } from '@modules/zuora/objectQuery/queries/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
+/**
+ * https://developer.zuora.com/docs/guides/expand-filter-fields-sort#using-filter-query-parameter
+ */
 export type ObjectQueryFilterObject<F extends string> = {
 	field: F | `${string}__c`;
 	operator: 'EQ' | 'NE' | 'GT' | 'GE' | 'LT' | 'LE' | 'SW' | 'IN';
 	value: string;
 };
 
+/**
+ * https://developer.zuora.com/docs/guides/expand-filter-fields-sort#using-sort-query-parameter
+ */
 export type ObjectQuerySortObject<F extends string> = {
 	field: F;
 	direction: 'ASC' | 'DESC';
@@ -27,38 +32,6 @@ export const objectQueryResponseSchema = <T>(
 		nextPage: z.string().nullable(),
 		data: z.array(itemSchema),
 	});
-
-/** Distributes a union of object types into their intersection. */
-type UnionToIntersection<U> = (
-	U extends unknown ? (x: U) => void : never
-) extends (x: infer I) => void
-	? I
-	: never;
-
-/**
- * The zod shape produced by merging the selected expand entries. Each entry is
- * already a `{ responseKey: schema }` fragment, so the shape is simply the
- * intersection of the selected entries.
- */
-type ExpandShape<
-	TRegistry extends Record<string, ExpandRegistryEntry>,
-	TExpands extends keyof TRegistry,
-> = UnionToIntersection<TRegistry[TExpands]>;
-
-/** Merges the selected expand entries into a single zod shape fragment. */
-export function pickExpands<
-	TRegistry extends Record<string, ExpandRegistryEntry>,
-	TExpands extends keyof TRegistry,
->(
-	registry: TRegistry,
-	keys: readonly TExpands[],
-): ExpandShape<TRegistry, TExpands> {
-	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- merging the selected single-key entry objects yields exactly their intersection
-	return Object.assign({}, ...keys.map((k) => registry[k])) as ExpandShape<
-		TRegistry,
-		TExpands
-	>;
-}
 
 /**
  * Auto complete/type checker friendly object query builder.
@@ -95,7 +68,7 @@ export class ObjectQueryBuilder<
 			Object.assign(
 				{},
 				pickKeys(this.fieldRegistry, fields),
-				pickExpands(this.expandRegistry, expand),
+				mergeValues(pickKeys(this.expandRegistry, expand)),
 			),
 		);
 	}
