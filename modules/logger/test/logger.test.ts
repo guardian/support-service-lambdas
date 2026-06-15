@@ -275,6 +275,20 @@ Error: fail 42
 		expect(logs[0]).toEqual(expectedEntry);
 		expect(errors[0]).toContain(expectedErrorStart);
 	});
+
+	test('does not emit SHORT_ARGS when logOnEntryAndExit is not provided', async () => {
+		const fn = (x: number): Promise<number> => Promise.resolve(x * 2);
+		const wrapped = logger.wrapFn(fn, undefined, undefined, () => ({
+			logOnEntryOnly: ['some-arg'],
+		}));
+
+		await wrapped(7);
+
+		expect(logs[0]).toContain('ENTRY ARGS');
+		expect(logs[1]).toContain('EXIT');
+		expect(logs[1]).not.toContain('SHORT_ARGS');
+		expect(errors).toEqual([]);
+	});
 });
 
 describe('Logger.joinLines', () => {
