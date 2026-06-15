@@ -113,7 +113,7 @@ export const handler: Handler = Router([
 	},
 	{
 		httpMethod: 'GET',
-		path: '/secondaryUser',
+		path: '/secondary-users',
 		handler: withBodyParser(
 			listSecondaryUsersBodySchema,
 			withMMAIdentityCheck(

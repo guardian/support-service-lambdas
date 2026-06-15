@@ -62,7 +62,7 @@ Headers: 'x-identity-id' - the identity id of the user creating the invitation
 
 #### Request:
 
-GET /subscriptions/{subscriptionName}/invitations
+GET /invitations
 
 Headers: 'x-identity-id' - the identity id of the primary user
 
@@ -87,7 +87,7 @@ Headers: 'x-identity-id' - the identity id of the primary user
 
 #### Request:
 
-GET /subscriptions/{subscriptionName}/secondary-users
+GET /secondary-users
 
 Headers: 'x-identity-id' - the identity id of the primary user
 
