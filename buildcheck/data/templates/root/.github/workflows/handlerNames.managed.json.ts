@@ -6,5 +6,5 @@ const cdkOnlyProject = 'salesforce-event-bus';
 
 export default (build: BuildDefinition) => ({
 	NOTICE: notice(__filename),
-	subproject: [...build.handlers.map((def) => def.name), cdkOnlyProject].sort(),
+	subproject: [...build.handlers.map((def) => def.name), cdkOnlyProject],
 });
