@@ -9,12 +9,30 @@ const identityUserSchema = z.object({
 	publicFields: z.object({ displayName: z.string() }),
 });
 
+const identityUserWithPrivateFieldsSchema = z.object({
+	id: z.string(),
+	primaryEmailAddress: z.string().optional(),
+	publicFields: z.object({ displayName: z.string() }),
+	privateFields: z.object({
+		brazeUuid: z.string().optional(),
+	}),
+});
+
 type IdentityUser = z.infer<typeof identityUserSchema>;
 
 const userByEmailResponseSchema = z.object({
 	status: z.literal('ok'),
 	user: identityUserSchema,
 });
+
+const userByIdentityIdResponseSchema = z.object({
+	status: z.literal('ok'),
+	user: identityUserWithPrivateFieldsSchema,
+});
+
+type IdentityUserWithPrivateFields = z.infer<
+	typeof identityUserWithPrivateFieldsSchema
+>;
 
 const guestAccountResponseSchema = z.object({
 	status: z.literal('ok'),
@@ -43,6 +61,30 @@ export const getUserByEmail = async (
 			// Any other error should be thrown
 			console.log(`No user found for email ${email}`);
 			return;
+		}
+		throw error;
+	}
+};
+
+export const getUserByIdentityId = async (
+	client: IdentityClient,
+	identityId: string,
+): Promise<IdentityUserWithPrivateFields | undefined> => {
+	try {
+		const response = await client.get<
+			z.input<typeof userByIdentityIdResponseSchema>,
+			z.output<typeof userByIdentityIdResponseSchema>,
+			typeof userByIdentityIdResponseSchema
+		>(
+			`/user/${encodeURIComponent(identityId)}`,
+			userByIdentityIdResponseSchema,
+		);
+		return response.user;
+	} catch (error) {
+		if (error instanceof RestClientError && error.status === 404) {
+			// A 404 means there is no user with that identity ID.
+			console.log(`No user found for identity ID ${identityId}`);
+			return undefined;
 		}
 		throw error;
 	}
