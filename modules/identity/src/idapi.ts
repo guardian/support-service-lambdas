@@ -67,11 +67,7 @@ export const getUserByIdentityId = async (
 	identityId: string,
 ): Promise<IdentityUserWithPrivateFields | undefined> => {
 	try {
-		const response = await client.get<
-			z.input<typeof userByIdentityIdResponseSchema>,
-			z.output<typeof userByIdentityIdResponseSchema>,
-			typeof userByIdentityIdResponseSchema
-		>(
+		const response = await client.get(
 			`/user/${encodeURIComponent(identityId)}`,
 			userByIdentityIdResponseSchema,
 		);
