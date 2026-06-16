@@ -446,7 +446,7 @@ exports[`The sf-move-subscriptions-api stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "LambdaRestApiDeployment95319089c9b7345418856597d39fed8581f9cc79": {
+    "LambdaRestApiDeployment95319089dc25b77f05c745bd119211feedee1a98": {
       "DependsOn": [
         "LambdaRestApiproxyANY486C4D1F",
         "LambdaRestApiproxy22103CFD",
@@ -466,7 +466,7 @@ exports[`The sf-move-subscriptions-api stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "LambdaRestApiDeployment95319089c9b7345418856597d39fed8581f9cc79",
+          "Ref": "LambdaRestApiDeployment95319089dc25b77f05c745bd119211feedee1a98",
         },
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",
@@ -1401,7 +1401,7 @@ exports[`The sf-move-subscriptions-api stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "LambdaRestApiDeployment95319089e8545d956fba61be8c00aaea7c57f5c1": {
+    "LambdaRestApiDeployment95319089b04e9bb157557257f9480a37aa81d11d": {
       "DependsOn": [
         "LambdaRestApiproxyANY486C4D1F",
         "LambdaRestApiproxy22103CFD",
@@ -1421,7 +1421,7 @@ exports[`The sf-move-subscriptions-api stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "LambdaRestApiDeployment95319089e8545d956fba61be8c00aaea7c57f5c1",
+          "Ref": "LambdaRestApiDeployment95319089b04e9bb157557257f9480a37aa81d11d",
         },
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",
