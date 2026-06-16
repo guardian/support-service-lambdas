@@ -726,7 +726,7 @@ exports[`The braze acquisition events sync stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "LambdaRestApiDeployment95319089be5a55c29de939eed6509da87100ea97": {
+    "LambdaRestApiDeployment95319089db4974f98497de81951eaa350d8aa124": {
       "DependsOn": [
         "LambdaRestApiproxyANY486C4D1F",
         "LambdaRestApiproxy22103CFD",
@@ -746,7 +746,7 @@ exports[`The braze acquisition events sync stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "LambdaRestApiDeployment95319089be5a55c29de939eed6509da87100ea97",
+          "Ref": "LambdaRestApiDeployment95319089db4974f98497de81951eaa350d8aa124",
         },
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",
@@ -1926,7 +1926,7 @@ exports[`The braze acquisition events sync stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "LambdaRestApiDeployment95319089ad62b4f7c79c34adbc8c368b44acb5ba": {
+    "LambdaRestApiDeployment953190899a7514581b2214a5cffcbd73c5734f15": {
       "DependsOn": [
         "LambdaRestApiproxyANY486C4D1F",
         "LambdaRestApiproxy22103CFD",
@@ -1946,7 +1946,7 @@ exports[`The braze acquisition events sync stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "LambdaRestApiDeployment95319089ad62b4f7c79c34adbc8c368b44acb5ba",
+          "Ref": "LambdaRestApiDeployment953190899a7514581b2214a5cffcbd73c5734f15",
         },
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",

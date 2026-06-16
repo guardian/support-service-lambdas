@@ -1322,7 +1322,7 @@ exports[`The stripe disputes webhook API stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "stripedisputeslambdaproducerstripedisputesproducerCODEDeploymentECBEB16545cfa47daab6724d3ef6e4ff15fac98e": {
+    "stripedisputeslambdaproducerstripedisputesproducerCODEDeploymentECBEB165162a28c677e2a8425412124523e822f8": {
       "DependsOn": [
         "stripedisputeslambdaproducerstripedisputesproducerCODEproxyANYC01EF3FC",
         "stripedisputeslambdaproducerstripedisputesproducerCODEproxyA9D84AD7",
@@ -1342,7 +1342,7 @@ exports[`The stripe disputes webhook API stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODEDeploymentECBEB16545cfa47daab6724d3ef6e4ff15fac98e",
+          "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODEDeploymentECBEB165162a28c677e2a8425412124523e822f8",
         },
         "RestApiId": {
           "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODE94CD3A3A",
@@ -3031,7 +3031,7 @@ DLQ: https://",
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "stripedisputeslambdaproducerstripedisputesproducerPRODDeploymentCC0BB07C8cf8bf1152da71205a48d1f5763d672b": {
+    "stripedisputeslambdaproducerstripedisputesproducerPRODDeploymentCC0BB07C0671608bd7b49e1193e1d144d489d981": {
       "DependsOn": [
         "stripedisputeslambdaproducerstripedisputesproducerPRODproxyANY523CD05A",
         "stripedisputeslambdaproducerstripedisputesproducerPRODproxy7610EE25",
@@ -3051,7 +3051,7 @@ DLQ: https://",
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODDeploymentCC0BB07C8cf8bf1152da71205a48d1f5763d672b",
+          "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODDeploymentCC0BB07C0671608bd7b49e1193e1d144d489d981",
         },
         "RestApiId": {
           "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODB20FADF6",

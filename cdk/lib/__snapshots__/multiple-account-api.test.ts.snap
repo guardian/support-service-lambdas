@@ -554,7 +554,7 @@ exports[`The Multiple account api stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "LambdaRestApiDeployment953190898b462d9ce8f351b7cc4880f45709b8ef": {
+    "LambdaRestApiDeployment953190899ba7460b40e6505606fdb96196498205": {
       "DependsOn": [
         "LambdaRestApiproxyANY486C4D1F",
         "LambdaRestApiproxy22103CFD",
@@ -574,7 +574,7 @@ exports[`The Multiple account api stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "LambdaRestApiDeployment953190898b462d9ce8f351b7cc4880f45709b8ef",
+          "Ref": "LambdaRestApiDeployment953190899ba7460b40e6505606fdb96196498205",
         },
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",
@@ -1823,7 +1823,7 @@ exports[`The Multiple account api stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "LambdaRestApiDeployment95319089ed584e24bcabb7de566d47213981080b": {
+    "LambdaRestApiDeployment95319089915a8aaa44b109e13e006efed4775ac1": {
       "DependsOn": [
         "LambdaRestApiproxyANY486C4D1F",
         "LambdaRestApiproxy22103CFD",
@@ -1843,7 +1843,7 @@ exports[`The Multiple account api stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "LambdaRestApiDeployment95319089ed584e24bcabb7de566d47213981080b",
+          "Ref": "LambdaRestApiDeployment95319089915a8aaa44b109e13e006efed4775ac1",
         },
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",
