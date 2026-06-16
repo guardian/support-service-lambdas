@@ -630,9 +630,6 @@ const ticketTailorWebhook: HandlerDefinition = {
 
 const updateSupporterPlusAmount: HandlerDefinition = {
 	name: 'update-supporter-plus-amount',
-	extraScripts: {
-		local: 'STAGE=CODE tsx runManual/local.ts',
-	},
 	dependencies: {
 		...dep['@aws-sdk/client-sqs'],
 		...dep['@hono/zod-openapi'],

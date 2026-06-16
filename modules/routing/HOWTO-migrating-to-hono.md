@@ -3,12 +3,12 @@
 ## Benefits of migrating handlers
 
 - OpenAPI spec and docs UI at `/openapi.json` and `/docs` auto-generated from your routes
-- Local development server via `pnpm local`
+- Local development server via `runManual/local.ts` script
 - better standardisation and testability on a commonly used platform
 
 ## Add dependencies
 
-In `build.ts`, add the dependencies to your handler:
+In `build.ts`, add the dependency to your handler:
 ```ts
 const updateSupporterPlusAmount: HandlerDefinition = {
     name: 'update-supporter-plus-amount',
@@ -118,28 +118,19 @@ handled automatically by `createHonoApp`'s `onError` hook.
 
 (add local.ts manually - in future it will be managed by buildcheck)
 
-Add a `src/local.ts` file:
+Add a `runManual/local.ts` file:
 
 ```ts
+#!/usr/bin/env -S STAGE=CODE pnpm exec tsx
 import { serveLocally } from '@modules/routing/honoLocalServer';
-import { app } from './index';
+import { app } from '../src/index';
+
+/*
+To use this, run this file as a script, you can click the green triangle in intellij
+ */
 
 serveLocally(app, 8787);
 ```
 
-And add a `local` script to your handler in `build.ts`, as per this example:
-
-```ts
-const updateSupporterPlusAmount: HandlerDefinition = {
-    name: 'update-supporter-plus-amount',
-    ...
-    extraScripts: {
-        local: 'STAGE=CODE tsx runManual/local.ts', // Add this line
-    },
-    ...
-};
-```
-then run `pnpm snapshot:update` to refresh the package.json
-
-Running `pnpm local` starts a local HTTP server, opens the try-it/docs UI in your browser, and
+Running `runManual/local.ts` starts a local HTTP server, opens the try-it/docs UI in your browser, and
 accesses CODE config and resources via janus credentials.
