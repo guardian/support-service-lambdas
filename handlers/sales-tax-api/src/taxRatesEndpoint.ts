@@ -11,6 +11,10 @@ import {
 	getZuoraTaxPeriods,
 	getZuoraTaxRates,
 } from '@modules/zuora/tax';
+import type {
+	ZuoraTaxPeriod,
+	ZuoraTaxRate,
+} from '@modules/zuora/types/objects/tax';
 import {
 	type ZuoraTaxCode,
 	zuoraTaxCodeSchema,
@@ -20,7 +24,6 @@ import {
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import type z from 'zod';
-import { canadianCountryStates } from '../test/fixtures';
 import type { ZuoraGetRatesPath } from './schemas';
 import {
 	type TaxRatesRequest,
@@ -34,21 +37,6 @@ const taxExclusiveProductNames: Partial<Record<ProductKey, string>> = {
 	DigitalSubscription: `Digital Pack`,
 };
 
-export const caStatesReverse: Record<string, string> = {
-	Alberta: 'AB',
-	'British Columbia': 'BC',
-	Manitoba: 'MB',
-	'New Brunswick': 'NB',
-	'Newfoundland and Labrador': 'NL',
-	'Northwest Territories': 'NT',
-	'Nova Scotia': 'NS',
-	Nunavut: 'NU',
-	Ontario: 'ON',
-	'Prince Edward Island': 'PE',
-	Quebec: 'QC',
-	Saskatchewan: 'SK',
-	Yukon: 'YT',
-};
 const caStatesDefault: TaxRatesResponse = {
 	NL: 0,
 	SK: 0,
@@ -150,7 +138,7 @@ async function getZuoraSalesTaxRates(
 	if (!zuoraTaxCodes) {
 		throw new ValidationError(`no tax codes found`);
 	}
-	const zuoraTaxCode = findTaxExclusiveProductZuoraTaxId(
+	const zuoraTaxCode = getProductZuoraTaxCode(
 		productKey,
 		zuoraTaxCodes.taxCodes,
 	);
@@ -162,34 +150,20 @@ async function getZuoraSalesTaxRates(
 	if (!zuoraTaxPeriods) {
 		throw new ValidationError(`no tax periods found`);
 	}
-	const productTaxPeriod = zuoraTaxPeriods.taxRatePeriods.filter(
-		(zuoraTaxPeriod) => zuoraTaxPeriod.taxCodeId === zuoraTaxCode.id,
-	)[0];
-	if (!productTaxPeriod) {
+	const zuoraTaxPeriod = getZuoraTaxPeriod(
+		zuoraTaxCode.id,
+		zuoraTaxPeriods.taxRatePeriods,
+	);
+	if (!zuoraTaxPeriod) {
 		throw new ValidationError(`invalid period for productKey:${productKey}`);
 	}
 
-	const zuoraTaxRates = await getZuoraTaxRates(
-		zuoraClient,
-		productTaxPeriod.id,
-	);
-	const countryZuoraTaxRates = zuoraTaxRates.taxRates.filter(
-		(zuoraTaxRate) => zuoraTaxRate.country === getCountryNameByIsoCode(country),
-	);
-	
-	const countryTaxRates: TaxRatesResponse = { ...caStatesDefault };
-	Object.keys(countryTaxRates).forEach((key) => {
-		if (isTaxRateKey(key)) {
-			const zuoraTaxRate = countryZuoraTaxRates.find(
-				(zuoraTaxRate) => zuoraTaxRate.state === caStates[key],
-			);
-			countryTaxRates[key] = zuoraTaxRate?.taxRate1 ?? 0;
-		}
-	});
-	return countryTaxRates;
+	const zuoraTaxRates = await getZuoraTaxRates(zuoraClient, zuoraTaxPeriod.id);
+	const cadZuoraTaxRates = getCadZuoraTaxRates(zuoraTaxRates.taxRates);
+	return createCadStateTaxRates(cadZuoraTaxRates);
 }
 
-function findTaxExclusiveProductZuoraTaxId(
+function getProductZuoraTaxCode(
 	productKey: ProductKey,
 	zuoraTaxCodes: ZuoraTaxCode[],
 ) {
@@ -199,6 +173,35 @@ function findTaxExclusiveProductZuoraTaxId(
 	);
 }
 
+function getZuoraTaxPeriod(
+	zuoraTaxCode: string,
+	zuoraTaxPeriods: ZuoraTaxPeriod[],
+) {
+	return zuoraTaxPeriods.filter(
+		(zuoraTaxPeriod) => zuoraTaxPeriod.taxCodeId === zuoraTaxCode,
+	)[0];
+}
+
+function getCadZuoraTaxRates(zuoraTaxRates: ZuoraTaxRate[]): ZuoraTaxRate[] {
+	return zuoraTaxRates.filter(
+		(zuoraTaxRate) => zuoraTaxRate.country === getCountryNameByIsoCode('CA'),
+	);
+}
+
+function createCadStateTaxRates(
+	cadZuoraTaxRates: ZuoraTaxRate[],
+): TaxRatesResponse {
+	const cadStateTaxRates: TaxRatesResponse = { ...caStatesDefault };
+	Object.keys(cadStateTaxRates).forEach((key) => {
+		if (isTaxRateKey(key)) {
+			const zuoraTaxRate = cadZuoraTaxRates.find(
+				(zuoraTaxRate) => caStates[key] === zuoraTaxRate.state,
+			);
+			cadStateTaxRates[key] = zuoraTaxRate?.taxRate1 ?? 0;
+		}
+	});
+	return cadStateTaxRates;
+}
 function isTaxRateKey(key: string): key is keyof TaxRatesResponse {
-	return key in canadianCountryStates;
+	return key in caStatesDefault;
 }
