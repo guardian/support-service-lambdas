@@ -12,15 +12,15 @@ import {
 	zuoraTaxRateSchema,
 } from '@modules/zuora/types/objects/tax';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-// import { taxRatesResponseSchema } from '../src/schemas';
+import { taxRatesResponseSchema } from '../src/schemas';
 import {
-	// taxRatesEndpoint,
+	taxRatesEndpoint,
 	zuoraTaxCodesEndpoint,
 	zuoraTaxPeriodsEndpoint,
 	zuoraTaxRatesEndpoint,
 } from '../src/taxRatesEndpoint';
 import {
-	// countryStates,
+	countryStates,
 	supporterPlusTaxEngineId,
 	zuoraTaxCodePeriod,
 	zuoraTaxCodeSupporterPlus,
@@ -35,7 +35,7 @@ export {
 } from './fixtures';
 
 describe('SalesTax API Integration', () => {
-	// const country = 'CA';
+	const country = 'CA';
 	const stage = 'CODE';
 
 	test('we can retrieve all Zuora tax codes', async () => {
@@ -76,16 +76,16 @@ describe('SalesTax API Integration', () => {
 		expect(body.taxRates).toContainEqual(zuoraTaxRateSupporterPlus);
 	});
 
-	// test('we can retrieve SupporterPlus Canadian tax rates', async () => {
-	// 	const zuoraClient = await ZuoraClient.create(stage);
+	test('we can retrieve SupporterPlus Canadian tax rates', async () => {
+		const zuoraClient = await ZuoraClient.create(stage);
 
-	// 	const result = await taxRatesEndpoint(zuoraClient, {
-	// 		productKey: 'SupporterPlus',
-	// 		country,
-	// 	});
+		const result = await taxRatesEndpoint(zuoraClient, {
+			productKey: 'SupporterPlus',
+			country,
+		});
 
-	// 	expect(result.statusCode).toEqual(200);
-	// 	const body = taxRatesResponseSchema.parse(JSON.parse(result.body));
-	// 	expect(body).toEqual(countryStates[country]);
-	// });
+		expect(result.statusCode).toEqual(200);
+		const body = taxRatesResponseSchema.parse(JSON.parse(result.body));
+		expect(body).toEqual(countryStates[country]);
+	});
 });

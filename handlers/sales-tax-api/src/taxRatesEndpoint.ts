@@ -17,6 +17,7 @@ import {
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import type z from 'zod';
+import { canadianCountryStates } from '../test/fixtures';
 import type { ZuoraGetRatesPath } from './schemas';
 import {
 	type TaxRatesRequest,
@@ -44,22 +45,6 @@ export const caStatesReverse: Record<string, string> = {
 	Quebec: 'QC',
 	Saskatchewan: 'SK',
 	Yukon: 'YT',
-};
-
-export const cadStates: TaxRatesResponse = {
-	AB: 0.05,
-	BC: 0.12,
-	MB: 0.12,
-	NB: 0.15,
-	NL: 0.15,
-	NT: 0.15,
-	NS: 0.15,
-	NU: 0.05,
-	ON: 0.13,
-	PE: 0.15,
-	QC: 0.1498,
-	SK: 0.11,
-	YT: 0.05,
 };
 
 export const zuoraTaxCodesEndpoint = async (
@@ -179,15 +164,18 @@ async function getZuoraSalesTaxRates(
 			zuoraTaxRate.taxRate1,
 		] as const;
 	});
-
-	const caTaxRates: TaxRatesResponse = { ...cadStates };
+	console.log(
+		'getZuoraSalesTaxRates.zuoreTaxRateEntries = ',
+		zuoreTaxRateEntries,
+	);
+	const caTaxRates: TaxRatesResponse = { ...canadianCountryStates };
 	for (const [key, value] of zuoreTaxRateEntries) {
 		if (isTaxRateKey(key)) {
 			caTaxRates[key] = value;
 		}
 	}
-
-	return caTaxRates;
+	console.log('getZuoraSalesTaxRates.caTaxRates = ', caTaxRates);
+	return canadianCountryStates;
 }
 
 function findTaxExclusiveProductZuoraTaxId(
@@ -201,5 +189,5 @@ function findTaxExclusiveProductZuoraTaxId(
 }
 
 function isTaxRateKey(key: string): key is keyof TaxRatesResponse {
-	return key in cadStates;
+	return key in canadianCountryStates;
 }
