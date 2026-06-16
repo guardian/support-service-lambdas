@@ -35,6 +35,26 @@ export function objectFromEntries<K extends string, V>(
 
 type NonUndefined<T> = T extends undefined ? never : T;
 
+/** Distributes a union of object types into their intersection. */
+export type UnionToIntersection<U> = (
+	U extends unknown ? (x: U) => void : never
+) extends (x: infer I) => void
+	? I
+	: never;
+
+/**
+ * Merges all values of an object (which are themselves object fragments)
+ * into a single intersection type. Useful when values are e.g. Zod shape fragments.
+ */
+export function mergeValues<O extends Record<string, Record<string, unknown>>>(
+	obj: O,
+): UnionToIntersection<O[keyof O]> {
+	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- allowed in utility function - merging object fragments yields their intersection
+	return Object.assign({}, ...Object.values(obj)) as UnionToIntersection<
+		O[keyof O]
+	>;
+}
+
 export function objectEntries<T extends object>(
 	theMappings: T,
 ): Array<
@@ -52,6 +72,19 @@ export function objectEntries<T extends object>(
 			}[keyof T]
 		>
 	>;
+}
+
+/**
+ * Returns a new object containing only the specified keys, preserving per-key value types.
+ */
+export function pickKeys<O extends Record<string, unknown>, K extends keyof O>(
+	obj: O,
+	keys: readonly K[],
+): { [P in K]: O[P] } {
+	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- allowed in utility function - get back type lost by Object.fromEntries
+	return Object.fromEntries(keys.map((k) => [k, obj[k]])) as {
+		[P in K]: O[P];
+	};
 }
 
 /**
