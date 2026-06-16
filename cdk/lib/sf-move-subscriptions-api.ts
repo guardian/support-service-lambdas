@@ -1,6 +1,6 @@
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { AllowSqsSendPolicy } from './cdk/policies';
 import { SrApiLambda } from './cdk/SrApiLambda';
 import type { SrStageNames } from './cdk/SrStack';
@@ -17,11 +17,14 @@ export class SfMoveSubscriptionsApi extends SrStack {
 		const lambda = new SrApiLambda(this, 'Lambda', {
 			lambdaOverrides: {
 				runtime: Runtime.JAVA_21,
+				architecture: Architecture.ARM_64,
 				fileName: 'sf-move-subscriptions-api.jar',
 				handler: 'com.gu.sf.move.subscriptions.api.Handler::handle',
 				memorySize: 1536,
 				timeout: Duration.seconds(300),
 				description: 'API for moving subscriptions between Salesforce accounts',
+				// The handler reads sys.env("Stage"); guCDK only injects uppercase STAGE.
+				environment: { Stage: stage },
 			},
 			monitoring: {
 				errorImpact:

@@ -126,6 +126,9 @@ exports[`The sf-move-subscriptions-api stack matches the snapshot 1`] = `
         "LambdaServiceRoleA8ED4D3B",
       ],
       "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
         "Code": {
           "S3Bucket": {
             "Ref": "DistributionBucketName",
@@ -139,6 +142,7 @@ exports[`The sf-move-subscriptions-api stack matches the snapshot 1`] = `
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "membership",
             "STAGE": "CODE",
+            "Stage": "CODE",
           },
         },
         "FunctionName": "sf-move-subscriptions-api-CODE",
@@ -1077,6 +1081,9 @@ exports[`The sf-move-subscriptions-api stack matches the snapshot 2`] = `
         "LambdaServiceRoleA8ED4D3B",
       ],
       "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
         "Code": {
           "S3Bucket": {
             "Ref": "DistributionBucketName",
@@ -1090,6 +1097,7 @@ exports[`The sf-move-subscriptions-api stack matches the snapshot 2`] = `
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "membership",
             "STAGE": "PROD",
+            "Stage": "PROD",
           },
         },
         "FunctionName": "sf-move-subscriptions-api-PROD",
