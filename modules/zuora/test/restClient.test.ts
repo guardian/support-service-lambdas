@@ -64,6 +64,31 @@ describe('RestClient', () => {
 				expect.objectContaining({ method: 'GET' }),
 			);
 		});
+
+		it('should make a GET request with URLSearchParams including duplicate keys', async () => {
+			const schema = z.object({ id: z.string(), name: z.string() });
+			const mockResponse = { id: '456', name: 'Test2' };
+
+			mockFetchResponse({
+				ok: true,
+				status: 200,
+				body: mockResponse,
+				headers: {},
+			});
+
+			const params = new URLSearchParams();
+			params.append('pageSize', '99');
+			params.append('fields[]', 'id');
+			params.append('fields[]', 'name');
+
+			const result = await client.get('/users', schema, params);
+
+			expect(result).toEqual(mockResponse);
+			expect(fetchMock).toHaveBeenCalledWith(
+				`${mockBaseUrl}/users?pageSize=99&fields%5B%5D=id&fields%5B%5D=name`,
+				expect.objectContaining({ method: 'GET' }),
+			);
+		});
 	});
 
 	describe('post', () => {

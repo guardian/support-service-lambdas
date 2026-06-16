@@ -21,10 +21,12 @@
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
     "zod": "catalog:",
-    "routing": "workspace:*"
+    "routing": "workspace:*",
+    "zuora": "workspace:*"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147",
-    "@redocly/cli": "2.30.5"
+    "@redocly/cli": "2.30.5",
+    "tsx": "^4.21.0"
   }
 }
