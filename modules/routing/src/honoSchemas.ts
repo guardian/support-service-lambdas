@@ -13,6 +13,14 @@ export const jsonContent = <S extends z.ZodType>(
 });
 
 /**
+ * Wraps a zod schema into the standard hono/zod-openapi required JSON request body shape.
+ */
+export const requiredJsonRequestBody = <S extends z.ZodType>(schema: S) => ({
+	required: true,
+	content: { 'application/json': { schema } },
+});
+
+/**
  * Standard 400 response schema for hono routes.
  * Two distinct sources, modelled as a union:
  *  - input validation failures (defaultHook):           { error, details }

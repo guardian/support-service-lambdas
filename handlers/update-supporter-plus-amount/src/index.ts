@@ -7,6 +7,7 @@ import {
 	errorResponses,
 	jsonContent,
 	mmaRequestHeaders,
+	requiredJsonRequestBody,
 } from '@modules/routing/honoSchemas';
 import { fetchSubscriptionWithIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
 import { stageFromEnvironment } from '@modules/stage';
@@ -44,14 +45,7 @@ const updateSupporterPlusAmountRoute = createRoute({
 	request: {
 		params: pathParserSchema,
 		headers: mmaRequestHeaders,
-		body: {
-			required: true,
-			content: {
-				'application/json': {
-					schema: requestBodySchema,
-				},
-			},
-		},
+		body: requiredJsonRequestBody(requestBodySchema),
 	},
 	responses: {
 		200: jsonContent(successResponseSchema, 'Amount was updated successfully'),
