@@ -808,9 +808,6 @@ importers:
       '@aws-sdk/client-sqs':
         specifier: ^3.940.0
         version: 3.1054.0
-      '@hono/node-server':
-        specifier: ^1.17.1
-        version: 1.19.14(hono@4.12.23)
       '@hono/zod-openapi':
         specifier: ^0.19.10
         version: 0.19.10(hono@4.12.23)(zod@3.25.76)
@@ -1122,12 +1119,21 @@ importers:
 
   modules/routing:
     dependencies:
+      '@hono/node-server':
+        specifier: ^1.17.1
+        version: 1.19.14(hono@4.12.23)
+      '@hono/zod-openapi':
+        specifier: ^0.19.10
+        version: 0.19.10(hono@4.12.23)(zod@3.25.76)
       aws:
         specifier: workspace:*
         version: link:../aws
       dayjs:
         specifier: ^1.11.13
         version: 1.11.21
+      hono:
+        specifier: ^4.10.4
+        version: 4.12.23
       logger:
         specifier: workspace:*
         version: link:../logger

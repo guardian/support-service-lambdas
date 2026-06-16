@@ -1,4 +1,4 @@
-import { buildScalarDocsHtml } from '../src/openApiDocs';
+import { buildScalarDocsHtml } from '@modules/routing/honoOpenApiDocs';
 
 describe('Hono docs routes', () => {
 	beforeEach(() => {
@@ -22,7 +22,7 @@ describe('Hono docs routes', () => {
 	});
 
 	test('builds scalar html that points at openapi.json', () => {
-		const body = buildScalarDocsHtml('/openapi.json');
+		const body = buildScalarDocsHtml('/openapi.json', 'My API');
 
 		expect(body).toContain('@scalar/api-reference');
 		expect(body).toContain('data-url="/openapi.json"');

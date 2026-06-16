@@ -146,6 +146,9 @@ const moduleRouting: ModuleDefinition = {
 	dependencies: {
 		...dep['zod'],
 		...dep['dayjs'],
+		...dep['hono'],
+		...dep['@hono/zod-openapi'],
+		...dep['@hono/node-server'],
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
@@ -628,11 +631,10 @@ const ticketTailorWebhook: HandlerDefinition = {
 const updateSupporterPlusAmount: HandlerDefinition = {
 	name: 'update-supporter-plus-amount',
 	extraScripts: {
-		local: 'STAGE=CODE HOST=127.0.0.1 PORT=8787 tsx src/local.ts',
+		local: 'tsx runManual/local.ts',
 	},
 	dependencies: {
 		...dep['@aws-sdk/client-sqs'],
-		...dep['@hono/node-server'],
 		...dep['@hono/zod-openapi'],
 		...dep.dayjs,
 		...dep.hono,

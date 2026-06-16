@@ -1,11 +1,12 @@
 export const buildScalarDocsHtml = (
 	openApiUrl: string,
+	title: string,
 ): string => `<!doctype html>
 <html>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Update supporter plus amount API docs</title>
+    <title>${title}</title>
   </head>
   <body>
     <script
