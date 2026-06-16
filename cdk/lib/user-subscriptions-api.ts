@@ -1,4 +1,5 @@
 import type { App } from 'aws-cdk-lib';
+import { AllowZuoraOAuthSecretsPolicy } from './cdk/policies';
 import { SrApiLambda } from './cdk/SrApiLambda';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
@@ -7,7 +8,7 @@ export class UserSubscriptionsApi extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
 		super(scope, { stage, app: 'user-subscriptions-api' });
 
-		new SrApiLambda(this, 'Lambda', {
+		const lambda = new SrApiLambda(this, 'Lambda', {
 			lambdaOverrides: {
 				description:
 					'A lambda that efficiently returns detailed user subscription information for account overview',
@@ -21,5 +22,7 @@ export class UserSubscriptionsApi extends SrStack {
 				burstLimit: 10,
 			},
 		});
+
+		lambda.addPolicies(new AllowZuoraOAuthSecretsPolicy(this));
 	}
 }
