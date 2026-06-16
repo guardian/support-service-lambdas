@@ -6,10 +6,11 @@ import {
 	type TransactWriteItem,
 } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
+import { logger } from '@modules/logger/logger';
 import type { Stage } from '@modules/stage';
 import { z } from 'zod';
 
-const secondaryUserRecordSchema = z.object({
+export const secondaryUserRecordSchema = z.object({
 	subscriptionName: z.string(),
 	secondaryIdentityId: z.string(),
 	primaryIdentityId: z.string(),
@@ -57,6 +58,9 @@ export class SecondaryUserRepository {
 	}
 
 	async list(subscriptionName: string): Promise<SecondaryUserRecord[]> {
+		logger.log(
+			`Querying secondary users for primary subscription ${subscriptionName}`,
+		);
 		const result = await this.client.send(
 			new QueryCommand({
 				TableName: this.tableName,

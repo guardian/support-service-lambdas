@@ -1,4 +1,5 @@
 import { Lazy } from '@modules/lazy';
+import { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { stageFromEnvironment } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
@@ -9,7 +10,6 @@ import {
 	isDiscountProductRatePlanItem,
 } from '../services/discounts';
 import { DynamoService } from '../services/dynamoService';
-import { SecondaryUserService } from '../services/secondaryUserService';
 import { ZuoraSubscriptionService } from '../services/zuoraSubscriptionService';
 import {
 	processEvent,
@@ -22,7 +22,7 @@ const buildDependencies = async (): Promise<ProcessItemDependencies> => {
 	const zuoraClient = await ZuoraClient.create(stage);
 	const subscriptionService = new ZuoraSubscriptionService(zuoraClient);
 	const dynamoService = new DynamoService(stage);
-	const secondaryUserService = SecondaryUserService.create(stage);
+	const secondaryUserRepository = SecondaryUserRepository.create(stage);
 
 	const zuoraCatalog = await getZuoraCatalogFromS3(stage);
 	const productCatalog = await getProductCatalogFromApi(stage);
@@ -39,7 +39,7 @@ const buildDependencies = async (): Promise<ProcessItemDependencies> => {
 			subscriptionService.getSubscription(subscriptionName),
 		writeItem: (item) => dynamoService.writeItem(item),
 		getSecondaryUsers: (subscriptionName) =>
-			secondaryUserService.listBySubscription(subscriptionName),
+			secondaryUserRepository.list(subscriptionName),
 		updateSecondarySubscription: (
 			secondaryIdentityId,
 			secondarySubscriptionName,

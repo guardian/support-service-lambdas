@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@modules/*": [
+        "../../modules/*"
+      ],
+      "@modules/logger/*": [
+        "../../modules/logger/src/*"
+      ],
+      "@modules/multiple-account/*": [
+        "../../modules/multiple-account/src/*"
+      ]
+    }
+  }
+}

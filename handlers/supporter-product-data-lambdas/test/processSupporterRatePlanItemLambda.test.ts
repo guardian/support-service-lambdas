@@ -1,7 +1,7 @@
+import type { SecondaryUserRecord } from '@modules/multiple-account/secondaryUserRepository';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import dayjs from 'dayjs';
 import { processItem } from '../src/handlers/processSupporterRatePlanItem';
-import type { SecondaryUser } from '../src/services/secondaryUserService';
 
 const item: SupporterRatePlanItem = {
 	subscriptionName: 'sub-1',
@@ -12,7 +12,9 @@ const item: SupporterRatePlanItem = {
 	contractEffectiveDate: dayjs('2026-02-01'),
 };
 
-const noSecondaryUsers = jest.fn(() => Promise.resolve([] as SecondaryUser[]));
+const noSecondaryUsers = jest.fn(() =>
+	Promise.resolve([] as SecondaryUserRecord[]),
+);
 const updateSecondaryItem = jest.fn(() => Promise.resolve());
 
 describe('processSupporterRatePlanItemLambda', () => {
@@ -91,9 +93,19 @@ describe('processSupporterRatePlanItemLambda', () => {
 
 	test('updates secondary items when present', async () => {
 		const writeItem = jest.fn(() => Promise.resolve());
-		const secondaryUsers: SecondaryUser[] = [
-			{ subscriptionName: 'sub-1', secondaryIdentityId: 'secondary-id-1' },
-			{ subscriptionName: 'sub-1', secondaryIdentityId: 'secondary-id-2' },
+		const secondaryUsers: SecondaryUserRecord[] = [
+			{
+				subscriptionName: 'sub-1',
+				secondaryIdentityId: 'secondary-id-1',
+				primaryIdentityId: 'primary-id-1',
+				acceptedDate: '2026-01-01',
+			},
+			{
+				subscriptionName: 'sub-1',
+				secondaryIdentityId: 'secondary-id-2',
+				primaryIdentityId: 'primary-id-1',
+				acceptedDate: '2026-01-02',
+			},
 		];
 		const getSecondaryUsers = jest.fn(() => Promise.resolve(secondaryUsers));
 

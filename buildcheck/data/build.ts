@@ -219,6 +219,16 @@ const moduleIdentity: ModuleDefinition = {
 	moduleDependencies: [moduleAws, moduleZuora],
 };
 
+const moduleMultipleAccount: ModuleDefinition = {
+	name: 'multiple-account',
+	devDependencies: {
+		...dep['@aws-sdk/client-dynamodb'],
+		...dep['@aws-sdk/util-dynamodb'],
+		...dep['zod'],
+	},
+	moduleDependencies: [moduleLogger],
+};
+
 const moduleSupporterProductData: ModuleDefinition = {
 	name: 'supporter-product-data',
 	devDependencies: {
@@ -741,6 +751,7 @@ const multipleAccountApi: HandlerDefinition = {
 		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr multiple-account-api.zip ./*.js.map ./*.js`,
 	},
 	moduleDependencies: [
+		moduleMultipleAccount,
 		moduleRouting,
 		moduleLogger,
 		moduleIdentity,
@@ -838,6 +849,7 @@ const supporterProductDataLambdas: HandlerDefinition = {
 	dependencies: {
 		...dep['@aws-sdk/client-cloudwatch'],
 		...dep['@aws-sdk/client-dynamodb'],
+		...dep['@aws-sdk/util-dynamodb'],
 		...dep['@aws-sdk/client-s3'],
 		...dep['@aws-sdk/client-sqs'],
 		...dep['@aws-sdk/client-ssm'],
@@ -852,6 +864,7 @@ const supporterProductDataLambdas: HandlerDefinition = {
 	},
 	moduleDependencies: [
 		moduleLogger,
+		moduleMultipleAccount,
 		moduleZuora,
 		moduleInternationalisation,
 		moduleSupporterProductData,
@@ -918,6 +931,7 @@ export const build: BuildDefinition = {
 		moduleIdentity,
 		moduleInternationalisation,
 		moduleLogger,
+		moduleMultipleAccount,
 		moduleProductBenefits,
 		moduleProductCatalog,
 		modulePromotions,

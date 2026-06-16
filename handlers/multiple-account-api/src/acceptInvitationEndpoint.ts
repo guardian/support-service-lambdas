@@ -1,5 +1,6 @@
 import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import type { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import type { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import {
 	badRequest,
@@ -17,7 +18,6 @@ import { zuoraDateFormat } from '@modules/zuora/utils';
 import dayjs from 'dayjs';
 import { z } from 'zod';
 import type { InvitationRepository } from './invitationRepository';
-import type { SecondaryUserRepository } from './secondaryUserRepository';
 
 export const acceptInvitationPathSchema = z.object({
 	invitationCode: z.string(),

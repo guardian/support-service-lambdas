@@ -130,25 +130,6 @@ importers:
         specifier: ^4.21.0
         version: 4.21.0
 
-  handlers/braze-acquisition-events-sync:
-    dependencies:
-      identity:
-        specifier: workspace:*
-        version: link:../../modules/identity
-      logger:
-        specifier: workspace:*
-        version: link:../../modules/logger
-      zod:
-        specifier: 'catalog:'
-        version: 3.25.76
-    devDependencies:
-      '@redocly/cli':
-        specifier: 2.30.5
-        version: 2.30.5(@opentelemetry/api@1.9.1)(core-js@3.49.0)
-      '@types/aws-lambda':
-        specifier: ^8.10.147
-        version: 8.10.161
-
   handlers/alarms-handler:
     dependencies:
       '@aws-sdk/client-cloudwatch':
@@ -176,6 +157,25 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.21
+
+  handlers/braze-acquisition-events-sync:
+    dependencies:
+      identity:
+        specifier: workspace:*
+        version: link:../../modules/identity
+      logger:
+        specifier: workspace:*
+        version: link:../../modules/logger
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@redocly/cli':
+        specifier: 2.30.5
+        version: 2.30.5(@opentelemetry/api@1.9.1)(core-js@3.49.0)
+      '@types/aws-lambda':
+        specifier: ^8.10.147
+        version: 8.10.161
 
   handlers/contributions-only-countries-api:
     dependencies:
@@ -400,6 +400,9 @@ importers:
       logger:
         specifier: workspace:*
         version: link:../../modules/logger
+      multiple-account:
+        specifier: workspace:*
+        version: link:../../modules/multiple-account
       nanoid:
         specifier: ^3.3.12
         version: 3.3.12
@@ -774,6 +777,9 @@ importers:
       '@aws-sdk/lib-storage':
         specifier: ^3.940.0
         version: 3.1054.0(@aws-sdk/client-s3@3.1054.0)
+      '@aws-sdk/util-dynamodb':
+        specifier: ^3.940.0
+        version: 3.996.2(@aws-sdk/client-dynamodb@3.1054.0)
       dayjs:
         specifier: ^1.11.13
         version: 1.11.21
@@ -783,6 +789,9 @@ importers:
       logger:
         specifier: workspace:*
         version: link:../../modules/logger
+      multiple-account:
+        specifier: workspace:*
+        version: link:../../modules/multiple-account
       supporter-product-data:
         specifier: workspace:*
         version: link:../../modules/supporter-product-data
@@ -1065,6 +1074,22 @@ importers:
       '@smithy/types':
         specifier: ^4.13.1
         version: 4.14.2
+
+  modules/multiple-account:
+    dependencies:
+      logger:
+        specifier: workspace:*
+        version: link:../logger
+    devDependencies:
+      '@aws-sdk/client-dynamodb':
+        specifier: ^3.940.0
+        version: 3.1054.0
+      '@aws-sdk/util-dynamodb':
+        specifier: ^3.940.0
+        version: 3.996.2(@aws-sdk/client-dynamodb@3.1054.0)
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
 
   modules/product-benefits:
     dependencies:
