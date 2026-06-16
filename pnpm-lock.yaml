@@ -1083,6 +1083,9 @@ importers:
       logger:
         specifier: workspace:*
         version: link:../logger
+      supporter-product-data:
+        specifier: workspace:*
+        version: link:../supporter-product-data
     devDependencies:
       '@aws-sdk/client-dynamodb':
         specifier: ^3.940.0

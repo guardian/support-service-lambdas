@@ -14,8 +14,8 @@
       "@modules/logger/*": [
         "../../modules/logger/src/*"
       ],
-      "@modules/routing/*": [
-        "../../modules/routing/src/*"
+      "@modules/supporter-product-data/*": [
+        "../../modules/supporter-product-data/src/*"
       ],
       "@modules/zuora/*": [
         "../../modules/zuora/src/*"
@@ -32,14 +32,14 @@
       "@modules/promotions/*": [
         "../../modules/promotions/src/*"
       ],
+      "@modules/routing/*": [
+        "../../modules/routing/src/*"
+      ],
       "@modules/identity/*": [
         "../../modules/identity/src/*"
       ],
       "@modules/product-benefits/*": [
         "../../modules/product-benefits/src/*"
-      ],
-      "@modules/supporter-product-data/*": [
-        "../../modules/supporter-product-data/src/*"
       ],
       "@modules/guardian-subscription/*": [
         "../../modules/guardian-subscription/src/*"

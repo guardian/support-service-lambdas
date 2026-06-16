@@ -16,7 +16,7 @@ export type ProcessItemDependencies = {
 	getSecondaryUsers: (
 		subscriptionName: string,
 	) => Promise<SecondaryUserRecord[]>;
-	updateSecondarySubscription: (
+	updateOrCreateSecondarySubscription: (
 		secondaryIdentityId: string,
 		secondarySubscriptionName: string,
 		primaryItem: SupporterRatePlanItem,
@@ -52,7 +52,7 @@ export const processItem = async (
 		});
 		await Promise.all(
 			secondaryUsers.map((secondaryUser) =>
-				dependencies.updateSecondarySubscription(
+				dependencies.updateOrCreateSecondarySubscription(
 					secondaryUser.secondaryIdentityId,
 					`${item.subscriptionName}-${secondaryUser.secondaryIdentityId}`,
 					itemWithContribution,

@@ -1,6 +1,5 @@
 import {
 	type AttributeValue,
-	ConditionalCheckFailedException,
 	DynamoDBClient,
 	UpdateItemCommand,
 } from '@aws-sdk/client-dynamodb';
@@ -113,7 +112,7 @@ export class DynamoService {
 	async updateSecondaryItemDates(
 		secondaryIdentityId: string,
 		secondarySubscriptionName: string,
-		termEndDate: SupporterRatePlanItem['termEndDate'],
+		termEndDate: Dayjs,
 	): Promise<void> {
 		logger.log('Updating secondary supporter rate plan item dates', {
 			secondaryIdentityId,
@@ -129,7 +128,6 @@ export class DynamoService {
 					},
 					UpdateExpression:
 						'SET termEndDate = :termEndDate, expiryDate = :expiryDate',
-					ConditionExpression: 'attribute_exists(identityId)',
 					ExpressionAttributeValues: {
 						':termEndDate': { S: zuoraDateFormat(termEndDate) },
 						':expiryDate': { N: this.formatAsTTL(termEndDate) },
@@ -144,13 +142,6 @@ export class DynamoService {
 				},
 			);
 		} catch (error) {
-			if (error instanceof ConditionalCheckFailedException) {
-				logger.log(
-					'Secondary SupporterProductData record not found, skipping update',
-					{ secondaryIdentityId, secondarySubscriptionName },
-				);
-				return;
-			}
 			throw new DynamoWriteError(error);
 		}
 	}

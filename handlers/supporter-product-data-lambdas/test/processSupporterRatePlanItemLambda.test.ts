@@ -32,7 +32,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 				Promise.resolve({ subscriptionNumber: 'sub-number', ratePlans: [] }),
 			writeItem,
 			getSecondaryUsers: noSecondaryUsers,
-			updateSecondarySubscription: updateSecondaryItem,
+			updateOrCreateSecondarySubscription: updateSecondaryItem,
 		});
 
 		expect(writeItem).not.toHaveBeenCalled();
@@ -61,7 +61,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 					}),
 				writeItem,
 				getSecondaryUsers: noSecondaryUsers,
-				updateSecondarySubscription: updateSecondaryItem,
+				updateOrCreateSecondarySubscription: updateSecondaryItem,
 			},
 		);
 
@@ -83,7 +83,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 				Promise.resolve({ subscriptionNumber: 'sub-number', ratePlans: [] }),
 			writeItem,
 			getSecondaryUsers: noSecondaryUsers,
-			updateSecondarySubscription: updateSecondaryItem,
+			updateOrCreateSecondarySubscription: updateSecondaryItem,
 		});
 
 		expect(writeItem).toHaveBeenCalled();
@@ -116,7 +116,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 				Promise.resolve({ subscriptionNumber: 'sub-number', ratePlans: [] }),
 			writeItem,
 			getSecondaryUsers,
-			updateSecondarySubscription: updateSecondaryItem,
+			updateOrCreateSecondarySubscription: updateSecondaryItem,
 		});
 
 		expect(writeItem).toHaveBeenCalled();

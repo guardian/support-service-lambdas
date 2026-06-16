@@ -1,5 +1,6 @@
 import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import type { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { createSecondarySubscription } from '@modules/multiple-account/secondarySubscription';
 import type { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import {
@@ -9,11 +10,7 @@ import {
 	ok,
 } from '@modules/routing/apiGatewayResponses';
 import type { Stage } from '@modules/stage';
-import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
-import {
-	getSupporterRatePlan,
-	sendToSupporterProductData,
-} from '@modules/supporter-product-data/supporterProductData';
+import { getSupporterRatePlan } from '@modules/supporter-product-data/supporterProductData';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import dayjs from 'dayjs';
 import { z } from 'zod';
@@ -70,25 +67,19 @@ export const acceptInvitationEndpoint = async (
 			}),
 		);
 
-		const secondarySubscriptionName = `${invitation.subscriptionName}-${invitation.secondaryIdentityId}`;
-		const supporterProductDataRecord: SupporterRatePlanItem = {
-			subscriptionName: secondarySubscriptionName,
-			primarySubscriptionName: invitation.subscriptionName,
-			identityId: invitation.secondaryIdentityId,
-			productRatePlanId: parentSupporterProductDataRecord.productRatePlanId,
-			productRatePlanName: 'Digital Plus Secondary User',
-			contractEffectiveDate: today,
-			termEndDate: parentSupporterProductDataRecord.termEndDate,
-		};
-
 		// This record is not part of the transaction because it is sent via an SQS queue
 		// If there is an issue with it it will be debugged and retried there
-		await sendToSupporterProductData(stage, supporterProductDataRecord);
+		const subName = await createSecondarySubscription(
+			stage,
+			parentSupporterProductDataRecord,
+			invitation.secondaryIdentityId,
+			today,
+		);
 
 		// TODO: email?
 		return ok({
 			identityId: invitation.secondaryIdentityId,
-			secondarySubscriptionName,
+			secondarySubscriptionName: subName,
 		});
 	} catch (error) {
 		return buildErrorResponse(error);

@@ -1,10 +1,16 @@
 import { Lazy } from '@modules/lazy';
+import { logger } from '@modules/logger/logger';
+import { createSecondarySubscription } from '@modules/multiple-account/secondarySubscription';
 import { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { stageFromEnvironment } from '@modules/stage';
+import type { Stage } from '@modules/stage';
+import { getSupporterRatePlan } from '@modules/supporter-product-data/supporterProductData';
+import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 import type { Handler, SQSEvent } from 'aws-lambda';
+import dayjs from 'dayjs';
 import {
 	getDiscountProductRatePlanIds,
 	isDiscountProductRatePlanItem,
@@ -15,6 +21,48 @@ import {
 	processEvent,
 	type ProcessItemDependencies,
 } from './processSupporterRatePlanItem';
+
+/**
+ * Check whether a secondary subscription already exists for the given
+ * secondary identity and subscription name, and either update the term
+ * end date and TTL or create a new secondary subscription as appropriate.
+ * @param stage
+ * @param dynamoService
+ * @param secondaryIdentityId
+ * @param secondarySubscriptionName
+ * @param item
+ */
+const updateOrCreateSecondarySubscription = async (
+	stage: Stage,
+	dynamoService: DynamoService,
+	secondaryIdentityId: string,
+	secondarySubscriptionName: string,
+	item: SupporterRatePlanItem,
+): Promise<void> => {
+	const existingRecord = await getSupporterRatePlan(
+		stage,
+		secondaryIdentityId,
+		secondarySubscriptionName,
+	);
+	if (existingRecord) {
+		await dynamoService.updateSecondaryItemDates(
+			secondaryIdentityId,
+			secondarySubscriptionName,
+			item.termEndDate,
+		);
+	} else {
+		logger.log(
+			'Secondary subscription record not found in SupporterProductData, creating new record',
+			{ secondaryIdentityId, secondarySubscriptionName },
+		);
+		await createSecondarySubscription(
+			stage,
+			item,
+			secondaryIdentityId,
+			dayjs(),
+		);
+	}
+};
 
 const buildDependencies = async (): Promise<ProcessItemDependencies> => {
 	const stage = stageFromEnvironment();
@@ -40,15 +88,17 @@ const buildDependencies = async (): Promise<ProcessItemDependencies> => {
 		writeItem: (item) => dynamoService.writeItem(item),
 		getSecondaryUsers: (subscriptionName) =>
 			secondaryUserRepository.list(subscriptionName),
-		updateSecondarySubscription: (
+		updateOrCreateSecondarySubscription: (
 			secondaryIdentityId,
 			secondarySubscriptionName,
 			item,
 		) =>
-			dynamoService.updateSecondaryItemDates(
+			updateOrCreateSecondarySubscription(
+				stage,
+				dynamoService,
 				secondaryIdentityId,
 				secondarySubscriptionName,
-				item.termEndDate,
+				item,
 			),
 	};
 };

@@ -219,17 +219,6 @@ const moduleIdentity: ModuleDefinition = {
 	moduleDependencies: [moduleAws, moduleZuora],
 };
 
-const moduleMultipleAccount: ModuleDefinition = {
-	name: 'multiple-account',
-	devDependencies: {
-		...dep['@aws-sdk/client-dynamodb'],
-		...dep['@aws-sdk/util-dynamodb'],
-		...dep['dayjs'],
-		...dep['zod'],
-	},
-	moduleDependencies: [moduleAws, moduleLogger],
-};
-
 const moduleSupporterProductData: ModuleDefinition = {
 	name: 'supporter-product-data',
 	devDependencies: {
@@ -242,6 +231,17 @@ const moduleSupporterProductData: ModuleDefinition = {
 		test: 'NODE_OPTIONS="$NODE_OPTIONS --experimental-vm-modules" jest --group=-integration',
 	},
 	moduleDependencies: [moduleAws, moduleLogger, moduleZuora],
+};
+
+const moduleMultipleAccount: ModuleDefinition = {
+	name: 'multiple-account',
+	devDependencies: {
+		...dep['@aws-sdk/client-dynamodb'],
+		...dep['@aws-sdk/util-dynamodb'],
+		...dep['dayjs'],
+		...dep['zod'],
+	},
+	moduleDependencies: [moduleAws, moduleLogger, moduleSupporterProductData],
 };
 
 const moduleProductBenefits: ModuleDefinition = {
