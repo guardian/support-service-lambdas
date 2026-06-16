@@ -15,16 +15,10 @@ import type {
 	ZuoraTaxPeriod,
 	ZuoraTaxRate,
 } from '@modules/zuora/types/objects/tax';
-import {
-	type ZuoraTaxCode,
-	zuoraTaxCodeSchema,
-	zuoraTaxPeriodsSchema,
-	zuoraTaxRateSchema,
-} from '@modules/zuora/types/objects/tax';
+import { type ZuoraTaxCode } from '@modules/zuora/types/objects/tax';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import type z from 'zod';
-import type { ZuoraGetRatesPath } from './schemas';
 import {
 	type TaxRatesRequest,
 	type TaxRatesResponse,
@@ -51,58 +45,6 @@ const caStatesDefault: TaxRatesResponse = {
 	NS: 0,
 	ON: 0,
 	QC: 0,
-};
-
-export const zuoraTaxCodesEndpoint = async (
-	zuoraClient: ZuoraClient,
-): Promise<APIGatewayProxyResult> => {
-	try {
-		logger.log('Retrieving Zuora codes');
-		const zuoraTaxCodes = await Promise.resolve(getZuoraTaxCodes(zuoraClient));
-		if (!zuoraTaxCodes) {
-			throw new ValidationError(`no tax codes found`);
-		}
-
-		return ok(zuoraTaxCodes, zuoraTaxCodeSchema.unwrap());
-	} catch (error) {
-		logger.error('Error fetching Zuora codes', error);
-		return Promise.resolve(buildErrorResponse(error));
-	}
-};
-
-export const zuoraTaxPeriodsEndpoint = async (
-	zuoraClient: ZuoraClient,
-): Promise<APIGatewayProxyResult> => {
-	try {
-		logger.log('Retrieving Zuora periods');
-		const zuoraTaxPeriods = await Promise.resolve(
-			getZuoraTaxPeriods(zuoraClient),
-		);
-		if (!zuoraTaxPeriods) {
-			throw new ValidationError(`no tax periods found`);
-		}
-
-		return ok(zuoraTaxPeriods, zuoraTaxPeriodsSchema.unwrap());
-	} catch (error) {
-		logger.error('Error fetching Zuora periods', error);
-		return Promise.resolve(buildErrorResponse(error));
-	}
-};
-
-export const zuoraTaxRatesEndpoint = async (
-	zuoraClient: ZuoraClient,
-	path: ZuoraGetRatesPath,
-): Promise<APIGatewayProxyResult> => {
-	try {
-		logger.log('Retrieving Zuora rates');
-		return ok(
-			await Promise.resolve(getZuoraTaxRates(zuoraClient, path.id)),
-			zuoraTaxRateSchema,
-		);
-	} catch (error) {
-		logger.error('Error fetching Zuora rates', error);
-		return Promise.resolve(buildErrorResponse(error));
-	}
 };
 
 export const taxRatesEndpoint = async (
