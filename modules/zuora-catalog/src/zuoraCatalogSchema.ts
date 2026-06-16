@@ -63,6 +63,7 @@ export const zuoraCatalogSchema = z.object({
 							billingPeriod: z.nullable(z.string()),
 							triggerEvent: z.string(),
 							description: z.nullable(z.string()),
+							taxMode: z.nullable(z.enum(['TaxExclusive', 'TaxInclusive'])),
 						}),
 					),
 				}),

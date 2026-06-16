@@ -130,6 +130,13 @@ export class SrApiLambda extends SrLambda {
 		}
 	}
 
+	/**
+	 * if your API gateway normally requires an API key, you can use this function
+	 * to make specific routes public
+	 *
+	 * this can be useful you want a lambda to self-serve documentation for access
+	 * via a browser
+	 */
 	addPublicPath(path: string) {
 		const publicResource = this.api.root.addResource(path);
 		publicResource.addMethod('GET', undefined, {

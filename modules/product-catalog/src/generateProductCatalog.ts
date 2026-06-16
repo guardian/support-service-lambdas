@@ -1,9 +1,9 @@
 import { arrayToObject } from '@modules/arrayFunctions';
 import { isBillingPeriod } from '@modules/billingPeriod';
-import type {
-	ZuoraCatalog,
-	ZuoraProductRatePlan,
-	ZuoraProductRatePlanCharge,
+import {
+	type ZuoraCatalog,
+	type ZuoraProductRatePlan,
+	type ZuoraProductRatePlanCharge,
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import { findDiscountRatePlan } from '@modules/product-catalog/generateSchema';
 import type {
@@ -119,6 +119,17 @@ const getZuoraProduct = (
 			allRatePlans.map((productRatePlan) => {
 				const billingPeriod = getBillingPeriod(productRatePlan);
 				const productRatePlanKey = getProductRatePlanKey(productRatePlan.name);
+				const taxModes = productRatePlan.productRatePlanCharges.map(
+					(charge) => charge.taxMode,
+				);
+				const uniqueTaxModeCount = new Set(taxModes).size;
+
+				if (uniqueTaxModeCount !== 1) {
+					throw new Error(
+						`productRatePlan ${productRatePlan.id} has charges with <1 or >1 taxModes: ${taxModes.join(', ')}`,
+					);
+				}
+
 				return {
 					[productRatePlanKey]: {
 						id: productRatePlan.id,
@@ -129,6 +140,7 @@ const getZuoraProduct = (
 						termType: getTermTypeName(productRatePlan.TermType__c),
 						termLengthInMonths: getTermLength(productRatePlan.DefaultTerm__c),
 						...(billingPeriod && { billingPeriod }),
+						taxMode: taxModes[0],
 					},
 				};
 			}),

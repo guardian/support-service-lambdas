@@ -799,14 +799,14 @@ const userSubscriptionsApi: HandlerDefinition = {
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
-
 		...devDeps['@redocly/cli'],
+		...devDeps['tsx'],
 	},
 	extraScripts: {
 		...openApiScripts,
 		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr user-subscriptions-api.zip ./*.js.map ./*.js`,
 	},
-	moduleDependencies: [moduleRouting],
+	moduleDependencies: [moduleRouting, moduleZuora],
 };
 
 const salesTaxApi: HandlerDefinition = {
@@ -863,6 +863,21 @@ const supporterProductDataLambdas: HandlerDefinition = {
 	],
 };
 
+const brazeAcquisitionEventsSync: HandlerDefinition = {
+	name: 'braze-acquisition-events-sync',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+		...devDeps['@redocly/cli'],
+	},
+	extraScripts: {
+		...openApiScripts,
+		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr braze-acquisition-events-sync.zip ./*.js.map ./*.js`,
+	},
+	moduleDependencies: [moduleLogger, moduleIdentity],
+};
 // MARKER new-lambda: buildcheck-const
 
 export const build: BuildDefinition = {
@@ -896,6 +911,7 @@ export const build: BuildDefinition = {
 		userSubscriptionsApi,
 		salesTaxApi,
 		supporterProductDataLambdas,
+		brazeAcquisitionEventsSync,
 		// MARKER new-lambda: buildcheck-reference
 	],
 
