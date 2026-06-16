@@ -6,7 +6,6 @@
  * @group integration
  */
 
-// import type { IsoCountry } from '@modules/internationalisation/country';
 import {
 	zuoraTaxCodeSchema,
 	zuoraTaxPeriodsSchema,
@@ -21,6 +20,7 @@ import {
 	zuoraTaxRatesEndpoint,
 } from '../src/taxRatesEndpoint';
 import {
+	// countryStates,
 	supporterPlusTaxEngineId,
 	zuoraTaxCodePeriod,
 	zuoraTaxCodeSupporterPlus,
