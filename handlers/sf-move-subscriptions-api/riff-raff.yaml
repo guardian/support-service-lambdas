@@ -18,7 +18,7 @@ deployments:
     type: aws-lambda
     parameters:
       fileName: sf-move-subscriptions-api.jar
-      bucket: support-service-lambdas-dist
+      bucketSsmLookup: true
       prefixStack: false
       functionNames:
       - sf-move-subscriptions-api-
