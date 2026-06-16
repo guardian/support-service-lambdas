@@ -1,6 +1,6 @@
-import { createRoute, type RouteHandler, z } from '@hono/zod-openapi';
+import type { RouteHandler } from '@hono/zod-openapi';
+import { createRoute, z } from '@hono/zod-openapi';
 import { sendEmail } from '@modules/email/email';
-import { logger } from '@modules/logger/logger';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { createHonoApp } from '@modules/routing/honoApp';
 import {
@@ -9,7 +9,7 @@ import {
 	mmaRequestHeaders,
 	requiredJsonRequestBody,
 } from '@modules/routing/honoSchemas';
-import { fetchSubscriptionWithIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
+import { withHonoMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
 import { stageFromEnvironment } from '@modules/stage';
 import type {
 	ZuoraAccount,
@@ -17,7 +17,6 @@ import type {
 } from '@modules/zuora/types/objects';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
-import type { RequestBody } from './schema';
 import { requestBodySchema } from './schema';
 import { createThankYouEmail } from './sendEmail';
 import { updateSupporterPlusAmount } from './updateSupporterPlusAmount';
@@ -39,6 +38,10 @@ const successResponseSchema = z.object({
 	message: z.literal('Success'),
 });
 
+export const { app, handler } = createHonoApp(
+	'Update supporter plus amount API',
+);
+
 const updateSupporterPlusAmountRoute = createRoute({
 	method: 'post',
 	path: '/update-supporter-plus-amount/{subscriptionNumber}',
@@ -53,42 +56,23 @@ const updateSupporterPlusAmountRoute = createRoute({
 	},
 });
 
-export const { app, handler } = createHonoApp(
-	'Update supporter plus amount API',
+app.openapi(
+	updateSupporterPlusAmountRoute,
+	withHonoMMAIdentityCheck<typeof updateSupporterPlusAmountRoute>(
+		stage,
+		handleUpdateAmount,
+		(c) => c.req.valid('param').subscriptionNumber,
+	),
 );
 
-const updateSupporterPlusAmountHandler: RouteHandler<
-	typeof updateSupporterPlusAmountRoute
-> = async (c) => {
-	const { subscriptionNumber } = c.req.valid('param');
-	const requestBody = c.req.valid('json');
-	const { zuoraClient, subscription, account } =
-		await fetchSubscriptionWithIdentityCheck(
-			stage,
-			subscriptionNumber,
-			c.req.header('x-identity-id'),
-		);
-
-	await handleUpdateAmount(requestBody, zuoraClient, subscription, account);
-
-	const successBody: z.infer<typeof successResponseSchema> = {
-		message: 'Success',
-	};
-	return c.json(successBody, 200);
-};
-
-app.openapi(updateSupporterPlusAmountRoute, updateSupporterPlusAmountHandler);
-
-export const updateSupporterPlusAmountApp = app;
-
 async function handleUpdateAmount(
-	requestBody: RequestBody,
+	c: Parameters<RouteHandler<typeof updateSupporterPlusAmountRoute>>[0],
 	zuoraClient: ZuoraClient,
 	subscription: ZuoraSubscription,
 	account: ZuoraAccount,
-): Promise<void> {
+) {
+	const requestBody = c.req.valid('json');
 	const subscriptionNumber = subscription.subscriptionNumber;
-	logger.log('Updating supporter plus amount for', subscriptionNumber);
 	const productCatalog = await getProductCatalogFromApi(stage);
 	const emailFields = await updateSupporterPlusAmount(
 		zuoraClient,
@@ -100,4 +84,5 @@ async function handleUpdateAmount(
 		dayjs(),
 	);
 	await sendEmail(stage, createThankYouEmail(emailFields));
+	return c.json({ message: 'Success' as const }, 200);
 }

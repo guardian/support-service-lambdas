@@ -7,9 +7,8 @@ describe('Hono docs routes', () => {
 	});
 
 	test('serves openapi json generated from registered route schemas', async () => {
-		const { updateSupporterPlusAmountApp } = await import('../src/index');
-		const response =
-			await updateSupporterPlusAmountApp.request('/openapi.json');
+		const { app } = await import('../src/index');
+		const response = await app.request('/openapi.json');
 		const body = await response.json();
 		const serialized = JSON.stringify(body);
 

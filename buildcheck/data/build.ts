@@ -149,6 +149,7 @@ const moduleRouting: ModuleDefinition = {
 		...dep['hono'],
 		...dep['@hono/zod-openapi'],
 		...dep['@hono/node-server'],
+		...dep['@hono/zod-openapi'],
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],

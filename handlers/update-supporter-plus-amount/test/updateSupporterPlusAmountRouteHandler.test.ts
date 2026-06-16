@@ -24,8 +24,8 @@ describe('Route validation (no mocks needed)', () => {
 	});
 
 	test('returns 400 when subscription number format is invalid', async () => {
-		const { updateSupporterPlusAmountApp } = await import('../src/index');
-		const response = await updateSupporterPlusAmountApp.request(
+		const { app } = await import('../src/index');
+		const response = await app.request(
 			'/update-supporter-plus-amount/not-a-sub-number',
 			{
 				method: 'POST',
@@ -40,8 +40,8 @@ describe('Route validation (no mocks needed)', () => {
 	});
 
 	test('returns 400 when request body is missing required field', async () => {
-		const { updateSupporterPlusAmountApp } = await import('../src/index');
-		const response = await updateSupporterPlusAmountApp.request(
+		const { app } = await import('../src/index');
+		const response = await app.request(
 			'/update-supporter-plus-amount/A-S12345678',
 			{
 				method: 'POST',
@@ -120,9 +120,9 @@ describe('Route handler (mocked services)', () => {
 	});
 
 	test('returns 200 with success message for a valid request', async () => {
-		const { updateSupporterPlusAmountApp } = await import('../src/index');
+		const { app } = await import('../src/index');
 
-		const response = await updateSupporterPlusAmountApp.request(
+		const response = await app.request(
 			'/update-supporter-plus-amount/A-S12345678',
 			{
 				method: 'POST',

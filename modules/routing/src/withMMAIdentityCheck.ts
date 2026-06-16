@@ -1,5 +1,11 @@
+import {
+	type RouteConfig,
+	type RouteConfigToTypedResponse,
+	type RouteHandler,
+} from '@hono/zod-openapi';
 import { ValidationError } from '@modules/errors';
 import { logger } from '@modules/logger/logger';
+import type { Handler } from '@modules/routing/router';
 import type { Stage } from '@modules/stage';
 import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
@@ -8,16 +14,11 @@ import type {
 	ZuoraSubscription,
 } from '@modules/zuora/types/objects';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type {
-	APIGatewayProxyEvent,
-	APIGatewayProxyEventHeaders,
-	APIGatewayProxyResult,
-} from 'aws-lambda';
-import type { Handler } from '@modules/routing/router';
+import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 export function assertIdentityIdMatches(
 	account: ZuoraAccount,
-	headers: APIGatewayProxyEventHeaders,
+	headers: Record<string, string | undefined>,
 ) {
 	const identityIdFromRequest = headers['x-identity-id'];
 	logger.log(`Checking subscription is owned by the currently logged in user`);
@@ -59,6 +60,40 @@ export const withMMAIdentityCheck =
 		logger.mutableAddContext(subscriptionNumber);
 		assertIdentityIdMatches(account, event.headers);
 		return await handler(body, zuoraClient, subscription, account);
+	};
+
+/**
+ * The async-only equivalent of RouteHandler<R>: identical inputs, but the return
+ * is narrowed from MaybePromise<T> to Promise<T>. Promise<T> is assignable to
+ * MaybePromise<T> (= T | Promise<T>), so this is accepted everywhere a
+ * RouteHandler<R> is expected.
+ */
+type AsyncRouteHandler<R extends RouteConfig> = (
+	...args: Parameters<RouteHandler<R>>
+) => Promise<RouteConfigToTypedResponse<R>>;
+
+export const withHonoMMAIdentityCheck =
+	<R extends RouteConfig>(
+		stage: Stage,
+		handler: (
+			c: Parameters<RouteHandler<R>>[0],
+			zuoraClient: ZuoraClient,
+			subscription: ZuoraSubscription,
+			account: ZuoraAccount,
+		) => Promise<RouteConfigToTypedResponse<R>>,
+		extractSubscriptionNumber: (c: Parameters<RouteHandler<R>>[0]) => string,
+	): AsyncRouteHandler<R> =>
+	async (c) => {
+		const zuoraClient = await ZuoraClient.create(stage);
+		logger.log('Getting the subscription and account details from Zuora');
+
+		const subscriptionNumber = extractSubscriptionNumber(c);
+		const subscription = await getSubscription(zuoraClient, subscriptionNumber);
+		const account = await getAccount(zuoraClient, subscription.accountNumber);
+
+		logger.mutableAddContext(subscriptionNumber);
+		assertIdentityIdMatches(account, c.req.header());
+		return handler(c, zuoraClient, subscription, account);
 	};
 
 /**
