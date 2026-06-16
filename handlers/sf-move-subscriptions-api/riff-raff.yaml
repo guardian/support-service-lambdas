@@ -6,11 +6,13 @@ allowedStages:
   - CODE
   - PROD
 deployments:
-  cfn:
+  sf-move-subscriptions-api-cloudformation:
     type: cloud-formation
     app: sf-move-subscriptions-api
     parameters:
-      templatePath: cfn.yaml
+      templateStagePaths:
+        CODE: sf-move-subscriptions-api-CODE.template.json
+        PROD: sf-move-subscriptions-api-PROD.template.json
 
   sf-move-subscriptions-api:
     type: aws-lambda
@@ -20,4 +22,4 @@ deployments:
       prefixStack: false
       functionNames:
       - sf-move-subscriptions-api-
-    dependencies: [cfn]
+    dependencies: [sf-move-subscriptions-api-cloudformation]
