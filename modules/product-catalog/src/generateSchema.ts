@@ -119,7 +119,7 @@ const generateProductRatePlanSchema = (
 		${getBillingPeriodForRatePlan(productRatePlan)}
 		termType: termTypeSchema,
 		termLengthInMonths: z.number(),
-		taxMode: z.string().nullable().optional(),
+		taxMode: z.enum(['TaxExclusive', 'TaxInclusive']).nullable().optional(),
 	})`;
 };
 
