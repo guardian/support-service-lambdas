@@ -32,19 +32,19 @@ const taxExclusiveProductNames: Partial<Record<ProductKey, string>> = {
 };
 
 const caStatesDefault: TaxRatesResponse = {
-	NL: 0,
-	SK: 0,
-	YT: 0,
-	NU: 0,
-	PE: 0,
 	AB: 0,
 	BC: 0,
 	MB: 0,
 	NB: 0,
+	NL: 0,
 	NT: 0,
 	NS: 0,
+	NU: 0,
 	ON: 0,
+	PE: 0,
 	QC: 0,
+	SK: 0,
+	YT: 0,
 };
 
 export const taxRatesEndpoint = async (
