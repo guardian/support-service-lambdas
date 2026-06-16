@@ -40,5 +40,21 @@ the high level calls should be implemented in separate files as per modules/zuor
 Use SrCDK constructs from ./cdk/lib/cdk/ where possible.
 
 
-### Verification
-Always run build, fix-formatting and eslint with a fix flag as well as all relevant tests after making changes to Typescript code.
+### Verification and repair
+
+After making changes to TypeScript code, always verify and repair using the `agent-tools` MCP tools.
+
+**Always scope to the minimum set of affected targets** — do not run across the whole workspace unless explicitly asked. Use `list_targets` if you are unsure which targets exist.
+
+Use tools defined in `agent-tools/src/index.ts` instead of ad-hoc commands such as raw `pnpm lint`, `pnpm type-check`, `prettier`, or `eslint`.
+
+Recommended order (use the first applicable scoped command):
+1. `validate_targets` or `list_targets` (if target scope is unclear)
+2. `git_diff_stat` or `git_diff_target_stat` (fast change summary)
+3. `verify_changed` (or `verify` with explicit targets)
+4. `repair_changed` (or `repair` with explicit targets) only when verify fails
+5. `verify_changed` again after repair
+6. `test_changed` (or `test`/`test_one`/`test_file` when tests are needed)
+7. `git_diff` or `git_diff_target` (full diff review when needed)
+
+If you identify a missing tool in `agent-tools` that would be safer or more efficient than an ad-hoc command, suggest adding it as a PR rather than working around it.
