@@ -78,7 +78,7 @@ async function getZuoraSalesTaxRates(
 
 	const zuoraTaxCodes = await getZuoraTaxCodes(zuoraClient);
 	if (!zuoraTaxCodes) {
-		throw new ValidationError(`no tax codes found`);
+		throw new Error('no tax codes found');
 	}
 	const zuoraTaxCode = getProductZuoraTaxCode(
 		productKey,
