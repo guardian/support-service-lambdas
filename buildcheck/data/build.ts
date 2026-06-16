@@ -224,9 +224,10 @@ const moduleMultipleAccount: ModuleDefinition = {
 	devDependencies: {
 		...dep['@aws-sdk/client-dynamodb'],
 		...dep['@aws-sdk/util-dynamodb'],
+		...dep['dayjs'],
 		...dep['zod'],
 	},
-	moduleDependencies: [moduleLogger],
+	moduleDependencies: [moduleAws, moduleLogger],
 };
 
 const moduleSupporterProductData: ModuleDefinition = {

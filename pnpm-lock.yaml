@@ -1077,6 +1077,9 @@ importers:
 
   modules/multiple-account:
     dependencies:
+      aws:
+        specifier: workspace:*
+        version: link:../aws
       logger:
         specifier: workspace:*
         version: link:../logger
@@ -1087,6 +1090,9 @@ importers:
       '@aws-sdk/util-dynamodb':
         specifier: ^3.940.0
         version: 3.996.2(@aws-sdk/client-dynamodb@3.1054.0)
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.21
       zod:
         specifier: 'catalog:'
         version: 3.25.76

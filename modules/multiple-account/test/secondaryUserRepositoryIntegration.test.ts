@@ -7,9 +7,9 @@
  */
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { getAwsConfig } from '@modules/aws/config';
-import { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
 import type { Stage } from '@modules/stage';
 import dayjs from 'dayjs';
+import { SecondaryUserRepository } from '../src/secondaryUserRepository';
 
 const stage: Stage = 'CODE';
 

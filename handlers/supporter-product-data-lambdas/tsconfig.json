@@ -11,11 +11,11 @@
       "@modules/multiple-account/*": [
         "../../modules/multiple-account/src/*"
       ],
-      "@modules/zuora/*": [
-        "../../modules/zuora/src/*"
-      ],
       "@modules/aws/*": [
         "../../modules/aws/src/*"
+      ],
+      "@modules/zuora/*": [
+        "../../modules/zuora/src/*"
       ],
       "@modules/internationalisation/*": [
         "../../modules/internationalisation/src/*"

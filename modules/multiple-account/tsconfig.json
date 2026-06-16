@@ -5,6 +5,9 @@
       "@modules/*": [
         "../../modules/*"
       ],
+      "@modules/aws/*": [
+        "../../modules/aws/src/*"
+      ],
       "@modules/logger/*": [
         "../../modules/logger/src/*"
       ],
