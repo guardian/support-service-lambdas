@@ -9,6 +9,7 @@ import {
 	isDiscountProductRatePlanItem,
 } from '../services/discounts';
 import { DynamoService } from '../services/dynamoService';
+import { SecondaryUserService } from '../services/secondaryUserService';
 import { ZuoraSubscriptionService } from '../services/zuoraSubscriptionService';
 import {
 	processEvent,
@@ -21,6 +22,7 @@ const buildDependencies = async (): Promise<ProcessItemDependencies> => {
 	const zuoraClient = await ZuoraClient.create(stage);
 	const subscriptionService = new ZuoraSubscriptionService(zuoraClient);
 	const dynamoService = new DynamoService(stage);
+	const secondaryUserService = SecondaryUserService.create(stage);
 
 	const zuoraCatalog = await getZuoraCatalogFromS3(stage);
 	const productCatalog = await getProductCatalogFromApi(stage);
@@ -36,6 +38,18 @@ const buildDependencies = async (): Promise<ProcessItemDependencies> => {
 		getSubscription: (subscriptionName) =>
 			subscriptionService.getSubscription(subscriptionName),
 		writeItem: (item) => dynamoService.writeItem(item),
+		getSecondaryUsers: (subscriptionName) =>
+			secondaryUserService.listBySubscription(subscriptionName),
+		updateSecondarySubscription: (
+			secondaryIdentityId,
+			secondarySubscriptionName,
+			item,
+		) =>
+			dynamoService.updateSecondaryItemDates(
+				secondaryIdentityId,
+				secondarySubscriptionName,
+				item.termEndDate,
+			),
 	};
 };
 

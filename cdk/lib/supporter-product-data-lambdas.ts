@@ -91,6 +91,14 @@ export class SupporterProductDataLambdas extends SrStack {
 			],
 		});
 
+		const secondaryUserTableReadPolicy = new PolicyStatement({
+			effect: Effect.ALLOW,
+			actions: ['dynamodb:Query'],
+			resources: [
+				`arn:aws:dynamodb:${this.region}:${this.account}:table/multiple-account-secondary-user-${this.stage}`,
+			],
+		});
+
 		const zuoraOAuthPolicy = new AllowZuoraOAuthSecretsPolicy(this);
 		const zuoraCatalogS3Policy = new AllowS3CatalogReadPolicy(this);
 
@@ -150,6 +158,7 @@ export class SupporterProductDataLambdas extends SrStack {
 		);
 		processItem.addPolicies(zuoraCatalogS3Policy);
 		processItem.addToRolePolicy(dynamoWritePolicy);
+		processItem.addToRolePolicy(secondaryUserTableReadPolicy);
 		processItem.addPolicies(zuoraOAuthPolicy);
 
 		queue.grantSendMessages(addToQueue);

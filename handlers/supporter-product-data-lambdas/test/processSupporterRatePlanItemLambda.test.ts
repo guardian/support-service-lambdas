@@ -1,6 +1,7 @@
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import dayjs from 'dayjs';
 import { processItem } from '../src/handlers/processSupporterRatePlanItem';
+import type { SecondaryUser } from '../src/services/secondaryUserService';
 
 const item: SupporterRatePlanItem = {
 	subscriptionName: 'sub-1',
@@ -11,7 +12,14 @@ const item: SupporterRatePlanItem = {
 	contractEffectiveDate: dayjs('2026-02-01'),
 };
 
+const noSecondaryUsers = jest.fn(() => Promise.resolve([] as SecondaryUser[]));
+const updateSecondaryItem = jest.fn(() => Promise.resolve());
+
 describe('processSupporterRatePlanItemLambda', () => {
+	beforeEach(() => {
+		jest.clearAllMocks();
+	});
+
 	test('skips discount items', async () => {
 		const writeItem = jest.fn(() => Promise.resolve());
 
@@ -21,9 +29,13 @@ describe('processSupporterRatePlanItemLambda', () => {
 			getSubscription: () =>
 				Promise.resolve({ subscriptionNumber: 'sub-number', ratePlans: [] }),
 			writeItem,
+			getSecondaryUsers: noSecondaryUsers,
+			updateSecondarySubscription: updateSecondaryItem,
 		});
 
 		expect(writeItem).not.toHaveBeenCalled();
+		expect(noSecondaryUsers).not.toHaveBeenCalled();
+		expect(updateSecondaryItem).not.toHaveBeenCalled();
 	});
 
 	test('adds contribution amount for contribution plans', async () => {
@@ -46,6 +58,8 @@ describe('processSupporterRatePlanItemLambda', () => {
 						],
 					}),
 				writeItem,
+				getSecondaryUsers: noSecondaryUsers,
+				updateSecondarySubscription: updateSecondaryItem,
 			},
 		);
 
@@ -55,5 +69,56 @@ describe('processSupporterRatePlanItemLambda', () => {
 			contributionAmount: 10.0,
 			contributionCurrency: 'GBP',
 		});
+	});
+
+	test('does not update secondary items when there are none', async () => {
+		const writeItem = jest.fn(() => Promise.resolve());
+
+		await processItem(item, {
+			isDiscountRatePlanItem: () => false,
+			contributionIds: [],
+			getSubscription: () =>
+				Promise.resolve({ subscriptionNumber: 'sub-number', ratePlans: [] }),
+			writeItem,
+			getSecondaryUsers: noSecondaryUsers,
+			updateSecondarySubscription: updateSecondaryItem,
+		});
+
+		expect(writeItem).toHaveBeenCalled();
+		expect(noSecondaryUsers).toHaveBeenCalledWith('sub-1');
+		expect(updateSecondaryItem).not.toHaveBeenCalled();
+	});
+
+	test('updates secondary items when present', async () => {
+		const writeItem = jest.fn(() => Promise.resolve());
+		const secondaryUsers: SecondaryUser[] = [
+			{ subscriptionName: 'sub-1', secondaryIdentityId: 'secondary-id-1' },
+			{ subscriptionName: 'sub-1', secondaryIdentityId: 'secondary-id-2' },
+		];
+		const getSecondaryUsers = jest.fn(() => Promise.resolve(secondaryUsers));
+
+		await processItem(item, {
+			isDiscountRatePlanItem: () => false,
+			contributionIds: [],
+			getSubscription: () =>
+				Promise.resolve({ subscriptionNumber: 'sub-number', ratePlans: [] }),
+			writeItem,
+			getSecondaryUsers,
+			updateSecondarySubscription: updateSecondaryItem,
+		});
+
+		expect(writeItem).toHaveBeenCalled();
+		expect(getSecondaryUsers).toHaveBeenCalledWith('sub-1');
+		expect(updateSecondaryItem).toHaveBeenCalledTimes(2);
+		expect(updateSecondaryItem).toHaveBeenCalledWith(
+			'secondary-id-1',
+			'sub-1-secondary-id-1',
+			expect.objectContaining({ subscriptionName: 'sub-1' }),
+		);
+		expect(updateSecondaryItem).toHaveBeenCalledWith(
+			'secondary-id-2',
+			'sub-1-secondary-id-2',
+			expect.objectContaining({ subscriptionName: 'sub-1' }),
+		);
 	});
 });
