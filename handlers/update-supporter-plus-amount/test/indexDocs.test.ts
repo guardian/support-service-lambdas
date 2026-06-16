@@ -1,13 +1,14 @@
 import { buildScalarDocsHtml } from '@modules/routing/honoOpenApiDocs';
+import { app } from '../src/index';
+
+// jest.mock() is hoisted before static imports — stageFromEnvironment() won't
+// throw when index.ts is loaded, even though process.env.STAGE isn't set yet.
+jest.mock('@modules/stage', () => ({
+	stageFromEnvironment: () => 'CODE' as const,
+}));
 
 describe('Hono docs routes', () => {
-	beforeEach(() => {
-		process.env.STAGE = 'CODE';
-		jest.resetModules();
-	});
-
 	test('serves openapi json generated from registered route schemas', async () => {
-		const { app } = await import('../src/index');
 		const response = await app.request('/openapi.json');
 		const body = await response.json();
 		const serialized = JSON.stringify(body);

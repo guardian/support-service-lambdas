@@ -1,13 +1,41 @@
+import { getProductCatalogFromApi } from '@modules/product-catalog/api';
+import { getAccount } from '@modules/zuora/account';
+import { getSubscription } from '@modules/zuora/subscription';
+import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
+import { app } from '../src/index';
+import { createThankYouEmail } from '../src/sendEmail';
+import { updateSupporterPlusAmount } from '../src/updateSupporterPlusAmount';
+
+// jest.mock() calls are hoisted before static imports at runtime — stageFromEnvironment()
+// won't throw when index.ts loads, and all dependency mocks are in place before any
+// module code runs. The mocked functions are only *called* at request time, not at
+// module load time, so static imports are sufficient — no jest.resetModules() needed.
+jest.mock('@modules/stage', () => ({
+	stageFromEnvironment: () => 'CODE' as const,
+}));
+jest.mock('@modules/zuora/zuoraClient', () => ({
+	ZuoraClient: { create: jest.fn() },
+}));
+jest.mock('@modules/zuora/subscription', () => ({
+	getSubscription: jest.fn(),
+}));
+jest.mock('@modules/zuora/account', () => ({ getAccount: jest.fn() }));
+jest.mock('@modules/product-catalog/api', () => ({
+	getProductCatalogFromApi: jest.fn(),
+}));
+jest.mock('../src/updateSupporterPlusAmount', () => ({
+	updateSupporterPlusAmount: jest.fn(),
+}));
+jest.mock('@modules/email/email', () => ({
+	sendEmail: jest.fn().mockResolvedValue({}),
+}));
+jest.mock('../src/sendEmail', () => ({ createThankYouEmail: jest.fn() }));
 
 /**
  * Tests for the hono route handler using app.request(), which exercises the full
  * hono pipeline (logging middleware, openapi validation, route handler) without
  * needing to construct a Lambda event.
- *
- * The identity check (fetchSubscriptionWithIdentityCheck) is called inside the
- * route handler AFTER input validation, so tests that only check validation
- * responses genuinely need no Zuora mocks — the handler is never reached.
  *
  * Additional tests that could be added here:
  * - Identity mismatch → 400: pass x-identity-id that doesn't match the account's identityId
@@ -15,16 +43,31 @@ import dayjs from 'dayjs';
  * - Amount below minimum → 400: mock updateSupporterPlusAmount to throw ValidationError
  */
 
-// Validation tests — no mocks needed because hono's defaultHook rejects invalid
-// inputs before the route handler (and therefore before any Zuora calls) runs.
-describe('Route validation (no mocks needed)', () => {
-	beforeEach(() => {
-		process.env.STAGE = 'CODE';
-		jest.resetModules();
-	});
+const mockZuoraClient = { post: jest.fn(), get: jest.fn() };
+const mockSubscription = {
+	subscriptionNumber: 'A-S12345678',
+	accountNumber: 'A00714188',
+	termEndDate: '2027-01-01',
+	ratePlans: [],
+};
+const mockAccount = {
+	basicInfo: { identityId: '999999999999' },
+	billToContact: {
+		workEmail: 'test@example.com',
+		firstName: 'Test',
+		lastName: 'User',
+	},
+	billingAndPayment: { currency: 'GBP' },
+};
 
+afterEach(() => {
+	jest.clearAllMocks();
+});
+
+// Validation tests — hono's defaultHook rejects invalid inputs before the route
+// handler (and therefore before any Zuora calls) runs.
+describe('Route validation (no mocks needed)', () => {
 	test('returns 400 when subscription number format is invalid', async () => {
-		const { app } = await import('../src/index');
 		const response = await app.request(
 			'/update-supporter-plus-amount/not-a-sub-number',
 			{
@@ -40,7 +83,6 @@ describe('Route validation (no mocks needed)', () => {
 	});
 
 	test('returns 400 when request body is missing required field', async () => {
-		const { app } = await import('../src/index');
 		const response = await app.request(
 			'/update-supporter-plus-amount/A-S12345678',
 			{
@@ -56,72 +98,27 @@ describe('Route validation (no mocks needed)', () => {
 	});
 });
 
-// Happy path test — mocks all external services so the full handler runs
+// Happy path test — all external services mocked
 describe('Route handler (mocked services)', () => {
-	const mockZuoraClient = { post: jest.fn(), get: jest.fn() };
-	const mockSubscription = {
-		subscriptionNumber: 'A-S12345678',
-		accountNumber: 'A00714188',
-		termEndDate: '2027-01-01',
-		ratePlans: [],
-	};
-	const mockAccount = {
-		basicInfo: { identityId: '999999999999' },
-		billToContact: {
-			workEmail: 'test@example.com',
+	beforeEach(() => {
+		jest.mocked(ZuoraClient).create.mockResolvedValue(mockZuoraClient as never);
+		jest.mocked(getSubscription).mockResolvedValue(mockSubscription as never);
+		jest.mocked(getAccount).mockResolvedValue(mockAccount as never);
+		jest.mocked(getProductCatalogFromApi).mockResolvedValue({} as never);
+		jest.mocked(updateSupporterPlusAmount).mockResolvedValue({
+			nextPaymentDate: dayjs(),
+			emailAddress: 'test@example.com',
 			firstName: 'Test',
 			lastName: 'User',
-		},
-		billingAndPayment: { currency: 'GBP' },
-	};
-
-	beforeEach(() => {
-		process.env.STAGE = 'CODE';
-		jest.resetModules();
-
-		jest.doMock('@modules/zuora/zuoraClient', () => ({
-			ZuoraClient: {
-				create: jest.fn().mockResolvedValue(mockZuoraClient),
-			},
-		}));
-		jest.doMock('@modules/zuora/subscription', () => ({
-			getSubscription: jest.fn().mockResolvedValue(mockSubscription),
-		}));
-		jest.doMock('@modules/zuora/account', () => ({
-			getAccount: jest.fn().mockResolvedValue(mockAccount),
-		}));
-		jest.doMock('@modules/product-catalog/api', () => ({
-			getProductCatalogFromApi: jest.fn().mockResolvedValue({}),
-		}));
-		jest.doMock('../src/updateSupporterPlusAmount', () => ({
-			updateSupporterPlusAmount: jest.fn().mockResolvedValue({
-				nextPaymentDate: dayjs(),
-				emailAddress: 'test@example.com',
-				firstName: 'Test',
-				lastName: 'User',
-				currency: 'GBP',
-				newAmount: 15,
-				billingPeriod: 'Month',
-				identityId: '999999999999',
-			}),
-		}));
-		// Mock both sendEmail and createThankYouEmail so the email module's
-		// DataExtensionNames enum doesn't need to be set up in tests
-		jest.doMock('@modules/email/email', () => ({
-			sendEmail: jest.fn().mockResolvedValue({}),
-		}));
-		jest.doMock('../src/sendEmail', () => ({
-			createThankYouEmail: jest.fn().mockReturnValue({ mocked: true }),
-		}));
-	});
-
-	afterEach(() => {
-		jest.clearAllMocks();
+			currency: 'GBP',
+			newAmount: 15,
+			billingPeriod: 'Month',
+			identityId: '999999999999',
+		} as never);
+		jest.mocked(createThankYouEmail).mockReturnValue({ mocked: true } as never);
 	});
 
 	test('returns 200 with success message for a valid request', async () => {
-		const { app } = await import('../src/index');
-
 		const response = await app.request(
 			'/update-supporter-plus-amount/A-S12345678',
 			{
