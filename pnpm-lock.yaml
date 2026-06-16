@@ -130,6 +130,25 @@ importers:
         specifier: ^4.21.0
         version: 4.21.0
 
+  handlers/braze-acquisition-events-sync:
+    dependencies:
+      identity:
+        specifier: workspace:*
+        version: link:../../modules/identity
+      logger:
+        specifier: workspace:*
+        version: link:../../modules/logger
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@redocly/cli':
+        specifier: 2.30.5
+        version: 2.30.5(@opentelemetry/api@1.9.1)(core-js@3.49.0)
+      '@types/aws-lambda':
+        specifier: ^8.10.147
+        version: 8.10.161
+
   handlers/alarms-handler:
     dependencies:
       '@aws-sdk/client-cloudwatch':

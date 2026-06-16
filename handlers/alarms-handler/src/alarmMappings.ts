@@ -12,6 +12,7 @@ export type Team =
 const teamToAppMappings: Record<Team, string[]> = {
 	MARTECH: [
 		'acquisition-events-api',
+		'braze-acquisition-events-sync',
 		'admin-console',
 		'apps-metering',
 		'apps-metering-exclusions-lambda',
@@ -77,6 +78,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'press-reader-entitlements',
 		'user-benefits',
 		'mobile-purchases-to-supporter-product-data',
+		'supporter-product-data-lambdas',
 	],
 	PLATFORM: [
 		// fulfilment

@@ -96,6 +96,18 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
+			AnnualTaxExclusive: z.object({
+				billingPeriod: z.literal('Annual'),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({ CAD: z.number(), GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
 			Discount: z.object({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
@@ -124,6 +136,18 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
+			MonthlyTaxExclusive: z.object({
+				billingPeriod: z.literal('Month'),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({ CAD: z.number(), GBP: z.number() }),
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
@@ -1846,6 +1870,21 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
+			AnnualTaxExclusive: z.object({
+				billingPeriod: z.literal('Annual'),
+				charges: z.object({
+					Contribution: z.object({
+						id: z.string(),
+					}),
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({ CAD: z.number(), GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
 			Discount: z.object({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
@@ -1877,6 +1916,21 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
+			MonthlyTaxExclusive: z.object({
+				billingPeriod: z.literal('Month'),
+				charges: z.object({
+					Contribution: z.object({
+						id: z.string(),
+					}),
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({ CAD: z.number(), GBP: z.number() }),
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
