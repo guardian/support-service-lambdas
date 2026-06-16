@@ -90,7 +90,7 @@ async function getZuoraSalesTaxRates(
 
 	const zuoraTaxPeriods = await getZuoraTaxPeriods(zuoraClient);
 	if (!zuoraTaxPeriods) {
-		throw new ValidationError(`no tax periods found`);
+		throw new Error('no tax periods found');
 	}
 	const zuoraTaxPeriod = getZuoraTaxPeriod(
 		zuoraTaxCode.id,
