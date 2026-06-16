@@ -3,6 +3,11 @@ import { sendEmail } from '@modules/email/email';
 import { logger } from '@modules/logger/logger';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { createHonoApp } from '@modules/routing/honoApp';
+import {
+	errorResponses,
+	jsonContent,
+	mmaRequestHeaders,
+} from '@modules/routing/honoSchemas';
 import { fetchSubscriptionWithIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
 import { stageFromEnvironment } from '@modules/stage';
 import type {
@@ -33,25 +38,12 @@ const successResponseSchema = z.object({
 	message: z.literal('Success'),
 });
 
-const badRequestSchema = z.object({
-	message: z.string().optional(),
-	error: z.string().optional(),
-	details: z.array(z.unknown()).optional(),
-});
-
-const internalServerErrorSchema = z.object({
-	message: z.string(),
-});
-
 const updateSupporterPlusAmountRoute = createRoute({
 	method: 'post',
 	path: '/update-supporter-plus-amount/{subscriptionNumber}',
 	request: {
 		params: pathParserSchema,
-		headers: z.object({
-			'x-api-key': z.string().optional(),
-			'x-identity-id': z.string().optional(),
-		}),
+		headers: mmaRequestHeaders,
 		body: {
 			required: true,
 			content: {
@@ -62,30 +54,8 @@ const updateSupporterPlusAmountRoute = createRoute({
 		},
 	},
 	responses: {
-		200: {
-			description: 'Amount was updated successfully',
-			content: {
-				'application/json': {
-					schema: successResponseSchema,
-				},
-			},
-		},
-		400: {
-			description: 'Validation error',
-			content: {
-				'application/json': {
-					schema: badRequestSchema,
-				},
-			},
-		},
-		500: {
-			description: 'Internal server error',
-			content: {
-				'application/json': {
-					schema: internalServerErrorSchema,
-				},
-			},
-		},
+		200: jsonContent(successResponseSchema, 'Amount was updated successfully'),
+		...errorResponses,
 	},
 });
 
