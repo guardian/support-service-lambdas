@@ -20,10 +20,7 @@ export function serveLocally(
 	app: OpenAPIHono<any>,
 	port: number,
 ): void {
-	const stage = 'CODE';
 	const host = '127.0.0.1';
-
-	process.env['STAGE'] = stage;
 
 	const docsUrl = `http://${host}:${port}/docs`;
 

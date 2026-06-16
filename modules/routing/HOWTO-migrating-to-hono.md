@@ -14,7 +14,6 @@ const updateSupporterPlusAmount: HandlerDefinition = {
     name: 'update-supporter-plus-amount',
     dependencies: {
         ...dep['@hono/zod-openapi'], // add this
-        ...dep.hono,                 // add this
     },
 };
 ```
@@ -135,7 +134,7 @@ const updateSupporterPlusAmount: HandlerDefinition = {
     name: 'update-supporter-plus-amount',
     ...
     extraScripts: {
-        local: 'tsx runManual/local.ts', // Add this line
+        local: 'STAGE=CODE tsx runManual/local.ts', // Add this line
     },
     ...
 };

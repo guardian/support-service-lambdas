@@ -817,9 +817,6 @@ importers:
       email:
         specifier: workspace:*
         version: link:../../modules/email
-      hono:
-        specifier: ^4.10.4
-        version: 4.12.23
       internationalisation:
         specifier: workspace:*
         version: link:../../modules/internationalisation
