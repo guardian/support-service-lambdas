@@ -649,11 +649,19 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEDeployment8B5BCDBB195cfef97b7c46788f73fb91caeab78e": {
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEDeployment8B5BCDBB967c83fda9e5cd6978019538f1d66bc7": {
       "DependsOn": [
         "updatesupporterplusamountlambdaupdatesupporterplusamountCODEproxyANY831FAFB9",
         "updatesupporterplusamountlambdaupdatesupporterplusamountCODEproxyF2B3818D",
         "updatesupporterplusamountlambdaupdatesupporterplusamountCODEANYB7D7F661",
+        "updatesupporterplusamountlambdaupdatesupporterplusamountCODEdocsproxyGETF30C3FE5",
+        "updatesupporterplusamountlambdaupdatesupporterplusamountCODEdocsproxy2E4083C9",
+        "updatesupporterplusamountlambdaupdatesupporterplusamountCODEdocsGET64C50F0B",
+        "updatesupporterplusamountlambdaupdatesupporterplusamountCODEdocsF4ACA464",
+        "updatesupporterplusamountlambdaupdatesupporterplusamountCODEopenapijsonproxyGET81CC8AA6",
+        "updatesupporterplusamountlambdaupdatesupporterplusamountCODEopenapijsonproxy19CC348A",
+        "updatesupporterplusamountlambdaupdatesupporterplusamountCODEopenapijsonGET4D98C4E5",
+        "updatesupporterplusamountlambdaupdatesupporterplusamountCODEopenapijsonF17E65A7",
       ],
       "Properties": {
         "Description": "API Gateway created by CDK",
@@ -669,7 +677,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEDeployment8B5BCDBB195cfef97b7c46788f73fb91caeab78e",
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEDeployment8B5BCDBB967c83fda9e5cd6978019538f1d66bc7",
         },
         "RestApiId": {
           "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
@@ -751,6 +759,536 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
         },
       },
       "Type": "AWS::ApiGateway::UsagePlanKey",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEdocsF4ACA464": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "docs",
+        "RestApiId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEdocsGET64C50F0B": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "updatesupporterplusamountlambda0DA9A4CB",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEdocsF4ACA464",
+        },
+        "RestApiId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEdocsGETApiPermissionTestupdatesupporterplusamountCODEupdatesupporterplusamountlambdaupdatesupporterplusamountCODE3B61ACCDGETdocsAD6E47C7": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambda0DA9A4CB",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+              },
+              "/test-invoke-stage/GET/docs",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEdocsGETApiPermissionupdatesupporterplusamountCODEupdatesupporterplusamountlambdaupdatesupporterplusamountCODE3B61ACCDGETdocs902D94C6": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambda0DA9A4CB",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+              },
+              "/",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEDeploymentStageCODE150E35C7",
+              },
+              "/GET/docs",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEdocsproxy2E4083C9": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEdocsF4ACA464",
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEdocsproxyGETApiPermissionTestupdatesupporterplusamountCODEupdatesupporterplusamountlambdaupdatesupporterplusamountCODE3B61ACCDGETdocsproxyF628C469": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambda0DA9A4CB",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+              },
+              "/test-invoke-stage/GET/docs/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEdocsproxyGETApiPermissionupdatesupporterplusamountCODEupdatesupporterplusamountlambdaupdatesupporterplusamountCODE3B61ACCDGETdocsproxyB6BDBD48": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambda0DA9A4CB",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+              },
+              "/",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEDeploymentStageCODE150E35C7",
+              },
+              "/GET/docs/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEdocsproxyGETF30C3FE5": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "updatesupporterplusamountlambda0DA9A4CB",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEdocsproxy2E4083C9",
+        },
+        "RestApiId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEopenapijsonF17E65A7": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "openapi.json",
+        "RestApiId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEopenapijsonGET4D98C4E5": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "updatesupporterplusamountlambda0DA9A4CB",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEopenapijsonF17E65A7",
+        },
+        "RestApiId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEopenapijsonGETApiPermissionTestupdatesupporterplusamountCODEupdatesupporterplusamountlambdaupdatesupporterplusamountCODE3B61ACCDGETopenapijson6A8E5F93": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambda0DA9A4CB",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+              },
+              "/test-invoke-stage/GET/openapi.json",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEopenapijsonGETApiPermissionupdatesupporterplusamountCODEupdatesupporterplusamountlambdaupdatesupporterplusamountCODE3B61ACCDGETopenapijson37C88BF5": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambda0DA9A4CB",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+              },
+              "/",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEDeploymentStageCODE150E35C7",
+              },
+              "/GET/openapi.json",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEopenapijsonproxy19CC348A": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEopenapijsonF17E65A7",
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEopenapijsonproxyGET81CC8AA6": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "updatesupporterplusamountlambda0DA9A4CB",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEopenapijsonproxy19CC348A",
+        },
+        "RestApiId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEopenapijsonproxyGETApiPermissionTestupdatesupporterplusamountCODEupdatesupporterplusamountlambdaupdatesupporterplusamountCODE3B61ACCDGETopenapijsonproxy313950CC": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambda0DA9A4CB",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+              },
+              "/test-invoke-stage/GET/openapi.json/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEopenapijsonproxyGETApiPermissionupdatesupporterplusamountCODEupdatesupporterplusamountlambdaupdatesupporterplusamountCODE3B61ACCDGETopenapijsonproxyE1AD2517": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambda0DA9A4CB",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
+              },
+              "/",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEDeploymentStageCODE150E35C7",
+              },
+              "/GET/openapi.json/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
     },
     "updatesupporterplusamountlambdaupdatesupporterplusamountCODEproxyANY831FAFB9": {
       "Properties": {
@@ -1654,11 +2192,19 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODDeployment7F9E10AE79e674afab169c2fe2e868677f50902a": {
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODDeployment7F9E10AE9f2cb9a1cc3215fdaa4b99960376a3f2": {
       "DependsOn": [
         "updatesupporterplusamountlambdaupdatesupporterplusamountPRODproxyANY8129D41C",
         "updatesupporterplusamountlambdaupdatesupporterplusamountPRODproxy9DC87935",
         "updatesupporterplusamountlambdaupdatesupporterplusamountPRODANY10F5483D",
+        "updatesupporterplusamountlambdaupdatesupporterplusamountPRODdocsproxyGET35529283",
+        "updatesupporterplusamountlambdaupdatesupporterplusamountPRODdocsproxy91315713",
+        "updatesupporterplusamountlambdaupdatesupporterplusamountPRODdocsGET8B0651E7",
+        "updatesupporterplusamountlambdaupdatesupporterplusamountPRODdocsD3B2E405",
+        "updatesupporterplusamountlambdaupdatesupporterplusamountPRODopenapijsonproxyGET2CA2BFED",
+        "updatesupporterplusamountlambdaupdatesupporterplusamountPRODopenapijsonproxyC8DEE453",
+        "updatesupporterplusamountlambdaupdatesupporterplusamountPRODopenapijsonGET4A24EB3A",
+        "updatesupporterplusamountlambdaupdatesupporterplusamountPRODopenapijsonDD86FAD0",
       ],
       "Properties": {
         "Description": "API Gateway created by CDK",
@@ -1674,7 +2220,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPRODDeployment7F9E10AE79e674afab169c2fe2e868677f50902a",
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPRODDeployment7F9E10AE9f2cb9a1cc3215fdaa4b99960376a3f2",
         },
         "RestApiId": {
           "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
@@ -1756,6 +2302,536 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
         },
       },
       "Type": "AWS::ApiGateway::UsagePlanKey",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODdocsD3B2E405": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "docs",
+        "RestApiId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODdocsGET8B0651E7": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "updatesupporterplusamountlambda0DA9A4CB",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPRODdocsD3B2E405",
+        },
+        "RestApiId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODdocsGETApiPermissionTestupdatesupporterplusamountPRODupdatesupporterplusamountlambdaupdatesupporterplusamountPROD07EC0FD8GETdocsDDAAE0CE": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambda0DA9A4CB",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+              },
+              "/test-invoke-stage/GET/docs",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODdocsGETApiPermissionupdatesupporterplusamountPRODupdatesupporterplusamountlambdaupdatesupporterplusamountPROD07EC0FD8GETdocsC64C795D": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambda0DA9A4CB",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+              },
+              "/",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPRODDeploymentStagePROD6C591B6D",
+              },
+              "/GET/docs",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODdocsproxy91315713": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPRODdocsD3B2E405",
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODdocsproxyGET35529283": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "updatesupporterplusamountlambda0DA9A4CB",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPRODdocsproxy91315713",
+        },
+        "RestApiId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODdocsproxyGETApiPermissionTestupdatesupporterplusamountPRODupdatesupporterplusamountlambdaupdatesupporterplusamountPROD07EC0FD8GETdocsproxy1F1CF6C4": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambda0DA9A4CB",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+              },
+              "/test-invoke-stage/GET/docs/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODdocsproxyGETApiPermissionupdatesupporterplusamountPRODupdatesupporterplusamountlambdaupdatesupporterplusamountPROD07EC0FD8GETdocsproxyE127E5B8": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambda0DA9A4CB",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+              },
+              "/",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPRODDeploymentStagePROD6C591B6D",
+              },
+              "/GET/docs/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODopenapijsonDD86FAD0": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "openapi.json",
+        "RestApiId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODopenapijsonGET4A24EB3A": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "updatesupporterplusamountlambda0DA9A4CB",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPRODopenapijsonDD86FAD0",
+        },
+        "RestApiId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODopenapijsonGETApiPermissionTestupdatesupporterplusamountPRODupdatesupporterplusamountlambdaupdatesupporterplusamountPROD07EC0FD8GETopenapijsonAC14FBEE": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambda0DA9A4CB",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+              },
+              "/test-invoke-stage/GET/openapi.json",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODopenapijsonGETApiPermissionupdatesupporterplusamountPRODupdatesupporterplusamountlambdaupdatesupporterplusamountPROD07EC0FD8GETopenapijsonFB9C994C": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambda0DA9A4CB",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+              },
+              "/",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPRODDeploymentStagePROD6C591B6D",
+              },
+              "/GET/openapi.json",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODopenapijsonproxyC8DEE453": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPRODopenapijsonDD86FAD0",
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODopenapijsonproxyGET2CA2BFED": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "updatesupporterplusamountlambda0DA9A4CB",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPRODopenapijsonproxyC8DEE453",
+        },
+        "RestApiId": {
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODopenapijsonproxyGETApiPermissionTestupdatesupporterplusamountPRODupdatesupporterplusamountlambdaupdatesupporterplusamountPROD07EC0FD8GETopenapijsonproxyB297EF2A": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambda0DA9A4CB",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+              },
+              "/test-invoke-stage/GET/openapi.json/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODopenapijsonproxyGETApiPermissionupdatesupporterplusamountPRODupdatesupporterplusamountlambdaupdatesupporterplusamountPROD07EC0FD8GETopenapijsonproxy32EDA021": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "updatesupporterplusamountlambda0DA9A4CB",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
+              },
+              "/",
+              {
+                "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPRODDeploymentStagePROD6C591B6D",
+              },
+              "/GET/openapi.json/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
     },
     "updatesupporterplusamountlambdaupdatesupporterplusamountPRODproxy9DC87935": {
       "Properties": {
