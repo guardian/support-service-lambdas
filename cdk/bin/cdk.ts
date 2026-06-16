@@ -34,6 +34,7 @@ import { SalesTaxApi } from '../lib/sales-tax-api';
 import { SalesforceDisasterRecovery } from '../lib/salesforce-disaster-recovery';
 import { SalesforceDisasterRecoveryHealthCheck } from '../lib/salesforce-disaster-recovery-health-check';
 import { SalesforceEventBus } from '../lib/salesforce-event-bus';
+import { SfEmailsToS3Exporter } from '../lib/sf-emails-to-s3-exporter';
 import { SfMoveSubscriptionsApi } from '../lib/sf-move-subscriptions-api';
 import {
 	APP_NAME as SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME,
@@ -167,6 +168,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	SupporterProductDataLambdas,
 	BrazeAcquisitionEventsSync,
 	SfMoveSubscriptionsApi,
+	SfEmailsToS3Exporter,
 	// MARKER new-lambda: cdk-bin
 ];
 

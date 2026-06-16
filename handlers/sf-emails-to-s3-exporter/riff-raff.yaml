@@ -6,18 +6,20 @@ allowedStages:
   - CODE
   - PROD
 deployments:
-  cfn:
+  sf-emails-to-s3-exporter-cloudformation:
     type: cloud-formation
     app: sf-emails-to-s3-exporter
     parameters:
-      templatePath: cfn.yaml
+      templateStagePaths:
+        CODE: sf-emails-to-s3-exporter-CODE.template.json
+        PROD: sf-emails-to-s3-exporter-PROD.template.json
 
   sf-emails-to-s3-exporter:
     type: aws-lambda
     parameters:
       fileName: sf-emails-to-s3-exporter.jar
-      bucket: support-service-lambdas-dist
+      bucketSsmLookup: true
       prefixStack: false
       functionNames:
-        - export-emails-from-sf-to-s3-
-    dependencies: [ cfn ]
+        - sf-emails-to-s3-exporter-
+    dependencies: [ sf-emails-to-s3-exporter-cloudformation ]
