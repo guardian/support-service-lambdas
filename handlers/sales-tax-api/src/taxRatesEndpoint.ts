@@ -18,7 +18,7 @@ import type {
 import { type ZuoraTaxCode } from '@modules/zuora/types/objects/tax';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyResult } from 'aws-lambda';
-import type z from 'zod';
+import type { z } from 'zod';
 import {
 	type TaxRatesRequest,
 	type TaxRatesResponse,
