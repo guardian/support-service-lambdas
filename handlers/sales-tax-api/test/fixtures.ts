@@ -63,7 +63,7 @@ export const canadianCountryStates: TaxRatesResponse = {
 	BC: 0.12,
 	MB: 0.12,
 	NB: 0.15,
-	NT: 0.15,
+	NT: 0.05,
 	NS: 0.15,
 	ON: 0.13,
 	QC: 0.1498,

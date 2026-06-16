@@ -1,5 +1,8 @@
 import { ValidationError } from '@modules/errors';
-import { getCountryNameByIsoCode } from '@modules/internationalisation/country';
+import {
+	caStates,
+	getCountryNameByIsoCode,
+} from '@modules/internationalisation/country';
 import { logger } from '@modules/logger/logger';
 import type { productKeySchema } from '@modules/product-catalog/productCatalogSchema';
 import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
@@ -45,6 +48,21 @@ export const caStatesReverse: Record<string, string> = {
 	Quebec: 'QC',
 	Saskatchewan: 'SK',
 	Yukon: 'YT',
+};
+const caStatesDefault: TaxRatesResponse = {
+	NL: 0,
+	SK: 0,
+	YT: 0,
+	NU: 0,
+	PE: 0,
+	AB: 0,
+	BC: 0,
+	MB: 0,
+	NB: 0,
+	NT: 0,
+	NS: 0,
+	ON: 0,
+	QC: 0,
 };
 
 export const zuoraTaxCodesEndpoint = async (
@@ -158,24 +176,17 @@ async function getZuoraSalesTaxRates(
 	const countryZuoraTaxRates = zuoraTaxRates.taxRates.filter(
 		(zuoraTaxRate) => zuoraTaxRate.country === getCountryNameByIsoCode(country),
 	);
-	const zuoreTaxRateEntries = countryZuoraTaxRates.map((zuoraTaxRate) => {
-		return [
-			caStatesReverse[zuoraTaxRate.state ?? ''] ?? ``,
-			zuoraTaxRate.taxRate1,
-		] as const;
-	});
-	console.log(
-		'getZuoraSalesTaxRates.zuoreTaxRateEntries = ',
-		zuoreTaxRateEntries,
-	);
-	const caTaxRates: TaxRatesResponse = { ...canadianCountryStates };
-	for (const [key, value] of zuoreTaxRateEntries) {
+	
+	const countryTaxRates: TaxRatesResponse = { ...caStatesDefault };
+	Object.keys(countryTaxRates).forEach((key) => {
 		if (isTaxRateKey(key)) {
-			caTaxRates[key] = value;
+			const zuoraTaxRate = countryZuoraTaxRates.find(
+				(zuoraTaxRate) => zuoraTaxRate.state === caStates[key],
+			);
+			countryTaxRates[key] = zuoraTaxRate?.taxRate1 ?? 0;
 		}
-	}
-	console.log('getZuoraSalesTaxRates.caTaxRates = ', caTaxRates);
-	return canadianCountryStates;
+	});
+	return countryTaxRates;
 }
 
 function findTaxExclusiveProductZuoraTaxId(
