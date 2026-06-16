@@ -10,7 +10,7 @@
 import {
 	zuoraTaxCodeSchema,
 	zuoraTaxPeriodsSchema,
-	// zuoraTaxRateSchema,
+	zuoraTaxRateSchema,
 } from '@modules/zuora/types/objects/tax';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 // import { taxRatesResponseSchema } from '../src/schemas';
@@ -18,9 +18,14 @@ import {
 	// taxRatesEndpoint,
 	zuoraTaxCodesEndpoint,
 	zuoraTaxPeriodsEndpoint,
-	// zuoraTaxRatesEndpoint,
+	zuoraTaxRatesEndpoint,
 } from '../src/taxRatesEndpoint';
-import { zuoraTaxCodePeriod, zuoraTaxCodeSupporterPlus } from './fixtures';
+import {
+	supporterPlusTaxEngineId,
+	zuoraTaxCodePeriod,
+	zuoraTaxCodeSupporterPlus,
+	zuoraTaxRateSupporterPlus,
+} from './fixtures';
 
 export {
 	supporterPlusTaxCodeId,
@@ -59,17 +64,17 @@ describe('SalesTax API Integration', () => {
 		expect(body.taxRatePeriods).toContainEqual(zuoraTaxCodePeriod);
 	});
 
-	// test('we can retrieve Zuora tax rates for TaxCodeId', async () => {
-	// 	const zuoraClient = await ZuoraClient.create(stage);
+	test('we can retrieve Zuora tax rates for TaxCodeId', async () => {
+		const zuoraClient = await ZuoraClient.create(stage);
 
-	// 	const result = await zuoraTaxRatesEndpoint(zuoraClient, {
-	// 		id: supporterPlusTaxCodeId,
-	// 	});
+		const result = await zuoraTaxRatesEndpoint(zuoraClient, {
+			id: supporterPlusTaxEngineId,
+		});
 
-	// 	expect(result.statusCode).toEqual(200);
-	// 	const body = zuoraTaxRateSchema.parse(JSON.parse(result.body));
-	// 	expect(body.taxRates).toContainEqual(zuoraTaxRateSupporterPlus);
-	// });
+		expect(result.statusCode).toEqual(200);
+		const body = zuoraTaxRateSchema.parse(JSON.parse(result.body));
+		expect(body.taxRates).toContainEqual(zuoraTaxRateSupporterPlus);
+	});
 
 	// test('we can retrieve SupporterPlus Canadian tax rates', async () => {
 	// 	const zuoraClient = await ZuoraClient.create(stage);
