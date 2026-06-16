@@ -67,10 +67,12 @@ export const zuoraTaxCodesEndpoint = async (
 ): Promise<APIGatewayProxyResult> => {
 	try {
 		logger.log('Retrieving Zuora codes');
-		return ok(
-			await Promise.resolve(getZuoraTaxCodes(zuoraClient)),
-			zuoraTaxCodeSchema,
-		);
+		const zuoraTaxCodes = await Promise.resolve(getZuoraTaxCodes(zuoraClient));
+		if (!zuoraTaxCodes) {
+			throw new ValidationError(`no tax codes found`);
+		}
+
+		return ok(zuoraTaxCodes, zuoraTaxCodeSchema.unwrap());
 	} catch (error) {
 		logger.error('Error fetching Zuora codes', error);
 		return Promise.resolve(buildErrorResponse(error));
@@ -82,10 +84,14 @@ export const zuoraTaxPeriodsEndpoint = async (
 ): Promise<APIGatewayProxyResult> => {
 	try {
 		logger.log('Retrieving Zuora periods');
-		return ok(
-			await Promise.resolve(getZuoraTaxPeriods(zuoraClient)),
-			zuoraTaxPeriodsSchema,
+		const zuoraTaxPeriods = await Promise.resolve(
+			getZuoraTaxPeriods(zuoraClient),
 		);
+		if (!zuoraTaxPeriods) {
+			throw new ValidationError(`no tax periods found`);
+		}
+
+		return ok(zuoraTaxPeriods, zuoraTaxPeriodsSchema.unwrap());
 	} catch (error) {
 		logger.error('Error fetching Zuora periods', error);
 		return Promise.resolve(buildErrorResponse(error));
@@ -138,24 +144,38 @@ async function getZuoraSalesTaxRates(
 	}
 
 	const zuoraTaxCodes = await getZuoraTaxCodes(zuoraClient);
-	const exclusiveZuoraTaxId = findTaxExclusiveProductZuoraTaxId(
+	if (!zuoraTaxCodes) {
+		throw new ValidationError(`no tax codes found`);
+	}
+	const zuoraTaxCode = findTaxExclusiveProductZuoraTaxId(
 		productKey,
 		zuoraTaxCodes.taxCodes,
 	);
-	if (!exclusiveZuoraTaxId) {
+	if (!zuoraTaxCode) {
 		throw new ValidationError(`invalid productKey:${productKey}`);
+	}
+
+	const zuoraTaxPeriods = await getZuoraTaxPeriods(zuoraClient);
+	if (!zuoraTaxPeriods) {
+		throw new ValidationError(`no tax periods found`);
+	}
+	const productTaxPeriod = zuoraTaxPeriods.taxRatePeriods.filter(
+		(zuoraTaxPeriod) => zuoraTaxPeriod.taxCodeId === zuoraTaxCode.id,
+	)[0];
+	if (!productTaxPeriod) {
+		throw new ValidationError(`invalid period for productKey:${productKey}`);
 	}
 
 	const zuoraTaxRates = await getZuoraTaxRates(
 		zuoraClient,
-		exclusiveZuoraTaxId.id,
+		productTaxPeriod.id,
 	);
 	const countryZuoraTaxRates = zuoraTaxRates.taxRates.filter(
 		(zuoraTaxRate) => zuoraTaxRate.country === getCountryNameByIsoCode(country),
 	);
 	const zuoreTaxRateEntries = countryZuoraTaxRates.map((zuoraTaxRate) => {
 		return [
-			caStatesReverse[zuoraTaxRate.state] ?? ``,
+			caStatesReverse[zuoraTaxRate.state ?? ''] ?? ``,
 			zuoraTaxRate.taxRate1,
 		] as const;
 	});

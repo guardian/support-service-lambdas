@@ -7,29 +7,33 @@ export const zuoraTaxCode = z.object({
 	name: z.string(),
 	description: z.string(),
 });
-export const zuoraTaxCodeSchema = z.object({
-	taxCodes: z.array(zuoraTaxCode),
-});
+export const zuoraTaxCodeSchema = z
+	.object({
+		taxCodes: z.array(zuoraTaxCode),
+	})
+	.optional();
 export type ZuoraTaxCode = z.infer<typeof zuoraTaxCode>;
-export type ZuoraTaxCodes = z.infer<typeof zuoraTaxCodeSchema>;
+export type ZuoraTaxCodes = z.infer<typeof zuoraTaxCodeSchema> | undefined;
 
 export const zuoraTaxPeriod = z.object({
 	id: z.string(),
-	startDate: z.date(),
-	endDate: z.date().nullable(),
+	startDate: z.string().nullable(),
+	endDate: z.string().nullable(),
 	taxCodeId: z.string(),
 });
-export const zuoraTaxPeriodsSchema = z.object({
-	taxRatePeriods: z.array(zuoraTaxPeriod),
-});
+export const zuoraTaxPeriodsSchema = z
+	.object({
+		taxRatePeriods: z.array(zuoraTaxPeriod),
+	})
+	.optional();
 export type ZuoraTaxPeriod = z.infer<typeof zuoraTaxPeriod>;
-export type ZuoraTaxPeriods = z.infer<typeof zuoraTaxPeriodsSchema>;
+export type ZuoraTaxPeriods = z.infer<typeof zuoraTaxPeriodsSchema> | undefined;
 
 export const zuoraTaxRate = z.object({
 	id: z.string(),
 	taxRatePeriodId: z.string(),
 	country: z.string(),
-	state: z.string(),
+	state: z.string().nullable(),
 	county: z.string().nullable(),
 	city: z.string().nullable(),
 	postalCode: z.string().nullable(),

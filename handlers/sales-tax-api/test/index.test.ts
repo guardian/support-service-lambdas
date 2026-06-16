@@ -1,21 +1,22 @@
-import {
-	caStates,
-	getCountryNameByIsoCode,
-	type IsoCountry,
-} from '@modules/internationalisation/country';
+import { type IsoCountry } from '@modules/internationalisation/country';
 import {
 	getZuoraTaxCodes,
-	// getZuoraTaxPeriods,
+	getZuoraTaxPeriods,
 	getZuoraTaxRates,
 } from '@modules/zuora/tax';
 import type {
 	ZuoraTaxCodes,
-	// ZuoraTaxPeriods,
+	ZuoraTaxPeriods,
 	ZuoraTaxRates,
 } from '@modules/zuora/types/objects/tax';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { handler } from '../src/index';
 import type { TaxRatesResponse } from '../src/schemas';
+import {
+	supporterPlusTaxCodeId,
+	zuoraTaxCodePeriod,
+	zuoraTaxRateSupporterPlus,
+} from './fixtures';
 
 jest.mock('@modules/stage', () => ({
 	stageFromEnvironment: () => 'CODE',
@@ -27,6 +28,7 @@ jest.mock('@modules/zuora/zuoraClient', () => ({
 
 jest.mock('@modules/zuora/tax', () => ({
 	getZuoraTaxCodes: jest.fn(),
+	getZuoraTaxPeriods: jest.fn(),
 	getZuoraTaxRates: jest.fn(),
 }));
 
@@ -49,15 +51,14 @@ const countryStates: Partial<Record<IsoCountry, Record<string, number>>> = {
 };
 
 describe('SalesTax API', () => {
-	const country = 'CA';
 	const province = 'ON';
 
 	const mockGetZuoraTaxCodes = jest.mocked(getZuoraTaxCodes);
 	const mockZuoraTaxCodes = {
 		taxCodes: [
 			{
-				id: '897689',
-				taxEngineId: '',
+				id: supporterPlusTaxCodeId,
+				taxEngineId: '2c92c0f94568f996014570f746f75c52',
 				active: true,
 				name: 'Supporter Plus',
 				description: '',
@@ -65,50 +66,14 @@ describe('SalesTax API', () => {
 		],
 	} as unknown as ZuoraTaxCodes;
 
-	// const mockGetZuoraTaxPeriods = jest.mocked(getZuoraTaxPeriods);
-	// const mockZuoraTaxPeriods = {
-	// 	taxRatePeriods: [
-	// 		{
-	// 			id: '897689',
-	// 			startDate: '2015-01-01',
-	// 			endDate: null,
-	// 			taxCodeId: '2c92c0f9458d03c30145a6f15360249c',
-	// 		},
-	// 	],
-	// } as unknown as ZuoraTaxPeriods;
+	const mockGetZuoraTaxPeriods = jest.mocked(getZuoraTaxPeriods);
+	const mockZuoraTaxPeriods = {
+		taxRatePeriods: [zuoraTaxCodePeriod],
+	} as unknown as ZuoraTaxPeriods;
 
 	const mockGetZuoraTaxRates = jest.mocked(getZuoraTaxRates);
 	const mockZuoraTaxRates = {
-		taxRates: [
-			{
-				id: '897689',
-				taxRatePeriodId: '2c92c0f9458d03c30145a6f15360249c',
-				country: getCountryNameByIsoCode(country),
-				state: caStates[province],
-				county: null,
-				city: null,
-				postalCode: null,
-				taxRegion: null,
-				taxRate1: countryStates[country]?.[province],
-				taxRateType1: null,
-				taxName1: null,
-				taxJursdiction1: null,
-				taxLocationCode1: null,
-				taxRateDescription1: null,
-				taxRate2: 0.0,
-				taxRateType2: null,
-				taxName2: null,
-				taxJursdiction2: null,
-				taxLocationCode2: null,
-				taxRateDescription2: null,
-				taxRate3: 0.0,
-				taxRateType3: null,
-				taxName3: null,
-				taxJursdiction3: null,
-				taxLocationCode3: null,
-				taxRateDescription3: null,
-			},
-		],
+		taxRates: [zuoraTaxRateSupporterPlus],
 	} as unknown as ZuoraTaxRates;
 
 	const baseTaxRatesEvent: Partial<APIGatewayProxyEvent> = {
@@ -119,6 +84,7 @@ describe('SalesTax API', () => {
 
 	beforeEach(() => {
 		mockGetZuoraTaxCodes.mockResolvedValue(mockZuoraTaxCodes);
+		mockGetZuoraTaxPeriods.mockResolvedValue(mockZuoraTaxPeriods);
 		mockGetZuoraTaxRates.mockResolvedValue(mockZuoraTaxRates);
 	});
 
