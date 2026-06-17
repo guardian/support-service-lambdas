@@ -78,8 +78,8 @@ describe('processAcquisitionEvent', () => {
 
 	it('creates Braze payload with expected event properties', () => {
 		const event = buildEvent({
-			product: 'SUPPORTER_PLUS',
-			paymentFrequency: 'MONTHLY',
+			product: 'CONTRIBUTION',
+			paymentFrequency: 'ONE_OFF',
 			currency: 'GBP',
 			eventTimeStamp: '2026-06-03T12:00:00Z',
 			promoCode: 'PROMO123',
@@ -96,14 +96,70 @@ describe('processAcquisitionEvent', () => {
 					time: '2026-06-03T12:00:00Z',
 					_update_existing_only: true,
 					properties: {
-						product_name: 'SUPPORTER_PLUS',
+						product_name: 'Single Contribution',
 						currency: 'GBP',
 						promo_code: 'PROMO123',
-						payment_frequency: 'MONTHLY',
+						payment_frequency: 'One-off payment',
 						transaction_value: 15,
 					},
 				},
 			],
 		});
 	});
+
+	it.each([
+		['RECURRING_CONTRIBUTION', undefined, 'Recurring Contribution'],
+		['SUPPORTER_PLUS', undefined, 'Supporter Plus'],
+		['TIER_THREE', undefined, 'Tier Three'],
+		['DIGITAL_SUBSCRIPTION', undefined, 'Digital Subscription'],
+		['GUARDIAN_AD_LITE', undefined, 'Guardian Ad-Lite'],
+		['PRINT_SUBSCRIPTION', 'GUARDIAN_WEEKLY', 'Guardian Weekly - Digital'],
+		['PRINT_SUBSCRIPTION', 'HOME_DELIVERY_SUNDAY', 'Newspaper - Subscription'],
+		['PRINT_SUBSCRIPTION', 'VOUCHER_SUNDAY', 'Newspaper - Subscription'],
+		[
+			'PRINT_SUBSCRIPTION',
+			'HOME_DELIVERY_EVERYDAY',
+			'Newspaper - Subscription',
+		],
+		['PRINT_SUBSCRIPTION', 'VOUCHER_SIXDAY', 'Newspaper - Subscription'],
+		['APP_PREMIUM_TIER', undefined, 'Premium App'],
+	] as const)(
+		'maps product %s with printProduct %s to %s',
+		(product, printProduct, expectedProductName) => {
+			const event = buildEvent({
+				product,
+				printProduct,
+			});
+
+			const payload = transformEventForBrazePayload(
+				event.detail,
+				'external-user-123',
+			);
+			expect(payload.events?.[0]?.properties?.product_name).toEqual(
+				expectedProductName,
+			);
+		},
+	);
+
+	it.each([
+		['ONE_OFF', 'One-off payment'],
+		['MONTHLY', 'Month'],
+		['QUARTERLY', 'Quarter'],
+		['SIX_MONTHLY', 'Semi-Annual'],
+		['ANNUALLY', 'Annual'],
+		['ANNUAL', 'Annual'],
+	] as const)(
+		'maps payment frequency %s to %s',
+		(paymentFrequency, expected) => {
+			const event = buildEvent({ paymentFrequency });
+
+			const payload = transformEventForBrazePayload(
+				event.detail,
+				'external-user-123',
+			);
+			expect(payload.events?.[0]?.properties?.payment_frequency).toEqual(
+				expected,
+			);
+		},
+	);
 });
