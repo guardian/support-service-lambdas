@@ -44,15 +44,23 @@ Use SrCDK constructs from ./cdk/lib/cdk/ where possible.
 
 When making changes to TypeScript code, use `./agent-tool <command>` instead of ad-hoc commands such as raw `pnpm lint`, `pnpm type-check`, `prettier`, `eslint`, or `git`.
 
+Call the wrapper by absolute path, e.g. `/Users/john_duffell/code/support-service-lambdas/agent-tool <command>`.
+
 Always scope to the minimum set of affected targets under `handlers/*` or `modules/*`. Use `list_targets` or `validate_targets` if the target scope is unclear.
+
+Default output is verbose streaming. Use global output flag when needed:
+- `--tail N` for concise output with failure tails and a full temp log path printed up front
 
 Recommended order (use the first applicable scoped command):
 1. `./agent-tool validate_targets <targets...>` or `./agent-tool list_targets`
 2. `./agent-tool git_diff_stat` or `./agent-tool git_diff_target_stat <target>`
 3. `./agent-tool verify_changed` (or `./agent-tool verify <targets...>`)
-4. `./agent-tool repair_changed` (or `./agent-tool repair <targets...>`) only when verify fails
-5. `./agent-tool verify_changed` again after repair
-6. `./agent-tool test_changed` (or `./agent-tool test <targets...>` / `test_one` / `test_file`) when tests are needed
-7. `./agent-tool git_diff` or `./agent-tool git_diff_target <target>` when full diff detail is needed
+4. `./agent-tool check_formatting_changed` / `./agent-tool lint_changed` / `./agent-tool type_check_changed` when only one verification stage is required
+5. `./agent-tool fix_formatting_changed` or `./agent-tool lint_fix_changed` only when verify fails
+6. `./agent-tool verify_changed` again after fixes
+7. `./agent-tool test_changed` (or `./agent-tool test <targets...>` / `test_one` / `test_file`) when tests are needed
+8. `./agent-tool git_diff` or `./agent-tool git_diff_target <target>` when full diff detail is needed
+9. `./agent-tool snapshot_update` when buildcheck-managed snapshots are expected
+10. `./agent-tool install_workspace` when dependencies or lockfiles need updating
 
 If `agent-tools` is missing a safer or more efficient command, suggest adding it rather than working around it with ad-hoc shell commands.
