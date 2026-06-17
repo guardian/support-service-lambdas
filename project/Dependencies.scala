@@ -92,7 +92,7 @@ object Dependencies {
   val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.2.0"
   val commonsIO = "commons-io" % "commons-io" % "2.22.0"
   val jodaTime = "joda-time" % "joda-time" % "2.14.2"
-  val typesafeConfig = "com.typesafe" % "config" % "1.4.8"
+  val typesafeConfig = "com.typesafe" % "config" % "1.4.9"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest-should" % "0.9.0" % Test
