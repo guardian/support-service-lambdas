@@ -22,15 +22,31 @@ export class ZuoraBearerTokenProvider implements BearerTokenProvider {
 	) {}
 
 	private tokenIsExpired = () => {
+		logger.log('Checking if Zuora bearer token is expired');
 		if (this.bearerToken === null) {
+			logger.log('No Zuora bearer token found, fetching a new one');
 			return true;
 		}
 		const now = new Date();
-		return (
-			this.lastFetchedTime === null ||
+		if (this.lastFetchedTime === null) {
+			logger.log(
+				'No last fetched time found, fetching a new Zuora bearer token',
+			);
+			return true;
+		}
+		if (
 			this.lastFetchedTime.getTime() + this.bearerToken.expires_in * 1000 <
-				now.getTime()
-		);
+			now.getTime()
+		) {
+			logger.log('Zuora bearer token is expired', {
+				lastFetchedTime: this.lastFetchedTime.getTime(),
+				expiresIn: this.bearerToken.expires_in * 1000,
+				now: now.getTime(),
+			});
+			return true;
+		}
+		logger.log('Zuora bearer token is still valid');
+		return false;
 	};
 	public async getBearerToken(): Promise<ZuoraBearerToken> {
 		if (this.bearerToken === null || this.tokenIsExpired()) {
@@ -60,8 +76,8 @@ export class ZuoraBearerTokenProvider implements BearerTokenProvider {
 		const json = await response.json();
 
 		const parseResult = zuoraBearerTokenSchema.safeParse(json);
+		logger.log('Zuora bearer token response:', json);
 		if (!parseResult.success) {
-			logger.log('Zuora bearer token response:', json);
 			throw new Error(
 				`Failed to fetch Zuora bearer token: ${JSON.stringify(parseResult.error.issues)}`,
 			);
