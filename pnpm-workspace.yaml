@@ -7,7 +7,7 @@ packages:
   - 'cdk'
   # build generator
   - 'buildcheck'
-  # agent/copilot tools (MCP server)
+  # agent/copilot tools (CLI)
   - 'agent-tools'
 
 catalog:

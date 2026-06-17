@@ -1,12 +1,12 @@
 import { resolve } from 'path';
 import {
+	type CommandResult,
 	getScriptCommand,
 	hasScript,
 	ROOT,
 	runScript,
 	type ScriptResult,
-	type ToolResult,
-	toToolResult,
+	toCommandResult,
 } from './runScript.js';
 import { resolveChangedTargets } from './targetSelection.js';
 
@@ -14,7 +14,11 @@ const TEST_TIMEOUT_SECONDS = 600;
 
 function scriptLooksLikeIntegration(script: string): boolean {
 	const lower = script.toLowerCase();
-	return lower.includes('group=integration') || lower.includes('it-test');
+	return (
+		/\bit-test\b/.test(lower) ||
+		/\bgroup(?:=|\s+)integration\b/.test(lower) ||
+		/\bintegration\b/.test(lower)
+	);
 }
 
 function safeRelativePath(filePath: string): string | null {
@@ -23,7 +27,7 @@ function safeRelativePath(filePath: string): string | null {
 		return null;
 	}
 	const abs = resolve(ROOT, normalized);
-	if (!abs.startsWith(ROOT)) {
+	if (abs !== ROOT && !abs.startsWith(`${ROOT}/`)) {
 		return null;
 	}
 	return normalized;
@@ -37,13 +41,17 @@ function runTestForTarget(target: string, extraArgs: string[]): ScriptResult {
 	});
 }
 
-function runTestWithArgs(targets: string[], extraArgs: string[]): ToolResult {
+// test executes repository code, so this command stays in CI mode, blocks integration-like scripts, and keeps a fixed timeout.
+function runTestWithArgs(
+	targets: string[],
+	extraArgs: string[],
+): CommandResult {
 	const lines: string[] = [];
 	let failCount = 0;
 	let passCount = 0;
 
 	for (const target of targets) {
-		lines.push(`\n--- ${target} ---`);
+		lines.push('', `--- ${target} ---`);
 
 		if (!hasScript(target, 'test')) {
 			lines.push('  WARN test: skipped (not in package.json)');
@@ -78,36 +86,37 @@ function runTestWithArgs(targets: string[], extraArgs: string[]): ToolResult {
 			? `OK   all tests passed (${passCount} target(s))`
 			: `FAIL ${failCount} target(s) had test failures`,
 	);
-	return toToolResult(lines);
+	return toCommandResult(lines, failCount === 0 ? 0 : 1);
 }
 
-export function runTest(targets: string[]): ToolResult {
+export function runTest(targets: string[]): CommandResult {
 	return runTestWithArgs(targets, []);
 }
 
-export function runTestChanged(): ToolResult {
+export function runTestChanged(): CommandResult {
 	const targets = resolveChangedTargets();
 	if (targets.length === 0) {
-		return toToolResult([
+		return toCommandResult([
 			'WARN no changed handlers/* or modules/* targets detected',
 		]);
 	}
 	return runTestWithArgs(targets, []);
 }
 
-export function runTestOne(target: string, pattern: string): ToolResult {
+export function runTestOne(target: string, pattern: string): CommandResult {
 	return runTestWithArgs([target], ['--testPathPattern', pattern]);
 }
 
-export function runTestFile(target: string, filePath: string): ToolResult {
+export function runTestFile(target: string, filePath: string): CommandResult {
 	const safePath = safeRelativePath(filePath);
 	if (!safePath) {
-		return toToolResult([`FAIL invalid filePath: ${filePath}`]);
+		return toCommandResult([`FAIL invalid filePath: ${filePath}`], 1);
 	}
 	if (!safePath.startsWith(`${target}/`)) {
-		return toToolResult([
-			`FAIL filePath must be inside target ${target}: ${filePath}`,
-		]);
+		return toCommandResult(
+			[`FAIL filePath must be inside target ${target}: ${filePath}`],
+			1,
+		);
 	}
 	return runTestWithArgs([target], [safePath]);
 }

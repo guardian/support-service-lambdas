@@ -1,48 +1,22 @@
-import { existsSync, readdirSync } from 'fs';
-import { resolve } from 'path';
 import {
+	type CommandResult,
 	getScripts,
-	ROOT,
 	targetExists,
-	type ToolResult,
-	toToolResult,
+	toCommandResult,
 } from './runScript.js';
+import { listTargetNames } from './targetRegistry.js';
 
-const TARGET_PREFIXES = ['handlers', 'modules'] as const;
+const TARGET_RE = /^(handlers|modules)\/[a-zA-Z0-9._-]+$/;
 
-export function listTargetNames(): string[] {
-	const targets: string[] = [];
-
-	for (const prefix of TARGET_PREFIXES) {
-		const dir = resolve(ROOT, prefix);
-		if (!existsSync(dir)) {
-			continue;
-		}
-		const entries = readdirSync(dir, { withFileTypes: true });
-		for (const entry of entries) {
-			if (entry.isDirectory()) {
-				targets.push(`${prefix}/${entry.name}`);
-			}
-		}
-	}
-
-	return targets.sort();
-}
-
-export function listTargets(): ToolResult {
+export function listTargets(): CommandResult {
 	const targets = listTargetNames();
-
-	return toToolResult([
-		'Available targets for verify, repair, and test:',
-		'',
-		...targets,
-	]);
+	return toCommandResult(targets.length > 0 ? targets : ['(no targets found)']);
 }
 
-export function validateTargetsTool(targets: string[]): ToolResult {
+export function validateTargetsTool(targets: string[]): CommandResult {
 	const knownTargets = new Set(listTargetNames());
 	const results = targets.map((target) => {
-		if (!/^(handlers|modules)\/[a-zA-Z0-9._-]+$/.test(target)) {
+		if (!TARGET_RE.test(target)) {
 			return {
 				target,
 				valid: false,
@@ -66,16 +40,16 @@ export function validateTargetsTool(targets: string[]): ToolResult {
 			? 'OK   all targets valid'
 			: `FAIL ${failCount} invalid target(s)`,
 	);
-	return toToolResult(lines);
+	return toCommandResult(lines, failCount === 0 ? 0 : 1);
 }
 
-export function showTargetScripts(target: string): ToolResult {
+export function showTargetScripts(target: string): CommandResult {
 	if (!targetExists(target)) {
-		return toToolResult([`FAIL ${target}: target does not exist`]);
+		return toCommandResult([`FAIL ${target}: target does not exist`], 1);
 	}
 	const scripts = getScripts(target);
 	if (scripts.length === 0) {
-		return toToolResult([`WARN ${target}: no scripts found`]);
+		return toCommandResult([`WARN ${target}: no scripts found`]);
 	}
-	return toToolResult([`Scripts for ${target}:`, '', ...scripts]);
+	return toCommandResult([`Scripts for ${target}:`, '', ...scripts]);
 }

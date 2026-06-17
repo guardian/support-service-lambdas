@@ -42,19 +42,17 @@ Use SrCDK constructs from ./cdk/lib/cdk/ where possible.
 
 ### Verification and repair
 
-After making changes to TypeScript code, always verify and repair using the `agent-tools` MCP tools.
+When making changes to TypeScript code, use `./agent-tool <command>` instead of ad-hoc commands such as raw `pnpm lint`, `pnpm type-check`, `prettier`, `eslint`, or `git`.
 
-**Always scope to the minimum set of affected targets** — do not run across the whole workspace unless explicitly asked. Use `list_targets` if you are unsure which targets exist.
-
-Use tools defined in `agent-tools/src/index.ts` instead of ad-hoc commands such as raw `pnpm lint`, `pnpm type-check`, `prettier`, or `eslint`.
+Always scope to the minimum set of affected targets under `handlers/*` or `modules/*`. Use `list_targets` or `validate_targets` if the target scope is unclear.
 
 Recommended order (use the first applicable scoped command):
-1. `validate_targets` or `list_targets` (if target scope is unclear)
-2. `git_diff_stat` or `git_diff_target_stat` (fast change summary)
-3. `verify_changed` (or `verify` with explicit targets)
-4. `repair_changed` (or `repair` with explicit targets) only when verify fails
-5. `verify_changed` again after repair
-6. `test_changed` (or `test`/`test_one`/`test_file` when tests are needed)
-7. `git_diff` or `git_diff_target` (full diff review when needed)
+1. `./agent-tool validate_targets <targets...>` or `./agent-tool list_targets`
+2. `./agent-tool git_diff_stat` or `./agent-tool git_diff_target_stat <target>`
+3. `./agent-tool verify_changed` (or `./agent-tool verify <targets...>`)
+4. `./agent-tool repair_changed` (or `./agent-tool repair <targets...>`) only when verify fails
+5. `./agent-tool verify_changed` again after repair
+6. `./agent-tool test_changed` (or `./agent-tool test <targets...>` / `test_one` / `test_file`) when tests are needed
+7. `./agent-tool git_diff` or `./agent-tool git_diff_target <target>` when full diff detail is needed
 
-If you identify a missing tool in `agent-tools` that would be safer or more efficient than an ad-hoc command, suggest adding it as a PR rather than working around it.
+If `agent-tools` is missing a safer or more efficient command, suggest adding it rather than working around it with ad-hoc shell commands.

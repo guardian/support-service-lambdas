@@ -1,8 +1,7 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { z } from 'zod';
 import { runGit, runGitForTarget } from './tools/git.js';
 import { runRepair, runRepairChanged } from './tools/repair.js';
+import { type CommandResult, toCommandResult } from './tools/runScript.js';
+import { listTargetNames } from './tools/targetRegistry.js';
 import {
 	listTargets,
 	showTargetScripts,
@@ -16,198 +15,234 @@ import {
 } from './tools/test.js';
 import { runVerify, runVerifyChanged } from './tools/verify.js';
 
-const server = new McpServer({ name: 'agent-tools', version: '1.0.0' });
+const HELP_LINES = [
+	'Usage:',
+	'  ./agent-tool <command> [args...]',
+	'',
+	'Commands:',
+	'  help',
+	'  list_targets',
+	'  validate_targets <target...>',
+	'  show_target_scripts <target>',
+	'  verify <target...>',
+	'  verify_changed',
+	'  repair <target...>',
+	'  repair_changed',
+	'  test <target...>',
+	'  test_changed',
+	'  test_one <target> <pattern>',
+	'  test_file <target> <filePath>',
+	'  git_status',
+	'  git_diff',
+	'  git_diff_target <target>',
+	'  git_diff_staged',
+	'  git_diff_stat',
+	'  git_diff_target_stat <target>',
+	'  git_diff_staged_stat',
+	'  git_changed_files',
+	'  git_changed_files_staged',
+	'',
+	'Notes:',
+	'  - Targets must be under handlers/* or modules/*.',
+	'  - Hyphenated aliases such as verify-changed are also accepted.',
+];
 
-const targetsParam = {
-	targets: z
-		.array(z.string().regex(/^(handlers|modules)\/[a-zA-Z0-9._-]+$/))
-		.min(1)
-		.describe(
-			"One or more workspace targets, e.g. ['handlers/new-subscription-api']",
-		),
-};
+const TARGET_RE = /^(handlers|modules)\/[a-zA-Z0-9._-]+$/;
 
-const targetParam = {
-	target: z
-		.string()
-		.regex(/^(handlers|modules)\/[a-zA-Z0-9._-]+$/)
-		.describe("Workspace target, e.g. 'handlers/new-subscription-api'"),
-};
+function normalizeCommand(command: string): string {
+	return command.replace(/-/g, '_');
+}
 
-server.registerTool(
-	'verify',
-	{
-		description:
-			'Run check-formatting, lint, and type-check for handlers/* or modules/* targets.',
-		inputSchema: targetsParam,
-	},
-	({ targets }) => runVerify(targets),
-);
+function help(exitCode = 0): CommandResult {
+	return toCommandResult(HELP_LINES, exitCode);
+}
 
-server.registerTool(
-	'verify_changed',
-	{
-		description:
-			'Run verify for changed handlers/* and modules/* targets only (staged + unstaged).',
-	},
-	() => runVerifyChanged(),
-);
+function fail(message: string): CommandResult {
+	return toCommandResult([`FAIL ${message}`], 1);
+}
 
-server.registerTool(
-	'repair',
-	{
-		description:
-			'Run fix-formatting and lint --fix for handlers/* or modules/* targets.',
-		inputSchema: targetsParam,
-	},
-	({ targets }) => runRepair(targets),
-);
+function validateTargetArgs(
+	targets: string[],
+): Array<{ target: string; reason: string }> {
+	const knownTargets = new Set(listTargetNames());
+	return targets.flatMap((target) => {
+		if (!TARGET_RE.test(target)) {
+			return [
+				{
+					target,
+					reason: 'invalid format (expected handlers/<name> or modules/<name>)',
+				},
+			];
+		}
+		if (!knownTargets.has(target)) {
+			return [{ target, reason: 'target does not exist' }];
+		}
+		return [];
+	});
+}
 
-server.registerTool(
-	'repair_changed',
-	{
-		description:
-			'Run repair for changed handlers/* and modules/* targets only (staged + unstaged).',
-	},
-	() => runRepairChanged(),
-);
+function requireTargets(
+	args: string[],
+	command: string,
+): CommandResult | { targets: string[] } {
+	if (args.length === 0) {
+		return fail(`${command} requires at least one target`);
+	}
+	const invalid = validateTargetArgs(args);
+	if (invalid.length > 0) {
+		return toCommandResult(
+			invalid.map((result) => `FAIL ${result.target}: ${result.reason}`),
+			1,
+		);
+	}
+	return { targets: args };
+}
 
-// Note: tests execute arbitrary repository code and are less safe than verify/repair.
-server.registerTool(
-	'test',
-	{
-		description:
-			'Run safe unit tests for handlers/* or modules/* targets (CI mode + timeout). Integration-like test scripts are blocked.',
-		inputSchema: targetsParam,
-	},
-	({ targets }) => runTest(targets),
-);
+function requireTarget(
+	args: string[],
+	command: string,
+): CommandResult | { target: string } {
+	if (args.length !== 1) {
+		return fail(`${command} requires exactly one target`);
+	}
+	const targets = requireTargets(args, command);
+	if ('exitCode' in targets) {
+		return targets;
+	}
+	return { target: targets.targets[0]! };
+}
 
-server.registerTool(
-	'test_changed',
-	{
-		description:
-			'Run safe unit tests for changed handlers/* and modules/* targets only.',
-	},
-	() => runTestChanged(),
-);
+function printResult(result: CommandResult): never {
+	const stream = result.exitCode === 0 ? process.stdout : process.stderr;
+	if (result.output.length > 0) {
+		stream.write(`${result.output}\n`);
+	}
+	process.exit(result.exitCode);
+}
 
-server.registerTool(
-	'test_one',
-	{
-		description:
-			'Run safe unit tests for one target filtered by test path pattern.',
-		inputSchema: {
-			...targetParam,
-			pattern: z.string().min(1).describe('Jest --testPathPattern value'),
-		},
-	},
-	({ target, pattern }) => runTestOne(target, pattern),
-);
+const cliArgs = process.argv.slice(2);
+const normalizedArgs = cliArgs[0] === '--' ? cliArgs.slice(1) : cliArgs;
+const [rawCommand, ...args] = normalizedArgs;
 
-server.registerTool(
-	'test_file',
-	{
-		description:
-			'Run safe unit tests for one target and one test file path inside that target.',
-		inputSchema: {
-			...targetParam,
-			filePath: z.string().min(1).describe('Workspace-relative test file path'),
-		},
-	},
-	({ target, filePath }) => runTestFile(target, filePath),
-);
+if (
+	!rawCommand ||
+	rawCommand === 'help' ||
+	rawCommand === '--help' ||
+	rawCommand === '-h'
+) {
+	printResult(help());
+}
 
-server.registerTool(
-	'list_targets',
-	{
-		description:
-			'List valid handlers/* and modules/* targets for verify, repair, and test.',
-	},
-	() => listTargets(),
-);
+const command = normalizeCommand(rawCommand);
+let result: CommandResult;
 
-server.registerTool(
-	'validate_targets',
-	{
-		description:
-			'Validate target names and report invalid format or missing directories.',
-		inputSchema: targetsParam,
-	},
-	({ targets }) => validateTargetsTool(targets),
-);
+switch (command) {
+	case 'list_targets':
+		result = listTargets();
+		break;
+	case 'validate_targets':
+		result =
+			args.length === 0
+				? fail('validate_targets requires at least one target')
+				: validateTargetsTool(args);
+		break;
+	case 'show_target_scripts': {
+		const target = requireTarget(args, command);
+		result = 'exitCode' in target ? target : showTargetScripts(target.target);
+		break;
+	}
+	case 'verify': {
+		const targets = requireTargets(args, command);
+		result = 'exitCode' in targets ? targets : runVerify(targets.targets);
+		break;
+	}
+	case 'verify_changed':
+		result = runVerifyChanged();
+		break;
+	case 'repair': {
+		const targets = requireTargets(args, command);
+		result = 'exitCode' in targets ? targets : runRepair(targets.targets);
+		break;
+	}
+	case 'repair_changed':
+		result = runRepairChanged();
+		break;
+	case 'test': {
+		const targets = requireTargets(args, command);
+		result = 'exitCode' in targets ? targets : runTest(targets.targets);
+		break;
+	}
+	case 'test_changed':
+		result = runTestChanged();
+		break;
+	case 'test_one': {
+		if (args.length < 2) {
+			result = fail('test_one requires a target and a pattern');
+			break;
+		}
+		const targetArg = args[0]!;
+		const target = requireTarget([targetArg], command);
+		if ('exitCode' in target) {
+			result = target;
+			break;
+		}
+		result = runTestOne(target.target, args.slice(1).join(' '));
+		break;
+	}
+	case 'test_file': {
+		if (args.length !== 2) {
+			result = fail('test_file requires exactly one target and one filePath');
+			break;
+		}
+		const targetArg = args[0]!;
+		const filePath = args[1]!;
+		const target = requireTarget([targetArg], command);
+		if ('exitCode' in target) {
+			result = target;
+			break;
+		}
+		result = runTestFile(target.target, filePath);
+		break;
+	}
+	case 'git_status':
+		result = runGit('status');
+		break;
+	case 'git_diff':
+		result = runGit('diff');
+		break;
+	case 'git_diff_target': {
+		const target = requireTarget(args, command);
+		result =
+			'exitCode' in target
+				? target
+				: runGitForTarget('diff-target', target.target);
+		break;
+	}
+	case 'git_diff_staged':
+		result = runGit('diff-staged');
+		break;
+	case 'git_diff_stat':
+		result = runGit('diff-stat');
+		break;
+	case 'git_diff_target_stat': {
+		const target = requireTarget(args, command);
+		result =
+			'exitCode' in target
+				? target
+				: runGitForTarget('diff-target-stat', target.target);
+		break;
+	}
+	case 'git_diff_staged_stat':
+		result = runGit('diff-staged-stat');
+		break;
+	case 'git_changed_files':
+		result = runGit('name-only');
+		break;
+	case 'git_changed_files_staged':
+		result = runGit('name-only-staged');
+		break;
+	default:
+		result = help(1);
+}
 
-server.registerTool(
-	'show_target_scripts',
-	{
-		description: 'Show available npm scripts for a target package.',
-		inputSchema: targetParam,
-	},
-	({ target }) => showTargetScripts(target),
-);
-
-server.registerTool(
-	'git_status',
-	{ description: 'Show short git status.' },
-	() => runGit('status'),
-);
-
-server.registerTool(
-	'git_diff',
-	{
-		description:
-			'Show full unstaged diff (use git_diff_stat first for large changesets).',
-	},
-	() => runGit('diff'),
-);
-
-server.registerTool(
-	'git_diff_target',
-	{
-		description: 'Show unstaged diff limited to one target directory.',
-		inputSchema: targetParam,
-	},
-	({ target }) => runGitForTarget('diff-target', target),
-);
-
-server.registerTool(
-	'git_diff_staged',
-	{ description: 'Show full staged diff.' },
-	() => runGit('diff-staged'),
-);
-
-server.registerTool(
-	'git_diff_stat',
-	{ description: 'Show file-level summary of unstaged changes.' },
-	() => runGit('diff-stat'),
-);
-
-server.registerTool(
-	'git_diff_target_stat',
-	{
-		description: 'Show file-level summary of unstaged changes for one target.',
-		inputSchema: targetParam,
-	},
-	({ target }) => runGitForTarget('diff-target-stat', target),
-);
-
-server.registerTool(
-	'git_diff_staged_stat',
-	{ description: 'Show file-level summary of staged changes.' },
-	() => runGit('diff-staged-stat'),
-);
-
-server.registerTool(
-	'git_changed_files',
-	{ description: 'List unstaged changed file names.' },
-	() => runGit('name-only'),
-);
-
-server.registerTool(
-	'git_changed_files_staged',
-	{ description: 'List staged changed file names.' },
-	() => runGit('name-only-staged'),
-);
-
-const transport = new StdioServerTransport();
-await server.connect(transport);
+printResult(result);

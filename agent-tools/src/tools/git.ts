@@ -1,5 +1,5 @@
 import { spawnSync } from 'child_process';
-import { ROOT, type ToolResult, toToolResult } from './runScript.js';
+import { type CommandResult, ROOT, toCommandResult } from './runScript.js';
 
 type GitSubcommand =
 	| 'status'
@@ -24,27 +24,33 @@ const GIT_COMMANDS: Record<GitSubcommand, string[]> = {
 	'diff-target-stat': ['diff', '--stat'],
 };
 
-function execGit(args: string[]): ToolResult {
-	const result = spawnSync('git', args, { cwd: ROOT, encoding: 'utf-8' });
+function execGit(args: string[]): CommandResult {
+	const result = spawnSync('git', ['--no-pager', ...args], {
+		cwd: ROOT,
+		encoding: 'utf-8',
+	});
 	const stdout = result.stdout.trim();
 	const stderr = result.stderr.trim();
 	const output = [stdout, stderr].filter(Boolean).join('\n');
 	if (result.status !== 0) {
-		throw new Error(`git command failed:\n${output}`);
+		return toCommandResult(
+			[output.length > 0 ? output : 'git command failed'],
+			1,
+		);
 	}
-	return toToolResult([output.length > 0 ? output : '(no output)']);
+	return toCommandResult([output.length > 0 ? output : '(no output)']);
 }
 
 export function runGit(
 	sub: Exclude<GitSubcommand, 'diff-target' | 'diff-target-stat'>,
-): ToolResult {
+): CommandResult {
 	return execGit(GIT_COMMANDS[sub]);
 }
 
 export function runGitForTarget(
 	sub: 'diff-target' | 'diff-target-stat',
 	target: string,
-): ToolResult {
+): CommandResult {
 	const baseArgs = GIT_COMMANDS[sub];
 	return execGit([...baseArgs, '--', target]);
 }

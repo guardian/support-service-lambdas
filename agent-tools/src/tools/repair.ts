@@ -1,9 +1,9 @@
 import {
+	type CommandResult,
 	hasScript,
 	runScript,
 	type ScriptResult,
-	type ToolResult,
-	toToolResult,
+	toCommandResult,
 } from './runScript.js';
 import { resolveChangedTargets } from './targetSelection.js';
 
@@ -12,12 +12,12 @@ const REPAIR_STEPS: ReadonlyArray<{ script: string; extraArgs: string[] }> = [
 	{ script: 'lint', extraArgs: ['--fix'] },
 ];
 
-export function runRepair(targets: string[]): ToolResult {
+export function runRepair(targets: string[]): CommandResult {
 	const lines: string[] = [];
 	let failCount = 0;
 
 	for (const target of targets) {
-		lines.push(`\n--- ${target} ---`);
+		lines.push('', `--- ${target} ---`);
 
 		for (const { script, extraArgs } of REPAIR_STEPS) {
 			if (!hasScript(target, script)) {
@@ -48,16 +48,14 @@ export function runRepair(targets: string[]): ToolResult {
 			? 'OK   repair complete'
 			: `FAIL ${failCount} step(s) failed`,
 	);
-	lines.push(
-		'INFO type errors cannot be auto-repaired; run verify after repair.',
-	);
-	return toToolResult(lines);
+	lines.push('INFO run verify after repair to confirm type-check results.');
+	return toCommandResult(lines, failCount === 0 ? 0 : 1);
 }
 
-export function runRepairChanged(): ToolResult {
+export function runRepairChanged(): CommandResult {
 	const targets = resolveChangedTargets();
 	if (targets.length === 0) {
-		return toToolResult([
+		return toCommandResult([
 			'WARN no changed handlers/* or modules/* targets detected',
 		]);
 	}

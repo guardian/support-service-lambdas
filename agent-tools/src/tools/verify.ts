@@ -1,20 +1,20 @@
 import {
+	type CommandResult,
 	hasScript,
 	runScript,
 	type ScriptResult,
-	type ToolResult,
-	toToolResult,
+	toCommandResult,
 } from './runScript.js';
 import { resolveChangedTargets } from './targetSelection.js';
 
 const VERIFY_SCRIPTS = ['check-formatting', 'lint', 'type-check'] as const;
 
-export function runVerify(targets: string[]): ToolResult {
+export function runVerify(targets: string[]): CommandResult {
 	const lines: string[] = [];
 	let failCount = 0;
 
 	for (const target of targets) {
-		lines.push(`\n--- ${target} ---`);
+		lines.push('', `--- ${target} ---`);
 		let targetFailed = false;
 
 		for (const script of VERIFY_SCRIPTS) {
@@ -46,13 +46,13 @@ export function runVerify(targets: string[]): ToolResult {
 			? 'OK   all checks passed'
 			: `FAIL ${failCount} check(s) failed`,
 	);
-	return toToolResult(lines);
+	return toCommandResult(lines, failCount === 0 ? 0 : 1);
 }
 
-export function runVerifyChanged(): ToolResult {
+export function runVerifyChanged(): CommandResult {
 	const targets = resolveChangedTargets();
 	if (targets.length === 0) {
-		return toToolResult([
+		return toCommandResult([
 			'WARN no changed handlers/* or modules/* targets detected',
 		]);
 	}

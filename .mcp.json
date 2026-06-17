@@ -1,8 +1,0 @@
-{
-	"mcpServers": {
-		"agent-tools": {
-			"command": "pnpm",
-			"args": ["--filter", "agent-tools", "run", "start"]
-		}
-	}
-}

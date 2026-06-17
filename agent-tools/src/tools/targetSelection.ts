@@ -1,50 +1,36 @@
 import { spawnSync } from 'child_process';
 import { ROOT } from './runScript.js';
-import { listTargetNames } from './targets.js';
+import { listTargetNames } from './targetRegistry.js';
 
-export type TargetValidation = {
-	target: string;
-	valid: boolean;
-	reason?: string;
-};
-
-const TARGET_RE = /^(handlers|modules)\/[a-zA-Z0-9._-]+$/;
-
-export function validateTargets(targets: string[]): TargetValidation[] {
-	const knownTargets = new Set(listTargetNames());
-	return targets.map((target) => {
-		if (!TARGET_RE.test(target)) {
-			return {
-				target,
-				valid: false,
-				reason: 'invalid format (expected handlers/<name> or modules/<name>)',
-			};
-		}
-		if (!knownTargets.has(target)) {
-			return { target, valid: false, reason: 'target does not exist' };
-		}
-		return { target, valid: true };
-	});
+function parseStatusPath(line: string): string | null {
+	if (line.length < 4) {
+		return null;
+	}
+	const path = line.slice(3).trim();
+	if (!path) {
+		return null;
+	}
+	const renameParts = path.split(' -> ');
+	return renameParts[renameParts.length - 1] ?? null;
 }
 
-function readGitChangedFiles(staged: boolean): string[] {
-	const args = staged
-		? ['diff', '--staged', '--name-only']
-		: ['diff', '--name-only'];
-	const result = spawnSync('git', args, { cwd: ROOT, encoding: 'utf-8' });
+function readGitChangedFiles(): string[] {
+	const result = spawnSync(
+		'git',
+		['--no-pager', 'status', '--short', '--untracked-files=all'],
+		{ cwd: ROOT, encoding: 'utf-8' },
+	);
 	if (result.status !== 0) {
 		return [];
 	}
 	return result.stdout
 		.split('\n')
-		.map((line) => line.trim())
-		.filter(Boolean);
+		.map((line) => parseStatusPath(line))
+		.filter((line): line is string => !!line);
 }
 
 export function getAllChangedFiles(): string[] {
-	return Array.from(
-		new Set([...readGitChangedFiles(false), ...readGitChangedFiles(true)]),
-	);
+	return Array.from(new Set(readGitChangedFiles()));
 }
 
 export function mapFilesToTargets(files: string[]): string[] {

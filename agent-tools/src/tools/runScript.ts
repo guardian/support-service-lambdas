@@ -42,6 +42,7 @@ export function getScriptCommand(
 	return scripts?.[script] ?? null;
 }
 
+export type CommandResult = { output: string; exitCode: number };
 export type ScriptResult = { passed: boolean; output: string };
 export type RunScriptOptions = {
 	extraArgs?: string[];
@@ -49,10 +50,8 @@ export type RunScriptOptions = {
 	env?: Record<string, string>;
 };
 
-export type ToolResult = { content: Array<{ type: 'text'; text: string }> };
-
-export function toToolResult(lines: string[]): ToolResult {
-	return { content: [{ type: 'text', text: lines.join('\n') }] };
+export function toCommandResult(lines: string[], exitCode = 0): CommandResult {
+	return { output: lines.join('\n'), exitCode };
 }
 
 export function runScript(
