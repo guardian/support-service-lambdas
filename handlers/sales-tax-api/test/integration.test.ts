@@ -11,7 +11,6 @@ import { taxRatesResponseSchema } from '../src/schemas';
 import { taxRatesEndpoint } from '../src/taxRatesEndpoint';
 import { countryStates } from './fixtures';
 
-
 describe('SalesTax API Integration', () => {
 	const country = 'CA';
 	test('we can retrieve SupporterPlus Canadian tax rates', async () => {
