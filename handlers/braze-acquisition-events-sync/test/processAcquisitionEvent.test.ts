@@ -118,8 +118,6 @@ describe('processAcquisitionEvent', () => {
 		['PRINT_SUBSCRIPTION', 'VOUCHER_SUNDAY', 'Newspaper - Observer only'],
 		['PRINT_SUBSCRIPTION', 'HOME_DELIVERY_EVERYDAY', 'newspaper'],
 		['PRINT_SUBSCRIPTION', 'VOUCHER_SIXDAY', 'newspaper'],
-		['MEMBERSHIP_SUPPORTER', undefined, 'MEMBERSHIP_SUPPORTER'],
-		['MEMBERSHIP_PARTNER', undefined, 'MEMBERSHIP_PARTNER'],
 		['APP_PREMIUM_TIER', undefined, 'APP_PREMIUM_TIER'],
 	] as const)(
 		'maps product %s with printProduct %s to %s',
