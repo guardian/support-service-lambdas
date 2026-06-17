@@ -117,10 +117,9 @@ function getZuoraTaxPeriod(
 	zuoraTaxCode: string,
 	zuoraTaxPeriods: ZuoraTaxPeriod[],
 ) {
-	return zuoraTaxPeriods.filter(
+	return zuoraTaxPeriods.find(
 		(zuoraTaxPeriod) => zuoraTaxPeriod.taxCodeId === zuoraTaxCode,
-	)[0];
-}
+	);
 
 function getCadZuoraTaxRates(zuoraTaxRates: ZuoraTaxRate[]): ZuoraTaxRate[] {
 	return zuoraTaxRates.filter(
