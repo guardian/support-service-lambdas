@@ -57,9 +57,7 @@ export const taxRatesEndpoint = async (
 			country,
 		});
 		return ok(
-			await Promise.resolve(
-				getZuoraSalesTaxRates(zuoraClient, { productKey, country }),
-			),
+			await getZuoraSalesTaxRates(zuoraClient, { productKey, country }),
 			taxRatesResponseSchema,
 		);
 	} catch (error) {
