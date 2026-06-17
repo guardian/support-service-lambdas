@@ -21,6 +21,8 @@ Command names, arguments, and behavior are source-of-truth in `agent-tools/src/i
 
 - Default: full child command output is streamed while deterministic progress/summary lines are emitted
 - `--tail N`: write full streaming output to a temp log file (path printed before execution) and include last `N` lines for failures
+- `--grep PATTERN`: stream only subcommand output lines that match the regex pattern
+- `--tail N --grep PATTERN`: keep concise failure tails while also filtering streamed subcommand lines
 
 ## Verification and fix commands
 

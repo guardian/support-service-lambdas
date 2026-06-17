@@ -44,12 +44,13 @@ Use SrCDK constructs from ./cdk/lib/cdk/ where possible.
 
 When making changes to TypeScript code, use `./agent-tool <command>` instead of ad-hoc commands such as raw `pnpm lint`, `pnpm type-check`, `prettier`, `eslint`, or `git`.
 
-Call the wrapper by absolute path, e.g. `/Users/john_duffell/code/support-service-lambdas/agent-tool <command>`.
+Call the wrapper by absolute path rather than calling "cd" first, e.g. `/Users/john_duffell/code/support-service-lambdas/agent-tool <command>`.
 
 Always scope to the minimum set of affected targets under `handlers/*` or `modules/*`. Use `list_targets` or `validate_targets` if the target scope is unclear.
 
 Default output is verbose streaming. Use global output flag when needed:
 - `--tail N` for concise output with failure tails and a full temp log path printed up front
+- `--grep PATTERN` to stream only subcommand output lines that match a regex pattern
 
 Recommended order (use the first applicable scoped command):
 1. `./agent-tool validate_targets <targets...>` or `./agent-tool list_targets`

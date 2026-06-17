@@ -37,7 +37,7 @@ import { runInstallWorkspace, runSnapshotUpdate } from './tools/workspace.js';
 
 const HELP_LINES = [
 	'Usage:',
-	'  ./agent-tool <command> [args...] [--tail N]',
+	'  ./agent-tool <command> [args...] [--tail N] [--grep PATTERN]',
 	'',
 	'Commands:',
 	'  help',
@@ -74,6 +74,7 @@ const HELP_LINES = [
 	'',
 	'Global options:',
 	'  --tail N        include N trailing lines for failures and stream full output to a temp log file',
+	'  --grep PATTERN  only stream subcommand output lines that match the regex pattern',
 	'',
 	'Notes:',
 	'  - Full child command output streams by default.',
@@ -87,6 +88,7 @@ const TARGET_RE = /^(handlers|modules)\/[a-zA-Z0-9._-]+$/;
 type ParsedGlobalOptions = {
 	positionals: string[];
 	tailLines: number | null;
+	grepPattern: string | null;
 };
 
 function help(exitCode = 0): CommandResult {
@@ -160,6 +162,7 @@ function parseGlobalOptions(
 ): ParsedGlobalOptions | CommandResult {
 	const positionals: string[] = [];
 	let tailLines: number | null = null;
+	let grepPattern: string | null = null;
 
 	for (let i = 0; i < args.length; i += 1) {
 		const arg = args[i]!;
@@ -188,10 +191,37 @@ function parseGlobalOptions(
 			tailLines = parsed;
 			continue;
 		}
+		if (arg === '--grep') {
+			const raw = args[i + 1];
+			if (!raw) {
+				return fail('--grep requires a regex pattern');
+			}
+			try {
+				new RegExp(raw);
+			} catch {
+				return fail(`invalid --grep pattern: ${raw}`);
+			}
+			grepPattern = raw;
+			i += 1;
+			continue;
+		}
+		if (arg.startsWith('--grep=')) {
+			const raw = arg.slice('--grep='.length);
+			if (!raw) {
+				return fail('--grep requires a regex pattern');
+			}
+			try {
+				new RegExp(raw);
+			} catch {
+				return fail(`invalid --grep pattern: ${raw}`);
+			}
+			grepPattern = raw;
+			continue;
+		}
 		positionals.push(arg);
 	}
 
-	return { positionals, tailLines };
+	return { positionals, tailLines, grepPattern };
 }
 
 function parseInstallOptions(
@@ -228,6 +258,7 @@ async function main(): Promise<void> {
 	const execOptions = createExecutionOptions({
 		verbose: true,
 		tailLines: parsed.tailLines,
+		grepPattern: parsed.grepPattern,
 	});
 	if (execOptions.logFilePath) {
 		process.stdout.write(`INFO full output log: ${execOptions.logFilePath}\n`);

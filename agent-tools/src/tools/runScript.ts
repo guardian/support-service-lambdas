@@ -60,6 +60,8 @@ export type RunScriptOptions = {
 export type ExecutionOptions = {
 	verbose: boolean;
 	tailLines: number | null;
+	grepPattern: string | null;
+	grepRegex: RegExp | null;
 	logFilePath: string | null;
 	logStream: WriteStream | null;
 };
@@ -83,34 +85,62 @@ export function buildPnpmRunArgs(
 export function createExecutionOptions({
 	verbose,
 	tailLines,
+	grepPattern,
 }: {
 	verbose: boolean;
 	tailLines: number | null;
+	grepPattern: string | null;
 }): ExecutionOptions {
+	const grepRegex = grepPattern === null ? null : new RegExp(grepPattern);
 	if (tailLines === null) {
-		return { verbose, tailLines, logFilePath: null, logStream: null };
+		return {
+			verbose,
+			tailLines,
+			grepPattern,
+			grepRegex,
+			logFilePath: null,
+			logStream: null,
+		};
 	}
 	const logFilePath = join(
 		tmpdir(),
 		`agent-tool-${Date.now()}-${process.pid}.log`,
 	);
 	const logStream = createWriteStream(logFilePath, { flags: 'a' });
-	return { verbose, tailLines, logFilePath, logStream };
+	return { verbose, tailLines, grepPattern, grepRegex, logFilePath, logStream };
 }
 
 export function closeExecutionOptions(options: ExecutionOptions): void {
 	options.logStream?.end();
 }
 
-function toExcerpt(output: string, tailLines: number | null): string {
+export function filterLinesByPattern(output: string, grepRegex: RegExp | null): string {
+	if (grepRegex === null) {
+		return output;
+	}
+	return output
+		.split(/\r?\n/)
+		.filter((line) => grepRegex.test(line))
+		.join('\n');
+}
+
+function toExcerpt(
+	output: string,
+	tailLines: number | null,
+	grepRegex: RegExp | null,
+): string {
 	const normalized = output.trim();
 	if (!normalized) {
 		return '';
 	}
-	const lines = normalized.split(/\r?\n/);
+	const filtered = filterLinesByPattern(normalized, grepRegex);
+	if (!filtered) {
+		return '';
+	}
+	const lines = filtered.split(/\r?\n/);
 	const keep = tailLines ?? DEFAULT_FAILURE_TAIL_LINES;
 	if (lines.length <= keep) {
-		return normalized;
+		return filtered;
 	}
 	return lines.slice(lines.length - keep).join('\n');
 }
@@ -139,13 +169,37 @@ async function runCommand({
 		});
 		let timedOut = false;
 		let output = '';
+		let pendingDisplayLine = '';
+
+		const flushDisplay = (text: string, flushPending: boolean) => {
+			if (!execOptions.verbose) {
+				return;
+			}
+			if (execOptions.grepRegex === null) {
+				process.stdout.write(text);
+				return;
+			}
+			pendingDisplayLine += text;
+			const lines = pendingDisplayLine.split(/\r?\n/);
+			pendingDisplayLine = lines.pop() ?? '';
+			for (const line of lines) {
+				if (execOptions.grepRegex.test(line)) {
+					process.stdout.write(`${line}\n`);
+				}
+			}
+			if (flushPending && pendingDisplayLine.length > 0) {
+				if (execOptions.grepRegex.test(pendingDisplayLine)) {
+					process.stdout.write(`${pendingDisplayLine}\n`);
+				}
+				pendingDisplayLine = '';
+			}
+		};
+
 		const writeChunk = (chunk: Buffer) => {
 			const text = chunk.toString('utf-8');
 			output += text;
 			execOptions.logStream?.write(text);
-			if (execOptions.verbose) {
-				process.stdout.write(text);
-			}
+			flushDisplay(text, false);
 		};
 		child.stdout.on('data', (chunk: Buffer) => {
 			writeChunk(chunk);
@@ -161,6 +215,7 @@ async function runCommand({
 						child.kill('SIGTERM');
 					}, timeoutSeconds * 1000);
 		child.on('close', (status) => {
+			flushDisplay('', true);
 			if (timeoutHandle) {
 				clearTimeout(timeoutHandle);
 			}
@@ -172,7 +227,7 @@ async function runCommand({
 			resolvePromise({
 				passed: exitCode === 0,
 				output,
-				excerpt: toExcerpt(output, execOptions.tailLines),
+				excerpt: toExcerpt(output, execOptions.tailLines, execOptions.grepRegex),
 				exitCode,
 				durationMs: Date.now() - start,
 			});
