@@ -28,8 +28,8 @@ import {
 	listInvitationsEndpoint,
 } from './listInvitationsEndpoint';
 import {
-	listSecondaryUsersBodySchema,
 	listSecondaryUsersEndpoint,
+	listSecondaryUsersPathSchema,
 } from './listSecondaryUsersEndpoint';
 import { SecondaryUserRepository } from './secondaryUserRepository';
 
@@ -113,14 +113,16 @@ export const handler: Handler = Router([
 	},
 	{
 		httpMethod: 'GET',
-		path: '/secondary-users',
-		handler: withBodyParser(
-			listSecondaryUsersBodySchema,
+		path: '/subscriptions/{subscriptionName}/secondary-users',
+		handler: withPathParser(
+			listSecondaryUsersPathSchema,
 			withMMAIdentityCheck(
 				stage,
-				async (body) =>
-					listSecondaryUsersEndpoint(secondaryUserRepository)(body),
-				({ body }) => body.subscriptionName,
+				async (_body, _zuoraClient, subscription) =>
+					listSecondaryUsersEndpoint(secondaryUserRepository)({
+						subscriptionName: subscription.subscriptionNumber,
+					}),
+				({ path }) => path.subscriptionName,
 			),
 		),
 	},

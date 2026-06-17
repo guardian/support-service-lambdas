@@ -3,19 +3,18 @@ import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
 import { z } from 'zod';
 import type { SecondaryUserRepository } from './secondaryUserRepository';
 
-export const listSecondaryUsersBodySchema = z.object({
+export const listSecondaryUsersPathSchema = z.object({
 	subscriptionName: z.string(),
 });
 
 export type ListSecondaryUsersBody = z.infer<
-	typeof listSecondaryUsersBodySchema
+	typeof listSecondaryUsersPathSchema
 >;
 
 export const listSecondaryUsersEndpoint =
 	(secondaryUserRepository: SecondaryUserRepository) =>
-	async (body: ListSecondaryUsersBody) => {
+	async ({ subscriptionName }: ListSecondaryUsersBody) => {
 		try {
-			const { subscriptionName } = body;
 			logger.mutableAddContext(subscriptionName);
 			const secondaryUsers =
 				await secondaryUserRepository.list(subscriptionName);
