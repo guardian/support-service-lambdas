@@ -21,7 +21,7 @@ export class SfMoveSubscriptionsApi extends SrStack {
 				fileName: 'sf-move-subscriptions-api.jar',
 				handler: 'com.gu.sf.move.subscriptions.api.Handler::handle',
 				memorySize: 1536,
-				timeout: Duration.seconds(300),
+				timeout: Duration.minutes(5),
 				description: 'API for moving subscriptions between Salesforce accounts',
 				// The handler reads sys.env("Stage"); guCDK only injects uppercase STAGE.
 				environment: { Stage: stage },
