@@ -69,7 +69,7 @@ export const acceptInvitationEndpoint = async (
 
 		// This record is not part of the transaction because it is sent via an SQS queue
 		// If there is an issue with it it will be debugged and retried there
-		const subName = await createSecondarySubscription(
+		const secondarySubscriptionName = await createSecondarySubscription(
 			stage,
 			parentSupporterProductDataRecord,
 			invitation.secondaryIdentityId,
@@ -79,7 +79,7 @@ export const acceptInvitationEndpoint = async (
 		// TODO: email?
 		return ok({
 			identityId: invitation.secondaryIdentityId,
-			secondarySubscriptionName: subName,
+			secondarySubscriptionName,
 		});
 	} catch (error) {
 		return buildErrorResponse(error);
