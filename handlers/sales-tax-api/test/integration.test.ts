@@ -11,12 +11,6 @@ import { taxRatesResponseSchema } from '../src/schemas';
 import { taxRatesEndpoint } from '../src/taxRatesEndpoint';
 import { countryStates } from './fixtures';
 
-export {
-	supporterPlusTaxCodeId,
-	supporterPlusTaxEngineId,
-	zuoraTaxCodePeriod,
-	zuoraTaxRateSupporterPlus,
-} from './fixtures';
 
 describe('SalesTax API Integration', () => {
 	const country = 'CA';
