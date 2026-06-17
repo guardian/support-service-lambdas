@@ -1,0 +1,28 @@
+import { fail, requireSingleTarget } from '../cli/commandArgs.js';
+import { runTestOne } from '../tools/test.js';
+import type { CommandDefinition } from './types.js';
+
+const safetyNote =
+	'test executes repository code, forces CI=true, and uses fixed timeouts';
+
+export const testOneCommand: CommandDefinition = {
+	name: 'test_one',
+	usage: '<target> <pattern>',
+	description: 'run tests in one target matching --testPathPattern',
+	category: 'Test',
+	safetyNote,
+	handler: async (args, context) => {
+		if (args.length < 2) {
+			return fail('test_one requires a target and a pattern');
+		}
+		const target = requireSingleTarget([args[0]!], 'test_one');
+		if ('exitCode' in target) {
+			return target;
+		}
+		return await runTestOne(
+			target.target,
+			args.slice(1).join(' '),
+			context.execOptions,
+		);
+	},
+};

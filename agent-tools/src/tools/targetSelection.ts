@@ -34,13 +34,16 @@ export function getAllChangedFiles(): string[] {
 }
 
 export function mapFilesToTargets(files: string[]): string[] {
-	const knownTargets = listTargetNames();
+	const knownTargets = listTargetNames().sort(
+		(left, right) => right.length - left.length,
+	);
 	const matched = new Set<string>();
 	for (const file of files) {
-		for (const target of knownTargets) {
-			if (file === target || file.startsWith(`${target}/`)) {
-				matched.add(target);
-			}
+		const target = knownTargets.find(
+			(candidate) => file === candidate || file.startsWith(`${candidate}/`),
+		);
+		if (target) {
+			matched.add(target);
 		}
 	}
 	return Array.from(matched).sort();

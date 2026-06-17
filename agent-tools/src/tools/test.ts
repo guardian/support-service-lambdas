@@ -2,13 +2,14 @@ import { resolve } from 'path';
 import {
 	type CommandResult,
 	type ExecutionOptions,
-	hasScript,
-	printProgress,
 	ROOT,
-	runScript,
 	toCommandResult,
 } from './runScript.js';
-import { resolveChangedTargets } from './targetSelection.js';
+import {
+	runChangedTargetsOrWarn,
+	runTargetScriptStepWithOutcome,
+	type TargetScriptStep,
+} from './targetScriptRunner.js';
 
 const TEST_TIMEOUT_SECONDS = 600;
 
@@ -24,17 +25,18 @@ function safeRelativePath(filePath: string): string | null {
 	return normalized;
 }
 
-function runTestForTarget(
-	target: string,
-	extraArgs: string[],
-	execOptions: ExecutionOptions,
-) {
-	return runScript(target, 'test', {
+function buildTestStep(extraArgs: string[]): TargetScriptStep {
+	return {
+		script: 'test',
+		label:
+			extraArgs.length === 0
+				? 'test'
+				: `test ${extraArgs.map((arg) => JSON.stringify(arg)).join(' ')}`,
+		summaryLabel: 'test',
 		extraArgs,
 		timeoutSeconds: TEST_TIMEOUT_SECONDS,
 		env: { CI: 'true' },
-		execOptions,
-	});
+	};
 }
 
 export async function runTest(
@@ -47,13 +49,9 @@ export async function runTest(
 export async function runTestChanged(
 	execOptions: ExecutionOptions,
 ): Promise<CommandResult> {
-	const targets = resolveChangedTargets();
-	if (targets.length === 0) {
-		return toCommandResult([
-			'WARN no changed handlers/* or modules/* targets detected',
-		]);
-	}
-	return await runTestWithArgs(targets, [], execOptions);
+	return await runChangedTargetsOrWarn(
+		async (targets) => await runTestWithArgs(targets, [], execOptions),
+	);
 }
 
 export async function runTestOne(
@@ -91,42 +89,16 @@ async function runTestWithArgs(
 	extraArgs: string[],
 	execOptions: ExecutionOptions,
 ): Promise<CommandResult> {
-	const lines: string[] = [];
-	let failCount = 0;
-	let passCount = 0;
-
-	for (const target of targets) {
-		if (!hasScript(target, 'test')) {
-			const warn = `WARN ${target} test: skipped (not in package.json)`;
-			printProgress(warn);
-			lines.push(warn);
-			continue;
-		}
-		const label =
-			extraArgs.length === 0
-				? 'test'
-				: `test ${extraArgs.map((arg) => JSON.stringify(arg)).join(' ')}`;
-		printProgress(`RUN  ${target} ${label}`);
-		const result = await runTestForTarget(target, extraArgs, execOptions);
-		const durationSeconds = Math.round(result.durationMs / 1000);
-		if (result.passed) {
-			printProgress(`OK   ${target} test (${durationSeconds}s)`);
-			passCount++;
-		} else {
-			const fail = `FAIL ${target} test (${durationSeconds}s)`;
-			printProgress(fail);
-			lines.push(fail);
-			if (result.excerpt) {
-				lines.push(result.excerpt);
-			}
-			failCount++;
-		}
-	}
-
-	lines.push(
-		failCount === 0
-			? `OK   all tests passed (${passCount} target(s))`
-			: `FAIL ${failCount} target(s) had test failures`,
+	const outcome = await runTargetScriptStepWithOutcome(
+		targets,
+		buildTestStep(extraArgs),
+		execOptions,
 	);
-	return toCommandResult(lines, failCount === 0 ? 0 : 1);
+	const lines = [...outcome.lines];
+	lines.push(
+		outcome.failCount === 0
+			? `OK   all tests passed (${outcome.passCount} target(s))`
+			: `FAIL ${outcome.failCount} target(s) had test failures`,
+	);
+	return toCommandResult(lines, outcome.failCount === 0 ? 0 : 1);
 }

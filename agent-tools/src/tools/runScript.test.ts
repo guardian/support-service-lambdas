@@ -39,4 +39,3 @@ void test('filterLinesByPattern returns original output when grep is disabled', 
 	const filtered = filterLinesByPattern(output, null);
 	assert.equal(filtered, output);
 });
-

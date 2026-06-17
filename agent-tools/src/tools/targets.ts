@@ -5,8 +5,7 @@ import {
 	toCommandResult,
 } from './runScript.js';
 import { listTargetNames } from './targetRegistry.js';
-
-const TARGET_RE = /^(handlers|modules)\/[a-zA-Z0-9._-]+$/;
+import { validateTargetAgainstKnownTargets } from './targetValidation.js';
 
 export function listTargets(): CommandResult {
 	const targets = listTargetNames();
@@ -16,15 +15,9 @@ export function listTargets(): CommandResult {
 export function validateTargetsTool(targets: string[]): CommandResult {
 	const knownTargets = new Set(listTargetNames());
 	const results = targets.map((target) => {
-		if (!TARGET_RE.test(target)) {
-			return {
-				target,
-				valid: false,
-				reason: 'invalid format (expected handlers/<name> or modules/<name>)',
-			};
-		}
-		if (!knownTargets.has(target)) {
-			return { target, valid: false, reason: 'target does not exist' };
+		const reason = validateTargetAgainstKnownTargets(target, knownTargets);
+		if (reason) {
+			return { target, valid: false, reason };
 		}
 		return { target, valid: true };
 	});

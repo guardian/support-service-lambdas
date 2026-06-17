@@ -114,7 +114,10 @@ export function closeExecutionOptions(options: ExecutionOptions): void {
 	options.logStream?.end();
 }
 
-export function filterLinesByPattern(output: string, grepRegex: RegExp | null): string {
+export function filterLinesByPattern(
+	output: string,
+	grepRegex: RegExp | null,
+): string {
 	if (grepRegex === null) {
 		return output;
 	}
@@ -227,7 +230,11 @@ async function runCommand({
 			resolvePromise({
 				passed: exitCode === 0,
 				output,
-				excerpt: toExcerpt(output, execOptions.tailLines, execOptions.grepRegex),
+				excerpt: toExcerpt(
+					output,
+					execOptions.tailLines,
+					execOptions.grepRegex,
+				),
 				exitCode,
 				durationMs: Date.now() - start,
 			});

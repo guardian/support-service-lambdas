@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+
+# The agent-tool is a wrapper for agent-tools project
+# See agent-tools/README.md for details
+
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
