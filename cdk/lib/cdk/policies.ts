@@ -93,7 +93,7 @@ export class AllowSupporterProductDataQueryPolicy extends GuAllowPolicy {
 	}
 }
 
-export class AllowSecondaryUserQueryPolicy extends GuAllowPolicy {
+export class AllowSecondaryUserTableQueryPolicy extends GuAllowPolicy {
 	constructor(scope: GuStack) {
 		super(scope, 'MultipleAccountSecondaryUserTable query access', {
 			actions: ['dynamodb:Query'],
