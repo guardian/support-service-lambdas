@@ -96,7 +96,7 @@ describe('processAcquisitionEvent', () => {
 					time: '2026-06-03T12:00:00Z',
 					_update_existing_only: true,
 					properties: {
-						product_name: 'Contribution',
+						product_name: 'Single Contribution',
 						currency: 'GBP',
 						promo_code: 'PROMO123',
 						payment_frequency: 'One-off payment',
@@ -108,17 +108,17 @@ describe('processAcquisitionEvent', () => {
 	});
 
 	it.each([
-		['RECURRING_CONTRIBUTION', undefined, 'Contribution'],
+		['RECURRING_CONTRIBUTION', undefined, 'Recurring Contribution'],
 		['SUPPORTER_PLUS', undefined, 'Supporter Plus'],
 		['TIER_THREE', undefined, 'Tier Three'],
-		['DIGITAL_SUBSCRIPTION', undefined, 'Digital Pack'],
+		['DIGITAL_SUBSCRIPTION', undefined, 'Digital Subscription'],
 		['GUARDIAN_AD_LITE', undefined, 'Guardian Ad-Lite'],
-		['PRINT_SUBSCRIPTION', 'GUARDIAN_WEEKLY', 'Guardian Weekly'],
-		['PRINT_SUBSCRIPTION', 'HOME_DELIVERY_SUNDAY', 'Newspaper - Observer only'],
-		['PRINT_SUBSCRIPTION', 'VOUCHER_SUNDAY', 'Newspaper - Observer only'],
-		['PRINT_SUBSCRIPTION', 'HOME_DELIVERY_EVERYDAY', 'newspaper'],
-		['PRINT_SUBSCRIPTION', 'VOUCHER_SIXDAY', 'newspaper'],
-		['APP_PREMIUM_TIER', undefined, 'APP_PREMIUM_TIER'],
+		['PRINT_SUBSCRIPTION', 'GUARDIAN_WEEKLY', 'Guardian Weekly - Digital'],
+		['PRINT_SUBSCRIPTION', 'HOME_DELIVERY_SUNDAY', 'Newspaper - Subscription'],
+		['PRINT_SUBSCRIPTION', 'VOUCHER_SUNDAY', 'Newspaper - Subscription'],
+		['PRINT_SUBSCRIPTION', 'HOME_DELIVERY_EVERYDAY', 'Newspaper - Subscription'],
+		['PRINT_SUBSCRIPTION', 'VOUCHER_SIXDAY', 'Newspaper - Subscription'],
+		['APP_PREMIUM_TIER', undefined, 'Premium App'],
 	] as const)(
 		'maps product %s with printProduct %s to %s',
 		(product, printProduct, expectedProductName) => {
