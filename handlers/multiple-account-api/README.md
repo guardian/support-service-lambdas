@@ -62,9 +62,11 @@ Headers: 'x-identity-id' - the identity id of the user creating the invitation
 
 #### Request:
 
-GET /invitations
+GET /subscriptions/{subscriptionName}/invitations
 
 Headers: 'x-identity-id' - the identity id of the primary user
+
+Example path: /subscriptions/A-S00974337/invitations
 
 #### Response:
 
@@ -87,9 +89,11 @@ Headers: 'x-identity-id' - the identity id of the primary user
 
 #### Request:
 
-GET /secondary-users
+GET /subscriptions/{subscriptionName}/secondary-users
 
 Headers: 'x-identity-id' - the identity id of the primary user
+
+Example path: /subscriptions/A-S00974337/secondary-users
 
 #### Response:
 
