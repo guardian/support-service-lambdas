@@ -24,8 +24,8 @@ import {
 } from './deleteInvitationEndpoint';
 import { InvitationRepository } from './invitationRepository';
 import {
-	listInvitationsBodySchema,
 	listInvitationsEndpoint,
+	listInvitationsPathSchema,
 } from './listInvitationsEndpoint';
 import {
 	listSecondaryUsersEndpoint,
@@ -52,18 +52,6 @@ const lazyZuoraCatalog = new Lazy(
 );
 
 export const handler: Handler = Router([
-	{
-		httpMethod: 'GET',
-		path: '/invitation',
-		handler: withBodyParser(
-			listInvitationsBodySchema,
-			withMMAIdentityCheck(
-				stage,
-				async (body) => listInvitationsEndpoint(invitationRepository)(body),
-				({ body }) => body.subscriptionName,
-			),
-		),
-	},
 	{
 		httpMethod: 'POST',
 		path: '/invitation',
@@ -110,6 +98,21 @@ export const handler: Handler = Router([
 				dynamoClient,
 			);
 		}),
+	},
+	{
+		httpMethod: 'GET',
+		path: '/subscriptions/{subscriptionName}/invitations',
+		handler: withPathParser(
+			listInvitationsPathSchema,
+			withMMAIdentityCheck(
+				stage,
+				async (_body, _zuoraClient, subscription) =>
+					listInvitationsEndpoint(invitationRepository)({
+						subscriptionName: subscription.subscriptionNumber,
+					}),
+				({ path }) => path.subscriptionName,
+			),
+		),
 	},
 	{
 		httpMethod: 'GET',

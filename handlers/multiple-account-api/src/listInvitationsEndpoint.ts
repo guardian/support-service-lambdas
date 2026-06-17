@@ -3,17 +3,16 @@ import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
 import { z } from 'zod';
 import type { InvitationRepository } from './invitationRepository';
 
-export const listInvitationsBodySchema = z.object({
+export const listInvitationsPathSchema = z.object({
 	subscriptionName: z.string(),
 });
 
-export type ListInvitationsBody = z.infer<typeof listInvitationsBodySchema>;
+export type ListInvitationsPath = z.infer<typeof listInvitationsPathSchema>;
 
 export const listInvitationsEndpoint =
 	(invitationRepository: InvitationRepository) =>
-	async (body: ListInvitationsBody) => {
+	async ({ subscriptionName }: ListInvitationsPath) => {
 		try {
-			const { subscriptionName } = body;
 			logger.mutableAddContext(subscriptionName);
 			const invitations = await invitationRepository.list(subscriptionName);
 			return ok({ invitations });
