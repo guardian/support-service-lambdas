@@ -116,7 +116,11 @@ describe('processAcquisitionEvent', () => {
 		['PRINT_SUBSCRIPTION', 'GUARDIAN_WEEKLY', 'Guardian Weekly - Digital'],
 		['PRINT_SUBSCRIPTION', 'HOME_DELIVERY_SUNDAY', 'Newspaper - Subscription'],
 		['PRINT_SUBSCRIPTION', 'VOUCHER_SUNDAY', 'Newspaper - Subscription'],
-		['PRINT_SUBSCRIPTION', 'HOME_DELIVERY_EVERYDAY', 'Newspaper - Subscription'],
+		[
+			'PRINT_SUBSCRIPTION',
+			'HOME_DELIVERY_EVERYDAY',
+			'Newspaper - Subscription',
+		],
 		['PRINT_SUBSCRIPTION', 'VOUCHER_SIXDAY', 'Newspaper - Subscription'],
 		['APP_PREMIUM_TIER', undefined, 'Premium App'],
 	] as const)(
