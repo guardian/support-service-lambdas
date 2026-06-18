@@ -14,7 +14,6 @@ import fixFormattingCommand from './repair/fix-formatting.js';
 import lintFixCommand from './repair/lint-fix.js';
 import showTargetScriptsCommand from './show-target-scripts.js';
 import snapshotUpdateCommand from './snapshot-update.js';
-import testFileCommand from './test/test-file.js';
 import testOneCommand from './test/test-one.js';
 import testCommand from './test/test.js';
 import type { CommandCategory, CommandDefinition } from './types.js';
@@ -44,7 +43,6 @@ export const commandDefinitions: CommandDefinition[] = [
 	lintFixCommand,
 	testCommand,
 	testOneCommand,
-	testFileCommand,
 	snapshotUpdateCommand,
 	installWorkspaceCommand,
 	gitStatusCommand,

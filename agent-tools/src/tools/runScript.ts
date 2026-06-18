@@ -1,4 +1,4 @@
-import { spawn, spawnSync } from 'child_process';
+import { spawn } from 'child_process';
 import {
 	createWriteStream,
 	existsSync,
@@ -276,22 +276,4 @@ export async function runRootCommand(
 		timeoutSeconds: options.timeoutSeconds,
 		execOptions: options.execOptions,
 	});
-}
-
-export function listGitChangedFilesForPaths(paths: string[]): string[] {
-	const unstaged = spawnSync('git', ['diff', '--name-only', '--', ...paths], {
-		cwd: ROOT,
-		encoding: 'utf-8',
-	});
-	const staged = spawnSync(
-		'git',
-		['diff', '--staged', '--name-only', '--', ...paths],
-		{ cwd: ROOT, encoding: 'utf-8' },
-	);
-	const lines = [unstaged.stdout, staged.stdout]
-		.join('\n')
-		.split(/\r?\n/)
-		.map((line) => line.trim())
-		.filter(Boolean);
-	return Array.from(new Set(lines)).sort();
 }

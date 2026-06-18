@@ -16,9 +16,7 @@ Help output (`./agent-tool help`) is generated from the same command metadata.
 
 ## Safety note
 
-`test` is less safe than verify/fix commands because it executes repository code, so `agent-tools` forces `CI=true` and applies a fixed timeout.
-
-`install-workspace` is mutating; default mode is lock-safe (`--frozen-lockfile`).
+`test` and `test-one` execute repository code. Run them only on targets you trust.
 
 ## Output modes
 

@@ -2,24 +2,6 @@ import { toCommandResult } from '../tools/runScript.js';
 import { targetFormatDescription } from '../tools/targetValidation.js';
 import type { CommandCategory, CommandDefinition } from './types.js';
 
-function collectSafetyNotes(
-	definitions: readonly CommandDefinition[],
-): string[] {
-	return Array.from(
-		new Set(
-			definitions.reduce<string[]>((notes, definition) => {
-				if (
-					'safetyNote' in definition &&
-					typeof definition.safetyNote === 'string'
-				) {
-					notes.push(definition.safetyNote);
-				}
-				return notes;
-			}, []),
-		),
-	);
-}
-
 function buildHelpLines(
 	definitions: readonly CommandDefinition[],
 	categories: readonly CommandCategory[],
@@ -56,10 +38,6 @@ function buildHelpLines(
 		`  - Targets must be ${targetFormatDescription}.`,
 		'  - Use the absolute wrapper path if your Copilot approvals are path-specific.',
 	);
-
-	for (const note of collectSafetyNotes(definitions)) {
-		lines.push(`  - ${note}.`);
-	}
 
 	return lines;
 }

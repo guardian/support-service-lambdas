@@ -58,7 +58,7 @@ Recommended order (use the first applicable scoped command):
 3. `./agent-tool check-formatting --changed` / `./agent-tool lint --changed` / `./agent-tool type-check --changed` (run all three after making changes)
 4. `./agent-tool fix-formatting --changed` or `./agent-tool lint-fix --changed` only when the above fail
 5. Re-run the failed check after fixing
-6. `./agent-tool test --changed` (or `./agent-tool test <targets...>` / `test-one` / `test-file`) when tests are needed
+6. `./agent-tool test --changed` (or `./agent-tool test <targets...>` / `./agent-tool test-one <target> <pattern>`) when tests are needed
 7. `./agent-tool git-diff` or `./agent-tool git-diff-target <target>` when full diff detail is needed
 8. `./agent-tool snapshot-update` when buildcheck-managed snapshots are expected
 9. `./agent-tool install-workspace` when dependencies or lockfiles need updating

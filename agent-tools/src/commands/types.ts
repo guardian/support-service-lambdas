@@ -22,6 +22,5 @@ export type CommandDefinition = {
 	usage: string;
 	description: string;
 	category: CommandCategory;
-	safetyNote?: string;
 	handler: CommandHandler;
 };

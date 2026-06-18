@@ -1,16 +1,12 @@
 import { fail, requireSingleTarget } from '../../cli/commandArgs.js';
+import { runSingleStep } from '../../tools/targetScriptRunner.js';
 import type { CommandDefinition } from '../types.js';
-import { runTestWithArgs } from './testStep.js';
-
-const safetyNote =
-	'test executes repository code, forces CI=true, and uses fixed timeouts';
 
 export default {
 	name: 'test-one',
 	usage: '<target> <pattern>',
-	description: 'run tests in one target matching --testPathPattern',
+	description: 'run tests in one target matching a path pattern',
 	category: 'Test',
-	safetyNote,
 	handler: async (args, context) => {
 		if (args.length < 2) {
 			return fail('test-one requires a target and a pattern');
@@ -19,9 +15,15 @@ export default {
 		if ('exitCode' in target) {
 			return target;
 		}
-		return await runTestWithArgs(
+		const pattern = args.slice(1).join(' ');
+		return await runSingleStep(
 			[target.target],
-			['--testPathPattern', args.slice(1).join(' ')],
+			{
+				script: 'test',
+				label: `test ${pattern}`,
+				summaryLabel: 'test',
+				extraArgs: [pattern],
+			},
 			context.execOptions,
 		);
 	},
