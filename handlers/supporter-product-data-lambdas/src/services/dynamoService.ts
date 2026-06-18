@@ -40,17 +40,23 @@ export class DynamoService {
 			productRatePlanName: item.productRatePlanName,
 		});
 
+		// Fields which are always updated by this function
 		const setFields: Array<{ name: string; value: AttributeValue }> = [
 			{ name: 'productRatePlanId', value: { S: item.productRatePlanId } },
 			{ name: 'productRatePlanName', value: { S: item.productRatePlanName } },
 			{ name: 'termEndDate', value: { S: zuoraDateFormat(item.termEndDate) } },
+			{ name: 'expiryDate', value: { N: this.formatAsTTL(item.termEndDate) } },
+		];
+
+		// Fields which are only set if they do not already exist
+		const ifNotExistsFields: Array<{ name: string; value: AttributeValue }> = [
 			{
 				name: 'contractEffectiveDate',
 				value: { S: zuoraDateFormat(item.contractEffectiveDate) },
 			},
-			{ name: 'expiryDate', value: { N: this.formatAsTTL(item.termEndDate) } },
 		];
 
+		// Fields which are removed if they do not exist in the supplied item.
 		// This is to prevent stale data in the data store if for instance the first
 		// version of a record contains optional fields but a later version does not
 		const fieldsToRemove: string[] = [];
@@ -70,6 +76,7 @@ export class DynamoService {
 			fieldsToRemove.push('contributionAmount', 'contributionCurrency');
 		}
 
+		// This will only be set for secondary subscriptions granted through the multiple accounts feature
 		if (item.primarySubscriptionName) {
 			setFields.push({
 				name: 'primarySubscriptionName',
@@ -79,14 +86,20 @@ export class DynamoService {
 			fieldsToRemove.push('primarySubscriptionName');
 		}
 
-		const expressionValues = Object.fromEntries(
-			setFields.map(({ name, value }) => [`:${name}`, value]),
-		);
-		const setClause = `SET ${setFields.map(({ name }) => `${name} = :${name}`).join(', ')}`;
+		// Build the update expression for the DynamoDB update operation
+		const setClause = `SET ${setFields.map(({ name }) => `${name} = :${name}`).join(', ')},`;
+		const ifNotExistsClause = `${ifNotExistsFields.map(({ name }) => `${name} = if_not_exists(${name}, :${name})`).join(', ')}`;
 		const removeClause =
-			fieldsToRemove.length > 0 ? ` REMOVE ${fieldsToRemove.join(', ')}` : '';
-		const updateExpression = setClause + removeClause;
+			fieldsToRemove.length > 0 ? `REMOVE ${fieldsToRemove.join(', ')}` : '';
+		const updateExpression = `${setClause} ${ifNotExistsClause} ${removeClause}`;
 
+		// Build the expression attribute values for the DynamoDB update operation
+		const expressionValues = Object.fromEntries(
+			setFields
+				.concat(ifNotExistsFields)
+				.map(({ name, value }) => [`:${name}`, value]),
+		);
+		
 		try {
 			await this.client.send(
 				new UpdateItemCommand({
@@ -107,42 +120,5 @@ export class DynamoService {
 			identityId: item.identityId,
 			subscriptionName: item.subscriptionName,
 		});
-	}
-
-	async updateSecondaryItemDates(
-		secondaryIdentityId: string,
-		secondarySubscriptionName: string,
-		termEndDate: Dayjs,
-	): Promise<void> {
-		logger.log('Updating secondary supporter rate plan item dates', {
-			secondaryIdentityId,
-			secondarySubscriptionName,
-		});
-		try {
-			await this.client.send(
-				new UpdateItemCommand({
-					TableName: this.tableName,
-					Key: {
-						identityId: { S: secondaryIdentityId },
-						subscriptionName: { S: secondarySubscriptionName },
-					},
-					UpdateExpression:
-						'SET termEndDate = :termEndDate, expiryDate = :expiryDate',
-					ExpressionAttributeValues: {
-						':termEndDate': { S: zuoraDateFormat(termEndDate) },
-						':expiryDate': { N: this.formatAsTTL(termEndDate) },
-					},
-				}),
-			);
-			logger.log(
-				'Successfully updated secondary supporter rate plan item dates',
-				{
-					secondaryIdentityId,
-					secondarySubscriptionName,
-				},
-			);
-		} catch (error) {
-			throw new DynamoWriteError(error);
-		}
 	}
 }

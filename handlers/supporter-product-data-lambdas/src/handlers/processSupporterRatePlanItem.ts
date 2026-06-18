@@ -12,13 +12,12 @@ export type ProcessItemDependencies = {
 	getSubscription: (
 		subscriptionName: string,
 	) => Promise<MinimalZuoraSubscription>;
-	writeItem: (item: SupporterRatePlanItem) => Promise<void>;
+	writePrimaryItem: (item: SupporterRatePlanItem) => Promise<void>;
 	getSecondaryUsers: (
 		subscriptionName: string,
 	) => Promise<SecondaryUserRecord[]>;
-	updateOrCreateSecondarySubscription: (
+	writeSecondaryItem: (
 		secondaryIdentityId: string,
-		secondarySubscriptionName: string,
 		primaryItem: SupporterRatePlanItem,
 	) => Promise<void>;
 };
@@ -27,8 +26,6 @@ export const processItem = async (
 	item: SupporterRatePlanItem,
 	dependencies: ProcessItemDependencies,
 ): Promise<void> => {
-	logger.resetContext();
-	logger.mutableAddContext(item.subscriptionName);
 	logger.log('Processing supporter rate plan item', item);
 
 	if (dependencies.isDiscountRatePlanItem(item)) {
@@ -41,7 +38,7 @@ export const processItem = async (
 		dependencies,
 	);
 
-	await dependencies.writeItem(itemWithContribution);
+	await dependencies.writePrimaryItem(itemWithContribution);
 
 	const secondaryUsers = await dependencies.getSecondaryUsers(
 		item.subscriptionName,
@@ -52,9 +49,8 @@ export const processItem = async (
 		});
 		await Promise.all(
 			secondaryUsers.map((secondaryUser) =>
-				dependencies.updateOrCreateSecondarySubscription(
+				dependencies.writeSecondaryItem(
 					secondaryUser.secondaryIdentityId,
-					`${item.subscriptionName}-${secondaryUser.secondaryIdentityId}`,
 					itemWithContribution,
 				),
 			),

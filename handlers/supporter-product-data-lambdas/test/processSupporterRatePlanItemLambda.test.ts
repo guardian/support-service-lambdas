@@ -15,7 +15,7 @@ const item: SupporterRatePlanItem = {
 const noSecondaryUsers = jest.fn(() =>
 	Promise.resolve([] as SecondaryUserRecord[]),
 );
-const updateSecondaryItem = jest.fn(() => Promise.resolve());
+const updateSecondarySubscription = jest.fn(() => Promise.resolve());
 
 describe('processSupporterRatePlanItemLambda', () => {
 	beforeEach(() => {
@@ -30,14 +30,14 @@ describe('processSupporterRatePlanItemLambda', () => {
 			contributionIds: [],
 			getSubscription: () =>
 				Promise.resolve({ subscriptionNumber: 'sub-number', ratePlans: [] }),
-			writeItem,
+			writePrimaryItem: writeItem,
 			getSecondaryUsers: noSecondaryUsers,
-			updateOrCreateSecondarySubscription: updateSecondaryItem,
+			writeSecondaryItem: updateSecondarySubscription,
 		});
 
 		expect(writeItem).not.toHaveBeenCalled();
 		expect(noSecondaryUsers).not.toHaveBeenCalled();
-		expect(updateSecondaryItem).not.toHaveBeenCalled();
+		expect(updateSecondarySubscription).not.toHaveBeenCalled();
 	});
 
 	test('adds contribution amount for contribution plans', async () => {
@@ -59,9 +59,9 @@ describe('processSupporterRatePlanItemLambda', () => {
 							},
 						],
 					}),
-				writeItem,
+				writePrimaryItem: writeItem,
 				getSecondaryUsers: noSecondaryUsers,
-				updateOrCreateSecondarySubscription: updateSecondaryItem,
+				writeSecondaryItem: updateSecondarySubscription,
 			},
 		);
 
@@ -81,14 +81,14 @@ describe('processSupporterRatePlanItemLambda', () => {
 			contributionIds: [],
 			getSubscription: () =>
 				Promise.resolve({ subscriptionNumber: 'sub-number', ratePlans: [] }),
-			writeItem,
+			writePrimaryItem: writeItem,
 			getSecondaryUsers: noSecondaryUsers,
-			updateOrCreateSecondarySubscription: updateSecondaryItem,
+			writeSecondaryItem: updateSecondarySubscription,
 		});
 
 		expect(writeItem).toHaveBeenCalled();
 		expect(noSecondaryUsers).toHaveBeenCalledWith('sub-1');
-		expect(updateSecondaryItem).not.toHaveBeenCalled();
+		expect(updateSecondarySubscription).not.toHaveBeenCalled();
 	});
 
 	test('updates secondary items when present', async () => {
@@ -114,22 +114,20 @@ describe('processSupporterRatePlanItemLambda', () => {
 			contributionIds: [],
 			getSubscription: () =>
 				Promise.resolve({ subscriptionNumber: 'sub-number', ratePlans: [] }),
-			writeItem,
+			writePrimaryItem: writeItem,
 			getSecondaryUsers,
-			updateOrCreateSecondarySubscription: updateSecondaryItem,
+			writeSecondaryItem: updateSecondarySubscription,
 		});
 
 		expect(writeItem).toHaveBeenCalled();
 		expect(getSecondaryUsers).toHaveBeenCalledWith('sub-1');
-		expect(updateSecondaryItem).toHaveBeenCalledTimes(2);
-		expect(updateSecondaryItem).toHaveBeenCalledWith(
+		expect(updateSecondarySubscription).toHaveBeenCalledTimes(2);
+		expect(updateSecondarySubscription).toHaveBeenCalledWith(
 			'secondary-id-1',
-			'sub-1-secondary-id-1',
 			expect.objectContaining({ subscriptionName: 'sub-1' }),
 		);
-		expect(updateSecondaryItem).toHaveBeenCalledWith(
+		expect(updateSecondarySubscription).toHaveBeenCalledWith(
 			'secondary-id-2',
-			'sub-1-secondary-id-2',
 			expect.objectContaining({ subscriptionName: 'sub-1' }),
 		);
 	});
