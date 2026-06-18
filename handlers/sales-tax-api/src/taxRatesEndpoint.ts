@@ -26,9 +26,10 @@ import {
 } from './schemas';
 
 type ProductKey = z.infer<typeof productKeySchema>;
-const taxExclusiveProductCodeNames: Partial<Record<ProductKey, string>> = {
+type TaxCodeName = 'Supporter Plus';
+const taxExclusiveProductCodeNames: Partial<Record<ProductKey, TaxCodeName>> = {
 	SupporterPlus: `Supporter Plus`,
-	DigitalSubscription: `Supporter Plus`, // DigitalSubscription is a tax-exclusive product, but it uses the same tax code as Supporter Plus
+	DigitalSubscription: `Supporter Plus`, // DigitalSubscription is a tax-exclusive product, but it uses the same tax code name as Supporter Plus
 };
 
 const caStatesDefault: TaxRatesResponse = {
