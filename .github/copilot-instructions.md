@@ -63,4 +63,6 @@ Recommended order (use the first applicable scoped command):
 8. `./agent-tool snapshot-update` when buildcheck-managed snapshots are expected
 9. `./agent-tool install` when dependencies or lockfiles need updating
 
+Prefer `--changed` over explicit package names for verification commands — it resolves directly changed packages from git and also runs checks on their downstream dependents via pnpm's dependency graph, catching breakage in consumers of a changed module.
+
 If `agent-tools` is missing a safer or more efficient command, suggest adding it rather than working around it with ad-hoc shell commands.

@@ -1,14 +1,11 @@
-import { existsSync } from 'fs';
-import { resolve as fsResolve } from 'path';
 import { listPackages, resolveChangedPackages } from './changed.js';
 import {
+	buildPnpmChangedArgs,
+	buildPnpmExplicitArgs,
 	type CommandResult,
 	type ExecutionOptions,
-	hasScript,
 	printProgress,
-	ROOT,
 	runRootCommand,
-	runScript,
 	toCommandResult,
 } from './run.js';
 
@@ -18,6 +15,9 @@ export type Handler = (
 ) => Promise<CommandResult>;
 
 export type Command = { usage: string; description: string; handler: Handler };
+
+// Matches valid package paths without hitting the filesystem
+const PKG_RE = /^(handlers|modules)\/\S+$|^(cdk|buildcheck)$/;
 
 export const COMMANDS: Record<string, Command> = {
 	'list-packages': {
@@ -38,10 +38,6 @@ export const COMMANDS: Record<string, Command> = {
 	'git-diff-staged': rootCmd('git --no-pager diff --staged --minimal'),
 	'git-diff-stat': rootCmd('git --no-pager diff --stat'),
 	'git-diff-staged-stat': rootCmd('git --no-pager diff --staged --stat'),
-	'git-changed-files': rootCmd('git --no-pager diff --name-only'),
-	'git-changed-files-staged': rootCmd(
-		'git --no-pager diff --staged --name-only',
-	),
 	'git-diff-target': pathCmd('git --no-pager diff --minimal'),
 	'git-diff-target-stat': pathCmd('git --no-pager diff --stat'),
 };
@@ -77,7 +73,7 @@ COMMANDS['help'] = {
 function resolvePackages(
 	args: string[],
 	commandName: string,
-): CommandResult | { packages: string[] } {
+): CommandResult | { packages: string[]; changed: boolean } {
 	if (args.includes('--changed')) {
 		const packages = resolveChangedPackages();
 		if (packages.length === 0) {
@@ -85,7 +81,7 @@ function resolvePackages(
 				'WARN no changed handlers/*, modules/*, cdk, or buildcheck packages detected',
 			]);
 		}
-		return { packages };
+		return { packages, changed: true };
 	}
 	const packages = args.filter((a) => !a.startsWith('--'));
 	if (packages.length === 0) {
@@ -94,12 +90,7 @@ function resolvePackages(
 			1,
 		);
 	}
-	for (const pkg of packages) {
-		if (!existsSync(fsResolve(ROOT, pkg))) {
-			return toCommandResult([`FAIL ${pkg}: package does not exist`], 1);
-		}
-	}
-	return { packages };
+	return { packages, changed: false };
 }
 
 async function runForPackages(
@@ -113,40 +104,25 @@ async function runForPackages(
 	if ('exitCode' in resolved) {
 		return resolved;
 	}
-	const label = [script, ...extraArgs].join(' ');
-	const lines: string[] = [];
-	let failCount = 0;
 
-	for (const pkg of resolved.packages) {
-		printProgress(`PACKAGE ${pkg}`);
-		if (!hasScript(pkg, script)) {
-			const warn = `WARN ${pkg} ${script}: skipped (not in package.json)`;
-			printProgress(warn);
-			lines.push(warn);
-			continue;
-		}
-		printProgress(`RUN  ${pkg} ${label}`);
-		const result = await runScript(pkg, script, { extraArgs, execOptions });
-		const s = Math.round(result.durationMs / 1000);
-		if (result.passed) {
-			printProgress(`OK   ${pkg} ${label} (${s}s)`);
-		} else {
-			const fail = `FAIL ${pkg} ${label} (${s}s)`;
-			printProgress(fail);
-			lines.push(fail);
-			if (result.excerpt) {
-				lines.push(result.excerpt);
-			}
-			failCount++;
-		}
+	const pnpmFilterArgs = resolved.changed
+		? buildPnpmChangedArgs(resolved.packages, script, extraArgs)
+		: buildPnpmExplicitArgs(resolved.packages, script, extraArgs);
+	const scope = resolved.changed
+		? `--changed (+ dependents)`
+		: resolved.packages.join(', ');
+
+	printProgress(`RUN  ${commandName} ${scope}`);
+	const result = await runRootCommand('pnpm', pnpmFilterArgs, execOptions);
+	const s = Math.round(result.durationMs / 1000);
+	if (result.passed) {
+		return toCommandResult([`OK   ${commandName} (${s}s)`]);
 	}
-
-	lines.push(
-		failCount === 0
-			? `OK   ${commandName} complete`
-			: `FAIL ${failCount} ${commandName} failure(s)`,
-	);
-	return toCommandResult(lines, failCount === 0 ? 0 : 1);
+	const lines = [`FAIL ${commandName} (${s}s)`];
+	if (result.excerpt) {
+		lines.push(result.excerpt);
+	}
+	return toCommandResult(lines, result.exitCode);
 }
 
 /** pnpm script run across packages. scriptAndArgs e.g. 'lint --fix'. */
@@ -169,11 +145,7 @@ function pkgScriptWithPattern(commandName: string): Command {
 			const packageArgs: string[] = [];
 			const patternParts: string[] = [];
 			for (const arg of args) {
-				if (
-					arg === '--changed' ||
-					arg.startsWith('--') ||
-					existsSync(fsResolve(ROOT, arg))
-				) {
+				if (arg === '--changed' || arg.startsWith('--') || PKG_RE.test(arg)) {
 					packageArgs.push(arg);
 				} else {
 					patternParts.push(arg);
@@ -230,9 +202,6 @@ function pathCmd(commandString: string): Command {
 				);
 			}
 			const pkg = args[0]!;
-			if (!existsSync(fsResolve(ROOT, pkg))) {
-				return toCommandResult([`FAIL ${pkg}: package does not exist`], 1);
-			}
 			printProgress(`RUN  ${commandString} -- ${pkg}`);
 			const result = await runRootCommand(
 				executable!,

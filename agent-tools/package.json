@@ -10,9 +10,6 @@
 		"fix-formatting": "prettier --write '**/*.ts'",
 		"test": "tsx --test src/**/*.test.ts"
 	},
-	"dependencies": {
-		"zod": "catalog:"
-	},
 	"devDependencies": {
 		"tsx": "^4.21.0"
 	}

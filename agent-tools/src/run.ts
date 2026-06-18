@@ -1,27 +1,11 @@
 import { spawn } from 'child_process';
-import { createWriteStream, readFileSync, type WriteStream } from 'fs';
+import { createWriteStream, type WriteStream } from 'fs';
 import { tmpdir } from 'os';
 import { join, resolve } from 'path';
-import { z } from 'zod';
 
 export const ROOT = resolve(import.meta.dirname, '../../..');
 
 const DEFAULT_FAILURE_TAIL_LINES = 40;
-
-const packageJsonSchema = z.object({
-	scripts: z.record(z.string()).optional(),
-});
-
-export function hasScript(target: string, script: string): boolean {
-	try {
-		const raw: unknown = JSON.parse(
-			readFileSync(resolve(ROOT, target, 'package.json'), 'utf-8'),
-		);
-		return !!packageJsonSchema.parse(raw).scripts?.[script];
-	} catch {
-		return false;
-	}
-}
 
 export type CommandResult = { output: string; exitCode: number };
 
@@ -50,12 +34,34 @@ export function printProgress(line: string): void {
 	process.stdout.write(`${line}\n`);
 }
 
-export function buildPnpmRunArgs(
-	target: string,
+/** Builds pnpm args for explicit packages — runs only those packages, skips missing scripts. */
+export function buildPnpmExplicitArgs(
+	packages: string[],
 	script: string,
 	extraArgs: string[] = [],
 ): string[] {
-	return ['--filter', `./${target}`, 'run', script, ...extraArgs];
+	return [
+		...packages.flatMap((pkg) => ['--filter', `./${pkg}`]),
+		'run',
+		'--if-present',
+		script,
+		...extraArgs,
+	];
+}
+
+/** Builds pnpm args for changed packages — each with its dependents, skips missing scripts. */
+export function buildPnpmChangedArgs(
+	packages: string[],
+	script: string,
+	extraArgs: string[] = [],
+): string[] {
+	return [
+		...packages.flatMap((pkg) => ['--filter', `...{./${pkg}}`]),
+		'run',
+		'--if-present',
+		script,
+		...extraArgs,
+	];
 }
 
 export function filterLinesByPattern(
@@ -195,19 +201,6 @@ async function runCommand({
 				durationMs: Date.now() - start,
 			});
 		});
-	});
-}
-
-export async function runScript(
-	target: string,
-	script: string,
-	options: { extraArgs?: string[]; execOptions: ExecutionOptions },
-): Promise<ScriptResult> {
-	return await runCommand({
-		command: 'pnpm',
-		args: buildPnpmRunArgs(target, script, options.extraArgs ?? []),
-		cwd: ROOT,
-		execOptions: options.execOptions,
 	});
 }
 
