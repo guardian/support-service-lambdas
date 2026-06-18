@@ -2,15 +2,13 @@
 
 ## Overview
 
-`agent-tools` is a repository-safe CLI for verify, test, snapshot update, install, and read-only git helpers.
+`agent-tools` is a repository-safe CLI for formatting, linting, type-checking, testing, and read-only git inspection.
 
 Use it from the repository root with `./agent-tool <command> [args...]`.
 
-Command names, arguments, and behavior are source-of-truth in command registry metadata under `agent-tools/src/commands/*`.
+Each command operates on one or more workspace targets (`handlers/<name>`, `modules/<name>`, `cdk`, `buildcheck`). Most commands accept `--changed` to automatically resolve targets from git-modified files rather than requiring explicit target names.
 
-Command names are kebab-case (for example: `check-formatting`, `git-diff-stat`).
-
-The registry composes one file per command (or command pair) in `agent-tools/src/commands/registry.ts`.
+Command names are kebab-case (for example: `check-formatting`, `git-diff-stat`). Each command lives in its own file under `agent-tools/src/commands/`; `registry.ts` composes them.
 
 Help output (`./agent-tool help`) is generated from the same command metadata.
 
@@ -27,15 +25,13 @@ Help output (`./agent-tool help`) is generated from the same command metadata.
 
 ## Verification and fix commands
 
-- Individual verification stages:
-  - `check-formatting` / `check-formatting --changed`
-  - `lint` / `lint --changed`
-  - `type-check` / `type-check --changed`
-- Individual fix stages:
-  - `fix-formatting` / `fix-formatting --changed`
-  - `lint-fix` / `lint-fix --changed`
+Each accepts explicit targets or `--changed`:
 
-These commands share a common runner implementation in `agent-tools/src/tools/targetScriptRunner.ts`.
+- `check-formatting --changed`
+- `lint --changed`
+- `type-check --changed`
+- `fix-formatting --changed`
+- `lint-fix --changed`
 
 ## How to test
 

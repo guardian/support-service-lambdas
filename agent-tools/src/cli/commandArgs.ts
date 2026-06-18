@@ -1,14 +1,7 @@
-import type { CommandResult, ExecutionOptions } from '../tools/runScript.js';
+import type { CommandResult } from '../tools/runScript.js';
 import { toCommandResult } from '../tools/runScript.js';
 import { listTargetNames } from '../tools/targetRegistry.js';
-import {
-	runChangedTargetsOrWarn,
-	runSingleStep,
-	type TargetScriptStep,
-} from '../tools/targetScriptRunner.js';
 import { validateTargetAgainstKnownTargets } from '../tools/targetValidation.js';
-
-// --- Target arg parsing (inlined from targetArgs.ts) ---
 
 type TargetValidationError = {
 	target: string;
@@ -50,8 +43,6 @@ function parseTargetCommandArgs(args: string[]): ParsedTargetCommandArgs {
 
 	return { changed, targets, unsupportedOptions };
 }
-
-// --- Shared arg helpers ---
 
 export function fail(message: string): CommandResult {
 	return toCommandResult([`FAIL ${message}`], 1);
@@ -132,36 +123,4 @@ export async function runSingleTargetCommand(
 		return target;
 	}
 	return await run(target.target);
-}
-
-/**
- * Creates a handler for commands that run a single pnpm script step across
- * one or more targets (or --changed targets). Covers all verify/repair commands.
- * Step fields default to the command name so callers only need to provide overrides.
- */
-export function targetStepHandler(
-	name: string,
-	stepOverrides?: Partial<TargetScriptStep>,
-): (
-	args: string[],
-	context: { execOptions: ExecutionOptions },
-) => Promise<CommandResult> {
-	const step: TargetScriptStep = {
-		script: name,
-		label: name,
-		summaryLabel: name,
-		...stepOverrides,
-	};
-	return async (args, context) => {
-		const parsed = parseRequiredTargets(args, name);
-		if ('exitCode' in parsed) {
-			return parsed;
-		}
-		const run = (targets: string[]) =>
-			runSingleStep(targets, step, context.execOptions);
-		if (parsed.changed) {
-			return await runChangedTargetsOrWarn(run);
-		}
-		return await run(parsed.targets);
-	};
 }
