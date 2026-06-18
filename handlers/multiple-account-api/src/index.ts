@@ -6,7 +6,11 @@ import { Lazy } from '@modules/lazy';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { Router } from '@modules/routing/router';
 import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
-import { withBodyParser, withPathParser } from '@modules/routing/withParsers';
+import {
+	withBodyParser,
+	withParsers,
+	withPathParser,
+} from '@modules/routing/withParsers';
 import { stageFromEnvironment } from '@modules/stage';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 import type { Handler } from 'aws-lambda';
@@ -17,6 +21,7 @@ import {
 import {
 	createInvitationBodySchema,
 	createInvitationEndpoint,
+	createInvitationPathSchema,
 } from './createInvitationEndpoint';
 import {
 	deleteInvitationEndpoint,
@@ -53,9 +58,25 @@ const lazyZuoraCatalog = new Lazy(
 
 export const handler: Handler = Router([
 	{
+		httpMethod: 'GET',
+		path: '/subscriptions/{subscriptionName}/invitations',
+		handler: withPathParser(
+			listInvitationsPathSchema,
+			withMMAIdentityCheck(
+				stage,
+				async (_body, _zuoraClient, subscription) =>
+					listInvitationsEndpoint(invitationRepository)({
+						subscriptionName: subscription.subscriptionNumber,
+					}),
+				({ path }) => path.subscriptionName,
+			),
+		),
+	},
+	{
 		httpMethod: 'POST',
-		path: '/invitation',
-		handler: withBodyParser(
+		path: '/subscriptions/{subscriptionName}/invitations',
+		handler: withParsers(
+			createInvitationPathSchema,
 			createInvitationBodySchema,
 			withMMAIdentityCheck(
 				stage,
@@ -68,20 +89,20 @@ export const handler: Handler = Router([
 						await lazyProductCatalog.get(),
 					)(body, zuoraClient, subscription, account);
 				},
-				({ body }) => body.subscriptionName,
+				(parsed) => parsed.path.subscriptionName,
 			),
 		),
 	},
 	{
 		httpMethod: 'DELETE',
-		path: '/invitation/{invitationCode}',
+		path: '/invitations/{invitationCode}',
 		handler: withPathParser(deleteInvitationPathSchema, async (_event, path) =>
 			deleteInvitationEndpoint(invitationRepository)(path),
 		),
 	},
 	{
 		httpMethod: 'POST',
-		path: '/invitation/{invitationCode}/accept',
+		path: '/invitations/{invitationCode}/accept',
 		handler: withPathParser(acceptInvitationPathSchema, async (event, path) => {
 			const maybeAuthenticatedEvent = await authenticate(event);
 
@@ -98,21 +119,6 @@ export const handler: Handler = Router([
 				dynamoClient,
 			);
 		}),
-	},
-	{
-		httpMethod: 'GET',
-		path: '/subscriptions/{subscriptionName}/invitations',
-		handler: withPathParser(
-			listInvitationsPathSchema,
-			withMMAIdentityCheck(
-				stage,
-				async (_body, _zuoraClient, subscription) =>
-					listInvitationsEndpoint(invitationRepository)({
-						subscriptionName: subscription.subscriptionNumber,
-					}),
-				({ path }) => path.subscriptionName,
-			),
-		),
 	},
 	{
 		httpMethod: 'GET',

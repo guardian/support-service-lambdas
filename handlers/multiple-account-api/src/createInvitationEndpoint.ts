@@ -20,8 +20,11 @@ import {
 	validateInvitationInformation,
 } from './validation';
 
-export const createInvitationBodySchema = z.object({
+export const createInvitationPathSchema = z.object({
 	subscriptionName: z.string(),
+});
+
+export const createInvitationBodySchema = z.object({
 	secondaryUserEmail: z.string().email(),
 });
 export type CreateInvitationBody = z.infer<typeof createInvitationBodySchema>;
@@ -48,7 +51,8 @@ export const createInvitationEndpoint =
 		zuoraSubscription: ZuoraSubscription,
 		account: ZuoraAccount,
 	): Promise<APIGatewayProxyResult> => {
-		const { subscriptionName } = body;
+		const { secondaryUserEmail } = body;
+		const subscriptionName = zuoraSubscription.subscriptionNumber;
 		logger.mutableAddContext(subscriptionName);
 
 		checkSubscriptionHasMultipleAccountsBenefit(
@@ -59,7 +63,7 @@ export const createInvitationEndpoint =
 
 		const secondaryIdentityId = await getOrCreateUserFromEmail(
 			identityClient,
-			body.secondaryUserEmail,
+			secondaryUserEmail,
 		);
 
 		await validateInvitationInformation(

@@ -9,7 +9,7 @@ servers:
   - url: https://multiple-account-api.support.guardianapis.com
     description: PROD
 paths:
-  /invitation:
+  /subscriptions/{subscriptionName}/invitations:
     post:
       operationId: createInvitation
       summary: Create invitation
@@ -17,6 +17,14 @@ paths:
       security:
         - identityId: []
         -  apiKey: []
+      parameters:
+        - name: subscriptionName
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Zuora subscription number for the primary user.
+          example: A-S00974337
       requestBody:
         required: true
         content:
@@ -26,7 +34,6 @@ paths:
             examples:
               default:
                 value:
-                  subscriptionName: A-S00974337
                   secondaryUserEmail: integration-test2+multiple-account@theguardian.com
       responses:
         '201':
@@ -65,7 +72,6 @@ paths:
               schema:
                 type: string
                 example: Internal server error
-  /subscriptions/{subscriptionName}/invitations:
     get:
       operationId: listInvitations
       summary: List invitations
@@ -157,7 +163,7 @@ paths:
               schema:
                 type: string
                 example: Internal server error
-  /invitation/{invitationCode}:
+  /invitations/{invitationCode}:
     delete:
       operationId: deleteInvitation
       summary: Delete invitation
@@ -196,7 +202,7 @@ paths:
               schema:
                 type: string
                 example: Internal server error
-  /invitation/{invitationCode}/accept:
+  /invitations/{invitationCode}/accept:
     post:
       operationId: acceptInvitation
       summary: Accept invitation
@@ -292,13 +298,8 @@ components:
       type: object
       additionalProperties: false
       required:
-        - subscriptionName
         - secondaryUserEmail
       properties:
-        subscriptionName:
-          type: string
-          description: Zuora subscription number.
-          example: A-S00974337
         secondaryUserEmail:
           type: string
           format: email

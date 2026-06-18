@@ -33,13 +33,14 @@ pnpm --filter multiple-account-api openapi:preview
 
 #### Request:
 
-POST /invitation
+POST /subscriptions/{subscriptionName}/invitations
 
 Headers: 'x-identity-id' - the identity id of the user creating the invitation
 
+Example path: /subscriptions/A-S00974337/invitations
+
 ```JSON
 {
-  "subscriptionName": "A-S00974337",
   "secondaryUserEmail": "integration-test2+multiple-account@theguardian.com"
 }
 ```
