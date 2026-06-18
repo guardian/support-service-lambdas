@@ -56,12 +56,6 @@ const staleFieldTestItem: SupporterRatePlanItem = {
 	primarySubscriptionName: 'A-S00009999',
 };
 
-const ifNotExistsTestItem: SupporterRatePlanItem = {
-	...baseItem,
-	subscriptionName: 'A-S00000006',
-	contractEffectiveDate: dayjs('2026-01-01'),
-};
-
 async function deleteItem(item: SupporterRatePlanItem) {
 	await client.send(
 		new DeleteItemCommand({
@@ -83,7 +77,6 @@ describe('DynamoService integration', () => {
 		await deleteItem(missingCurrencyTestItem);
 		await deleteItem(missingAmountTestItem);
 		await deleteItem(staleFieldTestItem);
-		await deleteItem(ifNotExistsTestItem);
 	});
 
 	test('writes primarySubscriptionName to DynamoDB', async () => {
