@@ -219,6 +219,14 @@ const moduleIdentity: ModuleDefinition = {
 	moduleDependencies: [moduleAws, moduleZuora],
 };
 
+const moduleSubscriptionSync: ModuleDefinition = {
+	name: 'subscription-sync',
+	devDependencies: {
+		...dep['dayjs'],
+		...dep['zod'],
+	},
+};
+
 const moduleSupporterProductData: ModuleDefinition = {
 	name: 'supporter-product-data',
 	devDependencies: {
@@ -924,6 +932,7 @@ export const build: BuildDefinition = {
 		moduleRouting,
 		moduleSalesforce,
 		moduleSecretsManager,
+		moduleSubscriptionSync,
 		moduleSupporterProductData,
 		moduleSyncSupporterProductData,
 		moduleTestUsers,
