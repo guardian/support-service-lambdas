@@ -1,5 +1,7 @@
-import { rootPnpmCommand } from './rootCommand.js';
+import { rootCommand } from './rootCommand.js';
 
-export default rootPnpmCommand('snapshot-update', 'Workspace', [
-	'snapshot:update',
-]);
+export default rootCommand(
+	'snapshot-update',
+	'Workspace',
+	'pnpm snapshot:update',
+);

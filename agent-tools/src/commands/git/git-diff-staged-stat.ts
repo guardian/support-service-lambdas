@@ -1,7 +1,7 @@
-import { gitCommand } from './git.js';
+import { rootCommand } from '../rootCommand.js';
 
-export default gitCommand('git-diff-staged-stat', [
-	'diff',
-	'--staged',
-	'--stat',
-]);
+export default rootCommand(
+	'git-diff-staged-stat',
+	'Git',
+	'git --no-pager diff --staged --stat',
+);

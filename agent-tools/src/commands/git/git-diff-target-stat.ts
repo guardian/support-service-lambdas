@@ -1,3 +1,7 @@
-import { gitTargetCommand } from './git.js';
+import { rootTargetCommand } from '../rootCommand.js';
 
-export default gitTargetCommand('git-diff-target-stat', ['diff', '--stat']);
+export default rootTargetCommand(
+	'git-diff-target-stat',
+	'Git',
+	'git --no-pager diff --stat',
+);

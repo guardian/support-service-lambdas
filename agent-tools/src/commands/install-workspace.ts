@@ -1,3 +1,3 @@
-import { rootPnpmCommand } from './rootCommand.js';
+import { rootCommand } from './rootCommand.js';
 
-export default rootPnpmCommand('install-workspace', 'Workspace', ['install']);
+export default rootCommand('install-workspace', 'Workspace', 'pnpm install');

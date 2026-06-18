@@ -1,3 +1,7 @@
-import { gitTargetCommand } from './git.js';
+import { rootTargetCommand } from '../rootCommand.js';
 
-export default gitTargetCommand('git-diff-target', ['diff', '--minimal']);
+export default rootTargetCommand(
+	'git-diff-target',
+	'Git',
+	'git --no-pager diff --minimal',
+);

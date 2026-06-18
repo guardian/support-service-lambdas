@@ -1,3 +1,7 @@
-import { gitCommand } from './git.js';
+import { rootCommand } from '../rootCommand.js';
 
-export default gitCommand('git-diff-staged', ['diff', '--staged', '--minimal']);
+export default rootCommand(
+	'git-diff-staged',
+	'Git',
+	'git --no-pager diff --staged --minimal',
+);

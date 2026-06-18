@@ -1,7 +1,7 @@
-import { gitCommand } from './git.js';
+import { rootCommand } from '../rootCommand.js';
 
-export default gitCommand('git-changed-files-staged', [
-	'diff',
-	'--staged',
-	'--name-only',
-]);
+export default rootCommand(
+	'git-changed-files-staged',
+	'Git',
+	'git --no-pager diff --staged --name-only',
+);
