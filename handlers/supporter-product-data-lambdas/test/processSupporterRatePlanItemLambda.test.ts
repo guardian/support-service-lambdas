@@ -15,7 +15,7 @@ const item: SupporterRatePlanItem = {
 const noSecondaryUsers = jest.fn(() =>
 	Promise.resolve([] as SecondaryUserRecord[]),
 );
-const updateSecondarySubscription = jest.fn(() => Promise.resolve());
+const writeSecondaryItem = jest.fn(() => Promise.resolve());
 
 describe('processSupporterRatePlanItemLambda', () => {
 	beforeEach(() => {
@@ -32,12 +32,12 @@ describe('processSupporterRatePlanItemLambda', () => {
 				Promise.resolve({ subscriptionNumber: 'sub-number', ratePlans: [] }),
 			writePrimaryItem: writeItem,
 			getSecondaryUsers: noSecondaryUsers,
-			writeSecondaryItem: updateSecondarySubscription,
+			writeSecondaryItem: writeSecondaryItem,
 		});
 
 		expect(writeItem).not.toHaveBeenCalled();
 		expect(noSecondaryUsers).not.toHaveBeenCalled();
-		expect(updateSecondarySubscription).not.toHaveBeenCalled();
+		expect(writeSecondaryItem).not.toHaveBeenCalled();
 	});
 
 	test('adds contribution amount for contribution plans', async () => {
@@ -61,7 +61,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 					}),
 				writePrimaryItem: writeItem,
 				getSecondaryUsers: noSecondaryUsers,
-				writeSecondaryItem: updateSecondarySubscription,
+				writeSecondaryItem: writeSecondaryItem,
 			},
 		);
 
@@ -83,12 +83,12 @@ describe('processSupporterRatePlanItemLambda', () => {
 				Promise.resolve({ subscriptionNumber: 'sub-number', ratePlans: [] }),
 			writePrimaryItem: writeItem,
 			getSecondaryUsers: noSecondaryUsers,
-			writeSecondaryItem: updateSecondarySubscription,
+			writeSecondaryItem: writeSecondaryItem,
 		});
 
 		expect(writeItem).toHaveBeenCalled();
 		expect(noSecondaryUsers).toHaveBeenCalledWith('sub-1');
-		expect(updateSecondarySubscription).not.toHaveBeenCalled();
+		expect(writeSecondaryItem).not.toHaveBeenCalled();
 	});
 
 	test('updates secondary items when present', async () => {
@@ -116,19 +116,19 @@ describe('processSupporterRatePlanItemLambda', () => {
 				Promise.resolve({ subscriptionNumber: 'sub-number', ratePlans: [] }),
 			writePrimaryItem: writeItem,
 			getSecondaryUsers,
-			writeSecondaryItem: updateSecondarySubscription,
+			writeSecondaryItem: writeSecondaryItem,
 		});
 
 		expect(writeItem).toHaveBeenCalled();
 		expect(getSecondaryUsers).toHaveBeenCalledWith('sub-1');
-		expect(updateSecondarySubscription).toHaveBeenCalledTimes(2);
-		expect(updateSecondarySubscription).toHaveBeenCalledWith(
-			'secondary-id-1',
+		expect(writeSecondaryItem).toHaveBeenCalledTimes(2);
+		expect(writeSecondaryItem).toHaveBeenCalledWith(
 			expect.objectContaining({ subscriptionName: 'sub-1' }),
+			expect.objectContaining({ secondaryIdentityId: 'secondary-id-1' }),
 		);
-		expect(updateSecondarySubscription).toHaveBeenCalledWith(
-			'secondary-id-2',
+		expect(writeSecondaryItem).toHaveBeenCalledWith(
 			expect.objectContaining({ subscriptionName: 'sub-1' }),
+			expect.objectContaining({ secondaryIdentityId: 'secondary-id-2' }),
 		);
 	});
 });
