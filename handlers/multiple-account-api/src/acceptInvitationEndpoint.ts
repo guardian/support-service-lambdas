@@ -53,13 +53,13 @@ export const acceptInvitationEndpoint = async (
 			acceptedDate: zuoraDateFormat(today),
 		};
 
-		const createSecondaryUserTransaction = secondaryUserRepository.getPutTransaction(
-			secondaryUserRecord,
-		);
-		const deleteInvitationTransaction = invitationRepository.getDeleteTransaction(
-			invitation.subscriptionName,
-			invitationCode,
-		);
+		const createSecondaryUserTransaction =
+			secondaryUserRepository.getPutTransaction(secondaryUserRecord);
+		const deleteInvitationTransaction =
+			invitationRepository.getDeleteTransaction(
+				invitation.subscriptionName,
+				invitationCode,
+			);
 
 		// Carry out the secondary user creation and deletion of the invitation
 		// in a transaction to keep them atomic

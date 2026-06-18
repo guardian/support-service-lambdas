@@ -99,7 +99,7 @@ export class DynamoService {
 				.concat(ifNotExistsFields)
 				.map(({ name, value }) => [`:${name}`, value]),
 		);
-		
+
 		try {
 			await this.client.send(
 				new UpdateItemCommand({
