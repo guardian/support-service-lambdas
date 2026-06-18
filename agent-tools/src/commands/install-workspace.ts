@@ -30,7 +30,7 @@ function parseInstallOptions(
 	if (args.length === 1 && args[0] === '--no-frozen') {
 		return { frozen: false };
 	}
-	return fail('install_workspace accepts only optional --no-frozen');
+	return fail('install-workspace accepts only optional --no-frozen');
 }
 
 async function runInstallWorkspace(
@@ -39,7 +39,7 @@ async function runInstallWorkspace(
 ): Promise<CommandResult> {
 	const args = options.frozen ? ['install', '--frozen-lockfile'] : ['install'];
 	const modeLabel = options.frozen ? 'frozen-lockfile' : 'mutable';
-	printProgress(`RUN  install_workspace (${modeLabel})`);
+	printProgress(`RUN  install-workspace (${modeLabel})`);
 	const result = await runRootCommand('pnpm', args, {
 		execOptions,
 		timeoutSeconds: INSTALL_TIMEOUT_SECONDS,
@@ -48,7 +48,7 @@ async function runInstallWorkspace(
 	if (!result.passed) {
 		return toCommandResult(
 			[
-				`FAIL install_workspace (${durationSeconds}s)`,
+				`FAIL install-workspace (${durationSeconds}s)`,
 				...(result.excerpt ? [result.excerpt] : []),
 			],
 			1,
@@ -56,7 +56,7 @@ async function runInstallWorkspace(
 	}
 	const changedFiles = listGitChangedFilesForPaths(WORKSPACE_FILES);
 	return toCommandResult([
-		`OK   install_workspace (${durationSeconds}s)`,
+		`OK   install-workspace (${durationSeconds}s)`,
 		`INFO mode: ${modeLabel}`,
 		'INFO dependency-related files changed:',
 		...(changedFiles.length > 0 ? changedFiles : ['(none)']),
@@ -64,12 +64,12 @@ async function runInstallWorkspace(
 }
 
 export default {
-	name: 'install_workspace',
+	name: 'install-workspace',
 	usage: '[--no-frozen]',
 	description: 'run pnpm install (default --frozen-lockfile)',
 	category: 'Workspace',
 	safetyNote:
-		'install_workspace is mutating; default mode is --frozen-lockfile',
+		'install-workspace is mutating; default mode is --frozen-lockfile',
 	handler: async (args, context) => {
 		const options = parseInstallOptions(args);
 		if ('exitCode' in options) {

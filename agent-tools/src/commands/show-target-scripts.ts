@@ -19,10 +19,10 @@ function showTargetScripts(target: string): CommandResult {
 }
 
 export default {
-	name: 'show_target_scripts',
+	name: 'show-target-scripts',
 	usage: '<target>',
 	description: 'show scripts from a target package.json',
 	category: 'Utility',
 	handler: (args) =>
-		runSingleTargetCommand(args, 'show_target_scripts', showTargetScripts),
+		runSingleTargetCommand(args, 'show-target-scripts', showTargetScripts),
 } satisfies CommandDefinition;

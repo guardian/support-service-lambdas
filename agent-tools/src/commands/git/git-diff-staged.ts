@@ -3,10 +3,10 @@ import type { CommandDefinition } from '../types.js';
 import { runGit } from './git.js';
 
 export default {
-	name: 'git_status',
+	name: 'git-diff-staged',
 	usage: '',
-	description: 'git status --short',
+	description: 'git diff --staged --minimal',
 	category: 'Git',
 	handler: (args) =>
-		runNoArgCommand(args, 'git_status', () => runGit('status')),
+		runNoArgCommand(args, 'git-diff-staged', () => runGit('diff-staged')),
 } satisfies CommandDefinition;

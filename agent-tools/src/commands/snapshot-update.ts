@@ -12,18 +12,18 @@ const SNAPSHOT_TIMEOUT_SECONDS = 600;
 async function runSnapshotUpdate(
 	execOptions: ExecutionOptions,
 ): Promise<CommandResult> {
-	printProgress('RUN  snapshot_update (pnpm snapshot:update)');
+	printProgress('RUN  snapshot-update (pnpm snapshot:update)');
 	const result = await runRootCommand('pnpm', ['snapshot:update'], {
 		execOptions,
 		timeoutSeconds: SNAPSHOT_TIMEOUT_SECONDS,
 	});
 	const durationSeconds = Math.round(result.durationMs / 1000);
 	if (result.passed) {
-		return toCommandResult([`OK   snapshot_update (${durationSeconds}s)`]);
+		return toCommandResult([`OK   snapshot-update (${durationSeconds}s)`]);
 	}
 	return toCommandResult(
 		[
-			`FAIL snapshot_update (${durationSeconds}s)`,
+			`FAIL snapshot-update (${durationSeconds}s)`,
 			...(result.excerpt ? [result.excerpt] : []),
 		],
 		1,
@@ -31,12 +31,12 @@ async function runSnapshotUpdate(
 }
 
 export default {
-	name: 'snapshot_update',
+	name: 'snapshot-update',
 	usage: '',
 	description: 'run pnpm snapshot:update at repo root',
 	category: 'Workspace',
 	handler: (args, context) =>
-		runNoArgCommand(args, 'snapshot_update', () =>
+		runNoArgCommand(args, 'snapshot-update', () =>
 			runSnapshotUpdate(context.execOptions),
 		),
 } satisfies CommandDefinition;

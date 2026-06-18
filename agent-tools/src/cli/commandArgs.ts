@@ -137,14 +137,21 @@ export async function runSingleTargetCommand(
 /**
  * Creates a handler for commands that run a single pnpm script step across
  * one or more targets (or --changed targets). Covers all verify/repair commands.
+ * Step fields default to the command name so callers only need to provide overrides.
  */
 export function targetStepHandler(
 	name: string,
-	step: TargetScriptStep,
+	stepOverrides?: Partial<TargetScriptStep>,
 ): (
 	args: string[],
 	context: { execOptions: ExecutionOptions },
 ) => Promise<CommandResult> {
+	const step: TargetScriptStep = {
+		script: name,
+		label: name,
+		summaryLabel: name,
+		...stepOverrides,
+	};
 	return async (args, context) => {
 		const parsed = parseRequiredTargets(args, name);
 		if ('exitCode' in parsed) {

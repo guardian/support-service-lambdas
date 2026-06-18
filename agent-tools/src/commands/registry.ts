@@ -1,27 +1,27 @@
-import gitChangedFilesCommand from './git/git_changed_files.js';
-import gitChangedFilesStagedCommand from './git/git_changed_files_staged.js';
-import gitDiffCommand from './git/git_diff.js';
-import gitDiffStagedCommand from './git/git_diff_staged.js';
-import gitDiffStagedStatCommand from './git/git_diff_staged_stat.js';
-import gitDiffStatCommand from './git/git_diff_stat.js';
-import gitDiffTargetCommand from './git/git_diff_target.js';
-import gitDiffTargetStatCommand from './git/git_diff_target_stat.js';
-import gitStatusCommand from './git/git_status.js';
+import gitChangedFilesStagedCommand from './git/git-changed-files-staged.js';
+import gitChangedFilesCommand from './git/git-changed-files.js';
+import gitDiffStagedStatCommand from './git/git-diff-staged-stat.js';
+import gitDiffStagedCommand from './git/git-diff-staged.js';
+import gitDiffStatCommand from './git/git-diff-stat.js';
+import gitDiffTargetStatCommand from './git/git-diff-target-stat.js';
+import gitDiffTargetCommand from './git/git-diff-target.js';
+import gitDiffCommand from './git/git-diff.js';
+import gitStatusCommand from './git/git-status.js';
 import { makeHelpCommand } from './help.js';
-import installWorkspaceCommand from './install_workspace.js';
-import listTargetsCommand from './list_targets.js';
-import fixFormattingCommand from './repair/fix_formatting.js';
-import lintFixCommand from './repair/lint_fix.js';
-import showTargetScriptsCommand from './show_target_scripts.js';
-import snapshotUpdateCommand from './snapshot_update.js';
+import installWorkspaceCommand from './install-workspace.js';
+import listTargetsCommand from './list-targets.js';
+import fixFormattingCommand from './repair/fix-formatting.js';
+import lintFixCommand from './repair/lint-fix.js';
+import showTargetScriptsCommand from './show-target-scripts.js';
+import snapshotUpdateCommand from './snapshot-update.js';
+import testFileCommand from './test/test-file.js';
+import testOneCommand from './test/test-one.js';
 import testCommand from './test/test.js';
-import testFileCommand from './test/test_file.js';
-import testOneCommand from './test/test_one.js';
 import type { CommandCategory, CommandDefinition } from './types.js';
-import validateTargetsCommand from './validate_targets.js';
-import checkFormattingCommand from './verify/check_formatting.js';
+import validateTargetsCommand from './validate-targets.js';
+import checkFormattingCommand from './verify/check-formatting.js';
 import lintCommand from './verify/lint.js';
-import typeCheckCommand from './verify/type_check.js';
+import typeCheckCommand from './verify/type-check.js';
 
 export const categoryOrder: CommandCategory[] = [
 	'Utility',

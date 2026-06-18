@@ -20,16 +20,16 @@ function safeRelativePath(filePath: string): string | null {
 }
 
 export default {
-	name: 'test_file',
+	name: 'test-file',
 	usage: '<target> <filePath>',
 	description: 'run tests in one target for a specific file path',
 	category: 'Test',
 	safetyNote,
 	handler: async (args, context) => {
 		if (args.length !== 2) {
-			return fail('test_file requires exactly one target and one filePath');
+			return fail('test-file requires exactly one target and one filePath');
 		}
-		const target = requireSingleTarget([args[0]!], 'test_file');
+		const target = requireSingleTarget([args[0]!], 'test-file');
 		if ('exitCode' in target) {
 			return target;
 		}

@@ -3,10 +3,10 @@ import type { CommandDefinition } from '../types.js';
 import { runGit } from './git.js';
 
 export default {
-	name: 'git_changed_files',
+	name: 'git-changed-files',
 	usage: '',
 	description: 'git diff --name-only',
 	category: 'Git',
 	handler: (args) =>
-		runNoArgCommand(args, 'git_changed_files', () => runGit('name-only')),
+		runNoArgCommand(args, 'git-changed-files', () => runGit('name-only')),
 } satisfies CommandDefinition;

@@ -26,14 +26,14 @@ function validateTargetsTool(targets: string[]) {
 }
 
 export default {
-	name: 'validate_targets',
+	name: 'validate-targets',
 	usage: '<target...>',
 	description: 'validate target names and formats',
 	category: 'Utility',
 	handler: (args) => {
 		if (args.length === 0) {
 			return Promise.resolve(
-				fail('validate_targets requires at least one target'),
+				fail('validate-targets requires at least one target'),
 			);
 		}
 		return Promise.resolve(validateTargetsTool(args));

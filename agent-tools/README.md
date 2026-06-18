@@ -8,7 +8,7 @@ Use it from the repository root with `./agent-tool <command> [args...]`.
 
 Command names, arguments, and behavior are source-of-truth in command registry metadata under `agent-tools/src/commands/*`.
 
-Command names are snake_case (for example: `verify`, `check_formatting`, `git_diff_stat`).
+Command names are kebab-case (for example: `check-formatting`, `git-diff-stat`).
 
 The registry composes one file per command (or command pair) in `agent-tools/src/commands/registry.ts`.
 
@@ -18,7 +18,7 @@ Help output (`./agent-tool help`) is generated from the same command metadata.
 
 `test` is less safe than verify/fix commands because it executes repository code, so `agent-tools` forces `CI=true` and applies a fixed timeout.
 
-`install_workspace` is mutating; default mode is lock-safe (`--frozen-lockfile`).
+`install-workspace` is mutating; default mode is lock-safe (`--frozen-lockfile`).
 
 ## Output modes
 
@@ -29,14 +29,13 @@ Help output (`./agent-tool help`) is generated from the same command metadata.
 
 ## Verification and fix commands
 
-- Shortcut: `verify` / `verify --changed`
 - Individual verification stages:
-  - `check_formatting` / `check_formatting --changed`
+  - `check-formatting` / `check-formatting --changed`
   - `lint` / `lint --changed`
-  - `type_check` / `type_check --changed`
+  - `type-check` / `type-check --changed`
 - Individual fix stages:
-  - `fix_formatting` / `fix_formatting --changed`
-  - `lint_fix` / `lint_fix --changed`
+  - `fix-formatting` / `fix-formatting --changed`
+  - `lint-fix` / `lint-fix --changed`
 
 These commands share a common runner implementation in `agent-tools/src/tools/targetScriptRunner.ts`.
 
@@ -48,7 +47,7 @@ pnpm --filter agent-tools run lint
 pnpm --filter agent-tools run check-formatting
 pnpm --filter agent-tools run test
 ./agent-tool help
-./agent-tool verify --changed
-./agent-tool snapshot_update
-./agent-tool install_workspace
+./agent-tool check-formatting --changed
+./agent-tool snapshot-update
+./agent-tool install-workspace
 ```

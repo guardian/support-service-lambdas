@@ -1,14 +1,3 @@
-import { targetStepHandler } from '../../cli/commandArgs.js';
-import type { CommandDefinition } from '../types.js';
+import { targetStepCommand } from '../stepCommand.js';
 
-export default {
-	name: 'lint',
-	usage: '<target...> | --changed',
-	description: 'run lint',
-	category: 'Verification',
-	handler: targetStepHandler('lint', {
-		script: 'lint',
-		label: 'lint',
-		summaryLabel: 'lint',
-	}),
-} satisfies CommandDefinition;
+export default targetStepCommand('lint', 'Verification');
