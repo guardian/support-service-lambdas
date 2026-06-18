@@ -99,7 +99,7 @@ async function getZuoraSalesTaxRates(
 	}
 
 	const zuoraTaxRates = await getZuoraTaxRates(zuoraClient, zuoraTaxPeriod.id);
-	const cadZuoraTaxRates = getCadZuoraTaxRates(zuoraTaxRates.taxRates);
+	const cadZuoraTaxRates = extractCadZuoraTaxRates(zuoraTaxRates.taxRates);
 	return createCadStateTaxRates(cadZuoraTaxRates);
 }
 
@@ -122,7 +122,9 @@ function getZuoraTaxPeriod(
 	);
 }
 
-function getCadZuoraTaxRates(zuoraTaxRates: ZuoraTaxRate[]): ZuoraTaxRate[] {
+function extractCadZuoraTaxRates(
+	zuoraTaxRates: ZuoraTaxRate[],
+): ZuoraTaxRate[] {
 	return zuoraTaxRates.filter(
 		(zuoraTaxRate) => zuoraTaxRate.country === getCountryNameByIsoCode('CA'),
 	);
