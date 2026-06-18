@@ -25,7 +25,7 @@ function validateTargetsTool(targets: string[]) {
 	return toCommandResult(lines, failCount === 0 ? 0 : 1);
 }
 
-export const validateTargetsCommand: CommandDefinition = {
+export default {
 	name: 'validate_targets',
 	usage: '<target...>',
 	description: 'validate target names and formats',
@@ -38,4 +38,4 @@ export const validateTargetsCommand: CommandDefinition = {
 		}
 		return Promise.resolve(validateTargetsTool(args));
 	},
-};
+} satisfies CommandDefinition;

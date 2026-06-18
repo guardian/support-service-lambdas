@@ -21,7 +21,7 @@ async function runLintFix(
 	return await runSingleStep(targets, lintFixStep, execOptions);
 }
 
-export const lintFixCommand: CommandDefinition = {
+export default {
 	name: 'lint_fix',
 	usage: '<target...> | --changed',
 	description: 'run lint --fix',
@@ -38,4 +38,4 @@ export const lintFixCommand: CommandDefinition = {
 		}
 		return await runLintFix(parsed.targets, context.execOptions);
 	},
-};
+} satisfies CommandDefinition;

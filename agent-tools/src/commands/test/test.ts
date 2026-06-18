@@ -6,7 +6,7 @@ import { runTestWithArgs } from './testStep.js';
 const safetyNote =
 	'test executes repository code, forces CI=true, and uses fixed timeouts';
 
-export const testCommand: CommandDefinition = {
+export default {
 	name: 'test',
 	usage: '<target...> | --changed',
 	description: 'run test with CI=true and fixed timeout',
@@ -24,4 +24,4 @@ export const testCommand: CommandDefinition = {
 		}
 		return await runTestWithArgs(parsed.targets, [], context.execOptions);
 	},
-};
+} satisfies CommandDefinition;

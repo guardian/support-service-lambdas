@@ -20,7 +20,7 @@ async function runCheckFormatting(
 	return await runSingleStep(targets, checkFormattingStep, execOptions);
 }
 
-export const checkFormattingCommand: CommandDefinition = {
+export default {
 	name: 'check_formatting',
 	usage: '<target...> | --changed',
 	description: 'run check-formatting',
@@ -37,4 +37,4 @@ export const checkFormattingCommand: CommandDefinition = {
 		}
 		return await runCheckFormatting(parsed.targets, context.execOptions);
 	},
-};
+} satisfies CommandDefinition;

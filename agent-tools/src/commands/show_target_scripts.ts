@@ -18,11 +18,11 @@ function showTargetScripts(target: string): CommandResult {
 	return toCommandResult([`Scripts for ${target}:`, '', ...scripts]);
 }
 
-export const showTargetScriptsCommand: CommandDefinition = {
+export default {
 	name: 'show_target_scripts',
 	usage: '<target>',
 	description: 'show scripts from a target package.json',
 	category: 'Utility',
 	handler: (args) =>
 		runSingleTargetCommand(args, 'show_target_scripts', showTargetScripts),
-};
+} satisfies CommandDefinition;

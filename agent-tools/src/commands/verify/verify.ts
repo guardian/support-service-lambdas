@@ -34,7 +34,7 @@ async function runVerify(
 	return toCommandResult(lines, failedSteps === 0 ? 0 : 1);
 }
 
-export const verifyCommand: CommandDefinition = {
+export default {
 	name: 'verify',
 	usage: '<target...> | --changed',
 	description: 'run check-formatting + lint + type-check',
@@ -51,4 +51,4 @@ export const verifyCommand: CommandDefinition = {
 		}
 		return await runVerify(parsed.targets, context.execOptions);
 	},
-};
+} satisfies CommandDefinition;

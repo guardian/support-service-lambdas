@@ -20,7 +20,7 @@ async function runTypeCheck(
 	return await runSingleStep(targets, typeCheckStep, execOptions);
 }
 
-export const typeCheckCommand: CommandDefinition = {
+export default {
 	name: 'type_check',
 	usage: '<target...> | --changed',
 	description: 'run type-check',
@@ -37,4 +37,4 @@ export const typeCheckCommand: CommandDefinition = {
 		}
 		return await runTypeCheck(parsed.targets, context.execOptions);
 	},
-};
+} satisfies CommandDefinition;

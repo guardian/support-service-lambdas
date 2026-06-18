@@ -20,7 +20,7 @@ async function runLint(
 	return await runSingleStep(targets, lintStep, execOptions);
 }
 
-export const lintCommand: CommandDefinition = {
+export default {
 	name: 'lint',
 	usage: '<target...> | --changed',
 	description: 'run lint',
@@ -37,4 +37,4 @@ export const lintCommand: CommandDefinition = {
 		}
 		return await runLint(parsed.targets, context.execOptions);
 	},
-};
+} satisfies CommandDefinition;

@@ -19,7 +19,7 @@ function safeRelativePath(filePath: string): string | null {
 	return normalized;
 }
 
-export const testFileCommand: CommandDefinition = {
+export default {
 	name: 'test_file',
 	usage: '<target> <filePath>',
 	description: 'run tests in one target for a specific file path',
@@ -49,4 +49,4 @@ export const testFileCommand: CommandDefinition = {
 			context.execOptions,
 		);
 	},
-};
+} satisfies CommandDefinition;

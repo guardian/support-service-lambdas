@@ -20,7 +20,7 @@ async function runFixFormatting(
 	return await runSingleStep(targets, fixFormattingStep, execOptions);
 }
 
-export const fixFormattingCommand: CommandDefinition = {
+export default {
 	name: 'fix_formatting',
 	usage: '<target...> | --changed',
 	description: 'run fix-formatting',
@@ -37,4 +37,4 @@ export const fixFormattingCommand: CommandDefinition = {
 		}
 		return await runFixFormatting(parsed.targets, context.execOptions);
 	},
-};
+} satisfies CommandDefinition;

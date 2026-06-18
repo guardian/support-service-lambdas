@@ -30,7 +30,7 @@ async function runSnapshotUpdate(
 	);
 }
 
-export const snapshotUpdateCommand: CommandDefinition = {
+export default {
 	name: 'snapshot_update',
 	usage: '',
 	description: 'run pnpm snapshot:update at repo root',
@@ -39,4 +39,4 @@ export const snapshotUpdateCommand: CommandDefinition = {
 		runNoArgCommand(args, 'snapshot_update', () =>
 			runSnapshotUpdate(context.execOptions),
 		),
-};
+} satisfies CommandDefinition;

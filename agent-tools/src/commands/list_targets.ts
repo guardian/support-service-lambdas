@@ -9,10 +9,10 @@ function listTargets(): CommandResult {
 	return toCommandResult(targets.length > 0 ? targets : ['(no targets found)']);
 }
 
-export const listTargetsCommand: CommandDefinition = {
+export default {
 	name: 'list_targets',
 	usage: '',
 	description: 'list all handlers/*, modules/*, cdk, and buildcheck targets',
 	category: 'Utility',
 	handler: (args) => runNoArgCommand(args, 'list_targets', listTargets),
-};
+} satisfies CommandDefinition;

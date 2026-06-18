@@ -1,23 +1,14 @@
 import { parseGlobalOptions } from './cli/globalOptions.js';
-import { buildHelpLines } from './cli/helpText.js';
-import { categoryOrder, commandDefinitions } from './commands/registry.js';
+import { commandDefinitions } from './commands/registry.js';
 import {
 	closeExecutionOptions,
 	createExecutionOptions,
-	toCommandResult,
 } from './tools/runScript.js';
 import type { CommandResult } from './tools/runScript.js';
 
 const commandLookup = new Map(
 	commandDefinitions.map((definition) => [definition.name, definition]),
 );
-
-function help(exitCode = 0): CommandResult {
-	return toCommandResult(
-		buildHelpLines(commandDefinitions, categoryOrder),
-		exitCode,
-	);
-}
 
 function printResult(result: CommandResult): never {
 	if (result.output.length > 0) {
@@ -35,16 +26,6 @@ if ('exitCode' in parsed) {
 	printResult(parsed);
 }
 
-const [rawCommand, ...args] = parsed.positionals;
-if (!rawCommand) {
-	printResult(help());
-}
-
-const definition = commandLookup.get(rawCommand);
-if (!definition) {
-	printResult(help(1));
-}
-
 const execOptions = createExecutionOptions({
 	verbose: true,
 	tailLines: parsed.tailLines,
@@ -54,9 +35,22 @@ if (execOptions.logFilePath) {
 	process.stdout.write(`INFO full output log: ${execOptions.logFilePath}\n`);
 }
 
+const [rawCommand, ...args] = parsed.positionals;
+const helpDef = commandLookup.get('help')!;
+
 let result: CommandResult;
 try {
-	result = await definition.handler(args, { execOptions });
+	if (!rawCommand) {
+		result = await helpDef.handler([], { execOptions });
+	} else {
+		const definition = commandLookup.get(rawCommand);
+		if (!definition) {
+			const helpResult = await helpDef.handler([], { execOptions });
+			result = { output: helpResult.output, exitCode: 1 };
+		} else {
+			result = await definition.handler(args, { execOptions });
+		}
+	}
 } finally {
 	closeExecutionOptions(execOptions);
 }

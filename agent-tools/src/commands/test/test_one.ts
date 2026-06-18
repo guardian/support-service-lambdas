@@ -5,7 +5,7 @@ import { runTestWithArgs } from './testStep.js';
 const safetyNote =
 	'test executes repository code, forces CI=true, and uses fixed timeouts';
 
-export const testOneCommand: CommandDefinition = {
+export default {
 	name: 'test_one',
 	usage: '<target> <pattern>',
 	description: 'run tests in one target matching --testPathPattern',
@@ -25,4 +25,4 @@ export const testOneCommand: CommandDefinition = {
 			context.execOptions,
 		);
 	},
-};
+} satisfies CommandDefinition;

@@ -1,7 +1,52 @@
 import type { CommandResult } from '../tools/runScript.js';
 import { toCommandResult } from '../tools/runScript.js';
 import { listTargetNames } from '../tools/targetRegistry.js';
-import { parseTargetCommandArgs, validateTargetArgs } from './targetArgs.js';
+import { validateTargetAgainstKnownTargets } from '../tools/targetValidation.js';
+
+// --- Target arg parsing (inlined from targetArgs.ts) ---
+
+type TargetValidationError = {
+	target: string;
+	reason: string;
+};
+
+type ParsedTargetCommandArgs = {
+	changed: boolean;
+	targets: string[];
+	unsupportedOptions: string[];
+};
+
+function validateTargetArgs(
+	targets: string[],
+	knownTargets: ReadonlySet<string>,
+): TargetValidationError[] {
+	return targets.flatMap((target) => {
+		const reason = validateTargetAgainstKnownTargets(target, knownTargets);
+		return reason === null ? [] : [{ target, reason }];
+	});
+}
+
+function parseTargetCommandArgs(args: string[]): ParsedTargetCommandArgs {
+	const targets: string[] = [];
+	const unsupportedOptions: string[] = [];
+	let changed = false;
+
+	for (const arg of args) {
+		if (arg === '--changed') {
+			changed = true;
+			continue;
+		}
+		if (arg.startsWith('--')) {
+			unsupportedOptions.push(arg);
+			continue;
+		}
+		targets.push(arg);
+	}
+
+	return { changed, targets, unsupportedOptions };
+}
+
+// --- Shared arg helpers ---
 
 export function fail(message: string): CommandResult {
 	return toCommandResult([`FAIL ${message}`], 1);

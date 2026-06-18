@@ -63,7 +63,7 @@ async function runInstallWorkspace(
 	]);
 }
 
-export const installWorkspaceCommand: CommandDefinition = {
+export default {
 	name: 'install_workspace',
 	usage: '[--no-frozen]',
 	description: 'run pnpm install (default --frozen-lockfile)',
@@ -77,4 +77,4 @@ export const installWorkspaceCommand: CommandDefinition = {
 		}
 		return await runInstallWorkspace(context.execOptions, options);
 	},
-};
+} satisfies CommandDefinition;
