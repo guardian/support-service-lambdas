@@ -15,6 +15,5 @@ export default {
 	name: 'list-packages',
 	usage: '',
 	description: 'list all handlers/*, modules/*, cdk, and buildcheck packages',
-	category: 'Utility',
 	handler: (args) => runNoArgCommand(args, 'list-packages', listPackagesResult),
 } satisfies CommandDefinition;

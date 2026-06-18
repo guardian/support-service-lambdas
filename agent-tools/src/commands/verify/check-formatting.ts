@@ -1,3 +1,3 @@
 import { packageScript } from '../stepCommand.js';
 
-export default packageScript('check-formatting', 'Verification');
+export default packageScript('check-formatting');

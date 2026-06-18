@@ -1,3 +1,3 @@
 import { packageScriptWithPattern } from './stepCommand.js';
 
-export default packageScriptWithPattern('test', 'Test');
+export default packageScriptWithPattern('test');

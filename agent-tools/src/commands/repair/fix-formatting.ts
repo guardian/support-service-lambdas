@@ -1,3 +1,3 @@
 import { packageScript } from '../stepCommand.js';
 
-export default packageScript('fix-formatting', 'Fix');
+export default packageScript('fix-formatting');

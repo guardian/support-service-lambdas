@@ -1,3 +1,3 @@
 import { packageScript } from '../stepCommand.js';
 
-export default packageScript('lint', 'Verification');
+export default packageScript('lint');

@@ -14,19 +14,10 @@ import fixFormattingCommand from './repair/fix-formatting.js';
 import lintFixCommand from './repair/lint-fix.js';
 import snapshotUpdateCommand from './snapshot-update.js';
 import testCommand from './test.js';
-import type { CommandCategory, CommandDefinition } from './types.js';
+import type { CommandDefinition } from './types.js';
 import checkFormattingCommand from './verify/check-formatting.js';
 import lintCommand from './verify/lint.js';
 import typeCheckCommand from './verify/type-check.js';
-
-export const categoryOrder: CommandCategory[] = [
-	'Utility',
-	'Verification',
-	'Fix',
-	'Test',
-	'Workspace',
-	'Git',
-];
 
 // All commands except help — help closes over this array so it appears in its own output
 export const commandDefinitions: CommandDefinition[] = [
@@ -52,7 +43,7 @@ export const commandDefinitions: CommandDefinition[] = [
 
 // Help is added last and closes over the array — by the time its handler is called
 // the array is fully populated, so help lists itself in its own output
-commandDefinitions.push(makeHelpCommand(commandDefinitions, categoryOrder));
+commandDefinitions.push(makeHelpCommand(commandDefinitions));
 
 const seenNames = new Set<string>();
 for (const definition of commandDefinitions) {

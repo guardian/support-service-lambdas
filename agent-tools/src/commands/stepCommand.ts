@@ -6,7 +6,7 @@ import {
 } from '../tools/packageScriptRunner.js';
 import { isValidPackageFormat } from '../tools/packageValidation.js';
 import type { CommandResult, ExecutionOptions } from '../tools/runScript.js';
-import type { CommandCategory, CommandDefinition } from './types.js';
+import type { CommandDefinition } from './types.js';
 
 /** Parses 'script arg1 arg2' into { script, extraArgs }. Defaults to name when omitted. */
 function parseScriptAndArgs(
@@ -80,14 +80,12 @@ function extractPattern(args: string[]): {
  */
 export function packageScript(
 	name: string,
-	category: CommandCategory,
 	scriptAndArgs?: string,
 ): CommandDefinition {
 	return {
 		name,
 		usage: '<package...> | --changed',
 		description: `run ${scriptAndArgs ?? name}`,
-		category,
 		handler: packageScriptHandler(name, scriptAndArgs),
 	};
 }
@@ -97,15 +95,11 @@ export function packageScript(
  * passed directly to the pnpm script (e.g. a jest path pattern).
  * Package args are identified by format; anything else is the pattern.
  */
-export function packageScriptWithPattern(
-	name: string,
-	category: CommandCategory,
-): CommandDefinition {
+export function packageScriptWithPattern(name: string): CommandDefinition {
 	return {
 		name,
 		usage: '<package...> | --changed [pattern]',
 		description: `run ${name}, optionally filtered by path pattern`,
-		category,
 		handler: async (args, context) => {
 			const { packageArgs, pattern } = extractPattern(args);
 			const parsed = parseRequiredPackages(packageArgs, name);
