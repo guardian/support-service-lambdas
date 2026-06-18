@@ -1,3 +1,3 @@
-import { targetStepCommandWithPattern } from './stepCommand.js';
+import { packageScriptWithPattern } from './stepCommand.js';
 
-export default targetStepCommandWithPattern('test', 'Test');
+export default packageScriptWithPattern('test', 'Test');

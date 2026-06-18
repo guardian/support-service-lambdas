@@ -1,5 +1,5 @@
+import { packageFormatDescription } from '../tools/packageValidation.js';
 import { toCommandResult } from '../tools/runScript.js';
-import { targetFormatDescription } from '../tools/targetValidation.js';
 import type { CommandCategory, CommandDefinition } from './types.js';
 
 function buildHelpLines(
@@ -35,7 +35,7 @@ function buildHelpLines(
 		'',
 		'Notes:',
 		'  - Full child command output streams by default.',
-		`  - Targets must be ${targetFormatDescription}.`,
+		`  - Packages must be ${packageFormatDescription}.`,
 		'  - Use the absolute wrapper path if your Copilot approvals are path-specific.',
 	);
 

@@ -1,6 +1,6 @@
 import { spawnSync } from 'child_process';
+import { listPackages } from './packageRegistry.js';
 import { ROOT } from './runScript.js';
-import { listTargetNames } from './targetRegistry.js';
 
 function parseStatusPath(line: string): string | null {
 	if (line.length < 4) {
@@ -33,22 +33,20 @@ export function getAllChangedFiles(): string[] {
 	return Array.from(new Set(readGitChangedFiles()));
 }
 
-export function mapFilesToTargets(files: string[]): string[] {
-	const knownTargets = listTargetNames().sort(
-		(left, right) => right.length - left.length,
-	);
+export function mapFilesToPackages(files: string[]): string[] {
+	const known = listPackages().sort((a, b) => b.length - a.length);
 	const matched = new Set<string>();
 	for (const file of files) {
-		const target = knownTargets.find(
+		const pkg = known.find(
 			(candidate) => file === candidate || file.startsWith(`${candidate}/`),
 		);
-		if (target) {
-			matched.add(target);
+		if (pkg) {
+			matched.add(pkg);
 		}
 	}
 	return Array.from(matched).sort();
 }
 
-export function resolveChangedTargets(): string[] {
-	return mapFilesToTargets(getAllChangedFiles());
+export function resolveChangedPackages(): string[] {
+	return mapFilesToPackages(getAllChangedFiles());
 }

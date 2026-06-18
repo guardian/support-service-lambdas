@@ -1,4 +1,7 @@
-import { runNoArgCommand, runSingleTargetCommand } from '../cli/commandArgs.js';
+import {
+	runNoArgCommand,
+	runSinglePackageCommand,
+} from '../cli/commandArgs.js';
 import type {
 	CommandResult,
 	ExecutionOptions,
@@ -54,10 +57,10 @@ export function rootCommand(
 }
 
 /**
- * Like rootCommand but appends -- <target> to the args.
- * Used for commands like git diff that scope to a single repo target path.
+ * Like rootCommand but appends -- <package> to the args.
+ * Used for commands like git diff that scope to a single package path.
  */
-export function rootTargetCommand(
+export function rootPathCommand(
 	name: string,
 	category: CommandCategory,
 	commandString: string,
@@ -65,15 +68,15 @@ export function rootTargetCommand(
 	const [executable, ...args] = parseArgsString(commandString);
 	return {
 		name,
-		usage: '<target>',
-		description: `${commandString} for one target`,
+		usage: '<package>',
+		description: `${commandString} for one package`,
 		category,
 		handler: (cmdArgs, context) =>
-			runSingleTargetCommand(cmdArgs, name, (target) =>
+			runSinglePackageCommand(cmdArgs, name, (pkg) =>
 				execRootCommand(
 					name,
 					executable!,
-					[...args, '--', target],
+					[...args, '--', pkg],
 					context.execOptions,
 				),
 			),

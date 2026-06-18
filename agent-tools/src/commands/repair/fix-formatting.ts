@@ -1,3 +1,3 @@
-import { targetStepCommand } from '../stepCommand.js';
+import { packageScript } from '../stepCommand.js';
 
-export default targetStepCommand('fix-formatting', 'Fix');
+export default packageScript('fix-formatting', 'Fix');

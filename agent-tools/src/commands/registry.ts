@@ -8,8 +8,8 @@ import gitDiffTargetCommand from './git/git-diff-target.js';
 import gitDiffCommand from './git/git-diff.js';
 import gitStatusCommand from './git/git-status.js';
 import { makeHelpCommand } from './help.js';
-import installWorkspaceCommand from './install-workspace.js';
-import listTargetsCommand from './list-targets.js';
+import installCommand from './install.js';
+import listPackagesCommand from './list-packages.js';
 import fixFormattingCommand from './repair/fix-formatting.js';
 import lintFixCommand from './repair/lint-fix.js';
 import snapshotUpdateCommand from './snapshot-update.js';
@@ -30,7 +30,7 @@ export const categoryOrder: CommandCategory[] = [
 
 // All commands except help — help closes over this array so it appears in its own output
 export const commandDefinitions: CommandDefinition[] = [
-	listTargetsCommand,
+	listPackagesCommand,
 	checkFormattingCommand,
 	lintCommand,
 	typeCheckCommand,
@@ -38,7 +38,7 @@ export const commandDefinitions: CommandDefinition[] = [
 	lintFixCommand,
 	testCommand,
 	snapshotUpdateCommand,
-	installWorkspaceCommand,
+	installCommand,
 	gitStatusCommand,
 	gitDiffCommand,
 	gitDiffTargetCommand,

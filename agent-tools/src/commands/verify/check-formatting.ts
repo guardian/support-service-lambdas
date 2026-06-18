@@ -1,3 +1,3 @@
-import { targetStepCommand } from '../stepCommand.js';
+import { packageScript } from '../stepCommand.js';
 
-export default targetStepCommand('check-formatting', 'Verification');
+export default packageScript('check-formatting', 'Verification');

@@ -1,3 +1,4 @@
+import { resolveChangedPackages } from './packageSelection.js';
 import type { CommandResult, ExecutionOptions } from './runScript.js';
 import {
 	hasScript,
@@ -5,72 +6,71 @@ import {
 	runScript,
 	toCommandResult,
 } from './runScript.js';
-import { resolveChangedTargets } from './targetSelection.js';
 
-export type TargetScriptStep = {
+export type PackageScriptStep = {
 	script: string;
 	extraArgs?: string[];
 	env?: Record<string, string>;
 };
 
-export type TargetScriptStepOutcome = {
+export type PackageScriptStepOutcome = {
 	lines: string[];
 	failCount: number;
 	passCount: number;
 };
 
-export function resolveChangedTargetsOrWarn():
+export function resolveChangedPackagesOrWarn():
 	| CommandResult
-	| { targets: string[] } {
-	const targets = resolveChangedTargets();
-	if (targets.length === 0) {
+	| { packages: string[] } {
+	const packages = resolveChangedPackages();
+	if (packages.length === 0) {
 		return toCommandResult([
-			'WARN no changed handlers/*, modules/*, cdk, or buildcheck targets detected',
+			'WARN no changed handlers/*, modules/*, cdk, or buildcheck packages detected',
 		]);
 	}
-	return { targets };
+	return { packages };
 }
 
-export async function runChangedTargetsOrWarn(
-	run: (targets: string[]) => Promise<CommandResult>,
+export async function runChangedPackagesOrWarn(
+	run: (packages: string[]) => Promise<CommandResult>,
 ): Promise<CommandResult> {
-	const changed = resolveChangedTargetsOrWarn();
+	const changed = resolveChangedPackagesOrWarn();
 	if ('exitCode' in changed) {
 		return changed;
 	}
-	return await run(changed.targets);
+	return await run(changed.packages);
 }
 
-export async function runTargetScriptStepWithOutcome(
-	targets: string[],
-	step: TargetScriptStep,
+export async function runPackageScriptStepWithOutcome(
+	packages: string[],
+	step: PackageScriptStep,
 	execOptions: ExecutionOptions,
-): Promise<TargetScriptStepOutcome> {
+): Promise<PackageScriptStepOutcome> {
 	const lines: string[] = [];
 	let failCount = 0;
 	let passCount = 0;
 	const label = [step.script, ...(step.extraArgs ?? [])].join(' ');
 
-	for (const target of targets) {
-		printProgress(`TARGET ${target}`);
-		if (!hasScript(target, step.script)) {
-			const warn = `WARN ${target} ${step.script}: skipped (not in package.json)`;
+	for (const pkg of packages) {
+		printProgress(`PACKAGE ${pkg}`);
+		if (!hasScript(pkg, step.script)) {
+			const warn = `WARN ${pkg} ${step.script}: skipped (not in package.json)`;
 			printProgress(warn);
 			lines.push(warn);
 			continue;
 		}
-		printProgress(`RUN  ${target} ${label}`);
-		const result = await runScript(target, step.script, {
+		printProgress(`RUN  ${pkg} ${label}`);
+		const result = await runScript(pkg, step.script, {
 			extraArgs: step.extraArgs,
 			env: step.env,
 			execOptions,
 		});
 		const durationSeconds = Math.round(result.durationMs / 1000);
 		if (result.passed) {
-			printProgress(`OK   ${target} ${label} (${durationSeconds}s)`);
+			printProgress(`OK   ${pkg} ${label} (${durationSeconds}s)`);
 			passCount++;
 		} else {
-			const fail = `FAIL ${target} ${label} (${durationSeconds}s)`;
+			const fail = `FAIL ${pkg} ${label} (${durationSeconds}s)`;
 			printProgress(fail);
 			lines.push(fail);
 			if (result.excerpt) {
@@ -83,14 +83,14 @@ export async function runTargetScriptStepWithOutcome(
 	return { lines, failCount, passCount };
 }
 
-export async function runSingleStep(
-	targets: string[],
-	step: TargetScriptStep,
+export async function runPackageScript(
+	packages: string[],
+	step: PackageScriptStep,
 	commandName: string,
 	execOptions: ExecutionOptions,
 ): Promise<CommandResult> {
-	const outcome = await runTargetScriptStepWithOutcome(
-		targets,
+	const outcome = await runPackageScriptStepWithOutcome(
+		packages,
 		step,
 		execOptions,
 	);

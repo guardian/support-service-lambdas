@@ -1,3 +1,3 @@
-import { targetStepCommand } from '../stepCommand.js';
+import { packageScript } from '../stepCommand.js';
 
-export default targetStepCommand('lint', 'Verification');
+export default packageScript('lint', 'Verification');

@@ -6,7 +6,7 @@
 
 Use it from the repository root with `./agent-tool <command> [args...]`.
 
-Each command operates on one or more workspace targets (`handlers/<name>`, `modules/<name>`, `cdk`, `buildcheck`). Most commands accept `--changed` to automatically resolve targets from git-modified files rather than requiring explicit target names.
+Each command operates on one or more workspace packages (`handlers/<name>`, `modules/<name>`, `cdk`, `buildcheck`). Most commands accept `--changed` to automatically resolve packages from git-modified files rather than requiring explicit package names.
 
 Command names are kebab-case (for example: `check-formatting`, `git-diff-stat`). Each command lives in its own file under `agent-tools/src/commands/`; `registry.ts` composes them.
 
@@ -14,7 +14,7 @@ Help output (`./agent-tool help`) is generated from the same command metadata.
 
 ## Safety note
 
-`test` and `test-one` execute repository code. Run them only on targets you trust.
+`test` executes repository code. Run it only on packages you trust.
 
 ## Output modes
 
@@ -25,7 +25,7 @@ Help output (`./agent-tool help`) is generated from the same command metadata.
 
 ## Verification and fix commands
 
-Each accepts explicit targets or `--changed`:
+Each accepts explicit packages or `--changed`:
 
 - `check-formatting --changed`
 - `lint --changed`
@@ -43,5 +43,5 @@ pnpm --filter agent-tools run test
 ./agent-tool help
 ./agent-tool check-formatting --changed
 ./agent-tool snapshot-update
-./agent-tool install-workspace
+./agent-tool install
 ```

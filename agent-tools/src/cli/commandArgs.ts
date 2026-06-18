@@ -1,31 +1,31 @@
+import { listPackages } from '../tools/packageRegistry.js';
+import { validatePackageAgainstKnown } from '../tools/packageValidation.js';
 import type { CommandResult } from '../tools/runScript.js';
 import { toCommandResult } from '../tools/runScript.js';
-import { listTargetNames } from '../tools/targetRegistry.js';
-import { validateTargetAgainstKnownTargets } from '../tools/targetValidation.js';
 
-type TargetValidationError = {
-	target: string;
+type PackageValidationError = {
+	pkg: string;
 	reason: string;
 };
 
-type ParsedTargetCommandArgs = {
+type ParsedPackageArgs = {
 	changed: boolean;
-	targets: string[];
+	packages: string[];
 	unsupportedOptions: string[];
 };
 
-function validateTargetArgs(
-	targets: string[],
-	knownTargets: ReadonlySet<string>,
-): TargetValidationError[] {
-	return targets.flatMap((target) => {
-		const reason = validateTargetAgainstKnownTargets(target, knownTargets);
-		return reason === null ? [] : [{ target, reason }];
+function validatePackageArgs(
+	packages: string[],
+	knownPackages: ReadonlySet<string>,
+): PackageValidationError[] {
+	return packages.flatMap((pkg) => {
+		const reason = validatePackageAgainstKnown(pkg, knownPackages);
+		return reason === null ? [] : [{ pkg, reason }];
 	});
 }
 
-function parseTargetCommandArgs(args: string[]): ParsedTargetCommandArgs {
-	const targets: string[] = [];
+function parsePackageArgs(args: string[]): ParsedPackageArgs {
+	const packages: string[] = [];
 	const unsupportedOptions: string[] = [];
 	let changed = false;
 
@@ -38,68 +38,68 @@ function parseTargetCommandArgs(args: string[]): ParsedTargetCommandArgs {
 			unsupportedOptions.push(arg);
 			continue;
 		}
-		targets.push(arg);
+		packages.push(arg);
 	}
 
-	return { changed, targets, unsupportedOptions };
+	return { changed, packages, unsupportedOptions };
 }
 
 export function fail(message: string): CommandResult {
 	return toCommandResult([`FAIL ${message}`], 1);
 }
 
-function requireTargets(
+function requirePackages(
 	args: string[],
 	command: string,
-): CommandResult | { targets: string[] } {
+): CommandResult | { packages: string[] } {
 	if (args.length === 0) {
-		return fail(`${command} requires at least one target`);
+		return fail(`${command} requires at least one package`);
 	}
-	const invalid = validateTargetArgs(args, new Set(listTargetNames()));
+	const invalid = validatePackageArgs(args, new Set(listPackages()));
 	if (invalid.length > 0) {
 		return toCommandResult(
-			invalid.map((result) => `FAIL ${result.target}: ${result.reason}`),
+			invalid.map((result) => `FAIL ${result.pkg}: ${result.reason}`),
 			1,
 		);
 	}
-	return { targets: args };
+	return { packages: args };
 }
 
-export function requireSingleTarget(
+export function requireSinglePackage(
 	args: string[],
 	command: string,
-): CommandResult | { target: string } {
+): CommandResult | { pkg: string } {
 	if (args.length !== 1) {
-		return fail(`${command} requires exactly one target`);
+		return fail(`${command} requires exactly one package`);
 	}
-	const targets = requireTargets(args, command);
-	if ('exitCode' in targets) {
-		return targets;
+	const result = requirePackages(args, command);
+	if ('exitCode' in result) {
+		return result;
 	}
-	return { target: targets.targets[0]! };
+	return { pkg: result.packages[0]! };
 }
 
-export function parseRequiredTargets(
+export function parseRequiredPackages(
 	args: string[],
 	command: string,
-): CommandResult | { changed: boolean; targets: string[] } {
-	const parsed = parseTargetCommandArgs(args);
+): CommandResult | { changed: boolean; packages: string[] } {
+	const parsed = parsePackageArgs(args);
 	if (parsed.unsupportedOptions.length > 0) {
 		return fail(
 			`${command} does not support option ${parsed.unsupportedOptions[0]}`,
 		);
 	}
 	if (parsed.changed) {
-		if (parsed.targets.length > 0) {
-			return fail(`${command} does not accept targets when --changed is set`);
+		if (parsed.packages.length > 0) {
+			return fail(`${command} does not accept packages when --changed is set`);
 		}
-		return { changed: true, targets: [] };
+		return { changed: true, packages: [] };
 	}
-	const required = requireTargets(parsed.targets, command);
+	const required = requirePackages(parsed.packages, command);
 	if ('exitCode' in required) {
 		return required;
 	}
-	return { changed: false, targets: required.targets };
+	return { changed: false, packages: required.packages };
 }
 
 export async function runNoArgCommand(
@@ -113,14 +113,14 @@ export async function runNoArgCommand(
 	return await run();
 }
 
-export async function runSingleTargetCommand(
+export async function runSinglePackageCommand(
 	args: string[],
 	command: string,
-	run: (target: string) => Promise<CommandResult> | CommandResult,
+	run: (pkg: string) => Promise<CommandResult> | CommandResult,
 ): Promise<CommandResult> {
-	const target = requireSingleTarget(args, command);
-	if ('exitCode' in target) {
-		return target;
+	const result = requireSinglePackage(args, command);
+	if ('exitCode' in result) {
+		return result;
 	}
-	return await run(target.target);
+	return await run(result.pkg);
 }

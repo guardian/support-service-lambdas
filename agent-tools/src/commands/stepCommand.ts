@@ -1,11 +1,11 @@
-import { parseRequiredTargets } from '../cli/commandArgs.js';
-import type { CommandResult, ExecutionOptions } from '../tools/runScript.js';
+import { parseRequiredPackages } from '../cli/commandArgs.js';
 import {
-	runChangedTargetsOrWarn,
-	runSingleStep,
-	type TargetScriptStep,
-} from '../tools/targetScriptRunner.js';
-import { isValidTargetFormat } from '../tools/targetValidation.js';
+	type PackageScriptStep,
+	runChangedPackagesOrWarn,
+	runPackageScript,
+} from '../tools/packageScriptRunner.js';
+import { isValidPackageFormat } from '../tools/packageValidation.js';
+import type { CommandResult, ExecutionOptions } from '../tools/runScript.js';
 import type { CommandCategory, CommandDefinition } from './types.js';
 
 /** Parses 'script arg1 arg2' into { script, extraArgs }. Defaults to name when omitted. */
@@ -20,11 +20,7 @@ function parseScriptAndArgs(
 	return { script: script!, extraArgs: rest };
 }
 
-/**
- * Builds a handler that runs a single pnpm script step across one or more
- * targets (or --changed targets). Script defaults to the command name.
- */
-function targetStepHandler(
+function packageScriptHandler(
 	name: string,
 	scriptAndArgs?: string,
 ): (
@@ -32,100 +28,100 @@ function targetStepHandler(
 	context: { execOptions: ExecutionOptions },
 ) => Promise<CommandResult> {
 	const { script, extraArgs } = parseScriptAndArgs(name, scriptAndArgs);
-	const step: TargetScriptStep = {
+	const step: PackageScriptStep = {
 		script,
 		...(extraArgs.length > 0 ? { extraArgs } : {}),
 	};
 	return async (args, context) => {
-		const parsed = parseRequiredTargets(args, name);
+		const parsed = parseRequiredPackages(args, name);
 		if ('exitCode' in parsed) {
 			return parsed;
 		}
-		const run = (targets: string[]) =>
-			runSingleStep(targets, step, name, context.execOptions);
+		const run = (packages: string[]) =>
+			runPackageScript(packages, step, name, context.execOptions);
 		if (parsed.changed) {
-			return await runChangedTargetsOrWarn(run);
+			return await runChangedPackagesOrWarn(run);
 		}
-		return await run(parsed.targets);
+		return await run(parsed.packages);
 	};
 }
 
 /**
- * Splits args into target-shaped args (passed to parseRequiredTargets) and
+ * Splits args into package-shaped args (passed to parseRequiredPackages) and
  * any remaining words (joined as an optional pattern for the pnpm script).
  */
 function extractPattern(args: string[]): {
-	targetArgs: string[];
+	packageArgs: string[];
 	pattern: string | undefined;
 } {
-	const targetArgs: string[] = [];
+	const packageArgs: string[] = [];
 	const patternParts: string[] = [];
 	for (const arg of args) {
 		if (
 			arg === '--changed' ||
 			arg.startsWith('--') ||
-			isValidTargetFormat(arg)
+			isValidPackageFormat(arg)
 		) {
-			targetArgs.push(arg);
+			packageArgs.push(arg);
 		} else {
 			patternParts.push(arg);
 		}
 	}
 	return {
-		targetArgs,
+		packageArgs,
 		pattern: patternParts.length > 0 ? patternParts.join(' ') : undefined,
 	};
 }
 
 /**
- * Builds a complete CommandDefinition for commands that run a single pnpm
- * script step across targets or --changed targets.
+ * Builds a CommandDefinition for running a pnpm script across one or more
+ * packages (or --changed packages).
  * scriptAndArgs defaults to the command name (e.g. 'lint --fix' overrides the script).
  */
-export function targetStepCommand(
+export function packageScript(
 	name: string,
 	category: CommandCategory,
 	scriptAndArgs?: string,
 ): CommandDefinition {
 	return {
 		name,
-		usage: '<target...> | --changed',
+		usage: '<package...> | --changed',
 		description: `run ${scriptAndArgs ?? name}`,
 		category,
-		handler: targetStepHandler(name, scriptAndArgs),
+		handler: packageScriptHandler(name, scriptAndArgs),
 	};
 }
 
 /**
- * Like targetStepCommand but accepts an optional trailing pattern argument
- * that is passed directly to the pnpm script (e.g. a jest path pattern).
- * Targets are identified by format; anything else is treated as the pattern.
+ * Like packageScript but accepts an optional trailing pattern argument
+ * passed directly to the pnpm script (e.g. a jest path pattern).
+ * Package args are identified by format; anything else is the pattern.
  */
-export function targetStepCommandWithPattern(
+export function packageScriptWithPattern(
 	name: string,
 	category: CommandCategory,
 ): CommandDefinition {
 	return {
 		name,
-		usage: '<target...> | --changed [pattern]',
+		usage: '<package...> | --changed [pattern]',
 		description: `run ${name}, optionally filtered by path pattern`,
 		category,
 		handler: async (args, context) => {
-			const { targetArgs, pattern } = extractPattern(args);
-			const parsed = parseRequiredTargets(targetArgs, name);
+			const { packageArgs, pattern } = extractPattern(args);
+			const parsed = parseRequiredPackages(packageArgs, name);
 			if ('exitCode' in parsed) {
 				return parsed;
 			}
-			const step: TargetScriptStep = {
+			const step: PackageScriptStep = {
 				script: name,
 				...(pattern !== undefined ? { extraArgs: [pattern] } : {}),
 			};
-			const run = (targets: string[]) =>
-				runSingleStep(targets, step, name, context.execOptions);
+			const run = (packages: string[]) =>
+				runPackageScript(packages, step, name, context.execOptions);
 			if (parsed.changed) {
-				return await runChangedTargetsOrWarn(run);
+				return await runChangedPackagesOrWarn(run);
 			}
-			return await run(parsed.targets);
+			return await run(parsed.packages);
 		},
 	};
 }
