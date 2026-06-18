@@ -85,3 +85,24 @@ export async function runTargetScriptStepWithOutcome(
 
 	return { lines, failCount, passCount };
 }
+
+export async function runSingleStep(
+	targets: string[],
+	step: TargetScriptStep,
+	execOptions: ExecutionOptions,
+): Promise<CommandResult> {
+	const outcome = await runTargetScriptStepWithOutcome(
+		targets,
+		step,
+		execOptions,
+	);
+	return toCommandResult(
+		[
+			...outcome.lines,
+			outcome.failCount === 0
+				? `OK   ${step.summaryLabel} complete`
+				: `FAIL ${outcome.failCount} ${step.summaryLabel} failure(s)`,
+		],
+		outcome.failCount === 0 ? 0 : 1,
+	);
+}

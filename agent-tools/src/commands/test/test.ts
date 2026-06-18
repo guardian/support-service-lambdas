@@ -1,6 +1,7 @@
-import { parseRequiredTargets } from '../cli/commandArgs.js';
-import { runTest, runTestChanged } from '../tools/test.js';
-import type { CommandDefinition } from './types.js';
+import { parseRequiredTargets } from '../../cli/commandArgs.js';
+import { runChangedTargetsOrWarn } from '../../tools/targetScriptRunner.js';
+import type { CommandDefinition } from '../types.js';
+import { runTestWithArgs } from './testStep.js';
 
 const safetyNote =
 	'test executes repository code, forces CI=true, and uses fixed timeouts';
@@ -17,8 +18,10 @@ export const testCommand: CommandDefinition = {
 			return parsed;
 		}
 		if (parsed.changed) {
-			return await runTestChanged(context.execOptions);
+			return await runChangedTargetsOrWarn((targets) =>
+				runTestWithArgs(targets, [], context.execOptions),
+			);
 		}
-		return await runTest(parsed.targets, context.execOptions);
+		return await runTestWithArgs(parsed.targets, [], context.execOptions);
 	},
 };

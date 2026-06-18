@@ -1,6 +1,6 @@
-import { runSingleTargetCommand } from '../cli/commandArgs.js';
-import { runGitForTarget } from '../tools/git.js';
-import type { CommandDefinition } from './types.js';
+import { runSingleTargetCommand } from '../../cli/commandArgs.js';
+import type { CommandDefinition } from '../types.js';
+import { runGitForTarget } from './git.js';
 
 export const gitDiffTargetStatCommand: CommandDefinition = {
 	name: 'git_diff_target_stat',

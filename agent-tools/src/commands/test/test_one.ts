@@ -1,6 +1,6 @@
-import { fail, requireSingleTarget } from '../cli/commandArgs.js';
-import { runTestOne } from '../tools/test.js';
-import type { CommandDefinition } from './types.js';
+import { fail, requireSingleTarget } from '../../cli/commandArgs.js';
+import type { CommandDefinition } from '../types.js';
+import { runTestWithArgs } from './testStep.js';
 
 const safetyNote =
 	'test executes repository code, forces CI=true, and uses fixed timeouts';
@@ -19,9 +19,9 @@ export const testOneCommand: CommandDefinition = {
 		if ('exitCode' in target) {
 			return target;
 		}
-		return await runTestOne(
-			target.target,
-			args.slice(1).join(' '),
+		return await runTestWithArgs(
+			[target.target],
+			['--testPathPattern', args.slice(1).join(' ')],
 			context.execOptions,
 		);
 	},

@@ -1,6 +1,6 @@
-import { runNoArgCommand } from '../cli/commandArgs.js';
-import { runGit } from '../tools/git.js';
-import type { CommandDefinition } from './types.js';
+import { runNoArgCommand } from '../../cli/commandArgs.js';
+import type { CommandDefinition } from '../types.js';
+import { runGit } from './git.js';
 
 export const gitDiffStagedCommand: CommandDefinition = {
 	name: 'git_diff_staged',

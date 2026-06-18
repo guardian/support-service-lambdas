@@ -36,7 +36,7 @@ if ('exitCode' in parsed) {
 }
 
 const [rawCommand, ...args] = parsed.positionals;
-if (!rawCommand || rawCommand === 'help') {
+if (!rawCommand) {
 	printResult(help());
 }
 

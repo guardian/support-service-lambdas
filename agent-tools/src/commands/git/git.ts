@@ -1,5 +1,9 @@
 import { spawnSync } from 'child_process';
-import { type CommandResult, ROOT, toCommandResult } from './runScript.js';
+import {
+	type CommandResult,
+	ROOT,
+	toCommandResult,
+} from '../../tools/runScript.js';
 
 type GitSubcommand =
 	| 'status'
