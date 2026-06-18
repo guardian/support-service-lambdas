@@ -10,7 +10,7 @@ import { logger } from '@modules/logger/logger';
 import type { Stage } from '@modules/stage';
 import { z } from 'zod';
 
-export const secondaryUserRecordSchema = z.object({
+const secondaryUserRecordSchema = z.object({
 	subscriptionName: z.string(),
 	secondaryIdentityId: z.string(),
 	primaryIdentityId: z.string(),

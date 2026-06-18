@@ -3,7 +3,7 @@ import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supp
 import { sendToSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
 import type { Dayjs } from 'dayjs';
 
-export const secondarySubscriptionName = (
+const secondarySubscriptionName = (
 	primarySubscriptionName: string,
 	secondaryIdentityId: string,
 ): string => `${primarySubscriptionName}-${secondaryIdentityId}`;
