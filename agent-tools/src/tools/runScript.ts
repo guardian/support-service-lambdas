@@ -52,7 +52,6 @@ export type ScriptResult = {
 
 export type RunScriptOptions = {
 	extraArgs?: string[];
-	timeoutSeconds?: number;
 	env?: Record<string, string>;
 	execOptions: ExecutionOptions;
 };
@@ -153,14 +152,12 @@ async function runCommand({
 	args,
 	cwd,
 	env,
-	timeoutSeconds,
 	execOptions,
 }: {
 	command: string;
 	args: string[];
 	cwd: string;
 	env?: Record<string, string>;
-	timeoutSeconds?: number;
 	execOptions: ExecutionOptions;
 }): Promise<ScriptResult> {
 	return await new Promise<ScriptResult>((resolvePromise) => {
@@ -170,7 +167,6 @@ async function runCommand({
 			env: { ...process.env, ...(env ?? {}) },
 			stdio: ['ignore', 'pipe', 'pipe'],
 		});
-		let timedOut = false;
 		let output = '';
 		let pendingDisplayLine = '';
 
@@ -210,22 +206,8 @@ async function runCommand({
 		child.stderr.on('data', (chunk: Buffer) => {
 			writeChunk(chunk);
 		});
-		const timeoutHandle =
-			timeoutSeconds === undefined
-				? null
-				: setTimeout(() => {
-						timedOut = true;
-						child.kill('SIGTERM');
-					}, timeoutSeconds * 1000);
 		child.on('close', (status) => {
 			flushDisplay('', true);
-			if (timeoutHandle) {
-				clearTimeout(timeoutHandle);
-			}
-			if (timedOut) {
-				const timeoutLine = `Timed out after ${timeoutSeconds}s`;
-				output = `${output}\n${timeoutLine}`.trim();
-			}
 			const exitCode = status ?? 1;
 			resolvePromise({
 				passed: exitCode === 0,
@@ -254,7 +236,6 @@ export async function runScript(
 		args,
 		cwd: ROOT,
 		env: options.env,
-		timeoutSeconds: options.timeoutSeconds,
 		execOptions: options.execOptions,
 	});
 }
@@ -263,7 +244,6 @@ export async function runRootCommand(
 	command: string,
 	args: string[],
 	options: {
-		timeoutSeconds?: number;
 		execOptions: ExecutionOptions;
 		env?: Record<string, string>;
 	},
@@ -273,7 +253,6 @@ export async function runRootCommand(
 		args,
 		cwd: ROOT,
 		env: options.env,
-		timeoutSeconds: options.timeoutSeconds,
 		execOptions: options.execOptions,
 	});
 }

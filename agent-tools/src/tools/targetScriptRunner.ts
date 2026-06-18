@@ -10,7 +10,6 @@ import { resolveChangedTargets } from './targetSelection.js';
 export type TargetScriptStep = {
 	script: string;
 	extraArgs?: string[];
-	timeoutSeconds?: number;
 	env?: Record<string, string>;
 };
 
@@ -63,7 +62,6 @@ export async function runTargetScriptStepWithOutcome(
 		printProgress(`RUN  ${target} ${label}`);
 		const result = await runScript(target, step.script, {
 			extraArgs: step.extraArgs,
-			timeoutSeconds: step.timeoutSeconds,
 			env: step.env,
 			execOptions,
 		});

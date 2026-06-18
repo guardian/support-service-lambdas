@@ -12,11 +12,9 @@ import installWorkspaceCommand from './install-workspace.js';
 import listTargetsCommand from './list-targets.js';
 import fixFormattingCommand from './repair/fix-formatting.js';
 import lintFixCommand from './repair/lint-fix.js';
-import showTargetScriptsCommand from './show-target-scripts.js';
 import snapshotUpdateCommand from './snapshot-update.js';
 import testCommand from './test.js';
 import type { CommandCategory, CommandDefinition } from './types.js';
-import validateTargetsCommand from './validate-targets.js';
 import checkFormattingCommand from './verify/check-formatting.js';
 import lintCommand from './verify/lint.js';
 import typeCheckCommand from './verify/type-check.js';
@@ -33,8 +31,6 @@ export const categoryOrder: CommandCategory[] = [
 // All commands except help — help closes over this array so it appears in its own output
 export const commandDefinitions: CommandDefinition[] = [
 	listTargetsCommand,
-	validateTargetsCommand,
-	showTargetScriptsCommand,
 	checkFormattingCommand,
 	lintCommand,
 	typeCheckCommand,

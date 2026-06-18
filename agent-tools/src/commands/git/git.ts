@@ -1,38 +1,30 @@
-import { spawnSync } from 'child_process';
 import {
 	runNoArgCommand,
 	runSingleTargetCommand,
 } from '../../cli/commandArgs.js';
-import {
-	type CommandResult,
-	ROOT,
-	toCommandResult,
-} from '../../tools/runScript.js';
+import type { CommandResult, ExecutionOptions } from '../../tools/runScript.js';
+import { runRootCommand } from '../../tools/runScript.js';
 import type { CommandDefinition } from '../types.js';
 
-function execGit(args: string[]): CommandResult {
-	const result = spawnSync('git', ['--no-pager', ...args], {
-		cwd: ROOT,
-		encoding: 'utf-8',
+async function runGit(
+	args: string[],
+	execOptions: ExecutionOptions,
+): Promise<CommandResult> {
+	const result = await runRootCommand('git', ['--no-pager', ...args], {
+		execOptions,
 	});
-	const stdout = result.stdout.trim();
-	const stderr = result.stderr.trim();
-	const output = [stdout, stderr].filter(Boolean).join('\n');
-	if (result.status !== 0) {
-		return toCommandResult(
-			[output.length > 0 ? output : 'git command failed'],
-			1,
-		);
+	if (!result.passed) {
+		return { output: result.output || 'git command failed', exitCode: 1 };
 	}
-	return toCommandResult([output.length > 0 ? output : '(no output)']);
+	return { output: result.output || '(no output)', exitCode: 0 };
 }
 
-function runGit(args: string[]): CommandResult {
-	return execGit(args);
-}
-
-function runGitForTarget(args: string[], target: string): CommandResult {
-	return execGit([...args, '--', target]);
+async function runGitForTarget(
+	args: string[],
+	target: string,
+	execOptions: ExecutionOptions,
+): Promise<CommandResult> {
+	return runGit([...args, '--', target], execOptions);
 }
 
 export function gitCommand(name: string, gitArgs: string[]): CommandDefinition {
@@ -41,7 +33,8 @@ export function gitCommand(name: string, gitArgs: string[]): CommandDefinition {
 		usage: '',
 		description: `git ${gitArgs.join(' ')}`,
 		category: 'Git',
-		handler: (args) => runNoArgCommand(args, name, () => runGit(gitArgs)),
+		handler: (args, context) =>
+			runNoArgCommand(args, name, () => runGit(gitArgs, context.execOptions)),
 	};
 }
 
@@ -54,9 +47,9 @@ export function gitTargetCommand(
 		usage: '<target>',
 		description: `git ${gitArgs.join(' ')} for one target`,
 		category: 'Git',
-		handler: (args) =>
+		handler: (args, context) =>
 			runSingleTargetCommand(args, name, (target) =>
-				runGitForTarget(gitArgs, target),
+				runGitForTarget(gitArgs, target, context.execOptions),
 			),
 	};
 }
