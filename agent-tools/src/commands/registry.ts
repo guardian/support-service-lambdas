@@ -22,7 +22,6 @@ import validateTargetsCommand from './validate_targets.js';
 import checkFormattingCommand from './verify/check_formatting.js';
 import lintCommand from './verify/lint.js';
 import typeCheckCommand from './verify/type_check.js';
-import verifyCommand from './verify/verify.js';
 
 export const categoryOrder: CommandCategory[] = [
 	'Utility',
@@ -38,7 +37,6 @@ export const commandDefinitions: CommandDefinition[] = [
 	listTargetsCommand,
 	validateTargetsCommand,
 	showTargetScriptsCommand,
-	verifyCommand,
 	checkFormattingCommand,
 	lintCommand,
 	typeCheckCommand,

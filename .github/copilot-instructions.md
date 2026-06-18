@@ -55,13 +55,12 @@ Default output is verbose streaming. Use global output flag when needed:
 Recommended order (use the first applicable scoped command):
 1. `./agent-tool validate_targets <targets...>` or `./agent-tool list_targets`
 2. `./agent-tool git_diff_stat` or `./agent-tool git_diff_target_stat <target>`
-3. `./agent-tool verify --changed` (or `./agent-tool verify <targets...>`)
-4. `./agent-tool check_formatting --changed` / `./agent-tool lint --changed` / `./agent-tool type_check --changed` when only one verification stage is required
-5. `./agent-tool fix_formatting --changed` or `./agent-tool lint_fix --changed` only when verify fails
-6. `./agent-tool verify --changed` again after fixes
-7. `./agent-tool test --changed` (or `./agent-tool test <targets...>` / `test_one` / `test_file`) when tests are needed
-8. `./agent-tool git_diff` or `./agent-tool git_diff_target <target>` when full diff detail is needed
-9. `./agent-tool snapshot_update` when buildcheck-managed snapshots are expected
-10. `./agent-tool install_workspace` when dependencies or lockfiles need updating
+3. `./agent-tool check_formatting --changed` / `./agent-tool lint --changed` / `./agent-tool type_check --changed` (run all three after making changes)
+4. `./agent-tool fix_formatting --changed` or `./agent-tool lint_fix --changed` only when the above fail
+5. Re-run the failed check after fixing
+6. `./agent-tool test --changed` (or `./agent-tool test <targets...>` / `test_one` / `test_file`) when tests are needed
+7. `./agent-tool git_diff` or `./agent-tool git_diff_target <target>` when full diff detail is needed
+8. `./agent-tool snapshot_update` when buildcheck-managed snapshots are expected
+9. `./agent-tool install_workspace` when dependencies or lockfiles need updating
 
 If `agent-tools` is missing a safer or more efficient command, suggest adding it rather than working around it with ad-hoc shell commands.

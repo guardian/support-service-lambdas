@@ -1,6 +1,11 @@
-import type { CommandResult } from '../tools/runScript.js';
+import type { CommandResult, ExecutionOptions } from '../tools/runScript.js';
 import { toCommandResult } from '../tools/runScript.js';
 import { listTargetNames } from '../tools/targetRegistry.js';
+import {
+	runChangedTargetsOrWarn,
+	runSingleStep,
+	type TargetScriptStep,
+} from '../tools/targetScriptRunner.js';
 import { validateTargetAgainstKnownTargets } from '../tools/targetValidation.js';
 
 // --- Target arg parsing (inlined from targetArgs.ts) ---
@@ -127,4 +132,29 @@ export async function runSingleTargetCommand(
 		return target;
 	}
 	return await run(target.target);
+}
+
+/**
+ * Creates a handler for commands that run a single pnpm script step across
+ * one or more targets (or --changed targets). Covers all verify/repair commands.
+ */
+export function targetStepHandler(
+	name: string,
+	step: TargetScriptStep,
+): (
+	args: string[],
+	context: { execOptions: ExecutionOptions },
+) => Promise<CommandResult> {
+	return async (args, context) => {
+		const parsed = parseRequiredTargets(args, name);
+		if ('exitCode' in parsed) {
+			return parsed;
+		}
+		const run = (targets: string[]) =>
+			runSingleStep(targets, step, context.execOptions);
+		if (parsed.changed) {
+			return await runChangedTargetsOrWarn(run);
+		}
+		return await run(parsed.targets);
+	};
 }
