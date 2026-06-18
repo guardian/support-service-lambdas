@@ -42,13 +42,13 @@ const buildDependencies = async (): Promise<ProcessItemDependencies> => {
 		writePrimaryItem: (item) => dynamoService.writeItem(item),
 		getSecondaryUsers: (subscriptionName) =>
 			secondaryUserRepository.list(subscriptionName),
-		writeSecondaryItem: async (secondaryIdentityId, item) => {
+		writeSecondaryItem: async (primaryItem, secondaryUser) => {
 			// Create is an upsert, so if the secondary subscription already exists it will be updated
 			await createSecondarySubscription(
 				stage,
-				item,
-				secondaryIdentityId,
-				dayjs(),
+				primaryItem,
+				secondaryUser.secondaryIdentityId,
+				dayjs(secondaryUser.acceptedDate),
 			);
 		},
 	};

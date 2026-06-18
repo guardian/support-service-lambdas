@@ -185,28 +185,4 @@ describe('DynamoService integration', () => {
 
 		expect(result.Item?.primarySubscriptionName).toBeUndefined();
 	});
-
-	test('does not overwrite contractEffectiveDate on subsequent writes', async () => {
-		// First write sets contractEffectiveDate to 2026-01-01
-		await service.writeItem(ifNotExistsTestItem);
-
-		// Second write supplies a different contractEffectiveDate
-		await service.writeItem({
-			...ifNotExistsTestItem,
-			contractEffectiveDate: dayjs('2025-06-01'),
-		});
-
-		const result = await client.send(
-			new GetItemCommand({
-				TableName: tableName,
-				Key: {
-					identityId: { S: ifNotExistsTestItem.identityId },
-					subscriptionName: { S: ifNotExistsTestItem.subscriptionName },
-				},
-			}),
-		);
-
-		// contractEffectiveDate should still be the original value from the first write
-		expect(result.Item?.contractEffectiveDate).toEqual({ S: '2026-01-01' });
-	});
 });

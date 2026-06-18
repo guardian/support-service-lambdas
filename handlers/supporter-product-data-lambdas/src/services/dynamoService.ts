@@ -46,10 +46,6 @@ export class DynamoService {
 			{ name: 'productRatePlanName', value: { S: item.productRatePlanName } },
 			{ name: 'termEndDate', value: { S: zuoraDateFormat(item.termEndDate) } },
 			{ name: 'expiryDate', value: { N: this.formatAsTTL(item.termEndDate) } },
-		];
-
-		// Fields which are only set if they do not already exist
-		const ifNotExistsFields: Array<{ name: string; value: AttributeValue }> = [
 			{
 				name: 'contractEffectiveDate',
 				value: { S: zuoraDateFormat(item.contractEffectiveDate) },
@@ -87,17 +83,14 @@ export class DynamoService {
 		}
 
 		// Build the update expression for the DynamoDB update operation
-		const setClause = `SET ${setFields.map(({ name }) => `${name} = :${name}`).join(', ')},`;
-		const ifNotExistsClause = `${ifNotExistsFields.map(({ name }) => `${name} = if_not_exists(${name}, :${name})`).join(', ')}`;
+		const setClause = `SET ${setFields.map(({ name }) => `${name} = :${name}`).join(', ')}`;
 		const removeClause =
 			fieldsToRemove.length > 0 ? `REMOVE ${fieldsToRemove.join(', ')}` : '';
-		const updateExpression = `${setClause} ${ifNotExistsClause} ${removeClause}`;
+		const updateExpression = `${setClause} ${removeClause}`;
 
 		// Build the expression attribute values for the DynamoDB update operation
 		const expressionValues = Object.fromEntries(
-			setFields
-				.concat(ifNotExistsFields)
-				.map(({ name, value }) => [`:${name}`, value]),
+			setFields.map(({ name, value }) => [`:${name}`, value]),
 		);
 
 		try {

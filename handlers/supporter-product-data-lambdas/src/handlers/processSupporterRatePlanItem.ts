@@ -17,8 +17,8 @@ export type ProcessItemDependencies = {
 		subscriptionName: string,
 	) => Promise<SecondaryUserRecord[]>;
 	writeSecondaryItem: (
-		secondaryIdentityId: string,
 		primaryItem: SupporterRatePlanItem,
+		secondaryUser: SecondaryUserRecord,
 	) => Promise<void>;
 };
 
@@ -49,10 +49,7 @@ export const processItem = async (
 		});
 		await Promise.all(
 			secondaryUsers.map((secondaryUser) =>
-				dependencies.writeSecondaryItem(
-					secondaryUser.secondaryIdentityId,
-					itemWithContribution,
-				),
+				dependencies.writeSecondaryItem(itemWithContribution, secondaryUser),
 			),
 		);
 	}
