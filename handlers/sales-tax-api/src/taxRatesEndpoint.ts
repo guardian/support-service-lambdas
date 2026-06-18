@@ -26,9 +26,9 @@ import {
 } from './schemas';
 
 type ProductKey = z.infer<typeof productKeySchema>;
-const taxExclusiveProductNames: Partial<Record<ProductKey, string>> = {
+const taxExclusiveProductCodeNames: Partial<Record<ProductKey, string>> = {
 	SupporterPlus: `Supporter Plus`,
-	DigitalSubscription: `Digital Pack`,
+	DigitalSubscription: `Supporter Plus`, // DigitalSubscription is a tax-exclusive product, but it uses the same tax code as Supporter Plus
 };
 
 const caStatesDefault: TaxRatesResponse = {
@@ -109,7 +109,7 @@ function getProductZuoraTaxCode(
 ) {
 	return zuoraTaxCodes.find(
 		(zuoraTaxCode) =>
-			zuoraTaxCode.name === taxExclusiveProductNames[productKey],
+			zuoraTaxCode.name === taxExclusiveProductCodeNames[productKey],
 	);
 }
 
