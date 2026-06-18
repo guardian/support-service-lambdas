@@ -1,5 +1,5 @@
 {
-  "NOTICE": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/root/.github/workflows/handlerNames.managed.json.ts",
+  "NOTICE": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/managed/root/templates/.github/workflows/handlerNames.managed.json.ts",
   "subproject": [
     "alarms-handler",
     "braze-acquisition-events-sync",

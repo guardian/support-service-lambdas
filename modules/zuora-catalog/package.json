@@ -10,7 +10,7 @@
     "build": "tsc --noEmit",
     "update-catalog-fixtures": "bash runManual/updateCatalogFixtures.sh"
   },
-  "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/module/package.json.ts",
+  "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/managed/module/templates/package.json.ts",
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.940.0",

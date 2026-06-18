@@ -11,7 +11,7 @@ export function relativePath(filename: string) {
 
 export const notice = (filename: string) =>
 	'MANAGED FILE: to push changes see buildcheck/README.md - template: ' +
-	relativePath(filename);
+	filename;
 
 type ContentPostProcessor = {
 	prefix?: (templatePath: string) => string;
@@ -30,5 +30,13 @@ export const contentPostProcessor: Record<string, ContentPostProcessor> = {
 	'.js': {
 		prefix: (templatePath) => '// ' + notice(templatePath) + '\n',
 		write: undefined, // cant be templated as an object
+	},
+	'.ts': {
+		prefix: (templatePath) => '// ' + notice(templatePath) + '\n',
+		write: undefined,
+	},
+	'.md': {
+		prefix: (templatePath) => '[//]: # (' + notice(templatePath) + ')\n',
+		write: undefined,
 	},
 };
