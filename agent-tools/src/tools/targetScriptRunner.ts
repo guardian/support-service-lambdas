@@ -9,8 +9,6 @@ import { resolveChangedTargets } from './targetSelection.js';
 
 export type TargetScriptStep = {
 	script: string;
-	label: string;
-	summaryLabel: string;
 	extraArgs?: string[];
 	timeoutSeconds?: number;
 	env?: Record<string, string>;
@@ -52,6 +50,7 @@ export async function runTargetScriptStepWithOutcome(
 	const lines: string[] = [];
 	let failCount = 0;
 	let passCount = 0;
+	const label = [step.script, ...(step.extraArgs ?? [])].join(' ');
 
 	for (const target of targets) {
 		printProgress(`TARGET ${target}`);
@@ -61,7 +60,7 @@ export async function runTargetScriptStepWithOutcome(
 			lines.push(warn);
 			continue;
 		}
-		printProgress(`RUN  ${target} ${step.label}`);
+		printProgress(`RUN  ${target} ${label}`);
 		const result = await runScript(target, step.script, {
 			extraArgs: step.extraArgs,
 			timeoutSeconds: step.timeoutSeconds,
@@ -70,10 +69,10 @@ export async function runTargetScriptStepWithOutcome(
 		});
 		const durationSeconds = Math.round(result.durationMs / 1000);
 		if (result.passed) {
-			printProgress(`OK   ${target} ${step.label} (${durationSeconds}s)`);
+			printProgress(`OK   ${target} ${label} (${durationSeconds}s)`);
 			passCount++;
 		} else {
-			const fail = `FAIL ${target} ${step.label} (${durationSeconds}s)`;
+			const fail = `FAIL ${target} ${label} (${durationSeconds}s)`;
 			printProgress(fail);
 			lines.push(fail);
 			if (result.excerpt) {
@@ -89,6 +88,7 @@ export async function runTargetScriptStepWithOutcome(
 export async function runSingleStep(
 	targets: string[],
 	step: TargetScriptStep,
+	commandName: string,
 	execOptions: ExecutionOptions,
 ): Promise<CommandResult> {
 	const outcome = await runTargetScriptStepWithOutcome(
@@ -100,8 +100,8 @@ export async function runSingleStep(
 		[
 			...outcome.lines,
 			outcome.failCount === 0
-				? `OK   ${step.summaryLabel} complete`
-				: `FAIL ${outcome.failCount} ${step.summaryLabel} failure(s)`,
+				? `OK   ${commandName} complete`
+				: `FAIL ${outcome.failCount} ${commandName} failure(s)`,
 		],
 		outcome.failCount === 0 ? 0 : 1,
 	);

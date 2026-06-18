@@ -8,22 +8,33 @@ import {
 import { isValidTargetFormat } from '../tools/targetValidation.js';
 import type { CommandCategory, CommandDefinition } from './types.js';
 
+/** Parses 'script arg1 arg2' into { script, extraArgs }. Defaults to name when omitted. */
+function parseScriptAndArgs(
+	name: string,
+	scriptAndArgs?: string,
+): { script: string; extraArgs: string[] } {
+	if (!scriptAndArgs) {
+		return { script: name, extraArgs: [] };
+	}
+	const [script, ...rest] = scriptAndArgs.split(' ');
+	return { script: script!, extraArgs: rest };
+}
+
 /**
  * Builds a handler that runs a single pnpm script step across one or more
- * targets (or --changed targets). Step fields default to the command name.
+ * targets (or --changed targets). Script defaults to the command name.
  */
 function targetStepHandler(
 	name: string,
-	stepOverrides?: Partial<TargetScriptStep>,
+	scriptAndArgs?: string,
 ): (
 	args: string[],
 	context: { execOptions: ExecutionOptions },
 ) => Promise<CommandResult> {
+	const { script, extraArgs } = parseScriptAndArgs(name, scriptAndArgs);
 	const step: TargetScriptStep = {
-		script: name,
-		label: name,
-		summaryLabel: name,
-		...stepOverrides,
+		script,
+		...(extraArgs.length > 0 ? { extraArgs } : {}),
 	};
 	return async (args, context) => {
 		const parsed = parseRequiredTargets(args, name);
@@ -31,7 +42,7 @@ function targetStepHandler(
 			return parsed;
 		}
 		const run = (targets: string[]) =>
-			runSingleStep(targets, step, context.execOptions);
+			runSingleStep(targets, step, name, context.execOptions);
 		if (parsed.changed) {
 			return await runChangedTargetsOrWarn(run);
 		}
@@ -69,20 +80,19 @@ function extractPattern(args: string[]): {
 /**
  * Builds a complete CommandDefinition for commands that run a single pnpm
  * script step across targets or --changed targets.
- * The step script/label/summaryLabel default to the command name so
- * the name appears exactly once in each command file.
+ * scriptAndArgs defaults to the command name (e.g. 'lint --fix' overrides the script).
  */
 export function targetStepCommand(
 	name: string,
 	category: CommandCategory,
-	stepOverrides?: Partial<TargetScriptStep>,
+	scriptAndArgs?: string,
 ): CommandDefinition {
 	return {
 		name,
 		usage: '<target...> | --changed',
-		description: `run ${name}`,
+		description: `run ${scriptAndArgs ?? name}`,
 		category,
-		handler: targetStepHandler(name, stepOverrides),
+		handler: targetStepHandler(name, scriptAndArgs),
 	};
 }
 
@@ -108,12 +118,10 @@ export function targetStepCommandWithPattern(
 			}
 			const step: TargetScriptStep = {
 				script: name,
-				label: pattern !== undefined ? `${name} ${pattern}` : name,
-				summaryLabel: name,
 				...(pattern !== undefined ? { extraArgs: [pattern] } : {}),
 			};
 			const run = (targets: string[]) =>
-				runSingleStep(targets, step, context.execOptions);
+				runSingleStep(targets, step, name, context.execOptions);
 			if (parsed.changed) {
 				return await runChangedTargetsOrWarn(run);
 			}
