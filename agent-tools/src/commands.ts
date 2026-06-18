@@ -1,11 +1,11 @@
 import { listPackages, resolveChangedPackages } from './changed.js';
 import {
-	buildPnpmChangedArgs,
-	buildPnpmExplicitArgs,
+	buildPnpmArgs,
 	type CommandResult,
 	type ExecutionOptions,
 	printProgress,
-	runRootCommand,
+	run,
+	type ScriptResult,
 	toCommandResult,
 } from './run.js';
 
@@ -18,6 +18,18 @@ export type Command = { usage: string; description: string; handler: Handler };
 
 // Matches valid package paths without hitting the filesystem
 const PKG_RE = /^(handlers|modules)\/\S+$|^(cdk|buildcheck)$/;
+
+function formatResult(name: string, result: ScriptResult): CommandResult {
+	const s = Math.round(result.durationMs / 1000);
+	if (result.passed) {
+		return toCommandResult([`OK   ${name} (${s}s)`]);
+	}
+	const lines = [`FAIL ${name} (${s}s)`];
+	if (result.excerpt) {
+		lines.push(result.excerpt);
+	}
+	return toCommandResult(lines, result.exitCode);
+}
 
 export const COMMANDS: Record<string, Command> = {
 	'list-packages': {
@@ -105,24 +117,21 @@ async function runForPackages(
 		return resolved;
 	}
 
-	const pnpmFilterArgs = resolved.changed
-		? buildPnpmChangedArgs(resolved.packages, script, extraArgs)
-		: buildPnpmExplicitArgs(resolved.packages, script, extraArgs);
+	const pnpmFilterArgs = buildPnpmArgs(
+		resolved.packages,
+		script,
+		extraArgs,
+		resolved.changed,
+	);
 	const scope = resolved.changed
 		? `--changed (+ dependents)`
 		: resolved.packages.join(', ');
 
 	printProgress(`RUN  ${commandName} ${scope}`);
-	const result = await runRootCommand('pnpm', pnpmFilterArgs, execOptions);
-	const s = Math.round(result.durationMs / 1000);
-	if (result.passed) {
-		return toCommandResult([`OK   ${commandName} (${s}s)`]);
-	}
-	const lines = [`FAIL ${commandName} (${s}s)`];
-	if (result.excerpt) {
-		lines.push(result.excerpt);
-	}
-	return toCommandResult(lines, result.exitCode);
+	return formatResult(
+		commandName,
+		await run('pnpm', pnpmFilterArgs, execOptions),
+	);
 }
 
 /** pnpm script run across packages. scriptAndArgs e.g. 'lint --fix'. */
@@ -174,16 +183,10 @@ function rootCmd(commandString: string): Command {
 				return toCommandResult([`FAIL this command takes no arguments`], 1);
 			}
 			printProgress(`RUN  ${commandString}`);
-			const result = await runRootCommand(executable!, cmdArgs, execOptions);
-			const s = Math.round(result.durationMs / 1000);
-			if (result.passed) {
-				return toCommandResult([`OK   ${commandString} (${s}s)`]);
-			}
-			const lines = [`FAIL ${commandString} (${s}s)`];
-			if (result.excerpt) {
-				lines.push(result.excerpt);
-			}
-			return toCommandResult(lines, result.exitCode);
+			return formatResult(
+				commandString,
+				await run(executable!, cmdArgs, execOptions),
+			);
 		},
 	};
 }
@@ -203,20 +206,10 @@ function pathCmd(commandString: string): Command {
 			}
 			const pkg = args[0]!;
 			printProgress(`RUN  ${commandString} -- ${pkg}`);
-			const result = await runRootCommand(
-				executable!,
-				[...cmdArgs, '--', pkg],
-				execOptions,
+			return formatResult(
+				commandString,
+				await run(executable!, [...cmdArgs, '--', pkg], execOptions),
 			);
-			const s = Math.round(result.durationMs / 1000);
-			if (result.passed) {
-				return toCommandResult([`OK   ${commandString} (${s}s)`]);
-			}
-			const lines = [`FAIL ${commandString} (${s}s)`];
-			if (result.excerpt) {
-				lines.push(result.excerpt);
-			}
-			return toCommandResult(lines, result.exitCode);
 		},
 	};
 }

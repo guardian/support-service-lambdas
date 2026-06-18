@@ -34,29 +34,18 @@ export function printProgress(line: string): void {
 	process.stdout.write(`${line}\n`);
 }
 
-/** Builds pnpm args for explicit packages — runs only those packages, skips missing scripts. */
-export function buildPnpmExplicitArgs(
+/** Builds pnpm args for a set of packages. Pass withDependents=true (--changed) to include each package's dependents. */
+export function buildPnpmArgs(
 	packages: string[],
 	script: string,
 	extraArgs: string[] = [],
+	withDependents = false,
 ): string[] {
 	return [
-		...packages.flatMap((pkg) => ['--filter', `./${pkg}`]),
-		'run',
-		'--if-present',
-		script,
-		...extraArgs,
-	];
-}
-
-/** Builds pnpm args for changed packages — each with its dependents, skips missing scripts. */
-export function buildPnpmChangedArgs(
-	packages: string[],
-	script: string,
-	extraArgs: string[] = [],
-): string[] {
-	return [
-		...packages.flatMap((pkg) => ['--filter', `...{./${pkg}}`]),
+		...packages.flatMap((pkg) => [
+			'--filter',
+			withDependents ? `...{./${pkg}}` : `./${pkg}`,
+		]),
 		'run',
 		'--if-present',
 		script,
@@ -129,21 +118,15 @@ function toExcerpt(
 		: lines.slice(lines.length - keep).join('\n');
 }
 
-async function runCommand({
-	command,
-	args,
-	cwd,
-	execOptions,
-}: {
-	command: string;
-	args: string[];
-	cwd: string;
-	execOptions: ExecutionOptions;
-}): Promise<ScriptResult> {
+export async function run(
+	command: string,
+	args: string[],
+	execOptions: ExecutionOptions,
+): Promise<ScriptResult> {
 	return await new Promise<ScriptResult>((resolvePromise) => {
 		const start = Date.now();
 		const child = spawn(command, args, {
-			cwd,
+			cwd: ROOT,
 			env: process.env,
 			stdio: ['ignore', 'pipe', 'pipe'],
 		});
@@ -202,12 +185,4 @@ async function runCommand({
 			});
 		});
 	});
-}
-
-export async function runRootCommand(
-	command: string,
-	args: string[],
-	execOptions: ExecutionOptions,
-): Promise<ScriptResult> {
-	return await runCommand({ command, args, cwd: ROOT, execOptions });
 }

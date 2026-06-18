@@ -59,11 +59,8 @@ function printResult(result: CommandResult): never {
 	process.exit(result.exitCode);
 }
 
-// pnpm run cli -- "$@" adds a leading -- separator; strip it before parsing
 const rawArgs = process.argv.slice(2);
-const parsed = parseGlobalOptions(
-	rawArgs[0] === '--' ? rawArgs.slice(1) : rawArgs,
-);
+const parsed = parseGlobalOptions(rawArgs);
 if ('exitCode' in parsed) {
 	printResult(parsed);
 }
