@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { buildPnpmRunArgs, filterLinesByPattern } from './runScript.js';
+import { buildPnpmRunArgs, filterLinesByPattern } from './run.js';
 
 void test('buildPnpmRunArgs forwards lint --fix without literal -- separator', () => {
 	const args = buildPnpmRunArgs('modules/zuora', 'lint', ['--fix']);
