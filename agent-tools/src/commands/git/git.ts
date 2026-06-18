@@ -1,32 +1,14 @@
 import { spawnSync } from 'child_process';
 import {
+	runNoArgCommand,
+	runSingleTargetCommand,
+} from '../../cli/commandArgs.js';
+import {
 	type CommandResult,
 	ROOT,
 	toCommandResult,
 } from '../../tools/runScript.js';
-
-type GitSubcommand =
-	| 'status'
-	| 'diff'
-	| 'diff-staged'
-	| 'diff-stat'
-	| 'diff-staged-stat'
-	| 'name-only'
-	| 'name-only-staged'
-	| 'diff-target'
-	| 'diff-target-stat';
-
-const GIT_COMMANDS: Record<GitSubcommand, string[]> = {
-	status: ['status', '--short'],
-	diff: ['diff', '--minimal'],
-	'diff-staged': ['diff', '--staged', '--minimal'],
-	'diff-stat': ['diff', '--stat'],
-	'diff-staged-stat': ['diff', '--staged', '--stat'],
-	'name-only': ['diff', '--name-only'],
-	'name-only-staged': ['diff', '--staged', '--name-only'],
-	'diff-target': ['diff', '--minimal'],
-	'diff-target-stat': ['diff', '--stat'],
-};
+import type { CommandDefinition } from '../types.js';
 
 function execGit(args: string[]): CommandResult {
 	const result = spawnSync('git', ['--no-pager', ...args], {
@@ -45,16 +27,36 @@ function execGit(args: string[]): CommandResult {
 	return toCommandResult([output.length > 0 ? output : '(no output)']);
 }
 
-export function runGit(
-	sub: Exclude<GitSubcommand, 'diff-target' | 'diff-target-stat'>,
-): CommandResult {
-	return execGit(GIT_COMMANDS[sub]);
+function runGit(args: string[]): CommandResult {
+	return execGit(args);
 }
 
-export function runGitForTarget(
-	sub: 'diff-target' | 'diff-target-stat',
-	target: string,
-): CommandResult {
-	const baseArgs = GIT_COMMANDS[sub];
-	return execGit([...baseArgs, '--', target]);
+function runGitForTarget(args: string[], target: string): CommandResult {
+	return execGit([...args, '--', target]);
+}
+
+export function gitCommand(name: string, gitArgs: string[]): CommandDefinition {
+	return {
+		name,
+		usage: '',
+		description: `git ${gitArgs.join(' ')}`,
+		category: 'Git',
+		handler: (args) => runNoArgCommand(args, name, () => runGit(gitArgs)),
+	};
+}
+
+export function gitTargetCommand(
+	name: string,
+	gitArgs: string[],
+): CommandDefinition {
+	return {
+		name,
+		usage: '<target>',
+		description: `git ${gitArgs.join(' ')} for one target`,
+		category: 'Git',
+		handler: (args) =>
+			runSingleTargetCommand(args, name, (target) =>
+				runGitForTarget(gitArgs, target),
+			),
+	};
 }
