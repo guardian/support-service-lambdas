@@ -18,8 +18,11 @@ import type {
 	ZuoraRatePlanWithIndexedCharges,
 } from '../group/groupSubscriptionByZuoraCatalogIds';
 
-type ZuoraProductWithoutRatePlans = Omit<CatalogProduct, 'productRatePlans'>;
-type ZuoraProductRatePlanWithoutCharges = Omit<
+export type ZuoraProductWithoutRatePlans = Omit<
+	CatalogProduct,
+	'productRatePlans'
+>;
+export type ZuoraProductRatePlanWithoutCharges = Omit<
 	ZuoraProductRatePlan,
 	'productRatePlanCharges'
 >;

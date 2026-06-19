@@ -1,5 +1,4 @@
-import { groupByToMap } from '@modules/arrayFunctions';
-import { groupByUniqueOrThrowMap, mapValuesMap } from '@modules/mapFunctions';
+import { groupByUniqueOrThrowMap } from '@modules/mapFunctions';
 import type {
 	RatePlan,
 	RatePlanCharge,
@@ -10,6 +9,7 @@ import type {
 	ProductRatePlanChargeId,
 	ProductRatePlanId,
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
+import { byProductAndRatePlanIds } from './byProductAndRatePlanIds';
 
 export type RatePlanWithoutCharges = Omit<RatePlan, 'ratePlanCharges'>;
 export type SubscriptionWithoutRatePlans = Omit<ZuoraSubscription, 'ratePlans'>;
@@ -78,25 +78,6 @@ function groupRatePlansToMatchProductCatalogStructure(
 	const ratePlanWithIndexedCharges: ZuoraRatePlanWithIndexedCharges[] =
 		ratePlans.map(indexTheCharges);
 	return byProductAndRatePlanIds(ratePlanWithIndexedCharges);
-}
-
-/**
- * group rate plans into a tree, first by the product id and then product rate plan id
- *
- * This makes the structure match the product-catalog.
- *
- * @param zuoraRatePlanWithChargesByPRPCId
- */
-function byProductAndRatePlanIds(
-	zuoraRatePlanWithChargesByPRPCId: ZuoraRatePlanWithIndexedCharges[],
-): Map<ProductId, Map<ProductRatePlanId, ZuoraRatePlanWithIndexedCharges[]>> {
-	const ratePlansByProductId = groupByToMap(
-		zuoraRatePlanWithChargesByPRPCId,
-		(ratePlan) => ratePlan.productId,
-	);
-	return mapValuesMap(ratePlansByProductId, (productRatePlanMap) =>
-		groupByToMap(productRatePlanMap, (ratePlan) => ratePlan.productRatePlanId),
-	);
 }
 
 /**

@@ -1,4 +1,3 @@
-import { joinAllLeft } from '@modules/mapFunctions';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import type {
@@ -16,6 +15,7 @@ import type {
 	ZuoraRatePlanWithIndexedCharges,
 } from './group/groupSubscriptionByZuoraCatalogIds';
 import { groupSubscriptionByIds } from './group/groupSubscriptionByZuoraCatalogIds';
+import { joinFlatMap } from './group/joinFlatMap';
 import type { GuardianRatePlanMap } from './reprocessRatePlans/guardianRatePlanBuilder';
 import { GuardianRatePlanBuilder } from './reprocessRatePlans/guardianRatePlanBuilder';
 import type { ZuoraRatePlan } from './reprocessRatePlans/zuoraRatePlanBuilder';
@@ -180,24 +180,4 @@ export class GuardianSubscriptionParser {
 			productsNotInCatalog: [],
 		};
 	}
-}
-
-/**
- * attaches a subscription rate plan id to a catalog id, and flattens out the
- * resulting lists
- */
-function joinFlatMap<K, S, C>(
-	subLookup: Map<K, S>,
-	catLookup: Map<K, C>,
-	mapFn: (sub: S, cat: C) => RatePlansWithCatalogData,
-) {
-	return joinAllLeft(subLookup, catLookup)
-		.map(([sub, cat]: [S, C, K]) => mapFn(sub, cat))
-		.reduce((rp1, rp2) => ({
-			ratePlans: [...rp1.ratePlans, ...rp2.ratePlans],
-			productsNotInCatalog: [
-				...rp1.productsNotInCatalog,
-				...rp2.productsNotInCatalog,
-			],
-		}));
 }
