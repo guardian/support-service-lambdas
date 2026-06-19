@@ -1,20 +1,19 @@
 import { spawnSync } from 'child_process';
 import { existsSync, readdirSync } from 'fs';
 import { resolve } from 'path';
-import { ROOT } from './run.js';
 
 const PACKAGE_PREFIXES = ['handlers', 'modules'] as const;
 const TOP_LEVEL_PACKAGES = ['cdk', 'buildcheck'] as const;
 
-export function listPackages(): string[] {
+export function listPackages(root: string): string[] {
 	const packages: string[] = [];
 	for (const pkg of TOP_LEVEL_PACKAGES) {
-		if (existsSync(resolve(ROOT, pkg))) {
+		if (existsSync(resolve(root, pkg))) {
 			packages.push(pkg);
 		}
 	}
 	for (const prefix of PACKAGE_PREFIXES) {
-		const dir = resolve(ROOT, prefix);
+		const dir = resolve(root, prefix);
 		if (!existsSync(dir)) {
 			continue;
 		}
@@ -27,11 +26,11 @@ export function listPackages(): string[] {
 	return packages.sort();
 }
 
-export function resolveChangedPackages(): string[] {
+export function resolveChangedPackages(root: string): string[] {
 	const result = spawnSync(
 		'git',
 		['--no-pager', 'status', '--short', '--untracked-files=all'],
-		{ cwd: ROOT, encoding: 'utf-8' },
+		{ cwd: root, encoding: 'utf-8' },
 	);
 	if (result.status !== 0) {
 		return [];
@@ -44,7 +43,7 @@ export function resolveChangedPackages(): string[] {
 			const parts = path.split(' -> ');
 			return parts[parts.length - 1]!;
 		});
-	const known = listPackages().sort((a, b) => b.length - a.length);
+	const known = listPackages(root).sort((a, b) => b.length - a.length);
 	const matched = new Set<string>();
 	for (const file of files) {
 		const pkg = known.find((c) => file === c || file.startsWith(`${c}/`));

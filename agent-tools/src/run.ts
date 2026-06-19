@@ -1,10 +1,7 @@
 import { spawn } from 'child_process';
 import { createWriteStream, type WriteStream } from 'fs';
 import { tmpdir } from 'os';
-import { join, resolve } from 'path';
-
-// ideally should be a command line arg
-export const ROOT = resolve(import.meta.dirname, '../..');
+import { join } from 'path';
 
 const DEFAULT_FAILURE_TAIL_LINES = 40;
 
@@ -19,6 +16,7 @@ export type ScriptResult = {
 };
 
 export type ExecutionOptions = {
+	root: string;
 	verbose: boolean;
 	tailLines: number | null;
 	grepPattern: string | null;
@@ -68,10 +66,12 @@ export function filterLinesByPattern(
 }
 
 export function createExecutionOptions({
+	root,
 	verbose,
 	tailLines,
 	grepPattern,
 }: {
+	root: string;
 	verbose: boolean;
 	tailLines: number | null;
 	grepPattern: string | null;
@@ -79,6 +79,7 @@ export function createExecutionOptions({
 	const grepRegex = grepPattern === null ? null : new RegExp(grepPattern);
 	if (tailLines === null) {
 		return {
+			root,
 			verbose,
 			tailLines,
 			grepPattern,
@@ -92,7 +93,15 @@ export function createExecutionOptions({
 		`agent-tool-${Date.now()}-${process.pid}.log`,
 	);
 	const logStream = createWriteStream(logFilePath, { flags: 'a' });
-	return { verbose, tailLines, grepPattern, grepRegex, logFilePath, logStream };
+	return {
+		root,
+		verbose,
+		tailLines,
+		grepPattern,
+		grepRegex,
+		logFilePath,
+		logStream,
+	};
 }
 
 export function closeExecutionOptions(options: ExecutionOptions): void {
@@ -127,7 +136,7 @@ export async function run(
 	return await new Promise<ScriptResult>((resolvePromise) => {
 		const start = Date.now();
 		const child = spawn(command, args, {
-			cwd: ROOT,
+			cwd: execOptions.root,
 			env: process.env,
 			stdio: ['ignore', 'pipe', 'pipe'],
 		});

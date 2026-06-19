@@ -35,7 +35,8 @@ export const COMMANDS: Record<string, Command> = {
 	'list-packages': {
 		usage: '',
 		description: 'list all handlers/*, modules/*, cdk, and buildcheck packages',
-		handler: () => Promise.resolve(toCommandResult(listPackages())),
+		handler: (_, execOptions) =>
+			Promise.resolve(toCommandResult(listPackages(execOptions.root))),
 	},
 	'check-formatting': pkgScript('check-formatting'),
 	lint: pkgScript('lint'),
@@ -85,9 +86,10 @@ COMMANDS['help'] = {
 function resolvePackages(
 	args: string[],
 	commandName: string,
+	root: string,
 ): CommandResult | { packages: string[]; changed: boolean } {
 	if (args.includes('--changed')) {
-		const packages = resolveChangedPackages();
+		const packages = resolveChangedPackages(root);
 		if (packages.length === 0) {
 			return toCommandResult([
 				'WARN no changed handlers/*, modules/*, cdk, or buildcheck packages detected',
@@ -112,7 +114,7 @@ async function runForPackages(
 	extraArgs: string[],
 	execOptions: ExecutionOptions,
 ): Promise<CommandResult> {
-	const resolved = resolvePackages(args, commandName);
+	const resolved = resolvePackages(args, commandName, execOptions.root);
 	if ('exitCode' in resolved) {
 		return resolved;
 	}

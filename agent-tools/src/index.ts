@@ -59,13 +59,20 @@ function printResult(result: CommandResult): never {
 	process.exit(result.exitCode);
 }
 
-const rawArgs = process.argv.slice(2);
+const [rootDir, ...rawArgs] = process.argv.slice(2);
+if (!rootDir) {
+	process.stdout.write(
+		'FAIL agent-tool requires a root directory as the first argument\n',
+	);
+	process.exit(1);
+}
 const parsed = parseGlobalOptions(rawArgs);
 if ('exitCode' in parsed) {
 	printResult(parsed);
 }
 
 const execOptions = createExecutionOptions({
+	root: rootDir,
 	verbose: true,
 	tailLines: parsed.tailLines,
 	grepPattern: parsed.grepPattern,

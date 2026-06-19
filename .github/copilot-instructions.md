@@ -40,9 +40,18 @@ the high level calls should be implemented in separate files as per modules/zuor
 Use SrCDK constructs from ./cdk/lib/cdk/ where possible.
 
 
+In agent mode, to reduce approval fatigue, here is the order of preference for tools:
+First choice: built in MCP functions
+Second choice: agent-tool (all sub-commands can be approved in one go)
+Third choice: consistent pnpm scripts (exact command strings can be manually approved)
+Fourth choice: consistent shell commands
+Last choice: arbitrary/ad hoc shell commmands
+
 ### Verification and repair
 
-When making changes to TypeScript code, use `./agent-tool <command>` instead of ad-hoc commands such as raw `pnpm lint`, `pnpm type-check`, `prettier`, `eslint`, or `git`.
+Always run type-check, fix-formatting and lint-fix as well as all relevant tests after making changes to Typescript code.
+
+When making changes to TypeScript code, always run use `./agent-tool <command>` instead of ad-hoc commands such as raw `pnpm lint`, `pnpm type-check`, `prettier`, `eslint`, or `git`.
 
 Call the wrapper by absolute path rather than calling "cd" first, e.g. `/Users/john_duffell/code/support-service-lambdas/agent-tool <command>`.
 
