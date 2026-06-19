@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import z from 'zod';
 import { ratePlanChargeItemSchema } from '@modules/zuora/objectQuery/expandSchemas/ratePlanChargeItemSchema';
 
 export const ratePlanItemSchema = z.object({
@@ -18,17 +18,7 @@ export const ratePlanItemSchema = z.object({
 	amendmentId: z.string().nullable(),
 	/** The type of amendment associated with the rate plan. */
 	amendmentType: z
-		.enum([
-			'Cancellation',
-			'NewProduct',
-			'Composite',
-			'RemoveProduct',
-			'Renewal',
-			'UpdateProduct',
-			'TermsAndConditions',
-			'SuspendSubscription',
-			'ResumeSubscription',
-		])
+		.enum(['NewProduct', 'RemoveProduct', 'UpdateProduct'])
 		.nullable(),
 	/** The name of the rate plan. */
 	name: z.string(),
