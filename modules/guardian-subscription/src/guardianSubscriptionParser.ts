@@ -1,19 +1,11 @@
 import { joinAllLeft } from '@modules/mapFunctions';
-import type {
-	GuardianCatalogKeys,
-	ProductCatalog,
-	ProductKey,
-} from '@modules/product-catalog/productCatalog';
-import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
-import {
-	zuoraCatalogToProductKey,
-	zuoraCatalogToProductRatePlanKey,
-} from '@modules/product-catalog/zuoraToProductNameMappings';
+import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import type {
 	CatalogProduct,
 	ZuoraCatalog,
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
+import { getGuardianKeysFromZuoraNames } from './getGuardianKeysFromZuoraNames';
 import type {
 	ZuoraProductIdMap,
 	ZuoraProductRatePlanNode,
@@ -154,7 +146,8 @@ export class GuardianSubscriptionParser {
 		productRatePlanNode: ZuoraProductRatePlanNode,
 		product: CatalogProduct,
 	): RatePlansWithCatalogData {
-		const maybeGuardianKeys = this.getGuardianKeys(
+		const maybeGuardianKeys = getGuardianKeysFromZuoraNames(
+			this.productCatalog,
 			product.name,
 			productRatePlanNode.zuoraProductRatePlan.name,
 		);
@@ -186,20 +179,6 @@ export class GuardianSubscriptionParser {
 			ratePlans,
 			productsNotInCatalog: [],
 		};
-	}
-
-	private getGuardianKeys(
-		zuoraProductName: string,
-		zuoraProductRatePlanName: string,
-	): GuardianCatalogKeys | undefined {
-		const pch = new ProductCatalogHelper(this.productCatalog);
-		const productKey: ProductKey | undefined =
-			zuoraCatalogToProductKey[zuoraProductName];
-		const productRatePlanKey: string | undefined =
-			zuoraCatalogToProductRatePlanKey[zuoraProductRatePlanName];
-		return productKey !== undefined && productRatePlanKey !== undefined
-			? pch.validate(productKey, productRatePlanKey)
-			: undefined;
 	}
 }
 
