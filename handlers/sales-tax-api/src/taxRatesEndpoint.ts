@@ -26,10 +26,10 @@ import {
 } from './schemas';
 
 type ProductKey = z.infer<typeof productKeySchema>;
-type TaxCodeName = 'Supporter Plus';
+type TaxCodeName = 'Supporter Plus Global Tax' | 'Digital Pack Global Tax';
 const taxExclusiveProductCodeNames: Partial<Record<ProductKey, TaxCodeName>> = {
-	SupporterPlus: `Supporter Plus`,
-	DigitalSubscription: `Supporter Plus`, // DigitalSubscription is a tax-exclusive product, but it uses the same tax code name as Supporter Plus
+	SupporterPlus: `Supporter Plus Global Tax`,
+	DigitalSubscription: `Digital Pack Global Tax`,
 };
 
 const caStatesDefault: TaxRatesResponse = {
