@@ -44,7 +44,6 @@ test('createInvitationEndpoint saves invitation data and returns invitation code
 
 	const result = await endpoint(
 		{
-			subscriptionName,
 			secondaryUserEmail: 'integration-test2+multiple-account@theguardian.com',
 		},
 		undefined as never,

@@ -53,6 +53,7 @@ export const createInvitationEndpoint =
 	): Promise<APIGatewayProxyResult> => {
 		const { secondaryUserEmail } = body;
 		const subscriptionName = zuoraSubscription.subscriptionNumber;
+
 		logger.mutableAddContext(subscriptionName);
 
 		checkSubscriptionHasMultipleAccountsBenefit(
@@ -76,7 +77,7 @@ export const createInvitationEndpoint =
 		const invitationCode = generateInvitationCode();
 
 		await invitationRepository.save({
-			subscriptionName: zuoraSubscription.subscriptionNumber,
+			subscriptionName,
 			invitationCode,
 			primaryIdentityId: account.basicInfo.identityId,
 			secondaryIdentityId,
