@@ -3,7 +3,8 @@ import { createWriteStream, type WriteStream } from 'fs';
 import { tmpdir } from 'os';
 import { join, resolve } from 'path';
 
-export const ROOT = resolve(import.meta.dirname, '../../..');
+// ideally should be a command line arg
+export const ROOT = resolve(import.meta.dirname, '../..');
 
 const DEFAULT_FAILURE_TAIL_LINES = 40;
 
