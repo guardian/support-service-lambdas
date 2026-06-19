@@ -82,10 +82,6 @@ importers:
         version: 3.25.76
 
   agent-tools:
-    dependencies:
-      zod:
-        specifier: 'catalog:'
-        version: 3.25.76
     devDependencies:
       tsx:
         specifier: ^4.21.0
