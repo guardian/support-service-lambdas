@@ -23,6 +23,14 @@ import {
 	deleteInvitationPathSchema,
 } from './deleteInvitationEndpoint';
 import { InvitationRepository } from './invitationRepository';
+import {
+	listInvitationsEndpoint,
+	listInvitationsPathSchema,
+} from './listInvitationsEndpoint';
+import {
+	listSecondaryUsersEndpoint,
+	listSecondaryUsersPathSchema,
+} from './listSecondaryUsersEndpoint';
 import { SecondaryUserRepository } from './secondaryUserRepository';
 
 const stage = stageFromEnvironment();
@@ -90,5 +98,35 @@ export const handler: Handler = Router([
 				dynamoClient,
 			);
 		}),
+	},
+	{
+		httpMethod: 'GET',
+		path: '/subscriptions/{subscriptionName}/invitations',
+		handler: withPathParser(
+			listInvitationsPathSchema,
+			withMMAIdentityCheck(
+				stage,
+				async (_body, _zuoraClient, subscription) =>
+					listInvitationsEndpoint(invitationRepository)({
+						subscriptionName: subscription.subscriptionNumber,
+					}),
+				({ path }) => path.subscriptionName,
+			),
+		),
+	},
+	{
+		httpMethod: 'GET',
+		path: '/subscriptions/{subscriptionName}/secondary-users',
+		handler: withPathParser(
+			listSecondaryUsersPathSchema,
+			withMMAIdentityCheck(
+				stage,
+				async (_body, _zuoraClient, subscription) =>
+					listSecondaryUsersEndpoint(secondaryUserRepository)({
+						subscriptionName: subscription.subscriptionNumber,
+					}),
+				({ path }) => path.subscriptionName,
+			),
+		),
 	},
 ]);
