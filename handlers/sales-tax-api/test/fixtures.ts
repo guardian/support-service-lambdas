@@ -1,8 +1,12 @@
-import type { IsoCountry } from '@modules/internationalisation/country';
+import {
+	caStates,
+	type IsoCountry,
+} from '@modules/internationalisation/country';
 import type {
 	ZuoraTaxCode,
 	ZuoraTaxPeriod,
 	ZuoraTaxRate,
+	ZuoraTaxRates,
 } from '@modules/zuora/types/objects/tax';
 import type { TaxRatesResponse } from '../src/schemas';
 
@@ -68,6 +72,50 @@ export const canadianCountryStates: TaxRatesResponse = {
 	SK: 0.11,
 	YT: 0.05,
 };
+export function canadianZuoraTaxRates(): ZuoraTaxRates {
+	return {
+		taxRates: Object.keys(canadianCountryStates).map((state) =>
+			canadianZuoraTaxRate(
+				state as keyof TaxRatesResponse,
+				canadianCountryStates,
+			),
+		),
+	};
+}
+
+function canadianZuoraTaxRate(
+	state: keyof TaxRatesResponse,
+	cadTaxRates: TaxRatesResponse,
+): ZuoraTaxRate {
+	return {
+		id: '8ad095dd81de1cf00181de66f5cf43b4',
+		taxRatePeriodId: supporterPlusTaxEngineId,
+		country: 'Canada',
+		state: caStates[state] ?? null,
+		county: null,
+		city: null,
+		postalCode: null,
+		taxRegion: null,
+		taxRate1: cadTaxRates[state],
+		taxRateType1: 'Percentage',
+		taxName1: 'US TAX',
+		taxJursdiction1: 'Country',
+		taxLocationCode1: 'CA',
+		taxRateDescription1: '',
+		taxRate2: 0.0,
+		taxRateType2: null,
+		taxName2: null,
+		taxJursdiction2: null,
+		taxLocationCode2: null,
+		taxRateDescription2: null,
+		taxRate3: 0.0,
+		taxRateType3: null,
+		taxName3: null,
+		taxJursdiction3: null,
+		taxLocationCode3: null,
+		taxRateDescription3: null,
+	};
+}
 
 export const countryStates: Partial<Record<IsoCountry, TaxRatesResponse>> = {
 	CA: canadianCountryStates,

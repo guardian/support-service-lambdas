@@ -12,10 +12,10 @@ import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { handler } from '../src/index';
 import type { TaxRatesResponse } from '../src/schemas';
 import {
+	canadianZuoraTaxRates,
 	countryStates,
 	supporterPlusTaxCodeId,
 	zuoraTaxCodePeriod,
-	zuoraTaxRateSupporterPlus,
 } from './fixtures';
 
 jest.mock('@modules/stage', () => ({
@@ -42,7 +42,7 @@ describe('SalesTax API', () => {
 				id: supporterPlusTaxCodeId,
 				taxEngineId: '2c92c0f94568f996014570f746f75c52',
 				active: true,
-				name: 'Supporter Plus',
+				name: 'Supporter Plus Global Tax',
 				description: '',
 			},
 		],
@@ -54,9 +54,7 @@ describe('SalesTax API', () => {
 	} as unknown as ZuoraTaxPeriods;
 
 	const mockGetZuoraTaxRates = jest.mocked(getZuoraTaxRates);
-	const mockZuoraTaxRates = {
-		taxRates: [zuoraTaxRateSupporterPlus],
-	} as unknown as ZuoraTaxRates;
+	const mockZuoraTaxRates = canadianZuoraTaxRates() as unknown as ZuoraTaxRates;
 
 	const baseTaxRatesEvent: Partial<APIGatewayProxyEvent> = {
 		path: '/tax-rates',
