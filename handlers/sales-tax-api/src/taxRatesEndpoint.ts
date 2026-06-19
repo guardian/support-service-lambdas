@@ -134,6 +134,13 @@ function extractCadZuoraTaxRates(
 function createCadStateTaxRates(
 	cadZuoraTaxRates: ZuoraTaxRate[],
 ): TaxRatesResponse {
+	const cadStatesMissing = checkForMissingCadStates(cadZuoraTaxRates);
+	if (cadStatesMissing.length > 0) {
+		throw new ValidationError(
+			`missing the following CA provinces: ${cadStatesMissing.join(', ')}`,
+		);
+	}
+
 	const cadStateTaxRates: TaxRatesResponse = { ...caStatesDefault };
 	Object.keys(cadStateTaxRates).forEach((key) => {
 		if (isTaxRateKey(key)) {
@@ -144,6 +151,12 @@ function createCadStateTaxRates(
 		}
 	});
 	return cadStateTaxRates;
+}
+function checkForMissingCadStates(cadZuoraTaxRates: ZuoraTaxRate[]): string[] {
+	const keys = taxRatesResponseSchema.keyof().options;
+	return keys.filter(
+		(key) => !cadZuoraTaxRates.some((rate) => caStates[key] === rate.state),
+	);
 }
 function isTaxRateKey(key: string): key is keyof TaxRatesResponse {
 	return key in caStatesDefault;
