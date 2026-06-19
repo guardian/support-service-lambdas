@@ -6,6 +6,17 @@ import type {
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
 
 /**
+ * Rate plans grouped into a tree, first by product id and then product rate plan id.
+ *
+ * Generic over the rate plan element type so it can describe both the
+ * charge-rich (full) path and the MMA (no charges) path.
+ */
+export type IndexedRatePlansByProduct<RP> = Map<
+	ProductId,
+	Map<ProductRatePlanId, readonly RP[]>
+>;
+
+/**
  * Group rate plans into a tree, first by product id and then product rate plan id.
  *
  * This makes the structure match the product-catalog and the Zuora catalog lookup,
@@ -20,7 +31,7 @@ import type {
  */
 export function byProductAndRatePlanIds<
 	RP extends { productId: ProductId; productRatePlanId: ProductRatePlanId },
->(ratePlans: RP[]): Map<ProductId, Map<ProductRatePlanId, RP[]>> {
+>(ratePlans: RP[]): IndexedRatePlansByProduct<RP> {
 	const ratePlansByProductId = groupByToMap(
 		ratePlans,
 		(ratePlan) => ratePlan.productId,

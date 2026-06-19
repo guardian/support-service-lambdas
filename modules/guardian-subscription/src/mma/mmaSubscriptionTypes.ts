@@ -1,10 +1,8 @@
-import type { ProductKey } from '@modules/product-catalog/productCatalog';
 import type { subscriptionWithRatePlansSchema } from '@modules/zuora/objectQuery/expandSchemas/subscriptionItemSchema';
 import type { z } from 'zod';
-import type {
-	ZuoraProductRatePlanWithoutCharges,
-	ZuoraProductWithoutRatePlans,
-} from '../reprocessRatePlans/zuoraRatePlanBuilder';
+import type { RatePlansBeforeCharges } from '../joinProductsAndRatePlans';
+import type { GuardianRatePlanBeforeCharges } from '../reprocessRatePlans/guardianRatePlanBuilder';
+import type { ZuoraRatePlanBeforeCharges } from '../reprocessRatePlans/zuoraRatePlanBuilder';
 
 export type MmaZuoraSubscription = z.infer<
 	typeof subscriptionWithRatePlansSchema
@@ -16,36 +14,29 @@ export type MmaSubscriptionWithoutRatePlans = Omit<
 	'ratePlans'
 >;
 
-export type MmaGuardianRatePlan = MmaZuoraRatePlan & {
-	productKey: ProductKey;
-	productRatePlanKey: string;
-};
-
 /**
- * A rate plan that is not in the product catalog (e.g. Discounts).
- * Carries product and productRatePlan from the Zuora catalog so that later
- * pipeline steps (filter, flatten) can identify discounts without re-querying
- * the catalog.
+ * A product-catalog rate plan in the MMA path.
  *
- * Mirrors ZuoraCatalogValues in zuoraRatePlanBuilder.ts, minus ratePlanCharges
- * (which are not fetched in the MMA/object-query path).
+ * This is the shared "before charges" rate plan, since the MMA path never
+ * fetches the subscription charges - so the carried productCatalogCharges stays
+ * attached and unused (useful later if/when we do fetch the charges).
  */
-export type MmaRatePlanNotInCatalog = MmaZuoraRatePlan & {
-	product: ZuoraProductWithoutRatePlans;
-	productRatePlan: ZuoraProductRatePlanWithoutCharges;
-};
+export type MmaGuardianRatePlan =
+	GuardianRatePlanBeforeCharges<MmaZuoraRatePlan>;
 
 /**
- * Mirrors GuardianSubscriptionMultiPlan for the MMA/object-query path.
+ * A rate plan that is not in the product catalog (e.g. Discounts) in the MMA path.
  *
- * Contains all rate plans split into two buckets by product catalog membership,
- * but without any further sub-classification (discounts, history).
- * Those splits happen in the filter/flatten steps.
+ * As above, this is the shared "before charges" non-catalog rate plan.
+ */
+export type MmaRatePlanNotInCatalog =
+	ZuoraRatePlanBeforeCharges<MmaZuoraRatePlan>;
+
+/**
+ * Mirrors GuardianSubscriptionMultiPlan for the MMA/object-query path, only the
+ * rate plans stop at the "before charges" stage (the MMA path never joins charges).
  *
  * See guardianSubscriptionParser.ts for the charge-rich equivalent.
  */
-export type MmaGuardianSubscriptionMultiPlan =
-	MmaSubscriptionWithoutRatePlans & {
-		ratePlans: MmaGuardianRatePlan[];
-		productsNotInCatalog: MmaRatePlanNotInCatalog[];
-	};
+export type MmaGuardianSubscriptionMultiPlan = MmaSubscriptionWithoutRatePlans &
+	RatePlansBeforeCharges<MmaZuoraRatePlan>;
