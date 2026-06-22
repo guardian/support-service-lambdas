@@ -454,7 +454,7 @@ exports[`The sf-emails-to-s3-exporter stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "Architectures": [
-          "x86_64",
+          "arm64",
         ],
         "Code": {
           "S3Bucket": {
@@ -701,10 +701,9 @@ exports[`The sf-emails-to-s3-exporter stack matches the snapshot 1`] = `
               "Effect": "Allow",
               "Resource": [
                 "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl",
-                "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/ConnectedApp/SFEmailsToS3-6QJGTX",
                 "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/EmailsToS3APIUser-EbXFEb",
-                "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/EmailsToS3APIUser-kGtUDC",
               ],
+              "Sid": "readSalesforceSecrets",
             },
             {
               "Action": "cloudwatch:PutMetricData",
@@ -726,12 +725,6 @@ exports[`The sf-emails-to-s3-exporter stack matches the snapshot 1`] = `
                 "arn:aws:s3:::emails-from-sf-code",
                 "arn:aws:s3:::emails-from-sf-code/*",
               ],
-            },
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/*",
-              "Sid": "readDeployedArtefact",
             },
           ],
           "Version": "2012-10-17",
@@ -1823,7 +1816,7 @@ exports[`The sf-emails-to-s3-exporter stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "Architectures": [
-          "x86_64",
+          "arm64",
         ],
         "Code": {
           "S3Bucket": {
@@ -2069,11 +2062,10 @@ exports[`The sf-emails-to-s3-exporter stack matches the snapshot 2`] = `
               ],
               "Effect": "Allow",
               "Resource": [
-                "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl",
                 "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/ConnectedApp/SFEmailsToS3-6QJGTX",
-                "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/EmailsToS3APIUser-EbXFEb",
                 "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/EmailsToS3APIUser-kGtUDC",
               ],
+              "Sid": "readSalesforceSecrets",
             },
             {
               "Action": "cloudwatch:PutMetricData",
@@ -2095,12 +2087,6 @@ exports[`The sf-emails-to-s3-exporter stack matches the snapshot 2`] = `
                 "arn:aws:s3:::emails-from-sf-prod",
                 "arn:aws:s3:::emails-from-sf-prod/*",
               ],
-            },
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/*",
-              "Sid": "readDeployedArtefact",
             },
           ],
           "Version": "2012-10-17",

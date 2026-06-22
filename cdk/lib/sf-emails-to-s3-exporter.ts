@@ -38,6 +38,20 @@ export class SfEmailsToS3Exporter extends SrStack {
 		const lowerCaseStage = stage.toLowerCase();
 		const bucketArn = `arn:aws:s3:::emails-from-sf-${lowerCaseStage}`;
 
+		// The lambda only ever reads the secrets for its own stage
+		// (see Secrets.scala, which keys off sys.env("Stage")), so we only
+		// grant access to the current stage's Salesforce secrets.
+		const salesforceSecretArns: Record<SrStageNames, string[]> = {
+			CODE: [
+				'arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl',
+				'arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/EmailsToS3APIUser-EbXFEb',
+			],
+			PROD: [
+				'arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/ConnectedApp/SFEmailsToS3-6QJGTX',
+				'arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/EmailsToS3APIUser-kGtUDC',
+			],
+		};
+
 		const lambda = new SrScheduledLambda(this, 'Lambda', {
 			rules: [
 				{
@@ -49,11 +63,13 @@ export class SfEmailsToS3Exporter extends SrStack {
 			monitoring: { noMonitoring: true },
 			lambdaOverrides: {
 				runtime: Runtime.JAVA_21,
-				architecture: Architecture.X86_64,
+				// ARM/Graviton is cheaper and the artefact is a pure-JVM fat JAR
+				// (no native dependencies), so it runs unchanged on arm64.
+				architecture: Architecture.ARM_64,
 				fileName: 'sf-emails-to-s3-exporter.jar',
 				handler: 'com.gu.sf_emails_to_s3_exporter.Handler::handleRequest',
 				memorySize: 512,
-				timeout: Duration.seconds(900),
+				timeout: Duration.minutes(15),
 				description: 'Retrieves emails from Salesforce and saves as Json to S3',
 				environment: {
 					// The handler reads sys.env("Stage"); guCDK only injects uppercase STAGE.
@@ -68,17 +84,13 @@ export class SfEmailsToS3Exporter extends SrStack {
 
 		lambda.addToRolePolicy(
 			new PolicyStatement({
+				sid: 'readSalesforceSecrets',
 				effect: Effect.ALLOW,
 				actions: [
 					'secretsmanager:DescribeSecret',
 					'secretsmanager:GetSecretValue',
 				],
-				resources: [
-					'arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl',
-					'arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/ConnectedApp/SFEmailsToS3-6QJGTX',
-					'arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/EmailsToS3APIUser-EbXFEb',
-					'arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/EmailsToS3APIUser-kGtUDC',
-				],
+				resources: salesforceSecretArns[stage],
 			}),
 		);
 		lambda.addToRolePolicy(
@@ -102,20 +114,15 @@ export class SfEmailsToS3Exporter extends SrStack {
 				resources: [bucketArn, `${bucketArn}/*`],
 			}),
 		);
-		lambda.addToRolePolicy(
-			new PolicyStatement({
-				sid: 'readDeployedArtefact',
-				effect: Effect.ALLOW,
-				actions: ['s3:GetObject'],
-				resources: ['arn:aws:s3::*:membership-dist/*'],
-			}),
-		);
+		// Reading the deployed artefact from the distribution bucket is granted
+		// automatically by @guardian/cdk's GuLambdaFunction, so no extra policy
+		// is needed here.
 
 		const apiRole = new Role(this, 'S3IntegrationRole', {
 			roleName: `emails-to-sf-api-${stage}-api-gateway-role`,
 			assumedBy: new ServicePrincipal('apigateway.amazonaws.com'),
 			description: 'Allows API Gateway to Read/Write/Delete from S3.',
-			maxSessionDuration: Duration.seconds(3600),
+			maxSessionDuration: Duration.hours(1),
 			managedPolicies: [
 				ManagedPolicy.fromAwsManagedPolicyName(
 					'service-role/AmazonAPIGatewayPushToCloudWatchLogs',
@@ -171,7 +178,7 @@ export class SfEmailsToS3Exporter extends SrStack {
 				options: {
 					credentialsRole: apiRole,
 					passthroughBehavior: PassthroughBehavior.WHEN_NO_MATCH,
-					timeout: Duration.millis(29000),
+					timeout: Duration.seconds(29),
 					requestParameters: {
 						'integration.request.path.folder': 'method.request.path.bucketName',
 						'integration.request.path.item': 'method.request.path.caseNumber',
@@ -211,7 +218,7 @@ export class SfEmailsToS3Exporter extends SrStack {
 				options: {
 					credentialsRole: apiRole,
 					passthroughBehavior: PassthroughBehavior.WHEN_NO_MATCH,
-					timeout: Duration.millis(29000),
+					timeout: Duration.seconds(29),
 					requestParameters: {
 						'integration.request.header.x-amz-checksum-sha1':
 							'method.request.header.x-amz-checksum-sha1',
@@ -328,7 +335,7 @@ export class SfEmailsToS3Exporter extends SrStack {
 						namespace: 's3-emails-from-sf',
 						metricName: alarm.metricName,
 						statistic: 'Sum',
-						period: Duration.seconds(3600),
+						period: Duration.hours(1),
 						dimensionsMap: { Stage: this.stage },
 					}),
 				});
