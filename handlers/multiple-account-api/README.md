@@ -109,3 +109,17 @@ Example path: /subscriptions/A-S00974337/secondary-users
   ]
 }
 ```
+
+### Delete a secondary user from a subscription
+
+#### Request:
+
+DELETE /subscriptions/{subscriptionName}/secondary-users/{secondaryIdentityId}
+
+Headers: 'x-identity-id' - the identity id of the primary user
+
+Example path: /subscriptions/A-S00974337/secondary-users/30067890
+
+#### Response:
+
+`204 No Content`

@@ -40,6 +40,7 @@ export const withMMAIdentityCheck =
 			zuoraClient: ZuoraClient,
 			subscription: ZuoraSubscription,
 			account: ZuoraAccount,
+			path: TPath,
 		) => Promise<APIGatewayProxyResult>,
 		extractSubscriptionNumber: (parsed: { path: TPath; body: TBody }) => string,
 	): Handler<Pick<APIGatewayProxyEvent, 'headers'>, TPath, TBody> =>
@@ -58,5 +59,5 @@ export const withMMAIdentityCheck =
 
 		logger.mutableAddContext(subscriptionNumber);
 		assertIdentityIdMatches(account, event.headers);
-		return await handler(body, zuoraClient, subscription, account);
+		return await handler(body, zuoraClient, subscription, account, path);
 	};

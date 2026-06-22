@@ -157,6 +157,46 @@ paths:
               schema:
                 type: string
                 example: Internal server error
+  /subscriptions/{subscriptionName}/secondary-users/{secondaryIdentityId}:
+    delete:
+      operationId: deleteSecondaryUser
+      summary: Delete secondary user
+      description: Removes a secondary user from a primary subscription.
+      security:
+        - identityId: []
+        - apiKey: []
+      parameters:
+        - name: subscriptionName
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Zuora subscription number for the primary user.
+          example: A-S00974337
+        - name: secondaryIdentityId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Identity ID of the secondary user to remove.
+          example: '30067890'
+      responses:
+        '204':
+          description: Secondary user deleted.
+        '404':
+          description: Route not found.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Not Found
+        '500':
+          description: Internal server error.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Internal server error
   /invitation/{invitationCode}:
     delete:
       operationId: deleteInvitation
