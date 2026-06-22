@@ -14,9 +14,9 @@ export interface BearerTokenProvider {
 
 export class ZuoraBearerTokenProvider implements BearerTokenProvider {
 	private bearerToken: ZuoraBearerToken | null = null;
-	private lastFetchedTime: Date | null = null;
-	// avoid failures caused by millisecond timing issues
-	private bufferInMilliseconds = 1000;
+	private tokenExpiryTime: number | null = null;
+	// 5 minute buffer in case of early expiry
+	private bufferInMilliseconds = 5 * 60 * 1000;
 
 	constructor(
 		private stage: string,
@@ -25,39 +25,30 @@ export class ZuoraBearerTokenProvider implements BearerTokenProvider {
 
 	private tokenIsExpired = () => {
 		logger.log('Checking if Zuora bearer token is expired');
-		if (this.bearerToken === null) {
-			logger.log('No Zuora bearer token found, fetching a new one');
-			return true;
-		}
-		const now = new Date();
-		if (this.lastFetchedTime === null) {
+		if (this.tokenExpiryTime === null) {
 			logger.log(
-				'No last fetched time found, fetching a new Zuora bearer token',
+				'No token expiry time found, fetching a new Zuora bearer token',
 			);
 			return true;
 		}
-		if (
-			this.lastFetchedTime.getTime() + this.bearerToken.expires_in * 1000 <
-			now.getTime() + this.bufferInMilliseconds
-		) {
+		const now = new Date();
+		if (this.tokenExpiryTime < now.getTime() + this.bufferInMilliseconds) {
 			logger.log('Zuora bearer token is expired', {
-				lastFetchedTime: this.lastFetchedTime.getTime(),
-				expiresIn: this.bearerToken.expires_in * 1000,
+				tokenExpiryTime: this.tokenExpiryTime,
 				now: now.getTime(),
 			});
 			return true;
 		}
 		logger.log('Zuora bearer token is still valid', {
-			lastFetchedTime: this.lastFetchedTime.getTime(),
-			expiresIn: this.bearerToken.expires_in * 1000,
+			tokenExpiryTime: this.tokenExpiryTime,
 			now: now.getTime(),
 		});
 		return false;
 	};
 	public async getBearerToken(): Promise<ZuoraBearerToken> {
 		if (this.bearerToken === null || this.tokenIsExpired()) {
-			this.lastFetchedTime = new Date();
 			this.bearerToken = await this.fetchZuoraBearerToken();
+			this.tokenExpiryTime = Date.now() + this.bearerToken.expires_in * 1000;
 		}
 		return this.bearerToken;
 	}
