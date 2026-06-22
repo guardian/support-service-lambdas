@@ -15,6 +15,8 @@ export interface BearerTokenProvider {
 export class ZuoraBearerTokenProvider implements BearerTokenProvider {
 	private bearerToken: ZuoraBearerToken | null = null;
 	private lastFetchedTime: Date | null = null;
+	// avoid failures caused by millisecond timing issues
+	private bufferInMilliseconds = 1000;
 
 	constructor(
 		private stage: string,
@@ -36,7 +38,7 @@ export class ZuoraBearerTokenProvider implements BearerTokenProvider {
 		}
 		if (
 			this.lastFetchedTime.getTime() + this.bearerToken.expires_in * 1000 <
-			now.getTime()
+			now.getTime() + this.bufferInMilliseconds
 		) {
 			logger.log('Zuora bearer token is expired', {
 				lastFetchedTime: this.lastFetchedTime.getTime(),
@@ -45,7 +47,11 @@ export class ZuoraBearerTokenProvider implements BearerTokenProvider {
 			});
 			return true;
 		}
-		logger.log('Zuora bearer token is still valid');
+		logger.log('Zuora bearer token is still valid', {
+			lastFetchedTime: this.lastFetchedTime.getTime(),
+			expiresIn: this.bearerToken.expires_in * 1000,
+			now: now.getTime(),
+		});
 		return false;
 	};
 	public async getBearerToken(): Promise<ZuoraBearerToken> {
