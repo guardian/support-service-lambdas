@@ -25,8 +25,8 @@ import {
 	deleteInvitationPathSchema,
 } from './deleteInvitationEndpoint';
 import {
-	deleteSecondaryUserBodySchema,
 	deleteSecondaryUserEndpoint,
+	deleteSecondaryUserPathSchema,
 } from './deleteSecondaryUserEndpoint';
 import { InvitationRepository } from './invitationRepository';
 import {
@@ -111,23 +111,6 @@ export const handler: Handler = Router([
 		}),
 	},
 	{
-		httpMethod: 'DELETE',
-		path: '/secondary-users',
-		handler: withBodyParser(
-			deleteSecondaryUserBodySchema,
-			withMMAIdentityCheck(
-				stage,
-				async (body) =>
-					deleteSecondaryUserEndpoint(
-						stage,
-						secondaryUserRepository,
-						dynamoClient,
-					)(body),
-				({ body }) => body.subscriptionName,
-			),
-		),
-	},
-	{
 		httpMethod: 'GET',
 		path: '/subscriptions/{subscriptionName}/invitations',
 		handler: withPathParser(
@@ -152,6 +135,26 @@ export const handler: Handler = Router([
 				async (_body, _zuoraClient, subscription) =>
 					listSecondaryUsersEndpoint(secondaryUserRepository)({
 						subscriptionName: subscription.subscriptionNumber,
+					}),
+				({ path }) => path.subscriptionName,
+			),
+		),
+	},
+	{
+		httpMethod: 'DELETE',
+		path: '/subscriptions/{subscriptionName}/secondary-users/{secondaryIdentityId}',
+		handler: withPathParser(
+			deleteSecondaryUserPathSchema,
+			withMMAIdentityCheck(
+				stage,
+				async (_body, _zuoraClient, subscription, _account, path) =>
+					deleteSecondaryUserEndpoint(
+						stage,
+						secondaryUserRepository,
+						dynamoClient,
+					)({
+						subscriptionName: subscription.subscriptionNumber,
+						secondaryIdentityId: path.secondaryIdentityId,
 					}),
 				({ path }) => path.subscriptionName,
 			),
