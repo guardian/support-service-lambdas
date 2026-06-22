@@ -8,6 +8,7 @@ import type { Stage } from '@modules/stage';
 import { getDeleteSupporterRatePlanTransaction } from '@modules/supporter-product-data/supporterProductData';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
+import { buildComposedSubscriptionName } from './helpers';
 import type { SecondaryUserRepository } from './secondaryUserRepository';
 
 export const deleteSecondaryUserBodySchema = z.object({
@@ -28,7 +29,10 @@ export const deleteSecondaryUserEndpoint =
 	async (body: DeleteSecondaryUserBody): Promise<APIGatewayProxyResult> => {
 		try {
 			const { subscriptionName, secondaryIdentityId } = body;
-			const composedSubscriptionName = `${subscriptionName}-${secondaryIdentityId}`;
+			const composedSubscriptionName = buildComposedSubscriptionName(
+				subscriptionName,
+				secondaryIdentityId,
+			);
 			logger.mutableAddContext(composedSubscriptionName);
 
 			// Carry out the secondary user deletion and deletion of the support product data record
