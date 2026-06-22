@@ -27,7 +27,7 @@ export class ZuoraBearerTokenProvider implements BearerTokenProvider {
 		private credentials: OAuthClientCredentials,
 	) {}
 
-	private tokenIsExpired = () => {
+	private tokenIsNullOrExpired = () => {
 		logger.log('Checking for valid Zuora bearer token');
 		if (this.bearerToken === null) {
 			logger.log(
@@ -54,10 +54,10 @@ export class ZuoraBearerTokenProvider implements BearerTokenProvider {
 	};
 
 	public async getBearerToken(): Promise<BearerToken> {
-		if (this.bearerToken === null || this.tokenIsExpired()) {
+		if (this.tokenIsNullOrExpired()) {
 			this.bearerToken = await this.fetchBearerToken();
 		}
-		return this.bearerToken;
+		return this.bearerToken!; //Checked in tokenIsNullOrExpired
 	}
 
 	private fetchBearerToken = async (): Promise<BearerToken> => {
