@@ -5,16 +5,16 @@ import type {
 	ProductRatePlanId,
 	ZuoraCatalog,
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
+import type {
+	MmaGuardianSubscriptionMultiPlan,
+	MmaZuoraSubscription,
+} from '@modules/guardian-subscription/mma/mmaSubscriptionTypes';
 import type { ZuoraProductIdMap } from './group/buildZuoraProductIdToKey';
 import { buildZuoraProductIdToKey } from './group/buildZuoraProductIdToKey';
 import { byProductAndRatePlanIds } from './group/byProductAndRatePlanIds';
 import type { SubscriptionWithoutRatePlans } from './group/groupSubscriptionByZuoraCatalogIds';
 import type { RatePlansBeforeCharges } from './joinProductsAndRatePlans';
 import { joinProductsAndRatePlans } from './joinProductsAndRatePlans';
-import type {
-	MmaGuardianSubscriptionMultiPlan,
-	MmaZuoraSubscription,
-} from './mma/mmaSubscriptionTypes';
 import type { GuardianRatePlanMap } from './reprocessRatePlans/guardianRatePlanBuilder';
 import { indexAndJoinGuardianRatePlanCharges } from './reprocessRatePlans/guardianRatePlanBuilder';
 import type { ZuoraRatePlan } from './reprocessRatePlans/zuoraRatePlanBuilder';
@@ -109,10 +109,11 @@ export class GuardianSubscriptionParser {
 	toGuardianSubscription(
 		zuoraSubscription: ZuoraSubscription,
 	): GuardianSubscriptionMultiPlan {
-		const { ratePlans, ...subscriptionWithoutRatePlans } = zuoraSubscription;
-		const { ratePlans: guardianRatePlans, productsNotInCatalog } =
-			this.groupAndJoinProductsAndRatePlans(ratePlans);
-
+		const {
+			ratePlans: guardianRatePlans,
+			productsNotInCatalog,
+			...subscriptionWithoutRatePlans
+		} = this.groupAndJoinProductsAndRatePlans(zuoraSubscription);
 		// now we have the subscription charges, index them and join them onto each rate plan
 		return {
 			...subscriptionWithoutRatePlans,
@@ -134,11 +135,7 @@ export class GuardianSubscriptionParser {
 	toMmaGuardianSubscription(
 		zuoraSubscription: MmaZuoraSubscription,
 	): MmaGuardianSubscriptionMultiPlan {
-		const { ratePlans, ...subscriptionWithoutRatePlans } = zuoraSubscription;
-		return {
-			...subscriptionWithoutRatePlans,
-			...this.groupAndJoinProductsAndRatePlans(ratePlans),
-		};
+		return this.groupAndJoinProductsAndRatePlans(zuoraSubscription);
 	}
 
 	/**
@@ -153,11 +150,21 @@ export class GuardianSubscriptionParser {
 			productId: ProductId;
 			productRatePlanId: ProductRatePlanId;
 		},
-	>(ratePlans: SubRP[]): RatePlansBeforeCharges<SubRP> {
-		return joinProductsAndRatePlans(
-			byProductAndRatePlanIds(ratePlans),
-			this.zuoraProductIdGuardianLookup,
-			this.productCatalog,
-		);
+		S extends { ratePlans: SubRP[] },
+	>(
+		zuoraSubscription: S,
+	): Omit<S, 'ratePlans'> & RatePlansBeforeCharges<S['ratePlans'][number]> {
+		const { ratePlans, ...subscriptionWithoutRatePlans } = zuoraSubscription;
+		const { ratePlans: guardianRatePlans, productsNotInCatalog } =
+			joinProductsAndRatePlans(
+				byProductAndRatePlanIds(ratePlans),
+				this.zuoraProductIdGuardianLookup,
+				this.productCatalog,
+			);
+		return {
+			...subscriptionWithoutRatePlans,
+			ratePlans: guardianRatePlans,
+			productsNotInCatalog,
+		};
 	}
 }
