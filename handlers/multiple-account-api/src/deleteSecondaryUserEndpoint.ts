@@ -11,13 +11,13 @@ import { z } from 'zod';
 import { buildComposedSubscriptionName } from './helpers';
 import type { SecondaryUserRepository } from './secondaryUserRepository';
 
-export const deleteSecondaryUserBodySchema = z.object({
+export const deleteSecondaryUserPathSchema = z.object({
 	subscriptionName: z.string(),
 	secondaryIdentityId: z.string(),
 });
 
-export type DeleteSecondaryUserBody = z.infer<
-	typeof deleteSecondaryUserBodySchema
+export type DeleteSecondaryUserPath = z.infer<
+	typeof deleteSecondaryUserPathSchema
 >;
 
 export const deleteSecondaryUserEndpoint =
@@ -26,9 +26,9 @@ export const deleteSecondaryUserEndpoint =
 		secondaryUserRepository: SecondaryUserRepository,
 		dynamoClient: DynamoDBClient,
 	) =>
-	async (body: DeleteSecondaryUserBody): Promise<APIGatewayProxyResult> => {
+	async (path: DeleteSecondaryUserPath): Promise<APIGatewayProxyResult> => {
 		try {
-			const { subscriptionName, secondaryIdentityId } = body;
+			const { subscriptionName, secondaryIdentityId } = path;
 			const composedSubscriptionName = buildComposedSubscriptionName(
 				subscriptionName,
 				secondaryIdentityId,

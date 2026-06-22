@@ -1,5 +1,6 @@
 import { ValidationError } from '@modules/errors';
 import { logger } from '@modules/logger/logger';
+import type { Handler } from '@modules/routing/router';
 import type { Stage } from '@modules/stage';
 import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
@@ -13,7 +14,6 @@ import type {
 	APIGatewayProxyEventHeaders,
 	APIGatewayProxyResult,
 } from 'aws-lambda';
-import type { Handler } from '@modules/routing/router';
 
 export function assertIdentityIdMatches(
 	account: ZuoraAccount,
@@ -40,6 +40,7 @@ export const withMMAIdentityCheck =
 			zuoraClient: ZuoraClient,
 			subscription: ZuoraSubscription,
 			account: ZuoraAccount,
+			path: TPath,
 		) => Promise<APIGatewayProxyResult>,
 		extractSubscriptionNumber: (parsed: { path: TPath; body: TBody }) => string,
 	): Handler<Pick<APIGatewayProxyEvent, 'headers'>, TPath, TBody> =>
@@ -58,5 +59,5 @@ export const withMMAIdentityCheck =
 
 		logger.mutableAddContext(subscriptionNumber);
 		assertIdentityIdMatches(account, event.headers);
-		return await handler(body, zuoraClient, subscription, account);
+		return await handler(body, zuoraClient, subscription, account, path);
 	};
