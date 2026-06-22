@@ -16,7 +16,7 @@ export class ZuoraBearerTokenProvider implements BearerTokenProvider {
 	private bearerToken: ZuoraBearerToken | null = null;
 	private tokenExpiryTime: number | null = null;
 	// 1 minute buffer in case of early expiry
-	private bufferInMilliseconds = 60 * 1000;
+	private readonly bufferInMilliseconds = 60 * 1000;
 
 	constructor(
 		private stage: string,
