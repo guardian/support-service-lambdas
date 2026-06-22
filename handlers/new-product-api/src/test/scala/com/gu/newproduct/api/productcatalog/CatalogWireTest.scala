@@ -62,6 +62,10 @@ class CatalogWireTest extends AnyFlatSpec with Matchers with ResourceLoader {
         Currency.GBP -> AmountMinorUnits(66666),
         Currency.USD -> AmountMinorUnits(66665),
       )
+    case DigipackAnnualTaxExclusive => Map(Currency.CAD -> AmountMinorUnits(11999))
+    case DigipackMonthlyTaxExclusive => Map(Currency.CAD -> AmountMinorUnits(1199))
+    case AnnualSupporterPlusTaxExclusive => Map(Currency.CAD -> AmountMinorUnits(16999))
+    case MonthlySupporterPlusTaxExclusive => Map(Currency.CAD -> AmountMinorUnits(1699))
     case GuardianWeeklyPlusDomesticMonthly =>
       Map(
         Currency.GBP -> AmountMinorUnits(1111111),
