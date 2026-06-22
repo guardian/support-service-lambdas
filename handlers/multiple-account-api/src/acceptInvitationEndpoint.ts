@@ -16,6 +16,7 @@ import {
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import dayjs from 'dayjs';
 import { z } from 'zod';
+import { buildComposedSubscriptionName } from './helpers';
 import type { InvitationRepository } from './invitationRepository';
 import type { SecondaryUserRepository } from './secondaryUserRepository';
 
@@ -33,26 +34,28 @@ export const acceptInvitationEndpoint = async (
 ) => {
 	try {
 		const invitation = await invitationRepository.get(invitationCode);
+
 		if (!invitation) {
 			return notFound();
 		}
+
 		if (signedInUserId !== invitation.secondaryIdentityId) {
 			return badRequest('Incorrect user');
 		}
+
+		const { subscriptionName, secondaryIdentityId, primaryIdentityId } =
+			invitation;
+
 		const parentSupporterProductDataRecord = getIfDefined(
-			await getSupporterRatePlan(
-				stage,
-				invitation.primaryIdentityId,
-				invitation.subscriptionName,
-			),
-			`Supporter rate plan record not found for ${invitation.subscriptionName} and identity ${invitation.primaryIdentityId}`,
+			await getSupporterRatePlan(stage, primaryIdentityId, subscriptionName),
+			`Supporter rate plan record not found for ${subscriptionName} and identity ${primaryIdentityId}`,
 		);
 		const today = dayjs();
 
 		const secondaryUserRecord = {
-			subscriptionName: invitation.subscriptionName,
-			secondaryIdentityId: invitation.secondaryIdentityId,
-			primaryIdentityId: invitation.primaryIdentityId,
+			subscriptionName,
+			secondaryIdentityId,
+			primaryIdentityId,
 			acceptedDate: zuoraDateFormat(today),
 		};
 
@@ -63,18 +66,21 @@ export const acceptInvitationEndpoint = async (
 				TransactItems: [
 					secondaryUserRepository.getPutTransaction(secondaryUserRecord),
 					invitationRepository.getDeleteTransaction(
-						invitation.subscriptionName,
+						subscriptionName,
 						invitationCode,
 					),
 				],
 			}),
 		);
 
-		const secondarySubscriptionName = `${invitation.subscriptionName}-${invitation.secondaryIdentityId}`;
+		const secondarySubscriptionName = buildComposedSubscriptionName(
+			subscriptionName,
+			secondaryIdentityId,
+		);
 		const supporterProductDataRecord: SupporterRatePlanItem = {
 			subscriptionName: secondarySubscriptionName,
-			primarySubscriptionName: invitation.subscriptionName,
-			identityId: invitation.secondaryIdentityId,
+			primarySubscriptionName: subscriptionName,
+			identityId: secondaryIdentityId,
 			productRatePlanId: parentSupporterProductDataRecord.productRatePlanId,
 			productRatePlanName: 'Digital Plus Secondary User',
 			contractEffectiveDate: today,
@@ -87,7 +93,7 @@ export const acceptInvitationEndpoint = async (
 
 		// TODO: email?
 		return ok({
-			identityId: invitation.secondaryIdentityId,
+			identityId: secondaryIdentityId,
 			secondarySubscriptionName,
 		});
 	} catch (error) {
