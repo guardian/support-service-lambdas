@@ -1,15 +1,24 @@
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { ZuoraSubscription } from '@modules/zuora/types';
-import type { ZuoraCatalog } from '@modules/zuora-catalog/zuoraCatalogSchema';
+import type {
+	ProductId,
+	ProductRatePlanId,
+	ZuoraCatalog,
+} from '@modules/zuora-catalog/zuoraCatalogSchema';
 import type { ZuoraProductIdMap } from './group/buildZuoraProductIdToKey';
 import { buildZuoraProductIdToKey } from './group/buildZuoraProductIdToKey';
+import { byProductAndRatePlanIds } from './group/byProductAndRatePlanIds';
 import type { SubscriptionWithoutRatePlans } from './group/groupSubscriptionByZuoraCatalogIds';
-import { groupSubscriptionByIds } from './group/groupSubscriptionByZuoraCatalogIds';
+import type { RatePlansBeforeCharges } from './joinProductsAndRatePlans';
 import { joinProductsAndRatePlans } from './joinProductsAndRatePlans';
+import type {
+	MmaGuardianSubscriptionMultiPlan,
+	MmaZuoraSubscription,
+} from './mma/mmaSubscriptionTypes';
 import type { GuardianRatePlanMap } from './reprocessRatePlans/guardianRatePlanBuilder';
-import { joinGuardianRatePlanCharges } from './reprocessRatePlans/guardianRatePlanBuilder';
+import { indexAndJoinGuardianRatePlanCharges } from './reprocessRatePlans/guardianRatePlanBuilder';
 import type { ZuoraRatePlan } from './reprocessRatePlans/zuoraRatePlanBuilder';
-import { joinZuoraRatePlanCharges } from './reprocessRatePlans/zuoraRatePlanBuilder';
+import { indexAndJoinZuoraRatePlanCharges } from './reprocessRatePlans/zuoraRatePlanBuilder';
 
 /**
  * This represents what extra info we attach to the subscription to make a "guardian" subscription.
@@ -100,21 +109,55 @@ export class GuardianSubscriptionParser {
 	toGuardianSubscription(
 		zuoraSubscription: ZuoraSubscription,
 	): GuardianSubscriptionMultiPlan {
-		const { products, ...subscriptionWithoutRatePlans } =
-			groupSubscriptionByIds(zuoraSubscription);
+		const { ratePlans, ...subscriptionWithoutRatePlans } = zuoraSubscription;
+		const { ratePlans: guardianRatePlans, productsNotInCatalog } =
+			this.groupAndJoinProductsAndRatePlans(ratePlans);
 
-		// join the products and rate plans - the charges are carried along but not yet joined
-		const { ratePlans, productsNotInCatalog } = joinProductsAndRatePlans(
-			products,
+		// now we have the subscription charges, index them and join them onto each rate plan
+		return {
+			...subscriptionWithoutRatePlans,
+			ratePlans: guardianRatePlans.map(indexAndJoinGuardianRatePlanCharges),
+			productsNotInCatalog: productsNotInCatalog.map(
+				indexAndJoinZuoraRatePlanCharges,
+			),
+		};
+	}
+
+	/**
+	 * the MMA/object-query equivalent of toGuardianSubscription.
+	 *
+	 * It shares the "join the products and rate plans" pass, but the object-query
+	 * expand has no charges, so it stops there and never runs the "join the
+	 * charges" pass. The carried catalog charge lookups stay attached and unused,
+	 * ready for later if/when we do fetch the charges.
+	 */
+	toMmaGuardianSubscription(
+		zuoraSubscription: MmaZuoraSubscription,
+	): MmaGuardianSubscriptionMultiPlan {
+		const { ratePlans, ...subscriptionWithoutRatePlans } = zuoraSubscription;
+		return {
+			...subscriptionWithoutRatePlans,
+			...this.groupAndJoinProductsAndRatePlans(ratePlans),
+		};
+	}
+
+	/**
+	 * the shared "join the products and rate plans" pass: group the subscription
+	 * rate plans by product*Id and join them to the catalog.
+	 *
+	 * The grouping never indexes the charges, so this is generic over the rate
+	 * plan type and works for both the full and MMA subscriptions.
+	 */
+	private groupAndJoinProductsAndRatePlans<
+		SubRP extends {
+			productId: ProductId;
+			productRatePlanId: ProductRatePlanId;
+		},
+	>(ratePlans: SubRP[]): RatePlansBeforeCharges<SubRP> {
+		return joinProductsAndRatePlans(
+			byProductAndRatePlanIds(ratePlans),
 			this.zuoraProductIdGuardianLookup,
 			this.productCatalog,
 		);
-
-		// join the charges onto each rate plan now we have the subscription charges
-		return {
-			...subscriptionWithoutRatePlans,
-			ratePlans: ratePlans.map(joinGuardianRatePlanCharges),
-			productsNotInCatalog: productsNotInCatalog.map(joinZuoraRatePlanCharges),
-		};
 	}
 }

@@ -4,7 +4,7 @@ import { joinAllLeft } from '@modules/mapFunctions';
  * Joins two maps by key, applies mapFn to each matched pair, then flattens
  * the resulting ratePlans and productsNotInCatalog arrays.
  *
- * Used in guardianSubscriptionParser.ts and mmaGuardianSubscriptionParser.ts
+ * Used in guardianSubscriptionParser.ts (via joinProductsAndRatePlans) to join
  * to join subscription rate plans against catalog entries at both the product
  * and rate-plan levels.
  */

@@ -16,7 +16,7 @@ import {
 	type ProductRatePlanChargeKey,
 } from '@modules/product-catalog/productCatalog';
 import { zuoraCatalogToProductRatePlanChargeKey } from '@modules/product-catalog/zuoraToProductNameMappings';
-import type { RatePlanCharge } from '@modules/zuora/types';
+import type { RatePlan, RatePlanCharge } from '@modules/zuora/types';
 import type { ZuoraProductRatePlanCharge } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import type { ZuoraProductRatePlanChargeIdMap } from '../group/buildZuoraProductIdToKey';
 import type {
@@ -24,6 +24,7 @@ import type {
 	RatePlanWithoutCharges,
 	ZuoraRatePlanWithIndexedCharges,
 } from '../group/groupSubscriptionByZuoraCatalogIds';
+import { indexCharges } from '../group/groupSubscriptionByZuoraCatalogIds';
 
 /**
  * There is a similar type only one with the charges as a Record and the other
@@ -256,6 +257,19 @@ export function joinGuardianRatePlanCharges<P extends ProductKey>(
 			ratePlanCharges,
 		),
 	};
+}
+
+/**
+ * composes the "index the charges" and "join the charges" passes for a
+ * product-catalog rate plan whose subscription charges are still a raw array
+ * (i.e. straight off the Zuora subscription, not yet indexed).
+ */
+export function indexAndJoinGuardianRatePlanCharges<P extends ProductKey>(
+	ratePlan: GuardianRatePlanBeforeCharges<RatePlan, P>,
+): GuardianRatePlanMap<P> {
+	return joinGuardianRatePlanCharges(
+		indexCharges<GuardianCatalogValuesBeforeCharges<P>>(ratePlan),
+	);
 }
 
 function buildGuardianRatePlanCharges<P extends ProductKey>(

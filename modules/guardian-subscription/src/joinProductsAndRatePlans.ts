@@ -28,8 +28,9 @@ export type RatePlansBeforeCharges<SubRP> = {
 };
 
 /**
- * the shared "join the products and rate plans" pass used by both
- * GuardianSubscriptionParser (full) and MmaGuardianSubscriptionParser (MMA).
+ * the shared "join the products and rate plans" pass used by both the full and
+ * MMA paths of GuardianSubscriptionParser (toGuardianSubscription and
+ * toMmaGuardianSubscription).
  *
  * It joins the subscription rate plans (already grouped by product*Id) to the
  * Zuora catalog, splitting them into known/unknown product-catalog plans and

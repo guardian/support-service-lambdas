@@ -4,12 +4,7 @@ import type {
 	RatePlanCharge,
 	ZuoraSubscription,
 } from '@modules/zuora/types';
-import type {
-	ProductId,
-	ProductRatePlanChargeId,
-	ProductRatePlanId,
-} from '@modules/zuora-catalog/zuoraCatalogSchema';
-import { byProductAndRatePlanIds } from './byProductAndRatePlanIds';
+import type { ProductRatePlanChargeId } from '@modules/zuora-catalog/zuoraCatalogSchema';
 
 export type RatePlanWithoutCharges = Omit<RatePlan, 'ratePlanCharges'>;
 export type SubscriptionWithoutRatePlans = Omit<ZuoraSubscription, 'ratePlans'>;
@@ -23,77 +18,31 @@ export type ZuoraRatePlanWithIndexedCharges = RatePlanWithoutCharges & {
 	ratePlanCharges: IndexedZuoraSubscriptionRatePlanCharges;
 };
 
-export type IndexedZuoraSubscriptionRatePlans = Map<
-	ProductRatePlanId,
-	readonly ZuoraRatePlanWithIndexedCharges[] // might have multiple of the same product, e.g. product switch and back again
->;
-export type IndexedZuoraSubscriptionRatePlansByProduct = Map<
-	ProductId,
-	IndexedZuoraSubscriptionRatePlans
->;
-
-export type ZuoraSubscriptionByCatalogIds = SubscriptionWithoutRatePlans & {
-	products: IndexedZuoraSubscriptionRatePlansByProduct;
-};
-
 /**
- * This is similar to buildZuoraProductIdToKey only it works on the
- * subscription instead of the catalog.
+ * replace the ratePlanCharges array with ones that are keyed by PRPC id, while
+ * preserving any other data (C) already attached to the rate plan.
  *
- * This rejigs a normal zuora subscription to index everything off the
- * product*Ids or names as required.
- *
- * In the case of product*Id makes it easier to connect a subscription with the
- * catalog
- *
- * In the case of names, it makes non-catalog things like Discounts more
- * usable.
- *
- * Note that if a sub has multiple of the same product and rateplan, the list
- * will have multiple entries which can be filtered down later.
- *
- * @param zuoraSubscription
- */
-export function groupSubscriptionByIds(
-	zuoraSubscription: ZuoraSubscription,
-): ZuoraSubscriptionByCatalogIds {
-	const { ratePlans, ...subscriptionWithoutRatePlans } = zuoraSubscription;
-	const productIdToProductRatePlanIdToRatePlans: IndexedZuoraSubscriptionRatePlansByProduct =
-		groupRatePlansToMatchProductCatalogStructure(ratePlans);
-
-	return {
-		...subscriptionWithoutRatePlans,
-		products: productIdToProductRatePlanIdToRatePlans,
-	};
-}
-
-/**
- * this groups the rate plans by the product ids at all three levels
- *
- * @param ratePlans
- */
-function groupRatePlansToMatchProductCatalogStructure(
-	ratePlans: RatePlan[],
-): IndexedZuoraSubscriptionRatePlansByProduct {
-	const ratePlanWithIndexedCharges: ZuoraRatePlanWithIndexedCharges[] =
-		ratePlans.map(indexTheCharges);
-	return byProductAndRatePlanIds(ratePlanWithIndexedCharges);
-}
-
-/**
- * replace the ratePlanCharges list with ones that are keyed by PRPC id
- *
- * This makes the structure match the product-catalog.
+ * This makes the charge structure match the product-catalog so the charges can
+ * be joined. It is applied lazily - only when we actually have charges to join,
+ * just before joining them - so the subscription grouping itself never needs to
+ * know about charges (which is what lets the grouping be shared with the MMA
+ * path, which has no charges).
  *
  * @param ratePlan
  */
-function indexTheCharges(ratePlan: RatePlan): ZuoraRatePlanWithIndexedCharges {
-	return {
-		...ratePlan,
-		ratePlanCharges: groupByUniqueOrThrowMap(
-			ratePlan.ratePlanCharges,
-			(charge) => charge.productRatePlanChargeId,
-			'duplicate charges',
-		),
+export function indexCharges<C>(
+	ratePlan: RatePlan & C,
+): ZuoraRatePlanWithIndexedCharges & C {
+	const { ratePlanCharges, ...rest } = ratePlan;
+	const indexedCharges = groupByUniqueOrThrowMap(
+		ratePlanCharges,
+		(charge) => charge.productRatePlanChargeId,
+		'duplicate charges',
+	);
+	const indexedRatePlan = {
+		...rest,
+		ratePlanCharges: indexedCharges,
 	};
+	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- rebuilding the rate plan with indexed charges while preserving the attached data C
+	return indexedRatePlan as ZuoraRatePlanWithIndexedCharges & C;
 }

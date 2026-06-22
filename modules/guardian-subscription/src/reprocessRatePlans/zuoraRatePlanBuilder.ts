@@ -2,7 +2,7 @@ import {
 	groupCollectByUniqueOrThrowMap,
 	objectJoinBijective,
 } from '@modules/mapFunctions';
-import type { RatePlanCharge } from '@modules/zuora/types';
+import type { RatePlan, RatePlanCharge } from '@modules/zuora/types';
 import type {
 	CatalogProduct,
 	ZuoraProductRatePlan,
@@ -17,6 +17,7 @@ import type {
 	RatePlanWithoutCharges,
 	ZuoraRatePlanWithIndexedCharges,
 } from '../group/groupSubscriptionByZuoraCatalogIds';
+import { indexCharges } from '../group/groupSubscriptionByZuoraCatalogIds';
 
 export type ZuoraProductWithoutRatePlans = Omit<
 	CatalogProduct,
@@ -141,6 +142,19 @@ export function joinZuoraRatePlanCharges(
 			ratePlanCharges,
 		),
 	};
+}
+
+/**
+ * composes the "index the charges" and "join the charges" passes for a
+ * non-product-catalog rate plan whose subscription charges are still a raw array
+ * (i.e. straight off the Zuora subscription, not yet indexed).
+ */
+export function indexAndJoinZuoraRatePlanCharges(
+	ratePlan: ZuoraRatePlanBeforeCharges<RatePlan>,
+): ZuoraRatePlan {
+	return joinZuoraRatePlanCharges(
+		indexCharges<ZuoraCatalogValuesBeforeCharges>(ratePlan),
+	);
 }
 
 function buildZuoraChargesByName(

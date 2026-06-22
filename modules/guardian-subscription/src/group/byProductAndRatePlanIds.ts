@@ -20,7 +20,7 @@ export type IndexedRatePlansByProduct<RP> = Map<
  * Group rate plans into a tree, first by product id and then product rate plan id.
  *
  * This makes the structure match the product-catalog and the Zuora catalog lookup,
- * enabling joining in GuardianSubscriptionParser / MmaGuardianSubscriptionParser.
+ * enabling joining in GuardianSubscriptionParser (both the full and MMA paths).
  *
  * It is generic over the rate plan element type so it can be shared by both the
  * charge-rich path (ZuoraRatePlanWithIndexedCharges) and the MMA/object-query
