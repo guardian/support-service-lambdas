@@ -3,8 +3,8 @@ import {
 	DynamoDBClient,
 	PutItemCommand,
 	QueryCommand,
-	UpdateItemCommand,
 	type TransactWriteItem,
+	UpdateItemCommand,
 } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { logger } from '@modules/logger/logger';
