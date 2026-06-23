@@ -155,6 +155,7 @@ export class SupporterProductDataLambdas extends SrStack {
 		processItem.addPolicies(zuoraOAuthPolicy);
 
 		queue.grantSendMessages(addToQueue);
+		queue.grantSendMessages(processItem); // The process item lambda calls itself for subscriptions with secondary users
 		queue.grantConsumeMessages(processItem);
 		processItem.addEventSource(
 			new SqsEventSource(queue, {
