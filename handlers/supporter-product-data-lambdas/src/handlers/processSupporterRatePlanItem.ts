@@ -54,19 +54,19 @@ export const processItem = async (
 			subscriptionName: item.subscriptionName,
 		});
 		await Promise.all(
-			secondaryUsers.map((secondaryUser) =>
-				dependencies
-					.writeSecondaryItem(itemWithContribution, secondaryUser)
-					.then(() =>
-						dependencies.updateSecondaryUserTTL(
-							itemWithContribution.subscriptionName,
-							secondaryUser.secondaryIdentityId,
-							secondaryUserTTLFromPrimarySubscriptionTTL(
-								itemWithContribution.termEndDate,
-							),
-						),
+			secondaryUsers.map(async (secondaryUser) => {
+				await dependencies.writeSecondaryItem(
+					itemWithContribution,
+					secondaryUser,
+				);
+				await dependencies.updateSecondaryUserTTL(
+					itemWithContribution.subscriptionName,
+					secondaryUser.secondaryIdentityId,
+					secondaryUserTTLFromPrimarySubscriptionTTL(
+						itemWithContribution.termEndDate,
 					),
-			),
+				);
+			}),
 		);
 	}
 };
