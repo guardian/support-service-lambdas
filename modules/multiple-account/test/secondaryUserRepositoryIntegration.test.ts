@@ -55,4 +55,3 @@ test('SecondaryUserRepository updateTTL updates the expiryDate without overwriti
 
 	expect(saved).toEqual([{ ...testRecord, expiryDate: newExpiryDate }]);
 });
-
