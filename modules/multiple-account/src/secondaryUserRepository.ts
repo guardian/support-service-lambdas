@@ -3,11 +3,13 @@ import {
 	DynamoDBClient,
 	PutItemCommand,
 	QueryCommand,
+	UpdateItemCommand,
 	type TransactWriteItem,
 } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { logger } from '@modules/logger/logger';
 import type { Stage } from '@modules/stage';
+import type { Dayjs } from 'dayjs';
 import { z } from 'zod';
 
 const secondaryUserRecordSchema = z.object({
@@ -15,7 +17,12 @@ const secondaryUserRecordSchema = z.object({
 	secondaryIdentityId: z.string(),
 	primaryIdentityId: z.string(),
 	acceptedDate: z.string(),
+	expiryDate: z.number(),
 });
+
+export function secondaryUserTTLFromPrimarySubscriptionTTL(primaryTTL: Dayjs) {
+	return primaryTTL.add(2, 'weeks').unix();
+}
 
 export type SecondaryUserRecord = z.infer<typeof secondaryUserRecordSchema>;
 
@@ -85,6 +92,26 @@ export class SecondaryUserRepository {
 				Key: {
 					subscriptionName: { S: subscriptionName },
 					secondaryIdentityId: { S: secondaryIdentityId },
+				},
+			}),
+		);
+	}
+
+	async updateTTL(
+		subscriptionName: string,
+		secondaryIdentityId: string,
+		expiryDate: number,
+	): Promise<void> {
+		await this.client.send(
+			new UpdateItemCommand({
+				TableName: this.tableName,
+				Key: {
+					subscriptionName: { S: subscriptionName },
+					secondaryIdentityId: { S: secondaryIdentityId },
+				},
+				UpdateExpression: 'SET expiryDate = :expiryDate',
+				ExpressionAttributeValues: {
+					':expiryDate': { N: expiryDate.toString() },
 				},
 			}),
 		);
