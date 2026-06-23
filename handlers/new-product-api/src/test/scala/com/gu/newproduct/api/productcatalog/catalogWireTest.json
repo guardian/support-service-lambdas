@@ -63,7 +63,8 @@
         "amount" : 16.99,
         "billingPeriod" : "Monthly",
         "description" : "CAD 16.99 every month"
-      } ]
+      } ],
+      "enabledForBillingCountries" : [ "Canada" ]
     }, {
       "id" : "annual_supporter_plus_tax_exclusive",
       "label" : "Annual",
@@ -79,7 +80,8 @@
         "amount" : 169.99,
         "billingPeriod" : "Annual",
         "description" : "CAD 169.99 every 12 months"
-      } ]
+      } ],
+      "enabledForBillingCountries" : [ "Canada" ]
     } ]
   }, {
     "label" : "Digital Plus",
@@ -142,7 +144,8 @@
         "amount" : 119.99,
         "billingPeriod" : "Annual",
         "description" : "CAD 119.99 every 12 months"
-      } ]
+      } ],
+      "enabledForBillingCountries" : [ "Canada" ]
     }, {
       "id" : "digipack_monthly_tax_exclusive",
       "label" : "Monthly",
@@ -158,7 +161,8 @@
         "amount" : 11.99,
         "billingPeriod" : "Monthly",
         "description" : "CAD 11.99 every month"
-      } ]
+      } ],
+      "enabledForBillingCountries" : [ "Canada" ]
     } ]
   }, {
     "label" : "Home Delivery",
