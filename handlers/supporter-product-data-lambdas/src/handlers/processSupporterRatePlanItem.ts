@@ -1,4 +1,5 @@
 import { logger } from '@modules/logger/logger';
+import type { SecondaryUserRecord } from '@modules/multiple-account/secondaryUserRepository';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import { supporterRatePlanItemSchema } from '@modules/supporter-product-data/supporterProductData';
 import type { SQSRecord } from 'aws-lambda';
@@ -11,15 +12,20 @@ export type ProcessItemDependencies = {
 	getSubscription: (
 		subscriptionName: string,
 	) => Promise<MinimalZuoraSubscription>;
-	writeItem: (item: SupporterRatePlanItem) => Promise<void>;
+	writePrimaryItem: (item: SupporterRatePlanItem) => Promise<void>;
+	getSecondaryUsers: (
+		subscriptionName: string,
+	) => Promise<SecondaryUserRecord[]>;
+	writeSecondaryItem: (
+		primaryItem: SupporterRatePlanItem,
+		secondaryUser: SecondaryUserRecord,
+	) => Promise<void>;
 };
 
 export const processItem = async (
 	item: SupporterRatePlanItem,
 	dependencies: ProcessItemDependencies,
 ): Promise<void> => {
-	logger.resetContext();
-	logger.mutableAddContext(item.subscriptionName);
 	logger.log('Processing supporter rate plan item', item);
 
 	if (dependencies.isDiscountRatePlanItem(item)) {
@@ -32,7 +38,21 @@ export const processItem = async (
 		dependencies,
 	);
 
-	await dependencies.writeItem(itemWithContribution);
+	await dependencies.writePrimaryItem(itemWithContribution);
+
+	const secondaryUsers = await dependencies.getSecondaryUsers(
+		item.subscriptionName,
+	);
+	if (secondaryUsers.length > 0) {
+		logger.log(`Updating ${secondaryUsers.length} secondary subscription(s)`, {
+			subscriptionName: item.subscriptionName,
+		});
+		await Promise.all(
+			secondaryUsers.map((secondaryUser) =>
+				dependencies.writeSecondaryItem(itemWithContribution, secondaryUser),
+			),
+		);
+	}
 };
 
 export const processEvent = async (
