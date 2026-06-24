@@ -63,7 +63,9 @@ async function getZuoraSalesTaxRates(
 		zuoraTaxCodes.taxCodes,
 	);
 	if (!zuoraTaxCode) {
-		throw new ValidationError(`invalid productKey:${productKey}`);
+		throw new ValidationError(
+			`No tax data found for productKey: ${productKey}`,
+		);
 	}
 
 	const zuoraTaxPeriods = await getZuoraTaxPeriods(zuoraClient);
