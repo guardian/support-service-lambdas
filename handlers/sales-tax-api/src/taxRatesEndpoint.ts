@@ -4,7 +4,7 @@ import {
 	getCountryNameByIsoCode,
 } from '@modules/internationalisation/country';
 import { logger } from '@modules/logger/logger';
-import type { productKeySchema } from '@modules/product-catalog/productCatalogSchema';
+import type { ProductKey } from '@modules/product-catalog/productCatalog';
 import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
 import {
 	getZuoraTaxCodes,
@@ -18,7 +18,6 @@ import type {
 import { type ZuoraTaxCode } from '@modules/zuora/types/objects/tax';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyResult } from 'aws-lambda';
-import type { z } from 'zod';
 import type { CaTaxRateState, TaxRatesResponse } from './schemas';
 import { type TaxRatesRequest, taxRatesResponseSchema } from './schemas';
 
@@ -29,7 +28,6 @@ export class InternalServerError extends Error {
 	}
 }
 
-type ProductKey = z.infer<typeof productKeySchema>;
 type TaxCodeName = 'Supporter Plus Global Tax' | 'Digital Pack Global Tax';
 const taxExclusiveProductCodeNames: Partial<Record<ProductKey, TaxCodeName>> = {
 	SupporterPlus: `Supporter Plus Global Tax`,
