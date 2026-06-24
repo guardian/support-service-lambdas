@@ -15,6 +15,8 @@ const identityUserWithPrivateFieldsSchema = z.object({
 	publicFields: z.object({ displayName: z.string() }),
 	privateFields: z.object({
 		brazeUuid: z.string().optional(),
+		firstName: z.string().optional(),
+		secondName: z.string().optional(),
 	}),
 });
 

@@ -5,8 +5,28 @@ import type { SecondaryUserRepository } from '@modules/multiple-account/secondar
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
 import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
-import type { InvitationRepository } from './invitationRepository';
+import { z } from 'zod';
+import {
+	invitationRecordSchema,
+	type InvitationRepository,
+} from './invitationRepository';
 import type { ListSecondaryUsersBody } from './listSecondaryUsersEndpoint';
+
+export const mmaPrimarySummaryResponseSchema = z.object({
+	invitations: z.array(invitationRecordSchema),
+	secondaryUsers: z.array(
+		z.object({
+			subscriptionName: z.string(),
+			secondaryIdentityId: z.string(),
+			primaryIdentityId: z.string(),
+			acceptedDate: z.string(),
+			email: z.string().optional(),
+			displayName: z.string().optional(),
+			firstName: z.string().optional(),
+			lastName: z.string().optional(),
+		}),
+	),
+});
 
 export const mmaPrimarySummaryEndpoint =
 	(
@@ -17,14 +37,17 @@ export const mmaPrimarySummaryEndpoint =
 	async ({ subscriptionName }: ListSecondaryUsersBody) => {
 		try {
 			logger.mutableAddContext(subscriptionName);
-			const invitations = invitationRepository.list(subscriptionName);
+			const invitations = await invitationRepository.list(subscriptionName);
 			const secondaryUsers = await getSecondaryUserListWithNames(
 				subscriptionName,
 				secondaryUserRepository,
 				identityClient,
 			);
 
-			return ok({ invitations, secondaryUsers });
+			return ok(
+				{ invitations, secondaryUsers },
+				mmaPrimarySummaryResponseSchema,
+			);
 		} catch (error) {
 			return buildErrorResponse(error);
 		}
@@ -48,7 +71,10 @@ const getSecondaryUserListWithNames = async (
 			);
 			return {
 				...secondaryUser,
-				name: userDetails.publicFields.displayName,
+				displayName: userDetails.publicFields.displayName,
+				firstName: userDetails.privateFields.firstName,
+				lastName: userDetails.privateFields.secondName,
+				email: userDetails.primaryEmailAddress,
 			};
 		}),
 	);
