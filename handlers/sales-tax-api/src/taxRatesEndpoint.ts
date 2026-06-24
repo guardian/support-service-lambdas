@@ -152,12 +152,21 @@ function createCadStateTaxRates(
 	});
 	return cadStateTaxRates;
 }
+
+function stateNotPresentInZuoraData(
+	cadZuoraTaxRates: ZuoraTaxRate[],
+	stateCode: string,
+) {
+	return !cadZuoraTaxRates.some((rate) => caStates[stateCode] === rate.state);
+}
+
 function checkForMissingCadStates(cadZuoraTaxRates: ZuoraTaxRate[]): string[] {
-	const keys = taxRatesResponseSchema.keyof().options;
-	return keys.filter(
-		(key) => !cadZuoraTaxRates.some((rate) => caStates[key] === rate.state),
+	const expectedStateKeys = taxRatesResponseSchema.keyof().options;
+	return expectedStateKeys.filter((stateCode) =>
+		stateNotPresentInZuoraData(cadZuoraTaxRates, stateCode),
 	);
 }
+
 function isTaxRateKey(key: string): key is keyof TaxRatesResponse {
 	return key in caStatesDefault;
 }
