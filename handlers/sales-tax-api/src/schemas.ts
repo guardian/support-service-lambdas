@@ -24,3 +24,4 @@ export const taxRatesResponseSchema = z.object({
 	YT: z.number(),
 });
 export type TaxRatesResponse = z.infer<typeof taxRatesResponseSchema>;
+export type CaTaxRateState = keyof TaxRatesResponse;

@@ -19,11 +19,8 @@ import { type ZuoraTaxCode } from '@modules/zuora/types/objects/tax';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import type { z } from 'zod';
-import {
-	type TaxRatesRequest,
-	type TaxRatesResponse,
-	taxRatesResponseSchema,
-} from './schemas';
+import type { CaTaxRateState, TaxRatesResponse } from './schemas';
+import { type TaxRatesRequest, taxRatesResponseSchema } from './schemas';
 
 export class InternalServerError extends Error {
 	constructor(message: string) {
@@ -39,22 +36,6 @@ const taxExclusiveProductCodeNames: Partial<Record<ProductKey, TaxCodeName>> = {
 	DigitalSubscription: `Digital Pack Global Tax`,
 };
 
-const caStatesDefault: TaxRatesResponse = {
-	AB: 0,
-	BC: 0,
-	MB: 0,
-	NB: 0,
-	NL: 0,
-	NT: 0,
-	NS: 0,
-	NU: 0,
-	ON: 0,
-	PE: 0,
-	QC: 0,
-	SK: 0,
-	YT: 0,
-};
-
 export const taxRatesEndpoint = async (
 	zuoraClient: ZuoraClient,
 	{ productKey, country }: TaxRatesRequest,
@@ -67,7 +48,6 @@ export const taxRatesEndpoint = async (
 	try {
 		return ok(
 			await getZuoraSalesTaxRates(zuoraClient, { productKey, country }),
-			taxRatesResponseSchema,
 		);
 	} catch (error) {
 		logger.error('Error fetching Zuora taxes', error);
@@ -109,6 +89,7 @@ async function getZuoraSalesTaxRates(
 
 	const zuoraTaxRates = await getZuoraTaxRates(zuoraClient, zuoraTaxPeriod.id);
 	const cadZuoraTaxRates = extractCadZuoraTaxRates(zuoraTaxRates.taxRates);
+
 	return createCadStateTaxRates(cadZuoraTaxRates);
 }
 
@@ -142,39 +123,39 @@ function extractCadZuoraTaxRates(
 function createCadStateTaxRates(
 	cadZuoraTaxRates: ZuoraTaxRate[],
 ): TaxRatesResponse {
-	const cadStatesMissing = checkForMissingCadStates(cadZuoraTaxRates);
-	if (cadStatesMissing.length > 0) {
+	const stateCodes = taxRatesResponseSchema.keyof().options;
+	const missingStateCodes: CaTaxRateState[] = [];
+
+	const taxCodesByState = stateCodes.reduce<Partial<TaxRatesResponse>>(
+		(memo: Partial<TaxRatesResponse>, stateCode: CaTaxRateState) => {
+			const zuoraTaxRate = cadZuoraTaxRates.find(
+				(zuoraTaxRate) => caStates[stateCode] === zuoraTaxRate.state,
+			);
+
+			if (zuoraTaxRate) {
+				memo[stateCode] = zuoraTaxRate.taxRate1;
+			} else {
+				missingStateCodes.push(stateCode);
+			}
+
+			return memo;
+		},
+		{},
+	);
+
+	if (missingStateCodes.length > 0) {
 		throw new InternalServerError(
-			`Zuora is missing tax rates for the following CA provinces: ${cadStatesMissing.join(', ')}`,
+			`Zuora is missing tax rates for the following CA provinces: ${missingStateCodes.join(', ')}`,
 		);
 	}
 
-	const cadStateTaxRates: TaxRatesResponse = { ...caStatesDefault };
-	Object.keys(cadStateTaxRates).forEach((key) => {
-		if (isTaxRateKey(key)) {
-			const zuoraTaxRate = cadZuoraTaxRates.find(
-				(zuoraTaxRate) => caStates[key] === zuoraTaxRate.state,
-			);
-			cadStateTaxRates[key] = zuoraTaxRate?.taxRate1 ?? 0;
-		}
-	});
-	return cadStateTaxRates;
-}
+	const parsedResult = taxRatesResponseSchema.safeParse(taxCodesByState);
 
-function stateNotPresentInZuoraData(
-	cadZuoraTaxRates: ZuoraTaxRate[],
-	stateCode: string,
-) {
-	return !cadZuoraTaxRates.some((rate) => caStates[stateCode] === rate.state);
-}
+	if (!parsedResult.success) {
+		// It shouldn't be possible to get here since we already validated all CA states
+		// are present above. But it's useful to resolve the type to a complete TaxRatesResponse
+		throw new InternalServerError('Failed to parse constructed CAD tax rates');
+	}
 
-function checkForMissingCadStates(cadZuoraTaxRates: ZuoraTaxRate[]): string[] {
-	const expectedStateKeys = taxRatesResponseSchema.keyof().options;
-	return expectedStateKeys.filter((stateCode) =>
-		stateNotPresentInZuoraData(cadZuoraTaxRates, stateCode),
-	);
-}
-
-function isTaxRateKey(key: string): key is keyof TaxRatesResponse {
-	return key in caStatesDefault;
+	return parsedResult.data;
 }
