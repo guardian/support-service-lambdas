@@ -1,6 +1,6 @@
 import { mergeValues, pickKeys } from '@modules/objectFunctions';
-import type { ZodType, ZodTypeDef } from 'zod';
 import { z } from 'zod';
+import type { ZodType, ZodTypeDef } from 'zod';
 import type { DoesNotHaveDuplicateResponseKey } from '@modules/zuora/objectQuery/doesNotHaveDuplicateResponseKey';
 import type {
 	ObjectQueryExpandRegistry,
@@ -57,7 +57,7 @@ export class ObjectQueryBuilder<
 	 * @param expand
 	 */
 	buildItemSchema<
-		TFields extends keyof TFieldRegistry,
+		const TFields extends keyof TFieldRegistry,
 		const TExpandKeys extends ReadonlyArray<keyof TExpandRegistry>,
 	>(
 		fields: readonly TFields[],
@@ -84,7 +84,7 @@ export class ObjectQueryBuilder<
 	 * @param sort
 	 */
 	async execute<
-		TFields extends keyof TFieldRegistry,
+		const TFields extends keyof TFieldRegistry,
 		const TExpandKeys extends ReadonlyArray<keyof TExpandRegistry>,
 	>(
 		zuoraClient: ZuoraClient,
