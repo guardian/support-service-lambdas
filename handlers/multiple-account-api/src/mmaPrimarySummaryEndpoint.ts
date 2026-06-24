@@ -1,8 +1,11 @@
 import { getUserByIdentityId } from '@modules/identity/idapi';
 import type { IdentityClient } from '@modules/identity/identityClient';
 import { logger } from '@modules/logger/logger';
-import type { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
-import { getIfDefined } from '@modules/nullAndUndefined';
+import type {
+	SecondaryUserRecord,
+	SecondaryUserRepository,
+} from '@modules/multiple-account/secondaryUserRepository';
+import { secondaryUserRecordSchema } from '@modules/multiple-account/secondaryUserRepository';
 import { prettyPrint } from '@modules/prettyPrint';
 import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
 import { z } from 'zod';
@@ -15,11 +18,7 @@ import type { ListSecondaryUsersBody } from './listSecondaryUsersEndpoint';
 export const mmaPrimarySummaryResponseSchema = z.object({
 	invitations: z.array(invitationRecordSchema),
 	secondaryUsers: z.array(
-		z.object({
-			subscriptionName: z.string(),
-			secondaryIdentityId: z.string(),
-			primaryIdentityId: z.string(),
-			acceptedDate: z.string(),
+		secondaryUserRecordSchema.extend({
 			email: z.string().optional(),
 			displayName: z.string().optional(),
 			firstName: z.string().optional(),
@@ -61,21 +60,32 @@ const getSecondaryUserListWithNames = async (
 	const secondaryUsers = await secondaryUserRepository.list(subscriptionName);
 
 	return Promise.all(
-		secondaryUsers.map(async (secondaryUser) => {
-			const userDetails = getIfDefined(
-				await getUserByIdentityId(
-					identityClient,
-					secondaryUser.secondaryIdentityId,
-				),
-				`No identity details found for secondary user ${prettyPrint(secondaryUser)}`,
-			);
-			return {
-				...secondaryUser,
-				displayName: userDetails.publicFields.displayName,
-				firstName: userDetails.privateFields.firstName,
-				lastName: userDetails.privateFields.secondName,
-				email: userDetails.primaryEmailAddress,
-			};
-		}),
+		secondaryUsers.map(async (secondaryUser) =>
+			getSecondaryUserWithName(identityClient, secondaryUser),
+		),
 	);
+};
+
+const getSecondaryUserWithName = async (
+	identityClient: IdentityClient,
+	secondaryUser: SecondaryUserRecord,
+) => {
+	const userDetails = await getUserByIdentityId(
+		identityClient,
+		secondaryUser.secondaryIdentityId,
+	);
+
+	if (!userDetails) {
+		throw new Error(
+			`No identity details found for secondary user ${prettyPrint(secondaryUser)}`,
+		);
+	}
+
+	return {
+		...secondaryUser,
+		displayName: userDetails.publicFields.displayName,
+		firstName: userDetails.privateFields.firstName,
+		lastName: userDetails.privateFields.secondName,
+		email: userDetails.primaryEmailAddress,
+	};
 };
