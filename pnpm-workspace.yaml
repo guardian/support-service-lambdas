@@ -7,6 +7,8 @@ packages:
   - 'cdk'
   # build generator
   - 'buildcheck'
+  # agent/copilot tools (CLI)
+  - 'agent-tools'
 
 catalog:
   zod: ^3.23.8

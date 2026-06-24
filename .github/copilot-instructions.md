@@ -40,5 +40,38 @@ the high level calls should be implemented in separate files as per modules/zuor
 Use SrCDK constructs from ./cdk/lib/cdk/ where possible.
 
 
-### Verification
-Always run build, fix-formatting and eslint with a fix flag as well as all relevant tests after making changes to Typescript code.
+In agent mode, to reduce approval fatigue, here is the order of preference for tools:
+First choice: built in MCP functions
+Second choice: agent-tool (all sub-commands can be approved in one go)
+Third choice: consistent pnpm scripts (exact command strings can be manually approved)
+Fourth choice: consistent shell commands
+Last choice: arbitrary/ad hoc shell commmands
+
+### Verification and repair
+
+Always run type-check, fix-formatting and lint-fix as well as all relevant tests after making changes to Typescript code.
+
+When making changes to TypeScript code, always run use `./agent-tool <command>` instead of ad-hoc commands such as raw `pnpm lint`, `pnpm type-check`, `prettier`, `eslint`, or `git`.
+
+Call the wrapper by absolute path rather than calling "cd" first, e.g. `/Users/john_duffell/code/support-service-lambdas/agent-tool <command>`.
+
+Always scope to the minimum set of affected packages under `handlers/*`, `modules/*`, `cdk`, or `buildcheck`. Use `list-packages` if the package scope is unclear.
+
+Default output is verbose streaming. Use global output flag when needed:
+- `--tail N` for concise output with failure tails and a full temp log path printed up front
+- `--grep PATTERN` to stream only subcommand output lines that match a regex pattern
+
+Recommended order (use the first applicable scoped command):
+1. `./agent-tool list-packages` if the package scope is unclear
+2. `./agent-tool git-diff-stat` or `./agent-tool git-diff-target-stat <package>`
+3. `./agent-tool check-formatting --changed` / `./agent-tool lint --changed` / `./agent-tool type-check --changed` (run all three after making changes)
+4. `./agent-tool fix-formatting --changed` or `./agent-tool lint-fix --changed` only when the above fail
+5. Re-run the failed check after fixing
+6. `./agent-tool test --changed` (or `./agent-tool test <packages...> [pattern]`) when tests are needed
+7. `./agent-tool git-diff` or `./agent-tool git-diff-target <package>` when full diff detail is needed
+8. `./agent-tool snapshot-update` when buildcheck-managed snapshots are expected
+9. `./agent-tool install` when dependencies or lockfiles need updating
+
+Prefer `--changed` over explicit package names for verification commands — it resolves directly changed packages from git and also runs checks on their downstream dependents via pnpm's dependency graph, catching breakage in consumers of a changed module.
+
+If `agent-tools` is missing a safer or more efficient command, suggest adding it rather than working around it with ad-hoc shell commands.
