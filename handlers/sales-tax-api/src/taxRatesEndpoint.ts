@@ -52,11 +52,12 @@ export const taxRatesEndpoint = async (
 	zuoraClient: ZuoraClient,
 	{ productKey, country }: TaxRatesRequest,
 ): Promise<APIGatewayProxyResult> => {
+	logger.log('Retrieving Zuora taxes for', {
+		productKey,
+		country,
+	});
+
 	try {
-		logger.log('Retrieving Zuora taxes for', {
-			productKey,
-			country,
-		});
 		return ok(
 			await getZuoraSalesTaxRates(zuoraClient, { productKey, country }),
 			taxRatesResponseSchema,
