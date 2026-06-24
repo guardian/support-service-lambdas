@@ -25,6 +25,13 @@ import {
 	taxRatesResponseSchema,
 } from './schemas';
 
+export class InternalServerError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = 'InternalServerError';
+	}
+}
+
 type ProductKey = z.infer<typeof productKeySchema>;
 type TaxCodeName = 'Supporter Plus Global Tax' | 'Digital Pack Global Tax';
 const taxExclusiveProductCodeNames: Partial<Record<ProductKey, TaxCodeName>> = {
@@ -137,8 +144,8 @@ function createCadStateTaxRates(
 ): TaxRatesResponse {
 	const cadStatesMissing = checkForMissingCadStates(cadZuoraTaxRates);
 	if (cadStatesMissing.length > 0) {
-		throw new ValidationError(
-			`missing the following CA provinces: ${cadStatesMissing.join(', ')}`,
+		throw new InternalServerError(
+			`Zuora is missing tax rates for the following CA provinces: ${cadStatesMissing.join(', ')}`,
 		);
 	}
 

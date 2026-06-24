@@ -68,7 +68,7 @@ describe('SalesTax API', () => {
 		mockGetZuoraTaxRates.mockResolvedValue(mockZuoraTaxRates);
 	});
 
-	describe('routing and body parsing taxRatesEndpoint', () => {
+	describe('handler', () => {
 		it('returns 400 for an empty body', async () => {
 			const response = await handler(
 				baseTaxRatesEvent as unknown as APIGatewayProxyEvent,
@@ -122,9 +122,27 @@ describe('SalesTax API', () => {
 			const response = await handler(requestEvent);
 			expect(response.statusCode).toEqual(400);
 		});
-	});
 
-	describe('taxRatesZuoraEndpoint', () => {
+		it('returns 500 if Zuora is missing data', async () => {
+			const mockZuoraTaxRatesWithMissingRate = {
+				// Remove the tax rate data for a single state
+				taxRates: mockZuoraTaxRates.taxRates.slice(0, -1),
+			};
+			mockGetZuoraTaxRates.mockResolvedValue(mockZuoraTaxRatesWithMissingRate);
+			const country = 'CA';
+			const requestEvent = {
+				...baseTaxRatesEvent,
+				body: JSON.stringify({
+					productKey: 'SupporterPlus',
+					country: country,
+				}),
+			} as unknown as APIGatewayProxyEvent;
+
+			const response = await handler(requestEvent);
+
+			expect(response.statusCode).toEqual(500);
+		});
+
 		it('returns 200 for a valid country, product', async () => {
 			const country = 'CA';
 			const requestEvent = {
