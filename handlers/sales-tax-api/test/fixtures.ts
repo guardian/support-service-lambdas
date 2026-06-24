@@ -70,7 +70,7 @@ function canadianZuoraTaxRate(
 		id: '8ad095dd81de1cf00181de66f5cf43b4',
 		taxRatePeriodId: supporterPlusTaxEngineId,
 		country: 'Canada',
-		state: caStates[state],
+		state: caStates[state] ?? null,
 		taxRate1: cadTaxRates[state],
 	};
 }
