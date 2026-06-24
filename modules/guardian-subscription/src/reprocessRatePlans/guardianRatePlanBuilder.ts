@@ -19,12 +19,10 @@ import { zuoraCatalogToProductRatePlanChargeKey } from '@modules/product-catalog
 import type { RatePlan, RatePlanCharge } from '@modules/zuora/types';
 import type { ZuoraProductRatePlanCharge } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import type { ZuoraProductRatePlanChargeIdMap } from '../group/buildZuoraProductIdToKey';
-import type {
-	IndexedZuoraSubscriptionRatePlanCharges,
-	RatePlanWithoutCharges,
-	ZuoraRatePlanWithIndexedCharges,
-} from '../group/groupSubscriptionByZuoraCatalogIds';
-import { indexCharges } from '../group/groupSubscriptionByZuoraCatalogIds';
+import type { IndexedZuoraSubscriptionRatePlanCharges } from '../group/groupSubscriptionByZuoraCatalogIds';
+import { indexTheCharges } from '../group/groupSubscriptionByZuoraCatalogIds';
+
+type RatePlanWithoutCharges = Omit<RatePlan, 'ratePlanCharges'>;
 
 /**
  * There is a similar type only one with the charges as a Record and the other
@@ -157,7 +155,7 @@ type GuardianCatalogValuesBeforeCharges<P extends ProductKey = ProductKey> = {
 			product: ProductWithoutRatePlans<K>;
 			productRatePlanKey: RPK;
 			productRatePlan: ProductRatePlanWithoutCharges<K, RPK>;
-			productCatalogCharges: ZuoraProductRatePlanChargeIdMap;
+			productRatePlanCharges: ZuoraProductRatePlanChargeIdMap;
 		};
 	}[ProductRatePlanKey<K>];
 }[P];
@@ -192,7 +190,7 @@ export class GuardianRatePlanBuilder<
 
 	constructor(
 		private productCatalog: ProductCatalog,
-		private productCatalogCharges: ZuoraProductRatePlanChargeIdMap,
+		private productRatePlanCharges: ZuoraProductRatePlanChargeIdMap,
 		private productKey: P,
 		private productRatePlanKey: PRP,
 	) {
@@ -225,38 +223,25 @@ export class GuardianRatePlanBuilder<
 	 * join the catalog product/rateplan onto each subscription rate plan, carrying
 	 * the catalog charge lookup along for the later charge join.
 	 */
-	joinProductAndRatePlans<SubRP>(
+	buildGuardianRatePlans<SubRP>(
 		subscriptionRatePlansForProductRatePlan: readonly SubRP[],
 	): Array<GuardianRatePlanBeforeCharges<SubRP, P>> {
-		return subscriptionRatePlansForProductRatePlan.map((subRatePlan) => ({
-			...subRatePlan,
+		return subscriptionRatePlansForProductRatePlan.map(
+			(zuoraSubscriptionRatePlan: SubRP) =>
+				this.buildGuardianRatePlan(zuoraSubscriptionRatePlan),
+		);
+	}
+
+	private buildGuardianRatePlan<SubRP>(zuoraSubscriptionRatePlan: SubRP) {
+		return {
+			...zuoraSubscriptionRatePlan,
+			productRatePlanCharges: this.productRatePlanCharges,
 			productKey: this.productKey,
 			product: this.productWithoutRatePlans,
 			productRatePlanKey: this.productRatePlanKey,
 			productRatePlan: this.productRatePlanWithoutCharges,
-			productCatalogCharges: this.productCatalogCharges,
-		}));
+		};
 	}
-}
-
-/**
- * the "join the charges" pass for a product-catalog rate plan.
- *
- * joins the carried catalog charges (productCatalogCharges) with the
- * subscription charges (ratePlanCharges) to produce the final rate plan with
- * charges keyed by the product-catalog charge key.
- */
-export function joinGuardianRatePlanCharges<P extends ProductKey>(
-	ratePlan: GuardianRatePlanBeforeCharges<ZuoraRatePlanWithIndexedCharges, P>,
-): GuardianRatePlanMap<P> {
-	const { productCatalogCharges, ratePlanCharges, ...rest } = ratePlan;
-	return {
-		...rest,
-		ratePlanCharges: buildGuardianRatePlanCharges<P>(
-			productCatalogCharges,
-			ratePlanCharges,
-		),
-	};
 }
 
 /**
@@ -267,17 +252,27 @@ export function joinGuardianRatePlanCharges<P extends ProductKey>(
 export function indexAndJoinGuardianRatePlanCharges<P extends ProductKey>(
 	ratePlan: GuardianRatePlanBeforeCharges<RatePlan, P>,
 ): GuardianRatePlanMap<P> {
-	return joinGuardianRatePlanCharges(
-		indexCharges<GuardianCatalogValuesBeforeCharges<P>>(ratePlan),
-	);
+	const { productRatePlanCharges, ratePlanCharges, ...rest } = ratePlan;
+	const zuoraSubscriptionRatePlanCharges: IndexedZuoraSubscriptionRatePlanCharges =
+		indexTheCharges(ratePlanCharges);
+	return {
+		...rest,
+		ratePlanCharges: buildGuardianRatePlanCharges<P>(
+			productRatePlanCharges,
+			zuoraSubscriptionRatePlanCharges,
+		),
+	};
 }
 
 function buildGuardianRatePlanCharges<P extends ProductKey>(
-	productCatalogCharges: ZuoraProductRatePlanChargeIdMap,
-	subscriptionCharges: IndexedZuoraSubscriptionRatePlanCharges,
+	productRatePlanCharges: ZuoraProductRatePlanChargeIdMap,
+	zuoraSubscriptionRatePlanCharges: IndexedZuoraSubscriptionRatePlanCharges,
 ): Map<ProductRatePlanChargeKey<P, ProductRatePlanKey<P>>, RatePlanCharge> {
 	return groupCollectByUniqueOrThrowMap(
-		objectJoinBijective(productCatalogCharges, subscriptionCharges),
+		objectJoinBijective(
+			productRatePlanCharges,
+			zuoraSubscriptionRatePlanCharges,
+		),
 		([zuoraProductRatePlanCharge, subCharge]: [
 			ZuoraProductRatePlanCharge,
 			RatePlanCharge,

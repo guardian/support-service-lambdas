@@ -12,12 +12,10 @@ import type {
 	ZuoraProductRatePlanChargeIdMap,
 	ZuoraProductRatePlanNode,
 } from '../group/buildZuoraProductIdToKey';
-import type {
-	IndexedZuoraSubscriptionRatePlanCharges,
-	RatePlanWithoutCharges,
-	ZuoraRatePlanWithIndexedCharges,
-} from '../group/groupSubscriptionByZuoraCatalogIds';
-import { indexCharges } from '../group/groupSubscriptionByZuoraCatalogIds';
+import type { IndexedZuoraSubscriptionRatePlanCharges } from '../group/groupSubscriptionByZuoraCatalogIds';
+import { indexTheCharges } from '../group/groupSubscriptionByZuoraCatalogIds';
+
+type RatePlanWithoutCharges = Omit<RatePlan, 'ratePlanCharges'>;
 
 export type ZuoraProductWithoutRatePlans = Omit<
 	CatalogProduct,
@@ -42,7 +40,7 @@ export type ZuoraChargesByName = Map<string, ZuoraRatePlanCharge>;
 export type ZuoraCatalogValuesBeforeCharges = {
 	product: ZuoraProductWithoutRatePlans;
 	productRatePlan: ZuoraProductRatePlanWithoutCharges;
-	productCatalogCharges: ZuoraProductRatePlanChargeIdMap;
+	productRatePlanCharges: ZuoraProductRatePlanChargeIdMap;
 };
 
 /**
@@ -87,7 +85,7 @@ type ZuoraRatePlanCharge = RatePlanCharge & {
 export class ZuoraRatePlanBuilder {
 	private zuoraProductWithoutRatePlans: ZuoraProductWithoutRatePlans;
 	private zuoraProductRatePlanWithoutCharges: ZuoraProductRatePlanWithoutCharges;
-	private productCatalogCharges: ZuoraProductRatePlanChargeIdMap;
+	private productRatePlanCharges: ZuoraProductRatePlanChargeIdMap;
 
 	constructor(
 		product: CatalogProduct,
@@ -103,7 +101,7 @@ export class ZuoraRatePlanBuilder {
 		} = productRatePlanNode.zuoraProductRatePlan;
 		this.zuoraProductRatePlanWithoutCharges =
 			zuoraProductRatePlanWithoutCharges;
-		this.productCatalogCharges = productRatePlanNode.productRatePlanCharges;
+		this.productRatePlanCharges = productRatePlanNode.productRatePlanCharges;
 	}
 
 	/**
@@ -112,57 +110,56 @@ export class ZuoraRatePlanBuilder {
 	 *
 	 * @param subscriptionRatePlansForProductRatePlan
 	 */
-	joinProductAndRatePlans<SubRP>(
+	buildZuoraRatePlans<SubRP>(
 		subscriptionRatePlansForProductRatePlan: readonly SubRP[],
 	): Array<ZuoraRatePlanBeforeCharges<SubRP>> {
-		return subscriptionRatePlansForProductRatePlan.map((subRatePlan) => ({
-			...subRatePlan,
+		return subscriptionRatePlansForProductRatePlan.map(
+			(zuoraSubscriptionRatePlan) =>
+				this.buildZuoraRatePlan(zuoraSubscriptionRatePlan),
+		);
+	}
+
+	private buildZuoraRatePlan<SubRP>(
+		zuoraSubscriptionRatePlan: SubRP,
+	): ZuoraRatePlanBeforeCharges<SubRP> {
+		return {
+			...zuoraSubscriptionRatePlan,
+			productRatePlanCharges: this.productRatePlanCharges,
 			product: this.zuoraProductWithoutRatePlans,
 			productRatePlan: this.zuoraProductRatePlanWithoutCharges,
-			productCatalogCharges: this.productCatalogCharges,
-		}));
+		};
 	}
 }
 
 /**
- * the "join the charges" pass for a non-product-catalog rate plan.
- *
- * joins the carried catalog charges (productCatalogCharges) with the
- * subscription charges (ratePlanCharges) to produce the final rate plan with
- * charges keyed by the catalog charge name.
- */
-export function joinZuoraRatePlanCharges(
-	ratePlan: ZuoraRatePlanBeforeCharges<ZuoraRatePlanWithIndexedCharges>,
-): ZuoraRatePlan {
-	const { productCatalogCharges, ratePlanCharges, ...rest } = ratePlan;
-	return {
-		...rest,
-		ratePlanCharges: buildZuoraChargesByName(
-			productCatalogCharges,
-			ratePlanCharges,
-		),
-	};
-}
-
-/**
- * composes the "index the charges" and "join the charges" passes for a
+ * indexes the charges by name and joins with the zuora equivalent
  * non-product-catalog rate plan whose subscription charges are still a raw array
  * (i.e. straight off the Zuora subscription, not yet indexed).
  */
 export function indexAndJoinZuoraRatePlanCharges(
 	ratePlan: ZuoraRatePlanBeforeCharges<RatePlan>,
 ): ZuoraRatePlan {
-	return joinZuoraRatePlanCharges(
-		indexCharges<ZuoraCatalogValuesBeforeCharges>(ratePlan),
-	);
+	const { ratePlanCharges, productRatePlanCharges, ...rest } = ratePlan;
+	const zuoraSubscriptionRatePlanCharges: IndexedZuoraSubscriptionRatePlanCharges =
+		indexTheCharges(ratePlanCharges);
+	return {
+		...rest,
+		ratePlanCharges: buildZuoraRatePlanCharges(
+			productRatePlanCharges,
+			zuoraSubscriptionRatePlanCharges,
+		),
+	};
 }
 
-function buildZuoraChargesByName(
-	productCatalogCharges: ZuoraProductRatePlanChargeIdMap,
-	subscriptionCharges: IndexedZuoraSubscriptionRatePlanCharges,
+function buildZuoraRatePlanCharges(
+	productRatePlanCharges: ZuoraProductRatePlanChargeIdMap,
+	zuoraSubscriptionRatePlanCharges: IndexedZuoraSubscriptionRatePlanCharges,
 ): ZuoraChargesByName {
 	return groupCollectByUniqueOrThrowMap(
-		objectJoinBijective(productCatalogCharges, subscriptionCharges),
+		objectJoinBijective(
+			productRatePlanCharges,
+			zuoraSubscriptionRatePlanCharges,
+		),
 		([zuoraProductRatePlanCharge, subCharge]: [
 			ZuoraProductRatePlanCharge,
 			RatePlanCharge,

@@ -1,48 +1,59 @@
-import { groupByUniqueOrThrowMap } from '@modules/mapFunctions';
+import { groupByToMap } from '@modules/arrayFunctions';
+import { groupByUniqueOrThrowMap, mapValuesMap } from '@modules/mapFunctions';
+import type { RatePlanCharge } from '@modules/zuora/types';
 import type {
-	RatePlan,
-	RatePlanCharge,
-	ZuoraSubscription,
-} from '@modules/zuora/types';
-import type { ProductRatePlanChargeId } from '@modules/zuora-catalog/zuoraCatalogSchema';
-
-export type RatePlanWithoutCharges = Omit<RatePlan, 'ratePlanCharges'>;
-export type SubscriptionWithoutRatePlans = Omit<ZuoraSubscription, 'ratePlans'>;
+	ProductId,
+	ProductRatePlanChargeId,
+	ProductRatePlanId,
+} from '@modules/zuora-catalog/zuoraCatalogSchema';
 
 export type IndexedZuoraSubscriptionRatePlanCharges = Map<
 	ProductRatePlanChargeId,
 	RatePlanCharge
 >;
 
-export type ZuoraRatePlanWithIndexedCharges = RatePlanWithoutCharges & {
-	ratePlanCharges: IndexedZuoraSubscriptionRatePlanCharges;
-};
+/**
+ * Rate plans grouped into a tree, first by product id and then product rate plan id.
+ *
+ * Generic over the rate plan element type so it can describe both the
+ * charge-rich (full) path and the MMA (no charges) path.
+ */
+export type IndexedRatePlansByProduct<RP> = Map<
+	ProductId,
+	Map<ProductRatePlanId, readonly RP[]>
+>;
 
 /**
- * replace the ratePlanCharges array with ones that are keyed by PRPC id, while
- * preserving any other data (C) already attached to the rate plan.
+ * Group rate plans into a tree, first by product id and then product rate plan id.
  *
- * This makes the charge structure match the product-catalog so the charges can
- * be joined. It is applied lazily - only when we actually have charges to join,
- * just before joining them - so the subscription grouping itself never needs to
- * know about charges (which is what lets the grouping be shared with the MMA
- * path, which has no charges).
+ * This makes the structure match the product-catalog and the Zuora catalog lookup,
+ * enabling joining in GuardianSubscriptionParser (both the full and MMA paths).
  *
- * @param ratePlan
+ * It is generic over the rate plan element type so it can be shared by both the
+ * charge-rich path (ZuoraRatePlanWithIndexedCharges) and the MMA/object-query
+ * path (MmaZuoraRatePlan), which differ only in whether charges are present.
+ *
+ * Note that if a sub has multiple of the same product and rateplan, the list
+ * will have multiple entries which can be filtered down later.
  */
-export function indexCharges<C>(
-	ratePlan: RatePlan & C,
-): ZuoraRatePlanWithIndexedCharges & C {
-	const { ratePlanCharges, ...rest } = ratePlan;
-	const indexedCharges = groupByUniqueOrThrowMap(
+export function groupSubscriptionByProductAndRatePlanIds<
+	RP extends { productId: ProductId; productRatePlanId: ProductRatePlanId },
+>(ratePlans: RP[]): IndexedRatePlansByProduct<RP> {
+	const ratePlansByProductId = groupByToMap(
+		ratePlans,
+		(ratePlan) => ratePlan.productId,
+	);
+	return mapValuesMap(ratePlansByProductId, (productRatePlanMap) =>
+		groupByToMap(productRatePlanMap, (ratePlan) => ratePlan.productRatePlanId),
+	);
+}
+
+export function indexTheCharges(
+	ratePlanCharges: RatePlanCharge[],
+): IndexedZuoraSubscriptionRatePlanCharges {
+	return groupByUniqueOrThrowMap(
 		ratePlanCharges,
 		(charge) => charge.productRatePlanChargeId,
 		'duplicate charges',
 	);
-	const indexedRatePlan = {
-		...rest,
-		ratePlanCharges: indexedCharges,
-	};
-	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- rebuilding the rate plan with indexed charges while preserving the attached data C
-	return indexedRatePlan as ZuoraRatePlanWithIndexedCharges & C;
 }
