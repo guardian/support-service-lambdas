@@ -22,13 +22,6 @@ import type { APIGatewayProxyResult } from 'aws-lambda';
 import type { CaTaxRateState, TaxRatesResponse } from './schemas';
 import { type TaxRatesRequest, taxRatesResponseSchema } from './schemas';
 
-export class InternalServerError extends Error {
-	constructor(message: string) {
-		super(message);
-		this.name = 'InternalServerError';
-	}
-}
-
 type TaxCodeName = 'Supporter Plus Global Tax' | 'Digital Pack Global Tax';
 const taxExclusiveProductCodeNames: Partial<Record<ProductKey, TaxCodeName>> = {
 	SupporterPlus: `Supporter Plus Global Tax`,
@@ -64,9 +57,7 @@ async function getZuoraSalesTaxRates(
 		zuoraTaxCodes.taxCodes,
 	);
 	if (!zuoraTaxCode) {
-		throw new InternalServerError(
-			`No tax data found for productKey: ${productKey}`,
-		);
+		throw new Error(`No tax data found for productKey: ${productKey}`);
 	}
 
 	const zuoraTaxPeriods = await getZuoraTaxPeriods(zuoraClient);
@@ -78,9 +69,7 @@ async function getZuoraSalesTaxRates(
 		zuoraTaxPeriods.taxRatePeriods,
 	);
 	if (!zuoraTaxPeriod) {
-		throw new InternalServerError(
-			`invalid period for productKey:${productKey}`,
-		);
+		throw new Error(`invalid period for productKey:${productKey}`);
 	}
 
 	const zuoraTaxRates = await getZuoraTaxRates(zuoraClient, zuoraTaxPeriod.id);
@@ -144,7 +133,7 @@ function createCadStateTaxRates(
 	);
 
 	if (missingStateCodes.length > 0) {
-		throw new InternalServerError(
+		throw new Error(
 			`Zuora is missing tax rates for the following CA provinces: ${missingStateCodes.join(', ')}`,
 		);
 	}
@@ -154,7 +143,7 @@ function createCadStateTaxRates(
 	if (!parsedResult.success) {
 		// It shouldn't be possible to get here since we already validated all CA states
 		// are present above. But it's useful to resolve the type to a complete TaxRatesResponse
-		throw new InternalServerError('Failed to parse constructed CAD tax rates');
+		throw new Error('Failed to parse constructed CAD tax rates');
 	}
 
 	return parsedResult.data;
