@@ -1,13 +1,13 @@
 import {
-	zuoraTaxCodeSchema,
+	zuoraTaxCodesSchema,
 	zuoraTaxPeriodsSchema,
-	zuoraTaxRateSchema,
+	zuoraTaxRatesSchema,
 } from './types/objects/tax';
 import type { ZuoraClient } from './zuoraClient';
 
 export const getZuoraTaxCodes = async (zuoraClient: ZuoraClient) => {
 	const path = `settings/tax-codes`;
-	return zuoraClient.get(path, zuoraTaxCodeSchema);
+	return zuoraClient.get(path, zuoraTaxCodesSchema);
 };
 
 export const getZuoraTaxPeriods = async (zuoraClient: ZuoraClient) => {
@@ -20,5 +20,5 @@ export const getZuoraTaxRates = async (
 	id: string,
 ) => {
 	const path = `settings/tax-rate-periods/${id}/tax-rates?page=1&size=500`;
-	return zuoraClient.get(path, zuoraTaxRateSchema);
+	return zuoraClient.get(path, zuoraTaxRatesSchema);
 };
