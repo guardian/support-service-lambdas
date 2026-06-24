@@ -5,7 +5,7 @@ import {
 } from '@modules/internationalisation/country';
 import { logger } from '@modules/logger/logger';
 import type { ProductKey } from '@modules/product-catalog/productCatalog';
-import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
+import { ok } from '@modules/routing/apiGatewayResponses';
 import {
 	getZuoraTaxCodes,
 	getZuoraTaxPeriods,
@@ -43,14 +43,7 @@ export const taxRatesEndpoint = async (
 		country,
 	});
 
-	try {
-		return ok(
-			await getZuoraSalesTaxRates(zuoraClient, { productKey, country }),
-		);
-	} catch (error) {
-		logger.error('Error fetching Zuora taxes', error);
-		return Promise.resolve(buildErrorResponse(error));
-	}
+	return ok(await getZuoraSalesTaxRates(zuoraClient, { productKey, country }));
 };
 
 async function getZuoraSalesTaxRates(
