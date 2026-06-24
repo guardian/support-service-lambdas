@@ -1,8 +1,8 @@
+import z from 'zod';
 import {
 	ratePlanItemSchema,
 	ratePlanWithChargesSchema,
 } from '@modules/zuora/objectQuery/expandSchemas/ratePlanItemSchema';
-import z from 'zod';
 
 /**
  * https://developer.zuora.com/v1-api-reference/api/object-queries/querysubscriptionbykey
