@@ -1,4 +1,5 @@
 import { ValidationError } from '@modules/errors';
+import type { IsoCountry } from '@modules/internationalisation/country';
 import {
 	caStates,
 	getCountryNameByIsoCode,
@@ -83,7 +84,10 @@ async function getZuoraSalesTaxRates(
 	}
 
 	const zuoraTaxRates = await getZuoraTaxRates(zuoraClient, zuoraTaxPeriod.id);
-	const cadZuoraTaxRates = extractCadZuoraTaxRates(zuoraTaxRates.taxRates);
+	const cadZuoraTaxRates = extractZuoraTaxRatesForCountry(
+		zuoraTaxRates.taxRates,
+		country,
+	);
 
 	return createCadStateTaxRates(cadZuoraTaxRates);
 }
@@ -107,11 +111,12 @@ function getZuoraTaxPeriod(
 	);
 }
 
-function extractCadZuoraTaxRates(
+function extractZuoraTaxRatesForCountry(
 	zuoraTaxRates: ZuoraTaxRate[],
+	country: IsoCountry,
 ): ZuoraTaxRate[] {
 	return zuoraTaxRates.filter(
-		(zuoraTaxRate) => zuoraTaxRate.country === getCountryNameByIsoCode('CA'),
+		(zuoraTaxRate) => zuoraTaxRate.country === getCountryNameByIsoCode(country),
 	);
 }
 
