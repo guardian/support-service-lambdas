@@ -12,6 +12,8 @@ export type IndexedZuoraSubscriptionRatePlanCharges = Map<
 	RatePlanCharge
 >;
 
+type IndexedRatePlans<RP> = Map<ProductRatePlanId, readonly RP[]>;
+
 /**
  * Rate plans grouped into a tree, first by product id and then product rate plan id.
  *
@@ -20,7 +22,7 @@ export type IndexedZuoraSubscriptionRatePlanCharges = Map<
  */
 export type IndexedRatePlansByProduct<RP> = Map<
 	ProductId,
-	Map<ProductRatePlanId, readonly RP[]>
+	IndexedRatePlans<RP>
 >;
 
 /**
@@ -48,7 +50,7 @@ export function groupSubscriptionByProductAndRatePlanIds<
 	);
 }
 
-export function indexTheCharges(
+export function indexChargeList(
 	ratePlanCharges: RatePlanCharge[],
 ): IndexedZuoraSubscriptionRatePlanCharges {
 	return groupByUniqueOrThrowMap(

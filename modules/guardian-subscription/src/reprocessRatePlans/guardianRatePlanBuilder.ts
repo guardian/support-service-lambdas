@@ -20,7 +20,7 @@ import type { RatePlan, RatePlanCharge } from '@modules/zuora/types';
 import type { ZuoraProductRatePlanCharge } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import type { ZuoraProductRatePlanChargeIdMap } from '../group/buildZuoraProductIdToKey';
 import type { IndexedZuoraSubscriptionRatePlanCharges } from '../group/groupSubscriptionByZuoraCatalogIds';
-import { indexTheCharges } from '../group/groupSubscriptionByZuoraCatalogIds';
+import { indexChargeList } from '../group/groupSubscriptionByZuoraCatalogIds';
 
 type RatePlanWithoutCharges = Omit<RatePlan, 'ratePlanCharges'>;
 
@@ -254,7 +254,7 @@ export function indexAndJoinGuardianRatePlanCharges<P extends ProductKey>(
 ): GuardianRatePlanMap<P> {
 	const { productRatePlanCharges, ratePlanCharges, ...rest } = ratePlan;
 	const zuoraSubscriptionRatePlanCharges: IndexedZuoraSubscriptionRatePlanCharges =
-		indexTheCharges(ratePlanCharges);
+		indexChargeList(ratePlanCharges);
 	return {
 		...rest,
 		ratePlanCharges: buildGuardianRatePlanCharges<P>(

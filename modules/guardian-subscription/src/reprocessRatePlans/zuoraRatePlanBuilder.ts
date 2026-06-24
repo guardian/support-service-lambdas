@@ -13,7 +13,7 @@ import type {
 	ZuoraProductRatePlanNode,
 } from '../group/buildZuoraProductIdToKey';
 import type { IndexedZuoraSubscriptionRatePlanCharges } from '../group/groupSubscriptionByZuoraCatalogIds';
-import { indexTheCharges } from '../group/groupSubscriptionByZuoraCatalogIds';
+import { indexChargeList } from '../group/groupSubscriptionByZuoraCatalogIds';
 
 type RatePlanWithoutCharges = Omit<RatePlan, 'ratePlanCharges'>;
 
@@ -141,7 +141,7 @@ export function indexAndJoinZuoraRatePlanCharges(
 ): ZuoraRatePlan {
 	const { ratePlanCharges, productRatePlanCharges, ...rest } = ratePlan;
 	const zuoraSubscriptionRatePlanCharges: IndexedZuoraSubscriptionRatePlanCharges =
-		indexTheCharges(ratePlanCharges);
+		indexChargeList(ratePlanCharges);
 	return {
 		...rest,
 		ratePlanCharges: buildZuoraRatePlanCharges(

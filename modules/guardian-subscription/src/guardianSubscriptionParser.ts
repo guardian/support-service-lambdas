@@ -10,8 +10,8 @@ import {
 	zuoraCatalogToProductRatePlanKey,
 } from '@modules/product-catalog/zuoraToProductNameMappings';
 import type {
-	MmaZuoraRatePlan,
-	MmaZuoraSubscription,
+	RatePlanOnly,
+	SubscriptionWithRatePlansOnly,
 } from '@modules/zuora/objectQuery/expandSchemas/subscriptionItemSchema';
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import type {
@@ -73,10 +73,13 @@ export type RatePlansBeforeCharges<SubRP> = {
 	productsNotInCatalog: Array<ZuoraRatePlanBeforeCharges<SubRP>>;
 };
 
-type MmaSubscriptionWithoutRatePlans = Omit<MmaZuoraSubscription, 'ratePlans'>;
+type MmaSubscriptionWithoutRatePlans = Omit<
+	SubscriptionWithRatePlansOnly,
+	'ratePlans'
+>;
 
 export type MmaGuardianSubscriptionMultiPlan =
-	RatePlansBeforeCharges<MmaZuoraRatePlan> & MmaSubscriptionWithoutRatePlans;
+	RatePlansBeforeCharges<RatePlanOnly> & MmaSubscriptionWithoutRatePlans;
 
 /**
  * this takes a basic zuora subscription and converts it to a guardian "product catalog"
@@ -177,7 +180,7 @@ export class GuardianSubscriptionParser {
 	 * ready for later if/when we do fetch the charges.
 	 */
 	toMmaGuardianSubscription(
-		zuoraSubscription: MmaZuoraSubscription,
+		zuoraSubscription: SubscriptionWithRatePlansOnly,
 	): MmaGuardianSubscriptionMultiPlan {
 		return this.toGuardianRatePlans(zuoraSubscription);
 	}
@@ -303,11 +306,13 @@ function joinFlatMap<K, S, C, RP, NIC>(
 	catLookup: Map<K, C>,
 	mapFn: (sub: S, cat: C) => PartitionedRatePlansByCatalog<RP, NIC>,
 ): PartitionedRatePlansByCatalog<RP, NIC> {
-	const items = joinAllLeft(subLookup, catLookup).map(([sub, cat]) =>
-		mapFn(sub, cat),
-	);
-	return {
-		ratePlans: items.flatMap((item) => item.ratePlans),
-		productsNotInCatalog: items.flatMap((item) => item.productsNotInCatalog),
-	};
+	return joinAllLeft(subLookup, catLookup)
+		.map(([sub, cat]: [S, C, K]) => mapFn(sub, cat))
+		.reduce((rp1, rp2) => ({
+			ratePlans: [...rp1.ratePlans, ...rp2.ratePlans],
+			productsNotInCatalog: [
+				...rp1.productsNotInCatalog,
+				...rp2.productsNotInCatalog,
+			],
+		}));
 }
