@@ -1,0 +1,2186 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`The sf-emails-to-s3-exporter stack matches the snapshot 1`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [
+      "GuDistributionBucketParameter",
+    ],
+    "gu:cdk:version": "TEST",
+  },
+  "Outputs": {
+    "ApiGatewayEndpoint5AA8EC3A": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "ApiGateway11E7F47B",
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region",
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "ApiGatewayDeploymentStageCODEF329A03D",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "DistributionBucketName": {
+      "Default": "/account/services/artifact.bucket",
+      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "ApiGateway11E7F47B": {
+      "Properties": {
+        "ApiKeySourceType": "HEADER",
+        "EndpointConfiguration": {
+          "Types": [
+            "EDGE",
+          ],
+        },
+        "Name": "import-emails-from-s3-to-sf-CODE-api-gateway",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "sf-emails-to-s3-exporter",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "ApiGatewayApiKeyC7E404FA": {
+      "Properties": {
+        "Enabled": true,
+        "Name": "import-emails-from-s3-to-sf-CODE-api-key",
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "ApiGateway11E7F47B",
+            },
+            "StageName": {
+              "Ref": "ApiGatewayDeploymentStageCODEF329A03D",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "sf-emails-to-s3-exporter",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
+    },
+    "ApiGatewayDeploymentA26796E8988b349e991f4a5784cb98bdcda75a69": {
+      "DependsOn": [
+        "ApiGatewaybucketNamecaseNumberGET2956CCE9",
+        "ApiGatewaybucketNamecaseNumber7165F760",
+        "ApiGatewaybucketNamePOSTA23BA547",
+        "ApiGatewaybucketNameB5439D93",
+      ],
+      "Properties": {
+        "Description": "Automatically created by the RestApi construct",
+        "RestApiId": {
+          "Ref": "ApiGateway11E7F47B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "ApiGatewayDeploymentStageCODEF329A03D": {
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "ApiGatewayDeploymentA26796E8988b349e991f4a5784cb98bdcda75a69",
+        },
+        "MethodSettings": [
+          {
+            "CachingEnabled": false,
+            "DataTraceEnabled": true,
+            "HttpMethod": "*",
+            "LoggingLevel": "INFO",
+            "MetricsEnabled": false,
+            "ResourcePath": "/*",
+            "ThrottlingBurstLimit": 5000,
+            "ThrottlingRateLimit": 10000,
+          },
+        ],
+        "RestApiId": {
+          "Ref": "ApiGateway11E7F47B",
+        },
+        "StageName": "CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "sf-emails-to-s3-exporter",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "ApiGatewayUsagePlan53F18B49": {
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "ApiGateway11E7F47B",
+            },
+            "Stage": {
+              "Ref": "ApiGatewayDeploymentStageCODEF329A03D",
+            },
+            "Throttle": {},
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "sf-emails-to-s3-exporter",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "UsagePlanName": "import-emails-from-s3-to-sf-CODE-usage-plan",
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
+    },
+    "ApiGatewayUsagePlanUsagePlanKeyResourcesfemailstos3exporterCODEApiGatewayApiKey6BEA33CD1B9173A2": {
+      "Properties": {
+        "KeyId": {
+          "Ref": "ApiGatewayApiKeyC7E404FA",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "ApiGatewayUsagePlan53F18B49",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
+    },
+    "ApiGatewaybucketNameB5439D93": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "ApiGateway11E7F47B",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "{bucketName}",
+        "RestApiId": {
+          "Ref": "ApiGateway11E7F47B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "ApiGatewaybucketNamePOSTA23BA547": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "POST",
+        "Integration": {
+          "Credentials": {
+            "Fn::GetAtt": [
+              "S3IntegrationRoleF31D2F62",
+              "Arn",
+            ],
+          },
+          "IntegrationHttpMethod": "POST",
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Content-Length": "integration.response.header.Content-Length",
+                "method.response.header.Content-Type": "integration.response.header.Content-Type",
+                "method.response.header.Timestamp": "integration.response.header.Date",
+              },
+              "SelectionPattern": "2\\d{2}",
+              "StatusCode": "200",
+            },
+            {
+              "SelectionPattern": "4\\d{2}",
+              "StatusCode": "400",
+            },
+            {
+              "SelectionPattern": "5\\d{2}",
+              "StatusCode": "500",
+            },
+          ],
+          "PassthroughBehavior": "WHEN_NO_MATCH",
+          "RequestParameters": {
+            "integration.request.header.x-amz-checksum-sha1": "method.request.header.x-amz-checksum-sha1",
+            "integration.request.header.x-amz-sdk-checksum-algorithm": "method.request.header.x-amz-sdk-checksum-algorithm",
+          },
+          "TimeoutInMillis": 29000,
+          "Type": "AWS",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":emails-from-sf-code.s3:path/?delete",
+              ],
+            ],
+          },
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Content-Length": false,
+              "method.response.header.Content-Type": false,
+              "method.response.header.Timestamp": false,
+            },
+            "StatusCode": "200",
+          },
+          {
+            "ResponseParameters": {
+              "method.response.header.Content-Length": false,
+              "method.response.header.Content-Type": false,
+              "method.response.header.Timestamp": false,
+            },
+            "StatusCode": "400",
+          },
+          {
+            "ResponseParameters": {
+              "method.response.header.Content-Length": false,
+              "method.response.header.Content-Type": false,
+              "method.response.header.Timestamp": false,
+            },
+            "StatusCode": "500",
+          },
+        ],
+        "RequestParameters": {
+          "method.request.header.x-amz-checksum-sha1": false,
+          "method.request.header.x-amz-sdk-checksum-algorithm": false,
+          "method.request.path.bucketName": true,
+        },
+        "ResourceId": {
+          "Ref": "ApiGatewaybucketNameB5439D93",
+        },
+        "RestApiId": {
+          "Ref": "ApiGateway11E7F47B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "ApiGatewaybucketNamecaseNumber7165F760": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "ApiGatewaybucketNameB5439D93",
+        },
+        "PathPart": "{caseNumber}",
+        "RestApiId": {
+          "Ref": "ApiGateway11E7F47B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "ApiGatewaybucketNamecaseNumberGET2956CCE9": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "Credentials": {
+            "Fn::GetAtt": [
+              "S3IntegrationRoleF31D2F62",
+              "Arn",
+            ],
+          },
+          "IntegrationHttpMethod": "GET",
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Content-Length": "integration.response.header.Content-Length",
+                "method.response.header.Content-Type": "integration.response.header.Content-Type",
+                "method.response.header.Timestamp": "integration.response.header.Date",
+              },
+              "SelectionPattern": "2\\d{2}",
+              "StatusCode": "200",
+            },
+            {
+              "SelectionPattern": "4\\d{2}",
+              "StatusCode": "400",
+            },
+            {
+              "SelectionPattern": "5\\d{2}",
+              "StatusCode": "500",
+            },
+          ],
+          "PassthroughBehavior": "WHEN_NO_MATCH",
+          "RequestParameters": {
+            "integration.request.path.folder": "method.request.path.bucketName",
+            "integration.request.path.item": "method.request.path.caseNumber",
+          },
+          "TimeoutInMillis": 29000,
+          "Type": "AWS",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":s3:path/{folder}/{item}",
+              ],
+            ],
+          },
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Content-Length": false,
+              "method.response.header.Content-Type": false,
+              "method.response.header.Timestamp": false,
+            },
+            "StatusCode": "200",
+          },
+          {
+            "ResponseParameters": {
+              "method.response.header.Content-Length": false,
+              "method.response.header.Content-Type": false,
+              "method.response.header.Timestamp": false,
+            },
+            "StatusCode": "400",
+          },
+          {
+            "ResponseParameters": {
+              "method.response.header.Content-Length": false,
+              "method.response.header.Content-Type": false,
+              "method.response.header.Timestamp": false,
+            },
+            "StatusCode": "500",
+          },
+        ],
+        "RequestParameters": {
+          "method.request.path.bucketName": true,
+          "method.request.path.caseNumber": true,
+        },
+        "ResourceId": {
+          "Ref": "ApiGatewaybucketNamecaseNumber7165F760",
+        },
+        "RestApiId": {
+          "Ref": "ApiGateway11E7F47B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "LambdaD247545B": {
+      "DependsOn": [
+        "LambdaServiceRoleDefaultPolicyDAE46E21",
+        "LambdaServiceRoleA8ED4D3B",
+      ],
+      "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "membership/CODE/sf-emails-to-s3-exporter/sf-emails-to-s3-exporter.jar",
+        },
+        "Description": "Retrieves emails from Salesforce and saves as Json to S3",
+        "Environment": {
+          "Variables": {
+            "APP": "sf-emails-to-s3-exporter",
+            "JAVA_TOOL_OPTIONS": "-Djdk.httpclient.allowRestrictedHeaders=host --add-opens=java.base/sun.net.www.protocol.https=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "membership",
+            "STAGE": "CODE",
+            "Stage": "CODE",
+            "bucketName": "emails-from-sf-CODE",
+            "sfApiVersion": "v50.0",
+          },
+        },
+        "FunctionName": "sf-emails-to-s3-exporter-CODE",
+        "Handler": "com.gu.sf_emails_to_s3_exporter.Handler::handleRequest",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 512,
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaServiceRoleA8ED4D3B",
+            "Arn",
+          ],
+        },
+        "Runtime": "java21",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "sf-emails-to-s3-exporter",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 900,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "LambdaRule0AllowEventRulesfemailstos3exporterCODELambdaCA60D94581F2AD72": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "LambdaRule0F219D97C",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRule0F219D97C": {
+      "Properties": {
+        "Description": "Runs SF Emails to S3 Exporter",
+        "ScheduleExpression": "cron(00,30 03 * * ? *)",
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "LambdaD247545B",
+                "Arn",
+              ],
+            },
+            "Id": "Target0",
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "LambdaServiceRoleA8ED4D3B": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "sf-emails-to-s3-exporter",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "LambdaServiceRoleDefaultPolicyDAE46E21": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/membership/CODE/sf-emails-to-s3-exporter/sf-emails-to-s3-exporter.jar",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/membership/sf-emails-to-s3-exporter",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/membership/sf-emails-to-s3-exporter/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "secretsmanager:DescribeSecret",
+                "secretsmanager:GetSecretValue",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl",
+                "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/EmailsToS3APIUser-EbXFEb",
+              ],
+              "Sid": "readSalesforceSecrets",
+            },
+            {
+              "Action": "cloudwatch:PutMetricData",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+              ],
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3:::emails-from-sf-code/*",
+            },
+            {
+              "Action": "s3:ListBucket",
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:s3:::emails-from-sf-code",
+                "arn:aws:s3:::emails-from-sf-code/*",
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "LambdaServiceRoleDefaultPolicyDAE46E21",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "S3IntegrationRoleDefaultPolicy5B77AE07": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:DeleteObject",
+              ],
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3:::emails-from-sf-code/*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "S3IntegrationRoleDefaultPolicy5B77AE07",
+        "Roles": [
+          {
+            "Ref": "S3IntegrationRoleF31D2F62",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "S3IntegrationRoleF31D2F62": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Description": "Allows API Gateway to Read/Write/Delete from S3.",
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "MaxSessionDuration": 3600,
+        "RoleName": "emails-to-sf-api-CODE-api-gateway-role",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "sf-emails-to-s3-exporter",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+  },
+}
+`;
+
+exports[`The sf-emails-to-s3-exporter stack matches the snapshot 2`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [
+      "GuDistributionBucketParameter",
+    ],
+    "gu:cdk:version": "TEST",
+  },
+  "Outputs": {
+    "ApiGatewayEndpoint5AA8EC3A": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "ApiGateway11E7F47B",
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region",
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "ApiGatewayDeploymentStagePRODB53EFD3B",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "DistributionBucketName": {
+      "Default": "/account/services/artifact.bucket",
+      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "ApiGateway11E7F47B": {
+      "Properties": {
+        "ApiKeySourceType": "HEADER",
+        "EndpointConfiguration": {
+          "Types": [
+            "EDGE",
+          ],
+        },
+        "Name": "import-emails-from-s3-to-sf-PROD-api-gateway",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "sf-emails-to-s3-exporter",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "ApiGatewayApiKeyC7E404FA": {
+      "Properties": {
+        "Enabled": true,
+        "Name": "import-emails-from-s3-to-sf-PROD-api-key",
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "ApiGateway11E7F47B",
+            },
+            "StageName": {
+              "Ref": "ApiGatewayDeploymentStagePRODB53EFD3B",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "sf-emails-to-s3-exporter",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
+    },
+    "ApiGatewayDeploymentA26796E86b8247d6b60f95cec9fff8650a34606e": {
+      "DependsOn": [
+        "ApiGatewaybucketNamecaseNumberGET2956CCE9",
+        "ApiGatewaybucketNamecaseNumber7165F760",
+        "ApiGatewaybucketNamePOSTA23BA547",
+        "ApiGatewaybucketNameB5439D93",
+      ],
+      "Properties": {
+        "Description": "Automatically created by the RestApi construct",
+        "RestApiId": {
+          "Ref": "ApiGateway11E7F47B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "ApiGatewayDeploymentStagePRODB53EFD3B": {
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "ApiGatewayDeploymentA26796E86b8247d6b60f95cec9fff8650a34606e",
+        },
+        "MethodSettings": [
+          {
+            "CachingEnabled": false,
+            "DataTraceEnabled": true,
+            "HttpMethod": "*",
+            "LoggingLevel": "INFO",
+            "MetricsEnabled": false,
+            "ResourcePath": "/*",
+            "ThrottlingBurstLimit": 5000,
+            "ThrottlingRateLimit": 10000,
+          },
+        ],
+        "RestApiId": {
+          "Ref": "ApiGateway11E7F47B",
+        },
+        "StageName": "PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "sf-emails-to-s3-exporter",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "ApiGatewayUsagePlan53F18B49": {
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "ApiGateway11E7F47B",
+            },
+            "Stage": {
+              "Ref": "ApiGatewayDeploymentStagePRODB53EFD3B",
+            },
+            "Throttle": {},
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "sf-emails-to-s3-exporter",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "UsagePlanName": "import-emails-from-s3-to-sf-PROD-usage-plan",
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
+    },
+    "ApiGatewayUsagePlanUsagePlanKeyResourcesfemailstos3exporterPRODApiGatewayApiKey16F07A19ECA74C52": {
+      "Properties": {
+        "KeyId": {
+          "Ref": "ApiGatewayApiKeyC7E404FA",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "ApiGatewayUsagePlan53F18B49",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
+    },
+    "ApiGatewaybucketNameB5439D93": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "ApiGateway11E7F47B",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "{bucketName}",
+        "RestApiId": {
+          "Ref": "ApiGateway11E7F47B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "ApiGatewaybucketNamePOSTA23BA547": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "POST",
+        "Integration": {
+          "Credentials": {
+            "Fn::GetAtt": [
+              "S3IntegrationRoleF31D2F62",
+              "Arn",
+            ],
+          },
+          "IntegrationHttpMethod": "POST",
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Content-Length": "integration.response.header.Content-Length",
+                "method.response.header.Content-Type": "integration.response.header.Content-Type",
+                "method.response.header.Timestamp": "integration.response.header.Date",
+              },
+              "SelectionPattern": "2\\d{2}",
+              "StatusCode": "200",
+            },
+            {
+              "SelectionPattern": "4\\d{2}",
+              "StatusCode": "400",
+            },
+            {
+              "SelectionPattern": "5\\d{2}",
+              "StatusCode": "500",
+            },
+          ],
+          "PassthroughBehavior": "WHEN_NO_MATCH",
+          "RequestParameters": {
+            "integration.request.header.x-amz-checksum-sha1": "method.request.header.x-amz-checksum-sha1",
+            "integration.request.header.x-amz-sdk-checksum-algorithm": "method.request.header.x-amz-sdk-checksum-algorithm",
+          },
+          "TimeoutInMillis": 29000,
+          "Type": "AWS",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":emails-from-sf-prod.s3:path/?delete",
+              ],
+            ],
+          },
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Content-Length": false,
+              "method.response.header.Content-Type": false,
+              "method.response.header.Timestamp": false,
+            },
+            "StatusCode": "200",
+          },
+          {
+            "ResponseParameters": {
+              "method.response.header.Content-Length": false,
+              "method.response.header.Content-Type": false,
+              "method.response.header.Timestamp": false,
+            },
+            "StatusCode": "400",
+          },
+          {
+            "ResponseParameters": {
+              "method.response.header.Content-Length": false,
+              "method.response.header.Content-Type": false,
+              "method.response.header.Timestamp": false,
+            },
+            "StatusCode": "500",
+          },
+        ],
+        "RequestParameters": {
+          "method.request.header.x-amz-checksum-sha1": false,
+          "method.request.header.x-amz-sdk-checksum-algorithm": false,
+          "method.request.path.bucketName": true,
+        },
+        "ResourceId": {
+          "Ref": "ApiGatewaybucketNameB5439D93",
+        },
+        "RestApiId": {
+          "Ref": "ApiGateway11E7F47B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "ApiGatewaybucketNamecaseNumber7165F760": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "ApiGatewaybucketNameB5439D93",
+        },
+        "PathPart": "{caseNumber}",
+        "RestApiId": {
+          "Ref": "ApiGateway11E7F47B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "ApiGatewaybucketNamecaseNumberGET2956CCE9": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "Credentials": {
+            "Fn::GetAtt": [
+              "S3IntegrationRoleF31D2F62",
+              "Arn",
+            ],
+          },
+          "IntegrationHttpMethod": "GET",
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Content-Length": "integration.response.header.Content-Length",
+                "method.response.header.Content-Type": "integration.response.header.Content-Type",
+                "method.response.header.Timestamp": "integration.response.header.Date",
+              },
+              "SelectionPattern": "2\\d{2}",
+              "StatusCode": "200",
+            },
+            {
+              "SelectionPattern": "4\\d{2}",
+              "StatusCode": "400",
+            },
+            {
+              "SelectionPattern": "5\\d{2}",
+              "StatusCode": "500",
+            },
+          ],
+          "PassthroughBehavior": "WHEN_NO_MATCH",
+          "RequestParameters": {
+            "integration.request.path.folder": "method.request.path.bucketName",
+            "integration.request.path.item": "method.request.path.caseNumber",
+          },
+          "TimeoutInMillis": 29000,
+          "Type": "AWS",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":s3:path/{folder}/{item}",
+              ],
+            ],
+          },
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Content-Length": false,
+              "method.response.header.Content-Type": false,
+              "method.response.header.Timestamp": false,
+            },
+            "StatusCode": "200",
+          },
+          {
+            "ResponseParameters": {
+              "method.response.header.Content-Length": false,
+              "method.response.header.Content-Type": false,
+              "method.response.header.Timestamp": false,
+            },
+            "StatusCode": "400",
+          },
+          {
+            "ResponseParameters": {
+              "method.response.header.Content-Length": false,
+              "method.response.header.Content-Type": false,
+              "method.response.header.Timestamp": false,
+            },
+            "StatusCode": "500",
+          },
+        ],
+        "RequestParameters": {
+          "method.request.path.bucketName": true,
+          "method.request.path.caseNumber": true,
+        },
+        "ResourceId": {
+          "Ref": "ApiGatewaybucketNamecaseNumber7165F760",
+        },
+        "RestApiId": {
+          "Ref": "ApiGateway11E7F47B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "FailedS3CheckFileExistsAlarm1BFB3DE2": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "Something went wrong when checking if a file exists in S3 bucket emails-from-sf-PROD",
+        "AlarmName": "emails-from-sf failed when checking if a file exists in s3",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "failed_s3_check_file_exists",
+        "Namespace": "s3-emails-from-sf",
+        "Period": 3600,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "sf-emails-to-s3-exporter",
+          },
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "LambdaD247545B",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "FailedS3GetFileAlarm69AB979E": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "Something went wrong when getting file from S3 bucket emails-from-sf-PROD",
+        "AlarmName": "emails-from-sf failed when getting file from s3",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "failed_s3_get_file",
+        "Namespace": "s3-emails-from-sf",
+        "Period": 3600,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "sf-emails-to-s3-exporter",
+          },
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "LambdaD247545B",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "FailedS3WriteFileAlarmF06DAF9A": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "Something went wrong when writing a file to S3 bucket emails-from-sf-PROD",
+        "AlarmName": "emails-from-sf failed when writing file to s3",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "failed_s3_write_file",
+        "Namespace": "s3-emails-from-sf",
+        "Period": 3600,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "sf-emails-to-s3-exporter",
+          },
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "LambdaD247545B",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "FailedToAuthenticateWithSalesforceAlarm9D880B74": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "Something went wrong authenticating with Salesforce",
+        "AlarmName": "emails-from-sf failed to authenticate with Salesforce",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "failed_to_authenticate_with_sf",
+        "Namespace": "s3-emails-from-sf",
+        "Period": 3600,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "sf-emails-to-s3-exporter",
+          },
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "LambdaD247545B",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "FailedToRetrieveEmailsFromSalesforceAlarm369BB9E3": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "Something went wrong retrieving emails from Salesforce",
+        "AlarmName": "emails-from-sf failed to retrieve emails from Salesforce",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "failed_to_get_records_from_sf",
+        "Namespace": "s3-emails-from-sf",
+        "Period": 3600,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "sf-emails-to-s3-exporter",
+          },
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "LambdaD247545B",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "FailedWritebackToSFRecordAlarm82E18EC3": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "Something went wrong writing success back to Salesforce record",
+        "AlarmName": "emails-from-sf failed writeback to Salesforce record",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "failed_writeback_to_sf_record",
+        "Namespace": "s3-emails-from-sf",
+        "Period": 3600,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "sf-emails-to-s3-exporter",
+          },
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "LambdaD247545B",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "FailedWritebackToSFRequestAlarm12280EA2": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "Something went wrong writing successes back to Salesforce (Bad Request)",
+        "AlarmName": "emails-from-sf failed request to Salesforce",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "failed_writeback_request_to_sf",
+        "Namespace": "s3-emails-from-sf",
+        "Period": 3600,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "sf-emails-to-s3-exporter",
+          },
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "LambdaD247545B",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "LambdaD247545B": {
+      "DependsOn": [
+        "LambdaServiceRoleDefaultPolicyDAE46E21",
+        "LambdaServiceRoleA8ED4D3B",
+      ],
+      "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "membership/PROD/sf-emails-to-s3-exporter/sf-emails-to-s3-exporter.jar",
+        },
+        "Description": "Retrieves emails from Salesforce and saves as Json to S3",
+        "Environment": {
+          "Variables": {
+            "APP": "sf-emails-to-s3-exporter",
+            "JAVA_TOOL_OPTIONS": "-Djdk.httpclient.allowRestrictedHeaders=host --add-opens=java.base/sun.net.www.protocol.https=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "membership",
+            "STAGE": "PROD",
+            "Stage": "PROD",
+            "bucketName": "emails-from-sf-PROD",
+            "sfApiVersion": "v50.0",
+          },
+        },
+        "FunctionName": "sf-emails-to-s3-exporter-PROD",
+        "Handler": "com.gu.sf_emails_to_s3_exporter.Handler::handleRequest",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 512,
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaServiceRoleA8ED4D3B",
+            "Arn",
+          ],
+        },
+        "Runtime": "java21",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "sf-emails-to-s3-exporter",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 900,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "LambdaRule0AllowEventRulesfemailstos3exporterPRODLambdaF9EC78EE509B8A72": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "LambdaRule0F219D97C",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRule0F219D97C": {
+      "Properties": {
+        "Description": "Runs SF Emails to S3 Exporter",
+        "ScheduleExpression": "cron(00,30 03 * * ? *)",
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "LambdaD247545B",
+                "Arn",
+              ],
+            },
+            "Id": "Target0",
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "LambdaServiceRoleA8ED4D3B": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "sf-emails-to-s3-exporter",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "LambdaServiceRoleDefaultPolicyDAE46E21": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/membership/PROD/sf-emails-to-s3-exporter/sf-emails-to-s3-exporter.jar",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/membership/sf-emails-to-s3-exporter",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/membership/sf-emails-to-s3-exporter/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "secretsmanager:DescribeSecret",
+                "secretsmanager:GetSecretValue",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/ConnectedApp/SFEmailsToS3-6QJGTX",
+                "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/EmailsToS3APIUser-kGtUDC",
+              ],
+              "Sid": "readSalesforceSecrets",
+            },
+            {
+              "Action": "cloudwatch:PutMetricData",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+              ],
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3:::emails-from-sf-prod/*",
+            },
+            {
+              "Action": "s3:ListBucket",
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:s3:::emails-from-sf-prod",
+                "arn:aws:s3:::emails-from-sf-prod/*",
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "LambdaServiceRoleDefaultPolicyDAE46E21",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "S3IntegrationRoleDefaultPolicy5B77AE07": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:DeleteObject",
+              ],
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3:::emails-from-sf-prod/*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "S3IntegrationRoleDefaultPolicy5B77AE07",
+        "Roles": [
+          {
+            "Ref": "S3IntegrationRoleF31D2F62",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "S3IntegrationRoleF31D2F62": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Description": "Allows API Gateway to Read/Write/Delete from S3.",
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "MaxSessionDuration": 3600,
+        "RoleName": "emails-to-sf-api-PROD-api-gateway-role",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "sf-emails-to-s3-exporter",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+  },
+}
+`;

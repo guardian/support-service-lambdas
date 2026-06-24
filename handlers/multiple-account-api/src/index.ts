@@ -3,6 +3,7 @@ import { awsConfig } from '@modules/aws/config';
 import { buildAuthenticate } from '@modules/identity/apiGateway';
 import { IdentityClient } from '@modules/identity/identityClient';
 import { Lazy } from '@modules/lazy';
+import { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { Router } from '@modules/routing/router';
 import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
@@ -31,7 +32,6 @@ import {
 	listSecondaryUsersEndpoint,
 	listSecondaryUsersPathSchema,
 } from './listSecondaryUsersEndpoint';
-import { SecondaryUserRepository } from './secondaryUserRepository';
 
 const stage = stageFromEnvironment();
 const authenticate = buildAuthenticate(stage, []);

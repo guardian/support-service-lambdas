@@ -4,10 +4,10 @@
  * @group integration
  */
 
+import { ZuoraBearerTokenProvider } from '@modules/zuora/auth';
+import { getOAuthClientCredentials } from '@modules/zuora/auth';
 import { getSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { ZuoraBearerTokenProvider } from '../src/auth/bearerTokenProvider';
-import { getOAuthClientCredentials } from '../src/auth/oAuthCredentials';
 
 test('getZuoraCredentials', async () => {
 	const credentials = await getOAuthClientCredentials('CODE');
@@ -21,7 +21,7 @@ test('BearerTokenProvider', async () => {
 		credentials,
 	);
 	const token = await provider.getBearerToken();
-	expect(token.access_token.length).toBeGreaterThan(0);
+	expect(token.bearerToken.length).toBeGreaterThan(0);
 });
 
 test('GetSubscription', async () => {

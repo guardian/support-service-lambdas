@@ -5,14 +5,17 @@
       "@modules/*": [
         "../../modules/*"
       ],
-      "@modules/routing/*": [
-        "../../modules/routing/src/*"
+      "@modules/multiple-account/*": [
+        "../../modules/multiple-account/src/*"
       ],
       "@modules/aws/*": [
         "../../modules/aws/src/*"
       ],
       "@modules/logger/*": [
         "../../modules/logger/src/*"
+      ],
+      "@modules/supporter-product-data/*": [
+        "../../modules/supporter-product-data/src/*"
       ],
       "@modules/zuora/*": [
         "../../modules/zuora/src/*"
@@ -29,14 +32,14 @@
       "@modules/promotions/*": [
         "../../modules/promotions/src/*"
       ],
+      "@modules/routing/*": [
+        "../../modules/routing/src/*"
+      ],
       "@modules/identity/*": [
         "../../modules/identity/src/*"
       ],
       "@modules/product-benefits/*": [
         "../../modules/product-benefits/src/*"
-      ],
-      "@modules/supporter-product-data/*": [
-        "../../modules/supporter-product-data/src/*"
       ],
       "@modules/guardian-subscription/*": [
         "../../modules/guardian-subscription/src/*"
