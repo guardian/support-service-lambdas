@@ -76,6 +76,7 @@ describe('SalesTax API', () => {
 
 			expect(response.statusCode).toEqual(400);
 		});
+
 		it('returns 400 when body not valid JSON', async () => {
 			const requestEvent = {
 				...baseTaxRatesEvent,
@@ -85,6 +86,7 @@ describe('SalesTax API', () => {
 			const response = await handler(requestEvent);
 			expect(response.statusCode).toEqual(400);
 		});
+
 		it('returns 400 when body is missing required fields', async () => {
 			const requestEvent = {
 				...baseTaxRatesEvent,
@@ -96,6 +98,7 @@ describe('SalesTax API', () => {
 			const response = await handler(requestEvent);
 			expect(response.statusCode).toEqual(400);
 		});
+
 		it('returns 400 for an invalid productKey', async () => {
 			const requestEvent = {
 				...baseTaxRatesEvent,
@@ -107,6 +110,7 @@ describe('SalesTax API', () => {
 			const response = await handler(requestEvent);
 			expect(response.statusCode).toEqual(400);
 		});
+
 		it('returns 400 for an invalid country', async () => {
 			const requestEvent = {
 				...baseTaxRatesEvent,
