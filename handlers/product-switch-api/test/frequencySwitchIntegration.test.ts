@@ -23,7 +23,6 @@ import dayjs from 'dayjs';
 import type { ContributionTestAdditionalOptions } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import { createContribution } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import { getSwitchResult } from '../src/frequencySwitchEndpoint';
-import type { FrequencySwitchResponse } from '../src/frequencySwitchSchemas';
 
 interface FrequencySwitchTestSetup {
 	zuoraClient: ZuoraClient;
@@ -126,7 +125,7 @@ describe('frequency switch behaviour', () => {
 					zuoraClient,
 					subscription.accountNumber,
 				);
-				const result: FrequencySwitchResponse = await getSwitchResult(
+				const result = await getSwitchResult(
 					stage,
 					dayjs(),
 					false,

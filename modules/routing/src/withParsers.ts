@@ -45,7 +45,7 @@ export const withBodyParser =
 				statusCode: 400,
 				body: JSON.stringify({
 					error: 'Invalid request body - wrong type',
-					details: parsedBody.error.errors,
+					details: parsedBody.error.issues,
 				}),
 			};
 		}
@@ -64,7 +64,7 @@ export const withPathParser =
 				statusCode: 400,
 				body: JSON.stringify({
 					error: 'Invalid request path',
-					details: parsedPath.error.errors,
+					details: parsedPath.error.issues,
 				}),
 			};
 		}

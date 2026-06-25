@@ -41,16 +41,12 @@ export type CreateOrderRequest = OrderRequest & {
 	processingOptions: ProcessingOptions;
 };
 
-export function executeOrderRequest<
-	I,
-	O,
-	T extends z.ZodType<O, z.ZodTypeDef, I>,
->(
+export function executeOrderRequest<T extends z.ZodType>(
 	zuoraClient: ZuoraClient,
 	orderRequest: CreateOrderRequest,
 	responseSchema: T,
 	idempotencyKey?: string,
-): Promise<O> {
+): Promise<z.infer<T>> {
 	const path = `/v1/orders`;
 	const body = JSON.stringify(orderRequest);
 	const headers = idempotencyKey
@@ -59,15 +55,11 @@ export function executeOrderRequest<
 	return zuoraClient.post(path, body, responseSchema, headers);
 }
 
-export function previewOrderRequest<
-	I,
-	O,
-	T extends z.ZodType<O, z.ZodTypeDef, I>,
->(
+export function previewOrderRequest<T extends z.ZodType>(
 	zuoraClient: ZuoraClient,
 	orderRequest: PreviewOrderRequest,
 	responseSchema: T,
-): Promise<O> {
+): Promise<z.infer<T>> {
 	const path = `/v1/orders/preview`;
 	const body = JSON.stringify(orderRequest);
 	return zuoraClient.post(path, body, responseSchema);
