@@ -1,14 +1,15 @@
 import { partitionByType } from '@modules/arrayFunctions';
 import { logger } from '@modules/logger/logger';
 import { mapValuesMap, partitionByValueType } from '@modules/mapFunctions';
-import type { RatePlanCharge } from '@modules/zuora/types';
+import type { RatePlan, RatePlanCharge } from '@modules/zuora/types';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import type { RatePlanWithoutCharges } from './group/groupSubscriptionByZuoraCatalogIds';
 import type { GuardianSubscriptionMultiPlan } from './guardianSubscriptionParser';
 import type { GuardianRatePlanMap } from './reprocessRatePlans/guardianRatePlanBuilder';
 import type { ZuoraRatePlan } from './reprocessRatePlans/zuoraRatePlanBuilder';
+
+type RatePlanWithoutCharges = Omit<RatePlan, 'ratePlanCharges'>;
 
 type GenericRatePlan = RatePlanWithoutCharges & {
 	ratePlanCharges: Map<string, RatePlanCharge>;

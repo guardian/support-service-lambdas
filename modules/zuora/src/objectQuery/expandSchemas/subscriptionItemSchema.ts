@@ -114,6 +114,11 @@ export const subscriptionWithRatePlansSchema = subscriptionItemSchema.extend({
 	ratePlans: z.array(ratePlanItemSchema),
 });
 
+export type SubscriptionWithRatePlansOnly = z.infer<
+	typeof subscriptionWithRatePlansSchema
+>;
+export type RatePlanOnly = SubscriptionWithRatePlansOnly['ratePlans'][number];
+
 export const subscriptionWithRatePlanChargesSchema =
 	subscriptionItemSchema.extend({
 		ratePlans: z.array(ratePlanWithChargesSchema),
