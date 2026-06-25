@@ -1,6 +1,6 @@
+import dayjs from 'dayjs';
 import { buildPaperEmailFields } from '@modules/email/dataFields/dayZero/paperEmailFields';
 import { DataExtensionNames } from '@modules/email/email';
-import dayjs from 'dayjs';
 import {
 	deliveryAgentDetails,
 	deliveryContact,
