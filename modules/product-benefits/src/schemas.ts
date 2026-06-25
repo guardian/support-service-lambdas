@@ -20,7 +20,10 @@ const trialSchema = z.object({
 	androidOfferTag: z.string(),
 });
 export type Trial = z.infer<typeof trialSchema>;
-const trialInformationSchema = z.record(productBenefitListSchema, trialSchema);
+const trialInformationSchema = z.partialRecord(
+	productBenefitListSchema,
+	trialSchema,
+);
 export type TrialInformation = z.infer<typeof trialInformationSchema>;
 
 export const userBenefitsSchema = z.object({

@@ -1,6 +1,6 @@
 import { mergeValues, pickKeys } from '@modules/objectFunctions';
+import type { ZodType } from 'zod';
 import { z } from 'zod';
-import type { ZodType, ZodTypeDef } from 'zod';
 import type { DoesNotHaveDuplicateResponseKey } from '@modules/zuora/objectQuery/doesNotHaveDuplicateResponseKey';
 import type {
 	ObjectQueryExpandRegistry,
@@ -26,8 +26,8 @@ export type ObjectQuerySortObject<F extends string> = {
 };
 
 export const objectQueryResponseSchema = <T>(
-	itemSchema: z.ZodType<T, ZodTypeDef, unknown>,
-): ZodType<{ nextPage: string | null; data: T[] }, ZodTypeDef, unknown> =>
+	itemSchema: z.ZodType<T>,
+): ZodType<{ nextPage: string | null; data: T[] }> =>
 	z.object({
 		nextPage: z.string().nullable(),
 		data: z.array(itemSchema),
