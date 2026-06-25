@@ -1,3 +1,5 @@
+import type {
+	CaState} from '@modules/internationalisation/country';
 import {
 	caStates,
 	type IsoCountry,
@@ -63,14 +65,14 @@ export function canadianZuoraTaxRates(): ZuoraTaxRates {
 }
 
 function canadianZuoraTaxRate(
-	state: keyof TaxRatesResponse,
+	state: CaState,
 	cadTaxRates: TaxRatesResponse,
 ): ZuoraTaxRate {
 	return {
 		id: '8ad095dd81de1cf00181de66f5cf43b4',
 		taxRatePeriodId: supporterPlusTaxEngineId,
 		country: 'Canada',
-		state: caStates[state] ?? null,
+		state: caStates[state],
 		taxRate1: cadTaxRates[state],
 	};
 }

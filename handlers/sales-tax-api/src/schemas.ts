@@ -1,3 +1,5 @@
+import type { CaState} from '@modules/internationalisation/country';
+import { caStateSchema } from '@modules/internationalisation/country';
 import { isoCountrySchema } from '@modules/internationalisation/schemas';
 import { productKeySchema } from '@modules/product-catalog/productCatalogSchema';
 import { z } from 'zod';
@@ -8,20 +10,10 @@ export const taxRatesRequestSchema = z.object({
 });
 export type TaxRatesRequest = z.infer<typeof taxRatesRequestSchema>;
 
-export const taxRatesResponseSchema = z.object({
-	AB: z.number(),
-	BC: z.number(),
-	MB: z.number(),
-	NB: z.number(),
-	NL: z.number(),
-	NT: z.number(),
-	NS: z.number(),
-	NU: z.number(),
-	ON: z.number(),
-	PE: z.number(),
-	QC: z.number(),
-	SK: z.number(),
-	YT: z.number(),
-});
-export type TaxRatesResponse = z.infer<typeof taxRatesResponseSchema>;
-export type CaTaxRateState = keyof TaxRatesResponse;
+export const taxRatesResponseSchema = z.object(
+	Object.fromEntries(
+		caStateSchema.options.map((state) => [state, z.number()]),
+	) as Record<CaState, z.ZodNumber>,
+);
+
+export type TaxRatesResponse = Record<CaState, number>

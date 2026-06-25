@@ -1,3 +1,5 @@
+import z from "zod";
+
 export const usStates: Record<string, string> = {
 	AL: 'Alabama',
 	AK: 'Alaska',
@@ -57,7 +59,25 @@ export const usStates: Record<string, string> = {
 	WI: 'Wisconsin',
 	WY: 'Wyoming',
 };
-export const caStates: Record<string, string> = {
+
+export const caStateSchema = z.enum([
+	"AB",
+	"BC",
+	"MB",
+	"NB",
+	"NL",
+	"NT",
+	"NS",
+	"NU",
+	"ON",
+	"PE",
+	"QC",
+	"SK",
+	"YT",
+]);
+
+export type CaState = z.infer<typeof caStateSchema>;
+export const caStates: Record<CaState, string> = {
 	AB: 'Alberta',
 	BC: 'British Columbia',
 	MB: 'Manitoba',
@@ -72,6 +92,7 @@ export const caStates: Record<string, string> = {
 	SK: 'Saskatchewan',
 	YT: 'Yukon',
 };
+
 export const auStates: Record<string, string> = {
 	ACT: 'Australian Capital Territory',
 	NSW: 'New South Wales',
@@ -597,6 +618,5 @@ export function getCountryNameByIsoCode(code: IsoCountry) {
 }
 // ----- Types ----- //
 export type UsState = keyof typeof usStates;
-export type CaState = keyof typeof caStates;
 export type AuState = keyof typeof auStates;
 export type StateProvince = UsState;
