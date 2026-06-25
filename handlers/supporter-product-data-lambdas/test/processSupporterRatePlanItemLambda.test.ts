@@ -148,7 +148,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 		);
 		expect(updateSecondaryUserTTL).toHaveBeenCalledWith(
 			expect.stringContaining('sub-1'),
-			expect.stringContaining('secondary-id-1'),
+			expect.stringContaining('secondary-id-2'),
 			secondaryUserTTLFromPrimarySubscriptionTTL(dayjs(termEndDate)),
 		);
 	});
