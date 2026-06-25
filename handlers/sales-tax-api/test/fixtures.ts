@@ -1,5 +1,4 @@
-import type {
-	CaState} from '@modules/internationalisation/country';
+import type { CaState } from '@modules/internationalisation/country';
 import {
 	caStates,
 	type IsoCountry,

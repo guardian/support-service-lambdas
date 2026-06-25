@@ -1,5 +1,8 @@
 import { ValidationError } from '@modules/errors';
-import type { CaState, IsoCountry } from '@modules/internationalisation/country';
+import type {
+	CaState,
+	IsoCountry,
+} from '@modules/internationalisation/country';
 import {
 	caStates,
 	caStateSchema,
@@ -20,7 +23,7 @@ import type {
 import { type ZuoraTaxCode } from '@modules/zuora/types/objects/tax';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyResult } from 'aws-lambda';
-import type { TaxRatesResponse} from './schemas';
+import type { TaxRatesResponse } from './schemas';
 import { type TaxRatesRequest, taxRatesResponseSchema } from './schemas';
 
 type TaxCodeName = 'Supporter Plus Global Tax' | 'Digital Pack Global Tax';
@@ -117,7 +120,10 @@ function createCadStateTaxRates(
 	const missingStateCodes: CaState[] = [];
 
 	const taxCodesByState = stateCodes.reduce<Partial<TaxRatesResponse>>(
-		(memo: Partial<TaxRatesResponse>, stateCode: CaState): Partial<TaxRatesResponse> => {
+		(
+			memo: Partial<TaxRatesResponse>,
+			stateCode: CaState,
+		): Partial<TaxRatesResponse> => {
 			const zuoraTaxRate = cadZuoraTaxRates.find(
 				(zuoraTaxRate) => caStates[stateCode] === zuoraTaxRate.state,
 			);
