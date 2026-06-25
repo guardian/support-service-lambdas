@@ -20,6 +20,7 @@
   "dependencies": {
     "@aws-sdk/client-cloudwatch": "^3.940.0",
     "@aws-sdk/client-dynamodb": "^3.940.0",
+    "@aws-sdk/util-dynamodb": "^3.940.0",
     "@aws-sdk/client-s3": "^3.940.0",
     "@aws-sdk/client-sqs": "^3.940.0",
     "@aws-sdk/client-ssm": "^3.940.0",
@@ -29,6 +30,7 @@
     "dayjs": "^1.11.13",
     "zod": "catalog:",
     "logger": "workspace:*",
+    "multiple-account": "workspace:*",
     "zuora": "workspace:*",
     "internationalisation": "workspace:*",
     "supporter-product-data": "workspace:*"

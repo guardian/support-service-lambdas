@@ -30,6 +30,7 @@ const buildRecord = (
 	subscriptionName,
 	invitationCode,
 	primaryIdentityId: '12345678',
+	secondaryUserEmail: 'integration-test@thegulocal.com',
 	secondaryIdentityId: '87654321',
 	invitedDate: new Date().toISOString(),
 	expiryDate: dayjs().add(10, 'seconds').toDate().getTime(),

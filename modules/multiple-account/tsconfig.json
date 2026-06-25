@@ -5,14 +5,11 @@
       "@modules/*": [
         "../../modules/*"
       ],
-      "@modules/logger/*": [
-        "../../modules/logger/src/*"
-      ],
-      "@modules/multiple-account/*": [
-        "../../modules/multiple-account/src/*"
-      ],
       "@modules/aws/*": [
         "../../modules/aws/src/*"
+      ],
+      "@modules/logger/*": [
+        "../../modules/logger/src/*"
       ],
       "@modules/supporter-product-data/*": [
         "../../modules/supporter-product-data/src/*"
@@ -32,8 +29,8 @@
       "@modules/promotions/*": [
         "../../modules/promotions/src/*"
       ],
-      "@modules/supporter-product-data-lambdas/*": [
-        "../../modules/supporter-product-data-lambdas/src/*"
+      "@modules/multiple-account/*": [
+        "../../modules/multiple-account/src/*"
       ]
     }
   }

@@ -9,14 +9,16 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { getAwsConfig } from '@modules/aws/config';
 import type { Stage } from '@modules/stage';
 import dayjs from 'dayjs';
+import type { InvitationRecord } from '../src/invitationRepository';
 import { InvitationRepository } from '../src/invitationRepository';
 
 const stage: Stage = 'CODE';
 
-const testRecord = {
+const testRecord: InvitationRecord = {
 	subscriptionName: 'A-S00099999',
 	invitationCode: 'it-test-code',
 	primaryIdentityId: '12345678',
+	secondaryUserEmail: 'integration-test@thegulocal.com',
 	secondaryIdentityId: '87654321',
 	invitedDate: new Date().toISOString(),
 	expiryDate: dayjs().add(10, 'seconds').toDate().getTime(),

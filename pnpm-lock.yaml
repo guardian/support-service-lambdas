@@ -13,8 +13,8 @@ catalogs:
       specifier: ^5.6.3
       version: 5.9.2
     zod:
-      specifier: ^3.23.8
-      version: 3.25.76
+      specifier: ^4.4.3
+      version: 4.4.3
 
 overrides:
   typescript-eslint: ^8.46.2
@@ -79,7 +79,7 @@ importers:
         version: 5.9.2
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
 
   buildcheck:
     dependencies:
@@ -130,25 +130,6 @@ importers:
         specifier: ^4.21.0
         version: 4.21.0
 
-  handlers/braze-acquisition-events-sync:
-    dependencies:
-      identity:
-        specifier: workspace:*
-        version: link:../../modules/identity
-      logger:
-        specifier: workspace:*
-        version: link:../../modules/logger
-      zod:
-        specifier: 'catalog:'
-        version: 3.25.76
-    devDependencies:
-      '@redocly/cli':
-        specifier: 2.30.5
-        version: 2.30.5(@opentelemetry/api@1.9.1)(core-js@3.49.0)
-      '@types/aws-lambda':
-        specifier: ^8.10.147
-        version: 8.10.161
-
   handlers/alarms-handler:
     dependencies:
       '@aws-sdk/client-cloudwatch':
@@ -165,7 +146,7 @@ importers:
         version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../../modules/zuora
@@ -176,6 +157,25 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.21
+
+  handlers/braze-acquisition-events-sync:
+    dependencies:
+      identity:
+        specifier: workspace:*
+        version: link:../../modules/identity
+      logger:
+        specifier: workspace:*
+        version: link:../../modules/logger
+      zod:
+        specifier: 'catalog:'
+        version: 4.4.3
+    devDependencies:
+      '@redocly/cli':
+        specifier: 2.30.5
+        version: 2.30.5(@opentelemetry/api@1.9.1)(core-js@3.49.0)
+      '@types/aws-lambda':
+        specifier: ^8.10.147
+        version: 8.10.161
 
   handlers/contributions-only-countries-api:
     dependencies:
@@ -190,7 +190,7 @@ importers:
         version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -209,7 +209,7 @@ importers:
         version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../../modules/zuora
@@ -249,7 +249,7 @@ importers:
         version: 9.15.1
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../../modules/zuora
@@ -296,7 +296,7 @@ importers:
         version: link:../../modules/email
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -337,7 +337,7 @@ importers:
         version: link:../../modules/supporter-product-data
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -365,7 +365,7 @@ importers:
         version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
     devDependencies:
       '@aws-sdk/client-s3':
         specifier: ^3.940.0
@@ -400,6 +400,9 @@ importers:
       logger:
         specifier: workspace:*
         version: link:../../modules/logger
+      multiple-account:
+        specifier: workspace:*
+        version: link:../../modules/multiple-account
       nanoid:
         specifier: ^3.3.12
         version: 3.3.12
@@ -411,7 +414,7 @@ importers:
         version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
     devDependencies:
       '@redocly/cli':
         specifier: 2.30.5
@@ -442,7 +445,7 @@ importers:
         version: 9.15.1
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../../modules/zuora
@@ -470,7 +473,7 @@ importers:
         version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../../modules/zuora
@@ -489,7 +492,7 @@ importers:
         version: 3.996.2(@aws-sdk/client-dynamodb@3.1054.0)
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -511,7 +514,7 @@ importers:
         version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../../modules/zuora
@@ -572,7 +575,7 @@ importers:
         version: link:../../modules/supporter-product-data
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../../modules/zuora
@@ -612,7 +615,7 @@ importers:
         version: link:../../modules/supporter-product-data
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../../modules/zuora
@@ -665,7 +668,7 @@ importers:
         version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
     devDependencies:
       '@redocly/cli':
         specifier: 2.30.5
@@ -736,7 +739,7 @@ importers:
         version: 18.5.0(@types/node@24.10.1)
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../../modules/zuora
@@ -774,6 +777,9 @@ importers:
       '@aws-sdk/lib-storage':
         specifier: ^3.940.0
         version: 3.1054.0(@aws-sdk/client-s3@3.1054.0)
+      '@aws-sdk/util-dynamodb':
+        specifier: ^3.940.0
+        version: 3.996.2(@aws-sdk/client-dynamodb@3.1054.0)
       dayjs:
         specifier: ^1.11.13
         version: 1.11.21
@@ -783,12 +789,15 @@ importers:
       logger:
         specifier: workspace:*
         version: link:../../modules/logger
+      multiple-account:
+        specifier: workspace:*
+        version: link:../../modules/multiple-account
       supporter-product-data:
         specifier: workspace:*
         version: link:../../modules/supporter-product-data
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../../modules/zuora
@@ -813,7 +822,7 @@ importers:
         version: link:../../modules/secrets-manager
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -844,7 +853,7 @@ importers:
         version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../../modules/zuora
@@ -879,7 +888,7 @@ importers:
         version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../../modules/zuora
@@ -922,7 +931,7 @@ importers:
         version: link:../../modules/salesforce
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../../modules/zuora
@@ -962,7 +971,7 @@ importers:
         version: link:../logger
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
 
   modules/bigquery:
     dependencies:
@@ -980,7 +989,7 @@ importers:
         version: 9.15.1
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
     devDependencies:
       '@types/jest':
         specifier: ^29.5.14
@@ -1045,7 +1054,7 @@ importers:
         version: link:../aws
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../zuora
@@ -1058,13 +1067,38 @@ importers:
     dependencies:
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
 
   modules/logger:
     devDependencies:
       '@smithy/types':
         specifier: ^4.13.1
         version: 4.14.2
+
+  modules/multiple-account:
+    dependencies:
+      aws:
+        specifier: workspace:*
+        version: link:../aws
+      logger:
+        specifier: workspace:*
+        version: link:../logger
+      supporter-product-data:
+        specifier: workspace:*
+        version: link:../supporter-product-data
+    devDependencies:
+      '@aws-sdk/client-dynamodb':
+        specifier: ^3.940.0
+        version: 3.1054.0
+      '@aws-sdk/util-dynamodb':
+        specifier: ^3.940.0
+        version: 3.996.2(@aws-sdk/client-dynamodb@3.1054.0)
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.21
+      zod:
+        specifier: 'catalog:'
+        version: 4.4.3
 
   modules/product-benefits:
     dependencies:
@@ -1082,7 +1116,7 @@ importers:
         version: link:../supporter-product-data
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
 
   modules/product-catalog:
     dependencies:
@@ -1107,7 +1141,7 @@ importers:
         version: 5.9.2
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
 
   modules/promotions:
     dependencies:
@@ -1131,7 +1165,7 @@ importers:
         version: link:../product-catalog
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
 
   modules/routing:
     dependencies:
@@ -1146,7 +1180,7 @@ importers:
         version: link:../logger
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../zuora
@@ -1162,7 +1196,7 @@ importers:
         version: link:../secrets-manager
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../zuora
@@ -1212,7 +1246,7 @@ importers:
         version: 1.11.21
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
 
   modules/sync-supporter-product-data:
     dependencies:
@@ -1224,7 +1258,7 @@ importers:
         version: link:../product-catalog
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../zuora
@@ -1286,7 +1320,7 @@ importers:
         version: link:../promotions
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora-catalog:
         specifier: workspace:*
         version: link:../zuora-catalog
@@ -1304,7 +1338,7 @@ importers:
         version: link:../logger
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
 
 packages:
 
@@ -5746,8 +5780,8 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  zod@3.25.76:
-    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+  zod@4.4.3:
+    resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
 
 snapshots:
 
@@ -11717,4 +11751,4 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  zod@3.25.76: {}
+  zod@4.4.3: {}

@@ -34,7 +34,7 @@ export type HttpResponse<T> =
 	  };
 
 export type Schema<RESP> =
-	| z.ZodType<RESP, z.ZodTypeDef, unknown>
+	| z.ZodType<RESP>
 	| ((body: string, contentType?: string) => RESP);
 
 export class RestRequestMaker {

@@ -1,8 +1,8 @@
-import { listSecondaryUsersEndpoint } from '../src/listSecondaryUsersEndpoint';
 import type {
 	SecondaryUserRecord,
 	SecondaryUserRepository,
-} from '../src/secondaryUserRepository';
+} from '@modules/multiple-account/secondaryUserRepository';
+import { listSecondaryUsersEndpoint } from '../src/listSecondaryUsersEndpoint';
 
 describe('listSecondaryUsersEndpoint', () => {
 	it('returns all secondary users for the subscription', async () => {

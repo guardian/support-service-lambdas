@@ -84,9 +84,9 @@ export const subscriptionItemSchema = z.object({
 	subscriptionVersionAmendmentId: z.string().nullable(),
 	/**
 	 * The date the subscription term ends.
-	 * Null if the subscription is evergreen and no cancellation date has been set.
+	 * would only be Null if the subscription is evergreen and no cancellation date has been set.
 	 */
-	termEndDate: z.coerce.date().nullable(),
+	termEndDate: z.coerce.date(),
 	/** The date the subscription term begins. */
 	termStartDate: z.coerce.date(),
 	/** The type of the subscription term. */
@@ -113,6 +113,11 @@ export const subscriptionItemSchema = z.object({
 export const subscriptionWithRatePlansSchema = subscriptionItemSchema.extend({
 	ratePlans: z.array(ratePlanItemSchema),
 });
+
+export type SubscriptionWithRatePlansOnly = z.infer<
+	typeof subscriptionWithRatePlansSchema
+>;
+export type RatePlanOnly = SubscriptionWithRatePlansOnly['ratePlans'][number];
 
 export const subscriptionWithRatePlanChargesSchema =
 	subscriptionItemSchema.extend({

@@ -6,7 +6,7 @@ import type { HandlerEnv } from '@modules/routing/lambdaHandler';
 import { LambdaHandlerWithServices } from '@modules/routing/lambdaHandler';
 
 export function SQSHandler<ConfigType, Services>(
-	configSchema: z.ZodType<ConfigType, z.ZodTypeDef, unknown>,
+	configSchema: z.ZodType<ConfigType>,
 	handler: (record: SQSRecord, services: Services) => Promise<void>,
 	buildServices: (handlerProps: HandlerEnv<ConfigType>) => Services,
 ) {

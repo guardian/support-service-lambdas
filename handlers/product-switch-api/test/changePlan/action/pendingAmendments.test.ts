@@ -19,7 +19,7 @@ import { getAccountInformation } from '../../../src/changePlan/prepare/accountIn
 import { SwitchOrderRequestBuilder } from '../../../src/changePlan/prepare/buildSwitchOrderRequest';
 import { getSubscriptionInformation } from '../../../src/changePlan/prepare/subscriptionInformation';
 import type { TargetInformation } from '../../../src/changePlan/prepare/targetInformation';
-import type { ZuoraSwitchResponse } from '../../../src/changePlan/schemas';
+import type { ZuoraSwitchResponseWithIds } from '../../../src/changePlan/schemas';
 import { supporterPlusTargetInformation } from '../../../src/changePlan/switchDefinition/supporterPlusTargetInformation';
 import type { ZuoraPreviewResponse } from '../../../src/doPreviewInvoices';
 import accountJson from '../../fixtures/account.json';
@@ -153,7 +153,7 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 		mockZuoraClient.post.mockResolvedValueOnce({
 			success: true,
 			invoiceIds: ['invoice-id'],
-		} as ZuoraSwitchResponse);
+		} as ZuoraSwitchResponseWithIds);
 
 		// getInvoices
 		mockZuoraClient.get.mockResolvedValueOnce({

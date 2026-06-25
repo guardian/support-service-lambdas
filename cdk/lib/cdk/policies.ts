@@ -93,6 +93,17 @@ export class AllowSupporterProductDataQueryPolicy extends GuAllowPolicy {
 	}
 }
 
+export class AllowSecondaryUserTableQueryPolicy extends GuAllowPolicy {
+	constructor(scope: GuStack) {
+		super(scope, 'MultipleAccountSecondaryUserTable query access', {
+			actions: ['dynamodb:Query'],
+			resources: [
+				`arn:aws:dynamodb:${scope.region}:${scope.account}:table/multiple-account-secondary-user-${scope.stage}`,
+			],
+		});
+	}
+}
+
 export class AllowPromoCodeTableQueryPolicy extends GuAllowPolicy {
 	constructor(scope: GuStack) {
 		super(scope, 'Promo code table query access', {
