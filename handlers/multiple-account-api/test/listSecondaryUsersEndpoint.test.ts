@@ -12,6 +12,7 @@ describe('listSecondaryUsersEndpoint', () => {
 				secondaryIdentityId: 'secondary-id',
 				primaryIdentityId: 'primary-id',
 				acceptedDate: '2026-06-12',
+				expiryDate: 1781218800,
 			},
 		];
 		const mockList = jest
