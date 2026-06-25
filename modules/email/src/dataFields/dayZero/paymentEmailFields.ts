@@ -74,19 +74,14 @@ export function getPaymentMethodFieldsSupporterPlus(
 	created: Dayjs,
 	mandateId?: string,
 ):
-	| {
-			payment_method: 'credit / debit card' | 'PayPal';
-			first_payment_date: string;
-	  }
+	| Record<string, never>
 	| {
 			payment_method: 'Direct Debit';
 			account_name: string;
 			account_number: string;
 			sort_code: string;
 			Mandate_ID: string;
-			first_payment_date: string;
 	  } {
-	const DIRECT_DEBIT_LEAD_TIME_DAYS = 10;
 	switch (paymentMethod.Type) {
 		case 'BankTransfer':
 			return {
@@ -98,19 +93,9 @@ export function getPaymentMethodFieldsSupporterPlus(
 					mandateId,
 					'No Mandate ID was provided for a Direct Debit payment',
 				),
-				first_payment_date: formatDate(
-					created.add(DIRECT_DEBIT_LEAD_TIME_DAYS, 'days'),
-				),
 			};
 		case 'CreditCardReferenceTransaction':
-			return {
-				payment_method: 'credit / debit card',
-				first_payment_date: formatDate(created),
-			};
 		case 'PayPal':
-			return {
-				payment_method: 'PayPal',
-				first_payment_date: formatDate(created),
-			};
+			return {};
 	}
 }
