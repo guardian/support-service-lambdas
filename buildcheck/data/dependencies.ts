@@ -9,6 +9,9 @@ export const dep = separateDepRecords({
 	// base libraries for general use
 	dayjs: '^1.11.13',
 	nanoid: '^3.3.12',
+	hono: '^4.12.25',
+	'@hono/node-server': '^2.0.5',
+	'@hono/zod-openapi': '^0.19.10',
 	// parsers
 	zod: 'catalog:',
 	'csv-parse': '^5.6.0',

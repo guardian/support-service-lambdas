@@ -1,19 +1,22 @@
+import type { RouteHandler } from '@hono/zod-openapi';
+import { createRoute, z } from '@hono/zod-openapi';
 import { sendEmail } from '@modules/email/email';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
-import { ok } from '@modules/routing/apiGatewayResponses';
-import { Router } from '@modules/routing/router';
-import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
-import { withParsers } from '@modules/routing/withParsers';
+import { createHonoApp } from '@modules/routing/honoApp';
+import {
+	errorResponses,
+	jsonContent,
+	mmaRequestHeaders,
+	requiredJsonRequestBody,
+} from '@modules/routing/honoSchemas';
+import { withHonoMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
 import { stageFromEnvironment } from '@modules/stage';
 import type {
 	ZuoraAccount,
 	ZuoraSubscription,
 } from '@modules/zuora/types/objects';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { APIGatewayProxyResult, Handler } from 'aws-lambda';
 import dayjs from 'dayjs';
-import { z } from 'zod';
-import type { RequestBody } from './schema';
 import { requestBodySchema } from './schema';
 import { createThankYouEmail } from './sendEmail';
 import { updateSupporterPlusAmount } from './updateSupporterPlusAmount';
@@ -31,29 +34,44 @@ const pathParserSchema = z.object({
 
 export type PathParser = z.infer<typeof pathParserSchema>;
 
-// main entry from AWS
-export const handler: Handler = Router([
-	{
-		httpMethod: 'POST',
-		path: '/update-supporter-plus-amount/{subscriptionNumber}',
-		handler: withParsers(
-			pathParserSchema,
-			requestBodySchema,
-			withMMAIdentityCheck(
-				stage,
-				handleUpdateAmount,
-				({ path }) => path.subscriptionNumber,
-			),
-		),
+const successResponseSchema = z.object({
+	message: z.literal('Success'),
+});
+
+export const { app, handler } = createHonoApp(
+	'Update supporter plus amount API',
+);
+
+const updateSupporterPlusAmountRoute = createRoute({
+	method: 'post',
+	path: '/update-supporter-plus-amount/{subscriptionNumber}',
+	request: {
+		params: pathParserSchema,
+		headers: mmaRequestHeaders,
+		body: requiredJsonRequestBody(requestBodySchema),
 	},
-]);
+	responses: {
+		200: jsonContent(successResponseSchema, 'Amount was updated successfully'),
+		...errorResponses,
+	},
+});
+
+app.openapi(
+	updateSupporterPlusAmountRoute,
+	withHonoMMAIdentityCheck<typeof updateSupporterPlusAmountRoute>(
+		stage,
+		handleUpdateAmount,
+		(c) => c.req.valid('param').subscriptionNumber,
+	),
+);
 
 async function handleUpdateAmount(
-	requestBody: RequestBody,
+	c: Parameters<RouteHandler<typeof updateSupporterPlusAmountRoute>>[0],
 	zuoraClient: ZuoraClient,
 	subscription: ZuoraSubscription,
 	account: ZuoraAccount,
-): Promise<APIGatewayProxyResult> {
+) {
+	const requestBody = c.req.valid('json');
 	const subscriptionNumber = subscription.subscriptionNumber;
 	const productCatalog = await getProductCatalogFromApi(stage);
 	const emailFields = await updateSupporterPlusAmount(
@@ -66,5 +84,5 @@ async function handleUpdateAmount(
 		dayjs(),
 	);
 	await sendEmail(stage, createThankYouEmail(emailFields));
-	return ok({ message: 'Success' });
+	return c.json({ message: 'Success' as const }, 200);
 }

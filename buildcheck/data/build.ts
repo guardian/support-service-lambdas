@@ -146,6 +146,10 @@ const moduleRouting: ModuleDefinition = {
 	dependencies: {
 		...dep['zod'],
 		...dep['dayjs'],
+		...dep['hono'],
+		...dep['@hono/zod-openapi'],
+		...dep['@hono/node-server'],
+		...dep['@hono/zod-openapi'],
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
@@ -640,11 +644,13 @@ const updateSupporterPlusAmount: HandlerDefinition = {
 	name: 'update-supporter-plus-amount',
 	dependencies: {
 		...dep['@aws-sdk/client-sqs'],
+		...dep['@hono/zod-openapi'],
 		...dep.dayjs,
 		...dep.zod,
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
+		...devDeps['tsx'],
 	},
 	moduleDependencies: [
 		moduleEmail,
