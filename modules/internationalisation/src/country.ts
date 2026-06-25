@@ -1,4 +1,4 @@
-import z from "zod";
+import z from 'zod';
 
 export const usStates: Record<string, string> = {
 	AL: 'Alabama',
@@ -61,19 +61,19 @@ export const usStates: Record<string, string> = {
 };
 
 export const caStateSchema = z.enum([
-	"AB",
-	"BC",
-	"MB",
-	"NB",
-	"NL",
-	"NT",
-	"NS",
-	"NU",
-	"ON",
-	"PE",
-	"QC",
-	"SK",
-	"YT",
+	'AB',
+	'BC',
+	'MB',
+	'NB',
+	'NL',
+	'NT',
+	'NS',
+	'NU',
+	'ON',
+	'PE',
+	'QC',
+	'SK',
+	'YT',
 ]);
 
 export type CaState = z.infer<typeof caStateSchema>;
