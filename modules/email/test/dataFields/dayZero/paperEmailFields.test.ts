@@ -1,6 +1,6 @@
-import dayjs from 'dayjs';
 import { buildPaperEmailFields } from '@modules/email/dataFields/dayZero/paperEmailFields';
 import { DataExtensionNames } from '@modules/email/email';
+import dayjs from 'dayjs';
 import {
 	deliveryAgentDetails,
 	deliveryContact,
@@ -31,7 +31,8 @@ describe('Paper email fields', () => {
 					last_name: deliveryContact.lastName,
 					account_holder: 'Mickey Mouse',
 					package: 'Everyday',
-					first_payment_date: 'Friday, 21 November 2025',
+					first_payment_date:
+						'Tuesday, 18 November 2025 (Direct Debit may be up to 10 days after this)',
 					bank_sort_code: '20-20-20',
 					mandate_id: mandateId,
 					bank_account_no: '******11',

@@ -42,20 +42,22 @@ export function getPaymentFields(
 	mandateId?: string,
 ): EmailPaymentFields {
 	switch (paymentMethod.Type) {
-		case 'BankTransfer':
+		case 'BankTransfer': {
+			const isFirstPaymentLessThan10DaysAway =
+				firstZuoraPaymentDate < today.add(DIRECT_DEBIT_LEAD_TIME_DAYS, 'day');
+			const directDebitDisclaimer = isFirstPaymentLessThan10DaysAway
+				? ' (Direct Debit may be up to 10 days after this)'
+				: '';
+
 			return {
 				bank_account_no: mask(paymentMethod.BankTransferAccountNumber),
 				bank_sort_code: hyphenate(paymentMethod.BankCode),
 				account_holder: paymentMethod.BankTransferAccountName,
 				payment_method: 'Direct Debit',
 				mandate_id: mandateId ?? '',
-				first_payment_date: formatDate(
-					dayjs.max(
-						firstZuoraPaymentDate,
-						today.add(DIRECT_DEBIT_LEAD_TIME_DAYS, 'day'),
-					),
-				),
+				first_payment_date: `${formatDate(firstZuoraPaymentDate)}${directDebitDisclaimer}`,
 			};
+		}
 		case 'CreditCardReferenceTransaction':
 			return {
 				payment_method: 'Credit/Debit Card',
