@@ -1,7 +1,4 @@
-import {
-	type DataExtensionName,
-	DataExtensionNames,
-} from '@modules/email/email';
+import { DataExtensionNames } from '@modules/email/email';
 import { ValidationError } from '@modules/errors';
 import type { ProductRatePlan } from '@modules/product-catalog/productCatalog';
 import type { SwitchTargetInformation } from '../prepare/switchCatalogHelper';
@@ -32,16 +29,11 @@ export const digitalSubscriptionTargetInformation: SwitchTargetInformation<
 			throw new ValidationError("digital plus doesn't have a variable amount");
 		}
 		let discount: Discount | undefined = undefined;
-		let dataExtensionName: DataExtensionName;
 		if (
 			switchActionData.discountEnabled &&
 			productRatePlan.billingPeriod === 'Month'
 		) {
 			discount = monthlyDigiPlus;
-			dataExtensionName =
-				DataExtensionNames.supporterPlusToDigitalPlusSwitchWithDiscount;
-		} else {
-			dataExtensionName = DataExtensionNames.supporterPlusToDigitalPlusSwitch;
 		}
 
 		const catalogPrice = productRatePlan.pricing[switchActionData.currency];
@@ -60,7 +52,7 @@ export const digitalSubscriptionTargetInformation: SwitchTargetInformation<
 			contributionCharge: undefined,
 			subscriptionChargeId: productRatePlan.charges.Subscription.id,
 			discount,
-			dataExtensionName,
+			dataExtensionName: DataExtensionNames.supporterPlusToDigitalPlusSwitch,
 		} satisfies TargetInformation);
 	},
 };
