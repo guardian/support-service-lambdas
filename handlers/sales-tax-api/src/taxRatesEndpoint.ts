@@ -29,6 +29,9 @@ export const taxRatesRequestEndpoint = async ({
 	country,
 }: TaxRatesRequest): Promise<APIGatewayProxyResult> => {
 	try {
+		if (process.env.FORCE_FAILURE === 'true') {
+			throw new Error('Forced failure');
+		}
 		logger.log('Checking sales taxes for', {
 			productKey,
 			country,
