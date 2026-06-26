@@ -1,7 +1,7 @@
 import { isInList } from '@modules/arrayFunctions';
 import z from 'zod';
 
-export const CurrencyValues = [
+export const isoCurrencies = [
 	'GBP',
 	'EUR',
 	'AUD',
@@ -10,8 +10,8 @@ export const CurrencyValues = [
 	'NZD',
 ] as const;
 
-export type IsoCurrency = (typeof CurrencyValues)[number];
-export const isoCurrencySchema = z.enum(CurrencyValues);
+export type IsoCurrency = (typeof isoCurrencies)[number];
+export const isoCurrencySchema = z.enum(isoCurrencies);
 
 export type CurrencyInfo = {
 	glyph: string;
@@ -52,7 +52,7 @@ const currencies: Record<IsoCurrency, CurrencyInfo> = {
 	},
 };
 
-export const isSupportedCurrency = isInList(CurrencyValues);
+export const isSupportedCurrency = isInList(isoCurrencies);
 
 export const getCurrencyInfo = (currency: IsoCurrency): CurrencyInfo =>
 	currencies[currency];
