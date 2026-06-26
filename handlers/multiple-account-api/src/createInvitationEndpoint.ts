@@ -75,6 +75,7 @@ export const createInvitationEndpoint =
 			subscriptionName: zuoraSubscription.subscriptionNumber,
 			invitationCode,
 			primaryIdentityId: account.basicInfo.identityId,
+			secondaryUserEmail: body.secondaryUserEmail,
 			secondaryIdentityId,
 			invitedDate: zuoraDateFormat(now),
 			expiryDate: now.add(1, 'month').toDate().getTime(),
