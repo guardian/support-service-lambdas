@@ -22,8 +22,8 @@ class SupporterPlusPlans(today: LocalDate) {
   val planInfo: List[(PlanId, PlanDescription, StartDateRules, BillingPeriod)] = List(
     (MonthlySupporterPlus, PlanDescription("Monthly"), rule, Monthly),
     (AnnualSupporterPlus, PlanDescription("Annual"), rule, Annual),
-    (MonthlySupporterPlusTaxExclusive, PlanDescription("Monthly"), rule, Monthly),
-    (AnnualSupporterPlusTaxExclusive, PlanDescription("Annual"), rule, Annual),
+    (MonthlySupporterPlusTaxExclusive, PlanDescription("Monthly (Tax Exclusive)"), rule, Monthly),
+    (AnnualSupporterPlusTaxExclusive, PlanDescription("Annual (Tax Exclusive)"), rule, Annual),
   )
 
 }

@@ -24,8 +24,8 @@ class DigitalPackPlans(today: LocalDate) {
   val planInfo: List[(PlanId, PlanDescription, StartDateRules, BillingPeriod)] = List(
     (DigipackAnnual, PlanDescription("Annual"), startRules, Annual),
     (DigipackMonthly, PlanDescription("Monthly"), startRules, Monthly),
-    (DigipackAnnualTaxExclusive, PlanDescription("Annual"), startRules, Annual),
-    (DigipackMonthlyTaxExclusive, PlanDescription("Monthly"), startRules, Monthly),
+    (DigipackAnnualTaxExclusive, PlanDescription("Annual (Tax Exclusive)"), startRules, Annual),
+    (DigipackMonthlyTaxExclusive, PlanDescription("Monthly (Tax Exclusive)"), startRules, Monthly),
   )
 
 }

@@ -50,7 +50,7 @@
       "paymentPlans" : [ ]
     }, {
       "id" : "monthly_supporter_plus_tax_exclusive",
-      "label" : "Monthly",
+      "label" : "Monthly (Tax Exclusive)",
       "startDateRules" : {
         "daysOfWeek" : [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ],
         "selectableWindow" : {
@@ -67,7 +67,7 @@
       "enabledForBillingCountries" : [ "Canada" ]
     }, {
       "id" : "annual_supporter_plus_tax_exclusive",
-      "label" : "Annual",
+      "label" : "Annual (Tax Exclusive)",
       "startDateRules" : {
         "daysOfWeek" : [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ],
         "selectableWindow" : {
@@ -131,7 +131,7 @@
       "paymentPlan" : "GBP 55.55 every month"
     }, {
       "id" : "digipack_annual_tax_exclusive",
-      "label" : "Annual",
+      "label" : "Annual (Tax Exclusive)",
       "startDateRules" : {
         "daysOfWeek" : [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ],
         "selectableWindow" : {
@@ -148,7 +148,7 @@
       "enabledForBillingCountries" : [ "Canada" ]
     }, {
       "id" : "digipack_monthly_tax_exclusive",
-      "label" : "Monthly",
+      "label" : "Monthly (Tax Exclusive)",
       "startDateRules" : {
         "daysOfWeek" : [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ],
         "selectableWindow" : {
