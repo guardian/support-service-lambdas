@@ -35,38 +35,58 @@ export type EmailPaymentFields =
 			mandate_id: string;
 	  };
 
+function getFirstPaymentDateCopy(
+	paymentMethod: EmailPaymentMethod,
+	firstZuoraPaymentDate: Dayjs,
+	today: Dayjs,
+): string {
+	const firstPaymentDateFormatted = formatDate(firstZuoraPaymentDate);
+
+	if (paymentMethod.Type !== 'BankTransfer') {
+		return firstPaymentDateFormatted;
+	}
+
+	const isFirstPaymentLessThan10DaysAway =
+		firstZuoraPaymentDate < today.add(DIRECT_DEBIT_LEAD_TIME_DAYS, 'day');
+	const directDebitDisclaimer = isFirstPaymentLessThan10DaysAway
+		? ' (Direct Debit may be up to 10 days after this)'
+		: '';
+
+	return `${firstPaymentDateFormatted}${directDebitDisclaimer}`;
+}
+
 export function getPaymentFields(
 	today: Dayjs,
 	paymentMethod: EmailPaymentMethod,
 	firstZuoraPaymentDate: Dayjs,
 	mandateId?: string,
 ): EmailPaymentFields {
+	const firstPaymentDateCopy = getFirstPaymentDateCopy(
+		paymentMethod,
+		firstZuoraPaymentDate,
+		today,
+	);
+
 	switch (paymentMethod.Type) {
 		case 'BankTransfer': {
-			const isFirstPaymentLessThan10DaysAway =
-				firstZuoraPaymentDate < today.add(DIRECT_DEBIT_LEAD_TIME_DAYS, 'day');
-			const directDebitDisclaimer = isFirstPaymentLessThan10DaysAway
-				? ' (Direct Debit may be up to 10 days after this)'
-				: '';
-
 			return {
 				bank_account_no: mask(paymentMethod.BankTransferAccountNumber),
 				bank_sort_code: hyphenate(paymentMethod.BankCode),
 				account_holder: paymentMethod.BankTransferAccountName,
 				payment_method: 'Direct Debit',
 				mandate_id: mandateId ?? '',
-				first_payment_date: `${formatDate(firstZuoraPaymentDate)}${directDebitDisclaimer}`,
+				first_payment_date: firstPaymentDateCopy,
 			};
 		}
 		case 'CreditCardReferenceTransaction':
 			return {
 				payment_method: 'Credit/Debit Card',
-				first_payment_date: formatDate(firstZuoraPaymentDate),
+				first_payment_date: firstPaymentDateCopy,
 			};
 		case 'PayPal':
 			return {
 				payment_method: 'PayPal',
-				first_payment_date: formatDate(firstZuoraPaymentDate),
+				first_payment_date: firstPaymentDateCopy,
 			};
 	}
 }
