@@ -1,5 +1,5 @@
-import { caStateCodes } from '@modules/internationalisation/country';
 import { isoCountrySchema } from '@modules/internationalisation/schemas';
+import { caStateCodeSchema } from '@modules/internationalisation/states';
 import { productKeySchema } from '@modules/product-catalog/productCatalogSchema';
 import { z } from 'zod';
 
@@ -9,6 +9,5 @@ export const taxRatesRequestSchema = z.object({
 });
 export type TaxRatesRequest = z.infer<typeof taxRatesRequestSchema>;
 
-export const caStateSchema = z.enum(caStateCodes);
-export const taxRatesResponseSchema = z.record(caStateSchema, z.number());
+export const taxRatesResponseSchema = z.record(caStateCodeSchema, z.number());
 export type TaxRatesResponse = z.infer<typeof taxRatesResponseSchema>;

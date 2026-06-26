@@ -1,365 +1,256 @@
-export const usStates: Record<string, string> = {
-	AL: 'Alabama',
-	AK: 'Alaska',
-	AZ: 'Arizona',
-	AR: 'Arkansas',
-	AE: 'Armed Forces',
-	AA: 'Armed Forces America',
-	AP: 'Armed Forces Pacific',
-	CA: 'California',
-	CO: 'Colorado',
-	CT: 'Connecticut',
-	DE: 'Delaware',
-	FL: 'Florida',
-	GA: 'Georgia',
-	GU: 'Guam',
-	HI: 'Hawaii',
-	ID: 'Idaho',
-	IL: 'Illinois',
-	IN: 'Indiana',
-	IA: 'Iowa',
-	KS: 'Kansas',
-	KY: 'Kentucky',
-	LA: 'Louisiana',
-	ME: 'Maine',
-	MD: 'Maryland',
-	MA: 'Massachusetts',
-	MI: 'Michigan',
-	MN: 'Minnesota',
-	MS: 'Mississippi',
-	MO: 'Missouri',
-	MT: 'Montana',
-	NE: 'Nebraska',
-	NV: 'Nevada',
-	NH: 'New Hampshire',
-	NJ: 'New Jersey',
-	NM: 'New Mexico',
-	NY: 'New York',
-	NC: 'North Carolina',
-	ND: 'North Dakota',
-	OH: 'Ohio',
-	OK: 'Oklahoma',
-	OR: 'Oregon',
-	PA: 'Pennsylvania',
-	PR: 'Puerto Rico',
-	RI: 'Rhode Island',
-	SC: 'South Carolina',
-	SD: 'South Dakota',
-	TN: 'Tennessee',
-	TX: 'Texas',
-	UT: 'Utah',
-	VT: 'Vermont',
-	VI: 'Virgin Islands',
-	VA: 'Virginia',
-	WA: 'Washington',
-	DC: 'Washington DC (District of Columbia)',
-	WV: 'West Virginia',
-	WI: 'Wisconsin',
-	WY: 'Wyoming',
-};
+import { objectKeys } from '@modules/objectFunctions';
+import z from 'zod';
 
-export const caStateCodes = [
-	'AB',
-	'BC',
-	'MB',
-	'NB',
-	'NL',
-	'NT',
-	'NS',
-	'NU',
-	'ON',
-	'PE',
-	'QC',
-	'SK',
-	'YT',
-] as const;
-
-export type CaState = (typeof caStateCodes)[number];
-
-export const caStates: Record<CaState, string> = {
-	AB: 'Alberta',
-	BC: 'British Columbia',
-	MB: 'Manitoba',
-	NB: 'New Brunswick',
-	NL: 'Newfoundland and Labrador',
-	NT: 'Northwest Territories',
-	NS: 'Nova Scotia',
-	NU: 'Nunavut',
-	ON: 'Ontario',
-	PE: 'Prince Edward Island',
-	QC: 'Quebec',
-	SK: 'Saskatchewan',
-	YT: 'Yukon',
-} as const;
-
-export const auStates: Record<string, string> = {
-	ACT: 'Australian Capital Territory',
-	NSW: 'New South Wales',
-	NT: 'Northern Territory',
-	QLD: 'Queensland',
-	SA: 'South Australia',
-	TAS: 'Tasmania',
-	VIC: 'Victoria',
-	WA: 'Western Australia',
-};
-export const newspaperCountries: Record<string, string> = {
-	GB: 'United Kingdom',
-	IM: 'Isle of Man',
-};
-export type IsoCountry = (typeof isoCountries)[number];
-export const isoCountries = [
-	'GB',
-	'US',
-	'AU',
-	'NZ',
-	'CK',
-	'CA',
-	'AD',
-	'AL',
-	'AT',
-	'BA',
-	'BE',
-	'BG',
-	'BL',
-	'CH',
-	'CY',
-	'CZ',
-	'DE',
-	'DK',
-	'EE',
-	'ES',
-	'FI',
-	'FO',
-	'FR',
-	'GF',
-	'GL',
-	'GP',
-	'GR',
-	'HR',
-	'HU',
-	'IE',
-	'IT',
-	'LI',
-	'LT',
-	'LU',
-	'LV',
-	'MC',
-	'ME',
-	'MF',
-	'IS',
-	'MQ',
-	'MT',
-	'NL',
-	'NO',
-	'PF',
-	'PL',
-	'PM',
-	'PT',
-	'RE',
-	'RO',
-	'RS',
-	'SE',
-	'SI',
-	'SJ',
-	'SK',
-	'SM',
-	'TF',
-	'TR',
-	'WF',
-	'YT',
-	'VA',
-	'AX',
-	'KI',
-	'NR',
-	'NF',
-	'TV',
-	'AE',
-	'AF',
-	'AG',
-	'AI',
-	'AM',
-	'AO',
-	'AQ',
-	'AR',
-	'AS',
-	'AW',
-	'AZ',
-	'BB',
-	'BD',
-	'BF',
-	'BH',
-	'BI',
-	'BJ',
-	'BM',
-	'BN',
-	'BO',
-	'BQ',
-	'BR',
-	'BS',
-	'BT',
-	'BV',
-	'BW',
-	'BY',
-	'BZ',
-	'CC',
-	'CD',
-	'CF',
-	'CG',
-	'CI',
-	'CL',
-	'CM',
-	'CN',
-	'CO',
-	'CR',
-	'CU',
-	'CV',
-	'CW',
-	'CX',
-	'DJ',
-	'DM',
-	'DO',
-	'DZ',
-	'EC',
-	'EG',
-	'EH',
-	'ER',
-	'ET',
-	'FJ',
-	'FM',
-	'GA',
-	'GD',
-	'GE',
-	'GH',
-	'GM',
-	'GN',
-	'GQ',
-	'GS',
-	'GT',
-	'GU',
-	'GW',
-	'GY',
-	'HK',
-	'HM',
-	'HN',
-	'HT',
-	'ID',
-	'IL',
-	'IN',
-	'IO',
-	'IQ',
-	'IR',
-	'JM',
-	'JO',
-	'JP',
-	'KE',
-	'KG',
-	'KH',
-	'KM',
-	'KN',
-	'KP',
-	'KR',
-	'KW',
-	'KY',
-	'KZ',
-	'LA',
-	'LB',
-	'LC',
-	'LK',
-	'LR',
-	'LS',
-	'LY',
-	'MA',
-	'MD',
-	'MG',
-	'MH',
-	'MK',
-	'ML',
-	'MM',
-	'MN',
-	'MO',
-	'MP',
-	'MR',
-	'MS',
-	'MU',
-	'MV',
-	'MW',
-	'MX',
-	'MY',
-	'MZ',
-	'NA',
-	'NC',
-	'NE',
-	'NG',
-	'NI',
-	'NP',
-	'NU',
-	'OM',
-	'PA',
-	'PE',
-	'PG',
-	'PH',
-	'PK',
-	'PN',
-	'PR',
-	'PS',
-	'PW',
-	'PY',
-	'QA',
-	'RU',
-	'RW',
-	'SA',
-	'SB',
-	'SC',
-	'SD',
-	'SG',
-	'SL',
-	'SN',
-	'SO',
-	'SR',
-	'SS',
-	'ST',
-	'SV',
-	'SX',
-	'SY',
-	'SZ',
-	'TC',
-	'TD',
-	'TG',
-	'TH',
-	'TJ',
-	'TK',
-	'TL',
-	'TM',
-	'TN',
-	'TO',
-	'TT',
-	'TW',
-	'TZ',
-	'UA',
-	'UG',
-	'UM',
-	'UY',
-	'UZ',
-	'VC',
-	'VE',
-	'VG',
-	'VI',
-	'VN',
-	'VU',
-	'WS',
-	'YE',
-	'ZA',
-	'ZM',
-	'ZW',
-	'FK',
-	'GI',
-	'GG',
-	'IM',
-	'JE',
-	'SH',
-] as const;
-
-export const isoCountrySet: Set<IsoCountry> = new Set(isoCountries);
+export type IsoCountry =
+	| 'GB'
+	| 'US'
+	| 'AU'
+	| 'NZ'
+	| 'CK'
+	| 'CA'
+	| 'AD'
+	| 'AL'
+	| 'AT'
+	| 'BA'
+	| 'BE'
+	| 'BG'
+	| 'BL'
+	| 'CH'
+	| 'CY'
+	| 'CZ'
+	| 'DE'
+	| 'DK'
+	| 'EE'
+	| 'ES'
+	| 'FI'
+	| 'FO'
+	| 'FR'
+	| 'GF'
+	| 'GL'
+	| 'GP'
+	| 'GR'
+	| 'HR'
+	| 'HU'
+	| 'IE'
+	| 'IT'
+	| 'LI'
+	| 'LT'
+	| 'LU'
+	| 'LV'
+	| 'MC'
+	| 'ME'
+	| 'MF'
+	| 'IS'
+	| 'MQ'
+	| 'MT'
+	| 'NL'
+	| 'NO'
+	| 'PF'
+	| 'PL'
+	| 'PM'
+	| 'PT'
+	| 'RE'
+	| 'RO'
+	| 'RS'
+	| 'SE'
+	| 'SI'
+	| 'SJ'
+	| 'SK'
+	| 'SM'
+	| 'TF'
+	| 'TR'
+	| 'WF'
+	| 'YT'
+	| 'VA'
+	| 'AX'
+	| 'KI'
+	| 'NR'
+	| 'NF'
+	| 'TV'
+	| 'AE'
+	| 'AF'
+	| 'AG'
+	| 'AI'
+	| 'AM'
+	| 'AO'
+	| 'AQ'
+	| 'AR'
+	| 'AS'
+	| 'AW'
+	| 'AZ'
+	| 'BB'
+	| 'BD'
+	| 'BF'
+	| 'BH'
+	| 'BI'
+	| 'BJ'
+	| 'BM'
+	| 'BN'
+	| 'BO'
+	| 'BQ'
+	| 'BR'
+	| 'BS'
+	| 'BT'
+	| 'BV'
+	| 'BW'
+	| 'BY'
+	| 'BZ'
+	| 'CC'
+	| 'CD'
+	| 'CF'
+	| 'CG'
+	| 'CI'
+	| 'CL'
+	| 'CM'
+	| 'CN'
+	| 'CO'
+	| 'CR'
+	| 'CU'
+	| 'CV'
+	| 'CW'
+	| 'CX'
+	| 'DJ'
+	| 'DM'
+	| 'DO'
+	| 'DZ'
+	| 'EC'
+	| 'EG'
+	| 'EH'
+	| 'ER'
+	| 'ET'
+	| 'FJ'
+	| 'FM'
+	| 'GA'
+	| 'GD'
+	| 'GE'
+	| 'GH'
+	| 'GM'
+	| 'GN'
+	| 'GQ'
+	| 'GS'
+	| 'GT'
+	| 'GU'
+	| 'GW'
+	| 'GY'
+	| 'HK'
+	| 'HM'
+	| 'HN'
+	| 'HT'
+	| 'ID'
+	| 'IL'
+	| 'IN'
+	| 'IO'
+	| 'IQ'
+	| 'IR'
+	| 'JM'
+	| 'JO'
+	| 'JP'
+	| 'KE'
+	| 'KG'
+	| 'KH'
+	| 'KM'
+	| 'KN'
+	| 'KP'
+	| 'KR'
+	| 'KW'
+	| 'KY'
+	| 'KZ'
+	| 'LA'
+	| 'LB'
+	| 'LC'
+	| 'LK'
+	| 'LR'
+	| 'LS'
+	| 'LY'
+	| 'MA'
+	| 'MD'
+	| 'MG'
+	| 'MH'
+	| 'MK'
+	| 'ML'
+	| 'MM'
+	| 'MN'
+	| 'MO'
+	| 'MP'
+	| 'MR'
+	| 'MS'
+	| 'MU'
+	| 'MV'
+	| 'MW'
+	| 'MX'
+	| 'MY'
+	| 'MZ'
+	| 'NA'
+	| 'NC'
+	| 'NE'
+	| 'NG'
+	| 'NI'
+	| 'NP'
+	| 'NU'
+	| 'OM'
+	| 'PA'
+	| 'PE'
+	| 'PG'
+	| 'PH'
+	| 'PK'
+	| 'PN'
+	| 'PR'
+	| 'PS'
+	| 'PW'
+	| 'PY'
+	| 'QA'
+	| 'RU'
+	| 'RW'
+	| 'SA'
+	| 'SB'
+	| 'SC'
+	| 'SD'
+	| 'SG'
+	| 'SL'
+	| 'SN'
+	| 'SO'
+	| 'SR'
+	| 'SS'
+	| 'ST'
+	| 'SV'
+	| 'SX'
+	| 'SY'
+	| 'SZ'
+	| 'TC'
+	| 'TD'
+	| 'TG'
+	| 'TH'
+	| 'TJ'
+	| 'TK'
+	| 'TL'
+	| 'TM'
+	| 'TN'
+	| 'TO'
+	| 'TT'
+	| 'TW'
+	| 'TZ'
+	| 'UA'
+	| 'UG'
+	| 'UM'
+	| 'UY'
+	| 'UZ'
+	| 'VC'
+	| 'VE'
+	| 'VG'
+	| 'VI'
+	| 'VN'
+	| 'VU'
+	| 'WS'
+	| 'YE'
+	| 'ZA'
+	| 'ZM'
+	| 'ZW'
+	| 'FK'
+	| 'GI'
+	| 'GG'
+	| 'IM'
+	| 'JE'
+	| 'SH';
 
 export const countries: Record<IsoCountry, string> = {
 	GB: 'United Kingdom',
@@ -612,10 +503,16 @@ export const countries: Record<IsoCountry, string> = {
 	JE: 'Jersey',
 	SH: 'Saint Helena',
 };
+
+export const isoCountries: IsoCountry[] = objectKeys(countries);
+export const isoCountrySet: Set<IsoCountry> = new Set(isoCountries);
+export const isoCountrySchema = z.enum(isoCountries);
+
+export const newspaperCountries: Partial<Record<IsoCountry, string>> = {
+	GB: 'United Kingdom',
+	IM: 'Isle of Man',
+};
+
 export function getCountryNameByIsoCode(code: IsoCountry) {
-	return countries[code] || null;
+	return countries[code];
 }
-// ----- Types ----- //
-export type UsState = keyof typeof usStates;
-export type AuState = keyof typeof auStates;
-export type StateProvince = UsState;
