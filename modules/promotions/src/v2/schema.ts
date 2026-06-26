@@ -1,5 +1,5 @@
 import { isoCountrySchema } from '@modules/internationalisation/country';
-import { supportRegionIdSchema } from '@modules/internationalisation/supportRegions';
+import { supportRegionIdSchema } from '@modules/internationalisation/supportRegion';
 import { optionalDropNulls } from '@modules/schemaUtils';
 import { z } from 'zod';
 

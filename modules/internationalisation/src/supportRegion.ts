@@ -2,7 +2,7 @@ import z from 'zod';
 import { isoCurrencySchema } from '@modules/internationalisation/currency';
 import type { IsoCountry } from './country';
 import { isoCountrySchema } from './country';
-import { auStates, caStates, stateOrProvinceSchema, usStates } from './states';
+import { auStates, caStates, stateOrProvinceSchema, usStates } from './state';
 
 export const supportRegionIds = [
 	'uk',
@@ -16,7 +16,7 @@ export const supportRegionIds = [
 
 export type SupportRegionId = (typeof supportRegionIds)[number];
 
-export const supportRegions = {
+export const supportRegion = {
 	uk: {
 		name: 'United Kingdom',
 		currency: 'GBP',
@@ -309,6 +309,6 @@ export type SupportRegion = z.infer<typeof supportRegionSchema>;
 export const supportRegionIdFromCountry = (
 	country: IsoCountry,
 ): SupportRegion | undefined =>
-	Object.values(supportRegions).find((supportRegion) =>
+	Object.values(supportRegion).find((supportRegion) =>
 		supportRegion.countries.some((c) => c === country),
 	);

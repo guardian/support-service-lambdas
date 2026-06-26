@@ -1,6 +1,6 @@
 import type { IsoCountry } from '@modules/internationalisation/country';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
-import type { SupportRegionId } from '@modules/internationalisation/supportRegions';
+import type { SupportRegionId } from '@modules/internationalisation/supportRegion';
 
 // ----- Types ----- //
 export const GBPCountries = 'GBPCountries';

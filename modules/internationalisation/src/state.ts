@@ -1,6 +1,6 @@
 import z from 'zod';
 
-export const usStateCodes = [
+export const usIsoStates = [
 	'AL',
 	'AK',
 	'AZ',
@@ -60,9 +60,9 @@ export const usStateCodes = [
 	'WY',
 ] as const;
 
-export type UsStateCode = (typeof usStateCodes)[number];
+export type UsIsoState = (typeof usIsoStates)[number];
 
-export const usStates: Record<UsStateCode, string> = {
+export const usStates: Record<UsIsoState, string> = {
 	AL: 'Alabama',
 	AK: 'Alaska',
 	AZ: 'Arizona',
@@ -122,11 +122,11 @@ export const usStates: Record<UsStateCode, string> = {
 	WY: 'Wyoming',
 };
 
-export const usStateCodeSchema = z.enum(usStateCodes);
-export const usStateSchema = z.record(usStateCodeSchema, z.string());
+export const usIsoStateSchema = z.enum(usIsoStates);
+export const usStateSchema = z.record(usIsoStateSchema, z.string());
 export type UsState = z.infer<typeof usStateSchema>;
 
-export const caStateCodes = [
+export const caIsoStates = [
 	'AB',
 	'BC',
 	'MB',
@@ -142,9 +142,9 @@ export const caStateCodes = [
 	'YT',
 ] as const;
 
-export type CaStateCode = (typeof caStateCodes)[number];
+export type CaIsoState = (typeof caIsoStates)[number];
 
-export const caStates: Record<CaStateCode, string> = {
+export const caStates: Record<CaIsoState, string> = {
 	AB: 'Alberta',
 	BC: 'British Columbia',
 	MB: 'Manitoba',
@@ -160,11 +160,11 @@ export const caStates: Record<CaStateCode, string> = {
 	YT: 'Yukon',
 };
 
-export const caStateCodeSchema = z.enum(caStateCodes);
-export const caStateSchema = z.record(caStateCodeSchema, z.string());
+export const caIsoStateSchema = z.enum(caIsoStates);
+export const caStateSchema = z.record(caIsoStateSchema, z.string());
 export type CaState = z.infer<typeof caStateSchema>;
 
-export const auStateCodes = [
+export const auIsoStates = [
 	'ACT',
 	'NSW',
 	'NT',
@@ -175,9 +175,9 @@ export const auStateCodes = [
 	'WA',
 ] as const;
 
-export type AuStateCode = (typeof auStateCodes)[number];
+export type AuIsoState = (typeof auIsoStates)[number];
 
-export const auStates: Record<AuStateCode, string> = {
+export const auStates: Record<AuIsoState, string> = {
 	ACT: 'Australian Capital Territory',
 	NSW: 'New South Wales',
 	NT: 'Northern Territory',
@@ -188,14 +188,14 @@ export const auStates: Record<AuStateCode, string> = {
 	WA: 'Western Australia',
 };
 
-export const auStateCodeSchema = z.enum(auStateCodes);
-export const auStateSchema = z.record(auStateCodeSchema, z.string());
+export const auIsoStateSchema = z.enum(auIsoStates);
+export const auStateSchema = z.record(auIsoStateSchema, z.string());
 export type AuState = z.infer<typeof auStateSchema>;
 
-export const stateOrProvinceCodeSchema = z.union([
-	usStateCodeSchema,
-	caStateCodeSchema,
-	auStateCodeSchema,
+export const isoStateSchema = z.union([
+	usIsoStateSchema,
+	caIsoStateSchema,
+	auIsoStateSchema,
 ]);
 export const stateOrProvinceSchema = z.union([
 	usStateSchema,

@@ -1,7 +1,7 @@
 import { intersection } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import { countryGroupBySupportRegionId } from '@modules/internationalisation/countryGroup';
-import type { SupportRegionId } from '@modules/internationalisation/supportRegions';
+import type { SupportRegionId } from '@modules/internationalisation/supportRegion';
 import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { getPromotionByCode } from './getPromotions';

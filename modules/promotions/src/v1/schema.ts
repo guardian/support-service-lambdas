@@ -1,5 +1,5 @@
 import { isoCountrySchema } from '@modules/internationalisation/country';
-import { supportRegionIdSchema } from '@modules/internationalisation/supportRegions';
+import { supportRegionIdSchema } from '@modules/internationalisation/supportRegion';
 import { z } from 'zod';
 
 export const promotionCopySchema = z.object({
