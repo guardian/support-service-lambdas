@@ -1,6 +1,6 @@
 import { ValidationError } from '@modules/errors';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
-import { isoCurrencySchema } from '@modules/internationalisation/schemas';
+import { isoCurrencySchema } from '@modules/internationalisation/currency';
 import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';

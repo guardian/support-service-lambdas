@@ -1,4 +1,5 @@
 import { isInList } from '@modules/arrayFunctions';
+import z from 'zod';
 
 export const CurrencyValues = [
 	'GBP',
@@ -10,6 +11,7 @@ export const CurrencyValues = [
 ] as const;
 
 export type IsoCurrency = (typeof CurrencyValues)[number];
+export const isoCurrencySchema = z.enum(CurrencyValues);
 
 export type CurrencyInfo = {
 	glyph: string;

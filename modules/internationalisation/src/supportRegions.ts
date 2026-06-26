@@ -1,7 +1,8 @@
+import { isoCurrencySchema } from '@modules/internationalisation/currency';
 import { objectKeys } from '@modules/objectFunctions';
 import z from 'zod';
 import type { IsoCountry } from './country';
-import { isoCountrySchema, isoCurrencySchema } from './schemas';
+import { isoCountrySchema } from './country';
 import { auStates, caStates, stateOrProvinceSchema, usStates } from './states';
 
 export type SupportRegionId = 'uk' | 'us' | 'au' | 'eu' | 'int' | 'nz' | 'ca';

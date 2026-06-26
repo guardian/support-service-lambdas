@@ -1,4 +1,4 @@
-import { isoCountrySchema } from '@modules/internationalisation/schemas';
+import { isoCountrySchema } from '@modules/internationalisation/country';
 import { caStateCodeSchema } from '@modules/internationalisation/states';
 import { productKeySchema } from '@modules/product-catalog/productCatalogSchema';
 import { z } from 'zod';
