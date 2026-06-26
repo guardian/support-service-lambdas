@@ -96,7 +96,7 @@ export function getPaymentMethodFieldsSupporterPlus(
 	created: Dayjs,
 	mandateId?: string,
 ):
-	| Record<string, never>
+	| undefined
 	| {
 			payment_method: 'Direct Debit';
 			account_name: string;
@@ -118,6 +118,6 @@ export function getPaymentMethodFieldsSupporterPlus(
 			};
 		case 'CreditCardReferenceTransaction':
 		case 'PayPal':
-			return {};
+			return undefined;
 	}
 }
