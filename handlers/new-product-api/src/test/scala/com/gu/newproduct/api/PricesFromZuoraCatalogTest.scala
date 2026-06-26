@@ -5,7 +5,13 @@ import com.gu.i18n.Currency.{EUR, GBP, USD}
 import com.gu.newproduct.api.productcatalog.PlanId._
 import com.gu.newproduct.api.productcatalog.ZuoraCatalogWireModel.Price
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
-import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, PricesFromZuoraCatalog, ZuoraCatalogWireModel}
+import com.gu.newproduct.api.productcatalog.{
+  AmountMinorUnits,
+  PlanPrices,
+  PricesFromZuoraCatalog,
+  TaxMode,
+  ZuoraCatalogWireModel,
+}
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.ZuoraEnvironment
 
@@ -29,6 +35,7 @@ class PricesFromZuoraCatalogTest extends AnyFlatSpec with Matchers {
         |          "productRatePlanCharges": [
         |            {
         |              "name": "Saturday",
+        |              "taxMode": "TaxExclusive",
         |              "pricing": [ { "currency": "GBP", "price": 10.36 }, { "currency": "EUR", "price": 10.26 }, { "currency": "USD", "price": 10.46 } ]
         |            },
         |            {
@@ -58,10 +65,13 @@ class PricesFromZuoraCatalogTest extends AnyFlatSpec with Matchers {
     )
     actual shouldBe Success(
       Map(
-        VoucherSaturdayPlus -> Map(
-          GBP -> AmountMinorUnits(2162),
-          USD -> AmountMinorUnits(2192),
-          EUR -> AmountMinorUnits(2152),
+        VoucherSaturdayPlus -> PlanPrices(
+          Map(
+            GBP -> AmountMinorUnits(2162),
+            USD -> AmountMinorUnits(2192),
+            EUR -> AmountMinorUnits(2152),
+          ),
+          Some(TaxMode.TaxExclusive),
         ),
       ),
     )

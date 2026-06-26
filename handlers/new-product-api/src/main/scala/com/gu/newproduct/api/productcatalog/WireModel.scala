@@ -45,10 +45,15 @@ object WireModel {
       amount: BigDecimal,
       billingPeriod: WireBillingPeriod,
       description: String,
+      taxMode: Option[String],
   )
   object WirePaymentPlan {
     implicit val writes: OWrites[WirePaymentPlan] = Json.writes[WirePaymentPlan]
 
+    def wireTaxMode(taxMode: TaxMode): String = taxMode match {
+      case TaxMode.TaxExclusive => "TaxExclusive"
+      case TaxMode.TaxInclusive => "TaxInclusive"
+    }
   }
 
   case class WireSelectableWindow(
@@ -125,6 +130,7 @@ object WireModel {
           paymentPlan.amountMinorUnits.value / 100d,
           WireBillingPeriod.fromBillingPeriod(paymentPlan.billingPeriod),
           paymentPlan.description,
+          paymentPlan.taxMode.map(WirePaymentPlan.wireTaxMode),
         )
       }
 
