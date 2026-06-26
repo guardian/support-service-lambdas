@@ -1,5 +1,5 @@
 import { isoCountrySchema } from '@modules/internationalisation/country';
-import { supportRegionSchema } from '@modules/internationalisation/schemas';
+import { supportRegionIdSchema } from '@modules/internationalisation/supportRegions';
 import { optionalDropNulls } from '@modules/schemaUtils';
 import { z } from 'zod';
 
@@ -50,6 +50,6 @@ export type Promo = z.infer<typeof promoSchema>;
 
 export const appliedPromotionSchema = z.object({
 	promoCode: z.string(),
-	supportRegionId: supportRegionSchema,
+	supportRegionId: supportRegionIdSchema,
 });
 export type AppliedPromotion = z.infer<typeof appliedPromotionSchema>;

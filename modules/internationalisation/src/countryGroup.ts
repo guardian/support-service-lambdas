@@ -1,5 +1,6 @@
 import type { IsoCountry } from '@modules/internationalisation/country';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { SupportRegionId } from '@modules/internationalisation/supportRegions';
 
 // ----- Types ----- //
 export const GBPCountries = 'GBPCountries';
@@ -28,16 +29,6 @@ export type CountryGroupName =
 	| 'New Zealand'
 	| 'Canada';
 
-export enum SupportRegionId {
-	UK = 'uk',
-	US = 'us',
-	AU = 'au',
-	EU = 'eu',
-	INT = 'int',
-	NZ = 'nz',
-	CA = 'ca',
-}
-
 export type CountryGroup = {
 	name: CountryGroupName;
 	currency: IsoCurrency;
@@ -50,19 +41,19 @@ export const countryGroups: CountryGroups = {
 		name: 'United Kingdom',
 		currency: 'GBP',
 		countries: ['GB', 'FK', 'GI', 'GG', 'IM', 'JE', 'SH'],
-		supportRegionId: SupportRegionId.UK,
+		supportRegionId: 'uk',
 	},
 	UnitedStates: {
 		name: 'United States',
 		currency: 'USD',
 		countries: ['US'],
-		supportRegionId: SupportRegionId.US,
+		supportRegionId: 'us',
 	},
 	AUDCountries: {
 		name: 'Australia',
 		currency: 'AUD',
 		countries: ['AU', 'KI', 'NR', 'NF', 'TV'],
-		supportRegionId: SupportRegionId.AU,
+		supportRegionId: 'au',
 	},
 	EURCountries: {
 		name: 'Europe',
@@ -130,7 +121,7 @@ export const countryGroups: CountryGroups = {
 			'UA',
 			'MK',
 		],
-		supportRegionId: SupportRegionId.EU,
+		supportRegionId: 'eu',
 	},
 	International: {
 		name: 'International',
@@ -309,38 +300,38 @@ export const countryGroups: CountryGroups = {
 			'ZM',
 			'ZW',
 		],
-		supportRegionId: SupportRegionId.INT,
+		supportRegionId: 'int',
 	},
 	NZDCountries: {
 		name: 'New Zealand',
 		currency: 'NZD',
 		countries: ['NZ', 'CK'],
-		supportRegionId: SupportRegionId.NZ,
+		supportRegionId: 'nz',
 	},
 	Canada: {
 		name: 'Canada',
 		currency: 'CAD',
 		countries: ['CA'],
-		supportRegionId: SupportRegionId.CA,
+		supportRegionId: 'ca',
 	},
 } as const;
 export const countryGroupBySupportRegionId = (
 	supportRegionId: SupportRegionId,
 ): CountryGroup => {
 	switch (supportRegionId) {
-		case SupportRegionId.UK:
+		case 'uk':
 			return countryGroups.GBPCountries;
-		case SupportRegionId.EU:
+		case 'eu':
 			return countryGroups.EURCountries;
-		case SupportRegionId.US:
+		case 'us':
 			return countryGroups.UnitedStates;
-		case SupportRegionId.CA:
+		case 'ca':
 			return countryGroups.Canada;
-		case SupportRegionId.AU:
+		case 'au':
 			return countryGroups.AUDCountries;
-		case SupportRegionId.NZ:
+		case 'nz':
 			return countryGroups.NZDCountries;
-		case SupportRegionId.INT:
+		case 'int':
 			return countryGroups.International;
 	}
 };

@@ -1,4 +1,3 @@
-import { SupportRegionId } from '@modules/internationalisation/countryGroup';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { AppliedPromotion, Promo } from '@modules/promotions/v2/schema';
@@ -136,7 +135,7 @@ describe('the buildCreateSubscriptionRequest function', () => {
 			...supporterPlusInput,
 			appliedPromotion: {
 				promoCode: 'PROMO10',
-				supportRegionId: SupportRegionId.UK,
+				supportRegionId: 'uk',
 			} as AppliedPromotion,
 		};
 		const request = buildCreateSubscriptionRequest(
@@ -182,7 +181,7 @@ describe('the buildCreateSubscriptionRequest function', () => {
 			...supporterPlusInput,
 			appliedPromotion: {
 				promoCode: 'TEST_PATRON',
-				supportRegionId: SupportRegionId.UK,
+				supportRegionId: 'uk',
 			} as AppliedPromotion,
 		};
 		const request = buildCreateSubscriptionRequest(

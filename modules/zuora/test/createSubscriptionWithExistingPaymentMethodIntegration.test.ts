@@ -3,7 +3,6 @@
  * @group integration
  */
 
-import { SupportRegionId } from '@modules/internationalisation/countryGroup';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import { getPromotion } from '@modules/promotions/v2/getPromotion';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
@@ -231,7 +230,7 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 				},
 				appliedPromotion: {
 					promoCode,
-					supportRegionId: SupportRegionId.UK,
+					supportRegionId: 'uk',
 				},
 			};
 

@@ -1,4 +1,3 @@
-import { SupportRegionId } from '@modules/internationalisation/countryGroup';
 import type { AppliedPromotion, Promo } from '@modules/promotions/v2/schema';
 import { validatePromotion } from '@modules/promotions/v2/validatePromotion';
 
@@ -24,7 +23,7 @@ const testPromotion: Promo = {
 
 const appliedPromotion: AppliedPromotion = {
 	promoCode,
-	supportRegionId: SupportRegionId.UK,
+	supportRegionId: 'uk',
 };
 
 describe('validatePromotion v2', () => {
@@ -62,7 +61,7 @@ describe('validatePromotion v2', () => {
 		expect(() =>
 			validatePromotion(
 				testPromotion,
-				{ promoCode, supportRegionId: SupportRegionId.EU },
+				{ promoCode, supportRegionId: 'eu' },
 				productRatePlanId,
 			),
 		).toThrow(
