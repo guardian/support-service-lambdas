@@ -1,64 +1,66 @@
-import { objectKeys } from '@modules/objectFunctions';
 import z from 'zod';
 
-export type UsStateCode =
-	| 'AL'
-	| 'AK'
-	| 'AZ'
-	| 'AR'
-	| 'AE'
-	| 'AA'
-	| 'AP'
-	| 'CA'
-	| 'CO'
-	| 'CT'
-	| 'DE'
-	| 'FL'
-	| 'GA'
-	| 'GU'
-	| 'HI'
-	| 'ID'
-	| 'IL'
-	| 'IN'
-	| 'IA'
-	| 'KS'
-	| 'KY'
-	| 'LA'
-	| 'ME'
-	| 'MD'
-	| 'MA'
-	| 'MI'
-	| 'MN'
-	| 'MS'
-	| 'MO'
-	| 'MT'
-	| 'NE'
-	| 'NV'
-	| 'NH'
-	| 'NJ'
-	| 'NM'
-	| 'NY'
-	| 'NC'
-	| 'ND'
-	| 'OH'
-	| 'OK'
-	| 'OR'
-	| 'PA'
-	| 'PR'
-	| 'RI'
-	| 'SC'
-	| 'SD'
-	| 'TN'
-	| 'TX'
-	| 'UT'
-	| 'VT'
-	| 'VI'
-	| 'VA'
-	| 'WA'
-	| 'DC'
-	| 'WV'
-	| 'WI'
-	| 'WY';
+export const usStateCodes = [
+	'AL',
+	'AK',
+	'AZ',
+	'AR',
+	'AE',
+	'AA',
+	'AP',
+	'CA',
+	'CO',
+	'CT',
+	'DE',
+	'FL',
+	'GA',
+	'GU',
+	'HI',
+	'ID',
+	'IL',
+	'IN',
+	'IA',
+	'KS',
+	'KY',
+	'LA',
+	'ME',
+	'MD',
+	'MA',
+	'MI',
+	'MN',
+	'MS',
+	'MO',
+	'MT',
+	'NE',
+	'NV',
+	'NH',
+	'NJ',
+	'NM',
+	'NY',
+	'NC',
+	'ND',
+	'OH',
+	'OK',
+	'OR',
+	'PA',
+	'PR',
+	'RI',
+	'SC',
+	'SD',
+	'TN',
+	'TX',
+	'UT',
+	'VT',
+	'VI',
+	'VA',
+	'WA',
+	'DC',
+	'WV',
+	'WI',
+	'WY',
+] as const;
+
+export type UsStateCode = (typeof usStateCodes)[number];
 
 export const usStates: Record<UsStateCode, string> = {
 	AL: 'Alabama',
@@ -120,25 +122,27 @@ export const usStates: Record<UsStateCode, string> = {
 	WY: 'Wyoming',
 };
 
-export const usStateCodeSchema = z.enum(objectKeys(usStates));
-export const usStateCodes: UsStateCode[] = objectKeys(usStates);
+export const usStateCodeSchema = z.enum(usStateCodes);
 export const usStateSchema = z.record(usStateCodeSchema, z.string());
 export type UsState = z.infer<typeof usStateSchema>;
 
-export type CaStateCode =
-	| 'AB'
-	| 'BC'
-	| 'MB'
-	| 'NB'
-	| 'NL'
-	| 'NT'
-	| 'NS'
-	| 'NU'
-	| 'ON'
-	| 'PE'
-	| 'QC'
-	| 'SK'
-	| 'YT';
+export const caStateCodes = [
+	'AB',
+	'BC',
+	'MB',
+	'NB',
+	'NL',
+	'NT',
+	'NS',
+	'NU',
+	'ON',
+	'PE',
+	'QC',
+	'SK',
+	'YT',
+] as const;
+
+export type CaStateCode = (typeof caStateCodes)[number];
 
 export const caStates: Record<CaStateCode, string> = {
 	AB: 'Alberta',
@@ -156,20 +160,22 @@ export const caStates: Record<CaStateCode, string> = {
 	YT: 'Yukon',
 };
 
-export const caStateCodeSchema = z.enum(objectKeys(caStates));
-export const caStateCodes: CaStateCode[] = objectKeys(caStates);
+export const caStateCodeSchema = z.enum(caStateCodes);
 export const caStateSchema = z.record(caStateCodeSchema, z.string());
 export type CaState = z.infer<typeof caStateSchema>;
 
-export type AuStateCode =
-	| 'ACT'
-	| 'NSW'
-	| 'NT'
-	| 'QLD'
-	| 'SA'
-	| 'TAS'
-	| 'VIC'
-	| 'WA';
+export const auStateCodes = [
+	'ACT',
+	'NSW',
+	'NT',
+	'QLD',
+	'SA',
+	'TAS',
+	'VIC',
+	'WA',
+] as const;
+
+export type AuStateCode = (typeof auStateCodes)[number];
 
 export const auStates: Record<AuStateCode, string> = {
 	ACT: 'Australian Capital Territory',
@@ -182,8 +188,7 @@ export const auStates: Record<AuStateCode, string> = {
 	WA: 'Western Australia',
 };
 
-export const auStateCodeSchema = z.enum(objectKeys(auStates));
-export const auStateCodes: AuStateCode[] = objectKeys(auStates);
+export const auStateCodeSchema = z.enum(auStateCodes);
 export const auStateSchema = z.record(auStateCodeSchema, z.string());
 export type AuState = z.infer<typeof auStateSchema>;
 
