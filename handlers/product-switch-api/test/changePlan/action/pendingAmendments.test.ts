@@ -207,6 +207,7 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 			mockZuoraClient as unknown as ZuoraClient,
 			'CODE',
 			dayjs('2025-09-16'),
+			() => Promise.resolve({ date: new Date(2026, 6, 29), total: 123 }),
 		).switch(
 			{ caseId: 'asdfCaseId', csrUserId: 'asdfCsrUserId' },
 			{

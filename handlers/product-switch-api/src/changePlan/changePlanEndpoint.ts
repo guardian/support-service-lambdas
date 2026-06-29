@@ -20,7 +20,7 @@ import type { APIGatewayProxyResult } from 'aws-lambda';
 import type dayjs from 'dayjs';
 import { removePendingUpdateAmendments } from './action/amendments';
 import { DoPreviewAction } from './action/preview';
-import { DoSwitchAction } from './action/switch';
+import { buildGetNextPayment, DoSwitchAction } from './action/switch';
 import { SwitchOrderRequestBuilder } from './prepare/buildSwitchOrderRequest';
 import { isEligibleForSwitch } from './prepare/isEligibleForSwitch';
 import { getSwitchInformation } from './prepare/switchInformation';
@@ -38,7 +38,12 @@ export class ChangePlanEndpoint {
 		private originalSubscription: ZuoraSubscription,
 		private account: ZuoraAccount,
 	) {
-		this.doSwitchAction = new DoSwitchAction(zuoraClient, stage, today);
+		this.doSwitchAction = new DoSwitchAction(
+			zuoraClient,
+			stage,
+			today,
+			buildGetNextPayment(zuoraClient),
+		);
 		this.doPreviewAction = new DoPreviewAction(zuoraClient, stage, today);
 	}
 

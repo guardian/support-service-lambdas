@@ -27,25 +27,26 @@ import { sendThankYouEmail } from './productSwitchEmail';
 
 export type SwitchResponse = { message: string };
 
-async function getNextPayment(
-	zuoraClient: ZuoraClient,
+export type GetNextPayment = (
 	targetDate: dayjs.Dayjs,
-	switchInformation: SwitchInformation,
-) {
-	const billingPreview = await getBillingPreview(
-		zuoraClient,
-		targetDate,
-		switchInformation.subscription.accountNumber,
-	);
-	const nextPayment: { date: Date; total: number } | undefined =
-		getOrderedInvoiceTotals(
-			toSimpleInvoiceItems(
-				itemsForSubscription(switchInformation.subscription.subscriptionNumber)(
-					billingPreview,
+	subscriptionNumber: string,
+) => Promise<{ date: Date; total: number } | undefined>;
+
+export function buildGetNextPayment(zuoraClient: ZuoraClient): GetNextPayment {
+	return async (targetDate, subscriptionNumber) => {
+		const billingPreview = await getBillingPreview(
+			zuoraClient,
+			targetDate,
+			subscriptionNumber,
+		);
+		const nextPayment: { date: Date; total: number } | undefined =
+			getOrderedInvoiceTotals(
+				toSimpleInvoiceItems(
+					itemsForSubscription(subscriptionNumber)(billingPreview),
 				),
-			),
-		)[0];
-	return nextPayment;
+			)[0];
+		return nextPayment;
+	};
 }
 
 export class DoSwitchAction {
@@ -53,6 +54,7 @@ export class DoSwitchAction {
 		private zuoraClient: ZuoraClient,
 		private stage: Stage,
 		private today: dayjs.Dayjs,
+		private getNextPayment: GetNextPayment,
 	) {}
 	async switch(
 		input: Pick<ProductSwitchRequestBody, 'csrUserId' | 'caseId'>,
@@ -69,12 +71,9 @@ export class DoSwitchAction {
 			switchInformation.account.defaultPaymentMethodId,
 		);
 
-		const zuoraClient = this.zuoraClient;
-		const targetDate = this.today.add(13, 'months');
-		const nextPayment = await getNextPayment(
-			zuoraClient,
-			targetDate,
-			switchInformation,
+		const nextPayment = await this.getNextPayment(
+			this.today.add(13, 'months'),
+			switchInformation.subscription.subscriptionNumber,
 		);
 
 		await Promise.allSettled([
