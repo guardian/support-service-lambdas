@@ -645,6 +645,9 @@ exports[`The New Subscription API stack matches the snapshot 1`] = `
         "newsubscriptionapilambdanewsubscriptionapiCODEproxyBFBD1BEA",
         "newsubscriptionapilambdanewsubscriptionapiCODEANY7AE49035",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "API Gateway created by CDK",
         "RestApiId": {
@@ -1610,6 +1613,9 @@ exports[`The New Subscription API stack matches the snapshot 2`] = `
         "newsubscriptionapilambdanewsubscriptionapiPRODproxy906EE08E",
         "newsubscriptionapilambdanewsubscriptionapiPRODANYAFE9D7DE",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "API Gateway created by CDK",
         "RestApiId": {

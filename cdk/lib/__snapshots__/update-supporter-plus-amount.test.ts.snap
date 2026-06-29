@@ -655,6 +655,9 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
         "updatesupporterplusamountlambdaupdatesupporterplusamountCODEproxyF2B3818D",
         "updatesupporterplusamountlambdaupdatesupporterplusamountCODEANYB7D7F661",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "API Gateway created by CDK",
         "RestApiId": {
@@ -1660,6 +1663,9 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
         "updatesupporterplusamountlambdaupdatesupporterplusamountPRODproxy9DC87935",
         "updatesupporterplusamountlambdaupdatesupporterplusamountPRODANY10F5483D",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "API Gateway created by CDK",
         "RestApiId": {

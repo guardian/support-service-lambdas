@@ -48,6 +48,24 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 1`] = `
       "Properties": {
         "ScheduleExpression": "cron(0 5 ? * * *)",
         "State": "DISABLED",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
         "Targets": [
           {
             "Arn": {
@@ -1000,6 +1018,24 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 2`] = `
       "Properties": {
         "ScheduleExpression": "cron(0 5 ? * * *)",
         "State": "ENABLED",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
         "Targets": [
           {
             "Arn": {
