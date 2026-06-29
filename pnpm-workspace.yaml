@@ -3,6 +3,8 @@ packages:
   - 'handlers/*'
   # shared code
   - 'modules/*'
+  # manual / one-off scripts
+  - 'scripts/*'
   # cdk directory
   - 'cdk'
   # build generator
