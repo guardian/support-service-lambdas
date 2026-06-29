@@ -10,7 +10,9 @@ import com.gu.i18n.Currency
 
 import scala.util.Try
 
-case class PlanWithPrice(planId: PlanId, priceMinorUnits: Map[Currency, AmountMinorUnits])
+case class PlanWithPrice(planId: PlanId, priceMinorUnits: Map[Currency, AmountMinorUnits], taxMode: Option[TaxMode])
+
+case class PlanPrices(priceMinorUnits: Map[Currency, AmountMinorUnits], taxMode: Option[TaxMode])
 
 object ZuoraCatalogWireModel {
 
@@ -22,6 +24,7 @@ object ZuoraCatalogWireModel {
 
   case class RateplanCharge(
       pricing: List[Price],
+      taxMode: Option[String],
   )
 
   object RateplanCharge {
@@ -67,7 +70,10 @@ object ZuoraCatalogWireModel {
 
         val totalPricesByCurrency: Map[Currency, AmountMinorUnits] = optionaltotalPricesByCurrency.flatten.toMap
 
-        PlanWithPrice(planId, totalPricesByCurrency)
+        // All charges in a Zuora rate plan share one taxMode (Zuora has no mixed mode), so take the first defined one.
+        val taxMode = productRatePlanCharges.flatMap(_.taxMode).flatMap(TaxMode.fromString).headOption
+
+        PlanWithPrice(planId, totalPricesByCurrency, taxMode)
       }
     }
   }
@@ -89,14 +95,14 @@ object ZuoraCatalogWireModel {
   case class ZuoraCatalog(
       products: List[Product],
   ) {
-    def toParsedPlans(planIdFor: ProductRatePlanId => Option[PlanId]): Map[PlanId, Map[Currency, AmountMinorUnits]] = {
+    def toParsedPlans(planIdFor: ProductRatePlanId => Option[PlanId]): Map[PlanId, PlanPrices] = {
       val plansWithPrice = for {
         product <- products
         rateplan <- product.productRatePlans
         parsedPlan <- rateplan.toParsedPlan(planIdFor).toList
       } yield parsedPlan
 
-      plansWithPrice.map(x => x.planId -> x.priceMinorUnits).toMap
+      plansWithPrice.map(x => x.planId -> PlanPrices(x.priceMinorUnits, x.taxMode)).toMap
     }
   }
 
@@ -111,7 +117,7 @@ object PricesFromZuoraCatalog {
       zuoraEnvironment: ZuoraEnvironment,
       fetchString: StringFromS3,
       planIdFor: ProductRatePlanId => Option[PlanId],
-  ): Try[Map[PlanId, Map[Currency, AmountMinorUnits]]] =
+  ): Try[Map[PlanId, PlanPrices]] =
     for {
       catalogString <- fetchString(
         S3Location(

@@ -106,7 +106,7 @@ object Steps {
       zuoraEnv = ZuoraEnvironment.EnvForStage(stage)
       plansWithPrice <- PricesFromZuoraCatalog(zuoraEnv, fetchString, zuoraIds.rateplanIdToApiId.get)
         .toApiGatewayOp("get prices from zuora catalog")
-      getPricesForPlan = (planId: PlanId) => plansWithPrice.getOrElse(planId, Map.empty)
+      getPricesForPlan = (planId: PlanId) => plansWithPrice.getOrElse(planId, PlanPrices(Map.empty, None))
       startDateFromProductType <- StartDateFromFulfilmentFiles(stage, fetchString, currentDate())
         .toApiGatewayOp("get fulfilment date files")
       catalog = NewProductApi.catalog(getPricesForPlan, startDateFromProductType, currentDate())
