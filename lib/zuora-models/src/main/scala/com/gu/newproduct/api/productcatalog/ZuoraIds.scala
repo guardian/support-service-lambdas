@@ -104,6 +104,22 @@ object ZuoraIds {
     )
   }
 
+  // Canadian tax-exclusive variants of Digital Plus (Digipack) and All Access Digital (Supporter Plus).
+  // The catalog only needs the product rate plan id, so we don't carry the charge ids here.
+  case class TaxExclusiveZuoraIds(
+      digipackMonthly: ProductRatePlanId,
+      digipackAnnual: ProductRatePlanId,
+      supporterPlusMonthly: ProductRatePlanId,
+      supporterPlusAnnual: ProductRatePlanId,
+  ) {
+    val byApiPlanId: Map[PlanId, ProductRatePlanId] = Map(
+      DigipackAnnualTaxExclusive -> digipackAnnual,
+      DigipackMonthlyTaxExclusive -> digipackMonthly,
+      AnnualSupporterPlusTaxExclusive -> supporterPlusAnnual,
+      MonthlySupporterPlusTaxExclusive -> supporterPlusMonthly,
+    )
+  }
+
   case class GuardianWeeklyDomesticIds(
       monthlyPlus: ProductRatePlanId,
       quarterlyPlus: ProductRatePlanId,
@@ -183,6 +199,7 @@ object ZuoraIds {
       guardianWeeklyPlusROW: GuardianWeeklyROWIds,
       digitalVoucher: DigitalVoucherZuoraIds,
       nationalDeliveryZuoraIds: NationalDeliveryZuoraIds,
+      taxExclusiveZuoraIds: TaxExclusiveZuoraIds,
   ) {
     def apiIdToRateplanId: Map[PlanId, ProductRatePlanId] =
       (supporterPlusZuoraIds.planAndChargeByApiPlanId.view.mapValues(_.productRatePlanId) ++
@@ -193,7 +210,8 @@ object ZuoraIds {
         guardianWeeklyPlusDomestic.zuoraRatePlanIdByApiPlanId ++
         guardianWeeklyPlusROW.zuoraRatePlanIdByApiPlanId ++
         digitalVoucher.byApiPlanId ++
-        nationalDeliveryZuoraIds.byApiPlanId).toMap
+        nationalDeliveryZuoraIds.byApiPlanId ++
+        taxExclusiveZuoraIds.byApiPlanId).toMap
 
     val rateplanIdToApiId: Map[ProductRatePlanId, PlanId] = apiIdToRateplanId.map(_.swap)
 
@@ -298,6 +316,12 @@ object ZuoraIds {
           weekendPlus = ProductRatePlanId("8a1280be96d33dbf0196d487b55c1283"),
           sixDayPlus = ProductRatePlanId("8a12994696d3587b0196d484491e3beb"),
         ),
+        TaxExclusiveZuoraIds(
+          digipackMonthly = ProductRatePlanId("8a129dff9e981ec8019ea80a4c9e5b24"),
+          digipackAnnual = ProductRatePlanId("8a129aae9e981ec4019eab88633c78ab"),
+          supporterPlusMonthly = ProductRatePlanId("8a1296cc9e981ec9019eab9092864ae0"),
+          supporterPlusAnnual = ProductRatePlanId("8a128e579e9807b1019eab92efee3f74"),
+        ),
       ),
       Stage("CODE") -> ZuoraIds(
         SupporterPlusZuoraIds(
@@ -388,6 +412,12 @@ object ZuoraIds {
           everydayPlus = ProductRatePlanId("71a116628be96ab11606b51ec6060555"),
           weekendPlus = ProductRatePlanId("71a1166283a96ab11606b50ebbb50381"),
           sixDayPlus = ProductRatePlanId("71a1383e2a796aafcb16b527842001ca"),
+        ),
+        TaxExclusiveZuoraIds(
+          digipackMonthly = ProductRatePlanId("71a1889a1579daf14eedb5c64fe800c9"),
+          digipackAnnual = ProductRatePlanId("14253478e8ca41888a2742f139823b51"),
+          supporterPlusMonthly = ProductRatePlanId("7a825d4a79bb49ec9a36883cad075fde"),
+          supporterPlusAnnual = ProductRatePlanId("f59be1a754254cf7bff266358fa14e7b"),
         ),
       ),
     )
