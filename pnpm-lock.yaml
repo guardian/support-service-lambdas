@@ -107,7 +107,7 @@ importers:
     devDependencies:
       '@guardian/cdk':
         specifier: 61.11.1
-        version: 61.11.1(aws-cdk-lib@2.246.0(constructs@10.6.0))(aws-cdk@2.1014.0)(constructs@10.6.0)
+        version: 61.11.1(aws-cdk-lib@2.246.0(constructs@10.6.0))(aws-cdk@2.1128.1)(constructs@10.6.0)
       '@types/jest':
         specifier: ^29.5.14
         version: 29.5.14
@@ -115,8 +115,8 @@ importers:
         specifier: ^22.15.14
         version: 22.19.1
       aws-cdk:
-        specifier: 2.1014.0
-        version: 2.1014.0
+        specifier: 2.1128.1
+        version: 2.1128.1
       aws-cdk-lib:
         specifier: 2.246.0
         version: 2.246.0(constructs@10.6.0)
@@ -2962,9 +2962,9 @@ packages:
       - yaml
       - mime-types
 
-  aws-cdk@2.1014.0:
-    resolution: {integrity: sha512-es101rtRAClix9BncNL54iW90MiOyRv4iCC5tv/firGDnidS6pPinuK0IIFt0RO6w0+3heRxWBXg8HY+f9877w==}
-    engines: {node: '>= 14.15.0'}
+  aws-cdk@2.1128.1:
+    resolution: {integrity: sha512-y9OHn5/BOcIiq409vPvpypMIr7/8M1ScFe8IkFMSCN1/GI/5c73fQ4pfzNq+VDkj86T5zxs7BQ1qU2lQQytdXA==}
+    engines: {node: '>= 18.0.0'}
     hasBin: true
 
   aws-sdk-client-mock@4.1.0:
@@ -3747,11 +3747,6 @@ packages:
 
   fs.realpath@1.0.0:
     resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
-
-  fsevents@2.3.2:
-    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
-    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
-    os: [darwin]
 
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
@@ -6864,10 +6859,10 @@ snapshots:
 
   '@google-cloud/promisify@4.0.0': {}
 
-  '@guardian/cdk@61.11.1(aws-cdk-lib@2.246.0(constructs@10.6.0))(aws-cdk@2.1014.0)(constructs@10.6.0)':
+  '@guardian/cdk@61.11.1(aws-cdk-lib@2.246.0(constructs@10.6.0))(aws-cdk@2.1128.1)(constructs@10.6.0)':
     dependencies:
       '@oclif/core': 3.26.6
-      aws-cdk: 2.1014.0
+      aws-cdk: 2.1128.1
       aws-cdk-lib: 2.246.0(constructs@10.6.0)
       aws-sdk: 2.1692.0
       chalk: 4.1.2
@@ -8095,9 +8090,7 @@ snapshots:
       '@aws-cdk/cloud-assembly-schema': 53.28.0
       constructs: 10.6.0
 
-  aws-cdk@2.1014.0:
-    optionalDependencies:
-      fsevents: 2.3.2
+  aws-cdk@2.1128.1: {}
 
   aws-sdk-client-mock@4.1.0:
     dependencies:
@@ -9195,9 +9188,6 @@ snapshots:
       universalify: 2.0.1
 
   fs.realpath@1.0.0: {}
-
-  fsevents@2.3.2:
-    optional: true
 
   fsevents@2.3.3:
     optional: true
