@@ -1,4 +1,5 @@
 import type { App } from 'aws-cdk-lib';
+import { AllowZuoraOAuthSecretsPolicy } from './cdk/policies';
 import { SrApiLambda } from './cdk/SrApiLambda';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
@@ -7,7 +8,7 @@ export class SalesTaxApi extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
 		super(scope, { stage, app: 'sales-tax-api' });
 
-		new SrApiLambda(this, 'Lambda', {
+		const lambda = new SrApiLambda(this, 'Lambda', {
 			lambdaOverrides: {
 				description: 'Handles API requests for state or province sales tax',
 			},
@@ -19,5 +20,7 @@ export class SalesTaxApi extends SrStack {
 				burstLimit: 10,
 			},
 		});
+
+		lambda.addPolicies(new AllowZuoraOAuthSecretsPolicy(this));
 	}
 }
