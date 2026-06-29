@@ -1,4 +1,4 @@
-import { isoCountrySchema } from '@modules/internationalisation/country';
+import { countryCodeSchema } from '@modules/internationalisation/country';
 import { supportRegionIdSchema } from '@modules/internationalisation/supportRegion';
 import { optionalDropNulls } from '@modules/schemaUtils';
 import { z } from 'zod';
@@ -20,7 +20,7 @@ export type PromoCampaign = z.infer<typeof promoCampaignSchema>;
 
 export const appliesToSchema = z.object({
 	productRatePlanIds: z.array(z.string()),
-	countries: z.array(isoCountrySchema),
+	countries: z.array(countryCodeSchema),
 });
 
 export const discountDetailsSchema = z.object({

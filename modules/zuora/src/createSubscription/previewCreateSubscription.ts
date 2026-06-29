@@ -1,11 +1,9 @@
-import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { CurrencyCode } from '@modules/internationalisation/currency';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 import type { AppliedPromotion, Promo } from '@modules/promotions/v2/schema';
 import { dateFromStringSchema } from '@modules/schemaUtils';
 import type { Stage } from '@modules/stage';
-import dayjs from 'dayjs';
-import { z } from 'zod';
 import { getChargeOverride } from '@modules/zuora/createSubscription/chargeOverride';
 import { getPromotionInputFields } from '@modules/zuora/createSubscription/createSubscription';
 import { getProductRatePlan } from '@modules/zuora/createSubscription/getProductRatePlan';
@@ -15,11 +13,13 @@ import type { PreviewOrderRequest } from '@modules/zuora/orders/orderRequests';
 import { previewOrderRequest } from '@modules/zuora/orders/orderRequests';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import dayjs from 'dayjs';
+import { z } from 'zod';
 
 export type PreviewCreateSubscriptionInputFields = {
 	stage: Stage;
 	accountNumber: string;
-	currency: IsoCurrency;
+	currency: CurrencyCode;
 	productPurchase: ProductPurchase;
 	appliedPromotion?: AppliedPromotion;
 };

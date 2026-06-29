@@ -1,5 +1,5 @@
 import { ValidationError } from '@modules/errors';
-import { isoCountrySchema } from '@modules/internationalisation/country';
+import { countryCodeSchema } from '@modules/internationalisation/country';
 import { supportRegionIdFromCountry } from '@modules/internationalisation/countryGroup';
 import { logger } from '@modules/logger/logger';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
@@ -26,7 +26,7 @@ async function fetchPromotionAndAppliedPromotionFromPromoCode(
 	const promotion = await getPromotion(promoCode, stage);
 	logger.log('Promotion fetched successfully');
 	const deliveryDetails = getDeliveryFields(requestBody.productPurchase);
-	const supportRegionCountry = isoCountrySchema.parse(
+	const supportRegionCountry = countryCodeSchema.parse(
 		deliveryDetails.deliveryContact?.country ??
 			requestBody.billToContact.country,
 	);

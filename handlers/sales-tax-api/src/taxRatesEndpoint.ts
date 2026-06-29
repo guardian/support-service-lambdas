@@ -1,10 +1,10 @@
 import { ValidationError } from '@modules/errors';
 import {
+	type CountryCode,
 	getCountryNameByIsoCode,
-	type IsoCountry,
 } from '@modules/internationalisation/country';
-import type { CaIsoState } from '@modules/internationalisation/state';
-import { caIsoStates, caStates } from '@modules/internationalisation/state';
+import type { CaStateCode } from '@modules/internationalisation/state';
+import { caStateCodes, caStates } from '@modules/internationalisation/state';
 import { logger } from '@modules/logger/logger';
 import type { ProductKey } from '@modules/product-catalog/productCatalog';
 import { ok } from '@modules/routing/apiGatewayResponses';
@@ -103,7 +103,7 @@ function getZuoraTaxPeriod(
 
 function extractZuoraTaxRatesForCountry(
 	zuoraTaxRates: ZuoraTaxRate[],
-	country: IsoCountry,
+	country: CountryCode,
 ): ZuoraTaxRate[] {
 	return zuoraTaxRates.filter(
 		(zuoraTaxRate) => zuoraTaxRate.country === getCountryNameByIsoCode(country),
@@ -113,12 +113,12 @@ function extractZuoraTaxRatesForCountry(
 function createCadStateTaxRates(
 	cadZuoraTaxRates: ZuoraTaxRate[],
 ): TaxRatesResponse {
-	const missingStateCodes: CaIsoState[] = [];
+	const missingStateCodes: CaStateCode[] = [];
 
-	const taxCodesByState = caIsoStates.reduce<Partial<TaxRatesResponse>>(
+	const taxCodesByState = caStateCodes.reduce<Partial<TaxRatesResponse>>(
 		(
 			memo: Partial<TaxRatesResponse>,
-			stateCode: CaIsoState,
+			stateCode: CaStateCode,
 		): Partial<TaxRatesResponse> => {
 			const zuoraTaxRate = cadZuoraTaxRates.find(
 				(zuoraTaxRate) => caStates[stateCode] === zuoraTaxRate.state,

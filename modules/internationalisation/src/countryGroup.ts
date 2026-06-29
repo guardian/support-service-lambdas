@@ -1,5 +1,5 @@
-import type { IsoCountry } from '@modules/internationalisation/country';
-import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { CountryCode } from '@modules/internationalisation/country';
+import type { CurrencyCode } from '@modules/internationalisation/currency';
 import type { SupportRegionId } from '@modules/internationalisation/supportRegion';
 
 // ----- Types ----- //
@@ -31,8 +31,8 @@ export type CountryGroupName =
 
 export type CountryGroup = {
 	name: CountryGroupName;
-	currency: IsoCurrency;
-	countries: IsoCountry[];
+	currency: CurrencyCode;
+	countries: CountryCode[];
 	supportRegionId: SupportRegionId;
 };
 type CountryGroups = Record<CountryGroupId, CountryGroup>;
@@ -335,7 +335,7 @@ export const countryGroupBySupportRegionId = (
 			return countryGroups.International;
 	}
 };
-export const supportRegionIdFromCountry = (country: IsoCountry) => {
+export const supportRegionIdFromCountry = (country: CountryCode) => {
 	return Object.values(countryGroups).find((countryGroup) =>
 		countryGroup.countries.includes(country),
 	)?.supportRegionId;

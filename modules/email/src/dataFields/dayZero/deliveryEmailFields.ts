@@ -1,5 +1,5 @@
 import { getCountryNameByIsoCode } from '@modules/internationalisation/country';
-import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { CurrencyCode } from '@modules/internationalisation/currency';
 import type { Dayjs } from 'dayjs';
 import type { NonDeliveryEmailFields } from './emailFields';
 import { buildNonDeliveryEmailFields } from './emailFields';
@@ -34,7 +34,7 @@ export function buildDeliveryEmailFields({
 	today: Dayjs;
 	user: EmailUser;
 	subscriptionNumber: string;
-	currency: IsoCurrency;
+	currency: CurrencyCode;
 	billingPeriod: EmailBillingPeriod;
 	paymentMethod: EmailPaymentMethod;
 	paymentSchedule: EmailPaymentSchedule;

@@ -1,14 +1,14 @@
-import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { CurrencyCode } from '@modules/internationalisation/currency';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { AppliedPromotion, Promo } from '@modules/promotions/v2/schema';
 import type { Stage } from '@modules/stage';
-import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import dayjs from 'dayjs';
 import { buildCreateSubscriptionRequest } from '@modules/zuora/createSubscription/createSubscription';
 import type { CreateSubscriptionInputFields } from '@modules/zuora/createSubscription/createSubscription';
 import type { CreateSubscriptionOrderAction } from '@modules/zuora/orders/orderActions';
 import type { PaymentGateway } from '@modules/zuora/orders/paymentGateways';
 import type { CreditCardReferenceTransaction } from '@modules/zuora/orders/paymentMethods';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
+import dayjs from 'dayjs';
 import code from '../../zuora-catalog/test/fixtures/catalog-code.json';
 import { ReaderType } from '../src/createSubscription/readerType';
 
@@ -65,7 +65,7 @@ const baseStripeInput = {
 	salesforceAccountId: 'sf-acc-1',
 	salesforceContactId: 'sf-con-1',
 	identityId: 'id-1',
-	currency: 'GBP' as IsoCurrency,
+	currency: 'GBP' as CurrencyCode,
 	paymentGateway:
 		'Stripe PaymentIntents GNM Membership' as PaymentGateway<CreditCardReferenceTransaction>,
 	paymentMethod: paymentMethod,

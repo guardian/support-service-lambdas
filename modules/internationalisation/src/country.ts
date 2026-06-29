@@ -1,6 +1,6 @@
 import z from 'zod';
 
-export const isoCountries = [
+export const countryCodes = [
 	'GB',
 	'US',
 	'AU',
@@ -252,9 +252,9 @@ export const isoCountries = [
 	'SH',
 ] as const;
 
-export type IsoCountry = (typeof isoCountries)[number];
+export type CountryCode = (typeof countryCodes)[number];
 
-export const countries: Record<IsoCountry, string> = {
+export const countries: Record<CountryCode, string> = {
 	GB: 'United Kingdom',
 	US: 'United States',
 	AU: 'Australia',
@@ -506,14 +506,18 @@ export const countries: Record<IsoCountry, string> = {
 	SH: 'Saint Helena',
 };
 
-export const isoCountrySet: Set<IsoCountry> = new Set(isoCountries);
-export const isoCountrySchema = z.enum(isoCountries);
+export const isoCountrySet: Set<CountryCode> = new Set(countryCodes);
+export const countryCodeSchema = z.enum(countryCodes);
 
-export const newspaperCountries: Partial<Record<IsoCountry, string>> = {
+export function isCountryCode(search: unknown): search is CountryCode {
+	return countryCodeSchema.safeParse(search).success;
+}
+
+export const newspaperCountries: Partial<Record<CountryCode, string>> = {
 	GB: 'United Kingdom',
 	IM: 'Isle of Man',
 };
 
-export function getCountryNameByIsoCode(code: IsoCountry) {
+export function getCountryNameByIsoCode(code: CountryCode) {
 	return countries[code];
 }

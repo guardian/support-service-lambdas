@@ -1,4 +1,4 @@
-import { isoCountrySchema } from '@modules/internationalisation/country';
+import { countryCodeSchema } from '@modules/internationalisation/country';
 import { supportRegionIdSchema } from '@modules/internationalisation/supportRegion';
 import { z } from 'zod';
 
@@ -32,7 +32,7 @@ export type PromotionType = z.infer<typeof promotionTypeSchema>;
 
 export const appliesToSchema = z.object({
 	productRatePlanIds: z.array(z.string()).transform((arr) => new Set(arr)),
-	countries: z.array(isoCountrySchema).transform((arr) => new Set(arr)),
+	countries: z.array(countryCodeSchema).transform((arr) => new Set(arr)),
 });
 
 export const promotionSchema = z.object({
