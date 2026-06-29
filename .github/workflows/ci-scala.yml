@@ -22,6 +22,8 @@ jobs:
           - batch-email-sender
           - cancellation-sf-cases-api
           - new-product-api
+          - sf-emails-to-s3-exporter
+          - sf-move-subscriptions-api
           - single-contribution-salesforce-writes
           - stripe-webhook-endpoints
           - soft-opt-in-consent-setter
@@ -93,9 +95,7 @@ jobs:
           - sf-api-user-credentials-setter
           - sf-contact-merge
           - sf-datalake-export
-          - sf-emails-to-s3-exporter
           - sf-gocardless-sync
-          - sf-move-subscriptions-api
           - zuora-datalake-export
           - zuora-rer
           - zuora-sar

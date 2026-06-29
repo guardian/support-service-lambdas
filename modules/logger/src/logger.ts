@@ -1,12 +1,12 @@
 import * as console from 'node:console';
 import { mapOption } from '@modules/nullAndUndefined';
+import { aroundAsync } from './aroundAsync';
+import {
+	createFunctionLoggingHooks,
+	type LoggableInput,
+} from './createFunctionLoggingHooks';
 import { getCallerInfo } from './getCallerInfo';
 import { prettyPrint } from './prettyPrint';
-
-type LoggableInput = {
-	logOnEntryAndExit?: string;
-	logOnEntryOnly?: unknown[];
-};
 
 export class Logger {
 	private prefix: string[] = [];
@@ -25,11 +25,8 @@ export class Logger {
 		if (index !== -1) {
 			this.prefix = this.prefix.slice(0, index);
 		} else {
-			this.logFn(
-				this.getMessage(
-					getCallerInfo(),
-					`dropContext: context value "${value}" not found`,
-				),
+			this.emitLog(getCallerInfo())(
+				this.toMessage(`dropContext: context value "${value}" not found`),
 			);
 		}
 	}
@@ -42,17 +39,16 @@ export class Logger {
 	/* eslint-disable @typescript-eslint/no-unsafe-argument -- this has to match console.log */
 	public log(message: any, ...optionalParams: any[]): void {
 		const callerInfo = getCallerInfo();
-		this.logFn(this.getMessage(callerInfo, message, ...optionalParams));
+		this.emitLog(callerInfo)(this.toMessage(message, ...optionalParams));
 	}
 
 	public error(message?: any, ...optionalParams: any[]): void {
 		const callerInfo = getCallerInfo();
-		this.errorFn(this.getMessage(callerInfo, message, ...optionalParams));
+		this.emitError(callerInfo)(this.toMessage(message, ...optionalParams));
 	}
 
 	getMessage(callerInfo: string, ...messages: any[]): string {
-		const message = messages.map(prettyPrint).join('\n');
-		return this.addPrefixes(callerInfo, message);
+		return this.addPrefixes(callerInfo, this.toMessage(...messages));
 	}
 
 	/* eslint-enable @typescript-eslint/no-explicit-any */
@@ -60,6 +56,22 @@ export class Logger {
 
 	private addPrefixes(callerInfo: string, message: string) {
 		return [...this.prefix, '[' + callerInfo + ']', message].join(' ');
+	}
+
+	private toMessage(...messages: unknown[]): string {
+		return messages.map(prettyPrint).join('\n');
+	}
+
+	private emitLog(callerInfo: string): (message: string) => void {
+		return (message) => {
+			this.logFn(this.addPrefixes(callerInfo, message));
+		};
+	}
+
+	private emitError(callerInfo: string): (message: string) => void {
+		return (message) => {
+			this.errorFn(this.addPrefixes(callerInfo, message));
+		};
 	}
 
 	/**
@@ -74,78 +86,25 @@ export class Logger {
 	 * @param argsToLoggable
 	 * @param responseToLoggable
 	 */
-	wrapFn<TArgs extends unknown[], TReturn>(
-		fn: AsyncFunction<TArgs, TReturn>,
+	wrapFn<TFn extends (...args: never[]) => Promise<unknown>>(
+		fn: TFn,
 		functionName: string | (() => string) = fn.name,
 		callerInfo: string = getCallerInfo(),
-		argsToLoggable: (args: TArgs) => LoggableInput,
-		responseToLoggable: (result: TReturn) => unknown = (result) => result,
-	): AsyncFunction<TArgs, TReturn> {
-		const prefix =
-			'TRACE ' +
-			(typeof functionName === 'function' ? functionName() : functionName) +
-			' ';
-
-		return async (...args: TArgs): Promise<TReturn> => {
-			const { logOnEntryAndExit, logOnEntryOnly } = argsToLoggable(args);
-
-			const prettyArgsArray = [
-				...(logOnEntryAndExit ? [logOnEntryAndExit] : []),
-				...(logOnEntryOnly ?? []),
-			].map(prettyPrint);
-
-			const prettyArgs = ' ARGS\n' + prettyArgsArray.join('\n');
-			const shortPrettyArgs =
-				logOnEntryAndExit === undefined
-					? ''
-					: ' SHORT_ARGS\n' + logOnEntryAndExit;
-
-			this.logEntry(callerInfo, prefix, prettyArgs);
-
-			try {
-				// actually call the function
-				const result = await fn(...args);
-
-				this.logExit(
-					responseToLoggable(result),
-					prefix,
-					shortPrettyArgs,
-					callerInfo,
-				);
-
-				return result;
-			} catch (error) {
-				this.logError(error, prefix, shortPrettyArgs, callerInfo);
-
-				throw error;
-			}
-		};
-	}
-
-	private logError(
-		error: unknown,
-		prefix: string,
-		shortPrettyArgs: string,
-		callerInfo: string,
-	) {
-		const prettyError = '\nERROR\n' + prettyPrint(error);
-		const errorMessage = `${prefix}ERROR${shortPrettyArgs}${prettyError}`;
-		this.errorFn(this.addPrefixes(callerInfo, errorMessage));
-	}
-
-	private logExit(
-		result: unknown,
-		prefix: string,
-		shortPrettyArgs: string,
-		callerInfo: string,
-	) {
-		const prettyResult = '\nRESULT\n' + prettyPrint(result);
-		const exitMessage = `${prefix}EXIT${shortPrettyArgs}${prettyResult}`;
-		this.logFn(this.addPrefixes(callerInfo, exitMessage));
-	}
-
-	private logEntry(callerInfo: string, prefix: string, prettyArgs: string) {
-		this.logFn(this.addPrefixes(callerInfo, `${prefix}ENTRY${prettyArgs}`));
+		argsToLoggable: (args: Parameters<TFn>) => LoggableInput,
+		responseToLoggable: (result: Awaited<ReturnType<TFn>>) => unknown = (
+			result,
+		) => result,
+	): TFn {
+		return aroundAsync(
+			fn,
+			createFunctionLoggingHooks({
+				functionName,
+				argsToLoggable,
+				responseToLoggable,
+				emitLog: this.emitLog(callerInfo),
+				emitError: this.emitError(callerInfo),
+			}),
+		);
 	}
 
 	/**
@@ -191,7 +150,7 @@ export class Logger {
 	 */
 	tap<T>(message: string, value: T, map: (t: T) => unknown = (t) => t) {
 		const callerInfo = getCallerInfo();
-		this.logFn(this.getMessage(callerInfo, message, map(value)));
+		this.emitLog(callerInfo)(this.toMessage(message, map(value)));
 		return value;
 	}
 }

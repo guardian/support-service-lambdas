@@ -14,6 +14,7 @@ const invitationRecordSchema = z.object({
 	subscriptionName: z.string(),
 	invitationCode: z.string(),
 	primaryIdentityId: z.string(),
+	secondaryUserEmail: z.string(),
 	secondaryIdentityId: z.string(),
 	invitedDate: z.string(),
 	expiryDate: z.number(),

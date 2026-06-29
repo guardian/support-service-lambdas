@@ -73,7 +73,7 @@ export class SrApiLambda extends SrLambda {
 				restApiName: getNameWithStage(scope, props.nameSuffix),
 				description:
 					props.apiDescriptionOverride ?? 'API Gateway created by CDK',
-				proxy: true,
+				proxy: false, // add proxy method later, to allow public paths
 				deployOptions: {
 					stageName: scope.stage,
 				},
@@ -87,6 +87,10 @@ export class SrApiLambda extends SrLambda {
 						}),
 			},
 		);
+
+		// by doing these explicitly rather than using proxy:true, we can later add specific public resources
+		this.api.root.addMethod('ANY');
+		this.api.root.addResource('{proxy+}').addMethod('ANY');
 
 		if (!props.isPublic) {
 			const usagePlan = this.api.addUsagePlan('UsagePlan', {
@@ -124,5 +128,22 @@ export class SrApiLambda extends SrLambda {
 				overrides: props.monitoring,
 			});
 		}
+	}
+
+	/**
+	 * if your API gateway normally requires an API key, you can use this function
+	 * to make specific routes public
+	 *
+	 * this can be useful you want a lambda to self-serve documentation for access
+	 * via a browser
+	 */
+	addPublicPath(path: string) {
+		const publicResource = this.api.root.addResource(path);
+		publicResource.addMethod('GET', undefined, {
+			apiKeyRequired: false,
+		});
+		publicResource.addResource('{proxy+}').addMethod('GET', undefined, {
+			apiKeyRequired: false,
+		});
 	}
 }

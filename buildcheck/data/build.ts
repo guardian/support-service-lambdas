@@ -233,6 +233,17 @@ const moduleSupporterProductData: ModuleDefinition = {
 	moduleDependencies: [moduleAws, moduleLogger, moduleZuora],
 };
 
+const moduleMultipleAccount: ModuleDefinition = {
+	name: 'multiple-account',
+	devDependencies: {
+		...dep['@aws-sdk/client-dynamodb'],
+		...dep['@aws-sdk/util-dynamodb'],
+		...dep['dayjs'],
+		...dep['zod'],
+	},
+	moduleDependencies: [moduleAws, moduleLogger, moduleSupporterProductData],
+};
+
 const moduleProductBenefits: ModuleDefinition = {
 	name: 'product-benefits',
 	dependencies: {
@@ -741,6 +752,7 @@ const multipleAccountApi: HandlerDefinition = {
 		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr multiple-account-api.zip ./*.js.map ./*.js`,
 	},
 	moduleDependencies: [
+		moduleMultipleAccount,
 		moduleRouting,
 		moduleLogger,
 		moduleIdentity,
@@ -794,14 +806,14 @@ const userSubscriptionsApi: HandlerDefinition = {
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
-
 		...devDeps['@redocly/cli'],
+		...devDeps['tsx'],
 	},
 	extraScripts: {
 		...openApiScripts,
 		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr user-subscriptions-api.zip ./*.js.map ./*.js`,
 	},
-	moduleDependencies: [moduleRouting],
+	moduleDependencies: [moduleRouting, moduleZuora],
 };
 
 const salesTaxApi: HandlerDefinition = {
@@ -838,6 +850,7 @@ const supporterProductDataLambdas: HandlerDefinition = {
 	dependencies: {
 		...dep['@aws-sdk/client-cloudwatch'],
 		...dep['@aws-sdk/client-dynamodb'],
+		...dep['@aws-sdk/util-dynamodb'],
 		...dep['@aws-sdk/client-s3'],
 		...dep['@aws-sdk/client-sqs'],
 		...dep['@aws-sdk/client-ssm'],
@@ -852,6 +865,7 @@ const supporterProductDataLambdas: HandlerDefinition = {
 	},
 	moduleDependencies: [
 		moduleLogger,
+		moduleMultipleAccount,
 		moduleZuora,
 		moduleInternationalisation,
 		moduleSupporterProductData,
@@ -918,6 +932,7 @@ export const build: BuildDefinition = {
 		moduleIdentity,
 		moduleInternationalisation,
 		moduleLogger,
+		moduleMultipleAccount,
 		moduleProductBenefits,
 		moduleProductCatalog,
 		modulePromotions,

@@ -24,7 +24,7 @@ export type HandlerEnv<ConfigType> = {
  * @constructor
  */
 export function LambdaHandler<ConfigType, E>(
-	configSchema: z.ZodType<ConfigType, z.ZodTypeDef, unknown>,
+	configSchema: z.ZodType<ConfigType>,
 	handler: (event: E, env: HandlerEnv<ConfigType>) => Promise<void>,
 ) {
 	const callerInfo = getCallerInfo();
@@ -44,6 +44,8 @@ export function LambdaHandler<ConfigType, E>(
 	);
 }
 
+type GuEnv = { stage: string; stack: string; app: string };
+
 /**
  * This is a similar wrapper to the Router only it handles loading config and
  * building any services e.g. ZuoraClient on cold start
@@ -56,13 +58,13 @@ export function LambdaHandler<ConfigType, E>(
  * @constructor
  */
 export function LambdaHandlerWithServices<ConfigType, Services, E>(
-	configSchema: z.ZodType<ConfigType, z.ZodTypeDef, unknown>,
+	configSchema: z.ZodType<ConfigType>,
 	handler: (event: E, services: Services) => Promise<void>,
 	buildServices: (handlerProps: HandlerEnv<ConfigType>) => Services,
 	callerInfo: string,
 ) {
 	// only expect env vars on a cold start, don't load if this file is referenced in tests
-	const lazyEnv = new Lazy(() => {
+	const lazyEnv = new Lazy<GuEnv>(() => {
 		const stage = getEnv('STAGE');
 		const stack = getEnv('STACK');
 		const app = getEnv('APP');
@@ -71,7 +73,7 @@ export function LambdaHandlerWithServices<ConfigType, Services, E>(
 
 	const handlerProps: Lazy<Services> = lazyEnv.then(
 		logger.wrapFn(
-			async ({ stage, stack, app }) => {
+			async ({ stage, stack, app }: GuEnv) => {
 				const config = await loadConfig(stage, stack, app, configSchema);
 				const handlerProps = { now: () => dayjs(), stage, config };
 				return buildServices(handlerProps);

@@ -14,7 +14,7 @@ export const cadStates: TaxRatesResponse = {
 	MB: 0.12,
 	NB: 0.15,
 	NL: 0.15,
-	NT: 0.15,
+	NT: 0.05,
 	NS: 0.15,
 	NU: 0.05,
 	ON: 0.13,

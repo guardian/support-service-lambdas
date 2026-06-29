@@ -13,7 +13,7 @@ export type ProductCatalog = z.infer<typeof productCatalogSchema>;
 // -------- Product --------
 export type ProductKey = keyof ProductCatalog;
 export const isProductKey = isInList(
-	objectKeysNonEmpty(productCatalogSchema._def.shape()),
+	objectKeysNonEmpty(productCatalogSchema.shape),
 );
 
 export type ZuoraProductKey = {

@@ -31,7 +31,7 @@ export interface SwitchDiscountResponse {
 	discountedPrice: number;
 	upToPeriods: number;
 	upToPeriodsType: 'Months' | 'Years';
-	discountPercentage: number;
+	discountPercentage?: number;
 }
 
 export const isRefundExpected = (

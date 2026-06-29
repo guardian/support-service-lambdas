@@ -1,3 +1,4 @@
+import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import { sendToSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
 import type {
@@ -79,6 +80,9 @@ export class DoSwitchAction {
 				zuoraSwitchResponseWithIdsSchema,
 			);
 
-		return switchResponse.invoiceIds[0];
+		return getIfDefined(
+			switchResponse.invoiceIds[0],
+			'No invoice id returned from switch order',
+		);
 	};
 }

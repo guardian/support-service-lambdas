@@ -19,7 +19,7 @@ export const loadConfig = async <O, I>(
 	stage: string,
 	stack: string,
 	app: string,
-	schema: z.ZodType<O, z.ZodTypeDef, I>,
+	schema: z.ZodType<O, I>,
 ): Promise<O> => {
 	const configRoot = '/' + [stage, stack, app].join('/');
 	console.log('getting app config from SSM', configRoot);
@@ -65,7 +65,7 @@ async function readAllRecursive(configRoot: string): Promise<SSMKeyValuePairs> {
 export function parseSSMConfigToObject<O, I>(
 	ssmKeyValuePairs: SSMKeyValuePairs,
 	configRoot: string,
-	schema: z.ZodType<O, z.ZodTypeDef, I>,
+	schema: z.ZodType<O, I>,
 ): O {
 	const configValuesByPath = ssmKeyValuePairs
 		.flatMap(objectEntries)

@@ -34,7 +34,7 @@ export async function getSwitchInformation(
 		subscriptionInformation.previousAmount,
 		subscriptionInformation.includesContribution,
 		productCatalogHelper,
-		discountEnabled,
+		discountEnabled || input.discountSwitchEnabled,
 	);
 
 	return {

@@ -3,6 +3,7 @@ import { awsConfig } from '@modules/aws/config';
 import { buildAuthenticate } from '@modules/identity/apiGateway';
 import { IdentityClient } from '@modules/identity/identityClient';
 import { Lazy } from '@modules/lazy';
+import { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { Router } from '@modules/routing/router';
 import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
@@ -23,7 +24,14 @@ import {
 	deleteInvitationPathSchema,
 } from './deleteInvitationEndpoint';
 import { InvitationRepository } from './invitationRepository';
-import { SecondaryUserRepository } from './secondaryUserRepository';
+import {
+	listInvitationsEndpoint,
+	listInvitationsPathSchema,
+} from './listInvitationsEndpoint';
+import {
+	listSecondaryUsersEndpoint,
+	listSecondaryUsersPathSchema,
+} from './listSecondaryUsersEndpoint';
 
 const stage = stageFromEnvironment();
 const authenticate = buildAuthenticate(stage, []);
@@ -90,5 +98,35 @@ export const handler: Handler = Router([
 				dynamoClient,
 			);
 		}),
+	},
+	{
+		httpMethod: 'GET',
+		path: '/subscriptions/{subscriptionName}/invitations',
+		handler: withPathParser(
+			listInvitationsPathSchema,
+			withMMAIdentityCheck(
+				stage,
+				async (_body, _zuoraClient, subscription) =>
+					listInvitationsEndpoint(invitationRepository)({
+						subscriptionName: subscription.subscriptionNumber,
+					}),
+				({ path }) => path.subscriptionName,
+			),
+		),
+	},
+	{
+		httpMethod: 'GET',
+		path: '/subscriptions/{subscriptionName}/secondary-users',
+		handler: withPathParser(
+			listSecondaryUsersPathSchema,
+			withMMAIdentityCheck(
+				stage,
+				async (_body, _zuoraClient, subscription) =>
+					listSecondaryUsersEndpoint(secondaryUserRepository)({
+						subscriptionName: subscription.subscriptionNumber,
+					}),
+				({ path }) => path.subscriptionName,
+			),
+		),
 	},
 ]);

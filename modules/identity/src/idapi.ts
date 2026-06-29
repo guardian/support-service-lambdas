@@ -46,11 +46,7 @@ export const getUserByEmail = async (
 	email: string,
 ): Promise<IdentityUser | undefined> => {
 	try {
-		const response = await client.get<
-			z.input<typeof userByEmailResponseSchema>,
-			z.output<typeof userByEmailResponseSchema>,
-			typeof userByEmailResponseSchema
-		>(
+		const response = await client.get(
 			`/user?emailAddress=${encodeURIComponent(email)}`,
 			userByEmailResponseSchema,
 		);
@@ -71,11 +67,7 @@ export const getUserByIdentityId = async (
 	identityId: string,
 ): Promise<IdentityUserWithPrivateFields | undefined> => {
 	try {
-		const response = await client.get<
-			z.input<typeof userByIdentityIdResponseSchema>,
-			z.output<typeof userByIdentityIdResponseSchema>,
-			typeof userByIdentityIdResponseSchema
-		>(
+		const response = await client.get(
 			`/user/${encodeURIComponent(identityId)}`,
 			userByIdentityIdResponseSchema,
 		);
@@ -94,11 +86,7 @@ export const createGuestAccount = async (
 	client: IdentityClient,
 	email: string,
 ): Promise<string> => {
-	const response = await client.post<
-		z.input<typeof guestAccountResponseSchema>,
-		z.output<typeof guestAccountResponseSchema>,
-		typeof guestAccountResponseSchema
-	>(
+	const response = await client.post(
 		`/guest?accountVerificationEmail=true`,
 		JSON.stringify({ primaryEmailAddress: email }),
 		guestAccountResponseSchema,
