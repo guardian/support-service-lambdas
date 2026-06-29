@@ -1,5 +1,8 @@
 import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import type { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { createSecondarySubscription } from '@modules/multiple-account/secondarySubscription';
+import type { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
+import { secondaryUserTTLFromPrimarySubscriptionTTL } from '@modules/multiple-account/secondaryUserRepository';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import {
 	badRequest,
@@ -8,16 +11,11 @@ import {
 	ok,
 } from '@modules/routing/apiGatewayResponses';
 import type { Stage } from '@modules/stage';
-import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
-import {
-	getSupporterRatePlan,
-	sendToSupporterProductData,
-} from '@modules/supporter-product-data/supporterProductData';
+import { getSupporterRatePlan } from '@modules/supporter-product-data/supporterProductData';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import dayjs from 'dayjs';
 import { z } from 'zod';
 import type { InvitationRepository } from './invitationRepository';
-import type { SecondaryUserRepository } from './secondaryUserRepository';
 
 export const acceptInvitationPathSchema = z.object({
 	invitationCode: z.string(),
@@ -54,36 +52,38 @@ export const acceptInvitationEndpoint = async (
 			secondaryIdentityId: invitation.secondaryIdentityId,
 			primaryIdentityId: invitation.primaryIdentityId,
 			acceptedDate: zuoraDateFormat(today),
+			expiryDate: secondaryUserTTLFromPrimarySubscriptionTTL(
+				parentSupporterProductDataRecord.termEndDate,
+			),
 		};
+
+		const createSecondaryUserTransaction =
+			secondaryUserRepository.getPutTransaction(secondaryUserRecord);
+		const deleteInvitationTransaction =
+			invitationRepository.getDeleteTransaction(
+				invitation.subscriptionName,
+				invitationCode,
+			);
 
 		// Carry out the secondary user creation and deletion of the invitation
 		// in a transaction to keep them atomic
 		await dynamoClient.send(
 			new TransactWriteItemsCommand({
 				TransactItems: [
-					secondaryUserRepository.getPutTransaction(secondaryUserRecord),
-					invitationRepository.getDeleteTransaction(
-						invitation.subscriptionName,
-						invitationCode,
-					),
+					createSecondaryUserTransaction,
+					deleteInvitationTransaction,
 				],
 			}),
 		);
 
-		const secondarySubscriptionName = `${invitation.subscriptionName}-${invitation.secondaryIdentityId}`;
-		const supporterProductDataRecord: SupporterRatePlanItem = {
-			subscriptionName: secondarySubscriptionName,
-			primarySubscriptionName: invitation.subscriptionName,
-			identityId: invitation.secondaryIdentityId,
-			productRatePlanId: parentSupporterProductDataRecord.productRatePlanId,
-			productRatePlanName: 'Digital Plus Secondary User',
-			contractEffectiveDate: today,
-			termEndDate: parentSupporterProductDataRecord.termEndDate,
-		};
-
 		// This record is not part of the transaction because it is sent via an SQS queue
 		// If there is an issue with it it will be debugged and retried there
-		await sendToSupporterProductData(stage, supporterProductDataRecord);
+		const secondarySubscriptionName = await createSecondarySubscription(
+			stage,
+			parentSupporterProductDataRecord,
+			invitation.secondaryIdentityId,
+			today,
+		);
 
 		// TODO: email?
 		return ok({

@@ -166,13 +166,13 @@ describe('Router', () => {
 		};
 		expect(payload.error).toEqual('Invalid request body - wrong type');
 		expect(payload.details[0]?.message).toEqual(
-			'Expected string, received number',
+			'Invalid input: expected string, received number',
 		);
 		expect(payload.details[1]?.message).toEqual(
-			'Expected number, received string',
+			'Invalid input: expected number, received string',
 		);
 		expect(payload.details[2]?.message).toEqual(
-			'Expected boolean, received string',
+			'Invalid input: expected boolean, received string',
 		);
 	});
 	test('it should return a suitable error for broken json body', async () => {

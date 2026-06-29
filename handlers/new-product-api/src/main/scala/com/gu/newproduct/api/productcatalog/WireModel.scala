@@ -37,6 +37,7 @@ object WireModel {
       startDateRules: WireStartDateRules,
       paymentPlans: List[WirePaymentPlan],
       paymentPlan: Option[String], // todo legacy field, remove once salesforce is reading from paymentPlans
+      enabledForBillingCountries: Option[List[String]],
   )
 
   case class WirePaymentPlan(
@@ -44,10 +45,15 @@ object WireModel {
       amount: BigDecimal,
       billingPeriod: WireBillingPeriod,
       description: String,
+      taxMode: Option[String],
   )
   object WirePaymentPlan {
     implicit val writes: OWrites[WirePaymentPlan] = Json.writes[WirePaymentPlan]
 
+    def wireTaxMode(taxMode: TaxMode): String = taxMode match {
+      case TaxMode.TaxExclusive => "TaxExclusive"
+      case TaxMode.TaxInclusive => "TaxInclusive"
+    }
   }
 
   case class WireSelectableWindow(
@@ -124,10 +130,18 @@ object WireModel {
           paymentPlan.amountMinorUnits.value / 100d,
           WireBillingPeriod.fromBillingPeriod(paymentPlan.billingPeriod),
           paymentPlan.description,
+          paymentPlan.taxMode.map(WirePaymentPlan.wireTaxMode),
         )
       }
 
       val legacyPaymentPlan = plan.paymentPlans.get(GBP).map(_.description)
+
+      val enabledForBillingCountries = plan.id match {
+        case PlanId.DigipackAnnualTaxExclusive | PlanId.DigipackMonthlyTaxExclusive |
+            PlanId.AnnualSupporterPlusTaxExclusive | PlanId.MonthlySupporterPlusTaxExclusive =>
+          Some(List(Country.Canada.name))
+        case _ => None
+      }
 
       WirePlanInfo(
         id = plan.id.name,
@@ -135,6 +149,7 @@ object WireModel {
         startDateRules = toWireRules(plan.startDateRules),
         paymentPlans = paymentPlans.toList,
         paymentPlan = legacyPaymentPlan,
+        enabledForBillingCountries = enabledForBillingCountries,
       )
     }
   }

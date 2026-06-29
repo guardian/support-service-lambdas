@@ -334,6 +334,28 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
         "Description": "notify about alarms in Alarm state every morning",
         "ScheduleExpression": "cron(0 8 ? * MON-FRI *)",
         "State": "ENABLED",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
         "Targets": [
           {
             "Arn": {
@@ -603,6 +625,28 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
         "Description": "share a weekly alarm summary",
         "ScheduleExpression": "cron(0 10 ? * FRI *)",
         "State": "ENABLED",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
         "Targets": [
           {
             "Arn": {
@@ -1702,6 +1746,28 @@ DLQ: https://",
         "Description": "notify about alarms in Alarm state every morning",
         "ScheduleExpression": "cron(0 8 ? * MON-FRI *)",
         "State": "ENABLED",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
         "Targets": [
           {
             "Arn": {
@@ -2075,6 +2141,28 @@ DLQ: https://",
         "Description": "share a weekly alarm summary",
         "ScheduleExpression": "cron(0 10 ? * FRI *)",
         "State": "ENABLED",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
         "Targets": [
           {
             "Arn": {

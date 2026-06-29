@@ -1,5 +1,5 @@
 import { logger } from '@modules/logger/logger';
-import type { OAuthClientCredentials, ZuoraBearerToken } from '../types';
+import type { OAuthClientCredentials } from '../types';
 import { zuoraBearerTokenSchema } from '../types';
 import { zuoraServerUrl } from '../utils';
 
@@ -12,51 +12,55 @@ export interface BearerTokenProvider {
 	getAuthorisation(): Promise<Authorisation>;
 }
 
+type BearerToken = {
+	bearerToken: string;
+	tokenExpiryTime: number;
+};
+
 export class ZuoraBearerTokenProvider implements BearerTokenProvider {
-	private bearerToken: ZuoraBearerToken | null = null;
-	private lastFetchedTime: Date | null = null;
+	// 1 minute buffer in case of early expiry
+	private readonly bufferInMilliseconds = 60 * 1000;
+	private bearerToken: BearerToken | null = null;
 
 	constructor(
 		private stage: string,
 		private credentials: OAuthClientCredentials,
 	) {}
 
-	private tokenIsExpired = () => {
-		logger.log('Checking if Zuora bearer token is expired');
+	private tokenIsNullOrExpired = () => {
+		logger.log('Checking for valid Zuora bearer token');
 		if (this.bearerToken === null) {
-			logger.log('No Zuora bearer token found, fetching a new one');
-			return true;
-		}
-		const now = new Date();
-		if (this.lastFetchedTime === null) {
 			logger.log(
-				'No last fetched time found, fetching a new Zuora bearer token',
+				'No Zuora bearer token found, fetching a new Zuora bearer token',
 			);
 			return true;
 		}
+		const now = new Date();
 		if (
-			this.lastFetchedTime.getTime() + this.bearerToken.expires_in * 1000 <
-			now.getTime()
+			this.bearerToken.tokenExpiryTime <
+			now.getTime() + this.bufferInMilliseconds
 		) {
 			logger.log('Zuora bearer token is expired', {
-				lastFetchedTime: this.lastFetchedTime.getTime(),
-				expiresIn: this.bearerToken.expires_in * 1000,
+				tokenExpiryTime: this.bearerToken.tokenExpiryTime,
 				now: now.getTime(),
 			});
 			return true;
 		}
-		logger.log('Zuora bearer token is still valid');
+		logger.log('Zuora bearer token is still valid', {
+			tokenExpiryTime: this.bearerToken.tokenExpiryTime,
+			now: now.getTime(),
+		});
 		return false;
 	};
-	public async getBearerToken(): Promise<ZuoraBearerToken> {
-		if (this.bearerToken === null || this.tokenIsExpired()) {
-			this.lastFetchedTime = new Date();
-			this.bearerToken = await this.fetchZuoraBearerToken();
+
+	public async getBearerToken(): Promise<BearerToken> {
+		if (this.tokenIsNullOrExpired()) {
+			this.bearerToken = await this.fetchBearerToken();
 		}
-		return this.bearerToken;
+		return this.bearerToken!; //Checked in tokenIsNullOrExpired
 	}
 
-	private fetchZuoraBearerToken = async (): Promise<ZuoraBearerToken> => {
+	private fetchBearerToken = async (): Promise<BearerToken> => {
 		logger.log(`fetching zuora bearer token for stage: ${this.stage}`);
 		const url = `${zuoraServerUrl(this.stage)}/oauth/token`;
 
@@ -82,7 +86,10 @@ export class ZuoraBearerTokenProvider implements BearerTokenProvider {
 				`Failed to fetch Zuora bearer token: ${JSON.stringify(parseResult.error.issues)}`,
 			);
 		}
-		return parseResult.data;
+		return {
+			bearerToken: parseResult.data.access_token,
+			tokenExpiryTime: Date.now() + parseResult.data.expires_in * 1000,
+		};
 	};
 
 	public async getAuthorisation() {
@@ -90,7 +97,7 @@ export class ZuoraBearerTokenProvider implements BearerTokenProvider {
 		return {
 			baseUrl: zuoraServerUrl(this.stage),
 			authHeaders: {
-				Authorization: `Bearer ${bearerToken.access_token}`,
+				Authorization: `Bearer ${bearerToken.bearerToken}`,
 			},
 		};
 	}

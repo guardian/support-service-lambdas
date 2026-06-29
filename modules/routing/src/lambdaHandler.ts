@@ -24,7 +24,7 @@ export type HandlerEnv<ConfigType> = {
  * @constructor
  */
 export function LambdaHandler<ConfigType, E>(
-	configSchema: z.ZodType<ConfigType, z.ZodTypeDef, unknown>,
+	configSchema: z.ZodType<ConfigType>,
 	handler: (event: E, env: HandlerEnv<ConfigType>) => Promise<void>,
 ) {
 	const callerInfo = getCallerInfo();
@@ -58,7 +58,7 @@ type GuEnv = { stage: string; stack: string; app: string };
  * @constructor
  */
 export function LambdaHandlerWithServices<ConfigType, Services, E>(
-	configSchema: z.ZodType<ConfigType, z.ZodTypeDef, unknown>,
+	configSchema: z.ZodType<ConfigType>,
 	handler: (event: E, services: Services) => Promise<void>,
 	buildServices: (handlerProps: HandlerEnv<ConfigType>) => Services,
 	callerInfo: string,

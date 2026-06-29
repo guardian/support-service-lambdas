@@ -77,8 +77,7 @@ export class MParticleClientImpl<
 		| DataSubjectAPI
 		| EventsAPI
 		| BulkDeletionAPI,
-> implements MParticleClient<T>
-{
+> implements MParticleClient<T> {
 	readonly clientType: T['clientType'];
 
 	private readonly rest: RestRequestMaker;

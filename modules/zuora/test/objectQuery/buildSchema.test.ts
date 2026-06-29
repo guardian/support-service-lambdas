@@ -29,6 +29,11 @@ test('single item deserialiser', () => {
 	expect(actual.subscriptions[0]?.ratePlans[0]?.name).toEqual(
 		'Monthly Contribution',
 	);
+	// if the types aren't narrowed properly then it doesn't find the type in map as it may not exist on all
+	expect(actual.subscriptions.map((sub) => sub.ratePlans[0]?.name)).toEqual([
+		'Monthly Contribution',
+		'Monthly Contribution',
+	]);
 });
 
 test('multiple item deserialiser', () => {

@@ -1,4 +1,8 @@
-import { z } from 'zod';
+import {
+	productIdSchema,
+	productRatePlanIdSchema,
+} from '@modules/zuora-catalog/zuoraCatalogSchema';
+import z from 'zod';
 import { ratePlanChargeItemSchema } from '@modules/zuora/objectQuery/expandSchemas/ratePlanChargeItemSchema';
 
 export const ratePlanItemSchema = z.object({
@@ -13,27 +17,17 @@ export const ratePlanItemSchema = z.object({
 	/** The date and time when the rate plan was last updated. */
 	updatedDate: z.coerce.date(),
 	/** The unique identifier of the product associated with the rate plan. */
-	productId: z.string(),
+	productId: productIdSchema,
 	/** The unique identifier of the amendment made to the subscription. */
 	amendmentId: z.string().nullable(),
 	/** The type of amendment associated with the rate plan. */
 	amendmentType: z
-		.enum([
-			'Cancellation',
-			'NewProduct',
-			'Composite',
-			'RemoveProduct',
-			'Renewal',
-			'UpdateProduct',
-			'TermsAndConditions',
-			'SuspendSubscription',
-			'ResumeSubscription',
-		])
+		.enum(['NewProduct', 'RemoveProduct', 'UpdateProduct'])
 		.nullable(),
 	/** The name of the rate plan. */
 	name: z.string(),
 	/** The unique identifier of the product rate plan that the rate plan is based on. */
-	productRatePlanId: z.string(),
+	productRatePlanId: productRatePlanIdSchema,
 	/** The unique identifier of the subscription associated with the rate plan. */
 	subscriptionId: z.string(),
 	/** The unique identifier of the account that owns the subscription. */
