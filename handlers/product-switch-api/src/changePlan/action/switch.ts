@@ -1,6 +1,12 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import { sendToSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
+import {
+	getBillingPreview,
+	getOrderedInvoiceTotals,
+	itemsForSubscription,
+	toSimpleInvoiceItems,
+} from '@modules/zuora/billingPreview';
 import type {
 	CreateOrderRequest,
 	OrderRequest,
@@ -20,6 +26,27 @@ import { zuoraSwitchResponseWithIdsSchema } from '../schemas';
 import { sendThankYouEmail } from './productSwitchEmail';
 
 export type SwitchResponse = { message: string };
+
+async function getNextPayment(
+	zuoraClient: ZuoraClient,
+	targetDate: dayjs.Dayjs,
+	switchInformation: SwitchInformation,
+) {
+	const billingPreview = await getBillingPreview(
+		zuoraClient,
+		targetDate,
+		switchInformation.subscription.accountNumber,
+	);
+	const nextPayment: { date: Date; total: number } | undefined =
+		getOrderedInvoiceTotals(
+			toSimpleInvoiceItems(
+				itemsForSubscription(switchInformation.subscription.subscriptionNumber)(
+					billingPreview,
+				),
+			),
+		)[0];
+	return nextPayment;
+}
 
 export class DoSwitchAction {
 	constructor(
@@ -42,8 +69,16 @@ export class DoSwitchAction {
 			switchInformation.account.defaultPaymentMethodId,
 		);
 
+		const zuoraClient = this.zuoraClient;
+		const targetDate = this.today.add(13, 'months');
+		const nextPayment = await getNextPayment(
+			zuoraClient,
+			targetDate,
+			switchInformation,
+		);
+
 		await Promise.allSettled([
-			sendThankYouEmail(this.stage, paidAmount, switchInformation),
+			sendThankYouEmail(this.stage, paidAmount, nextPayment, switchInformation),
 			sendSalesforceTracking(
 				this.stage,
 				input,

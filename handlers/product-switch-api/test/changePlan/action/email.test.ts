@@ -11,6 +11,7 @@ test('Email message body is correct', () => {
 	const dateOfFirstPayment = dayjs('2024-04-16');
 	const emailMessage: EmailMessageWithUserId = buildEmailMessage(
 		5.6,
+		{ date: new Date(2026, 6, 29), total: 12.21 },
 		testSwitchInformation,
 		dateOfFirstPayment,
 	);
@@ -67,7 +68,7 @@ const testSubscriptionInformation: SubscriptionInformation = {
 };
 
 const testTargetInformation: TargetInformation = {
-	actualTotalPrice: 10,
+	ongoingPrice: 10,
 	contributionCharge: undefined,
 	dataExtensionName:
 		DataExtensionNames.recurringContributionToSupporterPlusSwitch,

@@ -33,7 +33,7 @@ export const supporterPlusTargetInformation: SwitchTargetInformation<
 
 		let discount: Discount | undefined;
 		let contributionAmount: number;
-		let actualTotalPrice: number;
+		let ongoingPrice: number;
 		if (switchActionData.mode === 'save') {
 			const discountDetails = annualContribHalfPriceSupporterPlusForOneYear;
 			const discountedPrice =
@@ -43,22 +43,22 @@ export const supporterPlusTargetInformation: SwitchTargetInformation<
 			const isEligible =
 				productRatePlan.billingPeriod === 'Annual' &&
 				switchActionData.previousAmount <= discountedPrice;
-			if (isEligible) {
-				discount = discountDetails;
-				contributionAmount = 0;
-				actualTotalPrice = discountedPrice;
-			} else {
+			if (!isEligible) {
 				throw new ValidationError(
 					`Cannot switch to Supporter Plus: not eligible for a save discount: ${productRatePlan.billingPeriod} === Annual, ${switchActionData.previousAmount} <= ${discountedPrice}`,
 				);
 			}
+			discount = discountDetails;
+			contributionAmount = 0;
+			ongoingPrice = targetCatalogBasePrice; // no additional contribution possible so assume base price
 		} else {
-			actualTotalPrice =
+			// no initial discount possible
+			ongoingPrice =
 				switchActionData.mode === 'switchWithPriceOverride'
 					? switchActionData.userRequestedAmount
 					: Math.max(switchActionData.previousAmount, targetCatalogBasePrice);
 
-			contributionAmount = actualTotalPrice - targetCatalogBasePrice;
+			contributionAmount = ongoingPrice - targetCatalogBasePrice;
 		}
 
 		const ratePlanName =
@@ -67,7 +67,7 @@ export const supporterPlusTargetInformation: SwitchTargetInformation<
 				: `Supporter Plus V2 - Annual`;
 
 		return Promise.resolve({
-			actualTotalPrice,
+			ongoingPrice,
 			productRatePlanId: productRatePlan.id,
 			ratePlanName,
 			contributionCharge: {

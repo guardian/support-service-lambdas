@@ -8,6 +8,7 @@ import type { SwitchInformation } from '../prepare/switchInformation';
 
 export const buildEmailMessage = (
 	firstPaymentAmount: number,
+	nextPayment: { date: Date; total: number } | undefined,
 	switchInformation: SwitchInformation,
 	today: dayjs.Dayjs,
 ): EmailMessageWithUserId => {
@@ -22,10 +23,10 @@ export const buildEmailMessage = (
 	const { subscriptionNumber, productRatePlanKey } =
 		switchInformation.subscription;
 
-	const [billingPeriodMonths, frequency] = (
+	const frequency = (
 		{
-			Monthly: [1, 'Monthly'],
-			Annual: [12, 'Annually'],
+			Monthly: 'Monthly',
+			Annual: 'Annually',
 		} as const
 	)[productRatePlanKey];
 
@@ -37,14 +38,17 @@ export const buildEmailMessage = (
 					first_name: firstName,
 					last_name: lastName,
 					currency: getCurrencyInfo(currency).extendedGlyph,
-					price: switchInformation.target.actualTotalPrice.toFixed(2),
+					price: switchInformation.target.ongoingPrice.toFixed(2),
 					first_payment_amount: firstPaymentAmount.toFixed(2),
 					date_of_first_payment: today.format('DD MMMM YYYY'),
 					next_payment_amount:
-						switchInformation.target.actualTotalPrice.toFixed(2),
-					date_of_next_payment: today
-						.add(billingPeriodMonths, 'month')
-						.format('DD MMMM YYYY'),
+						nextPayment !== undefined
+							? nextPayment.total.toFixed(2)
+							: 'unknown amount',
+					date_of_next_payment:
+						nextPayment !== undefined
+							? dayjs(nextPayment.date).format('DD MMMM YYYY')
+							: 'unknown date',
 					payment_frequency: frequency,
 					payment_method: emailPaymentMethodTypes[paymentMethodType],
 					subscription_id: subscriptionNumber,
@@ -65,10 +69,12 @@ const emailPaymentMethodTypes: Record<PaymentMethodType, string> = {
 export const sendThankYouEmail = async (
 	stage: Stage,
 	firstPaymentAmount: number,
+	nextPayment: { date: Date; total: number } | undefined,
 	switchInformation: SwitchInformation,
 ) => {
 	const emailMessage: EmailMessageWithUserId = buildEmailMessage(
 		firstPaymentAmount,
+		nextPayment,
 		switchInformation,
 		dayjs(),
 	);

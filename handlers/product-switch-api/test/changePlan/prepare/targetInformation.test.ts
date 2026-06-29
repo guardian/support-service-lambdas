@@ -65,7 +65,7 @@ describe('getTargetInformation', () => {
 		);
 
 		expect(targetInfo).toStrictEqual({
-			actualTotalPrice: expectedActualTotalPrice,
+			ongoingPrice: expectedActualTotalPrice,
 			productRatePlanId: targetRatePlan.id,
 			ratePlanName: 'Supporter Plus V2 - Annual',
 			subscriptionChargeId: targetRatePlan.charges.Subscription.id,
@@ -97,7 +97,7 @@ describe('getTargetInformation', () => {
 			productCatalogHelper,
 		);
 
-		expect(targetInfo.actualTotalPrice).toBe(discountedPrice);
+		expect(targetInfo.ongoingPrice).toBe(discountedPrice);
 		expect(targetInfo.discount).toMatchObject({
 			discountPercentage:
 				annualContribHalfPriceSupporterPlusForOneYear.discountPercentage,
