@@ -48,6 +48,40 @@
         }
       },
       "paymentPlans" : [ ]
+    }, {
+      "id" : "monthly_supporter_plus_tax_exclusive",
+      "label" : "Monthly (Tax Exclusive)",
+      "startDateRules" : {
+        "daysOfWeek" : [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ],
+        "selectableWindow" : {
+          "startDate" : "2019-12-01",
+          "sizeInDays" : 1
+        }
+      },
+      "paymentPlans" : [ {
+        "currencyCode" : "CAD",
+        "amount" : 16.99,
+        "billingPeriod" : "Monthly",
+        "description" : "CAD 16.99 every month"
+      } ],
+      "enabledForBillingCountries" : [ "Canada" ]
+    }, {
+      "id" : "annual_supporter_plus_tax_exclusive",
+      "label" : "Annual (Tax Exclusive)",
+      "startDateRules" : {
+        "daysOfWeek" : [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ],
+        "selectableWindow" : {
+          "startDate" : "2019-12-01",
+          "sizeInDays" : 1
+        }
+      },
+      "paymentPlans" : [ {
+        "currencyCode" : "CAD",
+        "amount" : 169.99,
+        "billingPeriod" : "Annual",
+        "description" : "CAD 169.99 every 12 months"
+      } ],
+      "enabledForBillingCountries" : [ "Canada" ]
     } ]
   }, {
     "label" : "Digital Plus",
@@ -95,6 +129,40 @@
         "description" : "USD 55.54 every month"
       } ],
       "paymentPlan" : "GBP 55.55 every month"
+    }, {
+      "id" : "digipack_annual_tax_exclusive",
+      "label" : "Annual (Tax Exclusive)",
+      "startDateRules" : {
+        "daysOfWeek" : [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ],
+        "selectableWindow" : {
+          "startDate" : "2019-12-15",
+          "sizeInDays" : 90
+        }
+      },
+      "paymentPlans" : [ {
+        "currencyCode" : "CAD",
+        "amount" : 119.99,
+        "billingPeriod" : "Annual",
+        "description" : "CAD 119.99 every 12 months"
+      } ],
+      "enabledForBillingCountries" : [ "Canada" ]
+    }, {
+      "id" : "digipack_monthly_tax_exclusive",
+      "label" : "Monthly (Tax Exclusive)",
+      "startDateRules" : {
+        "daysOfWeek" : [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ],
+        "selectableWindow" : {
+          "startDate" : "2019-12-15",
+          "sizeInDays" : 90
+        }
+      },
+      "paymentPlans" : [ {
+        "currencyCode" : "CAD",
+        "amount" : 11.99,
+        "billingPeriod" : "Monthly",
+        "description" : "CAD 11.99 every month"
+      } ],
+      "enabledForBillingCountries" : [ "Canada" ]
     } ]
   }, {
     "label" : "Home Delivery",
