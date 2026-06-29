@@ -2,7 +2,7 @@
   "name": "user-subscriptions-api",
   "scripts": {
     "test": "jest --group=-integration",
-    "it-test": "jest --group=integration",
+    "it-test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --group=integration",
     "type-check": "tsc --noEmit",
     "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
     "check-formatting": "prettier --check \"**/*.ts\"",
@@ -21,10 +21,12 @@
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
     "zod": "catalog:",
-    "routing": "workspace:*"
+    "routing": "workspace:*",
+    "zuora": "workspace:*"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147",
-    "@redocly/cli": "2.30.5"
+    "@redocly/cli": "2.30.5",
+    "tsx": "^4.21.0"
   }
 }

@@ -9,12 +9,30 @@ const identityUserSchema = z.object({
 	publicFields: z.object({ displayName: z.string() }),
 });
 
+const identityUserWithPrivateFieldsSchema = z.object({
+	id: z.string(),
+	primaryEmailAddress: z.string().optional(),
+	publicFields: z.object({ displayName: z.string() }),
+	privateFields: z.object({
+		brazeUuid: z.string().optional(),
+	}),
+});
+
 type IdentityUser = z.infer<typeof identityUserSchema>;
 
 const userByEmailResponseSchema = z.object({
 	status: z.literal('ok'),
 	user: identityUserSchema,
 });
+
+const userByIdentityIdResponseSchema = z.object({
+	status: z.literal('ok'),
+	user: identityUserWithPrivateFieldsSchema,
+});
+
+type IdentityUserWithPrivateFields = z.infer<
+	typeof identityUserWithPrivateFieldsSchema
+>;
 
 const guestAccountResponseSchema = z.object({
 	status: z.literal('ok'),
@@ -28,11 +46,7 @@ export const getUserByEmail = async (
 	email: string,
 ): Promise<IdentityUser | undefined> => {
 	try {
-		const response = await client.get<
-			z.input<typeof userByEmailResponseSchema>,
-			z.output<typeof userByEmailResponseSchema>,
-			typeof userByEmailResponseSchema
-		>(
+		const response = await client.get(
 			`/user?emailAddress=${encodeURIComponent(email)}`,
 			userByEmailResponseSchema,
 		);
@@ -48,15 +62,31 @@ export const getUserByEmail = async (
 	}
 };
 
+export const getUserByIdentityId = async (
+	client: IdentityClient,
+	identityId: string,
+): Promise<IdentityUserWithPrivateFields | undefined> => {
+	try {
+		const response = await client.get(
+			`/user/${encodeURIComponent(identityId)}`,
+			userByIdentityIdResponseSchema,
+		);
+		return response.user;
+	} catch (error) {
+		if (error instanceof RestClientError && error.status === 404) {
+			// A 404 means there is no user with that identity ID.
+			console.log(`No user found for identity ID ${identityId}`);
+			return undefined;
+		}
+		throw error;
+	}
+};
+
 export const createGuestAccount = async (
 	client: IdentityClient,
 	email: string,
 ): Promise<string> => {
-	const response = await client.post<
-		z.input<typeof guestAccountResponseSchema>,
-		z.output<typeof guestAccountResponseSchema>,
-		typeof guestAccountResponseSchema
-	>(
+	const response = await client.post(
 		`/guest?accountVerificationEmail=true`,
 		JSON.stringify({ primaryEmailAddress: email }),
 		guestAccountResponseSchema,

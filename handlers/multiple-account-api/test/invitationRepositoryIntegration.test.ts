@@ -9,14 +9,16 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { getAwsConfig } from '@modules/aws/config';
 import type { Stage } from '@modules/stage';
 import dayjs from 'dayjs';
+import type { InvitationRecord } from '../src/invitationRepository';
 import { InvitationRepository } from '../src/invitationRepository';
 
 const stage: Stage = 'CODE';
 
-const testRecord = {
+const testRecord: InvitationRecord = {
 	subscriptionName: 'A-S00099999',
 	invitationCode: 'it-test-code',
 	primaryIdentityId: '12345678',
+	secondaryUserEmail: 'integration-test@thegulocal.com',
 	secondaryIdentityId: '87654321',
 	invitedDate: new Date().toISOString(),
 	expiryDate: dayjs().add(10, 'seconds').toDate().getTime(),
@@ -34,10 +36,13 @@ afterEach(async () => {
 test('InvitationRepository saves and retrieves a record from DynamoDB', async () => {
 	await repo.save(testRecord);
 
-	const saved = await repo.get(
-		testRecord.subscriptionName,
-		testRecord.invitationCode,
-	);
+	const saved = await repo.get(testRecord.invitationCode);
 
 	expect(saved).toEqual(testRecord);
+});
+
+test('InvitationRepository returns undefined when invitation code does not exist', async () => {
+	const result = await repo.get('it-nonexistent-code');
+
+	expect(result).toBeUndefined();
 });

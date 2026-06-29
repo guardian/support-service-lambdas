@@ -352,9 +352,7 @@ def lambdaProject(
     projectDependencies: Seq[ClasspathDependency] = Nil,
     scalaSettings: SettingsDefinition = scala2Settings,
 ) = {
-  val cfName = "cfn.yaml"
   Project(projectName, file(s"handlers/$projectName"))
-    .enablePlugins(RiffRaffArtifact)
     .configs(EffectsTest, HealthCheckTest)
     .dependsOn(projectDependencies *)
     .settings(scalaSettings, testSettings, scalafmtSettings)
@@ -363,12 +361,7 @@ def lambdaProject(
       description := projectDescription,
       assemblyJarName := s"$projectName.jar",
       assemblyMergeStrategyDiscardModuleInfo,
-      riffRaffAwsRegion := "eu-west-1",
-      riffRaffPackageType := assembly.value,
-      riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
-      riffRaffUploadManifestBucket := Option("riffraff-builds"),
-      riffRaffManifestProjectName := s"support-service-lambdas::$projectName",
-      riffRaffArtifactResources += (file(s"handlers/$projectName/$cfName"), s"cfn/$cfName"),
+      assembly / assemblyOutputPath := file("/tmp") / (assembly/assemblyJarName).value,
       dependencyOverrides ++= jacksonDependencies,
       dependencyOverrides ++= nettyOverrides,
       libraryDependencies ++= externalDependencies ++ logging,

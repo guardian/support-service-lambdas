@@ -233,6 +233,17 @@ const moduleSupporterProductData: ModuleDefinition = {
 	moduleDependencies: [moduleAws, moduleLogger, moduleZuora],
 };
 
+const moduleMultipleAccount: ModuleDefinition = {
+	name: 'multiple-account',
+	devDependencies: {
+		...dep['@aws-sdk/client-dynamodb'],
+		...dep['@aws-sdk/util-dynamodb'],
+		...dep['dayjs'],
+		...dep['zod'],
+	},
+	moduleDependencies: [moduleAws, moduleLogger, moduleSupporterProductData],
+};
+
 const moduleProductBenefits: ModuleDefinition = {
 	name: 'product-benefits',
 	dependencies: {
@@ -741,6 +752,7 @@ const multipleAccountApi: HandlerDefinition = {
 		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr multiple-account-api.zip ./*.js.map ./*.js`,
 	},
 	moduleDependencies: [
+		moduleMultipleAccount,
 		moduleRouting,
 		moduleLogger,
 		moduleIdentity,
@@ -794,16 +806,87 @@ const userSubscriptionsApi: HandlerDefinition = {
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
-
 		...devDeps['@redocly/cli'],
+		...devDeps['tsx'],
 	},
 	extraScripts: {
 		...openApiScripts,
 		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr user-subscriptions-api.zip ./*.js.map ./*.js`,
 	},
-	moduleDependencies: [moduleRouting],
+	moduleDependencies: [moduleRouting, moduleZuora],
 };
 
+const salesTaxApi: HandlerDefinition = {
+	name: 'sales-tax-api',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+
+		...devDeps['@redocly/cli'],
+	},
+	moduleDependencies: [
+		moduleLogger,
+		moduleRouting,
+		moduleProductCatalog,
+		moduleInternationalisation,
+	],
+	extraScripts: {
+		...openApiScripts,
+		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr sales-tax-api.zip ./*.js.map ./*.js`,
+	},
+};
+
+const supporterProductDataLambdas: HandlerDefinition = {
+	name: 'supporter-product-data-lambdas',
+	functionNames: [
+		'supporterProductData-QueryZuora-',
+		'supporterProductData-FetchResults-',
+		'supporterProductData-AddToQueue-',
+		'supporterProductData-ProcessItem-',
+	],
+	entryPoints: ['src/handlers/*.ts'],
+	dependencies: {
+		...dep['@aws-sdk/client-cloudwatch'],
+		...dep['@aws-sdk/client-dynamodb'],
+		...dep['@aws-sdk/util-dynamodb'],
+		...dep['@aws-sdk/client-s3'],
+		...dep['@aws-sdk/client-sqs'],
+		...dep['@aws-sdk/client-ssm'],
+		...dep['@aws-sdk/client-secrets-manager'],
+		...dep['@aws-sdk/credential-provider-node'],
+		...dep['@aws-sdk/lib-storage'],
+		...dep.dayjs,
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
+	moduleDependencies: [
+		moduleLogger,
+		moduleMultipleAccount,
+		moduleZuora,
+		moduleInternationalisation,
+		moduleSupporterProductData,
+	],
+};
+
+const brazeAcquisitionEventsSync: HandlerDefinition = {
+	name: 'braze-acquisition-events-sync',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+		...devDeps['@redocly/cli'],
+	},
+	extraScripts: {
+		...openApiScripts,
+		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr braze-acquisition-events-sync.zip ./*.js.map ./*.js`,
+	},
+	moduleDependencies: [moduleLogger, moduleIdentity],
+};
 // MARKER new-lambda: buildcheck-const
 
 export const build: BuildDefinition = {
@@ -835,6 +918,9 @@ export const build: BuildDefinition = {
 		observerBenefitsApi,
 		contributionsOnlyCountriesApi,
 		userSubscriptionsApi,
+		salesTaxApi,
+		supporterProductDataLambdas,
+		brazeAcquisitionEventsSync,
 		// MARKER new-lambda: buildcheck-reference
 	],
 
@@ -846,6 +932,7 @@ export const build: BuildDefinition = {
 		moduleIdentity,
 		moduleInternationalisation,
 		moduleLogger,
+		moduleMultipleAccount,
 		moduleProductBenefits,
 		moduleProductCatalog,
 		modulePromotions,

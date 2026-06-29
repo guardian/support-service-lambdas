@@ -454,12 +454,15 @@ exports[`The Observer benefits api stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "LambdaRestApiDeployment953190892f389e6404bc2ce3718756a66fd5299c": {
+    "LambdaRestApiDeployment95319089286a9a2c61673740d9941f4ceada778e": {
       "DependsOn": [
         "LambdaRestApiproxyANY486C4D1F",
         "LambdaRestApiproxy22103CFD",
         "LambdaRestApiANYC3C9D364",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "API Gateway created by CDK",
         "RestApiId": {
@@ -474,7 +477,7 @@ exports[`The Observer benefits api stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "LambdaRestApiDeployment953190892f389e6404bc2ce3718756a66fd5299c",
+          "Ref": "LambdaRestApiDeployment95319089286a9a2c61673740d9941f4ceada778e",
         },
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",
@@ -1439,12 +1442,15 @@ exports[`The Observer benefits api stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "LambdaRestApiDeployment953190898405e480a0e78f2f971d8de6660ea123": {
+    "LambdaRestApiDeployment95319089df21ffe3d731e1d75650d61b3e4e43bb": {
       "DependsOn": [
         "LambdaRestApiproxyANY486C4D1F",
         "LambdaRestApiproxy22103CFD",
         "LambdaRestApiANYC3C9D364",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "API Gateway created by CDK",
         "RestApiId": {
@@ -1459,7 +1465,7 @@ exports[`The Observer benefits api stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "LambdaRestApiDeployment953190898405e480a0e78f2f971d8de6660ea123",
+          "Ref": "LambdaRestApiDeployment95319089df21ffe3d731e1d75650d61b3e4e43bb",
         },
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",

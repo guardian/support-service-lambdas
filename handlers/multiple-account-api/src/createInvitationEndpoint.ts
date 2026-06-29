@@ -24,8 +24,11 @@ export const createInvitationBodySchema = z.object({
 	subscriptionName: z.string(),
 	secondaryUserEmail: z.string().email(),
 });
-
 export type CreateInvitationBody = z.infer<typeof createInvitationBodySchema>;
+
+export const createInvitationResponseBodySchema = z.object({
+	invitationCode: z.string(),
+});
 
 const generateInvitationCode = customAlphabet(
 	'123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz',
@@ -72,6 +75,7 @@ export const createInvitationEndpoint =
 			subscriptionName: zuoraSubscription.subscriptionNumber,
 			invitationCode,
 			primaryIdentityId: account.basicInfo.identityId,
+			secondaryUserEmail: body.secondaryUserEmail,
 			secondaryIdentityId,
 			invitedDate: zuoraDateFormat(now),
 			expiryDate: now.add(1, 'month').toDate().getTime(),
@@ -79,5 +83,8 @@ export const createInvitationEndpoint =
 
 		// TODO: trigger the invite email
 
-		return created({ invitationCode });
+		return created(
+			{ invitationCode },
+			{ schema: createInvitationResponseBodySchema },
+		);
 	};

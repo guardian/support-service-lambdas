@@ -1,0 +1,102 @@
+import { logger } from '@modules/logger/logger';
+import { getIfDefined } from '@modules/nullAndUndefined';
+import { toIsoLocalDateTimeUtc } from '../services/dateTimeService';
+import type { BatchQueryResponse } from '../services/zuoraQuerierService';
+import type {
+	AddSupporterRatePlanItemToQueueState,
+	FetchResultsState,
+} from './types';
+
+export type FetchResultsDependencies = {
+	getResults: (jobId: string) => Promise<BatchQueryResponse>;
+	getResultFileResponse: (fileId: string) => Promise<Response>;
+	uploadToS3: (
+		filename: string,
+		body: ReadableStream<Uint8Array>,
+	) => Promise<void>;
+	putLastSuccessfulQueryTime: (time: string) => Promise<void>;
+};
+
+export const fetchResults = async (
+	event: FetchResultsState,
+	dependencies: FetchResultsDependencies,
+): Promise<AddSupporterRatePlanItemToQueueState> => {
+	logger.log('Attempting to fetch results', {
+		jobId: event.jobId,
+		attemptedQueryTime: event.attemptedQueryTime,
+	});
+
+	const result = await dependencies.getResults(event.jobId);
+
+	logger.log('Received job status from Zuora', {
+		jobId: event.jobId,
+		status: result.status,
+		batchCount: result.batches.length,
+	});
+
+	if (result.status !== 'completed') {
+		throw new Error(
+			`Job with id ${event.jobId} is still in status ${result.status}`,
+		);
+	}
+
+	const batch = getIfDefined(
+		result.batches[0],
+		`No batches were returned in the batch query response for jobId ${event.jobId}`,
+	);
+
+	logger.log('Batch details', {
+		jobId: event.jobId,
+		fileId: batch.fileId,
+		recordCount: batch.recordCount,
+		full: batch.full,
+	});
+
+	const fileId = getIfDefined(
+		batch.fileId,
+		`Batch.fileId was missing in jobId ${event.jobId}`,
+	);
+
+	const filename = `select-active-rate-plans-${toIsoLocalDateTimeUtc(
+		event.attemptedQueryTime,
+	)}.csv`;
+
+	logger.log('Downloading result file from Zuora', { fileId, filename });
+
+	const fileResponse = await dependencies.getResultFileResponse(fileId);
+	if (!fileResponse.ok) {
+		throw new Error(
+			`File download for job with id ${event.jobId} failed with http code ${fileResponse.status}`,
+		);
+	}
+
+	if (!fileResponse.body) {
+		throw new Error(
+			`Response body was null for file download for job with id ${event.jobId}`,
+		);
+	}
+
+	logger.log('Streaming result file to S3', { filename });
+
+	await dependencies.uploadToS3(filename, fileResponse.body);
+
+	if (batch.recordCount === 0) {
+		logger.log('Record count is 0, updating lastSuccessfulQueryTime', {
+			attemptedQueryTime: event.attemptedQueryTime,
+		});
+		await dependencies.putLastSuccessfulQueryTime(event.attemptedQueryTime);
+	}
+
+	logger.log('Successfully wrote file to S3', {
+		filename,
+		recordCount: batch.recordCount,
+		jobId: event.jobId,
+	});
+
+	return {
+		filename,
+		recordCount: batch.recordCount,
+		processedCount: 0,
+		attemptedQueryTime: event.attemptedQueryTime,
+	};
+};

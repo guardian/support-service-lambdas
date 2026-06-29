@@ -401,12 +401,15 @@ exports[`The contributions-only countries list api stack matches the snapshot 1`
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "LambdaRestApiDeployment953190894fc22401a079ce8b559e3118b4f85a76": {
+    "LambdaRestApiDeployment95319089496bfa4870eed110fe9abbf1d3ecb754": {
       "DependsOn": [
         "LambdaRestApiproxyANY486C4D1F",
         "LambdaRestApiproxy22103CFD",
         "LambdaRestApiANYC3C9D364",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "API Gateway created by CDK",
         "RestApiId": {
@@ -421,7 +424,7 @@ exports[`The contributions-only countries list api stack matches the snapshot 1`
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "LambdaRestApiDeployment953190894fc22401a079ce8b559e3118b4f85a76",
+          "Ref": "LambdaRestApiDeployment95319089496bfa4870eed110fe9abbf1d3ecb754",
         },
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",
@@ -1219,12 +1222,15 @@ exports[`The contributions-only countries list api stack matches the snapshot 2`
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "LambdaRestApiDeployment95319089977580f54d2b9cd12c270fd360159028": {
+    "LambdaRestApiDeployment953190896de5e097b894c10e3d6208e4675efd2c": {
       "DependsOn": [
         "LambdaRestApiproxyANY486C4D1F",
         "LambdaRestApiproxy22103CFD",
         "LambdaRestApiANYC3C9D364",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "API Gateway created by CDK",
         "RestApiId": {
@@ -1239,7 +1245,7 @@ exports[`The contributions-only countries list api stack matches the snapshot 2`
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "LambdaRestApiDeployment95319089977580f54d2b9cd12c270fd360159028",
+          "Ref": "LambdaRestApiDeployment953190896de5e097b894c10e3d6208e4675efd2c",
         },
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",

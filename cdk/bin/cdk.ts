@@ -2,6 +2,7 @@ import 'source-map-support/register';
 import { App } from 'aws-cdk-lib';
 import { AlarmsHandler } from '../lib/alarms-handler';
 import { BatchEmailSender } from '../lib/batch-email-sender';
+import { BrazeAcquisitionEventsSync } from '../lib/braze-acquisition-events-sync';
 import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
 import type { SrStageNames } from '../lib/cdk/SrStack';
 import { stages } from '../lib/cdk/SrStack';
@@ -29,9 +30,12 @@ import { ObserverDataExport } from '../lib/observer-data-export';
 import { PressReaderEntitlements } from '../lib/press-reader-entitlements';
 import { ProductSwitchApi } from '../lib/product-switch-api';
 import { PromotionsLambdas } from '../lib/promotions-lambdas';
+import { SalesTaxApi } from '../lib/sales-tax-api';
 import { SalesforceDisasterRecovery } from '../lib/salesforce-disaster-recovery';
 import { SalesforceDisasterRecoveryHealthCheck } from '../lib/salesforce-disaster-recovery-health-check';
 import { SalesforceEventBus } from '../lib/salesforce-event-bus';
+import { SfEmailsToS3Exporter } from '../lib/sf-emails-to-s3-exporter';
+import { SfMoveSubscriptionsApi } from '../lib/sf-move-subscriptions-api';
 import {
 	APP_NAME as SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME,
 	SingleContributionSalesforceWrites,
@@ -40,6 +44,7 @@ import { SoftOptInConsentSetter } from '../lib/soft-opt-in-consent-setter';
 import { StripeDisputes } from '../lib/stripe-disputes';
 import type { StripeWebhookEndpointsProps } from '../lib/stripe-webhook-endpoints';
 import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
+import { SupporterProductDataLambdas } from '../lib/supporter-product-data-lambdas';
 import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
 import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
 import { UserBenefits } from '../lib/user-benefits';
@@ -159,6 +164,11 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	ObserverBenefitsApi,
 	ContributionsOnlyCountriesApi,
 	UserSubscriptionsApi,
+	SalesTaxApi,
+	SupporterProductDataLambdas,
+	BrazeAcquisitionEventsSync,
+	SfMoveSubscriptionsApi,
+	SfEmailsToS3Exporter,
 	// MARKER new-lambda: cdk-bin
 ];
 

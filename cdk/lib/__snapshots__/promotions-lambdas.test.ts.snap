@@ -464,8 +464,6 @@ exports[`The Promotions lambdas stack matches the snapshot 1`] = `
             {
               "Action": [
                 "dynamodb:BatchGetItem",
-                "dynamodb:GetRecords",
-                "dynamodb:GetShardIterator",
                 "dynamodb:Query",
                 "dynamodb:GetItem",
                 "dynamodb:Scan",
@@ -494,8 +492,34 @@ exports[`The Promotions lambdas stack matches the snapshot 1`] = `
                     ],
                   ],
                 },
+              ],
+            },
+            {
+              "Action": [
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+              ],
+              "Effect": "Allow",
+              "Resource": [
                 {
-                  "Ref": "AWS::NoValue",
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":dynamodb:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":table/support-admin-console-promo-campaigns-CODE",
+                    ],
+                  ],
                 },
               ],
             },
@@ -528,9 +552,6 @@ exports[`The Promotions lambdas stack matches the snapshot 1`] = `
                       ":table/MembershipSub-PromoCode-View-CODE",
                     ],
                   ],
-                },
-                {
-                  "Ref": "AWS::NoValue",
                 },
               ],
             },
@@ -682,6 +703,28 @@ exports[`The Promotions lambdas stack matches the snapshot 1`] = `
         "Description": "promo codes salesforce export trigger",
         "ScheduleExpression": "cron(0 8 ? * MON-SUN *)",
         "State": "ENABLED",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "promotions-lambdas",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
         "Targets": [
           {
             "Arn": {
@@ -860,8 +903,6 @@ exports[`The Promotions lambdas stack matches the snapshot 1`] = `
             {
               "Action": [
                 "dynamodb:BatchGetItem",
-                "dynamodb:GetRecords",
-                "dynamodb:GetShardIterator",
                 "dynamodb:Query",
                 "dynamodb:GetItem",
                 "dynamodb:Scan",
@@ -890,8 +931,34 @@ exports[`The Promotions lambdas stack matches the snapshot 1`] = `
                     ],
                   ],
                 },
+              ],
+            },
+            {
+              "Action": [
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+              ],
+              "Effect": "Allow",
+              "Resource": [
                 {
-                  "Ref": "AWS::NoValue",
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":dynamodb:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":table/MembershipSub-PromoCode-View-CODE",
+                    ],
+                  ],
                 },
               ],
             },
@@ -1375,8 +1442,6 @@ exports[`The Promotions lambdas stack matches the snapshot 2`] = `
             {
               "Action": [
                 "dynamodb:BatchGetItem",
-                "dynamodb:GetRecords",
-                "dynamodb:GetShardIterator",
                 "dynamodb:Query",
                 "dynamodb:GetItem",
                 "dynamodb:Scan",
@@ -1405,8 +1470,34 @@ exports[`The Promotions lambdas stack matches the snapshot 2`] = `
                     ],
                   ],
                 },
+              ],
+            },
+            {
+              "Action": [
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+              ],
+              "Effect": "Allow",
+              "Resource": [
                 {
-                  "Ref": "AWS::NoValue",
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":dynamodb:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":table/support-admin-console-promo-campaigns-PROD",
+                    ],
+                  ],
                 },
               ],
             },
@@ -1439,9 +1530,6 @@ exports[`The Promotions lambdas stack matches the snapshot 2`] = `
                       ":table/MembershipSub-PromoCode-View-PROD",
                     ],
                   ],
-                },
-                {
-                  "Ref": "AWS::NoValue",
                 },
               ],
             },
@@ -1691,6 +1779,28 @@ exports[`The Promotions lambdas stack matches the snapshot 2`] = `
         "Description": "promo codes salesforce export trigger",
         "ScheduleExpression": "cron(0 8 ? * MON-SUN *)",
         "State": "ENABLED",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "promotions-lambdas",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
         "Targets": [
           {
             "Arn": {
@@ -1869,8 +1979,6 @@ exports[`The Promotions lambdas stack matches the snapshot 2`] = `
             {
               "Action": [
                 "dynamodb:BatchGetItem",
-                "dynamodb:GetRecords",
-                "dynamodb:GetShardIterator",
                 "dynamodb:Query",
                 "dynamodb:GetItem",
                 "dynamodb:Scan",
@@ -1899,8 +2007,34 @@ exports[`The Promotions lambdas stack matches the snapshot 2`] = `
                     ],
                   ],
                 },
+              ],
+            },
+            {
+              "Action": [
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+              ],
+              "Effect": "Allow",
+              "Resource": [
                 {
-                  "Ref": "AWS::NoValue",
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":dynamodb:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":table/MembershipSub-PromoCode-View-PROD",
+                    ],
+                  ],
                 },
               ],
             },
