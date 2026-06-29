@@ -1,8 +1,8 @@
-import { previewDiscountHandler } from '../src';
-import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { createSupporterPlusSubscription } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
-import { APIGatewayProxyEvent } from 'aws-lambda';
 import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
+import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { APIGatewayProxyEvent } from 'aws-lambda';
+import { createSupporterPlusSubscription } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
+import { previewDiscountHandler } from '../src';
 
 /*
 This is a handy manual script to trigger a preview locally using sandbox zuora.

@@ -4,9 +4,10 @@ import { getSinglePlanFlattenedSubscriptionOrThrow } from '@modules/guardian-sub
 import type { GuardianSubscriptionMultiPlan } from '@modules/guardian-subscription/guardianSubscriptionParser';
 import { GuardianSubscriptionParser } from '@modules/guardian-subscription/guardianSubscriptionParser';
 import { SubscriptionFilter } from '@modules/guardian-subscription/subscriptionFilter';
+import { logger } from '@modules/logger/logger';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
-import { logger } from '@modules/routing/logger';
+import { ok } from '@modules/routing/apiGatewayResponses';
 import type { Stage } from '@modules/stage';
 import { getSubscription } from '@modules/zuora/subscription';
 import type {
@@ -57,10 +58,7 @@ export class ChangePlanEndpoint {
 				account,
 			);
 			const response = await productSwitchEndpoint.doPreview();
-			return {
-				body: JSON.stringify(response),
-				statusCode: 200,
-			};
+			return ok(response);
 		};
 	}
 
@@ -80,10 +78,7 @@ export class ChangePlanEndpoint {
 				account,
 			);
 			const response = await productSwitchEndpoint.doSwitch();
-			return {
-				body: JSON.stringify(response),
-				statusCode: 200,
-			};
+			return ok(response);
 		};
 	}
 
@@ -180,6 +175,7 @@ export class ChangePlanEndpoint {
 			this.body,
 			this.account,
 			subscription,
+			this.stage !== 'PROD',
 		);
 		logger.log(`switching from/to`, {
 			from: {

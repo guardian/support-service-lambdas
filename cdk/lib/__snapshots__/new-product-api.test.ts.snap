@@ -447,6 +447,9 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
         "RestApiproductcatalogOPTIONS7EB8EF88",
         "RestApiproductcatalog23DFEEE3",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "Automatically created by the RestApi construct",
         "RestApiId": {
@@ -1938,6 +1941,9 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
         "RestApiproductcatalogOPTIONS7EB8EF88",
         "RestApiproductcatalog23DFEEE3",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "Automatically created by the RestApi construct",
         "RestApiId": {

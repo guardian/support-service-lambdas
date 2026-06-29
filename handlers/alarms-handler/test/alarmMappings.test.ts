@@ -6,7 +6,15 @@ describe('getTeam', () => {
 
 		const team = prodAppToTeams(app);
 
-		expect(team).toEqual(['GROWTH']);
+		expect(team).toEqual(['MARTECH']);
+	});
+
+	it('routes acquisitions braze suppression sync alarms to MARTECH', () => {
+		const app = 'braze-acquisition-events-sync';
+
+		const team = prodAppToTeams(app);
+
+		expect(team).toEqual(['MARTECH']);
 	});
 
 	it('returns SRE if the app does not have a team owner', () => {

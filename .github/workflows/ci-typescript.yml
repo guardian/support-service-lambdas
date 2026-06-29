@@ -14,7 +14,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  common:
+  load-matrix:
+    runs-on: ubuntu-latest
+    permissions: {}
+    outputs:
+      subprojects: ${{ steps.read-matrix.outputs.subprojects }}
+    steps:
+      - uses: actions/checkout@v6.0.1
+      - id: read-matrix
+        run: |
+          echo "subprojects=$(jq -c '.subproject' .github/workflows/handlerNames.managed.json)" >> "$GITHUB_OUTPUT"
+
+  gu-cdk-build:
+    needs:
+      - load-matrix
+    strategy:
+      fail-fast: false
+      matrix:
+        subproject: ${{ fromJson(needs.load-matrix.outputs.subprojects) }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -33,63 +50,18 @@ jobs:
       - run: pnpm --filter "./buildcheck" type-check
       - run: pnpm --filter "./buildcheck" check-formatting
       - run: pnpm --filter "./buildcheck" lint
-      - run: pnpm --filter "./buildcheck" snapshot:assert ROOT
-      - run: pnpm --filter "./modules/**" check-formatting
-      - run: pnpm --filter "./modules/**" build
-      - run: pnpm --filter "./modules/**" lint
-      - run: pnpm --filter "./modules/**" test
-
-  gu-cdk-build:
-    needs: common
-    strategy:
-      fail-fast: false
-      matrix:
-        subproject:
-          - imovo-voucher-api
-          - promotions-lambdas
-          - user-benefits
-          - press-reader-entitlements
-          - ticket-tailor-webhook
-          - update-supporter-plus-amount
-          - product-switch-api
-          - generate-product-catalog
-          - alarms-handler
-          - discount-api
-          - stripe-disputes
-          - discount-expiry-notifier
-          - salesforce-disaster-recovery
-          - salesforce-disaster-recovery-health-check
-          - salesforce-event-bus
-          - zuora-salesforce-link-remover
-          - metric-push-api
-          - observer-data-export
-          - negative-invoices-processor
-          - write-off-unpaid-invoices
-          - mparticle-api
-          - mobile-purchases-to-supporter-product-data
-          - newsletter-acquisition
-          # MARKER new-lambda: github-action
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-      pull-requests: write
-    steps:
-      - uses: actions/checkout@v6.0.1
-      - run: npm install --global corepack@0.31.0
-      - run: corepack enable
-        shell: bash
-      - uses: actions/setup-node@v6
-        with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
-      - run: pnpm install
-      - run: pnpm --filter "./buildcheck" snapshot:assert handlers/${{ matrix.subproject }}
+      - run: pnpm --filter "./buildcheck" snapshot:assert 'ROOT|modules|handlers/${{ matrix.subproject }}'
       - run: pnpm --filter cdk package ${{ matrix.subproject }}
-      - run: pnpm --filter ${{ matrix.subproject }} package
+      - run: pnpm --filter ${{ matrix.subproject }}... type-check
+      - run: pnpm --filter ${{ matrix.subproject }}... lint
+
+      - run: pnpm --filter cdk check-formatting
+      - run: pnpm --filter ${{ matrix.subproject }}... check-formatting
+      - run: pnpm --filter ${{ matrix.subproject }}... test
+      - run: pnpm --filter ${{ matrix.subproject }} packageQuick
 
       - name: Upload to Riff-Raff
-        uses: guardian/actions-riff-raff@v4
+        uses: guardian/actions-riff-raff@v4.3.3
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
@@ -103,3 +75,17 @@ jobs:
               - ./cdk/cdk.out/${{ matrix.subproject }}-PROD.template.json
             ${{ matrix.subproject }}:
               - ./handlers/${{ matrix.subproject }}/target/${{ matrix.subproject }}.zip
+
+  # for branch protection - only passes if all builds pass
+  ci-typescript-all:
+    name: ci-typescript-all
+    runs-on: ubuntu-latest
+    permissions: {}
+    if: ${{ always() }}
+    needs:
+      - gu-cdk-build
+    steps:
+      - name: Fail unless all matrix jobs succeeded
+        run: |
+          [ "${{ needs.gu-cdk-build.result }}" = "success" ]
+

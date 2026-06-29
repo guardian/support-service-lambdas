@@ -1,4 +1,5 @@
-import { logger } from '@modules/routing/logger';
+import { logger } from '@modules/logger/logger';
+import { internalServerError } from '@modules/routing/apiGatewayResponses';
 import type {
 	APIGatewayProxyEvent,
 	APIGatewayProxyResult,
@@ -14,11 +15,11 @@ import { BatonS3WriterImpl } from './services/batonS3Writer';
 import { BrazeClient } from './services/brazeClient';
 import type { AppConfig } from './services/config';
 import { getAppConfig, getEnv } from './services/config';
-import { MParticleClient } from './services/mparticleClient';
 import type {
 	BulkDeletionAPI,
 	MParticleClient as MParticleClientType,
 } from './services/mparticleClient';
+import { MParticleClient } from './services/mparticleClient';
 import {
 	DeletionRequestBodySchema,
 	SnsMessageSchema,
@@ -34,10 +35,7 @@ export const handlerHttp: Handler<
 		return httpRouter(mParticleDataSubjectClient, batonS3Writer)(event);
 	} catch (error) {
 		console.error('HTTP handler error:', error);
-		return {
-			statusCode: 500,
-			body: JSON.stringify({ error: 'Internal server error' }),
-		};
+		return internalServerError();
 	}
 };
 

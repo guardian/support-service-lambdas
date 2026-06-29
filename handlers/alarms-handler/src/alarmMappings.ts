@@ -1,49 +1,36 @@
 import { objectEntries } from '@modules/objectFunctions';
 
 export type Team =
-	| 'VALUE'
-	| 'GROWTH'
+	| 'LIFECYCLE'
+	| 'MARTECH'
 	| 'PORTFOLIO'
 	| 'PLATFORM'
 	| 'SRE'
 	| 'ENGINE'
 	| 'PUZZLES';
 
-const mobilePurchasesApps = [
-	'mobile-purchases-apple-pubsub',
-	'mobile-purchases-apple-subscription-status',
-	'mobile-purchases-apple-update-subscriptions',
-	'mobile-purchases-delete-user-subscription',
-	'mobile-purchases-feast-apple-pubsub',
-	'mobile-purchases-feast-apple-update-subscriptions',
-	'mobile-purchases-feast-google-pubsub',
-	'mobile-purchases-feast-google-update-subscriptions',
-	'mobile-purchases-google-oauth',
-	'mobile-purchases-google-pubsub',
-	'mobile-purchases-google-subscription-status',
-	'mobile-purchases-google-update-subscriptions',
-];
-
 const teamToAppMappings: Record<Team, string[]> = {
-	GROWTH: [
+	MARTECH: [
 		'acquisition-events-api',
+		'braze-acquisition-events-sync',
 		'admin-console',
 		'apps-metering',
 		'apps-metering-exclusions-lambda',
+		'apps-metering-notifications-lambda',
 		'batch-email-sender',
 		'bigquery-acquisitions-publisher',
 		'component-event-stream',
 		'dotcom-components',
-		...mobilePurchasesApps,
 		'promotions-tool',
 		'promotions-lambdas',
 		'super-mode',
 		'support-reminders',
 		'ticker-calculator',
 		'bandit',
-	],
-	VALUE: [
 		'apps-metering-events',
+		'publishing-alarm-stack-cdk',
+	],
+	LIFECYCLE: [
 		'cancellation-sf-cases-api',
 		'comms-sqs', // membership-workflow queues
 		'contact-us-api',
@@ -56,7 +43,6 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'mobile-purchases-soft-opt-in-acquisitions',
 		'mobile-purchases-soft-opt-in-acquisitions-dlq-processor',
 		'payment-failure-comms',
-		'publishing-alarm-stack-cdk',
 		'salesforce-case-raiser',
 		'product-switch-api',
 		'update-supporter-plus-amount',
@@ -64,6 +50,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'workflow',
 		'consent-autolapse',
 		'mparticle-api',
+		'user-subscriptions-api',
 	],
 	SRE: ['alarms-handler', 'gchat-test-app'],
 	PORTFOLIO: [
@@ -91,6 +78,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'press-reader-entitlements',
 		'user-benefits',
 		'mobile-purchases-to-supporter-product-data',
+		'supporter-product-data-lambdas',
 	],
 	PLATFORM: [
 		// fulfilment
@@ -136,6 +124,20 @@ const teamToAppMappings: Record<Team, string[]> = {
 
 		// members-data-api
 		'membership-attribute-service',
+
+		// mobile-purchases-api
+		'mobile-purchases-apple-pubsub',
+		'mobile-purchases-apple-subscription-status',
+		'mobile-purchases-apple-update-subscriptions',
+		'mobile-purchases-delete-user-subscription',
+		'mobile-purchases-feast-apple-pubsub',
+		'mobile-purchases-feast-apple-update-subscriptions',
+		'mobile-purchases-feast-google-pubsub',
+		'mobile-purchases-feast-google-update-subscriptions',
+		'mobile-purchases-google-oauth',
+		'mobile-purchases-google-pubsub',
+		'mobile-purchases-google-subscription-status',
+		'mobile-purchases-google-update-subscriptions',
 
 		// misc
 		'discount-expiry-notifier',

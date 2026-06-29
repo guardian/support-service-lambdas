@@ -87,12 +87,14 @@ trait HolidayStopRequestPartialTrait {
   val endDate: LocalDate
   val subscriptionName: SubscriptionName
   val bulkSuspensionReason: Option[BulkSuspensionReason]
+  val userId: Option[String]
 }
 
 case class HolidayStopRequestPartial(
     startDate: LocalDate,
     endDate: LocalDate,
     subscriptionName: SubscriptionName,
+    userId: Option[String] = None,
 ) extends HolidayStopRequestPartialTrait {
   val bulkSuspensionReason = None
 }
@@ -106,6 +108,7 @@ case class BulkHolidayStopRequestPartial(
     endDate: LocalDate,
     subscriptionName: SubscriptionName,
     reason: BulkSuspensionReason,
+    userId: Option[String] = None,
 ) extends HolidayStopRequestPartialTrait {
   val bulkSuspensionReason = Some(reason)
 }

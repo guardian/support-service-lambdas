@@ -1,7 +1,7 @@
 import { DynamoDBClient, ScanCommand } from '@aws-sdk/client-dynamodb';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
 import { awsConfig } from '@modules/aws/config';
-import { logger } from '@modules/routing/logger';
+import { logger } from '@modules/logger/logger';
 import { sfApiVersion } from '@modules/salesforce/config';
 import { SfClient } from '@modules/salesforce/sfClient';
 import type { Stage } from '@modules/stage';

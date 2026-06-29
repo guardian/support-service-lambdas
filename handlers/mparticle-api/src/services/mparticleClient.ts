@@ -1,4 +1,4 @@
-import { getCallerInfo } from '@modules/routing/getCallerInfo';
+import { getCallerInfo } from '@modules/logger/getCallerInfo';
 import type { AppConfig } from './config';
 import type { HttpResponse, Schema } from './make-http-request';
 import { RestRequestMaker } from './make-http-request';
@@ -77,8 +77,7 @@ export class MParticleClientImpl<
 		| DataSubjectAPI
 		| EventsAPI
 		| BulkDeletionAPI,
-> implements MParticleClient<T>
-{
+> implements MParticleClient<T> {
 	readonly clientType: T['clientType'];
 
 	private readonly rest: RestRequestMaker;

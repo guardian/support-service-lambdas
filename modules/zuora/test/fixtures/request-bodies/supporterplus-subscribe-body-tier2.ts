@@ -1,8 +1,11 @@
+import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { Dayjs } from 'dayjs';
 import { zuoraDateFormat } from '@modules/zuora/utils';
-import { catalog } from '../../../../../handlers/discount-api/src/productToDiscountMapping';
 
-export const supporterPlusSubscribeBody = (subscriptionDate: Dayjs) => {
+export const supporterPlusSubscribeBody = (
+	subscriptionDate: Dayjs,
+	productCatalog: ProductCatalog,
+) => {
 	return {
 		subscribes: [
 			{
@@ -12,7 +15,6 @@ export const supporterPlusSubscribeBody = (subscriptionDate: Dayjs) => {
 					CrmId: '0019E00002QSysUQAT',
 					IdentityId__c: '200175946',
 					PaymentGateway: 'GoCardless',
-					CreatedRequestId__c: '17d9e675-4198-c0b0-0000-00000001280e',
 					BillCycleDay: 0,
 					AutoPay: true,
 					PaymentTerm: 'Due Upon Receipt',
@@ -42,7 +44,8 @@ export const supporterPlusSubscribeBody = (subscriptionDate: Dayjs) => {
 					RatePlanData: [
 						{
 							RatePlan: {
-								ProductRatePlanId: catalog.CODE.supporterPlus.Month,
+								ProductRatePlanId:
+									productCatalog.SupporterPlus.ratePlans.Monthly.id,
 							},
 							SubscriptionProductFeatureList: [],
 						},
@@ -59,7 +62,6 @@ export const supporterPlusSubscribeBody = (subscriptionDate: Dayjs) => {
 						RenewalTerm: 12,
 						TermType: 'TERMED',
 						ReaderType__c: 'Direct',
-						CreatedRequestId__c: '17d9e675-4198-c0b0-0000-00000001280e',
 					},
 				},
 				SubscribeOptions: { GenerateInvoice: true, ProcessPayments: true },

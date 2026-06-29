@@ -1,5 +1,5 @@
+import { getSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { getSubscription } from '../src';
 
 const validSubscriptionId = 'A-S00000000';
 const stage = 'CODE';

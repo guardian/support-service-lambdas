@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/require-await -- this is required to ensure the lambda returns a value*/
-import { DetectFailuresInputSchema } from '../types';
 import type { DetectFailuresInput, ProcessedInvoice } from '../types';
+import { DetectFailuresInputSchema } from '../types';
 
 export const handler = async (event: DetectFailuresInput) => {
 	try {

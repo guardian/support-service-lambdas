@@ -1,14 +1,15 @@
 import { buildAuthenticate } from '@modules/identity/apiGateway';
-import type { IdentityUserDetails } from '@modules/identity/identity';
+import type { IdentityUserDetails } from '@modules/identity/oktaTokenHelper';
 import { Lazy } from '@modules/lazy';
 import type { UserBenefitsResponse } from '@modules/product-benefits/schemas';
 import { getUserBenefits } from '@modules/product-benefits/userBenefits';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
+import { buildErrorResponse } from '@modules/routing/apiGatewayResponses';
 import type { Stage } from '@modules/stage';
 import { stageFromEnvironment } from '@modules/stage';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { buildErrorResponse, buildHttpResponse } from './response';
+import { buildHttpResponse } from './response';
 import { getTrialInformation } from './trials';
 
 const stage = stageFromEnvironment();

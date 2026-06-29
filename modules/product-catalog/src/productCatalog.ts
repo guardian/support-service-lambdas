@@ -13,7 +13,7 @@ export type ProductCatalog = z.infer<typeof productCatalogSchema>;
 // -------- Product --------
 export type ProductKey = keyof ProductCatalog;
 export const isProductKey = isInList(
-	objectKeysNonEmpty(productCatalogSchema._def.shape()),
+	objectKeysNonEmpty(productCatalogSchema.shape),
 );
 
 export type ZuoraProductKey = {
@@ -53,6 +53,10 @@ export function isDeliveryProductPurchase(
 	{ product: DeliveryProductKey }
 > {
 	return isDeliveryProduct(productPurchase.product);
+}
+
+export function isNewspaperProduct(productKey: ProductKey): boolean {
+	return isInList(newspaperProducts)(productKey);
 }
 
 // Products which do not support promotions

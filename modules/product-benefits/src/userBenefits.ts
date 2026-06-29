@@ -1,12 +1,12 @@
 import { distinct } from '@modules/arrayFunctions';
-import type { IdentityUserDetails } from '@modules/identity/identity';
+import type { IdentityUserDetails } from '@modules/identity/oktaTokenHelper';
 import type {
 	ProductCatalogHelper,
 	ProductKey,
 } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
-import { getSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
+import { getSupporterRatePlans } from '@modules/supporter-product-data/supporterProductData';
 import dayjs from 'dayjs';
 import {
 	inAppPurchaseProductKey,
@@ -25,7 +25,7 @@ export const getUserProducts = async (
 	productCatalogHelper: ProductCatalogHelper,
 	identityId: string,
 ): Promise<Array<ProductKey | InAppPurchaseProductKey>> => {
-	const supporterProductDataItems = await getSupporterProductData(
+	const supporterProductDataItems = await getSupporterRatePlans(
 		stage,
 		identityId,
 	);

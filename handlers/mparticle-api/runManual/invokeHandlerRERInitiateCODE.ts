@@ -1,5 +1,5 @@
 import { invokeFunction } from '@modules/aws/lambda';
-import { BatonRerEventInitiateRequest } from '../src/routers/baton/erasure/handleInitiate';
+import type { BatonRerEventInitiateRequest } from '../src/routers/baton/erasure/handleInitiate';
 
 const handlerTestEvent: BatonRerEventInitiateRequest = {
 	dataProvider: 'mparticlerer',

@@ -1,5 +1,5 @@
 ## How to run the tests
-To run the tests in identity.test.ts you need to create some config which will hold Jwt access tokens. To do this, follow these steps:
+To run the tests in oktaTokenHelper.test.ts you need to create some config which will hold Jwt access tokens. To do this, follow these steps:
 1. Ensure you have fresh Janus credentials for the membership account
 2. Run the following command to retrieve the test config (this is a one-time setup):
    `aws s3 cp s3://support-service-lambdas-test/identity-module/support-service-lambdas-auth-token-test.json /etc/gu/support-service-lambdas-auth-token-test.json`

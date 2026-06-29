@@ -1,0 +1,26 @@
+# MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/riff-raff.yaml.ts
+stacks:
+  - support
+regions:
+  - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  braze-acquisition-events-sync-cloudformation:
+    type: cloud-formation
+    app: braze-acquisition-events-sync
+    parameters:
+      templateStagePaths:
+        CODE: braze-acquisition-events-sync-CODE.template.json
+        PROD: braze-acquisition-events-sync-PROD.template.json
+  braze-acquisition-events-sync:
+    type: aws-lambda
+    parameters:
+      fileName: braze-acquisition-events-sync.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+        - braze-acquisition-events-sync-
+    dependencies:
+      - braze-acquisition-events-sync-cloudformation

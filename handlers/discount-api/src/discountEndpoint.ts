@@ -1,6 +1,6 @@
 import { sum } from '@modules/arrayFunctions';
 import { Lazy } from '@modules/lazy';
-import { logger } from '@modules/routing/logger';
+import { logger } from '@modules/logger/logger';
 import type { Stage } from '@modules/stage';
 import {
 	getBillingPreview,
@@ -208,6 +208,7 @@ async function getDiscountToApply(
 			);
 			break;
 		case 'NoCheck':
+		case undefined:
 			break;
 	}
 

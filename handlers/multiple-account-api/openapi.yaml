@@ -1,0 +1,414 @@
+openapi: 3.0.3
+info:
+  title: Multiple Account API
+  version: 1.0.0
+  description: API for creating and deleting invitation codes used by the multiple account feature.
+servers:
+  - url: https://multiple-account-api-code.support.guardianapis.com
+    description: CODE
+  - url: https://multiple-account-api.support.guardianapis.com
+    description: PROD
+paths:
+  /invitation:
+    post:
+      operationId: createInvitation
+      summary: Create invitation
+      description: Creates a new invitation for a subscription and returns an invitation code.
+      security:
+        - identityId: []
+        -  apiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInvitationRequest'
+            examples:
+              default:
+                value:
+                  subscriptionName: A-S00974337
+                  secondaryUserEmail: integration-test2+multiple-account@theguardian.com
+      responses:
+        '201':
+          description: Invitation created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateInvitationResponse'
+              examples:
+                default:
+                  value:
+                    invitationCode: RpwR62kMnAxe
+        '400':
+          description: Invalid request or validation failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParserError'
+            text/plain:
+              schema:
+                type: string
+              examples:
+                validationError:
+                  value: An invitation already exists for this subscription
+        '404':
+          description: Route not found.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Not Found
+        '500':
+          description: Internal server error.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Internal server error
+  /subscriptions/{subscriptionName}/invitations:
+    get:
+      operationId: listInvitations
+      summary: List invitations
+      description: Lists all invitations for a given primary subscription.
+      security:
+        - identityId: []
+        - apiKey: []
+      parameters:
+        - name: subscriptionName
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Zuora subscription number for the primary user.
+          example: A-S00974337
+      responses:
+        '200':
+          description: Invitations listed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListInvitationsResponse'
+        '400':
+          description: Invalid request or validation failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParserError'
+            text/plain:
+              schema:
+                type: string
+        '404':
+          description: Route not found.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Not Found
+        '500':
+          description: Internal server error.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Internal server error
+  /subscriptions/{subscriptionName}/secondary-users:
+    get:
+      operationId: listSecondaryUsers
+      summary: List secondary users
+      description: Lists all secondary users associated with a primary subscription.
+      security:
+        - identityId: []
+        - apiKey: []
+      parameters:
+        - name: subscriptionName
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Zuora subscription number for the primary user.
+          example: A-S00974337
+      responses:
+        '200':
+          description: Secondary users listed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListSecondaryUsersResponse'
+        '400':
+          description: Invalid request or validation failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParserError'
+            text/plain:
+              schema:
+                type: string
+        '404':
+          description: Route not found.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Not Found
+        '500':
+          description: Internal server error.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Internal server error
+  /invitation/{invitationCode}:
+    delete:
+      operationId: deleteInvitation
+      summary: Delete invitation
+      description: Deletes an invitation by invitation code.
+      security:
+        - apiKey: []
+      parameters:
+        - name: invitationCode
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The invitation code to delete.
+      responses:
+        '204':
+          description: Invitation deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteInvitationResponse'
+              examples:
+                default:
+                  value:
+                    message: Deleted
+        '404':
+          description: Invitation not found.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Not found
+        '500':
+          description: Internal server error.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Internal server error
+  /invitation/{invitationCode}/accept:
+    post:
+      operationId: acceptInvitation
+      summary: Accept invitation
+      description: Accepts an invitation for the signed-in secondary user, linking them to the subscription.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: invitationCode
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 12
+            maxLength: 12
+            pattern: '^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{12}$'
+          description: 12-character Base58 invitation code.
+          example: RpwR62kMnAxe
+      responses:
+        '200':
+          description: Invitation accepted.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+        '400':
+          description: Invalid request or the signed-in user does not match the invited user.
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                incorrectUser:
+                  value: Incorrect user
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParserError'
+        '401':
+          description: Missing, expired, or invalid Okta token.
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                noToken:
+                  value: No Authorization header provided
+                expired:
+                  value: Token has expired
+                invalid:
+                  value: Token is invalid
+                signingKey:
+                  value: Unable to find a signing key for the token
+        '403':
+          description: Token does not have the required scopes.
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                invalidScopes:
+                  value: Token does not have the required scopes
+        '404':
+          description: Route not found.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Not Found
+        '500':
+          description: Internal server error.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Internal server error
+components:
+  securitySchemes:
+    identityId:
+      type: apiKey
+      in: header
+      name: x-identity-id
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Okta JWT token passed in the Authorization header.
+  schemas:
+    CreateInvitationRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - subscriptionName
+        - secondaryUserEmail
+      properties:
+        subscriptionName:
+          type: string
+          description: Zuora subscription number.
+          example: A-S00974337
+        secondaryUserEmail:
+          type: string
+          format: email
+          example: integration-test2+multiple-account@theguardian.com
+    CreateInvitationResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - invitationCode
+      properties:
+        invitationCode:
+          type: string
+          minLength: 12
+          maxLength: 12
+          pattern: '^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{12}$'
+          description: 12-character Base58 invitation code.
+          example: RpwR62kMnAxe
+    DeleteInvitationResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: Deleted
+    Invitation:
+      type: object
+      additionalProperties: false
+      required:
+        - subscriptionName
+        - invitationCode
+        - primaryIdentityId
+        - secondaryIdentityId
+        - invitedDate
+        - expiryDate
+      properties:
+        subscriptionName:
+          type: string
+          example: A-S00974337
+        invitationCode:
+          type: string
+          example: RpwR62kMnAxe
+        primaryIdentityId:
+          type: string
+          example: 20012345
+        secondaryIdentityId:
+          type: string
+          example: 30067890
+        invitedDate:
+          type: string
+          example: '2026-06-12'
+        expiryDate:
+          type: number
+          example: 1781222400000
+    ListInvitationsResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - invitations
+      properties:
+        invitations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Invitation'
+    SecondaryUser:
+      type: object
+      additionalProperties: false
+      required:
+        - subscriptionName
+        - secondaryIdentityId
+        - primaryIdentityId
+        - acceptedDate
+      properties:
+        subscriptionName:
+          type: string
+          example: A-S00974337
+        secondaryIdentityId:
+          type: string
+          example: 30067890
+        primaryIdentityId:
+          type: string
+          example: 20012345
+        acceptedDate:
+          type: string
+          example: '2026-06-12'
+    ListSecondaryUsersResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - secondaryUsers
+      properties:
+        secondaryUsers:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecondaryUser'
+    ParserError:
+      type: object
+      additionalProperties: true
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          enum:
+            - Missing request body
+            - Invalid request body - not json
+            - Invalid request body - wrong type
+            - Invalid request path
+        details:
+          description: Parser-specific error details.
+
+

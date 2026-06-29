@@ -1,4 +1,4 @@
-import { logger } from '@modules/routing/logger';
+import { logger } from '@modules/logger/logger';
 import type { Context, SQSEvent } from 'aws-lambda';
 import { processUserDeletion } from '../src/apis/dataSubjectRequests/deleteUser';
 import { handlerDeletion } from '../src/index';
@@ -24,7 +24,7 @@ jest.mock('../src/services/config', () => ({
 	getEnv: jest.fn().mockReturnValue('test'),
 }));
 
-jest.mock('@modules/routing/logger', () => ({
+jest.mock('@modules/logger/logger', () => ({
 	logger: {
 		log: jest.fn(),
 		error: jest.fn(),
@@ -320,6 +320,7 @@ describe('handlerDeletion', () => {
 		expect(mockProcessUserDeletion).not.toHaveBeenCalled();
 
 		// Should log the SubscribeURL so it can be found in CloudWatch
+
 		// eslint-disable-next-line @typescript-eslint/unbound-method -- logger is fully mocked via jest.fn(), `this` binding is irrelevant
 		expect(logger.log).toHaveBeenCalledWith(
 			expect.stringContaining('SubscriptionConfirmation'),

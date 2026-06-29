@@ -2,8 +2,8 @@ import {
 	difference,
 	getSingleOrThrow,
 	partitionByType,
-} from '@modules/arrayFunctions';
-import { getIfDefined } from '@modules/nullAndUndefined';
+} from './arrayFunctions';
+import { getIfDefined } from './nullAndUndefined';
 
 export const mapValuesMap = <K, V, RES>(
 	obj: Map<K, V>,

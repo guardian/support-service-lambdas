@@ -75,6 +75,25 @@ function getNextPaymentDate(ratePlanCharges: RatePlanCharge[]) {
 	);
 }
 
+function ratePlanIncludesContribution(ratePlan: GuardianRatePlan) {
+	if (ratePlan.productKey === 'Contribution') {
+		return true;
+	}
+	if (
+		ratePlan.productKey === 'SupporterPlus' &&
+		(ratePlan.productRatePlanKey == 'Annual' ||
+			ratePlan.productRatePlanKey == 'Monthly')
+	) {
+		return (
+			getIfDefined(
+				ratePlan.ratePlanCharges.Contribution.price,
+				'missing contribution price',
+			) > 0
+		);
+	}
+	return false;
+}
+
 export function getSubscriptionInformation(
 	subscription: GuardianSubscription,
 ): SubscriptionInformation {
@@ -88,22 +107,7 @@ export function getSubscriptionInformation(
 		),
 		'missing charges',
 	);
-	let includesContribution = false;
-	switch (ratePlan.productKey) {
-		case 'Contribution':
-			includesContribution = true;
-			break;
-		case 'SupporterPlus':
-			switch (ratePlan.productRatePlanKey) {
-				case 'Annual':
-				case 'Monthly':
-					includesContribution =
-						getIfDefined(
-							ratePlan.ratePlanCharges.Contribution.price,
-							'missing contribution price',
-						) > 0;
-			}
-	}
+	const includesContribution = ratePlanIncludesContribution(ratePlan);
 
 	return {
 		accountNumber: subscription.accountNumber,

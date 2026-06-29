@@ -1,4 +1,4 @@
-import type { Logger } from '@modules/routing/logger';
+import type { Logger } from '@modules/logger/logger';
 import type { ListenDisputeClosedRequestBody } from '../../src/dtos';
 import { handleListenDisputeClosed } from '../../src/sqs-consumers/listenDisputeClosed';
 

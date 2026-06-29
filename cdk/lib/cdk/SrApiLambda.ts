@@ -1,5 +1,9 @@
 import { Duration } from 'aws-cdk-lib';
 import { ApiKeySourceType, LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
+import type {
+	QuotaSettings,
+	ThrottleSettings,
+} from 'aws-cdk-lib/aws-apigateway/lib/usage-plan';
 import { SrApiGateway5xxAlarm } from './SrApiGateway5xxAlarm';
 import type { SrLambdaProps } from './SrLambda';
 import { getNameWithStage, SrLambda } from './SrLambda';
@@ -26,6 +30,16 @@ type SrApiLambdaProps = SrLambdaProps & {
 	 * of it here or add a public facing fastly enabled domain.
 	 */
 	srRestDomainProps?: SrRestDomainProps;
+	/**
+	 * Number of requests clients can make in a given time period.
+	 * @default none
+	 */
+	readonly quota?: QuotaSettings;
+	/**
+	 * Overall throttle settings for the API.
+	 * @default none
+	 */
+	readonly throttle?: ThrottleSettings;
 };
 
 const defaultProps = {
@@ -59,7 +73,7 @@ export class SrApiLambda extends SrLambda {
 				restApiName: getNameWithStage(scope, props.nameSuffix),
 				description:
 					props.apiDescriptionOverride ?? 'API Gateway created by CDK',
-				proxy: true,
+				proxy: false, // add proxy method later, to allow public paths
 				deployOptions: {
 					stageName: scope.stage,
 				},
@@ -74,10 +88,16 @@ export class SrApiLambda extends SrLambda {
 			},
 		);
 
+		// by doing these explicitly rather than using proxy:true, we can later add specific public resources
+		this.api.root.addMethod('ANY');
+		this.api.root.addResource('{proxy+}').addMethod('ANY');
+
 		if (!props.isPublic) {
 			const usagePlan = this.api.addUsagePlan('UsagePlan', {
 				name: getNameWithStage(scope, props.nameSuffix),
 				description: 'REST endpoints for ' + scope.app,
+				throttle: props.throttle,
+				quota: props.quota,
 				apiStages: [
 					{
 						stage: this.api.deploymentStage,
@@ -108,5 +128,22 @@ export class SrApiLambda extends SrLambda {
 				overrides: props.monitoring,
 			});
 		}
+	}
+
+	/**
+	 * if your API gateway normally requires an API key, you can use this function
+	 * to make specific routes public
+	 *
+	 * this can be useful you want a lambda to self-serve documentation for access
+	 * via a browser
+	 */
+	addPublicPath(path: string) {
+		const publicResource = this.api.root.addResource(path);
+		publicResource.addMethod('GET', undefined, {
+			apiKeyRequired: false,
+		});
+		publicResource.addResource('{proxy+}').addMethod('GET', undefined, {
+			apiKeyRequired: false,
+		});
 	}
 }

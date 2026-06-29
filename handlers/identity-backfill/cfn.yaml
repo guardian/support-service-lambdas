@@ -54,6 +54,14 @@ Resources:
                             - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/trustedApi-${Stage}.*.json
                             - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/identity-${Stage}.*.json
                             - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfAuth-${Stage}.*.json
+                - PolicyName: SendToSupporterProductDataQueue
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - sqs:GetQueueUrl
+                            - sqs:SendMessage
+                            Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:supporter-product-data-${Stage}
     IdentityBackfillLambda:
         Type: AWS::Lambda::Function
         Properties:

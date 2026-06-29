@@ -2,7 +2,7 @@
   "name": "supporter-product-data",
   "scripts": {
     "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --group=-integration",
-    "it-test": "jest --group=integration",
+    "it-test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --group=integration",
     "type-check": "tsc --noEmit",
     "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
     "check-formatting": "prettier --check \"**/*.ts\"",
@@ -11,6 +11,11 @@
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/module/package.json.ts",
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
+  "dependencies": {
+    "aws": "workspace:*",
+    "logger": "workspace:*",
+    "zuora": "workspace:*"
+  },
   "devDependencies": {
     "@aws-sdk/client-dynamodb": "^3.940.0",
     "@aws-sdk/util-dynamodb": "^3.940.0",

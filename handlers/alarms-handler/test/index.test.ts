@@ -6,8 +6,8 @@ import type { WebhookUrls } from '../src/configSchema';
 
 describe('Handler', () => {
 	const mockWebhookUrls: WebhookUrls = {
-		VALUE: 'value-webhook-url',
-		GROWTH: 'growth-webhook-url',
+		LIFECYCLE: 'lifecycle-webhook-url',
+		MARTECH: 'martech-webhook-url',
 		SRE: 'sre-webhook-url',
 		PORTFOLIO: 'portfolio-webhook-url',
 		PLATFORM: 'platform-webhook-url',
