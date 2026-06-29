@@ -628,6 +628,9 @@ exports[`The Discount API stack matches the snapshot 1`] = `
         "discountapilambdadiscountapiCODEproxyDA26EBF1",
         "discountapilambdadiscountapiCODEANY827A81C0",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "API Gateway created by CDK",
         "RestApiId": {
@@ -1666,6 +1669,9 @@ exports[`The Discount API stack matches the snapshot 2`] = `
         "discountapilambdadiscountapiPRODproxy2CE9F043",
         "discountapilambdadiscountapiPRODANY1101E911",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "API Gateway created by CDK",
         "RestApiId": {

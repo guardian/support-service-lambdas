@@ -650,6 +650,9 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
         "metricpushapilambdametricpushapiCODEproxyBBD345B3",
         "metricpushapilambdametricpushapiCODEANY7DBEC52E",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "API Gateway endpoint for the metric-push-api-CODE lambda",
         "RestApiId": {
@@ -1529,6 +1532,9 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
         "metricpushapilambdametricpushapiPRODproxy1154D5C4",
         "metricpushapilambdametricpushapiPRODANYD7FD3932",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "API Gateway endpoint for the metric-push-api-PROD lambda",
         "RestApiId": {
