@@ -1,5 +1,3 @@
-import z from 'zod';
-
 export const usStates: Record<string, string> = {
 	AL: 'Alabama',
 	AK: 'Alaska',
@@ -60,23 +58,21 @@ export const usStates: Record<string, string> = {
 	WY: 'Wyoming',
 };
 
-export const caStateSchema = z.enum([
-	'AB',
-	'BC',
-	'MB',
-	'NB',
-	'NL',
-	'NT',
-	'NS',
-	'NU',
-	'ON',
-	'PE',
-	'QC',
-	'SK',
-	'YT',
-]);
+export type CaState =
+	| 'AB'
+	| 'BC'
+	| 'MB'
+	| 'NB'
+	| 'NL'
+	| 'NT'
+	| 'NS'
+	| 'NU'
+	| 'ON'
+	| 'PE'
+	| 'QC'
+	| 'SK'
+	| 'YT';
 
-export type CaState = z.infer<typeof caStateSchema>;
 export const caStates: Record<CaState, string> = {
 	AB: 'Alberta',
 	BC: 'British Columbia',

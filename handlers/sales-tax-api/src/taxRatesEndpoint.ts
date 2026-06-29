@@ -5,7 +5,6 @@ import type {
 } from '@modules/internationalisation/country';
 import {
 	caStates,
-	caStateSchema,
 	getCountryNameByIsoCode,
 } from '@modules/internationalisation/country';
 import { logger } from '@modules/logger/logger';
@@ -24,7 +23,11 @@ import { type ZuoraTaxCode } from '@modules/zuora/types/objects/tax';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import type { TaxRatesResponse } from './schemas';
-import { type TaxRatesRequest, taxRatesResponseSchema } from './schemas';
+import {
+	caStateSchema,
+	type TaxRatesRequest,
+	taxRatesResponseSchema,
+} from './schemas';
 
 type TaxCodeName = 'Supporter Plus Global Tax' | 'Digital Pack Global Tax';
 const taxExclusiveProductCodeNames: Partial<Record<ProductKey, TaxCodeName>> = {
