@@ -58,20 +58,23 @@ export const usStates: Record<string, string> = {
 	WY: 'Wyoming',
 };
 
-export type CaState =
-	| 'AB'
-	| 'BC'
-	| 'MB'
-	| 'NB'
-	| 'NL'
-	| 'NT'
-	| 'NS'
-	| 'NU'
-	| 'ON'
-	| 'PE'
-	| 'QC'
-	| 'SK'
-	| 'YT';
+export const caStateCodes = [
+	'AB',
+	'BC',
+	'MB',
+	'NB',
+	'NL',
+	'NT',
+	'NS',
+	'NU',
+	'ON',
+	'PE',
+	'QC',
+	'SK',
+	'YT',
+] as const;
+
+export type CaState = (typeof caStateCodes)[number];
 
 export const caStates: Record<CaState, string> = {
 	AB: 'Alberta',
@@ -87,7 +90,7 @@ export const caStates: Record<CaState, string> = {
 	QC: 'Quebec',
 	SK: 'Saskatchewan',
 	YT: 'Yukon',
-};
+} as const;
 
 export const auStates: Record<string, string> = {
 	ACT: 'Australian Capital Territory',
