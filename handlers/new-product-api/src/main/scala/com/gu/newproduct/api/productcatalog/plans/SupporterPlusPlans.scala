@@ -1,6 +1,11 @@
 package com.gu.newproduct.api.productcatalog.plans
 
-import com.gu.newproduct.api.productcatalog.PlanId.{AnnualSupporterPlus, MonthlySupporterPlus}
+import com.gu.newproduct.api.productcatalog.PlanId.{
+  AnnualSupporterPlus,
+  AnnualSupporterPlusTaxExclusive,
+  MonthlySupporterPlus,
+  MonthlySupporterPlusTaxExclusive,
+}
 import com.gu.newproduct.api.productcatalog._
 
 import java.time.LocalDate
@@ -17,6 +22,8 @@ class SupporterPlusPlans(today: LocalDate) {
   val planInfo: List[(PlanId, PlanDescription, StartDateRules, BillingPeriod)] = List(
     (MonthlySupporterPlus, PlanDescription("Monthly"), rule, Monthly),
     (AnnualSupporterPlus, PlanDescription("Annual"), rule, Annual),
+    (MonthlySupporterPlusTaxExclusive, PlanDescription("Monthly (Tax Exclusive)"), rule, Monthly),
+    (AnnualSupporterPlusTaxExclusive, PlanDescription("Annual (Tax Exclusive)"), rule, Annual),
   )
 
 }
