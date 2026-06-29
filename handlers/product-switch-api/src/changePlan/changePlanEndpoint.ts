@@ -19,8 +19,9 @@ import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import type dayjs from 'dayjs';
 import { removePendingUpdateAmendments } from './action/amendments';
+import { GetNextPayment } from './action/getNextPayment';
 import { DoPreviewAction } from './action/preview';
-import { buildGetNextPayment, DoSwitchAction } from './action/switch';
+import { DoSwitchAction } from './action/switch';
 import { SwitchOrderRequestBuilder } from './prepare/buildSwitchOrderRequest';
 import { isEligibleForSwitch } from './prepare/isEligibleForSwitch';
 import { getSwitchInformation } from './prepare/switchInformation';
@@ -42,7 +43,7 @@ export class ChangePlanEndpoint {
 			zuoraClient,
 			stage,
 			today,
-			buildGetNextPayment(zuoraClient),
+			new GetNextPayment(zuoraClient),
 		);
 		this.doPreviewAction = new DoPreviewAction(zuoraClient, stage, today);
 	}

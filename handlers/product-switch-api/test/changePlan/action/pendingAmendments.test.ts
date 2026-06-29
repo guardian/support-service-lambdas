@@ -13,6 +13,7 @@ import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
+import type { GetNextPayment } from '../../../src/changePlan/action/getNextPayment';
 import { DoPreviewAction } from '../../../src/changePlan/action/preview';
 import { DoSwitchAction } from '../../../src/changePlan/action/switch';
 import { getAccountInformation } from '../../../src/changePlan/prepare/accountInformation';
@@ -207,7 +208,10 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 			mockZuoraClient as unknown as ZuoraClient,
 			'CODE',
 			dayjs('2025-09-16'),
-			() => Promise.resolve({ date: new Date(2026, 6, 29), total: 123 }),
+			{
+				execute: () =>
+					Promise.resolve({ date: new Date(2026, 6, 29), total: 123 }),
+			} as unknown as GetNextPayment,
 		).switch(
 			{ caseId: 'asdfCaseId', csrUserId: 'asdfCsrUserId' },
 			{
