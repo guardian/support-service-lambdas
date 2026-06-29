@@ -6,6 +6,8 @@ import type {
 	SwitchActionData,
 	TargetInformation,
 } from '../prepare/targetInformation';
+import type { Discount } from './discounts';
+import { monthlyDigiPlus } from './discounts';
 
 export const digitalSubscriptionTargetInformation: SwitchTargetInformation<
 	'DigitalSubscription',
@@ -26,6 +28,13 @@ export const digitalSubscriptionTargetInformation: SwitchTargetInformation<
 		if (switchActionData.mode === 'switchWithPriceOverride') {
 			throw new ValidationError("digital plus doesn't have a variable amount");
 		}
+		let discount: Discount | undefined = undefined;
+		if (
+			switchActionData.discountEnabled &&
+			productRatePlan.billingPeriod === 'Month'
+		) {
+			discount = monthlyDigiPlus;
+		}
 
 		const catalogPrice = productRatePlan.pricing[switchActionData.currency];
 		if (switchActionData.includesContribution) {
@@ -42,7 +51,7 @@ export const digitalSubscriptionTargetInformation: SwitchTargetInformation<
 			ratePlanName,
 			contributionCharge: undefined,
 			subscriptionChargeId: productRatePlan.charges.Subscription.id,
-			discount: undefined,
+			discount,
 			dataExtensionName: DataExtensionNames.supporterPlusToDigitalPlusSwitch,
 		} satisfies TargetInformation);
 	},

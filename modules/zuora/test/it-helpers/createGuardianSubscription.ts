@@ -1,11 +1,19 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
+import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
+import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
 import { zuoraSubscribeResponseSchema } from '@modules/zuora/types';
 import type { ZuoraSubscribeResponse } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import code from '../../../zuora-catalog/test/fixtures/catalog-code.json';
 import { contributionSubscribeBody } from '../fixtures/request-bodies/contribution-subscribe-body';
 import { digiSubSubscribeBody } from '../fixtures/request-bodies/digitalSub-subscribe-body-old-price';
 import { supporterPlusSubscribeBody } from '../fixtures/request-bodies/supporterplus-subscribe-body-tier2';
+
+const productCatalog: ProductCatalog = generateProductCatalog(
+	zuoraCatalogSchema.parse(code),
+);
 
 export const createDigitalSubscription = async (
 	zuoraClient: ZuoraClient,
@@ -13,7 +21,7 @@ export const createDigitalSubscription = async (
 ): Promise<string> => {
 	const subscribeResponse = await subscribe(
 		zuoraClient,
-		digiSubSubscribeBody(dayjs(), createWithOldPrice),
+		digiSubSubscribeBody(dayjs(), createWithOldPrice, productCatalog),
 	);
 	return getIfDefined(
 		subscribeResponse[0]?.SubscriptionNumber,
@@ -26,7 +34,7 @@ export const createSupporterPlusSubscription = async (
 ): Promise<string> => {
 	const subscribeResponse = await subscribe(
 		zuoraClient,
-		supporterPlusSubscribeBody(dayjs()),
+		supporterPlusSubscribeBody(dayjs(), productCatalog),
 	);
 
 	return getIfDefined(
@@ -55,7 +63,7 @@ export const createContribution = async (
 ): Promise<string> => {
 	const subscribeResponse = await subscribe(
 		zuoraClient,
-		contributionSubscribeBody(startDate, additionOptions),
+		contributionSubscribeBody(startDate, productCatalog, additionOptions),
 	);
 	return getIfDefined(
 		subscribeResponse[0]?.SubscriptionNumber,
@@ -72,7 +80,6 @@ async function subscribe(
 				InvoiceTemplateId: string;
 				AutoPay: boolean;
 				PaymentTerm: string;
-				CreatedRequestId__c: string;
 				Name: string;
 				sfContactId__c: string;
 				Batch: string;
@@ -97,7 +104,6 @@ async function subscribe(
 					InitialTerm: number;
 					ReaderType__c: string;
 					TermType: string;
-					CreatedRequestId__c: string;
 					InitialTermPeriodType: string;
 				};
 			};

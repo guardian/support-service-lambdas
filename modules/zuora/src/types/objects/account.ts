@@ -21,6 +21,7 @@ export const billToContactSchema = z.object({
 	firstName: z.string(),
 	lastName: z.string(),
 	workEmail: z.string(),
+	zipCode: z.string().nullable(),
 });
 
 const validPaymentGateways = [

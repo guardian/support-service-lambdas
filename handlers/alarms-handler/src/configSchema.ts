@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 export const WebhookUrlsSchema = z.object({
-	VALUE: z.string(),
-	GROWTH: z.string(),
+	LIFECYCLE: z.string(),
+	MARTECH: z.string(),
 	SRE: z.string(),
 	PORTFOLIO: z.string(),
 	PLATFORM: z.string(),

@@ -2,13 +2,14 @@
   "name": "stripe-disputes",
   "scripts": {
     "test": "jest --group=-integration",
-    "it-test": "jest --group=integration",
+    "it-test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --group=integration",
     "type-check": "tsc --noEmit",
     "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
-    "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/producer.ts src/consumer.ts --sourcemap --source-root=/support-service-lambdas/handlers/stripe-disputes/target/",
-    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr stripe-disputes.zip ./*.js.map ./*.js",
+    "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/producer.ts src/consumer.ts --sourcemap --source-root=/support-service-lambdas/handlers/stripe-disputes/target/",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm packageQuick",
+    "packageQuick": "pnpm build && cd target && zip -qr stripe-disputes.zip ./*.js.map ./*.js",
     "cdk:test": "pnpm --filter cdk test stripe-disputes",
     "cdk:test-update": "pnpm --filter cdk test-update stripe-disputes",
     "update-lambda": "../../update-lambda.sh \"stripe-disputes\" stripe-disputes-producer- stripe-disputes-consumer-",
@@ -20,7 +21,12 @@
     "aws-sdk": "^2.1692.0",
     "dayjs": "^1.11.13",
     "stripe": "^18.5.0",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "email": "workspace:*",
+    "routing": "workspace:*",
+    "salesforce": "workspace:*",
+    "secrets-manager": "workspace:*",
+    "zuora": "workspace:*"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147",

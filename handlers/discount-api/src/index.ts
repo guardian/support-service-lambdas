@@ -1,5 +1,6 @@
 import { sendEmail } from '@modules/email/email';
-import { logger } from '@modules/routing/logger';
+import { logger } from '@modules/logger/logger';
+import { ok } from '@modules/routing/apiGatewayResponses';
 import { Router } from '@modules/routing/router';
 import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
 import { withBodyParser } from '@modules/routing/withParsers';
@@ -18,15 +19,10 @@ import {
 } from './discountEndpoint';
 import type { ApplyDiscountRequestBody } from './requestSchema';
 import { applyDiscountSchema } from './requestSchema';
-import type {
-	ApplyDiscountResponseBody,
-	EligibilityCheckResponseBody,
-} from './responseSchema';
 import {
 	applyDiscountResponseSchema,
 	previewDiscountResponseSchema,
 } from './responseSchema';
-import { stringify } from './stringify';
 
 const stage = stageFromEnvironment();
 
@@ -74,13 +70,7 @@ export function applyDiscountHandler(stage: Stage) {
 			dayjs(),
 		);
 		await sendEmail(stage, emailPayload);
-		return {
-			body: stringify<ApplyDiscountResponseBody>(
-				response,
-				applyDiscountResponseSchema,
-			),
-			statusCode: 200,
-		};
+		return ok(response, applyDiscountResponseSchema);
 	};
 }
 
@@ -99,12 +89,6 @@ export function previewDiscountHandler(stage: Stage) {
 			account,
 			dayjs(),
 		);
-		return {
-			body: stringify<EligibilityCheckResponseBody>(
-				result,
-				previewDiscountResponseSchema,
-			),
-			statusCode: 200,
-		};
+		return ok(result, previewDiscountResponseSchema);
 	};
 }

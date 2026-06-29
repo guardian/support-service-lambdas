@@ -20,6 +20,7 @@ export async function getSwitchInformation(
 	input: ProductSwitchTargetBody,
 	account: ZuoraAccount,
 	subscription: GuardianSubscription,
+	discountEnabled: boolean,
 ): Promise<SwitchInformation> {
 	const accountInformation = getAccountInformation(account);
 
@@ -33,6 +34,7 @@ export async function getSwitchInformation(
 		subscriptionInformation.previousAmount,
 		subscriptionInformation.includesContribution,
 		productCatalogHelper,
+		discountEnabled || input.discountSwitchEnabled,
 	);
 
 	return {

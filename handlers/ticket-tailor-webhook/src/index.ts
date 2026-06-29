@@ -1,5 +1,5 @@
 import { putMetric } from '@modules/aws/cloudwatch';
-import { logger } from '@modules/routing/logger';
+import { logger } from '@modules/logger/logger';
 import type { Stage } from '@modules/stage';
 import { stageFromEnvironment } from '@modules/stage';
 import type { SQSEvent, SQSRecord } from 'aws-lambda';

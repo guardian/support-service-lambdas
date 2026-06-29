@@ -11,5 +11,13 @@ const <%= h.changeCase.camel(lambdaName) %>: HandlerDefinition = {
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
-	},
+	<% if (includeOpenApiDoc === 'Y'){ %>
+		...devDeps['@redocly/cli'],
+    },
+    moduleDependencies: [moduleLogger, moduleRouting],
+    extraScripts: {
+        ...openApiScripts,
+        package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr <%= lambdaName %>.zip ./*.js.map ./*.js`,
+    <% } %>
+    },
 };

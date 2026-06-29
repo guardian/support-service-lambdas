@@ -1,10 +1,11 @@
+import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { Dayjs } from 'dayjs';
 import { zuoraDateFormat } from '@modules/zuora/utils';
-import { catalog } from '../../../../../handlers/discount-api/src/productToDiscountMapping';
 
 export const digiSubSubscribeBody = (
 	subscriptionDate: Dayjs,
 	createWithOldPrice: boolean,
+	productCatalog: ProductCatalog,
 ) => {
 	const chargeOverride = createWithOldPrice
 		? {
@@ -28,7 +29,6 @@ export const digiSubSubscribeBody = (
 					CrmId: '0019E00002QSysUQAT',
 					IdentityId__c: '200175946',
 					PaymentGateway: 'GoCardless',
-					CreatedRequestId__c: '17d9e675-4198-c0b0-0000-00000001280e',
 					BillCycleDay: 0,
 					AutoPay: true,
 					PaymentTerm: 'Due Upon Receipt',
@@ -58,7 +58,8 @@ export const digiSubSubscribeBody = (
 					RatePlanData: [
 						{
 							RatePlan: {
-								ProductRatePlanId: catalog.CODE.digiSub.Month,
+								ProductRatePlanId:
+									productCatalog.DigitalSubscription.ratePlans.Monthly.id,
 							},
 							...chargeOverride,
 							SubscriptionProductFeatureList: [],
@@ -76,7 +77,6 @@ export const digiSubSubscribeBody = (
 						RenewalTerm: 12,
 						TermType: 'TERMED',
 						ReaderType__c: 'Direct',
-						CreatedRequestId__c: '17d9e675-4198-c0b0-0000-00000001280e',
 					},
 				},
 				SubscribeOptions: { GenerateInvoice: true, ProcessPayments: true },

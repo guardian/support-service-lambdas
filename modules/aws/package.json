@@ -2,7 +2,7 @@
   "name": "aws",
   "scripts": {
     "test": "jest --group=-integration",
-    "it-test": "jest --group=integration",
+    "it-test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --group=integration",
     "type-check": "tsc --noEmit",
     "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
     "check-formatting": "prettier --check \"**/*.ts\"",
@@ -19,6 +19,7 @@
     "@aws-sdk/client-ssm": "^3.940.0",
     "@aws-sdk/credential-provider-node": "^3.940.0",
     "@aws-sdk/lib-storage": "^3.940.0",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "logger": "workspace:*"
   }
 }

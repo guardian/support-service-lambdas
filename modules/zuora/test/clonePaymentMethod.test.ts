@@ -54,6 +54,7 @@ describe('clonePaymentMethod', () => {
 			});
 
 			expect(result).toEqual({
+				type: 'ExistingPaymentMethod',
 				hpmCreditCardPaymentMethodId: 'pm-existing-id',
 			});
 			expect(mockGet).not.toHaveBeenCalled();
@@ -71,11 +72,9 @@ describe('clonePaymentMethod', () => {
 			});
 
 			expect(result).toEqual({
-				paymentMethod: {
-					type: 'CreditCardReferenceTransaction',
-					tokenId: 'tok_stripe_123',
-					secondTokenId: 'cus_stripe_456',
-				},
+				type: 'CreditCardReferenceTransaction',
+				tokenId: 'tok_stripe_123',
+				secondTokenId: 'cus_stripe_456',
 			});
 		});
 
@@ -91,7 +90,10 @@ describe('clonePaymentMethod', () => {
 				requiresCloning: true,
 			});
 
-			expect(result).toEqual({ hpmCreditCardPaymentMethodId: 'new-pm-id' });
+			expect(result).toEqual({
+				type: 'ExistingPaymentMethod',
+				hpmCreditCardPaymentMethodId: 'new-pm-id',
+			});
 			const [path, body] = mockPost.mock.calls[0] as [string, string];
 			expect(path).toBe('/v1/object/payment-method');
 			const pm = JSON.parse(body) as Record<string, unknown>;

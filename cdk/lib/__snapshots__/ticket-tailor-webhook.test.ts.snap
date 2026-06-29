@@ -314,6 +314,9 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
       "DependsOn": [
         "RestApiPOSTEF2EB351",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "Automatically created by the RestApi construct",
         "RestApiId": {
@@ -1366,6 +1369,9 @@ DLQ: https://",
       "DependsOn": [
         "RestApiPOSTEF2EB351",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "Automatically created by the RestApi construct",
         "RestApiId": {

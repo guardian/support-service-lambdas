@@ -83,11 +83,38 @@ export class AllowZuoraOAuthSecretsPolicy extends AllowGetSecretValuePolicy {
 export class AllowSupporterProductDataQueryPolicy extends GuAllowPolicy {
 	constructor(scope: GuStack) {
 		super(scope, 'SupporterProductDataTable query access', {
-			actions: ['dynamodb:Query'],
+			actions: ['dynamodb:Query', 'dynamodb:GetItem'],
 			resources: [
 				Fn.importValue(
 					`supporter-product-data-tables-${scope.stage}-SupporterProductDataTable`,
 				),
+			],
+		});
+	}
+}
+
+export class AllowSecondaryUserTableQueryPolicy extends GuAllowPolicy {
+	constructor(scope: GuStack) {
+		super(scope, 'MultipleAccountSecondaryUserTable query access', {
+			actions: ['dynamodb:Query'],
+			resources: [
+				`arn:aws:dynamodb:${scope.region}:${scope.account}:table/multiple-account-secondary-user-${scope.stage}`,
+			],
+		});
+	}
+}
+
+export class AllowPromoCodeTableQueryPolicy extends GuAllowPolicy {
+	constructor(scope: GuStack) {
+		super(scope, 'Promo code table query access', {
+			actions: [
+				'dynamodb:GetItem',
+				'dynamodb:Scan',
+				'dynamodb:Query',
+				'dynamodb:DescribeTable',
+			],
+			resources: [
+				`arn:aws:dynamodb:*:*:table/support-admin-console-promos-${scope.stage}`,
 			],
 		});
 	}

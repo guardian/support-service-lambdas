@@ -37,6 +37,11 @@ and receive a 200 response with the body 'Hello World'.
 
 You can then go ahead and write your lambda in `my-new-lambda\index.ts`
 
+### Next steps
+- set up CD to PROD as per the "Important" section at the top.
+- go to the alarms handler and make sure the alarms are assigned to your team by editing https://github.com/guardian/support-service-lambdas/blob/main/handlers/alarms-handler/src/alarmMappings.ts
+
+
 
 ## Scala lambdas
 ### Api Gateway with a custom domain name

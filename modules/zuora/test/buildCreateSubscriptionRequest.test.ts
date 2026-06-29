@@ -76,6 +76,9 @@ const baseStripeInput = {
 		workEmail: 'test@test.com',
 		country: 'GB',
 	},
+	acquisitionCase: 'case_123',
+	acquisitionSource: 'source_123',
+	createdByCSR: 'Jenny Wren',
 };
 
 const supporterPlusInput: CreateSubscriptionInputFields<CreditCardReferenceTransaction> =

@@ -2,13 +2,14 @@
   "name": "salesforce-disaster-recovery",
   "scripts": {
     "test": "jest --group=-integration",
-    "it-test": "jest --group=integration",
+    "it-test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --group=integration",
     "type-check": "tsc --noEmit",
     "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
-    "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/handlers/*.ts --sourcemap --source-root=/support-service-lambdas/handlers/salesforce-disaster-recovery/target/",
-    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr salesforce-disaster-recovery.zip ./*.js.map ./*.js",
+    "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/handlers/*.ts --sourcemap --source-root=/support-service-lambdas/handlers/salesforce-disaster-recovery/target/",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm packageQuick",
+    "packageQuick": "pnpm build && cd target && zip -qr salesforce-disaster-recovery.zip ./*.js.map ./*.js",
     "cdk:test": "pnpm --filter cdk test salesforce-disaster-recovery",
     "cdk:test-update": "pnpm --filter cdk test-update salesforce-disaster-recovery",
     "update-lambda": "../../update-lambda.sh \"salesforce-disaster-recovery\" save-failed-rows-to-s3- save-salesforce-query-result-to-s3- update-zuora-accounts-",
@@ -19,7 +20,8 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.940.0",
     "@aws-sdk/client-secrets-manager": "^3.940.0",
-    "csv-parse": "^5.6.0"
+    "csv-parse": "^5.6.0",
+    "zuora": "workspace:*"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147",

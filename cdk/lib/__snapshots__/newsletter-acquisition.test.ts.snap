@@ -333,9 +333,6 @@ exports[`The NewsletterAcquisition stack matches the snapshot 1`] = `
                     "Arn",
                   ],
                 },
-                {
-                  "Ref": "AWS::NoValue",
-                },
               ],
             },
           ],
@@ -811,9 +808,6 @@ exports[`The NewsletterAcquisition stack matches the snapshot 2`] = `
                     "AcquisitionsTableB9BB02F9",
                     "Arn",
                   ],
-                },
-                {
-                  "Ref": "AWS::NoValue",
                 },
               ],
             },

@@ -1,6 +1,7 @@
-import { getCallerInfo } from '@modules/routing/getCallerInfo';
-import { logger } from '@modules/routing/logger';
-import type z from 'zod';
+import { groupMap } from '@modules/arrayFunctions';
+import { getCallerInfo } from '@modules/logger/getCallerInfo';
+import { logger } from '@modules/logger/logger';
+import type { z, ZodType } from 'zod';
 import type { BearerTokenProvider } from '@modules/zuora/auth';
 
 export class RestClientError extends Error implements RestResult {
@@ -26,19 +27,27 @@ export type RestResult = {
 export abstract class RestClient {
 	public constructor(readonly tokenProvider: BearerTokenProvider) {}
 
-	public async get<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
+	public async get<S extends ZodType>(
 		path: string,
-		schema: T,
-	): Promise<O> {
-		return await this.fetchWithLogging(getCallerInfo(1))(path, 'GET', schema);
+		schema: S,
+		urlSearchParams?: URLSearchParams,
+	): Promise<z.infer<S>> {
+		return await this.fetchWithLogging(getCallerInfo(1))(
+			path,
+			'GET',
+			schema,
+			undefined,
+			undefined,
+			urlSearchParams,
+		);
 	}
 
-	public async post<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
+	public async post<S extends ZodType>(
 		path: string,
 		body: string,
-		schema: T,
+		schema: S,
 		headers?: Record<string, string>,
-	): Promise<O> {
+	): Promise<z.infer<S>> {
 		return await this.fetchWithLogging(getCallerInfo(1))(
 			path,
 			'POST',
@@ -48,12 +57,12 @@ export abstract class RestClient {
 		);
 	}
 
-	public async put<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
+	public async put<S extends ZodType>(
 		path: string,
 		body: string,
-		schema: T,
+		schema: S,
 		headers?: Record<string, string>,
-	): Promise<O> {
+	): Promise<z.infer<S>> {
 		return await this.fetchWithLogging(getCallerInfo(1))(
 			path,
 			'PUT',
@@ -63,12 +72,12 @@ export abstract class RestClient {
 		);
 	}
 
-	public async patch<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
+	public async patch<S extends ZodType>(
 		path: string,
 		body: string,
-		schema: T,
+		schema: S,
 		headers?: Record<string, string>,
-	): Promise<O> {
+	): Promise<z.infer<S>> {
 		return await this.fetchWithLogging(getCallerInfo(1))(
 			path,
 			'PATCH',
@@ -78,10 +87,10 @@ export abstract class RestClient {
 		);
 	}
 
-	public async delete<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
+	public async delete<S extends ZodType>(
 		path: string,
-		schema: T,
-	): Promise<O> {
+		schema: S,
+	): Promise<z.infer<S>> {
 		return await this.fetchWithLogging(getCallerInfo(1))(
 			path,
 			'DELETE',
@@ -95,25 +104,39 @@ export abstract class RestClient {
 			this.fetch.bind(this),
 			() => 'HTTP ' + this.constructor.name,
 			maybeCallerInfo,
-			([path, method, , body, headers]) => ({
+			([path, method, , body, headers, params]) => ({
 				logOnEntryAndExit: `${method} ${path}`,
 				logOnEntryOnly:
-					body !== undefined || headers !== undefined
-						? [{ body, headers }]
+					body !== undefined || headers !== undefined || params !== undefined
+						? [
+								{
+									urlSearchParams:
+										params !== undefined
+											? groupMap(
+													[...params.entries()],
+													([key]) => key,
+													([, value]) => value,
+												)
+											: undefined,
+									body,
+									headers,
+								},
+							]
 						: undefined,
 			}),
 		);
 
-	protected async fetch<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
+	protected async fetch<S extends ZodType>(
 		path: string,
 		method: string,
-		schema: T,
+		schema: S,
 		body?: string,
 		headers?: Record<string, string>,
-	): Promise<O> {
+		params?: URLSearchParams,
+	): Promise<z.infer<S>> {
 		const authorisation = await this.tokenProvider.getAuthorisation();
 		const pathWithoutLeadingSlash = path.replace(/^\//, '');
-		const url = `${authorisation.baseUrl}/${pathWithoutLeadingSlash}`;
+		const url = `${authorisation.baseUrl}/${pathWithoutLeadingSlash}${params === undefined ? '' : '?' + params.toString()}`;
 		const response = await fetch(url, {
 			method,
 			headers: {

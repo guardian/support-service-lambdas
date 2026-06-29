@@ -1,10 +1,12 @@
-import { logger } from '@modules/routing/logger';
+import { logger } from '@modules/logger/logger';
 import type { SQSEvent } from 'aws-lambda';
 import { getEnv } from '../../../modules/routing/src/lambdaHandler';
 import type { Services } from '../src';
-import { GoogleChatSendMessage } from '../src';
-import { GoogleChatClient } from '../src';
-import { handlerWithStage } from '../src';
+import {
+	GoogleChatClient,
+	GoogleChatSendMessage,
+	handlerWithStage,
+} from '../src';
 
 // to run this, get credentials for membership
 // and set TEST_WEBHOOK to your chat link
@@ -38,8 +40,8 @@ const services: Services = {
 			DiagnosticLinks: 'lambda:product-switch-api-CODE',
 		}),
 	webhookUrls: {
-		VALUE: testWebhook,
-		GROWTH: testWebhook,
+		LIFECYCLE: testWebhook,
+		MARTECH: testWebhook,
 		SRE: testWebhook,
 		PORTFOLIO: testWebhook,
 		PLATFORM: testWebhook,
