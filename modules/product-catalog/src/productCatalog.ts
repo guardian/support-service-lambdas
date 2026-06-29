@@ -128,8 +128,9 @@ export type ProductRatePlanChargeKey<
 	PRP extends ProductRatePlanKey<P>,
 > = {
 	[PK in P]: {
-		[K in ProductRatePlanKey<PK> &
-			PRP]: ProductCatalog[PK]['ratePlans'][K] extends { charges: infer C }
+		[
+			K in ProductRatePlanKey<PK> & PRP
+		]: ProductCatalog[PK]['ratePlans'][K] extends { charges: infer C }
 			? keyof C & string
 			: never;
 	}[ProductRatePlanKey<PK> & PRP];
