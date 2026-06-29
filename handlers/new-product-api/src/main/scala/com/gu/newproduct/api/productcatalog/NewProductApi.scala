@@ -10,7 +10,7 @@ object NewProductApi {
 
   private def paymentPlansFor(
       billingPeriod: BillingPeriod,
-      pricesByCurrency: Map[Currency, AmountMinorUnits],
+      planPrices: PlanPrices,
   ): Map[Currency, PaymentPlan] = {
 
     val billingPeriodDescription = billingPeriod match {
@@ -19,19 +19,20 @@ object NewProductApi {
       case Annual => "every 12 months"
       case SixWeeks => "for the first six weeks"
     }
-    pricesByCurrency.map { case (currency, amount) =>
+    planPrices.priceMinorUnits.map { case (currency, amount) =>
       currency ->
         PaymentPlan(
           currency = currency,
           amountMinorUnits = amount,
           billingPeriod = billingPeriod,
           description = s"${currency.iso} ${amount.formatted} $billingPeriodDescription",
+          taxMode = planPrices.taxMode,
         )
     }
   }
 
   def catalog(
-      pricingFor: PlanId => Map[Currency, AmountMinorUnits],
+      pricingFor: PlanId => PlanPrices,
       getStartDateFromFulfilmentFiles: (ProductType, List[DayOfWeek]) => LocalDate,
       today: LocalDate,
   ): Map[PlanId, Plan] = {

@@ -38,7 +38,7 @@ object Handler extends Logging {
         "get prices from zuora catalog",
       )
       .withLogging("plansWithPrice")
-    getPricesForPlan = (planId: PlanId) => plansWithPrice.getOrElse(planId, Map.empty)
+    getPricesForPlan = (planId: PlanId) => plansWithPrice.getOrElse(planId, PlanPrices(Map.empty, None))
     startDateFromProductType <- StartDateFromFulfilmentFiles(stage, fetchString, today).toApiGatewayOpOr422.withLogging(
       "startDateFromProductType",
     )
