@@ -48,6 +48,7 @@ export class DoSwitchAction {
 		const nextPayment = await this.getNextPayment.execute(
 			this.today.add(13, 'months'),
 			switchInformation.subscription.subscriptionNumber,
+			switchInformation.subscription.accountNumber,
 		);
 
 		await Promise.allSettled([

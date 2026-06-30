@@ -13,11 +13,12 @@ export class GetNextPayment {
 	execute = async (
 		targetDate: dayjs.Dayjs,
 		subscriptionNumber: string,
+		accountNumber: string,
 	): Promise<{ date: Date; total: number } | undefined> => {
 		const billingPreview = await getBillingPreview(
 			this.zuoraClient,
 			targetDate,
-			subscriptionNumber,
+			accountNumber,
 		);
 		return getOrderedInvoiceTotals(
 			toSimpleInvoiceItems(
