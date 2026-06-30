@@ -1,4 +1,5 @@
 import { isInList } from '@modules/arrayFunctions';
+import z from 'zod';
 
 export const CurrencyValues = [
 	'GBP',
@@ -54,3 +55,5 @@ export const isSupportedCurrency = isInList(CurrencyValues);
 
 export const getCurrencyInfo = (currency: IsoCurrency): CurrencyInfo =>
 	currencies[currency];
+
+export const isoCurrencySchema = z.enum(CurrencyValues);
