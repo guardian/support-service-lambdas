@@ -1,6 +1,11 @@
 package com.gu.newproduct.api.productcatalog.plans
 
-import com.gu.newproduct.api.productcatalog.PlanId.{DigipackAnnual, DigipackMonthly}
+import com.gu.newproduct.api.productcatalog.PlanId.{
+  DigipackAnnual,
+  DigipackAnnualTaxExclusive,
+  DigipackMonthly,
+  DigipackMonthlyTaxExclusive,
+}
 import com.gu.newproduct.api.productcatalog._
 
 import java.time.LocalDate
@@ -19,6 +24,8 @@ class DigitalPackPlans(today: LocalDate) {
   val planInfo: List[(PlanId, PlanDescription, StartDateRules, BillingPeriod)] = List(
     (DigipackAnnual, PlanDescription("Annual"), startRules, Annual),
     (DigipackMonthly, PlanDescription("Monthly"), startRules, Monthly),
+    (DigipackAnnualTaxExclusive, PlanDescription("Annual (Tax Exclusive)"), startRules, Annual),
+    (DigipackMonthlyTaxExclusive, PlanDescription("Monthly (Tax Exclusive)"), startRules, Monthly),
   )
 
 }

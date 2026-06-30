@@ -1,7 +1,7 @@
 import { groupMap } from '@modules/arrayFunctions';
 import { getCallerInfo } from '@modules/logger/getCallerInfo';
 import { logger } from '@modules/logger/logger';
-import type { z, ZodType, ZodTypeDef } from 'zod';
+import type { z, ZodType } from 'zod';
 import type { BearerTokenProvider } from '@modules/zuora/auth';
 
 export class RestClientError extends Error implements RestResult {
@@ -27,7 +27,7 @@ export type RestResult = {
 export abstract class RestClient {
 	public constructor(readonly tokenProvider: BearerTokenProvider) {}
 
-	public async get<S extends ZodType<unknown, ZodTypeDef, unknown>>(
+	public async get<S extends ZodType>(
 		path: string,
 		schema: S,
 		urlSearchParams?: URLSearchParams,
@@ -42,7 +42,7 @@ export abstract class RestClient {
 		);
 	}
 
-	public async post<S extends ZodType<unknown, ZodTypeDef, unknown>>(
+	public async post<S extends ZodType>(
 		path: string,
 		body: string,
 		schema: S,
@@ -57,7 +57,7 @@ export abstract class RestClient {
 		);
 	}
 
-	public async put<S extends ZodType<unknown, ZodTypeDef, unknown>>(
+	public async put<S extends ZodType>(
 		path: string,
 		body: string,
 		schema: S,
@@ -72,7 +72,7 @@ export abstract class RestClient {
 		);
 	}
 
-	public async patch<S extends ZodType<unknown, ZodTypeDef, unknown>>(
+	public async patch<S extends ZodType>(
 		path: string,
 		body: string,
 		schema: S,
@@ -87,7 +87,7 @@ export abstract class RestClient {
 		);
 	}
 
-	public async delete<S extends ZodType<unknown, ZodTypeDef, unknown>>(
+	public async delete<S extends ZodType>(
 		path: string,
 		schema: S,
 	): Promise<z.infer<S>> {
@@ -126,7 +126,7 @@ export abstract class RestClient {
 			}),
 		);
 
-	protected async fetch<S extends ZodType<unknown, ZodTypeDef, unknown>>(
+	protected async fetch<S extends ZodType>(
 		path: string,
 		method: string,
 		schema: S,

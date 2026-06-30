@@ -51,6 +51,9 @@ const buildDependencies = async (): Promise<ProcessItemDependencies> => {
 				dayjs(secondaryUser.acceptedDate),
 			);
 		},
+		updateSecondaryUserTTL: secondaryUserRepository.updateTTL.bind(
+			secondaryUserRepository,
+		),
 	};
 };
 

@@ -76,6 +76,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
             "Expression": "100*m1/m2",
             "Id": "expr_1",
             "Label": "% of 5XX responses served for user-benefits",
+            "ReturnData": true,
           },
           {
             "Id": "m1",
@@ -343,6 +344,9 @@ exports[`The User benefits stack matches the snapshot 1`] = `
         "RestApibenefits030C9A78",
         "RestApiOPTIONS6AA64D2D",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "Automatically created by the RestApi construct",
         "RestApiId": {
@@ -1882,6 +1886,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
             "Expression": "100*m1/m2",
             "Id": "expr_1",
             "Label": "% of 5XX responses served for user-benefits",
+            "ReturnData": true,
           },
           {
             "Id": "m1",
@@ -2149,6 +2154,9 @@ exports[`The User benefits stack matches the snapshot 2`] = `
         "RestApibenefits030C9A78",
         "RestApiOPTIONS6AA64D2D",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "Automatically created by the RestApi construct",
         "RestApiId": {

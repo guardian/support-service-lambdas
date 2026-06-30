@@ -725,6 +725,9 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
         "RestApidatasubjectrequestsrequestId1EC01CA2",
         "RestApidatasubjectrequests6F9B1B02",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "Automatically created by the RestApi construct",
         "RestApiId": {
@@ -2496,6 +2499,9 @@ DLQ: https://",
         "RestApidatasubjectrequestsrequestId1EC01CA2",
         "RestApidatasubjectrequests6F9B1B02",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "Automatically created by the RestApi construct",
         "RestApiId": {

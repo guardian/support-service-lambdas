@@ -124,6 +124,9 @@ exports[`The sf-emails-to-s3-exporter stack matches the snapshot 1`] = `
         "ApiGatewaybucketNamePOSTA23BA547",
         "ApiGatewaybucketNameB5439D93",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "Automatically created by the RestApi construct",
         "RestApiId": {
@@ -538,6 +541,28 @@ exports[`The sf-emails-to-s3-exporter stack matches the snapshot 1`] = `
         "Description": "Runs SF Emails to S3 Exporter",
         "ScheduleExpression": "cron(00,30 03 * * ? *)",
         "State": "ENABLED",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "sf-emails-to-s3-exporter",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
         "Targets": [
           {
             "Arn": {
@@ -947,6 +972,9 @@ exports[`The sf-emails-to-s3-exporter stack matches the snapshot 2`] = `
         "ApiGatewaybucketNamePOSTA23BA547",
         "ApiGatewaybucketNameB5439D93",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "Automatically created by the RestApi construct",
         "RestApiId": {
@@ -1900,6 +1928,28 @@ exports[`The sf-emails-to-s3-exporter stack matches the snapshot 2`] = `
         "Description": "Runs SF Emails to S3 Exporter",
         "ScheduleExpression": "cron(00,30 03 * * ? *)",
         "State": "ENABLED",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "sf-emails-to-s3-exporter",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
         "Targets": [
           {
             "Arn": {

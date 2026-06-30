@@ -15,7 +15,7 @@ object Dependencies {
   val catsEffectVersion = "2.5.5"
 
   val logging: Seq[ModuleID] = Seq(
-    "ch.qos.logback" % "logback-classic" % "1.5.32",
+    "ch.qos.logback" % "logback-classic" % "1.5.34",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
   )
 
@@ -41,8 +41,8 @@ object Dependencies {
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.3.0"
 
   // GCP
-  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.66.0"
-  val grpcNettyOverride = "io.grpc" % "grpc-netty-shaded" % "1.81.0"
+  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.67.0"
+  val grpcNettyOverride = "io.grpc" % "grpc-netty-shaded" % "1.82.0"
 
   // Cats
   val catsCore = "org.typelevel" %% "cats-core" % catsVersion
@@ -76,7 +76,7 @@ object Dependencies {
   val http4sCore = "org.http4s" %% "http4s-core" % http4sVersion
 
   // Guardian
-  val simpleConfig = "com.gu" %% "simple-configuration-ssm" % "10.0.2"
+  val simpleConfig = "com.gu" %% "simple-configuration-ssm" % "11.0.0"
   val supportInternationalisation =
     "com.gu" %% "support-internationalisation" % "0.16"
 
@@ -92,7 +92,7 @@ object Dependencies {
   val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.2.0"
   val commonsIO = "commons-io" % "commons-io" % "2.22.0"
   val jodaTime = "joda-time" % "joda-time" % "2.14.2"
-  val typesafeConfig = "com.typesafe" % "config" % "1.4.8"
+  val typesafeConfig = "com.typesafe" % "config" % "1.4.9"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest-should" % "0.9.0" % Test
@@ -104,7 +104,7 @@ object Dependencies {
   // CVE-2026-33871: Netty HTTP/2 CONTINUATION frame flood DoS; patched in 4.1.132.Final
   // CVE-2026-33870: Netty HTTP Request Smuggling via Chunked Extension Quoted-String Parsing
   // Affects io.netty:netty-codec-http < 4.1.132.Final, pulled in transitively by async-http-client and aws-sdk netty-nio-client
-  val nettyVersion = "4.2.14.Final"
+  val nettyVersion = "4.2.15.Final"
   val nettyOverrides: Seq[ModuleID] = Seq(
     "io.netty" % "netty-buffer" % nettyVersion,
     "io.netty" % "netty-codec" % nettyVersion,

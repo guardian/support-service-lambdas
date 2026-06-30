@@ -663,6 +663,9 @@ exports[`The zuora-auto-cancel stack matches the snapshot 1`] = `
       "DependsOn": [
         "RestApiPOSTEF2EB351",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "Automatically created by the RestApi construct",
         "RestApiId": {
@@ -1712,6 +1715,9 @@ DLQ: https://",
       "DependsOn": [
         "RestApiPOSTEF2EB351",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "Automatically created by the RestApi construct",
         "RestApiId": {

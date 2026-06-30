@@ -17,11 +17,26 @@ object Quarterly extends BillingPeriod
 object Annual extends BillingPeriod
 object SixWeeks extends BillingPeriod
 
+// Mirrors Zuora's charge-level taxMode. Tax-exclusive plans (e.g. the Canadian sales-tax plans)
+// quote the price net of tax; the others are tax-inclusive.
+sealed trait TaxMode
+object TaxMode {
+  case object TaxExclusive extends TaxMode
+  case object TaxInclusive extends TaxMode
+
+  def fromString(value: String): Option[TaxMode] = value match {
+    case "TaxExclusive" => Some(TaxExclusive)
+    case "TaxInclusive" => Some(TaxInclusive)
+    case _ => None
+  }
+}
+
 case class PaymentPlan(
     currency: Currency,
     amountMinorUnits: AmountMinorUnits,
     billingPeriod: BillingPeriod,
     description: String,
+    taxMode: Option[TaxMode] = None,
 )
 
 case class PlanDescription(value: String) extends AnyVal

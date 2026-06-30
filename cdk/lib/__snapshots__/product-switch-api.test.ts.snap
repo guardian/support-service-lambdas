@@ -692,6 +692,9 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
         "productswitchapilambdaproductswitchapiCODEproxy466471EA",
         "productswitchapilambdaproductswitchapiCODEANY9F9E62A7",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "API Gateway endpoint for the product-switch-api-CODE lambda",
         "RestApiId": {
@@ -1734,6 +1737,9 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
         "productswitchapilambdaproductswitchapiPRODproxy05CF61E1",
         "productswitchapilambdaproductswitchapiPRODANY623BDD80",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "API Gateway endpoint for the product-switch-api-PROD lambda",
         "RestApiId": {
