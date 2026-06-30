@@ -133,6 +133,7 @@ describe('DoSwitchAction', () => {
 		expect(getNextPaymentMock.execute).toHaveBeenCalledWith(
 			expect.anything(),
 			subscriptionInformation.subscriptionNumber,
+			subscriptionInformation.accountNumber,
 		);
 
 		// email contains the values from the billing preview, not any precomputed amount
