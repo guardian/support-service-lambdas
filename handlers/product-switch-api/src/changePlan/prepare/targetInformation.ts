@@ -1,6 +1,6 @@
 import type { DataExtensionName } from '@modules/email/email';
 import type { GuardianRatePlan } from '@modules/guardian-subscription/reprocessRatePlans/guardianRatePlanBuilder';
-import { type IsoCurrency } from '@modules/internationalisation/currency';
+import { type CurrencyCode } from '@modules/internationalisation/currency';
 import type {
 	GuardianCatalogKeys,
 	ProductCatalogHelper,
@@ -37,7 +37,7 @@ export type TargetContribution = {
  */
 export type SwitchActionData = {
 	mode: SwitchMode;
-	currency: IsoCurrency;
+	currency: CurrencyCode;
 	discountEnabled?: boolean; // switch
 } & (
 	| {
@@ -58,7 +58,7 @@ export type SwitchActionData = {
 export const getTargetInformation = (
 	input: ProductSwitchTargetBody,
 	productCatalogKeys: GuardianRatePlan,
-	currency: IsoCurrency,
+	currency: CurrencyCode,
 	previousAmount: number,
 	includesContribution: boolean,
 	productCatalogHelper: ProductCatalogHelper,

@@ -1,6 +1,6 @@
 import { getSingleOrThrow } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
-import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { CurrencyCode } from '@modules/internationalisation/currency';
 import { isSupportedCurrency } from '@modules/internationalisation/currency';
 import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
@@ -143,7 +143,7 @@ export const getSupporterPlusData = (
 
 const validateNewAmount = (
 	newAmount: number,
-	currency: IsoCurrency,
+	currency: CurrencyCode,
 	billingPeriod: ProductBillingPeriod<'SupporterPlus'>,
 ): void => {
 	const amountBand = supporterPlusAmountBands[currency][billingPeriod];

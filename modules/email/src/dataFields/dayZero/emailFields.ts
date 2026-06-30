@@ -1,4 +1,4 @@
-import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { CurrencyCode } from '@modules/internationalisation/currency';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import type {
@@ -38,7 +38,7 @@ export function buildNonDeliveryEmailFields({
 	today: Dayjs;
 	user: EmailUser;
 	subscriptionNumber: string;
-	currency: IsoCurrency;
+	currency: CurrencyCode;
 	billingPeriod: EmailBillingPeriod;
 	paymentMethod: EmailPaymentMethod;
 	paymentSchedule: EmailPaymentSchedule;

@@ -1,4 +1,4 @@
-import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { CurrencyCode } from '@modules/internationalisation/currency';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type {
 	ProductCatalog,
@@ -9,8 +9,8 @@ import { getDiscountRatePlanFromCatalog } from '@modules/promotions/v2/getPromot
 import type { AppliedPromotion, Promo } from '@modules/promotions/v2/schema';
 import type { ValidatedPromotion } from '@modules/promotions/v2/validatePromotion';
 import { validatePromotion } from '@modules/promotions/v2/validatePromotion';
-import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import { z } from 'zod';
 import { getChargeOverride } from '@modules/zuora/createSubscription/chargeOverride';
 import type { ClonedPaymentMethod } from '@modules/zuora/createSubscription/clonePaymentMethod';
@@ -53,7 +53,7 @@ export type CreateSubscriptionInputFields<T extends PaymentMethod> = {
 	salesforceAccountId: string;
 	salesforceContactId: string;
 	identityId: string;
-	currency: IsoCurrency;
+	currency: CurrencyCode;
 	paymentGateway: PaymentGateway<T>;
 	paymentMethod: T | ClonedPaymentMethod;
 	billToContact: Contact;
@@ -119,7 +119,7 @@ export function getReaderType(
 export function buildSubscriptionOrderAction(
 	productCatalog: ProductCatalog,
 	productPurchase: ProductPurchase,
-	currency: IsoCurrency,
+	currency: CurrencyCode,
 	appliedPromotion: AppliedPromotion | undefined,
 	promotion: Promo | undefined,
 ): {

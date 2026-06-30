@@ -1,4 +1,4 @@
-import type { IsoCountry } from '@modules/internationalisation/country';
+import type { CountryCode } from '@modules/internationalisation/country';
 
 export type EmailBillingPeriod = 'Annual' | 'Monthly' | 'Quarterly';
 
@@ -7,7 +7,7 @@ export type PostalAddress = {
 	lineTwo?: string;
 	city?: string;
 	postCode?: string;
-	country: IsoCountry;
+	country: CountryCode;
 };
 
 export type EmailUser = {

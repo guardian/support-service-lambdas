@@ -1,12 +1,10 @@
 import { ValidationError } from '@modules/errors';
-import type {
-	CaState,
-	IsoCountry,
-} from '@modules/internationalisation/country';
 import {
-	caStates,
+	type CountryCode,
 	getCountryNameByIsoCode,
 } from '@modules/internationalisation/country';
+import type { CaStateCode } from '@modules/internationalisation/state';
+import { caStateCodes, caStates } from '@modules/internationalisation/state';
 import { logger } from '@modules/logger/logger';
 import type { ProductKey } from '@modules/product-catalog/productCatalog';
 import { ok } from '@modules/routing/apiGatewayResponses';
@@ -23,11 +21,7 @@ import { type ZuoraTaxCode } from '@modules/zuora/types/objects/tax';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import type { TaxRatesResponse } from './schemas';
-import {
-	caStateSchema,
-	type TaxRatesRequest,
-	taxRatesResponseSchema,
-} from './schemas';
+import { type TaxRatesRequest, taxRatesResponseSchema } from './schemas';
 
 type TaxCodeName = 'Supporter Plus Global Tax' | 'Digital Pack Global Tax';
 const taxExclusiveProductCodeNames: Partial<Record<ProductKey, TaxCodeName>> = {
@@ -126,7 +120,7 @@ function getZuoraTaxPeriod(
 
 function extractZuoraTaxRatesForCountry(
 	zuoraTaxRates: ZuoraTaxRate[],
-	country: IsoCountry,
+	country: CountryCode,
 ): ZuoraTaxRate[] {
 	return zuoraTaxRates.filter(
 		(zuoraTaxRate) => zuoraTaxRate.country === getCountryNameByIsoCode(country),
@@ -136,13 +130,12 @@ function extractZuoraTaxRatesForCountry(
 function createCadStateTaxRates(
 	cadZuoraTaxRates: ZuoraTaxRate[],
 ): TaxRatesResponse {
-	const stateCodes = caStateSchema.options;
-	const missingStateCodes: CaState[] = [];
+	const missingStateCodes: CaStateCode[] = [];
 
-	const taxCodesByState = stateCodes.reduce<Partial<TaxRatesResponse>>(
+	const taxCodesByState = caStateCodes.reduce<Partial<TaxRatesResponse>>(
 		(
 			memo: Partial<TaxRatesResponse>,
-			stateCode: CaState,
+			stateCode: CaStateCode,
 		): Partial<TaxRatesResponse> => {
 			const zuoraTaxRate = cadZuoraTaxRates.find(
 				(zuoraTaxRate) => caStates[stateCode] === zuoraTaxRate.state,

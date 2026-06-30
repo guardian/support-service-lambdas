@@ -1,6 +1,6 @@
 import type { EmailMessageWithUserId } from '@modules/email/email';
 import { sendEmail } from '@modules/email/email';
-import { getCurrencyInfo } from '@modules/internationalisation/currency';
+import { getCurrency } from '@modules/internationalisation/currency';
 import type { Stage } from '@modules/stage';
 import dayjs from 'dayjs';
 import type { PaymentMethodType } from '../prepare/accountInformation';
@@ -36,7 +36,7 @@ export const buildEmailMessage = (
 				SubscriberAttributes: {
 					first_name: firstName,
 					last_name: lastName,
-					currency: getCurrencyInfo(currency).extendedGlyph,
+					currency: getCurrency(currency).extendedGlyph,
 					price: switchInformation.target.actualTotalPrice.toFixed(2),
 					first_payment_amount: firstPaymentAmount.toFixed(2),
 					date_of_first_payment: today.format('DD MMMM YYYY'),

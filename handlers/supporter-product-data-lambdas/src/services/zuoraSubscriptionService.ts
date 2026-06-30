@@ -1,10 +1,10 @@
-import { isoCurrencySchema } from '@modules/internationalisation/schemas';
+import { currencyCodeSchema } from '@modules/internationalisation/schemas';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { z } from 'zod';
 
 const ratePlanChargeSchema = z.object({
 	price: z.number().nullable(),
-	currency: isoCurrencySchema,
+	currency: currencyCodeSchema,
 });
 
 const ratePlanSchema = z.object({

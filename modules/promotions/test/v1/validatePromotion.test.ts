@@ -1,4 +1,3 @@
-import { SupportRegionId } from '@modules/internationalisation/countryGroup';
 import type {
 	AppliedPromotion,
 	Promotion,
@@ -23,12 +22,12 @@ const testPromotion: Promotion = {
 
 const validAppliedPromotion: AppliedPromotion = {
 	promoCode: promoCode,
-	supportRegionId: SupportRegionId.UK,
+	supportRegionId: 'uk',
 };
 
 const invalidAppliedPromotion: AppliedPromotion = {
 	promoCode: promoCode,
-	supportRegionId: SupportRegionId.EU,
+	supportRegionId: 'eu',
 };
 
 describe('validatePromotion', () => {
@@ -73,7 +72,7 @@ describe('validatePromotion', () => {
 	it('throws an error if promotion code does not exist', () => {
 		const unknownAppliedPromotion: AppliedPromotion = {
 			promoCode: 'UNKNOWN',
-			supportRegionId: SupportRegionId.UK,
+			supportRegionId: 'uk',
 		};
 		expect(() =>
 			validatePromotion(

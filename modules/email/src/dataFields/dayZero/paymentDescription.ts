@@ -1,6 +1,6 @@
 import { partition } from '@modules/arrayFunctions';
-import type { IsoCurrency } from '@modules/internationalisation/currency';
-import { getCurrencyInfo } from '@modules/internationalisation/currency';
+import type { CurrencyCode } from '@modules/internationalisation/currency';
+import { getCurrency } from '@modules/internationalisation/currency';
 import { getNonEmptyOrThrow, isNonEmpty } from '@modules/nullAndUndefined';
 import dayjs from 'dayjs';
 import type { EmailBillingPeriod, EmailPaymentSchedule } from './types';
@@ -23,10 +23,10 @@ export function formatPrice(amount: number): string {
 }
 
 export function priceWithCurrency(
-	currency: IsoCurrency,
+	currency: CurrencyCode,
 	amount: number,
 ): string {
-	return `${getCurrencyInfo(currency).glyph}${formatPrice(amount)}`;
+	return `${getCurrency(currency).glyph}${formatPrice(amount)}`;
 }
 
 export function firstPayment(paymentSchedule: EmailPaymentSchedule): Payment {
@@ -78,7 +78,7 @@ function monthsBetween(start: Date, end: Date): number {
 export function describePayments(
 	paymentSchedule: EmailPaymentSchedule,
 	billingPeriod: EmailBillingPeriod,
-	currency: IsoCurrency,
+	currency: CurrencyCode,
 	isFixedTerm: boolean,
 ): string {
 	const initialPrice = firstPayment(paymentSchedule).amount;
@@ -129,7 +129,7 @@ export function describePayments(
 
 function descriptionWithSingleIntroductoryPeriod(
 	paymentsWithDifferentPrice: [Payment, ...Payment[]],
-	currency: IsoCurrency,
+	currency: CurrencyCode,
 	initialPrice: number,
 	billingPeriod: EmailBillingPeriod,
 ) {
@@ -148,7 +148,7 @@ function descriptionWithSingleIntroductoryPeriod(
 function descriptionWithMultipleIntroductoryPeriods(
 	paymentsWithInitialPrice: [Payment, ...Payment[]],
 	paymentsWithDifferentPrice: [Payment, ...Payment[]],
-	currency: IsoCurrency,
+	currency: CurrencyCode,
 	initialPrice: number,
 	billingPeriod: EmailBillingPeriod,
 ) {

@@ -1,8 +1,6 @@
-import type { CaState } from '@modules/internationalisation/country';
-import {
-	caStates,
-	type IsoCountry,
-} from '@modules/internationalisation/country';
+import type { CountryCode } from '@modules/internationalisation/country';
+import type { CaStateCode } from '@modules/internationalisation/state';
+import { caStates } from '@modules/internationalisation/state';
 import type {
 	ZuoraTaxCode,
 	ZuoraTaxPeriod,
@@ -64,7 +62,7 @@ export function canadianZuoraTaxRates(): ZuoraTaxRates {
 }
 
 function canadianZuoraTaxRate(
-	state: CaState,
+	state: CaStateCode,
 	cadTaxRates: TaxRatesResponse,
 ): ZuoraTaxRate {
 	return {
@@ -76,6 +74,6 @@ function canadianZuoraTaxRate(
 	};
 }
 
-export const countryStates: Partial<Record<IsoCountry, TaxRatesResponse>> = {
+export const countryStates: Partial<Record<CountryCode, TaxRatesResponse>> = {
 	CA: canadianCountryStates,
 };

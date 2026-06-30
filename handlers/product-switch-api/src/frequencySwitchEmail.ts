@@ -1,7 +1,7 @@
 import type { EmailMessageWithUserId } from '@modules/email/email';
 import { DataExtensionNames, sendEmail } from '@modules/email/email';
-import type { IsoCurrency } from '@modules/internationalisation/currency';
-import { getCurrencyInfo } from '@modules/internationalisation/currency';
+import type { CurrencyCode } from '@modules/internationalisation/currency';
+import { getCurrency } from '@modules/internationalisation/currency';
 import type { Stage } from '@modules/stage';
 import type { ZuoraAccount, ZuoraSubscription } from '@modules/zuora/types';
 import type dayjs from 'dayjs';
@@ -26,7 +26,7 @@ export const buildFrequencySwitchEmailMessage = (
 	lastName: string,
 	identityId: string,
 	subscriptionNumber: string,
-	currency: IsoCurrency,
+	currency: CurrencyCode,
 	newAnnualPrice: number,
 	nextPaymentDate: dayjs.Dayjs,
 ): EmailMessageWithUserId => {
@@ -38,7 +38,7 @@ export const buildFrequencySwitchEmailMessage = (
 					first_name: firstName,
 					last_name: lastName,
 					first_discounted_payment_date: nextPaymentDate.format('DD MMMM YYYY'),
-					currency: getCurrencyInfo(currency).extendedGlyph,
+					currency: getCurrency(currency).extendedGlyph,
 					new_price: newAnnualPrice.toFixed(2),
 					payment_frequency: 'Annually',
 					subscription_id: subscriptionNumber,
@@ -67,7 +67,7 @@ export const sendFrequencySwitchConfirmationEmail = async (
 	stage: Stage,
 	subscription: ZuoraSubscription,
 	account: ZuoraAccount,
-	currency: IsoCurrency,
+	currency: CurrencyCode,
 	newAnnualPrice: number,
 	effectiveDate: dayjs.Dayjs,
 ): Promise<void> => {

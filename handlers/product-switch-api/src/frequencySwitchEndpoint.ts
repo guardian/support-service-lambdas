@@ -1,6 +1,6 @@
 import { ValidationError } from '@modules/errors';
-import type { IsoCurrency } from '@modules/internationalisation/currency';
-import { isoCurrencySchema } from '@modules/internationalisation/schemas';
+import type { CurrencyCode } from '@modules/internationalisation/currency';
+import { currencyCodeSchema } from '@modules/internationalisation/schemas';
 import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
@@ -228,7 +228,7 @@ export async function selectCandidateSubscriptionCharge(
 interface FrequencySwitchInfo {
 	targetRatePlanId: string;
 	targetPrice: number;
-	currency: IsoCurrency;
+	currency: CurrencyCode;
 	orderActions: OrderAction[];
 }
 
@@ -254,7 +254,7 @@ function prepareFrequencySwitchInfo(
 	const targetRatePlanId = getTargetRatePlanId(productCatalog, currentRatePlan);
 
 	// Frequency switches are Supporter Plus specific, so directly access the Annual rate plan
-	const currency = isoCurrencySchema.parse(currentCharge.currency);
+	const currency = currencyCodeSchema.parse(currentCharge.currency);
 	const targetPrice =
 		productCatalog.SupporterPlus.ratePlans.Annual.pricing[currency];
 

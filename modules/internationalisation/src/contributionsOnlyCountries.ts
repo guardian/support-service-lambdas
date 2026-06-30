@@ -1,6 +1,6 @@
-import type { IsoCountry } from './country';
+import type { CountryCode } from './country';
 
-export const contributionsOnlyCountries: IsoCountry[] = [
+export const contributionsOnlyCountries: CountryCode[] = [
 	'RS',
 	'EG',
 	'PK',

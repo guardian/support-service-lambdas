@@ -1,4 +1,4 @@
-import { type IsoCurrency } from '@modules/internationalisation/currency';
+import { type CurrencyCode } from '@modules/internationalisation/currency';
 import type { ZuoraAccount } from '@modules/zuora/types';
 
 export type PaymentMethodType =
@@ -12,7 +12,7 @@ export type AccountInformation = {
 	emailAddress: string; // email
 	firstName: string; // email
 	lastName: string; // email
-	currency: IsoCurrency; // email
+	currency: CurrencyCode; // email
 	defaultPaymentMethodId: string; // create payment
 	paymentMethodType: PaymentMethodType; // email
 };

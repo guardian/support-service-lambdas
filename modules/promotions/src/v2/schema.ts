@@ -1,6 +1,6 @@
 import {
-	isoCountrySchema,
-	supportRegionSchema,
+	countryCodeSchema,
+	supportRegionIdSchema,
 } from '@modules/internationalisation/schemas';
 import { optionalDropNulls } from '@modules/schemaUtils';
 import { z } from 'zod';
@@ -22,7 +22,7 @@ export type PromoCampaign = z.infer<typeof promoCampaignSchema>;
 
 export const appliesToSchema = z.object({
 	productRatePlanIds: z.array(z.string()),
-	countries: z.array(isoCountrySchema),
+	countries: z.array(countryCodeSchema),
 });
 
 export const discountDetailsSchema = z.object({
@@ -52,6 +52,6 @@ export type Promo = z.infer<typeof promoSchema>;
 
 export const appliedPromotionSchema = z.object({
 	promoCode: z.string(),
-	supportRegionId: supportRegionSchema,
+	supportRegionId: supportRegionIdSchema,
 });
 export type AppliedPromotion = z.infer<typeof appliedPromotionSchema>;

@@ -1,6 +1,6 @@
-import type { IsoCountry } from '@modules/internationalisation/country';
+import type { CountryCode } from '@modules/internationalisation/country';
 
-export const gwCountries: Partial<Record<IsoCountry, string>> = {
+export const gwCountries: Partial<Record<CountryCode, string>> = {
 	GB: 'United Kingdom',
 	US: 'United States',
 	AF: 'Afghanistan',
