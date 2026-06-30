@@ -1,7 +1,7 @@
 import { spawn } from 'child_process';
 import { createWriteStream, type WriteStream } from 'fs';
 import { tmpdir } from 'os';
-import { join } from 'path';
+import { join, relative, resolve, sep } from 'path';
 
 const DEFAULT_FAILURE_TAIL_LINES = 40;
 
@@ -126,6 +126,23 @@ function toExcerpt(
 	return lines.length <= keep
 		? filtered
 		: lines.slice(lines.length - keep).join('\n');
+}
+
+/**
+ * Resolves `inputPath` (relative or absolute) against `root`, validates it is
+ * strictly inside the repository, and returns a repo-relative path.
+ * Returns null if the path escapes the repository (e.g. via `..` or an
+ * absolute path outside `root`).
+ */
+export function resolveRepoPath(
+	root: string,
+	inputPath: string,
+): string | null {
+	const abs = resolve(root, inputPath);
+	if (!abs.startsWith(root + sep)) {
+		return null;
+	}
+	return relative(root, abs);
 }
 
 export async function run(

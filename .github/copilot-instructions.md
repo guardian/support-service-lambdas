@@ -66,12 +66,16 @@ Recommended order (use the first applicable scoped command):
 2. `./agent-tool git-diff-stat` or `./agent-tool git-diff-target-stat <package>`
 3. `./agent-tool fix-formatting --changed` / `./agent-tool lint-fix --changed` / `./agent-tool type-check --changed` (run all three after making changes)
 4. `./agent-tool test --changed` (or `./agent-tool test <packages...> [pattern]`) when tests are needed
-    - The optional pattern is a Jest path filter, e.g. `./agent-tool test handlers/product-switch-api test/changePlan/action/pendingAmendments.test.ts`
-    - Never use `cd` + `pnpm jest` directly; the pattern argument achieves the same scoping safely through agent-tool
+   - The optional pattern is a Jest path filter, e.g. `./agent-tool test handlers/product-switch-api test/changePlan/action/pendingAmendments.test.ts`
+   - Never use `cd` + `pnpm jest` directly; the pattern argument achieves the same scoping safely through agent-tool
 5. `./agent-tool git-diff` or `./agent-tool git-diff-target <package>` when full diff detail is needed
-6. `./agent-tool snapshot-update` when buildcheck-managed snapshots are expected
-7. `./agent-tool install` when dependencies or lockfiles need updating
+6. `./agent-tool git-rm <file>` to delete a tracked file (staged automatically); `./agent-tool git-mv <source> <destination>` to rename/move one
+   - Both commands validate the path(s) are inside the repository — never use `rm` or `git rm` directly
+7. `./agent-tool snapshot-update` when buildcheck-managed snapshots are expected
+8. `./agent-tool install` when dependencies or lockfiles need updating
 
 Prefer `--changed` over explicit package names for verification commands — it resolves directly changed packages from git and also runs checks on their downstream dependents via pnpm's dependency graph, catching breakage in consumers of a changed module.
 
 If `agent-tools` is missing a safer or more efficient command, suggest adding it rather than working around it with ad-hoc shell commands.
+
+Note that agent-tools can't be used on itself.

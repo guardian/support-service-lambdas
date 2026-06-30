@@ -33,6 +33,15 @@ Each accepts explicit packages or `--changed`:
 - `fix-formatting --changed`
 - `lint-fix --changed`
 
+## File operations
+
+These commands canonicalise and validate all paths before acting — both reject any path that escapes the repository root.
+
+- `git-rm <file>` — remove a tracked file and stage the deletion
+- `git-mv <source> <destination>` — rename or move a tracked file within the repo
+
+Never use `rm`, `git rm`, or `git mv` directly; use these commands instead so path safety is enforced and the operation can be approved in one go.
+
 ## How to test
 
 ```bash

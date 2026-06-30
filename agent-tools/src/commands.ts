@@ -4,6 +4,7 @@ import {
 	type CommandResult,
 	type ExecutionOptions,
 	printProgress,
+	resolveRepoPath,
 	run,
 	type ScriptResult,
 	toCommandResult,
@@ -53,6 +54,65 @@ export const COMMANDS: Record<string, Command> = {
 	'git-diff-staged-stat': rootCmd('git --no-pager diff --staged --stat'),
 	'git-diff-target': pathCmd('git --no-pager diff --minimal'),
 	'git-diff-target-stat': pathCmd('git --no-pager diff --stat'),
+	'git-rm': {
+		usage: '<file>',
+		description:
+			'remove a tracked file from the repo and stage the deletion (path must be inside the repo)',
+		handler: async (args, execOptions) => {
+			if (args.length !== 1) {
+				return toCommandResult(
+					[`FAIL git-rm requires exactly one file path`],
+					1,
+				);
+			}
+			const repoPath = resolveRepoPath(execOptions.root, args[0]!);
+			if (repoPath === null) {
+				return toCommandResult(
+					[`FAIL path is outside the repository: ${args[0]}`],
+					1,
+				);
+			}
+			printProgress(`RUN  git rm ${repoPath}`);
+			return formatResult(
+				'git-rm',
+				await run('git', ['rm', repoPath], execOptions),
+			);
+		},
+	},
+	'git-mv': {
+		usage: '<source> <destination>',
+		description:
+			'rename or move a tracked file within the repo (both paths must be inside the repo)',
+		handler: async (args, execOptions) => {
+			if (args.length !== 2) {
+				return toCommandResult(
+					[
+						`FAIL git-mv requires exactly two file paths: <source> <destination>`,
+					],
+					1,
+				);
+			}
+			const srcPath = resolveRepoPath(execOptions.root, args[0]!);
+			if (srcPath === null) {
+				return toCommandResult(
+					[`FAIL source path is outside the repository: ${args[0]}`],
+					1,
+				);
+			}
+			const destPath = resolveRepoPath(execOptions.root, args[1]!);
+			if (destPath === null) {
+				return toCommandResult(
+					[`FAIL destination path is outside the repository: ${args[1]}`],
+					1,
+				);
+			}
+			printProgress(`RUN  git mv ${srcPath} ${destPath}`);
+			return formatResult(
+				'git-mv',
+				await run('git', ['mv', srcPath, destPath], execOptions),
+			);
+		},
+	},
 };
 
 // Help is added last so its handler can reference the completed COMMANDS table
