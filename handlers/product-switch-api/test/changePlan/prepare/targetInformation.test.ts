@@ -97,12 +97,20 @@ describe('getTargetInformation', () => {
 			productCatalogHelper,
 		);
 
-		expect(targetInfo.ongoingPrice).toBe(discountedPrice);
-		expect(targetInfo.discount).toMatchObject({
+		const { ongoingPrice, discount, contributionCharge } = targetInfo;
+		const expectedDiscount = {
 			discountPercentage:
 				annualContribHalfPriceSupporterPlusForOneYear.discountPercentage,
+		};
+		expect({
+			ongoingPrice,
+			discount,
+			contributionAmount: contributionCharge?.contributionAmount,
+		}).toMatchObject({
+			ongoingPrice: targetBasePrice,
+			discount: expectedDiscount,
+			contributionAmount: 0,
 		});
-		expect(targetInfo.contributionCharge?.contributionAmount).toBe(0);
 	});
 
 	test('throws when requesting a target product that is not a valid switch', () => {
