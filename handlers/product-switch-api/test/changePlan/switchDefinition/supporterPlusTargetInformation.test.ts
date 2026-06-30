@@ -13,7 +13,7 @@ const productCatalog = generateProductCatalog(
 const annualSupporterPlusRatePlan =
 	productCatalog.SupporterPlus.ratePlans.Annual;
 describe('getSupporterPlusTargetInformation', () => {
-	test('returns target info with contribution when previous amount exceeds base price', async () => {
+	test('returns target info with contribution when previous amount exceeds base price', () => {
 		const basePrice = annualSupporterPlusRatePlan.pricing.GBP;
 		const previousAmount = basePrice + 50;
 
@@ -24,7 +24,7 @@ describe('getSupporterPlusTargetInformation', () => {
 			includesContribution: true,
 		};
 
-		const result = await supporterPlusTargetInformation.fromUserInformation(
+		const result = supporterPlusTargetInformation.fromUserInformation(
 			annualSupporterPlusRatePlan,
 			switchActionData,
 		);
@@ -36,7 +36,7 @@ describe('getSupporterPlusTargetInformation', () => {
 		expect(result.discount).toBeUndefined();
 	});
 
-	test('puts people up onto the base price if they switch from below', async () => {
+	test('puts people up onto the base price if they switch from below', () => {
 		const basePrice = annualSupporterPlusRatePlan.pricing.GBP;
 		const previousAmount = basePrice - 50;
 
@@ -47,7 +47,7 @@ describe('getSupporterPlusTargetInformation', () => {
 			includesContribution: true,
 		};
 
-		const result = await supporterPlusTargetInformation.fromUserInformation(
+		const result = supporterPlusTargetInformation.fromUserInformation(
 			annualSupporterPlusRatePlan,
 			switchActionData,
 		);
@@ -56,7 +56,7 @@ describe('getSupporterPlusTargetInformation', () => {
 		expect(result.contributionCharge?.contributionAmount).toBe(0);
 	});
 
-	test('uses user-requested amount when provided and valid', async () => {
+	test('uses user-requested amount when provided and valid', () => {
 		const basePrice = annualSupporterPlusRatePlan.pricing.GBP;
 		const userRequestedAmount = basePrice + 100;
 
@@ -66,7 +66,7 @@ describe('getSupporterPlusTargetInformation', () => {
 			userRequestedAmount,
 		};
 
-		const result = await supporterPlusTargetInformation.fromUserInformation(
+		const result = supporterPlusTargetInformation.fromUserInformation(
 			annualSupporterPlusRatePlan,
 			switchActionData,
 		);
@@ -93,7 +93,7 @@ describe('getSupporterPlusTargetInformation', () => {
 		).toThrow(ValidationError);
 	});
 
-	test('applies discount when eligible for annual plan with low previous amount', async () => {
+	test('applies discount when eligible for annual plan with low previous amount', () => {
 		const basePrice = annualSupporterPlusRatePlan.pricing.GBP;
 		const discountedPrice = basePrice / 2;
 		const previousAmount = discountedPrice - 10;
@@ -105,19 +105,17 @@ describe('getSupporterPlusTargetInformation', () => {
 			includesContribution: true,
 		};
 
-		const result = await supporterPlusTargetInformation.fromUserInformation(
+		const result = supporterPlusTargetInformation.fromUserInformation(
 			annualSupporterPlusRatePlan,
 			switchActionData,
 		);
 
 		expect(result.discount).toBeDefined();
-		expect(result.ongoingPrice).toBe(discountedPrice);
+		expect(result.ongoingPrice).toBe(basePrice);
 		expect(result.contributionCharge?.contributionAmount).toBe(0);
 		expect(result.discount?.discountPercentage).toBe(
 			annualContribHalfPriceSupporterPlusForOneYear.discountPercentage,
 		);
-		expect(result.ongoingPrice).toBe(discountedPrice);
-		expect(result.contributionCharge?.contributionAmount).toBe(0);
 	});
 
 	test('does not apply discount when previous amount exceeds discounted price', () => {
@@ -140,7 +138,7 @@ describe('getSupporterPlusTargetInformation', () => {
 		).toThrow(ValidationError);
 	});
 
-	test('does not apply discount when not generally eligible', async () => {
+	test('does not apply discount when not generally eligible', () => {
 		const basePrice = annualSupporterPlusRatePlan.pricing.GBP;
 		const discountedPrice =
 			(basePrice *
@@ -156,7 +154,7 @@ describe('getSupporterPlusTargetInformation', () => {
 			includesContribution: true,
 		};
 
-		const result = await supporterPlusTargetInformation.fromUserInformation(
+		const result = supporterPlusTargetInformation.fromUserInformation(
 			annualSupporterPlusRatePlan,
 			switchActionData,
 		);

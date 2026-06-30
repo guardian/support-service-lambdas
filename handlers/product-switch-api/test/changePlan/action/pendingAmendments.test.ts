@@ -13,6 +13,7 @@ import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
+import type { CreateSwitchOrder } from '../../../src/changePlan/action/createSwitchOrder';
 import type { GetNextPayment } from '../../../src/changePlan/action/getNextPayment';
 import { DoPreviewAction } from '../../../src/changePlan/action/preview';
 import { DoSwitchAction } from '../../../src/changePlan/action/switch';
@@ -43,8 +44,8 @@ const { subscription } = loadSubscription(
 );
 const account = zuoraAccountSchema.parse(accountJson);
 
-const getTestTargetInformation = async () =>
-	await supporterPlusTargetInformation.fromUserInformation(
+const getTestTargetInformation = () =>
+	supporterPlusTargetInformation.fromUserInformation(
 		productCatalog.SupporterPlus.ratePlans.Annual,
 		{
 			mode: 'switchToBasePrice',
@@ -99,8 +100,7 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 			},
 		} satisfies ZuoraPreviewResponse);
 
-		const switchInformation: TargetInformation =
-			await getTestTargetInformation();
+		const switchInformation: TargetInformation = getTestTargetInformation();
 
 		const subscriptionInformation = getSubscriptionInformation(subscription);
 
@@ -189,8 +189,7 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 			sendToSupporterProductData,
 		}));
 
-		const targetInformation: TargetInformation =
-			await getTestTargetInformation();
+		const targetInformation: TargetInformation = getTestTargetInformation();
 
 		const subscriptionInformation = getSubscriptionInformation(subscription);
 
@@ -212,6 +211,9 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 				execute: () =>
 					Promise.resolve({ date: new Date(2026, 6, 29), total: 123 }),
 			} as unknown as GetNextPayment,
+			{
+				execute: () => Promise.resolve('invoice-id'),
+			} as unknown as CreateSwitchOrder,
 		).switch(
 			{ caseId: 'asdfCaseId', csrUserId: 'asdfCsrUserId' },
 			{
@@ -223,12 +225,6 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 		);
 
 		expect(result.message).toContain('has successfully switched product');
-		expect(mockZuoraClient.post).toHaveBeenCalled();
-		const postCall = getOrderData();
-		expect(postCall).toEqual({
-			url: 'v1/orders?returnIds=true',
-			orderTypes: ['ChangePlan'],
-		});
 		// might be worth checking that it actually removed the pending amendments - need to mock the getLatestAmendment call
 	});
 });

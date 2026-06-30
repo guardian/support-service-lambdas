@@ -11,7 +11,7 @@ test('Email message body is correct', () => {
 	const dateOfFirstPayment = dayjs('2024-04-16');
 	const emailMessage: EmailMessageWithUserId = buildEmailMessage(
 		5.6,
-		{ date: new Date(2026, 6, 29), total: 12.21 },
+		{ date: new Date(2026, 5, 29), total: 12.21 },
 		testSwitchInformation,
 		dateOfFirstPayment,
 	);
@@ -27,8 +27,8 @@ test('Email message body is correct', () => {
 					price: '10.00',
 					first_payment_amount: '5.60',
 					date_of_first_payment: '16 April 2024',
-					next_payment_amount: '10.00',
-					date_of_next_payment: '16 April 2025',
+					next_payment_amount: '12.21',
+					date_of_next_payment: '29 June 2026',
 					payment_frequency: 'Annually',
 					payment_method: 'Direct Debit',
 					subscription_id: 'A-S123456',

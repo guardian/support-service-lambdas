@@ -1,10 +1,5 @@
-import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import { sendToSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
-import type {
-	CreateOrderRequest,
-	OrderRequest,
-} from '@modules/zuora/orders/orderRequests';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type dayjs from 'dayjs';
 import { takePaymentOrAdjustInvoice } from '../../payment';
@@ -12,11 +7,8 @@ import { sendSalesforceTracking } from '../../salesforceTracking';
 import { supporterRatePlanItemFromSwitchInformation } from '../../supporterProductData';
 import type { SwitchOrderRequestBuilder } from '../prepare/buildSwitchOrderRequest';
 import type { SwitchInformation } from '../prepare/switchInformation';
-import type {
-	ProductSwitchRequestBody,
-	ZuoraSwitchResponseWithIds,
-} from '../schemas';
-import { zuoraSwitchResponseWithIdsSchema } from '../schemas';
+import type { ProductSwitchRequestBody } from '../schemas';
+import type { CreateSwitchOrder } from './createSwitchOrder';
 import type { GetNextPayment } from './getNextPayment';
 import { sendThankYouEmail } from './productSwitchEmail';
 
@@ -28,13 +20,17 @@ export class DoSwitchAction {
 		private stage: Stage,
 		private today: dayjs.Dayjs,
 		private getNextPayment: GetNextPayment,
+		private createSwitchOrder: CreateSwitchOrder,
 	) {}
+
 	async switch(
 		input: Pick<ProductSwitchRequestBody, 'csrUserId' | 'caseId'>,
 		switchInformation: SwitchInformation,
 		orderRequest: SwitchOrderRequestBuilder,
 	): Promise<SwitchResponse> {
-		const invoiceId = await this.doSwitch(orderRequest.build(this.today));
+		const invoiceId = await this.createSwitchOrder.execute(
+			orderRequest.build(this.today),
+		);
 
 		const paidAmount = await takePaymentOrAdjustInvoice(
 			this.zuoraClient,
@@ -70,26 +66,4 @@ export class DoSwitchAction {
 			message: `Subscription ${switchInformation.subscription.subscriptionNumber} has successfully switched product`,
 		};
 	}
-
-	private doSwitch = async (orderRequest: OrderRequest): Promise<string> => {
-		const requestBody: CreateOrderRequest = {
-			processingOptions: {
-				runBilling: true,
-				collectPayment: false, // We will take payment separately because we don't want to charge the user if the amount payable is less than 50 pence/cents
-			},
-			...orderRequest,
-		};
-
-		const switchResponse: ZuoraSwitchResponseWithIds =
-			await this.zuoraClient.post(
-				'v1/orders?returnIds=true',
-				JSON.stringify(requestBody),
-				zuoraSwitchResponseWithIdsSchema,
-			);
-
-		return getIfDefined(
-			switchResponse.invoiceIds[0],
-			'No invoice id returned from switch order',
-		);
-	};
 }

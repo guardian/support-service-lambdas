@@ -16,7 +16,7 @@ export const supporterPlusTargetInformation: SwitchTargetInformation<
 	fromUserInformation: (
 		productRatePlan: ProductRatePlan<'SupporterPlus', 'Annual' | 'Monthly'>,
 		switchActionData: SwitchActionData,
-	): Promise<TargetInformation> => {
+	): TargetInformation => {
 		const targetCatalogBasePrice =
 			productRatePlan.pricing[switchActionData.currency];
 
@@ -66,7 +66,7 @@ export const supporterPlusTargetInformation: SwitchTargetInformation<
 				? `Supporter Plus V2 - Monthly`
 				: `Supporter Plus V2 - Annual`;
 
-		return Promise.resolve({
+		return {
 			ongoingPrice,
 			productRatePlanId: productRatePlan.id,
 			ratePlanName,
@@ -78,6 +78,6 @@ export const supporterPlusTargetInformation: SwitchTargetInformation<
 			discount,
 			dataExtensionName:
 				DataExtensionNames.recurringContributionToSupporterPlusSwitch,
-		} satisfies TargetInformation);
+		} satisfies TargetInformation;
 	},
 };
