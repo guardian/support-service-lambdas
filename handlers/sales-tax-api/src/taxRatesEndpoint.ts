@@ -75,9 +75,6 @@ async function getZuoraSalesTaxRates(
 		zuoraTaxCode.id,
 		zuoraTaxPeriods.taxRatePeriods,
 	);
-	if (!zuoraTaxPeriod) {
-		throw new Error(`invalid period for productKey:${productKey}`);
-	}
 
 	const zuoraTaxRates = await getZuoraTaxRates(zuoraClient, zuoraTaxPeriod.id);
 	const cadZuoraTaxRates = extractZuoraTaxRatesForCountry(
@@ -117,7 +114,14 @@ function getZuoraTaxPeriod(
 		);
 	}
 
-	return periodsForTaxCodeWithNoEndDate[0];
+	const period = periodsForTaxCodeWithNoEndDate[0];
+	if (!period) {
+		throw new Error(
+			`Failed to find tax period for tax code ${zuoraTaxCode} with no end date`,
+		);
+	}
+
+	return period;
 }
 
 function extractZuoraTaxRatesForCountry(
