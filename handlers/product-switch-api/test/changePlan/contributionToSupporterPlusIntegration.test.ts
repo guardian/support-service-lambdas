@@ -20,14 +20,12 @@ import type { ContributionTestAdditionalOptions } from '../../../../modules/zuor
 import { createContribution } from '../../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import type { PreviewResponse } from '../../src/changePlan/action/preview';
 import type { SwitchResponse } from '../../src/changePlan/action/switch';
-import {
-	ChangePlanEndpoint,
-	ToSingleGuardianSubscription,
-} from '../../src/changePlan/changePlanEndpoint';
+import { ChangePlanEndpoint } from '../../src/changePlan/changePlanEndpoint';
 import type { LegacyProductSwitchRequestBody } from '../../src/changePlan/legacyContributionToSupporterPlusEndpoint';
 import { legacyContributionToSupporterPlus } from '../../src/changePlan/legacyContributionToSupporterPlusEndpoint';
 import type { ValidTargetProduct } from '../../src/changePlan/prepare/switchCatalogHelper';
 import type { ProductSwitchRequestBody } from '../../src/changePlan/schemas';
+import { ToSingleGuardianSubscription } from '../../src/changePlan/toSingleGuardianSubscription';
 
 // change to true to test the version on CODE instead of local
 const testCODELambda: boolean = false;
