@@ -1,8 +1,6 @@
-import z from 'zod';
-import { currencyCodeSchema } from '@modules/internationalisation/currency';
+import type { SupportRegion } from '@modules/internationalisation/schemas';
 import type { CountryCode } from './country';
-import { countryCodeSchema } from './country';
-import { auStates, caStates, stateOrProvinceSchema, usStates } from './state';
+import { auStates, caStates, usStates } from './state';
 
 export const supportRegionIds = [
 	'uk',
@@ -295,16 +293,6 @@ export const supportRegions = {
 		states: caStates,
 	},
 } satisfies Record<SupportRegionId, SupportRegion>;
-
-export const supportRegionIdSchema = z.enum(supportRegionIds);
-
-export const supportRegionSchema = z.object({
-	name: z.string(),
-	currency: currencyCodeSchema,
-	countries: countryCodeSchema.array(),
-	states: stateOrProvinceSchema.optional(),
-});
-export type SupportRegion = z.infer<typeof supportRegionSchema>;
 
 export const supportRegionIdFromCountry = (
 	country: CountryCode,

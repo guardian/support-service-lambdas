@@ -1,5 +1,4 @@
 import { isInList } from '@modules/arrayFunctions';
-import z from 'zod';
 
 export const currencyCodes = [
 	'GBP',
@@ -11,7 +10,6 @@ export const currencyCodes = [
 ] as const;
 
 export type CurrencyCode = (typeof currencyCodes)[number];
-export const currencyCodeSchema = z.enum(currencyCodes);
 
 export type Currency = {
 	glyph: string;

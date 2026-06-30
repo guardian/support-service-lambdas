@@ -1,6 +1,6 @@
 import { ValidationError } from '@modules/errors';
-import { countryCodeSchema } from '@modules/internationalisation/country';
 import { supportRegionIdFromCountry } from '@modules/internationalisation/countryGroup';
+import { countryCodeSchema } from '@modules/internationalisation/schemas';
 import { logger } from '@modules/logger/logger';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { getPromotion } from '@modules/promotions/v2/getPromotion';

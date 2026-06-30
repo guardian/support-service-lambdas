@@ -1,5 +1,7 @@
-import { countryCodeSchema } from '@modules/internationalisation/country';
-import { caStateCodeSchema } from '@modules/internationalisation/state';
+import {
+	caStateCodeSchema,
+	countryCodeSchema,
+} from '@modules/internationalisation/schemas';
 import { productKeySchema } from '@modules/product-catalog/productCatalogSchema';
 import { z } from 'zod';
 

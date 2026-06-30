@@ -1,5 +1,3 @@
-import z from 'zod';
-
 export const usStateCodes = [
 	'AL',
 	'AK',
@@ -122,10 +120,6 @@ export const usStates: Record<UsStateCode, string> = {
 	WY: 'Wyoming',
 };
 
-export const usStateCodeSchema = z.enum(usStateCodes);
-export const usStateSchema = z.record(usStateCodeSchema, z.string());
-export type UsState = z.infer<typeof usStateSchema>;
-
 export const caStateCodes = [
 	'AB',
 	'BC',
@@ -160,10 +154,6 @@ export const caStates: Record<CaStateCode, string> = {
 	YT: 'Yukon',
 };
 
-export const caStateCodeSchema = z.enum(caStateCodes);
-export const caStateSchema = z.record(caStateCodeSchema, z.string());
-export type CaState = z.infer<typeof caStateSchema>;
-
 export const auStateCodes = [
 	'ACT',
 	'NSW',
@@ -188,16 +178,5 @@ export const auStates: Record<AuStateCode, string> = {
 	WA: 'Western Australia',
 };
 
-export const auStateCodeSchema = z.enum(auStateCodes);
-export const auStateSchema = z.record(auStateCodeSchema, z.string());
-export type AuState = z.infer<typeof auStateSchema>;
-
 export const stateCodes = [...usStateCodes, ...auStateCodes, ...caStateCodes];
 export type StateCode = (typeof stateCodes)[number];
-export const stateCodeSchema = z.enum(stateCodes);
-
-export const stateOrProvinceSchema = z.union([
-	usStateSchema,
-	caStateSchema,
-	auStateSchema,
-]);

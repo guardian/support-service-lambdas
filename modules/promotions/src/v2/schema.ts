@@ -1,5 +1,7 @@
-import { countryCodeSchema } from '@modules/internationalisation/country';
-import { supportRegionIdSchema } from '@modules/internationalisation/supportRegion';
+import {
+	countryCodeSchema,
+	supportRegionIdSchema,
+} from '@modules/internationalisation/schemas';
 import { optionalDropNulls } from '@modules/schemaUtils';
 import { z } from 'zod';
 

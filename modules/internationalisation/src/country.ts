@@ -1,4 +1,4 @@
-import z from 'zod';
+import { isInList } from '@modules/arrayFunctions';
 
 export const countryCodes = [
 	'GB',
@@ -507,10 +507,9 @@ export const countries: Record<CountryCode, string> = {
 };
 
 export const isoCountrySet: Set<CountryCode> = new Set(countryCodes);
-export const countryCodeSchema = z.enum(countryCodes);
 
-export function isCountryCode(search: unknown): search is CountryCode {
-	return countryCodeSchema.safeParse(search).success;
+export function isCountryCode(search: string): search is CountryCode {
+	return isInList(countryCodes)(search);
 }
 
 export const newspaperCountries: Partial<Record<CountryCode, string>> = {
