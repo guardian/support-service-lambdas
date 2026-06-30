@@ -1,3 +1,4 @@
+import { sendEmail } from '@modules/email/email';
 import { ValidationError } from '@modules/errors';
 import type { GuardianSubscription } from '@modules/guardian-subscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import { getSinglePlanFlattenedSubscriptionOrThrow } from '@modules/guardian-subscription/getSinglePlanFlattenedSubscriptionOrThrow';
@@ -89,6 +90,7 @@ export class ChangePlanEndpoint {
 			today,
 			new GetNextPayment(zuoraClient),
 			new CreateSwitchOrder(zuoraClient),
+			sendEmail,
 		);
 		this.doPreviewAction = new DoPreviewAction(zuoraClient, stage, today);
 	}

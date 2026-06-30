@@ -1,3 +1,4 @@
+import type { EmailMessageWithUserId } from '@modules/email/email';
 import type { Stage } from '@modules/stage';
 import { sendToSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
@@ -10,7 +11,7 @@ import type { SwitchInformation } from '../prepare/switchInformation';
 import type { ProductSwitchRequestBody } from '../schemas';
 import type { CreateSwitchOrder } from './createSwitchOrder';
 import type { GetNextPayment } from './getNextPayment';
-import { sendThankYouEmail } from './productSwitchEmail';
+import { buildEmailMessage } from './productSwitchEmail';
 
 export type SwitchResponse = { message: string };
 
@@ -21,6 +22,10 @@ export class DoSwitchAction {
 		private today: dayjs.Dayjs,
 		private getNextPayment: GetNextPayment,
 		private createSwitchOrder: CreateSwitchOrder,
+		private sendEmail: (
+			stage: Stage,
+			message: EmailMessageWithUserId,
+		) => Promise<unknown>,
 	) {}
 
 	async switch(
@@ -46,7 +51,7 @@ export class DoSwitchAction {
 		);
 
 		await Promise.allSettled([
-			sendThankYouEmail(this.stage, paidAmount, nextPayment, switchInformation),
+			this.sendThankYouEmail(paidAmount, nextPayment, switchInformation),
 			sendSalesforceTracking(
 				this.stage,
 				input,
@@ -65,5 +70,20 @@ export class DoSwitchAction {
 		return {
 			message: `Subscription ${switchInformation.subscription.subscriptionNumber} has successfully switched product`,
 		};
+	}
+
+	private sendThankYouEmail(
+		firstPaymentAmount: number,
+		nextPayment: { date: Date; total: number } | undefined,
+		switchInformation: SwitchInformation,
+	) {
+		const emailMessage: EmailMessageWithUserId = buildEmailMessage(
+			firstPaymentAmount,
+			nextPayment,
+			switchInformation,
+			this.today,
+		);
+
+		return this.sendEmail(this.stage, emailMessage);
 	}
 }
