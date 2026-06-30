@@ -20,7 +20,10 @@ import type { ContributionTestAdditionalOptions } from '../../../../modules/zuor
 import { createContribution } from '../../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import type { PreviewResponse } from '../../src/changePlan/action/preview';
 import type { SwitchResponse } from '../../src/changePlan/action/switch';
-import { ChangePlanEndpoint } from '../../src/changePlan/changePlanEndpoint';
+import {
+	ChangePlanEndpoint,
+	ToSingleGuardianSubscription,
+} from '../../src/changePlan/changePlanEndpoint';
 import type { LegacyProductSwitchRequestBody } from '../../src/changePlan/legacyContributionToSupporterPlusEndpoint';
 import { legacyContributionToSupporterPlus } from '../../src/changePlan/legacyContributionToSupporterPlusEndpoint';
 import type { ValidTargetProduct } from '../../src/changePlan/prepare/switchCatalogHelper';
@@ -149,6 +152,7 @@ async function testCall(
 	} else {
 		const changePlanEndpoint = new ChangePlanEndpoint(
 			'CODE',
+			await ToSingleGuardianSubscription.build('CODE'),
 			dayjs(),
 			input,
 			testData.zuoraClient,

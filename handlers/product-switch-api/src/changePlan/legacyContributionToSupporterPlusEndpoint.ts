@@ -7,7 +7,10 @@ import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type dayjs from 'dayjs';
 import { z } from 'zod';
 import type { PreviewResponse, SwitchDiscountResponse } from './action/preview';
-import { ChangePlanEndpoint } from './changePlanEndpoint';
+import {
+	ChangePlanEndpoint,
+	ToSingleGuardianSubscription,
+} from './changePlanEndpoint';
 import { productSwitchCommonRequestSchema } from './schemas';
 
 export async function legacyContributionToSupporterPlus(
@@ -20,6 +23,7 @@ export async function legacyContributionToSupporterPlus(
 ) {
 	const productSwitchEndpoint = new ChangePlanEndpoint(
 		stage,
+		await ToSingleGuardianSubscription.build(stage),
 		today,
 		{
 			...body,
