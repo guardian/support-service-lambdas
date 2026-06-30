@@ -51,11 +51,11 @@ Last choice: arbitrary/ad hoc shell commmands
 
 Always run type-check, fix-formatting and lint-fix as well as all relevant tests after making changes to Typescript code.
 
-When making changes to TypeScript code, always run use `./agent-tool <command>` instead of ad-hoc commands such as raw `pnpm lint`, `pnpm type-check`, `prettier`, `eslint`, or `git`.
-
-Call the wrapper by absolute path rather than calling "cd" first, e.g. `/Users/john_duffell/code/support-service-lambdas/agent-tool <command>`.
+Call the agent-tool wrapper by absolute path rather than calling "cd" first, e.g. `/Users/john_duffell/code/support-service-lambdas/agent-tool <command>`.
 
 Always scope to the minimum set of affected packages under `handlers/*`, `modules/*`, `cdk`, or `buildcheck`. Use `list-packages` if the package scope is unclear.
+
+Package arguments must always be given as workspace paths, e.g. `handlers/product-switch-api` or `modules/aws` rather than `product-switch-api`.
 
 Default output is verbose streaming. Use global output flag when needed:
 - `--tail N` for concise output with failure tails and a full temp log path printed up front
@@ -64,13 +64,13 @@ Default output is verbose streaming. Use global output flag when needed:
 Recommended order (use the first applicable scoped command):
 1. `./agent-tool list-packages` if the package scope is unclear
 2. `./agent-tool git-diff-stat` or `./agent-tool git-diff-target-stat <package>`
-3. `./agent-tool check-formatting --changed` / `./agent-tool lint --changed` / `./agent-tool type-check --changed` (run all three after making changes)
-4. `./agent-tool fix-formatting --changed` or `./agent-tool lint-fix --changed` only when the above fail
-5. Re-run the failed check after fixing
-6. `./agent-tool test --changed` (or `./agent-tool test <packages...> [pattern]`) when tests are needed
-7. `./agent-tool git-diff` or `./agent-tool git-diff-target <package>` when full diff detail is needed
-8. `./agent-tool snapshot-update` when buildcheck-managed snapshots are expected
-9. `./agent-tool install` when dependencies or lockfiles need updating
+3. `./agent-tool fix-formatting --changed` / `./agent-tool lint-fix --changed` / `./agent-tool type-check --changed` (run all three after making changes)
+4. `./agent-tool test --changed` (or `./agent-tool test <packages...> [pattern]`) when tests are needed
+    - The optional pattern is a Jest path filter, e.g. `./agent-tool test handlers/product-switch-api test/changePlan/action/pendingAmendments.test.ts`
+    - Never use `cd` + `pnpm jest` directly; the pattern argument achieves the same scoping safely through agent-tool
+5. `./agent-tool git-diff` or `./agent-tool git-diff-target <package>` when full diff detail is needed
+6. `./agent-tool snapshot-update` when buildcheck-managed snapshots are expected
+7. `./agent-tool install` when dependencies or lockfiles need updating
 
 Prefer `--changed` over explicit package names for verification commands — it resolves directly changed packages from git and also runs checks on their downstream dependents via pnpm's dependency graph, catching breakage in consumers of a changed module.
 

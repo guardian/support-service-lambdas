@@ -100,7 +100,10 @@ function resolvePackages(
 	const packages = args.filter((a) => !a.startsWith('--'));
 	if (packages.length === 0) {
 		return toCommandResult(
-			[`FAIL ${commandName} requires at least one package or --changed`],
+			[
+				`FAIL ${commandName} requires at least one package or --changed`,
+				`  Packages must be workspace paths e.g. handlers/product-switch-api or modules/aws`,
+			],
 			1,
 		);
 	}
