@@ -13,7 +13,8 @@ import { countryStates } from './fixtures';
 
 describe('SalesTax API Integration', () => {
 	const country = 'CA';
-	test('we can retrieve SupporterPlus Canadian tax rates', async () => {
+
+	it('returns SupporterPlus Canadian tax rates', async () => {
 		const zuoraClient = await ZuoraClient.create('CODE');
 
 		const result = await taxRatesEndpoint(zuoraClient, {
@@ -24,5 +25,16 @@ describe('SalesTax API Integration', () => {
 		expect(result.statusCode).toEqual(200);
 		const body = taxRatesResponseSchema.parse(JSON.parse(result.body));
 		expect(body).toEqual(countryStates[country]);
+	});
+
+	it('returns a successful response for DigitalSubscription Canadian tax rates', async () => {
+		const zuoraClient = await ZuoraClient.create('CODE');
+
+		const result = await taxRatesEndpoint(zuoraClient, {
+			productKey: 'DigitalSubscription',
+			country,
+		});
+
+		expect(result.statusCode).toEqual(200);
 	});
 });
