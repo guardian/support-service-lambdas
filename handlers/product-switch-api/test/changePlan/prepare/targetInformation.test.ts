@@ -41,11 +41,11 @@ const buildGuardianSubscriptionWithKeys = (): GuardianSubscription => {
 };
 
 describe('getTargetInformation', () => {
-	test('returns supporter plus target info for a valid contribution switch', async () => {
+	test('returns supporter plus target info for a valid contribution switch', () => {
 		const subscription = buildGuardianSubscriptionWithKeys();
 		const previousAmount = 50;
 
-		const targetInfo = await getTargetInformation(
+		const targetInfo = getTargetInformation(
 			{
 				mode: 'switchToBasePrice',
 				targetProduct: 'SupporterPlus',
@@ -79,13 +79,13 @@ describe('getTargetInformation', () => {
 		} satisfies TargetInformation);
 	});
 
-	test('applies the supporter plus annual discount during save flows when eligible', async () => {
+	test('applies the supporter plus annual discount during save flows when eligible', () => {
 		const subscription = buildGuardianSubscriptionWithKeys();
 		const targetRatePlan = productCatalog.SupporterPlus.ratePlans.Annual;
 		const targetBasePrice = targetRatePlan.pricing.EUR;
 		const discountedPrice = targetBasePrice / 2;
 		const discountEligiblePreviousAmount = Math.min(50, discountedPrice);
-		const targetInfo = await getTargetInformation(
+		const targetInfo = getTargetInformation(
 			{
 				mode: 'save',
 				targetProduct: 'SupporterPlus',

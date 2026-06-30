@@ -13,7 +13,7 @@ const annualDigitalSubscriptionRatePlan =
 	productCatalog.DigitalSubscription.ratePlans.Annual;
 
 describe('digitalSubscriptionTargetInformation', () => {
-	test("returns target info when amount doesn't include a contribution", async () => {
+	test("returns target info when amount doesn't include a contribution", () => {
 		const catalogPrice = annualDigitalSubscriptionRatePlan.pricing.GBP;
 
 		const switchActionData: SwitchActionData = {
@@ -23,11 +23,10 @@ describe('digitalSubscriptionTargetInformation', () => {
 			includesContribution: false,
 		};
 
-		const result =
-			await digitalSubscriptionTargetInformation.fromUserInformation(
-				annualDigitalSubscriptionRatePlan,
-				switchActionData,
-			);
+		const result = digitalSubscriptionTargetInformation.fromUserInformation(
+			annualDigitalSubscriptionRatePlan,
+			switchActionData,
+		);
 
 		expect(result.ongoingPrice).toBe(catalogPrice);
 		expect(result.productRatePlanId).toBe(annualDigitalSubscriptionRatePlan.id);
@@ -54,7 +53,7 @@ describe('digitalSubscriptionTargetInformation', () => {
 		).toThrow(ValidationError);
 	});
 
-	test('accepts user-requested amount when it matches catalog price', async () => {
+	test('accepts user-requested amount when it matches catalog price', () => {
 		const catalogPrice = annualDigitalSubscriptionRatePlan.pricing.GBP;
 
 		const switchActionData: SwitchActionData = {
@@ -64,11 +63,10 @@ describe('digitalSubscriptionTargetInformation', () => {
 			includesContribution: false,
 		};
 
-		const result =
-			await digitalSubscriptionTargetInformation.fromUserInformation(
-				annualDigitalSubscriptionRatePlan,
-				switchActionData,
-			);
+		const result = digitalSubscriptionTargetInformation.fromUserInformation(
+			annualDigitalSubscriptionRatePlan,
+			switchActionData,
+		);
 
 		expect(result.ongoingPrice).toBe(catalogPrice);
 	});
