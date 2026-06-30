@@ -142,7 +142,7 @@ def sort_filter_rules(json_obj):
             "Arn",
           ],
         },
-        "Runtime": "python3.11",
+        "Runtime": "python3.13",
         "Tags": [
           {
             "Key": "App",
@@ -229,12 +229,34 @@ def sort_filter_rules(json_obj):
             {
               "Action": "s3:PutBucketNotification",
               "Effect": "Allow",
-              "Resource": "*",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":s3:::gu-zuora-catalog",
+                  ],
+                ],
+              },
             },
             {
               "Action": "s3:GetBucketNotification",
               "Effect": "Allow",
-              "Resource": "*",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":s3:::gu-zuora-catalog",
+                  ],
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
@@ -921,7 +943,7 @@ def sort_filter_rules(json_obj):
             "Arn",
           ],
         },
-        "Runtime": "python3.11",
+        "Runtime": "python3.13",
         "Tags": [
           {
             "Key": "App",
@@ -1008,12 +1030,34 @@ def sort_filter_rules(json_obj):
             {
               "Action": "s3:PutBucketNotification",
               "Effect": "Allow",
-              "Resource": "*",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":s3:::gu-zuora-catalog",
+                  ],
+                ],
+              },
             },
             {
               "Action": "s3:GetBucketNotification",
               "Effect": "Allow",
-              "Resource": "*",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":s3:::gu-zuora-catalog",
+                  ],
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",

@@ -315,6 +315,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
           {
             "Expression": "IF(HOUR(errors) > 5, errors)",
             "Id": "expr_1",
+            "ReturnData": true,
           },
           {
             "Id": "errors",
@@ -1345,6 +1346,28 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
       "Properties": {
         "ScheduleExpression": "cron(0 9 ? * MON-FRI *)",
         "State": "ENABLED",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "supporter-product-data-lambdas",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
         "Targets": [
           {
             "Arn": {
@@ -2057,6 +2080,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
           {
             "Expression": "IF(HOUR(errors) > 5, errors)",
             "Id": "expr_1",
+            "ReturnData": true,
           },
           {
             "Id": "errors",
@@ -3087,6 +3111,28 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
       "Properties": {
         "ScheduleExpression": "cron(*/5 * ? * * *)",
         "State": "ENABLED",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "supporter-product-data-lambdas",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
         "Targets": [
           {
             "Arn": {

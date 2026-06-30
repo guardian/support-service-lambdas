@@ -21,6 +21,14 @@ object PlanId {
 
   case object MonthlySupporterPlus extends PlanId("monthly_supporter_plus") with SupporterPlusPlanId
 
+  case object AnnualSupporterPlusTaxExclusive
+      extends PlanId("annual_supporter_plus_tax_exclusive")
+      with SupporterPlusPlanId
+
+  case object MonthlySupporterPlusTaxExclusive
+      extends PlanId("monthly_supporter_plus_tax_exclusive")
+      with SupporterPlusPlanId
+
   case object AnnualContribution extends PlanId("annual_contribution") with ContributionPlanId
 
   case object MonthlyContribution extends PlanId("monthly_contribution") with ContributionPlanId
@@ -64,6 +72,10 @@ object PlanId {
   case object DigipackMonthly extends PlanId("digipack_monthly") with DigipackPlanId
 
   case object DigipackAnnual extends PlanId("digipack_annual") with DigipackPlanId
+
+  case object DigipackMonthlyTaxExclusive extends PlanId("digipack_monthly_tax_exclusive") with DigipackPlanId
+
+  case object DigipackAnnualTaxExclusive extends PlanId("digipack_annual_tax_exclusive") with DigipackPlanId
 
   case object GuardianWeeklyPlusDomesticMonthly
       extends PlanId("guardian_weekly_plus_domestic_monthly")
@@ -135,6 +147,8 @@ object PlanId {
   val enabledSupporterPlusPlans = List(
     MonthlySupporterPlus,
     AnnualSupporterPlus,
+    MonthlySupporterPlusTaxExclusive,
+    AnnualSupporterPlusTaxExclusive,
   )
 
   val enabledHomeDeliveryPlans = List(
@@ -152,6 +166,8 @@ object PlanId {
   val enabledDigipackPlans = List(
     DigipackAnnual,
     DigipackMonthly,
+    DigipackAnnualTaxExclusive,
+    DigipackMonthlyTaxExclusive,
   )
 
   val enabledGuardianWeeklyPlusDomesticPlans = List(

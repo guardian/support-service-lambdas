@@ -54,6 +54,28 @@ exports[`The braze acquisition events sync stack matches the snapshot 1`] = `
         },
         "Name": "braze-acquisition-events-sync-CODE",
         "State": "ENABLED",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "braze-acquisition-events-sync",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
         "Targets": [
           {
             "Arn": {
@@ -732,6 +754,9 @@ exports[`The braze acquisition events sync stack matches the snapshot 1`] = `
         "LambdaRestApiproxy22103CFD",
         "LambdaRestApiANYC3C9D364",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "API Gateway created by CDK",
         "RestApiId": {
@@ -1178,6 +1203,28 @@ exports[`The braze acquisition events sync stack matches the snapshot 2`] = `
         },
         "Name": "braze-acquisition-events-sync-PROD",
         "State": "ENABLED",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "braze-acquisition-events-sync",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
         "Targets": [
           {
             "Arn": {
@@ -1932,6 +1979,9 @@ exports[`The braze acquisition events sync stack matches the snapshot 2`] = `
         "LambdaRestApiproxy22103CFD",
         "LambdaRestApiANYC3C9D364",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "API Gateway created by CDK",
         "RestApiId": {

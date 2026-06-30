@@ -1328,6 +1328,9 @@ exports[`The stripe disputes webhook API stack matches the snapshot 1`] = `
         "stripedisputeslambdaproducerstripedisputesproducerCODEproxyA9D84AD7",
         "stripedisputeslambdaproducerstripedisputesproducerCODEANY3CC4B447",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "API Gateway created by CDK",
         "RestApiId": {
@@ -3037,6 +3040,9 @@ DLQ: https://",
         "stripedisputeslambdaproducerstripedisputesproducerPRODproxy7610EE25",
         "stripedisputeslambdaproducerstripedisputesproducerPRODANY3EDEAC10",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "API Gateway created by CDK",
         "RestApiId": {

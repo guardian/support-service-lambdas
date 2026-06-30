@@ -150,6 +150,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
             "Expression": "100*m1/m2",
             "Id": "expr_1",
             "Label": "% of 5XX responses served for press-reader-entitlements",
+            "ReturnData": true,
           },
           {
             "Id": "m1",
@@ -771,6 +772,9 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
         "pressreaderentitlementslambdapressreaderentitlementsCODEproxyC7B8C5A6",
         "pressreaderentitlementslambdapressreaderentitlementsCODEANYBCD0DFF3",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "API Gateway created by CDK",
         "RestApiId": {
@@ -1195,6 +1199,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
             "Expression": "100*m1/m2",
             "Id": "expr_1",
             "Label": "% of 5XX responses served for press-reader-entitlements",
+            "ReturnData": true,
           },
           {
             "Id": "m1",
@@ -1816,6 +1821,9 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
         "pressreaderentitlementslambdapressreaderentitlementsPRODproxyA619485E",
         "pressreaderentitlementslambdapressreaderentitlementsPRODANYA19F1CF4",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "API Gateway created by CDK",
         "RestApiId": {

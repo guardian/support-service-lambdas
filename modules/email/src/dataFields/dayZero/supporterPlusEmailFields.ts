@@ -51,7 +51,7 @@ export function buildSupporterPlusEmailFields({
 		currency: currency,
 		billing_period: billingPeriod.toLowerCase(),
 		is_fixed_term: isFixedTerm.toString(),
-		...oldNonStandardPaymentFields,
+		...(oldNonStandardPaymentFields ?? {}),
 		...nonDeliveryEmailFields,
 	};
 	return buildEmailFields(

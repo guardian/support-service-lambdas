@@ -1,21 +1,24 @@
 import type { SecondaryUserRecord } from '@modules/multiple-account/secondaryUserRepository';
+import { secondaryUserTTLFromPrimarySubscriptionTTL } from '@modules/multiple-account/secondaryUserRepository';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import dayjs from 'dayjs';
 import { processItem } from '../src/handlers/processSupporterRatePlanItem';
 
+const termEndDate = '2026-03-01';
 const item: SupporterRatePlanItem = {
 	subscriptionName: 'sub-1',
 	identityId: 'id-1',
 	productRatePlanId: 'prp-1',
 	productRatePlanName: 'plan-1',
-	termEndDate: dayjs('2026-03-01'),
-	contractEffectiveDate: dayjs('2026-02-01'),
+	termEndDate: dayjs(termEndDate),
+	contractEffectiveDate: dayjs('2025-03-01'),
 };
 
 const noSecondaryUsers = jest.fn(() =>
 	Promise.resolve([] as SecondaryUserRecord[]),
 );
 const writeSecondaryItem = jest.fn(() => Promise.resolve());
+const updateSecondaryUserTTL = jest.fn(() => Promise.resolve());
 
 describe('processSupporterRatePlanItemLambda', () => {
 	beforeEach(() => {
@@ -33,11 +36,13 @@ describe('processSupporterRatePlanItemLambda', () => {
 			writePrimaryItem: writeItem,
 			getSecondaryUsers: noSecondaryUsers,
 			writeSecondaryItem: writeSecondaryItem,
+			updateSecondaryUserTTL: updateSecondaryUserTTL,
 		});
 
 		expect(writeItem).not.toHaveBeenCalled();
 		expect(noSecondaryUsers).not.toHaveBeenCalled();
 		expect(writeSecondaryItem).not.toHaveBeenCalled();
+		expect(updateSecondaryUserTTL).not.toHaveBeenCalled();
 	});
 
 	test('adds contribution amount for contribution plans', async () => {
@@ -62,6 +67,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 				writePrimaryItem: writeItem,
 				getSecondaryUsers: noSecondaryUsers,
 				writeSecondaryItem: writeSecondaryItem,
+				updateSecondaryUserTTL: updateSecondaryUserTTL,
 			},
 		);
 
@@ -84,11 +90,13 @@ describe('processSupporterRatePlanItemLambda', () => {
 			writePrimaryItem: writeItem,
 			getSecondaryUsers: noSecondaryUsers,
 			writeSecondaryItem: writeSecondaryItem,
+			updateSecondaryUserTTL: updateSecondaryUserTTL,
 		});
 
 		expect(writeItem).toHaveBeenCalled();
 		expect(noSecondaryUsers).toHaveBeenCalledWith('sub-1');
 		expect(writeSecondaryItem).not.toHaveBeenCalled();
+		expect(updateSecondaryUserTTL).not.toHaveBeenCalled();
 	});
 
 	test('updates secondary items when present', async () => {
@@ -99,12 +107,14 @@ describe('processSupporterRatePlanItemLambda', () => {
 				secondaryIdentityId: 'secondary-id-1',
 				primaryIdentityId: 'primary-id-1',
 				acceptedDate: '2026-01-01',
+				expiryDate: dayjs('2026-01-01').add(2, 'weeks').unix(),
 			},
 			{
 				subscriptionName: 'sub-1',
 				secondaryIdentityId: 'secondary-id-2',
 				primaryIdentityId: 'primary-id-1',
 				acceptedDate: '2026-01-02',
+				expiryDate: dayjs('2026-01-02').add(2, 'weeks').unix(),
 			},
 		];
 		const getSecondaryUsers = jest.fn(() => Promise.resolve(secondaryUsers));
@@ -117,6 +127,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 			writePrimaryItem: writeItem,
 			getSecondaryUsers,
 			writeSecondaryItem: writeSecondaryItem,
+			updateSecondaryUserTTL: updateSecondaryUserTTL,
 		});
 
 		expect(writeItem).toHaveBeenCalled();
@@ -129,6 +140,16 @@ describe('processSupporterRatePlanItemLambda', () => {
 		expect(writeSecondaryItem).toHaveBeenCalledWith(
 			expect.objectContaining({ subscriptionName: 'sub-1' }),
 			expect.objectContaining({ secondaryIdentityId: 'secondary-id-2' }),
+		);
+		expect(updateSecondaryUserTTL).toHaveBeenCalledWith(
+			expect.stringContaining('sub-1'),
+			expect.stringContaining('secondary-id-1'),
+			secondaryUserTTLFromPrimarySubscriptionTTL(dayjs(termEndDate)),
+		);
+		expect(updateSecondaryUserTTL).toHaveBeenCalledWith(
+			expect.stringContaining('sub-1'),
+			expect.stringContaining('secondary-id-2'),
+			secondaryUserTTLFromPrimarySubscriptionTTL(dayjs(termEndDate)),
 		);
 	});
 });

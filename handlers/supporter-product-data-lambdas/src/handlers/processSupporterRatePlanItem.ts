@@ -1,5 +1,6 @@
 import { logger } from '@modules/logger/logger';
 import type { SecondaryUserRecord } from '@modules/multiple-account/secondaryUserRepository';
+import { secondaryUserTTLFromPrimarySubscriptionTTL } from '@modules/multiple-account/secondaryUserRepository';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import { supporterRatePlanItemSchema } from '@modules/supporter-product-data/supporterProductData';
 import type { SQSRecord } from 'aws-lambda';
@@ -19,6 +20,11 @@ export type ProcessItemDependencies = {
 	writeSecondaryItem: (
 		primaryItem: SupporterRatePlanItem,
 		secondaryUser: SecondaryUserRecord,
+	) => Promise<void>;
+	updateSecondaryUserTTL: (
+		primarySubscriptionName: string,
+		secondaryIdentityId: string,
+		newTTL: number,
 	) => Promise<void>;
 };
 
@@ -48,9 +54,19 @@ export const processItem = async (
 			subscriptionName: item.subscriptionName,
 		});
 		await Promise.all(
-			secondaryUsers.map((secondaryUser) =>
-				dependencies.writeSecondaryItem(itemWithContribution, secondaryUser),
-			),
+			secondaryUsers.map(async (secondaryUser) => {
+				await dependencies.writeSecondaryItem(
+					itemWithContribution,
+					secondaryUser,
+				);
+				await dependencies.updateSecondaryUserTTL(
+					itemWithContribution.subscriptionName,
+					secondaryUser.secondaryIdentityId,
+					secondaryUserTTLFromPrimarySubscriptionTTL(
+						itemWithContribution.termEndDate,
+					),
+				);
+			}),
 		);
 	}
 };

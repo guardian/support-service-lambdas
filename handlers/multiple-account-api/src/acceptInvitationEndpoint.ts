@@ -2,6 +2,7 @@ import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import type { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { createSecondarySubscription } from '@modules/multiple-account/secondarySubscription';
 import type { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
+import { secondaryUserTTLFromPrimarySubscriptionTTL } from '@modules/multiple-account/secondaryUserRepository';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import {
 	badRequest,
@@ -51,6 +52,9 @@ export const acceptInvitationEndpoint = async (
 			secondaryIdentityId: invitation.secondaryIdentityId,
 			primaryIdentityId: invitation.primaryIdentityId,
 			acceptedDate: zuoraDateFormat(today),
+			expiryDate: secondaryUserTTLFromPrimarySubscriptionTTL(
+				parentSupporterProductDataRecord.termEndDate,
+			),
 		};
 
 		const createSecondaryUserTransaction =
