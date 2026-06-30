@@ -1,7 +1,7 @@
-import type { EmailMessageWithIdentityUserId } from '@modules/email/email';
-import { DataExtensionNames } from '@modules/email/email';
 import type { CurrencyCode } from '@modules/internationalisation/currency';
 import type { Dayjs } from 'dayjs';
+import type { EmailMessageWithIdentityUserId } from '@modules/email/email';
+import { DataExtensionNames } from '@modules/email/email';
 import { buildEmailFields, buildNonDeliveryEmailFields } from './emailFields';
 import type {
 	EmailBillingPeriod,

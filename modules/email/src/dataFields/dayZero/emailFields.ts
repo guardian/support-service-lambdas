@@ -1,10 +1,10 @@
+import type { CurrencyCode } from '@modules/internationalisation/currency';
+import type { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import type {
 	DataExtensionName,
 	EmailMessageWithIdentityUserId,
 } from '@modules/email/email';
-import type { CurrencyCode } from '@modules/internationalisation/currency';
-import type { Dayjs } from 'dayjs';
-import dayjs from 'dayjs';
 import { describePayments, firstPayment } from './paymentDescription';
 import type { EmailPaymentFields } from './paymentEmailFields';
 import { getPaymentFields } from './paymentEmailFields';

@@ -1,11 +1,11 @@
-import { DataExtensionNames } from '@modules/email/email';
+import type { CurrencyCode } from '@modules/internationalisation/currency';
+import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
+import type { Dayjs } from 'dayjs';
 import type {
 	DataExtensionName,
 	EmailMessageWithIdentityUserId,
 } from '@modules/email/email';
-import type { CurrencyCode } from '@modules/internationalisation/currency';
-import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
-import type { Dayjs } from 'dayjs';
+import { DataExtensionNames } from '@modules/email/email';
 import { buildDeliveryEmailFields } from './deliveryEmailFields';
 import { buildEmailFields } from './emailFields';
 import type {
