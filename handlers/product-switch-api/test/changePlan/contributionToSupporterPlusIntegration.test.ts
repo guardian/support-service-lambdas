@@ -25,6 +25,7 @@ import type { LegacyProductSwitchRequestBody } from '../../src/changePlan/legacy
 import { legacyContributionToSupporterPlus } from '../../src/changePlan/legacyContributionToSupporterPlusEndpoint';
 import type { ValidTargetProduct } from '../../src/changePlan/prepare/switchCatalogHelper';
 import type { ProductSwitchRequestBody } from '../../src/changePlan/schemas';
+import { ToSingleGuardianSubscription } from '../../src/changePlan/toSingleGuardianSubscription';
 
 // change to true to test the version on CODE instead of local
 const testCODELambda: boolean = false;
@@ -149,6 +150,7 @@ async function testCall(
 	} else {
 		const changePlanEndpoint = new ChangePlanEndpoint(
 			'CODE',
+			await ToSingleGuardianSubscription.build('CODE'),
 			dayjs(),
 			input,
 			testData.zuoraClient,
