@@ -1,12 +1,14 @@
+import { describePayments } from '@modules/email/dataFields/dayZero/paymentDescription';
 import type { EmailMessageWithUserId } from '@modules/email/email';
 import { getCurrencyInfo } from '@modules/internationalisation/currency';
+import type { SimpleInvoiceTotal } from '@modules/zuora/billingPreview';
 import dayjs from 'dayjs';
 import type { PaymentMethodType } from '../prepare/accountInformation';
 import type { SwitchInformation } from '../prepare/switchInformation';
 
 export const buildEmailMessage = (
 	firstPaymentAmount: number,
-	nextPayment: { date: Date; total: number } | undefined,
+	paymentSchedule: SimpleInvoiceTotal[],
 	switchInformation: SwitchInformation,
 	today: dayjs.Dayjs,
 ): EmailMessageWithUserId => {
@@ -21,12 +23,18 @@ export const buildEmailMessage = (
 	const { subscriptionNumber, productRatePlanKey } =
 		switchInformation.subscription;
 
-	const frequency = (
+	const subscriptionRate = describePayments(
 		{
-			Monthly: 'Monthly',
-			Annual: 'Annually',
-		} as const
-	)[productRatePlanKey];
+			payments: paymentSchedule.map(({ date, total }) => ({
+				date,
+				amount: total,
+			})),
+		},
+		productRatePlanKey,
+		currency,
+		false,
+	);
+	const nextPaymentDate = paymentSchedule[0]?.date;
 
 	return {
 		To: {
@@ -36,18 +44,13 @@ export const buildEmailMessage = (
 					first_name: firstName,
 					last_name: lastName,
 					currency: getCurrencyInfo(currency).extendedGlyph,
-					price: switchInformation.target.ongoingPrice.toFixed(2),
 					first_payment_amount: firstPaymentAmount.toFixed(2),
 					date_of_first_payment: today.format('DD MMMM YYYY'),
-					next_payment_amount:
-						nextPayment !== undefined
-							? nextPayment.total.toFixed(2)
-							: 'unknown amount',
 					date_of_next_payment:
-						nextPayment !== undefined
-							? dayjs(nextPayment.date).format('DD MMMM YYYY')
+						nextPaymentDate !== undefined
+							? dayjs(nextPaymentDate).format('DD MMMM YYYY')
 							: 'unknown date',
-					payment_frequency: frequency,
+					subscription_rate: subscriptionRate,
 					payment_method: emailPaymentMethodTypes[paymentMethodType],
 					subscription_id: subscriptionNumber,
 				},

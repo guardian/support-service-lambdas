@@ -18,7 +18,7 @@ import {
 } from './switchCatalogHelper';
 
 export type TargetInformation = {
-	ongoingPrice: number; // email, sf tracking
+	ongoingPrice: number; // sf tracking
 	productRatePlanId: string; // order, supporter product data
 	ratePlanName: string; // supporter product data
 	dataExtensionName: DataExtensionName; // email

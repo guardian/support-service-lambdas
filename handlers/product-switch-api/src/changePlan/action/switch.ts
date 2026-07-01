@@ -1,6 +1,7 @@
 import type { EmailMessageWithUserId } from '@modules/email/email';
 import type { Stage } from '@modules/stage';
 import { sendToSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
+import type { SimpleInvoiceTotal } from '@modules/zuora/billingPreview';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type dayjs from 'dayjs';
 import { takePaymentOrAdjustInvoice } from '../../payment';
@@ -10,7 +11,7 @@ import type { SwitchOrderRequestBuilder } from '../prepare/buildSwitchOrderReque
 import type { SwitchInformation } from '../prepare/switchInformation';
 import type { ProductSwitchRequestBody } from '../schemas';
 import type { CreateSwitchOrder } from './createSwitchOrder';
-import type { GetNextPayment } from './getNextPayment';
+import type { GetPaymentSchedule } from './getPaymentSchedule';
 import { buildEmailMessage } from './productSwitchEmail';
 
 export type SwitchResponse = { message: string };
@@ -20,7 +21,7 @@ export class DoSwitchAction {
 		private zuoraClient: ZuoraClient,
 		private stage: Stage,
 		private today: dayjs.Dayjs,
-		private getNextPayment: GetNextPayment,
+		private getPaymentSchedule: GetPaymentSchedule,
 		private createSwitchOrder: CreateSwitchOrder,
 		private sendEmail: (
 			stage: Stage,
@@ -45,14 +46,14 @@ export class DoSwitchAction {
 			switchInformation.account.defaultPaymentMethodId,
 		);
 
-		const nextPayment = await this.getNextPayment.execute(
+		const paymentSchedule = await this.getPaymentSchedule.execute(
 			this.today.add(13, 'months'),
 			switchInformation.subscription.subscriptionNumber,
 			switchInformation.subscription.accountNumber,
 		);
 
 		await Promise.allSettled([
-			this.sendThankYouEmail(paidAmount, nextPayment, switchInformation),
+			this.sendThankYouEmail(paidAmount, paymentSchedule, switchInformation),
 			sendSalesforceTracking(
 				this.stage,
 				input,
@@ -75,12 +76,12 @@ export class DoSwitchAction {
 
 	private sendThankYouEmail(
 		firstPaymentAmount: number,
-		nextPayment: { date: Date; total: number } | undefined,
+		paymentSchedule: SimpleInvoiceTotal[],
 		switchInformation: SwitchInformation,
 	) {
 		const emailMessage: EmailMessageWithUserId = buildEmailMessage(
 			firstPaymentAmount,
-			nextPayment,
+			paymentSchedule,
 			switchInformation,
 			this.today,
 		);

@@ -1,3 +1,4 @@
+import type { SimpleInvoiceTotal } from '@modules/zuora/billingPreview';
 import {
 	getBillingPreview,
 	getOrderedInvoiceTotals,
@@ -7,14 +8,17 @@ import {
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type dayjs from 'dayjs';
 
-export class GetNextPayment {
+/**
+ * returns the payment schedule for a given subscription in a simple format suitable for summary display e.g. on screen or in confirmation emails
+ */
+export class GetPaymentSchedule {
 	constructor(private zuoraClient: ZuoraClient) {}
 
 	execute = async (
 		targetDate: dayjs.Dayjs,
 		subscriptionNumber: string,
 		accountNumber: string,
-	): Promise<{ date: Date; total: number } | undefined> => {
+	): Promise<SimpleInvoiceTotal[]> => {
 		const billingPreview = await getBillingPreview(
 			this.zuoraClient,
 			targetDate,
@@ -24,6 +28,6 @@ export class GetNextPayment {
 			toSimpleInvoiceItems(
 				itemsForSubscription(subscriptionNumber)(billingPreview),
 			),
-		)[0];
+		);
 	};
 }
