@@ -8,13 +8,15 @@ import type { SwitchInformation } from '../../../src/changePlan/prepare/switchIn
 import type { TargetInformation } from '../../../src/changePlan/prepare/targetInformation';
 
 test('Email message body is correct', () => {
+	const testPaymentSchedule = [
+		{ date: new Date(2026, 5, 29), total: 12.21 },
+		{ date: new Date(2027, 5, 29), total: 12.21 },
+	];
+
 	const dateOfFirstPayment = dayjs('2024-04-16');
 	const emailMessage: EmailMessageWithUserId = buildEmailMessage(
 		5.6,
-		[
-			{ date: new Date(2026, 5, 29), total: 12.21 },
-			{ date: new Date(2027, 5, 29), total: 12.21 },
-		],
+		testPaymentSchedule,
 		testSwitchInformation,
 		dateOfFirstPayment,
 	);
@@ -40,6 +42,27 @@ test('Email message body is correct', () => {
 		IdentityUserId: '123456789',
 	};
 	expect(emailMessage).toStrictEqual(expectedOutput);
+});
+
+test('Email subscription_rate is correct during a discount', () => {
+	const testDiscountedPaymentSchedule = [
+		{ date: new Date(2026, 5, 29), total: 8.21 },
+		{ date: new Date(2027, 5, 29), total: 12.21 },
+	];
+
+	const dateOfFirstPayment = dayjs('2024-04-16');
+	const emailMessage: EmailMessageWithUserId = buildEmailMessage(
+		5.6,
+		testDiscountedPaymentSchedule,
+		testSwitchInformation,
+		dateOfFirstPayment,
+	);
+
+	const expectedSubscriptionRate =
+		'£8.21 for the first year, then £12.21 every year';
+	const actualSubsciptionRate =
+		emailMessage.To.ContactAttributes.SubscriberAttributes.subscription_rate;
+	expect(actualSubsciptionRate).toEqual(expectedSubscriptionRate);
 });
 
 const emailAddress = 'test@thegulocal.com';
