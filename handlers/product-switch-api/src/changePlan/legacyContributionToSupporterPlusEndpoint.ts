@@ -9,6 +9,7 @@ import { z } from 'zod';
 import type { PreviewResponse, SwitchDiscountResponse } from './action/preview';
 import { ChangePlanEndpoint } from './changePlanEndpoint';
 import { productSwitchCommonRequestSchema } from './schemas';
+import { ToSingleGuardianSubscription } from './toSingleGuardianSubscription';
 
 export async function legacyContributionToSupporterPlus(
 	stage: Stage,
@@ -20,6 +21,7 @@ export async function legacyContributionToSupporterPlus(
 ) {
 	const productSwitchEndpoint = new ChangePlanEndpoint(
 		stage,
+		await ToSingleGuardianSubscription.build(stage),
 		today,
 		{
 			...body,

@@ -63,7 +63,7 @@ export const getTargetInformation = (
 	includesContribution: boolean,
 	productCatalogHelper: ProductCatalogHelper,
 	discountEnabled?: boolean,
-): Promise<TargetInformation> => {
+): TargetInformation => {
 	const targetProductKeys: GuardianCatalogKeys<typeof input.targetProduct> =
 		productCatalogHelper.validateOrThrow(
 			input.targetProduct,
@@ -108,7 +108,7 @@ function getSwitchSpecificTargetInformationOrThrow<
 	sourceProductKeys: GuardianCatalogKeys<SP>,
 	targetProductKeys: GuardianCatalogKeys<TP>,
 	switchActionData: SwitchActionData,
-): Promise<TargetInformation> {
+): TargetInformation {
 	const validSwitches: AvailableTargetProducts = getAvailableTargetProducts(
 		sourceProductKeys.productKey,
 		sourceProductKeys.productRatePlanKey,

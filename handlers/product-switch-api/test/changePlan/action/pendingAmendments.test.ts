@@ -42,8 +42,8 @@ const { subscription } = loadSubscription(
 );
 const account = zuoraAccountSchema.parse(accountJson);
 
-const getTestTargetInformation = async () =>
-	await supporterPlusTargetInformation.fromUserInformation(
+const getTestTargetInformation = () =>
+	supporterPlusTargetInformation.fromUserInformation(
 		productCatalog.SupporterPlus.ratePlans.Annual,
 		{
 			mode: 'switchToBasePrice',
@@ -98,8 +98,7 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 			},
 		} satisfies ZuoraPreviewResponse);
 
-		const switchInformation: TargetInformation =
-			await getTestTargetInformation();
+		const switchInformation: TargetInformation = getTestTargetInformation();
 
 		const subscriptionInformation = getSubscriptionInformation(subscription);
 
@@ -188,8 +187,7 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 			sendToSupporterProductData,
 		}));
 
-		const targetInformation: TargetInformation =
-			await getTestTargetInformation();
+		const targetInformation: TargetInformation = getTestTargetInformation();
 
 		const subscriptionInformation = getSubscriptionInformation(subscription);
 

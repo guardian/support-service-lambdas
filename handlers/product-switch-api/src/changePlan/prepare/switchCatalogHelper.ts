@@ -18,7 +18,7 @@ export interface SwitchTargetInformation<
 	fromUserInformation(
 		productRatePlan: ProductRatePlan<P, RPK>,
 		switchActionData: SwitchActionData,
-	): Promise<TargetInformation>;
+	): TargetInformation;
 }
 
 type AvailableTargetRatePlans<P extends ProductKey> = {

@@ -19,7 +19,7 @@ export const digitalSubscriptionTargetInformation: SwitchTargetInformation<
 			'Annual' | 'Monthly'
 		>,
 		switchActionData: SwitchActionData,
-	): Promise<TargetInformation> => {
+	): TargetInformation => {
 		if (switchActionData.mode === 'save') {
 			throw new ValidationError(
 				'you cannot currently get a discount on t2->3 switch',
@@ -45,7 +45,7 @@ export const digitalSubscriptionTargetInformation: SwitchTargetInformation<
 				? `Digital Pack Monthly`
 				: `Digital Pack Annual`;
 
-		return Promise.resolve({
+		return {
 			actualTotalPrice: catalogPrice,
 			productRatePlanId: productRatePlan.id,
 			ratePlanName,
@@ -53,6 +53,6 @@ export const digitalSubscriptionTargetInformation: SwitchTargetInformation<
 			subscriptionChargeId: productRatePlan.charges.Subscription.id,
 			discount,
 			dataExtensionName: DataExtensionNames.supporterPlusToDigitalPlusSwitch,
-		} satisfies TargetInformation);
+		} satisfies TargetInformation;
 	},
 };
