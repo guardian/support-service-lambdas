@@ -28,7 +28,7 @@ const getSwitchInformation = (): SwitchInformation => ({
 	target: {
 		productRatePlanId: 'supporterPlusProductRatePlanId',
 		subscriptionChargeId: 'subscriptionChargeId',
-		actualTotalPrice: 1,
+		ongoingPrice: 1,
 		ratePlanName: 'Supporter Plus V2 - Monthly',
 		dataExtensionName:
 			DataExtensionNames.recurringContributionToSupporterPlusSwitch,

@@ -28,7 +28,7 @@ describe('digitalSubscriptionTargetInformation', () => {
 			switchActionData,
 		);
 
-		expect(result.actualTotalPrice).toBe(catalogPrice);
+		expect(result.ongoingPrice).toBe(catalogPrice);
 		expect(result.productRatePlanId).toBe(annualDigitalSubscriptionRatePlan.id);
 		expect(result.ratePlanName).toBe('Digital Pack Annual');
 		expect(result.contributionCharge).toBeUndefined();
@@ -68,7 +68,7 @@ describe('digitalSubscriptionTargetInformation', () => {
 			switchActionData,
 		);
 
-		expect(result.actualTotalPrice).toBe(catalogPrice);
+		expect(result.ongoingPrice).toBe(catalogPrice);
 	});
 
 	test('throws ValidationError in save mode', () => {

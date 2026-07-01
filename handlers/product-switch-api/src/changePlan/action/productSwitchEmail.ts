@@ -35,11 +35,10 @@ export const buildEmailMessage = (
 					first_name: firstName,
 					last_name: lastName,
 					currency: getCurrencyInfo(currency).extendedGlyph,
-					price: switchInformation.target.actualTotalPrice.toFixed(2),
+					price: switchInformation.target.ongoingPrice.toFixed(2),
 					first_payment_amount: firstPaymentAmount.toFixed(2),
 					date_of_first_payment: today.format('DD MMMM YYYY'),
-					next_payment_amount:
-						switchInformation.target.actualTotalPrice.toFixed(2),
+					next_payment_amount: switchInformation.target.ongoingPrice.toFixed(2),
 					date_of_next_payment: today
 						.add(billingPeriodMonths, 'month')
 						.format('DD MMMM YYYY'),

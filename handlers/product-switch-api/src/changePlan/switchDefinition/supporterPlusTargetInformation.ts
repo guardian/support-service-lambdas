@@ -33,7 +33,7 @@ export const supporterPlusTargetInformation: SwitchTargetInformation<
 
 		let discount: Discount | undefined;
 		let contributionAmount: number;
-		let actualTotalPrice: number;
+		let ongoingPrice: number;
 		if (switchActionData.mode === 'save') {
 			const discountDetails = annualContribHalfPriceSupporterPlusForOneYear;
 			const discountedPrice =
@@ -50,15 +50,15 @@ export const supporterPlusTargetInformation: SwitchTargetInformation<
 			}
 			discount = discountDetails;
 			contributionAmount = 0;
-			actualTotalPrice = discountedPrice;
+			ongoingPrice = discountedPrice;
 		} else {
 			// no initial discount possible
-			actualTotalPrice =
+			ongoingPrice =
 				switchActionData.mode === 'switchWithPriceOverride'
 					? switchActionData.userRequestedAmount
 					: Math.max(switchActionData.previousAmount, targetCatalogBasePrice);
 
-			contributionAmount = actualTotalPrice - targetCatalogBasePrice;
+			contributionAmount = ongoingPrice - targetCatalogBasePrice;
 		}
 
 		const ratePlanName =
@@ -67,7 +67,7 @@ export const supporterPlusTargetInformation: SwitchTargetInformation<
 				: `Supporter Plus V2 - Annual`;
 
 		return {
-			actualTotalPrice,
+			ongoingPrice,
 			productRatePlanId: productRatePlan.id,
 			ratePlanName,
 			contributionCharge: {
