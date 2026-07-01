@@ -6,9 +6,9 @@ import {
 	type TransactWriteItem,
 } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
+import { z } from 'zod';
 import { getMaybeSingleOrThrow } from '@modules/arrayFunctions';
 import type { Stage } from '@modules/stage';
-import { z } from 'zod';
 
 const invitationRecordSchema = z.object({
 	subscriptionName: z.string(),

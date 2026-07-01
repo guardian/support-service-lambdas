@@ -3,12 +3,11 @@
  * @group integration
  */
 
+import dayjs from 'dayjs';
+import { z } from 'zod';
 import { SupportRegionId } from '@modules/internationalisation/countryGroup';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import { getPromotion } from '@modules/promotions/v2/getPromotion';
-import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import dayjs from 'dayjs';
-import { z } from 'zod';
 import { deleteAccount } from '@modules/zuora/account';
 import type { CreateSubscriptionWithExistingPaymentMethodInput } from '@modules/zuora/createSubscription/createSubscriptionWithExistingPaymentMethod';
 import { createSubscriptionWithExistingPaymentMethod } from '@modules/zuora/createSubscription/createSubscriptionWithExistingPaymentMethod';
@@ -17,6 +16,7 @@ import type { PaymentMethod } from '@modules/zuora/orders/paymentMethods';
 import { getSubscription } from '@modules/zuora/subscription';
 import { zuoraSubscriptionSchema } from '@modules/zuora/types/objects/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import code from '../../zuora-catalog/test/fixtures/catalog-code.json';
 
 describe('createSubscriptionWithExistingPaymentMethod integration', () => {

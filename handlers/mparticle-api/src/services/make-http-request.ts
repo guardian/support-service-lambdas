@@ -1,6 +1,6 @@
+import type { z } from 'zod';
 import { groupMap } from '@modules/arrayFunctions';
 import { logger } from '@modules/logger/logger';
-import type { z } from 'zod';
 
 export class HttpError extends Error {
 	public statusCode: number;

@@ -1,5 +1,5 @@
-import { logger } from '@modules/logger/logger';
 import type { Handler } from 'aws-lambda';
+import { logger } from '@modules/logger/logger';
 import {
 	type AcquisitionsEventBridgeEvent,
 	acquisitionsEventSchema,

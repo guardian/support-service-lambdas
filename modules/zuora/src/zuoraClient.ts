@@ -1,7 +1,7 @@
-import { logger } from '@modules/logger/logger';
-import type { Stage } from '@modules/stage';
 import type { ZodType } from 'zod';
 import { z } from 'zod';
+import { logger } from '@modules/logger/logger';
+import type { Stage } from '@modules/stage';
 import { getOAuthClientCredentials, ZuoraBearerTokenProvider } from './auth';
 import { generateZuoraError } from './errors';
 import { RestClient, RestClientError } from './restClient';

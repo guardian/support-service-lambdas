@@ -1,7 +1,7 @@
 import * as console from 'node:console';
-import type { Stage } from '@modules/stage';
 import OktaJwtVerifier from '@okta/jwt-verifier';
 import { z } from 'zod';
+import type { Stage } from '@modules/stage';
 
 // The claims object returned by Okta. It should include the identity ID and email
 const jwtClaimsSchema = z.object({

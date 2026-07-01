@@ -1,7 +1,7 @@
+import type { z } from 'zod';
 import { stageFromEnvironment } from '@modules/stage';
 import { getSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { z } from 'zod';
 import { BigQueryRecordSchema } from '../types';
 
 export type SubIsActiveInput = z.infer<typeof BigQueryRecordSchema>;

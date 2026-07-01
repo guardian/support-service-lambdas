@@ -1,5 +1,5 @@
-import type { UserBenefitsResponse } from '@modules/product-benefits/schemas';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
+import type { UserBenefitsResponse } from '@modules/product-benefits/schemas';
 import { benefitsMeHandler } from '../src/benefitsMe';
 
 jest.mock('@modules/identity/apiGateway', () => ({

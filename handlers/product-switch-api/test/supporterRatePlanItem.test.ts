@@ -1,5 +1,5 @@
-import { DataExtensionNames } from '@modules/email/email';
 import dayjs from 'dayjs';
+import { DataExtensionNames } from '@modules/email/email';
 import type { SwitchInformation } from '../src/changePlan/prepare/switchInformation';
 import { supporterRatePlanItemFromSwitchInformation } from '../src/supporterProductData';
 

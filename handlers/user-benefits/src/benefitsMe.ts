@@ -1,3 +1,4 @@
+import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { buildAuthenticate } from '@modules/identity/apiGateway';
 import type { IdentityUserDetails } from '@modules/identity/oktaTokenHelper';
 import { Lazy } from '@modules/lazy';
@@ -8,7 +9,6 @@ import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import { buildErrorResponse } from '@modules/routing/apiGatewayResponses';
 import type { Stage } from '@modules/stage';
 import { stageFromEnvironment } from '@modules/stage';
-import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { buildHttpResponse } from './response';
 import { getTrialInformation } from './trials';
 

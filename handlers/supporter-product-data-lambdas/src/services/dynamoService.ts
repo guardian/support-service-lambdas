@@ -3,14 +3,14 @@ import {
 	DynamoDBClient,
 	UpdateItemCommand,
 } from '@aws-sdk/client-dynamodb';
+import type { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import { awsConfig } from '@modules/aws/config';
 import { logger } from '@modules/logger/logger';
 import type { Stage } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import { zuoraDateFormat } from '@modules/zuora/utils';
-import type { Dayjs } from 'dayjs';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
 
 dayjs.extend(utc);
 

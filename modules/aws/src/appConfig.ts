@@ -1,7 +1,7 @@
 import { GetParametersByPathCommand, SSMClient } from '@aws-sdk/client-ssm';
+import type { z } from 'zod';
 import { wrapAwsClient } from '@modules/logger/wrapAwsClient';
 import { objectEntries } from '@modules/objectFunctions';
-import type { z } from 'zod';
 import { groupMap, mapValues, partitionByType } from '../../arrayFunctions';
 import { awsConfig } from '../src/config';
 import { fetchAllPages } from './fetchAllPages';

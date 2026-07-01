@@ -1,7 +1,7 @@
+import dayjs from 'dayjs';
 import type { SecondaryUserRecord } from '@modules/multiple-account/secondaryUserRepository';
 import { secondaryUserTTLFromPrimarySubscriptionTTL } from '@modules/multiple-account/secondaryUserRepository';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
-import dayjs from 'dayjs';
 import { processItem } from '../src/handlers/processSupporterRatePlanItem';
 
 const termEndDate = '2026-03-01';

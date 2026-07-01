@@ -1,11 +1,11 @@
+import dayjs from 'dayjs';
 import { SupportRegionId } from '@modules/internationalisation/countryGroup';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { Promo } from '@modules/promotions/v2/schema';
-import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import dayjs from 'dayjs';
 import { createSubscriptionWithExistingPaymentMethod } from '@modules/zuora/createSubscription/createSubscriptionWithExistingPaymentMethod';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import code from '../../zuora-catalog/test/fixtures/catalog-code.json';
 
 const buildMockZuoraClient = (

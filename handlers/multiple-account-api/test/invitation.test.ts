@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import * as identity from '@modules/identity/idapi';
 import type { IdentityClient } from '@modules/identity/identityClient';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
@@ -8,7 +9,6 @@ import type {
 import { zuoraSubscriptionSchema } from '@modules/zuora/types/objects';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import dayjs from 'dayjs';
 import code from '../../../modules/zuora-catalog/test/fixtures/catalog-code.json';
 import { createInvitationEndpoint } from '../src/createInvitationEndpoint';
 import type {

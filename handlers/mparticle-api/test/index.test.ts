@@ -1,5 +1,5 @@
-import { logger } from '@modules/logger/logger';
 import type { Context, SQSEvent } from 'aws-lambda';
+import { logger } from '@modules/logger/logger';
 import { processUserDeletion } from '../src/apis/dataSubjectRequests/deleteUser';
 import { handlerDeletion } from '../src/index';
 

@@ -1,9 +1,9 @@
+import { z } from 'zod';
 import { isoCurrencySchema } from '@modules/internationalisation/schemas';
 import { productPurchaseSchema } from '@modules/product-catalog/productPurchaseSchema';
 import { existingPaymentMethodInputSchema } from '@modules/zuora/createSubscription/createSubscriptionWithExistingPaymentMethod';
 import { giftRecipientSchema } from '@modules/zuora/createSubscription/giftRecipient';
 import { paymentGatewaySchema } from '@modules/zuora/orders/paymentGateways';
-import { z } from 'zod';
 
 export const contactSchema = z.object({
 	firstName: z.string(),

@@ -1,7 +1,7 @@
+import { z } from 'zod';
 import { isInList } from '@modules/arrayFunctions';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { objectEntries, objectKeysNonEmpty } from '@modules/objectFunctions';
-import { z } from 'zod';
 import type { termTypeSchema } from '@modules/product-catalog/productCatalogSchema';
 import { productCatalogSchema } from '@modules/product-catalog/productCatalogSchema';
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';

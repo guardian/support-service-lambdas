@@ -1,8 +1,3 @@
-import type {
-	ProductId,
-	ProductRatePlanChargeId,
-	ProductRatePlanId,
-} from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
 import { ZuoraError } from '@modules/zuora/errors/zuoraError';
 import {
@@ -19,6 +14,11 @@ import {
 	zuoraSubscriptionSchema,
 	zuoraSubscriptionsFromAccountSchema,
 } from '@modules/zuora/types';
+import type {
+	ProductId,
+	ProductRatePlanChargeId,
+	ProductRatePlanId,
+} from '@modules/zuora-catalog/zuoraCatalogSchema';
 import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
 
 jest.mock('@modules/zuora/zuoraClient');

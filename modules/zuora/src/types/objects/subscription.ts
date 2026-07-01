@@ -1,10 +1,10 @@
+import { z } from 'zod';
 import { BillingPeriodValues } from '@modules/billingPeriod';
 import {
 	productIdSchema,
 	productRatePlanChargeIdSchema,
 	productRatePlanIdSchema,
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import { z } from 'zod';
 
 const billingPeriodAlignmentValues = [
 	'AlignToCharge',

@@ -1,4 +1,5 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import type { Handler } from 'aws-lambda';
 import { awsConfig } from '@modules/aws/config';
 import { buildAuthenticate } from '@modules/identity/apiGateway';
 import { IdentityClient } from '@modules/identity/identityClient';
@@ -10,7 +11,6 @@ import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
 import { withBodyParser, withPathParser } from '@modules/routing/withParsers';
 import { stageFromEnvironment } from '@modules/stage';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
-import type { Handler } from 'aws-lambda';
 import {
 	acceptInvitationEndpoint,
 	acceptInvitationPathSchema,

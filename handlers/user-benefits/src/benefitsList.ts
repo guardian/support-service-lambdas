@@ -1,10 +1,10 @@
+import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { productBenefitMapping } from '@modules/product-benefits/productBenefit';
 import {
 	getCustomerFacingName,
 	isProductKey,
 } from '@modules/product-catalog/productCatalog';
 import { zuoraCatalogToProductKey } from '@modules/product-catalog/zuoraToProductNameMappings';
-import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 export const benefitsListHandler = async (
 	event: APIGatewayProxyEvent,

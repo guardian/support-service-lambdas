@@ -1,7 +1,7 @@
-import { getCallerInfo } from '@modules/logger/getCallerInfo';
-import { logger } from '@modules/logger/logger';
 import type { SQSEvent, SQSRecord } from 'aws-lambda';
 import type { z } from 'zod';
+import { getCallerInfo } from '@modules/logger/getCallerInfo';
+import { logger } from '@modules/logger/logger';
 import type { HandlerEnv } from '@modules/routing/lambdaHandler';
 import { LambdaHandlerWithServices } from '@modules/routing/lambdaHandler';
 
