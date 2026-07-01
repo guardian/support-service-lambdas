@@ -1,10 +1,12 @@
 import guardian from '@guardian/eslint-config';
+import { importOrderConfig } from './eslint.shared.mjs';
 
 export default [
 	...guardian.configs.recommended,
 	...guardian.configs.jest,
 	...guardian.configs.react,
 	...guardian.configs.storybook,
+	importOrderConfig,
 	{
 		rules: {
 			'@typescript-eslint/consistent-type-assertions': [
