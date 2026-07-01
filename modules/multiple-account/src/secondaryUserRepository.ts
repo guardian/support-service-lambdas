@@ -12,7 +12,7 @@ import type { Stage } from '@modules/stage';
 import type { Dayjs } from 'dayjs';
 import { z } from 'zod';
 
-const secondaryUserRecordSchema = z.object({
+export const secondaryUserRecordSchema = z.object({
 	subscriptionName: z.string(),
 	secondaryIdentityId: z.string(),
 	primaryIdentityId: z.string(),

@@ -10,7 +10,7 @@ import { getMaybeSingleOrThrow } from '@modules/arrayFunctions';
 import type { Stage } from '@modules/stage';
 import { z } from 'zod';
 
-const invitationRecordSchema = z.object({
+export const invitationRecordSchema = z.object({
 	subscriptionName: z.string(),
 	invitationCode: z.string(),
 	primaryIdentityId: z.string(),
