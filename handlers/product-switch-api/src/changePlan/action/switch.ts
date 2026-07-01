@@ -47,7 +47,7 @@ export class DoSwitchAction {
 		);
 
 		const paymentSchedule = await this.getPaymentSchedule.execute(
-			this.today.add(13, 'months'),
+			this.today.add(25, 'months'),
 			switchInformation.subscription.subscriptionNumber,
 			switchInformation.subscription.accountNumber,
 		);
