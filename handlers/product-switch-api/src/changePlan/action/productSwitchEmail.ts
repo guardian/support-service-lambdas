@@ -1,8 +1,6 @@
 import type { EmailMessageWithUserId } from '@modules/email/email';
-import { sendEmail } from '@modules/email/email';
 import { getCurrencyInfo } from '@modules/internationalisation/currency';
-import type { Stage } from '@modules/stage';
-import dayjs from 'dayjs';
+import type dayjs from 'dayjs';
 import type { PaymentMethodType } from '../prepare/accountInformation';
 import type { SwitchInformation } from '../prepare/switchInformation';
 
@@ -60,18 +58,4 @@ const emailPaymentMethodTypes: Record<PaymentMethodType, string> = {
 	BankTransfer: 'Direct Debit',
 	CreditCardReferenceTransaction: 'Credit/Debit Card',
 	PayPal: 'PayPal',
-};
-
-export const sendThankYouEmail = async (
-	stage: Stage,
-	firstPaymentAmount: number,
-	switchInformation: SwitchInformation,
-) => {
-	const emailMessage: EmailMessageWithUserId = buildEmailMessage(
-		firstPaymentAmount,
-		switchInformation,
-		dayjs(),
-	);
-
-	return await sendEmail(stage, emailMessage);
 };

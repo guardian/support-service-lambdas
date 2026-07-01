@@ -52,6 +52,7 @@ export const supporterPlusTargetInformation: SwitchTargetInformation<
 			contributionAmount = 0;
 			actualTotalPrice = discountedPrice;
 		} else {
+			// no initial discount possible
 			actualTotalPrice =
 				switchActionData.mode === 'switchWithPriceOverride'
 					? switchActionData.userRequestedAmount
