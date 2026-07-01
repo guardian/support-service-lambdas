@@ -67,7 +67,7 @@ const testSubscriptionInformation: SubscriptionInformation = {
 };
 
 const testTargetInformation: TargetInformation = {
-	actualTotalPrice: 10,
+	ongoingPrice: 10,
 	contributionCharge: undefined,
 	dataExtensionName:
 		DataExtensionNames.recurringContributionToSupporterPlusSwitch,

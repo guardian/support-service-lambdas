@@ -46,7 +46,7 @@ export const digitalSubscriptionTargetInformation: SwitchTargetInformation<
 				: `Digital Pack Annual`;
 
 		return {
-			actualTotalPrice: catalogPrice,
+			ongoingPrice: catalogPrice,
 			productRatePlanId: productRatePlan.id,
 			ratePlanName,
 			contributionCharge: undefined,
