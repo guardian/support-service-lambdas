@@ -1,6 +1,5 @@
 import { COMMANDS } from './commands.js';
 import {
-	closeExecutionOptions,
 	type CommandResult,
 	createExecutionOptions,
 	toCommandResult,
@@ -77,27 +76,20 @@ const execOptions = createExecutionOptions({
 	tailLines: parsed.tailLines,
 	grepPattern: parsed.grepPattern,
 });
-if (execOptions.logFilePath) {
-	process.stdout.write(`INFO full output log: ${execOptions.logFilePath}\n`);
-}
 
 const [rawCommand, ...cmdArgs] = parsed.positionals;
 
 let result: CommandResult;
-try {
-	if (!rawCommand) {
-		result =
-			(await COMMANDS['help']?.handler([], execOptions)) ?? toCommandResult([]);
+if (!rawCommand) {
+	result =
+		(await COMMANDS['help']?.handler([], execOptions)) ?? toCommandResult([]);
+} else {
+	const command = COMMANDS[rawCommand];
+	if (command) {
+		result = await command.handler(cmdArgs, execOptions);
 	} else {
-		const command = COMMANDS[rawCommand];
-		if (command) {
-			result = await command.handler(cmdArgs, execOptions);
-		} else {
-			const helpOutput = await COMMANDS['help']?.handler([], execOptions);
-			result = { output: helpOutput?.output ?? '', exitCode: 1 };
-		}
+		const helpOutput = await COMMANDS['help']?.handler([], execOptions);
+		result = { output: helpOutput?.output ?? '', exitCode: 1 };
 	}
-} finally {
-	closeExecutionOptions(execOptions);
 }
 printResult(result);

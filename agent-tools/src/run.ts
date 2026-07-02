@@ -1,6 +1,6 @@
 import { spawn } from 'child_process';
 import { createHash } from 'crypto';
-import { createWriteStream, type WriteStream } from 'fs';
+import { createWriteStream } from 'fs';
 import { tmpdir } from 'os';
 import { join, relative, resolve, sep } from 'path';
 
@@ -22,8 +22,6 @@ export type ExecutionOptions = {
 	tailLines: number | null;
 	grepPattern: string | null;
 	grepRegex: RegExp | null;
-	logFilePath: string | null;
-	logStream: WriteStream | null;
 };
 
 export function toCommandResult(lines: string[], exitCode = 0): CommandResult {
@@ -121,35 +119,7 @@ export function createExecutionOptions({
 	grepPattern: string | null;
 }): ExecutionOptions {
 	const grepRegex = grepPattern === null ? null : new RegExp(grepPattern);
-	if (tailLines === null) {
-		return {
-			root,
-			verbose,
-			tailLines,
-			grepPattern,
-			grepRegex,
-			logFilePath: null,
-			logStream: null,
-		};
-	}
-	const logFilePath = join(
-		tmpdir(),
-		`agent-tool-${Date.now()}-${process.pid}.log`,
-	);
-	const logStream = createWriteStream(logFilePath, { flags: 'a' });
-	return {
-		root,
-		verbose,
-		tailLines,
-		grepPattern,
-		grepRegex,
-		logFilePath,
-		logStream,
-	};
-}
-
-export function closeExecutionOptions(options: ExecutionOptions): void {
-	options.logStream?.end();
+	return { root, verbose, tailLines, grepPattern, grepRegex };
 }
 
 /**
@@ -263,6 +233,14 @@ export async function run(
 			env: process.env,
 			stdio: ['ignore', 'pipe', 'pipe'],
 		});
+		// Always (over)write the single per-repo log so `last` can retrieve
+		// this run's full output later, regardless of --tail/--grep/--all.
+		const logStream = createWriteStream(getLastLogPath(execOptions.root), {
+			flags: 'w',
+		});
+		logStream.on('error', () => {
+			// Best-effort capture only; never let log-file issues break a run.
+		});
 		let output = '';
 		let pendingDisplayLine = '';
 
@@ -293,7 +271,7 @@ export async function run(
 		const writeChunk = (chunk: Buffer) => {
 			const text = chunk.toString('utf-8');
 			output += text;
-			execOptions.logStream?.write(text);
+			logStream.write(text);
 			flushDisplay(text, false);
 		};
 		child.stdout.on('data', (chunk: Buffer) => {
@@ -304,6 +282,7 @@ export async function run(
 		});
 		child.on('close', (status) => {
 			flushDisplay('', true);
+			logStream.end();
 			const exitCode = status ?? 1;
 			resolvePromise({
 				passed: exitCode === 0,

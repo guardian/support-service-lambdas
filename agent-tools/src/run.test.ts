@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import { existsSync, readFileSync, unlinkSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import test from 'node:test';
 import {
 	buildPnpmArgs,
@@ -7,6 +9,7 @@ import {
 	getLastLogPath,
 	postProcessOutput,
 	resolveRepoPath,
+	run,
 } from './run.js';
 
 void test('buildPnpmArgs explicit: generates --filter ./pkg with --if-present', () => {
@@ -293,4 +296,53 @@ void test('getLastLogPath: different for different roots', () => {
 void test('getLastLogPath: lives in the OS temp dir and is repo-specific', () => {
 	const path = getLastLogPath('/repo/root');
 	assert.match(path, /agent-tool-last-[0-9a-f]{12}\.log$/);
+});
+
+// tmpdir() is a real, existing directory distinct from any actual repo root,
+// so it's a safe stand-in for `root` (used as both cwd and the log-path key)
+// in these integration-style tests that spawn a real child process.
+const TEST_ROOT = tmpdir();
+
+function cleanupLastLog(root: string): void {
+	const path = getLastLogPath(root);
+	if (existsSync(path)) {
+		unlinkSync(path);
+	}
+}
+
+const baseExecOptions = {
+	root: TEST_ROOT,
+	verbose: false,
+	tailLines: null,
+	grepPattern: null,
+	grepRegex: null,
+};
+
+void test('run: captures full combined stdout/stderr to the per-root log file', async () => {
+	cleanupLastLog(TEST_ROOT);
+	try {
+		await run(
+			'node',
+			['-e', 'console.log("out-marker"); console.error("err-marker")'],
+			baseExecOptions,
+		);
+		const logged = readFileSync(getLastLogPath(TEST_ROOT), 'utf-8');
+		assert.match(logged, /out-marker/);
+		assert.match(logged, /err-marker/);
+	} finally {
+		cleanupLastLog(TEST_ROOT);
+	}
+});
+
+void test('run: overwrites rather than appends to the previous log for the same root', async () => {
+	cleanupLastLog(TEST_ROOT);
+	try {
+		await run('node', ['-e', 'console.log("first-run")'], baseExecOptions);
+		await run('node', ['-e', 'console.log("second-run")'], baseExecOptions);
+		const logged = readFileSync(getLastLogPath(TEST_ROOT), 'utf-8');
+		assert.equal(logged.includes('first-run'), false);
+		assert.match(logged, /second-run/);
+	} finally {
+		cleanupLastLog(TEST_ROOT);
+	}
 });
