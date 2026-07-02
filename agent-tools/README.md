@@ -19,9 +19,17 @@ Help output (`./agent-tool help`) is generated from the same command metadata.
 ## Output modes
 
 - Default: full child command output is streamed while deterministic progress/summary lines are emitted
-- `--tail N`: write full streaming output to a temp log file (path printed before execution) and include last `N` lines for failures
+- `--tail N`: include the last `N` lines for failures (bypasses the default cap)
 - `--grep PATTERN`: stream only subcommand output lines that match the regex pattern
+- `--context N`: keep `N` lines of context around each `--grep` match, like `grep -C` (requires `--grep`)
+- `--all`: show the full output, bypassing `--tail`/the default cap entirely
 - `--tail N --grep PATTERN`: keep concise failure tails while also filtering streamed subcommand lines
+
+Every run's full combined stdout/stderr is also captured to a single, always-overwritten per-repository log file in the OS temp directory (named from a hash of the repo root, so different repos never collide). Its raw path is never printed — use `./agent-tool last` to retrieve it, re-filtered by the same `--tail`/`--grep`/`--context`/`--all` flags. When the default cap truncates an excerpt, a trailing hint such as `— showing last 40 of 312 lines — run ./agent-tool last for more, or pass --all/--tail/--grep/--context` is appended (omitting "run ./agent-tool last" when the hint is shown from inside `last`'s own output).
+
+## Retrieving full output
+
+- `./agent-tool last` — show this repository's most recently recorded full command output, re-filtered by `--tail`/`--grep`/`--context`/`--all`. Fails clearly if no command has run yet for this repository.
 
 ## Verification and fix commands
 
@@ -51,6 +59,7 @@ pnpm --filter agent-tools run check-formatting
 pnpm --filter agent-tools run test
 ./agent-tool help
 ./agent-tool check-formatting --changed
+./agent-tool last
 ./agent-tool snapshot-update
 ./agent-tool install
 ```
