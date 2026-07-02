@@ -22,6 +22,8 @@ export type ExecutionOptions = {
 	tailLines: number | null;
 	grepPattern: string | null;
 	grepRegex: RegExp | null;
+	contextLines: number | null;
+	all: boolean;
 };
 
 export function toCommandResult(lines: string[], exitCode = 0): CommandResult {
@@ -30,6 +32,85 @@ export function toCommandResult(lines: string[], exitCode = 0): CommandResult {
 
 export function printProgress(line: string): void {
 	process.stdout.write(`${line}\n`);
+}
+
+export type ParsedGlobalOptions = {
+	positionals: string[];
+	tailLines: number | null;
+	grepPattern: string | null;
+	contextLines: number | null;
+	all: boolean;
+};
+
+/**
+ * Parses the global --tail/--grep/--context/--all flags out of the raw CLI
+ * args, returning the remaining positionals plus a FAIL CommandResult for
+ * any invalid combination (missing/invalid values, or --context without
+ * --grep, since context is meaningless without a pattern to expand around).
+ */
+export function parseGlobalOptions(
+	args: string[],
+): ParsedGlobalOptions | CommandResult {
+	const positionals: string[] = [];
+	let tailLines: number | null = null;
+	let grepPattern: string | null = null;
+	let contextLines: number | null = null;
+	let all = false;
+
+	for (let i = 0; i < args.length; i += 1) {
+		const arg = args[i]!;
+		if (arg === '--tail') {
+			const raw = args[i + 1];
+			if (!raw) {
+				return toCommandResult(['FAIL --tail requires a numeric value'], 1);
+			}
+			const parsed = Number.parseInt(raw, 10);
+			if (!Number.isFinite(parsed) || parsed <= 0) {
+				return toCommandResult([`FAIL invalid --tail value: ${raw}`], 1);
+			}
+			tailLines = parsed;
+			i += 1;
+			continue;
+		}
+		if (arg === '--grep') {
+			const raw = args[i + 1];
+			if (!raw) {
+				return toCommandResult(['FAIL --grep requires a regex pattern'], 1);
+			}
+			try {
+				new RegExp(raw);
+			} catch {
+				return toCommandResult([`FAIL invalid --grep pattern: ${raw}`], 1);
+			}
+			grepPattern = raw;
+			i += 1;
+			continue;
+		}
+		if (arg === '--context') {
+			const raw = args[i + 1];
+			if (!raw) {
+				return toCommandResult(['FAIL --context requires a numeric value'], 1);
+			}
+			const parsed = Number.parseInt(raw, 10);
+			if (!Number.isFinite(parsed) || parsed < 0) {
+				return toCommandResult([`FAIL invalid --context value: ${raw}`], 1);
+			}
+			contextLines = parsed;
+			i += 1;
+			continue;
+		}
+		if (arg === '--all') {
+			all = true;
+			continue;
+		}
+		positionals.push(arg);
+	}
+
+	if (contextLines !== null && grepPattern === null) {
+		return toCommandResult(['FAIL --context requires --grep'], 1);
+	}
+
+	return { positionals, tailLines, grepPattern, contextLines, all };
 }
 
 /** Builds pnpm args for a set of packages. Pass withDependents=true (--changed) to include each package's dependents. */
@@ -112,14 +193,26 @@ export function createExecutionOptions({
 	verbose,
 	tailLines,
 	grepPattern,
+	contextLines,
+	all,
 }: {
 	root: string;
 	verbose: boolean;
 	tailLines: number | null;
 	grepPattern: string | null;
+	contextLines: number | null;
+	all: boolean;
 }): ExecutionOptions {
 	const grepRegex = grepPattern === null ? null : new RegExp(grepPattern);
-	return { root, verbose, tailLines, grepPattern, grepRegex };
+	return {
+		root,
+		verbose,
+		tailLines,
+		grepPattern,
+		grepRegex,
+		contextLines,
+		all,
+	};
 }
 
 /**
@@ -290,8 +383,8 @@ export async function run(
 				excerpt: postProcessOutput(output, {
 					tailLines: execOptions.tailLines,
 					grepRegex: execOptions.grepRegex,
-					contextLines: null,
-					all: false,
+					contextLines: execOptions.contextLines,
+					all: execOptions.all,
 					defaultCap: DEFAULT_FAILURE_TAIL_LINES,
 				}).excerpt,
 				exitCode,

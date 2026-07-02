@@ -2,54 +2,9 @@ import { COMMANDS } from './commands.js';
 import {
 	type CommandResult,
 	createExecutionOptions,
+	parseGlobalOptions,
 	toCommandResult,
 } from './run.js';
-
-function parseGlobalOptions(args: string[]):
-	| {
-			positionals: string[];
-			tailLines: number | null;
-			grepPattern: string | null;
-	  }
-	| CommandResult {
-	const positionals: string[] = [];
-	let tailLines: number | null = null;
-	let grepPattern: string | null = null;
-
-	for (let i = 0; i < args.length; i += 1) {
-		const arg = args[i]!;
-		if (arg === '--tail') {
-			const raw = args[i + 1];
-			if (!raw) {
-				return toCommandResult(['FAIL --tail requires a numeric value'], 1);
-			}
-			const parsed = Number.parseInt(raw, 10);
-			if (!Number.isFinite(parsed) || parsed <= 0) {
-				return toCommandResult([`FAIL invalid --tail value: ${raw}`], 1);
-			}
-			tailLines = parsed;
-			i += 1;
-			continue;
-		}
-		if (arg === '--grep') {
-			const raw = args[i + 1];
-			if (!raw) {
-				return toCommandResult(['FAIL --grep requires a regex pattern'], 1);
-			}
-			try {
-				new RegExp(raw);
-			} catch {
-				return toCommandResult([`FAIL invalid --grep pattern: ${raw}`], 1);
-			}
-			grepPattern = raw;
-			i += 1;
-			continue;
-		}
-		positionals.push(arg);
-	}
-
-	return { positionals, tailLines, grepPattern };
-}
 
 function printResult(result: CommandResult): never {
 	if (result.output.length > 0) {
@@ -75,6 +30,8 @@ const execOptions = createExecutionOptions({
 	verbose: true,
 	tailLines: parsed.tailLines,
 	grepPattern: parsed.grepPattern,
+	contextLines: parsed.contextLines,
+	all: parsed.all,
 });
 
 const [rawCommand, ...cmdArgs] = parsed.positionals;

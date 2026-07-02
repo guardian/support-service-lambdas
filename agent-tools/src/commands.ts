@@ -18,7 +18,7 @@ export type Handler = (
 export type Command = { usage: string; description: string; handler: Handler };
 
 // Matches valid package paths without hitting the filesystem
-const PKG_RE = /^(handlers|modules)\/\S+$|^(cdk|buildcheck)$/;
+const PKG_RE = /^(handlers|modules)\/\S+$|^(cdk|buildcheck|agent-tools)$/;
 
 function formatResult(name: string, result: ScriptResult): CommandResult {
 	const s = Math.round(result.durationMs / 1000);
@@ -122,7 +122,7 @@ COMMANDS['help'] = {
 	handler: () => {
 		const lines = [
 			'Usage:',
-			'  ./agent-tool <command> [args...] [--tail N] [--grep PATTERN]',
+			'  ./agent-tool <command> [args...] [--tail N] [--grep PATTERN] [--context N] [--all]',
 			'',
 			'Commands:',
 			...Object.entries(COMMANDS).map(([name, cmd]) => {
@@ -131,8 +131,10 @@ COMMANDS['help'] = {
 			}),
 			'',
 			'Global options:',
-			'  --tail N        include N trailing lines for failures and stream full output to a temp log file',
-			'  --grep PATTERN  only stream subcommand output lines that match the regex pattern',
+			'  --tail N        include N trailing lines for failures (bypasses the default cap; overridden by --all)',
+			'  --grep PATTERN  only show subcommand output lines that match the regex pattern',
+			'  --context N     include N lines of context around each --grep match (requires --grep)',
+			'  --all           show the full output, bypassing --tail/the default cap entirely',
 			'',
 			'Notes:',
 			'  - Full child command output streams by default.',

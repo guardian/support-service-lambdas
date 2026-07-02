@@ -7,6 +7,7 @@ import {
 	filterLinesByPattern,
 	filterLinesByPatternWithContext,
 	getLastLogPath,
+	parseGlobalOptions,
 	postProcessOutput,
 	resolveRepoPath,
 	run,
@@ -316,6 +317,8 @@ const baseExecOptions = {
 	tailLines: null,
 	grepPattern: null,
 	grepRegex: null,
+	contextLines: null,
+	all: false,
 };
 
 void test('run: captures full combined stdout/stderr to the per-root log file', async () => {
@@ -345,4 +348,90 @@ void test('run: overwrites rather than appends to the previous log for the same 
 	} finally {
 		cleanupLastLog(TEST_ROOT);
 	}
+});
+
+void test('parseGlobalOptions: parses all flags and leaves other args as positionals', () => {
+	assert.deepEqual(
+		parseGlobalOptions([
+			'test',
+			'handlers/foo',
+			'--tail',
+			'50',
+			'--grep',
+			'ERROR',
+			'--context',
+			'3',
+			'--all',
+		]),
+		{
+			positionals: ['test', 'handlers/foo'],
+			tailLines: 50,
+			grepPattern: 'ERROR',
+			contextLines: 3,
+			all: true,
+		},
+	);
+});
+
+void test('parseGlobalOptions: defaults when no flags are given', () => {
+	assert.deepEqual(parseGlobalOptions(['test', 'handlers/foo']), {
+		positionals: ['test', 'handlers/foo'],
+		tailLines: null,
+		grepPattern: null,
+		contextLines: null,
+		all: false,
+	});
+});
+
+void test('parseGlobalOptions: --tail requires a numeric value', () => {
+	const result = parseGlobalOptions(['--tail']);
+	assert.ok('exitCode' in result);
+	assert.equal(result.exitCode, 1);
+	assert.match(result.output, /--tail requires a numeric value/);
+});
+
+void test('parseGlobalOptions: rejects invalid --tail value', () => {
+	const result = parseGlobalOptions(['--tail', 'abc']);
+	assert.ok('exitCode' in result);
+	assert.match(result.output, /invalid --tail value: abc/);
+});
+
+void test('parseGlobalOptions: rejects invalid --grep regex', () => {
+	const result = parseGlobalOptions(['--grep', '(']);
+	assert.ok('exitCode' in result);
+	assert.match(result.output, /invalid --grep pattern/);
+});
+
+void test('parseGlobalOptions: rejects --context without --grep', () => {
+	const result = parseGlobalOptions(['--context', '3']);
+	assert.ok('exitCode' in result);
+	assert.match(result.output, /--context requires --grep/);
+});
+
+void test('parseGlobalOptions: accepts --context 0 when --grep is present', () => {
+	const result = parseGlobalOptions(['--grep', 'ERROR', '--context', '0']);
+	assert.deepEqual(result, {
+		positionals: [],
+		tailLines: null,
+		grepPattern: 'ERROR',
+		contextLines: 0,
+		all: false,
+	});
+});
+
+void test('parseGlobalOptions: rejects negative --context value', () => {
+	const result = parseGlobalOptions(['--grep', 'ERROR', '--context', '-1']);
+	assert.ok('exitCode' in result);
+	assert.match(result.output, /invalid --context value: -1/);
+});
+
+void test('parseGlobalOptions: --all is a plain boolean flag', () => {
+	const result = parseGlobalOptions(['--all']);
+	assert.deepEqual(result, {
+		positionals: [],
+		tailLines: null,
+		grepPattern: null,
+		contextLines: null,
+		all: true,
+	});
 });
