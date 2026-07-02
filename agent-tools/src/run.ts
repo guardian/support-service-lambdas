@@ -5,8 +5,12 @@ import { tmpdir } from 'os';
 import { join, relative, resolve, sep } from 'path';
 
 const DEFAULT_FAILURE_TAIL_LINES = 40;
-/** Cap for the one-time --context buffered dump; more generous since it's an explicit "show me more" case. */
-const DEFAULT_MAX_OUTPUT_LINES = 200;
+/**
+ * Cap for the one-time --context buffered dump and for the `last` command;
+ * more generous than DEFAULT_FAILURE_TAIL_LINES since both are explicit
+ * "show me more" cases.
+ */
+export const DEFAULT_MAX_OUTPUT_LINES = 200;
 
 export type CommandResult = { output: string; exitCode: number };
 

@@ -1,8 +1,12 @@
+import { existsSync, readFileSync } from 'fs';
 import { listPackages, resolveChangedPackages } from './changed.js';
 import {
 	buildPnpmArgs,
 	type CommandResult,
+	DEFAULT_MAX_OUTPUT_LINES,
 	type ExecutionOptions,
+	getLastLogPath,
+	postProcessOutput,
 	printProgress,
 	resolveRepoPath,
 	run,
@@ -110,6 +114,33 @@ export const COMMANDS: Record<string, Command> = {
 			return formatResult(
 				'git-mv',
 				await run('git', ['mv', srcPath, destPath], execOptions),
+			);
+		},
+	},
+	last: {
+		usage: '',
+		description:
+			"show this repository's most recently recorded full command output, re-filtered by --tail/--grep/--context/--all",
+		handler: (_, execOptions) => {
+			const logPath = getLastLogPath(execOptions.root);
+			if (!existsSync(logPath)) {
+				return Promise.resolve(
+					toCommandResult(
+						['FAIL no previous command output recorded for this repository'],
+						1,
+					),
+				);
+			}
+			const output = readFileSync(logPath, 'utf-8');
+			const { excerpt } = postProcessOutput(output, {
+				tailLines: execOptions.tailLines,
+				grepRegex: execOptions.grepRegex,
+				contextLines: execOptions.contextLines,
+				all: execOptions.all,
+				defaultCap: DEFAULT_MAX_OUTPUT_LINES,
+			});
+			return Promise.resolve(
+				toCommandResult(excerpt ? [excerpt] : ['(no output)']),
 			);
 		},
 	},
