@@ -1,6 +1,6 @@
+import type { Dayjs } from 'dayjs';
 import { getCountryNameByIsoCode } from '@modules/internationalisation/country';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
-import type { Dayjs } from 'dayjs';
 import type { NonDeliveryEmailFields } from './emailFields';
 import { buildNonDeliveryEmailFields } from './emailFields';
 import type {

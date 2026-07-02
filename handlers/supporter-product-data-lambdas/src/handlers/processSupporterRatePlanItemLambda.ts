@@ -1,3 +1,5 @@
+import type { Handler, SQSEvent } from 'aws-lambda';
+import dayjs from 'dayjs';
 import { Lazy } from '@modules/lazy';
 import { createSecondarySubscription } from '@modules/multiple-account/secondarySubscription';
 import { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
@@ -5,8 +7,6 @@ import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { stageFromEnvironment } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
-import type { Handler, SQSEvent } from 'aws-lambda';
-import dayjs from 'dayjs';
 import {
 	getDiscountProductRatePlanIds,
 	isDiscountProductRatePlanItem,

@@ -1,7 +1,7 @@
-import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import minMax from 'dayjs/plugin/minMax';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import type { EmailPaymentMethod } from './types';
 
 dayjs.extend(minMax);

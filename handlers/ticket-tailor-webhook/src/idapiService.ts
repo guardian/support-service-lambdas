@@ -1,7 +1,7 @@
+import { z } from 'zod';
 import { logger } from '@modules/logger/logger';
 import { getSecretValue } from '@modules/secrets-manager/getSecret';
 import type { Stage } from '@modules/stage';
-import { z } from 'zod';
 
 export type IdApiToken = {
 	token: string;

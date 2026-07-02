@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import type { EmailMessageWithUserId } from '@modules/email/email';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { GetInvoiceResponse } from '@modules/zuora/types';
@@ -7,7 +8,6 @@ import {
 } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 import type { CreateSwitchOrder } from '../../../../src/changePlan/action/createSwitchOrder';
 import type { GetPaymentSchedule } from '../../../../src/changePlan/action/getPaymentSchedule';

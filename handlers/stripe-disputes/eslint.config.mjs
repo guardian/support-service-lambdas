@@ -1,8 +1,10 @@
 import guardian from '@guardian/eslint-config';
 import { defineConfig } from 'eslint/config';
+import { importOrderConfig } from '../../eslint.shared.mjs';
 
 export default defineConfig([
 	guardian.configs.recommended,
+	importOrderConfig,
 	{
 		extends: [guardian.configs.recommended],
 		files: ['test/**/*.ts', '**/*.test.ts'],

@@ -1,5 +1,3 @@
-import type { BearerTokenProvider } from '@modules/zuora/auth';
-import { RestClient } from '@modules/zuora/restClient';
 import {
 	getSfClientCredentials,
 	SfClientCredentialsTokenProvider,
@@ -9,6 +7,8 @@ import {
 	SfPasswordFlowTokenProvider,
 } from '@modules/salesforce/auth/sfPasswordFlowTokenProvider';
 import type { SecretNames } from '@modules/salesforce/secrets';
+import type { BearerTokenProvider } from '@modules/zuora/auth';
+import { RestClient } from '@modules/zuora/restClient';
 
 export class SfClient extends RestClient {
 	constructor(tokenProvider: BearerTokenProvider) {

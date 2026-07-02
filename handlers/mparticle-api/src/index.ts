@@ -1,5 +1,3 @@
-import { logger } from '@modules/logger/logger';
-import { internalServerError } from '@modules/routing/apiGatewayResponses';
 import type {
 	APIGatewayProxyEvent,
 	APIGatewayProxyResult,
@@ -7,6 +5,8 @@ import type {
 	SQSEvent,
 	SQSRecord,
 } from 'aws-lambda';
+import { logger } from '@modules/logger/logger';
+import { internalServerError } from '@modules/routing/apiGatewayResponses';
 import { processUserDeletion } from './apis/dataSubjectRequests/deleteUser';
 import type { BatonEventRequest, BatonEventResponse } from './routers/baton';
 import { batonRerRouter } from './routers/baton';

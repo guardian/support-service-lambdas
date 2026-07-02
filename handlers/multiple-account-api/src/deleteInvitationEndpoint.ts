@@ -1,10 +1,10 @@
+import type { APIGatewayProxyResult } from 'aws-lambda';
+import { z } from 'zod';
 import { logger } from '@modules/logger/logger';
 import {
 	internalServerError,
 	notFound,
 } from '@modules/routing/apiGatewayResponses';
-import type { APIGatewayProxyResult } from 'aws-lambda';
-import { z } from 'zod';
 import { type InvitationRepository } from './invitationRepository';
 
 export const deleteInvitationPathSchema = z.object({

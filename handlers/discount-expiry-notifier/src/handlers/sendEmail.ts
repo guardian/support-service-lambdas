@@ -1,6 +1,6 @@
+import type { z } from 'zod';
 import { DataExtensionNames, sendEmail } from '@modules/email/email';
 import { stageFromEnvironment } from '@modules/stage';
-import type { z } from 'zod';
 import { BaseRecordForEmailSendSchema } from '../types';
 
 export const SendEmailInputSchema = BaseRecordForEmailSendSchema;

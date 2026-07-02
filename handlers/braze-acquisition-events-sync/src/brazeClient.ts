@@ -1,5 +1,5 @@
-import { logger } from '@modules/logger/logger';
 import { z } from 'zod';
+import { logger } from '@modules/logger/logger';
 
 export type BrazeTrackPayload = {
 	attributes?: Array<

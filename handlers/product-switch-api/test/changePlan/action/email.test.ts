@@ -1,6 +1,6 @@
+import dayjs from 'dayjs';
 import type { EmailMessageWithUserId } from '@modules/email/email';
 import { DataExtensionNames } from '@modules/email/email';
-import dayjs from 'dayjs';
 import { buildEmailMessage } from '../../../src/changePlan/action/productSwitchEmail';
 import type { AccountInformation } from '../../../src/changePlan/prepare/accountInformation';
 import type { SubscriptionInformation } from '../../../src/changePlan/prepare/subscriptionInformation';

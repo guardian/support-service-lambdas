@@ -18,3 +18,6 @@ c7065a7fd22fc65c30d5c71f7ce819e84133be1b
 
 # Scala Steward: Reformat with scalafmt 3.10.4
 038ad7cbb7bcd2353cce4ec04273df16f7b6dd07
+
+# Reformat imports after setting all @modules imports to 'internal' for sort purposes
+b5401250344c270d473481f628c26c71699b713f

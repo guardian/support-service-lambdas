@@ -1,3 +1,5 @@
+import type { APIGatewayProxyResult, Handler } from 'aws-lambda';
+import dayjs from 'dayjs';
 import { sendEmail } from '@modules/email/email';
 import { logger } from '@modules/logger/logger';
 import { ok } from '@modules/routing/apiGatewayResponses';
@@ -11,8 +13,6 @@ import type {
 	ZuoraSubscription,
 } from '@modules/zuora/types/objects';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { APIGatewayProxyResult, Handler } from 'aws-lambda';
-import dayjs from 'dayjs';
 import {
 	applyDiscountEndpoint,
 	previewDiscountEndpoint,

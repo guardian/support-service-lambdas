@@ -1,7 +1,7 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
-import { stageFromEnvironment } from '@modules/stage';
 import type { SQSEvent } from 'aws-lambda';
+import { stageFromEnvironment } from '@modules/stage';
 import { BrazeEmailSender } from './adapters/brazeEmailSender';
 import { DynamoVoucherRepository } from './adapters/dynamoVoucherRepository';
 import { ImovoVoucherProvider } from './adapters/imovoVoucherProvider';

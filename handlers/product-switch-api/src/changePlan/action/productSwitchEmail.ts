@@ -1,8 +1,8 @@
+import dayjs from 'dayjs';
 import { describePayments } from '@modules/email/dataFields/dayZero/paymentDescription';
 import type { EmailMessageWithUserId } from '@modules/email/email';
 import { getCurrencyInfo } from '@modules/internationalisation/currency';
 import type { SimpleInvoiceTotal } from '@modules/zuora/billingPreview';
-import dayjs from 'dayjs';
 import type { PaymentMethodType } from '../prepare/accountInformation';
 import type { SwitchInformation } from '../prepare/switchInformation';
 

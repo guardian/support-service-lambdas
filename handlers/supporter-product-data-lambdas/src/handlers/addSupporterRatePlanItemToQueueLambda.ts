@@ -1,7 +1,7 @@
+import type { Handler } from 'aws-lambda';
 import { sendBatchMessagesToQueue } from '@modules/aws/sqs';
 import { Lazy } from '@modules/lazy';
 import { stageFromEnvironment } from '@modules/stage';
-import type { Handler } from 'aws-lambda';
 import { ConfigService } from '../services/configService';
 import { parseCsvStreamWithHeader } from '../services/csvService';
 import { S3Service } from '../services/s3Service';

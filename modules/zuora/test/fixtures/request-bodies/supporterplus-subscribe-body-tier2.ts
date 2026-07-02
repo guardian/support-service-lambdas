@@ -1,5 +1,5 @@
-import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { Dayjs } from 'dayjs';
+import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 
 export const supporterPlusSubscribeBody = (

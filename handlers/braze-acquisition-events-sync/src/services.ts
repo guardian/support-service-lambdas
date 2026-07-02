@@ -1,8 +1,8 @@
+import { z } from 'zod';
 import { getUserByIdentityId } from '@modules/identity/idapi';
 import { IdentityClient } from '@modules/identity/identityClient';
 import { logger } from '@modules/logger/logger';
 import { stageFromEnvironment } from '@modules/stage';
-import { z } from 'zod';
 import { BrazeClient, type BrazeTrackPayload } from './brazeClient';
 import { getAppConfig } from './config';
 

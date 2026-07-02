@@ -1,5 +1,5 @@
-import { CurrencyValues } from '@modules/internationalisation/currency';
 import { z } from 'zod';
+import { CurrencyValues } from '@modules/internationalisation/currency';
 import { zuoraSubscriptionSchema } from './subscription';
 
 export const zuoraAccountBasicInfoSchema = z

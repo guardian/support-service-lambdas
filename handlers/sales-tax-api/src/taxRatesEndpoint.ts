@@ -1,3 +1,4 @@
+import type { APIGatewayProxyResult } from 'aws-lambda';
 import { ValidationError } from '@modules/errors';
 import type {
 	CaState,
@@ -21,7 +22,6 @@ import type {
 } from '@modules/zuora/types/objects/tax';
 import { type ZuoraTaxCode } from '@modules/zuora/types/objects/tax';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { APIGatewayProxyResult } from 'aws-lambda';
 import type { TaxRatesResponse } from './schemas';
 import {
 	caStateSchema,

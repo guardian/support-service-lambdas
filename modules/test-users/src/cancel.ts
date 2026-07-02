@@ -1,6 +1,6 @@
+import dayjs from 'dayjs';
 import { cancelSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import dayjs from 'dayjs';
 
 void (async () => {
 	const subscriptionNumber = process.argv[2];

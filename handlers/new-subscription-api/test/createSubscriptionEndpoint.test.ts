@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return -- jest expect matchers and requireActual return any */
+import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import { getPromotion } from '@modules/promotions/v2/getPromotion';
@@ -6,7 +7,6 @@ import { clonePaymentMethod } from '@modules/zuora/createSubscription/clonePayme
 import { executeOrderRequest } from '@modules/zuora/orders/orderRequests';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import type { APIGatewayProxyEvent } from 'aws-lambda';
 import catalogCode from '../../../modules/zuora-catalog/test/fixtures/catalog-code.json';
 import type { CreateSubscriptionResponse } from '../src/responseSchema';
 

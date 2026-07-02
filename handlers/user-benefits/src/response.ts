@@ -1,6 +1,6 @@
+import type { APIGatewayProxyResult } from 'aws-lambda';
 import type { UserBenefitsResponse } from '@modules/product-benefits/schemas';
 import type { Stage } from '@modules/stage';
-import type { APIGatewayProxyResult } from 'aws-lambda';
 import { allowedOriginsForStage } from './cors';
 
 const buildCorsHeaders = (

@@ -1,3 +1,5 @@
+import type { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import type { SafeForDistinct } from '@modules/arrayFunctions';
 import {
 	distinct,
@@ -13,8 +15,6 @@ import {
 } from '@modules/nullAndUndefined';
 import { objectValues } from '@modules/objectFunctions';
 import type { RatePlanCharge } from '@modules/zuora/types';
-import type { Dayjs } from 'dayjs';
-import dayjs from 'dayjs';
 import type { ValidSwitchableRatePlanKey } from './switchCatalogHelper';
 import { asSwitchableRatePlanKey } from './switchCatalogHelper';
 

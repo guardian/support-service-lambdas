@@ -1,8 +1,8 @@
-import { getSecretValue } from '@modules/secrets-manager/getSecret';
-import type { Authorisation, BearerTokenProvider } from '@modules/zuora/auth';
 import type { SfConnectedAppAuth } from '@modules/salesforce/auth/auth';
 import { authenticateSalesforce } from '@modules/salesforce/auth/auth';
 import type { ConnectedAppSecret } from '@modules/salesforce/secrets';
+import { getSecretValue } from '@modules/secrets-manager/getSecret';
+import type { Authorisation, BearerTokenProvider } from '@modules/zuora/auth';
 
 export type SfClientCredentials = {
 	authUrl: string;

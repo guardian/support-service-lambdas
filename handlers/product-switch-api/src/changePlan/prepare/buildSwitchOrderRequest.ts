@@ -1,3 +1,5 @@
+import type dayjs from 'dayjs';
+import type { Dayjs } from 'dayjs';
 import type {
 	ChangePlanOrderAction,
 	OrderAction,
@@ -5,8 +7,6 @@ import type {
 import { singleTriggerDate } from '@modules/zuora/orders/orderActions';
 import type { OrderRequest } from '@modules/zuora/orders/orderRequests';
 import { zuoraDateFormat } from '@modules/zuora/utils/common';
-import type dayjs from 'dayjs';
-import type { Dayjs } from 'dayjs';
 import type { SubscriptionInformation } from './subscriptionInformation';
 import type { TargetContribution } from './targetInformation';
 

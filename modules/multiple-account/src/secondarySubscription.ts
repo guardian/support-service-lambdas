@@ -1,7 +1,7 @@
+import type { Dayjs } from 'dayjs';
 import type { Stage } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import { sendToSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
-import type { Dayjs } from 'dayjs';
 
 const secondarySubscriptionName = (
 	primarySubscriptionName: string,

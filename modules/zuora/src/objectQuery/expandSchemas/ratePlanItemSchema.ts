@@ -1,9 +1,9 @@
+import z from 'zod';
+import { ratePlanChargeItemSchema } from '@modules/zuora/objectQuery/expandSchemas/ratePlanChargeItemSchema';
 import {
 	productIdSchema,
 	productRatePlanIdSchema,
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import z from 'zod';
-import { ratePlanChargeItemSchema } from '@modules/zuora/objectQuery/expandSchemas/ratePlanChargeItemSchema';
 
 export const ratePlanItemSchema = z.object({
 	/** The unique identifier of the rate plan. */

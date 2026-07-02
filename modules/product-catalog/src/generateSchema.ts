@@ -1,11 +1,5 @@
 import { distinct } from '@modules/arrayFunctions';
 import { getIfDefined, isNotNull } from '@modules/nullAndUndefined';
-import type {
-	CatalogProduct,
-	ZuoraCatalog,
-	ZuoraProductRatePlan,
-	ZuoraProductRatePlanCharge,
-} from '@modules/zuora-catalog/zuoraCatalogSchema';
 import {
 	isDeliveryProduct,
 	supportsPromotions,
@@ -19,6 +13,12 @@ import {
 	isSupportedProduct,
 	isSupportedProductRatePlan,
 } from '@modules/product-catalog/zuoraToProductNameMappings';
+import type {
+	CatalogProduct,
+	ZuoraCatalog,
+	ZuoraProductRatePlan,
+	ZuoraProductRatePlanCharge,
+} from '@modules/zuora-catalog/zuoraCatalogSchema';
 
 const header = `
 // ---------- This file is auto-generated. Do not edit manually. -------------

@@ -1,8 +1,8 @@
+import type { Handler } from 'aws-lambda';
 import { Lazy } from '@modules/lazy';
 import { stageFromEnvironment } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
-import type { Handler } from 'aws-lambda';
 import { ConfigService } from '../services/configService';
 import { getDiscountProductRatePlanIds } from '../services/discounts';
 import { ZuoraQuerierService } from '../services/zuoraQuerierService';
