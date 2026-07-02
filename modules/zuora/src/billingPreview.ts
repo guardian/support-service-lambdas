@@ -30,6 +30,8 @@ export const itemsForSubscription =
 
 export type SimpleInvoiceItem = { date: Date; amount: number };
 
+export type SimpleInvoiceTotal = { date: Date; total: number };
+
 export function getNextInvoiceTotal(invoiceItems: SimpleInvoiceItem[]) {
 	return convertItemsToTotal(getNextInvoice(invoiceItems)).total;
 }
@@ -89,10 +91,11 @@ const convertItemsToTotal = ({
 }: {
 	date: Date;
 	items: SimpleInvoiceItem[];
-}) => ({
-	date: new Date(date),
-	total: sumNumbers(items.map((item) => item.amount)),
-});
+}) =>
+	({
+		date: new Date(date),
+		total: sumNumbers(items.map((item) => item.amount)),
+	}) satisfies SimpleInvoiceTotal;
 
 export const toSimpleInvoiceItems = (
 	billingPreviewAfter: BillingPreview['invoiceItems'],

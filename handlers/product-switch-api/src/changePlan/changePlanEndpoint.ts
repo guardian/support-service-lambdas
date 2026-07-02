@@ -15,6 +15,7 @@ import type { APIGatewayProxyResult } from 'aws-lambda';
 import type dayjs from 'dayjs';
 import { removePendingUpdateAmendments } from './action/amendments';
 import { CreateSwitchOrder } from './action/createSwitchOrder';
+import { GetPaymentSchedule } from './action/getPaymentSchedule';
 import { DoPreviewAction } from './action/preview';
 import { DoSwitchAction } from './action/switch';
 import { SwitchOrderRequestBuilder } from './prepare/buildSwitchOrderRequest';
@@ -40,6 +41,7 @@ export class ChangePlanEndpoint {
 			zuoraClient,
 			stage,
 			today,
+			new GetPaymentSchedule(zuoraClient),
 			new CreateSwitchOrder(zuoraClient),
 			sendEmail,
 		);

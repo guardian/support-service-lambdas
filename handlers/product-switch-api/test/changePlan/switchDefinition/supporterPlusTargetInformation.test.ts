@@ -111,7 +111,7 @@ describe('getSupporterPlusTargetInformation', () => {
 		);
 
 		expect(result.discount).toBeDefined();
-		expect(result.ongoingPrice).toBe(discountedPrice);
+		expect(result.ongoingPrice).toBe(basePrice);
 		expect(result.contributionCharge?.contributionAmount).toBe(0);
 		expect(result.discount?.discountPercentage).toBe(
 			annualContribHalfPriceSupporterPlusForOneYear.discountPercentage,

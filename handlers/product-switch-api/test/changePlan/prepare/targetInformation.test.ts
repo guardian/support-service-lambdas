@@ -107,7 +107,7 @@ describe('getTargetInformation', () => {
 			discount,
 			contributionAmount: contributionCharge?.contributionAmount,
 		}).toMatchObject({
-			ongoingPrice: discountedPrice,
+			ongoingPrice: targetBasePrice,
 			discount: expectedDiscount,
 			contributionAmount: 0,
 		});

@@ -50,7 +50,7 @@ export const supporterPlusTargetInformation: SwitchTargetInformation<
 			}
 			discount = discountDetails;
 			contributionAmount = 0;
-			ongoingPrice = discountedPrice;
+			ongoingPrice = targetCatalogBasePrice; // no additional contribution possible so assume base price
 		} else {
 			// no initial discount possible
 			ongoingPrice =

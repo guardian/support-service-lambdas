@@ -10,6 +10,7 @@ import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 import type { CreateSwitchOrder } from '../../../../src/changePlan/action/createSwitchOrder';
+import type { GetPaymentSchedule } from '../../../../src/changePlan/action/getPaymentSchedule';
 import { DoSwitchAction } from '../../../../src/changePlan/action/switch';
 import { getAccountInformation } from '../../../../src/changePlan/prepare/accountInformation';
 import { SwitchOrderRequestBuilder } from '../../../../src/changePlan/prepare/buildSwitchOrderRequest';
@@ -72,12 +73,14 @@ const zeroAmountInvoice: GetInvoiceResponse = {
 
 const buildDoSwitchAction = (
 	createSwitchOrder: CreateSwitchOrder,
+	getPaymentSchedule: GetPaymentSchedule,
 	sendEmail = jest.fn().mockResolvedValue(undefined),
 ) =>
 	new DoSwitchAction(
 		mockZuoraClient as unknown as ZuoraClient,
 		'CODE',
 		dayjs('2025-09-16'),
+		getPaymentSchedule,
 		createSwitchOrder,
 		sendEmail,
 	);
@@ -87,23 +90,56 @@ describe('DoSwitchAction', () => {
 		jest.clearAllMocks();
 	});
 
-	test('next payment in the email is assumed to be the catalog price, one billing period after today', async () => {
-		const nextPaymentTotal = 120;
+	test('sequences switch order then billing preview, and passes preview result into email', async () => {
+		const callOrder: string[] = [];
+		const nextPaymentDate = new Date(2026, 10, 16); // 16 November 2026
+		const nextPaymentTotal = 95.5;
 
 		mockZuoraClient.get.mockResolvedValueOnce(zeroAmountInvoice);
 
 		const createSwitchOrderMock = {
 			execute: jest.fn().mockImplementation(() => {
+				callOrder.push('createSwitchOrder');
 				return Promise.resolve('invoice-id');
 			}),
 		} as unknown as CreateSwitchOrder;
 
+		const getPaymentSchedule = {
+			execute: jest.fn().mockImplementation(() => {
+				callOrder.push('getNextPayment');
+				return Promise.resolve([
+					{
+						date: nextPaymentDate,
+						total: nextPaymentTotal,
+					},
+					{
+						date: dayjs(nextPaymentDate).add(1, 'year').toDate(),
+						total: nextPaymentTotal,
+					},
+				]);
+			}),
+		} as unknown as GetPaymentSchedule;
+
 		const sendEmailMock = jest.fn().mockResolvedValue(undefined);
 
-		await buildDoSwitchAction(createSwitchOrderMock, sendEmailMock).switch(
+		await buildDoSwitchAction(
+			createSwitchOrderMock,
+			getPaymentSchedule,
+			sendEmailMock,
+		).switch(
 			{ caseId: 'case-1', csrUserId: 'csr-1' },
 			switchInformation,
 			orderRequest,
+		);
+
+		// switch order happens before billing preview
+		expect(callOrder).toEqual(['createSwitchOrder', 'getNextPayment']);
+
+		// billing preview is called with the correct subscription
+		expect(getPaymentSchedule.execute).toHaveBeenCalledWith(
+			expect.anything(),
+			subscriptionInformation.subscriptionNumber,
+			subscriptionInformation.accountNumber,
 		);
 
 		// email contains the values from the billing preview, not any precomputed amount
@@ -112,7 +148,7 @@ describe('DoSwitchAction', () => {
 			EmailMessageWithUserId,
 		];
 		const attrs = emailMessage.To.ContactAttributes.SubscriberAttributes;
-		expect(attrs.next_payment_amount).toBe(nextPaymentTotal.toFixed(2));
-		expect(attrs.date_of_next_payment).toBe('16 September 2026');
+		expect(attrs.subscription_rate).toBe('€95.50 every year');
+		expect(attrs.date_of_next_payment).toBe('16 November 2026');
 	});
 });
