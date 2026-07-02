@@ -5,6 +5,8 @@ import { tmpdir } from 'os';
 import { join, relative, resolve, sep } from 'path';
 
 const DEFAULT_FAILURE_TAIL_LINES = 40;
+/** Cap for the one-time --context buffered dump; more generous since it's an explicit "show me more" case. */
+const DEFAULT_MAX_OUTPUT_LINES = 200;
 
 export type CommandResult = { output: string; exitCode: number };
 
@@ -314,10 +316,29 @@ export function resolveRepoPath(
 	return relative(root, abs);
 }
 
+/**
+ * Live, line-by-line streaming can't know in advance whether an upcoming
+ * line will fall within a --context window, so when contextLines is set we
+ * buffer the whole run and print the context-filtered result once at the
+ * end instead (covering both pass and fail, since success shows no other
+ * output at all in that mode).
+ */
+export function shouldStreamIncrementally(
+	execOptions: Pick<ExecutionOptions, 'contextLines'>,
+): boolean {
+	return execOptions.contextLines === null;
+}
+
 export async function run(
 	command: string,
 	args: string[],
 	execOptions: ExecutionOptions,
+	// Injectable so tests can capture output without touching the real
+	// process.stdout (which is also used concurrently by the test runner's
+	// own reporter during an awaited async child-process spawn).
+	writeStdout: (text: string) => void = (text) => {
+		process.stdout.write(text);
+	},
 ): Promise<ScriptResult> {
 	return await new Promise<ScriptResult>((resolvePromise) => {
 		const start = Date.now();
@@ -338,11 +359,11 @@ export async function run(
 		let pendingDisplayLine = '';
 
 		const flushDisplay = (text: string, flushPending: boolean) => {
-			if (!execOptions.verbose) {
+			if (!execOptions.verbose || !shouldStreamIncrementally(execOptions)) {
 				return;
 			}
 			if (execOptions.grepRegex === null) {
-				process.stdout.write(text);
+				writeStdout(text);
 				return;
 			}
 			pendingDisplayLine += text;
@@ -350,12 +371,12 @@ export async function run(
 			pendingDisplayLine = lines.pop() ?? '';
 			for (const line of lines) {
 				if (execOptions.grepRegex.test(line)) {
-					process.stdout.write(`${line}\n`);
+					writeStdout(`${line}\n`);
 				}
 			}
 			if (flushPending && pendingDisplayLine.length > 0) {
 				if (execOptions.grepRegex.test(pendingDisplayLine)) {
-					process.stdout.write(`${pendingDisplayLine}\n`);
+					writeStdout(`${pendingDisplayLine}\n`);
 				}
 				pendingDisplayLine = '';
 			}
@@ -376,6 +397,18 @@ export async function run(
 		child.on('close', (status) => {
 			flushDisplay('', true);
 			logStream.end();
+			if (execOptions.verbose && !shouldStreamIncrementally(execOptions)) {
+				const buffered = postProcessOutput(output, {
+					tailLines: execOptions.tailLines,
+					grepRegex: execOptions.grepRegex,
+					contextLines: execOptions.contextLines,
+					all: execOptions.all,
+					defaultCap: DEFAULT_MAX_OUTPUT_LINES,
+				});
+				if (buffered.excerpt) {
+					writeStdout(`${buffered.excerpt}\n`);
+				}
+			}
 			const exitCode = status ?? 1;
 			resolvePromise({
 				passed: exitCode === 0,

@@ -11,6 +11,7 @@ import {
 	postProcessOutput,
 	resolveRepoPath,
 	run,
+	shouldStreamIncrementally,
 } from './run.js';
 
 void test('buildPnpmArgs explicit: generates --filter ./pkg with --if-present', () => {
@@ -434,4 +435,89 @@ void test('parseGlobalOptions: --all is a plain boolean flag', () => {
 		contextLines: null,
 		all: true,
 	});
+});
+
+void test('shouldStreamIncrementally: true when contextLines is null', () => {
+	assert.equal(shouldStreamIncrementally({ contextLines: null }), true);
+});
+
+void test('shouldStreamIncrementally: false whenever contextLines is set, including 0', () => {
+	assert.equal(shouldStreamIncrementally({ contextLines: 0 }), false);
+	assert.equal(shouldStreamIncrementally({ contextLines: 3 }), false);
+});
+
+void test('run: --context buffers output and prints the filtered block once instead of streaming incrementally', async () => {
+	cleanupLastLog(TEST_ROOT);
+	const calls: string[] = [];
+	try {
+		await run(
+			'node',
+			[
+				'-e',
+				'console.log("l0"); console.log("MATCH"); console.log("l2"); console.log("l3")',
+			],
+			{
+				...baseExecOptions,
+				verbose: true,
+				grepPattern: 'MATCH',
+				grepRegex: /MATCH/,
+				contextLines: 1,
+			},
+			(text) => calls.push(text),
+		);
+	} finally {
+		cleanupLastLog(TEST_ROOT);
+	}
+	// Exactly one write for the whole context-filtered block; l3 excluded since
+	// it falls outside the +-1 line window around the match.
+	assert.deepEqual(calls, ['l0\nMATCH\nl2\n']);
+});
+
+void test('run: without --context, matching lines still stream incrementally as they arrive', async () => {
+	cleanupLastLog(TEST_ROOT);
+	const calls: string[] = [];
+	try {
+		await run(
+			'node',
+			[
+				'-e',
+				'console.log("l0"); console.log("MATCH1"); console.log("l2"); console.log("MATCH2")',
+			],
+			{
+				...baseExecOptions,
+				verbose: true,
+				grepPattern: 'MATCH',
+				grepRegex: /MATCH/,
+				contextLines: null,
+			},
+			(text) => calls.push(text),
+		);
+	} finally {
+		cleanupLastLog(TEST_ROOT);
+	}
+	// One write per matching line as it streams, not a single buffered block.
+	assert.deepEqual(calls, ['MATCH1\n', 'MATCH2\n']);
+});
+
+void test('run: --context still prints the buffered block on success (which shows no other output)', async () => {
+	cleanupLastLog(TEST_ROOT);
+	const calls: string[] = [];
+	try {
+		const result = await run(
+			'node',
+			['-e', 'console.log("MATCH")'],
+			{
+				...baseExecOptions,
+				verbose: true,
+				grepPattern: 'MATCH',
+				grepRegex: /MATCH/,
+				contextLines: 0,
+			},
+			(text) => calls.push(text),
+		);
+		assert.equal(result.passed, true);
+	} finally {
+		cleanupLastLog(TEST_ROOT);
+	}
+	assert.deepEqual(calls, ['MATCH\n']);
 });
