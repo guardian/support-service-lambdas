@@ -77,3 +77,18 @@ void test('last: reports empty output distinctly when the recorded log is blank'
 		cleanupLastLog(TEST_ROOT);
 	}
 });
+
+void test('last: appends a truncation notice without the self-referential "run last" hint', async () => {
+	cleanupLastLog(TEST_ROOT);
+	try {
+		const lines = Array.from({ length: 250 }, (_, i) => `line${i + 1}`).join(
+			'\n',
+		);
+		writeFileSync(getLastLogPath(TEST_ROOT), lines);
+		const result = await COMMANDS['last']!.handler([], baseExecOptions);
+		assert.match(result.output, /— showing last 200 of 250 lines — /);
+		assert.doesNotMatch(result.output, /run \.\/agent-tool last/);
+	} finally {
+		cleanupLastLog(TEST_ROOT);
+	}
+});

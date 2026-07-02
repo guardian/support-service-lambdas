@@ -6,6 +6,7 @@ import {
 	buildPnpmArgs,
 	filterLinesByPattern,
 	filterLinesByPatternWithContext,
+	formatTruncationNotice,
 	getLastLogPath,
 	parseGlobalOptions,
 	postProcessOutput,
@@ -300,6 +301,34 @@ void test('getLastLogPath: lives in the OS temp dir and is repo-specific', () =>
 	assert.match(path, /agent-tool-last-[0-9a-f]{12}\.log$/);
 });
 
+void test('formatTruncationNotice: returns null when not truncated', () => {
+	assert.equal(
+		formatTruncationNotice({ truncated: false, totalLines: 5, keptLines: 5 }),
+		null,
+	);
+});
+
+void test('formatTruncationNotice: default context mentions ./agent-tool last', () => {
+	assert.equal(
+		formatTruncationNotice({
+			truncated: true,
+			totalLines: 312,
+			keptLines: 40,
+		}),
+		'— showing last 40 of 312 lines — run ./agent-tool last for more, or pass --all/--tail/--grep/--context',
+	);
+});
+
+void test('formatTruncationNotice: "last" context omits the self-referential "run last" hint', () => {
+	assert.equal(
+		formatTruncationNotice(
+			{ truncated: true, totalLines: 312, keptLines: 200 },
+			'last',
+		),
+		'— showing last 200 of 312 lines — pass --all/--tail/--grep/--context',
+	);
+});
+
 // tmpdir() is a real, existing directory distinct from any actual repo root,
 // so it's a safe stand-in for `root` (used as both cwd and the log-path key)
 // in these integration-style tests that spawn a real child process.
@@ -520,4 +549,24 @@ void test('run: --context still prints the buffered block on success (which show
 		cleanupLastLog(TEST_ROOT);
 	}
 	assert.deepEqual(calls, ['MATCH\n']);
+});
+
+void test('run: failure ScriptResult reports truncation metadata for the excerpt', async () => {
+	cleanupLastLog(TEST_ROOT);
+	try {
+		const result = await run(
+			'node',
+			[
+				'-e',
+				'for (let i = 1; i <= 50; i++) { console.log(`line${i}`); } process.exit(1);',
+			],
+			baseExecOptions,
+		);
+		assert.equal(result.passed, false);
+		assert.equal(result.truncated, true);
+		assert.equal(result.totalLines, 50);
+		assert.equal(result.keptLines, 40);
+	} finally {
+		cleanupLastLog(TEST_ROOT);
+	}
 });

@@ -5,6 +5,7 @@ import {
 	type CommandResult,
 	DEFAULT_MAX_OUTPUT_LINES,
 	type ExecutionOptions,
+	formatTruncationNotice,
 	getLastLogPath,
 	postProcessOutput,
 	printProgress,
@@ -32,6 +33,10 @@ function formatResult(name: string, result: ScriptResult): CommandResult {
 	const lines = [`FAIL ${name} (${s}s)`];
 	if (result.excerpt) {
 		lines.push(result.excerpt);
+	}
+	const notice = formatTruncationNotice(result);
+	if (notice) {
+		lines.push(notice);
 	}
 	return toCommandResult(lines, result.exitCode);
 }
@@ -132,16 +137,19 @@ export const COMMANDS: Record<string, Command> = {
 				);
 			}
 			const output = readFileSync(logPath, 'utf-8');
-			const { excerpt } = postProcessOutput(output, {
+			const result = postProcessOutput(output, {
 				tailLines: execOptions.tailLines,
 				grepRegex: execOptions.grepRegex,
 				contextLines: execOptions.contextLines,
 				all: execOptions.all,
 				defaultCap: DEFAULT_MAX_OUTPUT_LINES,
 			});
-			return Promise.resolve(
-				toCommandResult(excerpt ? [excerpt] : ['(no output)']),
-			);
+			const lines = result.excerpt ? [result.excerpt] : ['(no output)'];
+			const notice = formatTruncationNotice(result, 'last');
+			if (notice) {
+				lines.push(notice);
+			}
+			return Promise.resolve(toCommandResult(lines));
 		},
 	},
 };

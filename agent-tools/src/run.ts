@@ -18,6 +18,10 @@ export type ScriptResult = {
 	passed: boolean;
 	output: string;
 	excerpt: string;
+	/** True only when the default cap (not an explicit --tail) reduced excerpt. */
+	truncated: boolean;
+	totalLines: number;
+	keptLines: number;
 	exitCode: number;
 	durationMs: number;
 };
@@ -293,6 +297,26 @@ export function postProcessOutput(
 }
 
 /**
+ * Builds the path-free hint appended after a truncated excerpt, e.g.
+ * "— showing last 40 of 312 lines — run ./agent-tool last for more, or pass
+ * --all/--tail/--grep/--context". Returns null when `truncated` is false
+ * (nothing to hint about). The `last` command itself points only at the
+ * remaining flags, omitting the self-referential "run ./agent-tool last"
+ * suggestion since the caller is already there.
+ */
+export function formatTruncationNotice(
+	result: Pick<PostProcessResult, 'truncated' | 'totalLines' | 'keptLines'>,
+	context: 'default' | 'last' = 'default',
+): string | null {
+	if (!result.truncated) {
+		return null;
+	}
+	const runLastHint =
+		context === 'last' ? '' : 'run ./agent-tool last for more, or ';
+	return `— showing last ${result.keptLines} of ${result.totalLines} lines — ${runLastHint}pass --all/--tail/--grep/--context`;
+}
+
+/**
  * Returns the path of the single, always-overwritten log file used to
  * capture the most recent command's full output for a given repository root
  * (read by the `last` command). The filename is derived from a hash of
@@ -414,16 +438,20 @@ export async function run(
 				}
 			}
 			const exitCode = status ?? 1;
+			const failureResult = postProcessOutput(output, {
+				tailLines: execOptions.tailLines,
+				grepRegex: execOptions.grepRegex,
+				contextLines: execOptions.contextLines,
+				all: execOptions.all,
+				defaultCap: DEFAULT_FAILURE_TAIL_LINES,
+			});
 			resolvePromise({
 				passed: exitCode === 0,
 				output,
-				excerpt: postProcessOutput(output, {
-					tailLines: execOptions.tailLines,
-					grepRegex: execOptions.grepRegex,
-					contextLines: execOptions.contextLines,
-					all: execOptions.all,
-					defaultCap: DEFAULT_FAILURE_TAIL_LINES,
-				}).excerpt,
+				excerpt: failureResult.excerpt,
+				truncated: failureResult.truncated,
+				totalLines: failureResult.totalLines,
+				keptLines: failureResult.keptLines,
 				exitCode,
 				durationMs: Date.now() - start,
 			});
