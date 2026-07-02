@@ -36,6 +36,10 @@ export const buildEmailMessage = (
 	);
 	const nextPaymentDate = paymentSchedule[0]?.date;
 
+	const frequency = ({ Monthly: 'Monthly', Annual: 'Annually' } as const)[
+		productRatePlanKey
+	];
+
 	return {
 		To: {
 			Address: emailAddress,
@@ -44,12 +48,16 @@ export const buildEmailMessage = (
 					first_name: firstName,
 					last_name: lastName,
 					currency: getCurrencyInfo(currency).extendedGlyph,
+					price: switchInformation.target.ongoingPrice.toFixed(2), // superseded by subscription_rate - to remove
 					first_payment_amount: firstPaymentAmount.toFixed(2),
 					date_of_first_payment: today.format('DD MMMM YYYY'),
+					next_payment_amount:
+						paymentSchedule[0]?.total.toFixed(2) ?? 'unknown amount', // superseded by subscription_rate - to remove
 					date_of_next_payment:
 						nextPaymentDate !== undefined
 							? dayjs(nextPaymentDate).format('DD MMMM YYYY')
 							: 'unknown date',
+					payment_frequency: frequency, // superseded by subscription_rate - to remove
 					subscription_rate: subscriptionRate,
 					payment_method: emailPaymentMethodTypes[paymentMethodType],
 					subscription_id: subscriptionNumber,
