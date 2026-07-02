@@ -1,5 +1,8 @@
-import { isInList } from '@modules/arrayFunctions';
-
+export const newspaperCountries: Record<string, string> = {
+	GB: 'United Kingdom',
+	IM: 'Isle of Man',
+};
+export type IsoCountry = (typeof isoCountries)[number];
 export const isoCountries = [
 	'GB',
 	'US',
@@ -252,7 +255,7 @@ export const isoCountries = [
 	'SH',
 ] as const;
 
-export type IsoCountry = (typeof isoCountries)[number];
+export const isoCountrySet: Set<IsoCountry> = new Set(isoCountries);
 
 export const countries: Record<IsoCountry, string> = {
 	GB: 'United Kingdom',
@@ -505,18 +508,6 @@ export const countries: Record<IsoCountry, string> = {
 	JE: 'Jersey',
 	SH: 'Saint Helena',
 };
-
-export const isoCountrySet: Set<IsoCountry> = new Set(isoCountries);
-
-export function isIsoCountry(search: string): search is IsoCountry {
-	return isInList(isoCountries)(search);
-}
-
-export const newspaperCountries: Partial<Record<IsoCountry, string>> = {
-	GB: 'United Kingdom',
-	IM: 'Isle of Man',
-};
-
 export function getCountryNameByIsoCode(code: IsoCountry) {
-	return countries[code];
+	return countries[code] || null;
 }
