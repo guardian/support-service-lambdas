@@ -7,6 +7,7 @@ import type {
 	TargetInformation,
 } from '../prepare/targetInformation';
 import type { Discount } from './discounts';
+import { annualDigiPlus } from './discounts';
 import { monthlyDigiPlus } from './discounts';
 
 export const digitalSubscriptionTargetInformation: SwitchTargetInformation<
@@ -29,11 +30,12 @@ export const digitalSubscriptionTargetInformation: SwitchTargetInformation<
 			throw new ValidationError("digital plus doesn't have a variable amount");
 		}
 		let discount: Discount | undefined = undefined;
-		if (
-			switchActionData.discountEnabled &&
-			productRatePlan.billingPeriod === 'Month'
-		) {
-			discount = monthlyDigiPlus;
+		if (switchActionData.discountEnabled) {
+			if (productRatePlan.billingPeriod === 'Month') {
+				discount = monthlyDigiPlus;
+			} else {
+				discount = annualDigiPlus;
+			}
 		}
 
 		const catalogPrice = productRatePlan.pricing[switchActionData.currency];
