@@ -36,12 +36,4 @@ export default [
 			'@typescript-eslint/switch-exhaustiveness-check': 'error',
 		},
 	},
-	{
-		// agent-tools command files use export default so each command file
-		// is a self-contained CommandDefinition; the registry uses default imports
-		files: ['agent-tools/src/commands/**/*.ts'],
-		rules: {
-			'import/no-default-export': 'off',
-		},
-	},
 ];

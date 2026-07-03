@@ -35,6 +35,8 @@ export function buildPackageJson(
 
 			'type-check': 'tsc --noEmit',
 			lint: "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
+			'lint-fix':
+				"eslint --cache --cache-location /tmp/eslintcache/ --fix 'src/**/*.ts' 'test/**/*.ts'",
 			'check-formatting': 'prettier --check "**/*.ts"',
 			'fix-formatting': 'prettier --write "**/*.ts"',
 			...extraScripts,

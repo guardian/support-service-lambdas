@@ -5,6 +5,7 @@
     "it-test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --group=integration",
     "type-check": "tsc --noEmit",
     "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts'",
+    "lint-fix": "eslint --cache --cache-location /tmp/eslintcache/ --fix 'src/**/*.ts'",
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
     "build": "tsc --noEmit"

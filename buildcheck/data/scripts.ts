@@ -1,5 +1,7 @@
 export const srcOnly = {
 	lint: "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts'",
+	'lint-fix':
+		"eslint --cache --cache-location /tmp/eslintcache/ --fix 'src/**/*.ts'",
 	test: 'jest --group=-integration --passWithNoTests',
 };
 
