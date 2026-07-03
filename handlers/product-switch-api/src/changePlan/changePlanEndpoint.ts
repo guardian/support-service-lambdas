@@ -166,7 +166,6 @@ export class ChangePlanEndpoint {
 			this.body,
 			this.account,
 			subscription,
-			this.stage !== 'PROD',
 		);
 		logger.log(`switching from/to`, {
 			from: {
