@@ -263,6 +263,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
             "Expression": "100*m1/m2",
             "Id": "expr_1",
             "Label": "% of 5XX responses served for stripe-webhook-endpoints",
+            "ReturnData": true,
           },
           {
             "Id": "m1",
@@ -613,6 +614,9 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
         "RestApipaymentintentissuePOSTA78C3986",
         "RestApipaymentintentissue6417F57B",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "Automatically created by the RestApi construct",
         "RestApiId": {
@@ -1749,6 +1753,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
             "Expression": "100*m1/m2",
             "Id": "expr_1",
             "Label": "% of 5XX responses served for stripe-webhook-endpoints",
+            "ReturnData": true,
           },
           {
             "Id": "m1",
@@ -2099,6 +2104,9 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
         "RestApipaymentintentissuePOSTA78C3986",
         "RestApipaymentintentissue6417F57B",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "Automatically created by the RestApi construct",
         "RestApiId": {

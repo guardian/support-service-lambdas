@@ -13,8 +13,8 @@ catalogs:
       specifier: ^5.6.3
       version: 5.9.2
     zod:
-      specifier: ^3.23.8
-      version: 3.25.76
+      specifier: ^4.4.3
+      version: 4.4.3
 
 overrides:
   typescript-eslint: ^8.46.2
@@ -72,14 +72,14 @@ importers:
         specifier: ^3.3.3
         version: 3.6.2
       ts-jest:
-        specifier: ^29.4.6
-        version: 29.4.6(@babel/core@7.28.3)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@29.7.0(@babel/core@7.28.3))(esbuild@0.25.12)(jest-util@30.2.0)(jest@29.7.0(@types/node@22.19.1)(ts-node@10.9.2(@types/node@22.19.1)(typescript@5.9.2)))(typescript@5.9.2)
+        specifier: ^29.4.11
+        version: 29.4.11(@babel/core@7.28.3)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@29.7.0(@babel/core@7.28.3))(esbuild@0.25.12)(jest-util@30.2.0)(jest@29.7.0(@types/node@22.19.1)(ts-node@10.9.2(@types/node@22.19.1)(typescript@5.9.2)))(typescript@5.9.2)
       typescript:
         specifier: 'catalog:'
         version: 5.9.2
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
 
   buildcheck:
     dependencies:
@@ -107,7 +107,7 @@ importers:
     devDependencies:
       '@guardian/cdk':
         specifier: 61.11.1
-        version: 61.11.1(aws-cdk-lib@2.195.0(constructs@10.4.2))(aws-cdk@2.1014.0)(constructs@10.4.2)
+        version: 61.11.1(aws-cdk-lib@2.246.0(constructs@10.6.0))(aws-cdk@2.1128.1)(constructs@10.6.0)
       '@types/jest':
         specifier: ^29.5.14
         version: 29.5.14
@@ -115,14 +115,14 @@ importers:
         specifier: ^22.15.14
         version: 22.19.1
       aws-cdk:
-        specifier: 2.1014.0
-        version: 2.1014.0
+        specifier: 2.1128.1
+        version: 2.1128.1
       aws-cdk-lib:
-        specifier: 2.195.0
-        version: 2.195.0(constructs@10.4.2)
+        specifier: 2.246.0
+        version: 2.246.0(constructs@10.6.0)
       constructs:
-        specifier: 10.4.2
-        version: 10.4.2
+        specifier: 10.6.0
+        version: 10.6.0
       source-map-support:
         specifier: ^0.5.21
         version: 0.5.21
@@ -146,7 +146,7 @@ importers:
         version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../../modules/zuora
@@ -168,7 +168,7 @@ importers:
         version: link:../../modules/logger
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
     devDependencies:
       '@redocly/cli':
         specifier: 2.30.5
@@ -190,7 +190,7 @@ importers:
         version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -209,7 +209,7 @@ importers:
         version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../../modules/zuora
@@ -249,7 +249,7 @@ importers:
         version: 9.15.1
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../../modules/zuora
@@ -296,7 +296,7 @@ importers:
         version: link:../../modules/email
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -337,7 +337,7 @@ importers:
         version: link:../../modules/supporter-product-data
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -365,7 +365,7 @@ importers:
         version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
     devDependencies:
       '@aws-sdk/client-s3':
         specifier: ^3.940.0
@@ -400,6 +400,9 @@ importers:
       logger:
         specifier: workspace:*
         version: link:../../modules/logger
+      multiple-account:
+        specifier: workspace:*
+        version: link:../../modules/multiple-account
       nanoid:
         specifier: ^3.3.12
         version: 3.3.12
@@ -411,7 +414,7 @@ importers:
         version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
     devDependencies:
       '@redocly/cli':
         specifier: 2.30.5
@@ -442,7 +445,7 @@ importers:
         version: 9.15.1
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../../modules/zuora
@@ -470,7 +473,7 @@ importers:
         version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../../modules/zuora
@@ -489,7 +492,7 @@ importers:
         version: 3.996.2(@aws-sdk/client-dynamodb@3.1054.0)
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -511,7 +514,7 @@ importers:
         version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../../modules/zuora
@@ -572,7 +575,7 @@ importers:
         version: link:../../modules/supporter-product-data
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../../modules/zuora
@@ -612,7 +615,7 @@ importers:
         version: link:../../modules/supporter-product-data
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../../modules/zuora
@@ -665,7 +668,7 @@ importers:
         version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
     devDependencies:
       '@redocly/cli':
         specifier: 2.30.5
@@ -736,7 +739,7 @@ importers:
         version: 18.5.0(@types/node@24.10.1)
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../../modules/zuora
@@ -774,6 +777,9 @@ importers:
       '@aws-sdk/lib-storage':
         specifier: ^3.940.0
         version: 3.1054.0(@aws-sdk/client-s3@3.1054.0)
+      '@aws-sdk/util-dynamodb':
+        specifier: ^3.940.0
+        version: 3.996.2(@aws-sdk/client-dynamodb@3.1054.0)
       dayjs:
         specifier: ^1.11.13
         version: 1.11.21
@@ -783,12 +789,15 @@ importers:
       logger:
         specifier: workspace:*
         version: link:../../modules/logger
+      multiple-account:
+        specifier: workspace:*
+        version: link:../../modules/multiple-account
       supporter-product-data:
         specifier: workspace:*
         version: link:../../modules/supporter-product-data
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../../modules/zuora
@@ -813,7 +822,7 @@ importers:
         version: link:../../modules/secrets-manager
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
@@ -844,7 +853,7 @@ importers:
         version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../../modules/zuora
@@ -879,7 +888,7 @@ importers:
         version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../../modules/zuora
@@ -922,7 +931,7 @@ importers:
         version: link:../../modules/salesforce
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../../modules/zuora
@@ -962,7 +971,7 @@ importers:
         version: link:../logger
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
 
   modules/bigquery:
     dependencies:
@@ -980,7 +989,7 @@ importers:
         version: 9.15.1
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
     devDependencies:
       '@types/jest':
         specifier: ^29.5.14
@@ -1045,7 +1054,7 @@ importers:
         version: link:../aws
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../zuora
@@ -1058,13 +1067,38 @@ importers:
     dependencies:
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
 
   modules/logger:
     devDependencies:
       '@smithy/types':
         specifier: ^4.13.1
         version: 4.14.2
+
+  modules/multiple-account:
+    dependencies:
+      aws:
+        specifier: workspace:*
+        version: link:../aws
+      logger:
+        specifier: workspace:*
+        version: link:../logger
+      supporter-product-data:
+        specifier: workspace:*
+        version: link:../supporter-product-data
+    devDependencies:
+      '@aws-sdk/client-dynamodb':
+        specifier: ^3.940.0
+        version: 3.1054.0
+      '@aws-sdk/util-dynamodb':
+        specifier: ^3.940.0
+        version: 3.996.2(@aws-sdk/client-dynamodb@3.1054.0)
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.21
+      zod:
+        specifier: 'catalog:'
+        version: 4.4.3
 
   modules/product-benefits:
     dependencies:
@@ -1082,7 +1116,7 @@ importers:
         version: link:../supporter-product-data
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
 
   modules/product-catalog:
     dependencies:
@@ -1107,7 +1141,7 @@ importers:
         version: 5.9.2
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
 
   modules/promotions:
     dependencies:
@@ -1131,7 +1165,7 @@ importers:
         version: link:../product-catalog
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
 
   modules/routing:
     dependencies:
@@ -1146,7 +1180,7 @@ importers:
         version: link:../logger
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../zuora
@@ -1162,7 +1196,7 @@ importers:
         version: link:../secrets-manager
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../zuora
@@ -1212,7 +1246,7 @@ importers:
         version: 1.11.21
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
 
   modules/sync-supporter-product-data:
     dependencies:
@@ -1224,7 +1258,7 @@ importers:
         version: link:../product-catalog
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../zuora
@@ -1286,7 +1320,7 @@ importers:
         version: link:../promotions
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
       zuora-catalog:
         specifier: workspace:*
         version: link:../zuora-catalog
@@ -1304,7 +1338,7 @@ importers:
         version: link:../logger
       zod:
         specifier: 'catalog:'
-        version: 3.25.76
+        version: 4.4.3
 
 packages:
 
@@ -1312,15 +1346,15 @@ packages:
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
 
-  '@aws-cdk/asset-awscli-v1@2.2.249':
-    resolution: {integrity: sha512-VtTIdYPJ8SPvafsuGRBloaMwiKRBd6rgS8QGyTmsOnKbK4dWL24MA9hVJx3f+MX7J51F9FukPmaFmP4iuMarkA==}
+  '@aws-cdk/asset-awscli-v1@2.2.263':
+    resolution: {integrity: sha512-X9JvcJhYcb7PHs8R7m4zMablO5C9PGb/hYfLnxds9h/rKJu6l7MiXE/SabCibuehxPnuO/vk+sVVJiUWrccarQ==}
 
-  '@aws-cdk/asset-node-proxy-agent-v6@2.1.0':
-    resolution: {integrity: sha512-7bY3J8GCVxLupn/kNmpPc5VJz8grx+4RKfnnJiO1LG+uxkZfANZG3RMHhE+qQxxwkyQ9/MfPtTpf748UhR425A==}
+  '@aws-cdk/asset-node-proxy-agent-v6@2.1.2':
+    resolution: {integrity: sha512-pDiuqH+qY3zM9lhhLjbKJ1tnKOHzQ2V4Wr/3qsxyKeKAkuPMI/BVGvZG1PbrikUw949cGVTfVEt4ETKKYnrj0Q==}
 
-  '@aws-cdk/cloud-assembly-schema@41.2.0':
-    resolution: {integrity: sha512-JaulVS6z9y5+u4jNmoWbHZRs9uGOnmn/ktXygNWKNu1k6lF3ad4so3s18eRu15XCbUIomxN9WPYT6Ehh7hzONw==}
-    engines: {node: '>= 14.15.0'}
+  '@aws-cdk/cloud-assembly-schema@53.28.0':
+    resolution: {integrity: sha512-pZS+9bLGv2tCqcgxfA0WD3XjcqT3yE4ICvKeJEicw6aTdCxBl8FQ/AUsorY/6f2JrMS3kUQgvhXxA30MWcji0A==}
+    engines: {node: '>= 18.0.0'}
     bundledDependencies:
       - jsonschema
       - semver
@@ -2909,13 +2943,14 @@ packages:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
 
-  aws-cdk-lib@2.195.0:
-    resolution: {integrity: sha512-AYLysgSjSnSjkal/AmR86DqvOVqy0VjeWmXR+ucIIGSOzJsevsYuNWCeVnf4v9x+vd2ysVcO8fXndG426vGZ/w==}
-    engines: {node: '>= 14.15.0'}
+  aws-cdk-lib@2.246.0:
+    resolution: {integrity: sha512-7OtF95mss9dWohopCNQKAlNFrMJwgOIvNTNgoOWWcKhULBf6UxKCaf6ATlnuysIWRGf2DHgcval/4+yySOKRBw==}
+    engines: {node: '>= 20.0.0'}
     peerDependencies:
-      constructs: ^10.0.0
+      constructs: ^10.5.0
     bundledDependencies:
       - '@balena/dockerignore'
+      - '@aws-cdk/cloud-assembly-api'
       - case
       - fs-extra
       - ignore
@@ -2927,9 +2962,9 @@ packages:
       - yaml
       - mime-types
 
-  aws-cdk@2.1014.0:
-    resolution: {integrity: sha512-es101rtRAClix9BncNL54iW90MiOyRv4iCC5tv/firGDnidS6pPinuK0IIFt0RO6w0+3heRxWBXg8HY+f9877w==}
-    engines: {node: '>= 14.15.0'}
+  aws-cdk@2.1128.1:
+    resolution: {integrity: sha512-y9OHn5/BOcIiq409vPvpypMIr7/8M1ScFe8IkFMSCN1/GI/5c73fQ4pfzNq+VDkj86T5zxs7BQ1qU2lQQytdXA==}
+    engines: {node: '>= 18.0.0'}
     hasBin: true
 
   aws-sdk-client-mock@4.1.0:
@@ -3184,8 +3219,8 @@ packages:
   constant-case@2.0.0:
     resolution: {integrity: sha512-eS0N9WwmjTqrOmR3o83F5vW8Z+9R1HnVz3xmzT2PMFug9ly+Au/fxRWlEBSb6LcZwspSsEn9Xs1uw9YgzAg1EQ==}
 
-  constructs@10.4.2:
-    resolution: {integrity: sha512-wsNxBlAott2qg8Zv87q3eYZYgheb9lchtBfjHzzLHtXbttwSrHPs1NNQbBrmbb1YZvYg2+Vh0Dor76w4mFxJkA==}
+  constructs@10.6.0:
+    resolution: {integrity: sha512-TxHOnBO5zMo/G76ykzGF/wMpEHu257TbWiIxP9K0Yv/+t70UzgBQiTqjkAsWOPC6jW91DzJI0+ehQV6xDRNBuQ==}
 
   convert-source-map@2.0.0:
     resolution: {integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==}
@@ -3712,11 +3747,6 @@ packages:
 
   fs.realpath@1.0.0:
     resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
-
-  fsevents@2.3.2:
-    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
-    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
-    os: [darwin]
 
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
@@ -5104,6 +5134,11 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
+  semver@7.8.5:
+    resolution: {integrity: sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA==}
+    engines: {node: '>=10'}
+    hasBin: true
+
   sentence-case@2.1.1:
     resolution: {integrity: sha512-ENl7cYHaK/Ktwk5OTD+aDbQ3uC8IByu/6Bkg+HDv8Mm+XnBnppVNalcfJTNsp1ibstKh030/JKQQWglDvtKwEQ==}
 
@@ -5398,6 +5433,33 @@ packages:
   ts-dedent@2.2.0:
     resolution: {integrity: sha512-q5W7tVM71e2xjHZTlgfTDoPF/SmqKG5hddq9SzR49CH2hayqRKJtQ4mtRlSxKaJlR/+9rEM+mnBHf7I2/BQcpQ==}
     engines: {node: '>=6.10'}
+
+  ts-jest@29.4.11:
+    resolution: {integrity: sha512-IrFl7l9AuB/qrNw5quqvAv/hmKMb8dhWOH4jQOGo0Oq8tCeo1O86/iTFG1FaRimgUkF13l4PcepO8ATFT6Ns4g==}
+    engines: {node: ^14.15.0 || ^16.10.0 || ^18.0.0 || >=20.0.0}
+    hasBin: true
+    peerDependencies:
+      '@babel/core': '>=7.0.0-beta.0 <8'
+      '@jest/transform': ^29.0.0 || ^30.0.0
+      '@jest/types': ^29.0.0 || ^30.0.0
+      babel-jest: ^29.0.0 || ^30.0.0
+      esbuild: '*'
+      jest: ^29.0.0 || ^30.0.0
+      jest-util: ^29.0.0 || ^30.0.0
+      typescript: '>=4.3 <7'
+    peerDependenciesMeta:
+      '@babel/core':
+        optional: true
+      '@jest/transform':
+        optional: true
+      '@jest/types':
+        optional: true
+      babel-jest:
+        optional: true
+      esbuild:
+        optional: true
+      jest-util:
+        optional: true
 
   ts-jest@29.4.6:
     resolution: {integrity: sha512-fSpWtOO/1AjSNQguk43hb/JCo16oJDnMJf3CdEGNkqsEX3t0KX96xvyX1D7PfLCpVoKu4MfVrqUkFyblYoY4lA==}
@@ -5746,8 +5808,8 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  zod@3.25.76:
-    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+  zod@4.4.3:
+    resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
 
 snapshots:
 
@@ -5756,11 +5818,11 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.13
       '@jridgewell/trace-mapping': 0.3.31
 
-  '@aws-cdk/asset-awscli-v1@2.2.249': {}
+  '@aws-cdk/asset-awscli-v1@2.2.263': {}
 
-  '@aws-cdk/asset-node-proxy-agent-v6@2.1.0': {}
+  '@aws-cdk/asset-node-proxy-agent-v6@2.1.2': {}
 
-  '@aws-cdk/cloud-assembly-schema@41.2.0': {}
+  '@aws-cdk/cloud-assembly-schema@53.28.0': {}
 
   '@aws-crypto/crc32@5.2.0':
     dependencies:
@@ -6829,15 +6891,15 @@ snapshots:
 
   '@google-cloud/promisify@4.0.0': {}
 
-  '@guardian/cdk@61.11.1(aws-cdk-lib@2.195.0(constructs@10.4.2))(aws-cdk@2.1014.0)(constructs@10.4.2)':
+  '@guardian/cdk@61.11.1(aws-cdk-lib@2.246.0(constructs@10.6.0))(aws-cdk@2.1128.1)(constructs@10.6.0)':
     dependencies:
       '@oclif/core': 3.26.6
-      aws-cdk: 2.1014.0
-      aws-cdk-lib: 2.195.0(constructs@10.4.2)
+      aws-cdk: 2.1128.1
+      aws-cdk-lib: 2.246.0(constructs@10.6.0)
       aws-sdk: 2.1692.0
       chalk: 4.1.2
       codemaker: 1.114.1
-      constructs: 10.4.2
+      constructs: 10.6.0
       git-url-parse: 16.1.0
       js-yaml: 4.1.1
       read-pkg-up: 7.0.1
@@ -8053,16 +8115,14 @@ snapshots:
     dependencies:
       possible-typed-array-names: 1.1.0
 
-  aws-cdk-lib@2.195.0(constructs@10.4.2):
+  aws-cdk-lib@2.246.0(constructs@10.6.0):
     dependencies:
-      '@aws-cdk/asset-awscli-v1': 2.2.249
-      '@aws-cdk/asset-node-proxy-agent-v6': 2.1.0
-      '@aws-cdk/cloud-assembly-schema': 41.2.0
-      constructs: 10.4.2
+      '@aws-cdk/asset-awscli-v1': 2.2.263
+      '@aws-cdk/asset-node-proxy-agent-v6': 2.1.2
+      '@aws-cdk/cloud-assembly-schema': 53.28.0
+      constructs: 10.6.0
 
-  aws-cdk@2.1014.0:
-    optionalDependencies:
-      fsevents: 2.3.2
+  aws-cdk@2.1128.1: {}
 
   aws-sdk-client-mock@4.1.0:
     dependencies:
@@ -8418,7 +8478,7 @@ snapshots:
       snake-case: 2.1.0
       upper-case: 1.1.3
 
-  constructs@10.4.2: {}
+  constructs@10.6.0: {}
 
   convert-source-map@2.0.0: {}
 
@@ -9160,9 +9220,6 @@ snapshots:
       universalify: 2.0.1
 
   fs.realpath@1.0.0: {}
-
-  fsevents@2.3.2:
-    optional: true
 
   fsevents@2.3.3:
     optional: true
@@ -10959,6 +11016,8 @@ snapshots:
 
   semver@7.7.3: {}
 
+  semver@7.8.5: {}
+
   sentence-case@2.1.1:
     dependencies:
       no-case: 2.3.2
@@ -11323,7 +11382,7 @@ snapshots:
 
   ts-dedent@2.2.0: {}
 
-  ts-jest@29.4.6(@babel/core@7.28.3)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@29.7.0(@babel/core@7.28.3))(esbuild@0.25.12)(jest-util@30.2.0)(jest@29.7.0(@types/node@22.19.1)(ts-node@10.9.2(@types/node@22.19.1)(typescript@5.9.2)))(typescript@5.9.2):
+  ts-jest@29.4.11(@babel/core@7.28.3)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@29.7.0(@babel/core@7.28.3))(esbuild@0.25.12)(jest-util@30.2.0)(jest@29.7.0(@types/node@22.19.1)(ts-node@10.9.2(@types/node@22.19.1)(typescript@5.9.2)))(typescript@5.9.2):
     dependencies:
       bs-logger: 0.2.6
       fast-json-stable-stringify: 2.1.0
@@ -11332,7 +11391,7 @@ snapshots:
       json5: 2.2.3
       lodash.memoize: 4.1.2
       make-error: 1.3.6
-      semver: 7.7.3
+      semver: 7.8.5
       type-fest: 4.41.0
       typescript: 5.9.2
       yargs-parser: 21.1.1
@@ -11717,4 +11776,4 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  zod@3.25.76: {}
+  zod@4.4.3: {}

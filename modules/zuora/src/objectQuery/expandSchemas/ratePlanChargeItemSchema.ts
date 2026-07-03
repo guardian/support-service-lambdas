@@ -1,4 +1,5 @@
 import z from 'zod';
+import { productRatePlanChargeIdSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 
 export const ratePlanChargeItemSchema = z.object({
 	/** The unique identifier of the rate plan charge. */
@@ -14,7 +15,7 @@ export const ratePlanChargeItemSchema = z.object({
 	/** The unique identifier of the rate plan to which this charge belongs. */
 	ratePlanId: z.string(),
 	/** The unique identifier of the product rate plan charge this is based on. */
-	productRatePlanChargeId: z.string(),
+	productRatePlanChargeId: productRatePlanChargeIdSchema,
 	/** Specifies the type of charges a specific discount applies to. */
 	applyDiscountTo: z
 		.enum([

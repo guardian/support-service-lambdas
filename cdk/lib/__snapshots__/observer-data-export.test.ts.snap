@@ -193,7 +193,7 @@ def sort_filter_rules(json_obj):
             "Arn",
           ],
         },
-        "Runtime": "python3.11",
+        "Runtime": "python3.13",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -272,7 +272,12 @@ def sort_filter_rules(json_obj):
             {
               "Action": "s3:PutBucketNotification",
               "Effect": "Allow",
-              "Resource": "*",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SalesforceObserverDataTransferBucketC46E06F4",
+                  "Arn",
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
@@ -1998,7 +2003,7 @@ def sort_filter_rules(json_obj):
             "Arn",
           ],
         },
-        "Runtime": "python3.11",
+        "Runtime": "python3.13",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -2077,7 +2082,12 @@ def sort_filter_rules(json_obj):
             {
               "Action": "s3:PutBucketNotification",
               "Effect": "Allow",
-              "Resource": "*",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SalesforceObserverDataTransferBucketC46E06F4",
+                  "Arn",
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",

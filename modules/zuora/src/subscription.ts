@@ -1,5 +1,5 @@
 import type { Dayjs } from 'dayjs';
-import type { z, ZodTypeDef } from 'zod';
+import type { z } from 'zod';
 import type {
 	CancelSubscriptionResponse,
 	ZuoraSubscription,
@@ -54,16 +54,12 @@ export async function getSubscription(
 	zuoraClient: ZuoraClient,
 	subscriptionNumber: string,
 ): Promise<ZuoraSubscription>;
-export async function getSubscription<
-	T extends z.ZodType<unknown, ZodTypeDef, unknown>,
->(
+export async function getSubscription<T extends z.ZodType>(
 	zuoraClient: ZuoraClient,
 	subscriptionNumber: string,
 	schema: T,
 ): Promise<z.infer<T>>;
-export async function getSubscription<
-	T extends z.ZodType<unknown, ZodTypeDef, unknown>,
->(
+export async function getSubscription<T extends z.ZodType>(
 	zuoraClient: ZuoraClient,
 	subscriptionNumber: string,
 	schema?: T,

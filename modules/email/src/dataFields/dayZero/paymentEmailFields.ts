@@ -1,7 +1,7 @@
-import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import minMax from 'dayjs/plugin/minMax';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import type { EmailPaymentMethod } from './types';
 
 dayjs.extend(minMax);
@@ -35,36 +35,58 @@ export type EmailPaymentFields =
 			mandate_id: string;
 	  };
 
+function getFirstPaymentDateCopy(
+	paymentMethod: EmailPaymentMethod,
+	firstZuoraPaymentDate: Dayjs,
+	today: Dayjs,
+): string {
+	const firstPaymentDateFormatted = formatDate(firstZuoraPaymentDate);
+
+	if (paymentMethod.Type !== 'BankTransfer') {
+		return firstPaymentDateFormatted;
+	}
+
+	const isFirstPaymentLessThan10DaysAway =
+		firstZuoraPaymentDate < today.add(DIRECT_DEBIT_LEAD_TIME_DAYS, 'day');
+	const directDebitDisclaimer = isFirstPaymentLessThan10DaysAway
+		? ' (Direct Debit may be up to 10 days after this)'
+		: '';
+
+	return `${firstPaymentDateFormatted}${directDebitDisclaimer}`;
+}
+
 export function getPaymentFields(
 	today: Dayjs,
 	paymentMethod: EmailPaymentMethod,
 	firstZuoraPaymentDate: Dayjs,
 	mandateId?: string,
 ): EmailPaymentFields {
+	const firstPaymentDateCopy = getFirstPaymentDateCopy(
+		paymentMethod,
+		firstZuoraPaymentDate,
+		today,
+	);
+
 	switch (paymentMethod.Type) {
-		case 'BankTransfer':
+		case 'BankTransfer': {
 			return {
 				bank_account_no: mask(paymentMethod.BankTransferAccountNumber),
 				bank_sort_code: hyphenate(paymentMethod.BankCode),
 				account_holder: paymentMethod.BankTransferAccountName,
 				payment_method: 'Direct Debit',
 				mandate_id: mandateId ?? '',
-				first_payment_date: formatDate(
-					dayjs.max(
-						firstZuoraPaymentDate,
-						today.add(DIRECT_DEBIT_LEAD_TIME_DAYS, 'day'),
-					),
-				),
+				first_payment_date: firstPaymentDateCopy,
 			};
+		}
 		case 'CreditCardReferenceTransaction':
 			return {
 				payment_method: 'Credit/Debit Card',
-				first_payment_date: formatDate(firstZuoraPaymentDate),
+				first_payment_date: firstPaymentDateCopy,
 			};
 		case 'PayPal':
 			return {
 				payment_method: 'PayPal',
-				first_payment_date: formatDate(firstZuoraPaymentDate),
+				first_payment_date: firstPaymentDateCopy,
 			};
 	}
 }
@@ -74,19 +96,14 @@ export function getPaymentMethodFieldsSupporterPlus(
 	created: Dayjs,
 	mandateId?: string,
 ):
-	| {
-			payment_method: 'credit / debit card' | 'PayPal';
-			first_payment_date: string;
-	  }
+	| undefined
 	| {
 			payment_method: 'Direct Debit';
 			account_name: string;
 			account_number: string;
 			sort_code: string;
 			Mandate_ID: string;
-			first_payment_date: string;
 	  } {
-	const DIRECT_DEBIT_LEAD_TIME_DAYS = 10;
 	switch (paymentMethod.Type) {
 		case 'BankTransfer':
 			return {
@@ -98,19 +115,9 @@ export function getPaymentMethodFieldsSupporterPlus(
 					mandateId,
 					'No Mandate ID was provided for a Direct Debit payment',
 				),
-				first_payment_date: formatDate(
-					created.add(DIRECT_DEBIT_LEAD_TIME_DAYS, 'days'),
-				),
 			};
 		case 'CreditCardReferenceTransaction':
-			return {
-				payment_method: 'credit / debit card',
-				first_payment_date: formatDate(created),
-			};
 		case 'PayPal':
-			return {
-				payment_method: 'PayPal',
-				first_payment_date: formatDate(created),
-			};
+			return undefined;
 	}
 }

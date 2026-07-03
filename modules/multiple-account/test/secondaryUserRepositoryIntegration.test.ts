@@ -6,9 +6,9 @@
  * @group integration
  */
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import dayjs from 'dayjs';
 import { getAwsConfig } from '@modules/aws/config';
 import type { Stage } from '@modules/stage';
-import dayjs from 'dayjs';
 import { SecondaryUserRepository } from '../src/secondaryUserRepository';
 
 const stage: Stage = 'CODE';
@@ -39,4 +39,19 @@ test('SecondaryUserRepository saves and retrieves a record from DynamoDB', async
 	const saved = await repo.get(testRecord.secondaryIdentityId);
 
 	expect(saved).toEqual([testRecord]);
+});
+
+test('SecondaryUserRepository updateTTL updates the expiryDate without overwriting other fields', async () => {
+	await repo.save(testRecord);
+
+	const newExpiryDate = dayjs().add(1, 'year').unix();
+	await repo.updateTTL(
+		testRecord.subscriptionName,
+		testRecord.secondaryIdentityId,
+		newExpiryDate,
+	);
+
+	const saved = await repo.get(testRecord.secondaryIdentityId);
+
+	expect(saved).toEqual([{ ...testRecord, expiryDate: newExpiryDate }]);
 });

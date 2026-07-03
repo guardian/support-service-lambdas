@@ -6,8 +6,9 @@ const stageSchema = z.enum(['CODE', 'PROD']);
 
 export const stageFromEnvironment = (): Stage => {
 	const stage = process.env.STAGE;
+
 	return stageSchema.parse(stage, {
-		errorMap: () => ({
+		error: () => ({
 			message: `Stage environment variable is invalid`,
 		}),
 	});

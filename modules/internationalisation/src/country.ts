@@ -57,7 +57,26 @@ export const usStates: Record<string, string> = {
 	WI: 'Wisconsin',
 	WY: 'Wyoming',
 };
-export const caStates: Record<string, string> = {
+
+export const caStateCodes = [
+	'AB',
+	'BC',
+	'MB',
+	'NB',
+	'NL',
+	'NT',
+	'NS',
+	'NU',
+	'ON',
+	'PE',
+	'QC',
+	'SK',
+	'YT',
+] as const;
+
+export type CaState = (typeof caStateCodes)[number];
+
+export const caStates: Record<CaState, string> = {
 	AB: 'Alberta',
 	BC: 'British Columbia',
 	MB: 'Manitoba',
@@ -71,7 +90,8 @@ export const caStates: Record<string, string> = {
 	QC: 'Quebec',
 	SK: 'Saskatchewan',
 	YT: 'Yukon',
-};
+} as const;
+
 export const auStates: Record<string, string> = {
 	ACT: 'Australian Capital Territory',
 	NSW: 'New South Wales',
@@ -597,6 +617,5 @@ export function getCountryNameByIsoCode(code: IsoCountry) {
 }
 // ----- Types ----- //
 export type UsState = keyof typeof usStates;
-export type CaState = keyof typeof caStates;
 export type AuState = keyof typeof auStates;
 export type StateProvince = UsState;

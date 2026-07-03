@@ -1,6 +1,6 @@
-import type { IsoCurrency } from '@modules/internationalisation/currency';
 import type dayjs from 'dayjs';
 import { DataExtensionNames } from '@modules/email/email';
+import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { buildEmailFields, buildNonDeliveryEmailFields } from './emailFields';
 import { getPaymentMethodFieldsSupporterPlus } from './paymentEmailFields';
 import type {
@@ -51,7 +51,7 @@ export function buildSupporterPlusEmailFields({
 		currency: currency,
 		billing_period: billingPeriod.toLowerCase(),
 		is_fixed_term: isFixedTerm.toString(),
-		...oldNonStandardPaymentFields,
+		...(oldNonStandardPaymentFields ?? {}),
 		...nonDeliveryEmailFields,
 	};
 	return buildEmailFields(

@@ -1,3 +1,7 @@
+import type { APIGatewayProxyResult } from 'aws-lambda';
+import dayjs from 'dayjs';
+import { customAlphabet } from 'nanoid';
+import { z } from 'zod';
 import { getOrCreateUserFromEmail } from '@modules/identity/idapi';
 import type { IdentityClient } from '@modules/identity/identityClient';
 import { logger } from '@modules/logger/logger';
@@ -10,10 +14,6 @@ import type {
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ZuoraCatalog } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import type { APIGatewayProxyResult } from 'aws-lambda';
-import dayjs from 'dayjs';
-import { customAlphabet } from 'nanoid';
-import { z } from 'zod';
 import type { InvitationRepository } from './invitationRepository';
 import {
 	checkSubscriptionHasMultipleAccountsBenefit,
@@ -75,6 +75,7 @@ export const createInvitationEndpoint =
 			subscriptionName: zuoraSubscription.subscriptionNumber,
 			invitationCode,
 			primaryIdentityId: account.basicInfo.identityId,
+			secondaryUserEmail: body.secondaryUserEmail,
 			secondaryIdentityId,
 			invitedDate: zuoraDateFormat(now),
 			expiryDate: now.add(1, 'month').toDate().getTime(),

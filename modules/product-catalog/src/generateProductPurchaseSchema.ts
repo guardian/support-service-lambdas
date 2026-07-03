@@ -1,8 +1,3 @@
-import type {
-	CatalogProduct,
-	ZuoraCatalog,
-	ZuoraProductRatePlan,
-} from '@modules/zuora-catalog/zuoraCatalogSchema';
 import {
 	isDeliveryProduct,
 	requiresDeliveryInstructions,
@@ -13,6 +8,11 @@ import {
 	isSupportedProduct,
 	isSupportedProductRatePlan,
 } from '@modules/product-catalog/zuoraToProductNameMappings';
+import type {
+	CatalogProduct,
+	ZuoraCatalog,
+	ZuoraProductRatePlan,
+} from '@modules/zuora-catalog/zuoraCatalogSchema';
 
 const header = `
 // ---------- This file is auto-generated. Do not edit manually. -------------

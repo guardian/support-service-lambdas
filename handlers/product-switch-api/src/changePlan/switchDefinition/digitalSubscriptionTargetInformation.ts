@@ -7,6 +7,7 @@ import type {
 	TargetInformation,
 } from '../prepare/targetInformation';
 import type { Discount } from './discounts';
+import { annualDigiPlus } from './discounts';
 import { monthlyDigiPlus } from './discounts';
 
 export const digitalSubscriptionTargetInformation: SwitchTargetInformation<
@@ -19,7 +20,7 @@ export const digitalSubscriptionTargetInformation: SwitchTargetInformation<
 			'Annual' | 'Monthly'
 		>,
 		switchActionData: SwitchActionData,
-	): Promise<TargetInformation> => {
+	): TargetInformation => {
 		if (switchActionData.mode === 'save') {
 			throw new ValidationError(
 				'you cannot currently get a discount on t2->3 switch',
@@ -29,11 +30,12 @@ export const digitalSubscriptionTargetInformation: SwitchTargetInformation<
 			throw new ValidationError("digital plus doesn't have a variable amount");
 		}
 		let discount: Discount | undefined = undefined;
-		if (
-			switchActionData.discountEnabled &&
-			productRatePlan.billingPeriod === 'Month'
-		) {
-			discount = monthlyDigiPlus;
+		if (switchActionData.discountEnabled) {
+			if (productRatePlan.billingPeriod === 'Month') {
+				discount = monthlyDigiPlus;
+			} else {
+				discount = annualDigiPlus;
+			}
 		}
 
 		const catalogPrice = productRatePlan.pricing[switchActionData.currency];
@@ -45,14 +47,14 @@ export const digitalSubscriptionTargetInformation: SwitchTargetInformation<
 				? `Digital Pack Monthly`
 				: `Digital Pack Annual`;
 
-		return Promise.resolve({
-			actualTotalPrice: catalogPrice,
+		return {
+			ongoingPrice: catalogPrice,
 			productRatePlanId: productRatePlan.id,
 			ratePlanName,
 			contributionCharge: undefined,
 			subscriptionChargeId: productRatePlan.charges.Subscription.id,
 			discount,
 			dataExtensionName: DataExtensionNames.supporterPlusToDigitalPlusSwitch,
-		} satisfies TargetInformation);
+		} satisfies TargetInformation;
 	},
 };

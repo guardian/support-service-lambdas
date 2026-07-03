@@ -1,7 +1,7 @@
+import type { Dayjs } from 'dayjs';
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import { voidSchema } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { Dayjs } from 'dayjs';
 import { updateSubscriptionBody } from './fixtures/request-bodies/update-subscription-body';
 
 export const doPriceRise = async (

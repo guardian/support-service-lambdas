@@ -60,6 +60,28 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 1`
         },
         "Name": "forward-mobile-purchases-to-sqs-CODE",
         "State": "ENABLED",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "mobile-purchases-to-supporter-product-data",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
         "Targets": [
           {
             "Arn": {
@@ -648,6 +670,28 @@ DLQ: https://",
         },
         "Name": "forward-mobile-purchases-to-sqs-PROD",
         "State": "ENABLED",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "mobile-purchases-to-supporter-product-data",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
         "Targets": [
           {
             "Arn": {

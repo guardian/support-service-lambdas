@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import * as identity from '@modules/identity/idapi';
 import type { IdentityClient } from '@modules/identity/identityClient';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
@@ -8,7 +9,6 @@ import type {
 import { zuoraSubscriptionSchema } from '@modules/zuora/types/objects';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import dayjs from 'dayjs';
 import code from '../../../modules/zuora-catalog/test/fixtures/catalog-code.json';
 import { createInvitationEndpoint } from '../src/createInvitationEndpoint';
 import type {
@@ -34,11 +34,12 @@ const mockSubscription: ZuoraSubscription =
 
 const testDay = dayjs('2026-05-11').startOf('day');
 
-const mockInvitations = [
+const mockInvitations: InvitationRecord[] = [
 	{
 		subscriptionName: 'A-S12345',
 		invitationCode: 'invitation-code',
 		primaryIdentityId: '99999999',
+		secondaryUserEmail: 'integration-test@thegulocal.com',
 		secondaryIdentityId: '8888888',
 		invitedDate: zuoraDateFormat(testDay),
 		expiryDate: dayjs(testDay).add(1, 'm').toDate().getTime(),

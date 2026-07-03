@@ -1,6 +1,6 @@
+import { z } from 'zod';
 import { logger } from '@modules/logger/logger';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { z } from 'zod';
 import type { BatchQueryRequest } from '../model/query';
 
 const batchQueryItemSchema = z.object({

@@ -1,9 +1,9 @@
+import { z } from 'zod';
 import {
 	isoCountrySchema,
 	supportRegionSchema,
 } from '@modules/internationalisation/schemas';
 import { optionalDropNulls } from '@modules/schemaUtils';
-import { z } from 'zod';
 
 export const promoCampaignSchema = z.object({
 	campaignCode: z.string(),

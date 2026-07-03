@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
@@ -7,7 +8,6 @@ import type { ZuoraSubscription } from '@modules/zuora/types';
 import { zuoraSuccessSchema } from '@modules/zuora/types';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import dayjs from 'dayjs';
 
 const getFirstContributionRatePlan = (
 	productCatalog: ProductCatalog,

@@ -1,4 +1,4 @@
-import type { z, ZodTypeDef } from 'zod';
+import type { z } from 'zod';
 import { DefaultPaymentMethodResponseSchema } from './types';
 import type { ZuoraClient } from './zuoraClient';
 
@@ -6,12 +6,12 @@ export async function getPaymentMethods(
 	zuoraClient: ZuoraClient,
 	accountId: string,
 ): Promise<z.infer<typeof DefaultPaymentMethodResponseSchema>>;
-export async function getPaymentMethods<
-	T extends z.ZodType<unknown, ZodTypeDef, unknown>,
->(zuoraClient: ZuoraClient, accountId: string, schema: T): Promise<z.infer<T>>;
-export async function getPaymentMethods<
-	T extends z.ZodType<unknown, ZodTypeDef, unknown>,
->(
+export async function getPaymentMethods<T extends z.ZodType>(
+	zuoraClient: ZuoraClient,
+	accountId: string,
+	schema: T,
+): Promise<z.infer<T>>;
+export async function getPaymentMethods<T extends z.ZodType>(
 	zuoraClient: ZuoraClient,
 	accountId: string,
 	schema?: T,

@@ -6,9 +6,9 @@
  * @group integration
  */
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import dayjs from 'dayjs';
 import { getAwsConfig } from '@modules/aws/config';
 import type { Stage } from '@modules/stage';
-import dayjs from 'dayjs';
 import { deleteInvitationEndpoint } from '../src/deleteInvitationEndpoint';
 import {
 	type InvitationRecord,
@@ -30,6 +30,7 @@ const buildRecord = (
 	subscriptionName,
 	invitationCode,
 	primaryIdentityId: '12345678',
+	secondaryUserEmail: 'integration-test@thegulocal.com',
 	secondaryIdentityId: '87654321',
 	invitedDate: new Date().toISOString(),
 	expiryDate: dayjs().add(10, 'seconds').toDate().getTime(),

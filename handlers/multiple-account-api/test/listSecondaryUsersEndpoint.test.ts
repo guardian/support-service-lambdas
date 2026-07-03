@@ -1,8 +1,8 @@
-import { listSecondaryUsersEndpoint } from '../src/listSecondaryUsersEndpoint';
 import type {
 	SecondaryUserRecord,
 	SecondaryUserRepository,
-} from '../src/secondaryUserRepository';
+} from '@modules/multiple-account/secondaryUserRepository';
+import { listSecondaryUsersEndpoint } from '../src/listSecondaryUsersEndpoint';
 
 describe('listSecondaryUsersEndpoint', () => {
 	it('returns all secondary users for the subscription', async () => {
@@ -12,6 +12,7 @@ describe('listSecondaryUsersEndpoint', () => {
 				secondaryIdentityId: 'secondary-id',
 				primaryIdentityId: 'primary-id',
 				acceptedDate: '2026-06-12',
+				expiryDate: 1781218800,
 			},
 		];
 		const mockList = jest

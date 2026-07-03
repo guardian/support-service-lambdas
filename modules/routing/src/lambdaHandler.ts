@@ -1,11 +1,11 @@
+import dayjs from 'dayjs';
+import type { z } from 'zod';
 import { loadConfig } from '@modules/aws/appConfig';
 import { invokeFunction } from '@modules/aws/lambda';
 import { Lazy } from '@modules/lazy';
 import { getCallerInfo } from '@modules/logger/getCallerInfo';
 import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
-import dayjs from 'dayjs';
-import type { z } from 'zod';
 
 export type HandlerEnv<ConfigType> = {
 	now: () => dayjs.Dayjs;
@@ -24,7 +24,7 @@ export type HandlerEnv<ConfigType> = {
  * @constructor
  */
 export function LambdaHandler<ConfigType, E>(
-	configSchema: z.ZodType<ConfigType, z.ZodTypeDef, unknown>,
+	configSchema: z.ZodType<ConfigType>,
 	handler: (event: E, env: HandlerEnv<ConfigType>) => Promise<void>,
 ) {
 	const callerInfo = getCallerInfo();
@@ -58,7 +58,7 @@ type GuEnv = { stage: string; stack: string; app: string };
  * @constructor
  */
 export function LambdaHandlerWithServices<ConfigType, Services, E>(
-	configSchema: z.ZodType<ConfigType, z.ZodTypeDef, unknown>,
+	configSchema: z.ZodType<ConfigType>,
 	handler: (event: E, services: Services) => Promise<void>,
 	buildServices: (handlerProps: HandlerEnv<ConfigType>) => Services,
 	callerInfo: string,

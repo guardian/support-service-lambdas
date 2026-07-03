@@ -11,6 +11,7 @@ describe('listInvitationsEndpoint', () => {
 				subscriptionName: 'A-S00974337',
 				invitationCode: 'RpwR62kMnAxe',
 				primaryIdentityId: 'primary-id',
+				secondaryUserEmail: 'integration-test@thegulocal.com',
 				secondaryIdentityId: 'secondary-id',
 				invitedDate: '2026-06-12',
 				expiryDate: 1781222400000,

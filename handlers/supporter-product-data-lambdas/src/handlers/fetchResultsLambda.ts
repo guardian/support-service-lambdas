@@ -1,7 +1,7 @@
+import type { Handler } from 'aws-lambda';
 import { Lazy } from '@modules/lazy';
 import { stageFromEnvironment } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { Handler } from 'aws-lambda';
 import { ConfigService } from '../services/configService';
 import { S3Service } from '../services/s3Service';
 import { ZuoraQuerierService } from '../services/zuoraQuerierService';

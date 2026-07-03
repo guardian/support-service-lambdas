@@ -1,7 +1,7 @@
-import { logger } from '@modules/logger/logger';
-import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
 import { z } from 'zod';
-import type { SecondaryUserRepository } from './secondaryUserRepository';
+import { logger } from '@modules/logger/logger';
+import type { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
+import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
 
 export const listSecondaryUsersPathSchema = z.object({
 	subscriptionName: z.string(),

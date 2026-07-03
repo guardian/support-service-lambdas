@@ -30,12 +30,13 @@ export function parseArguments(argv: string[]): ParsedArgs {
 	}
 
 	const repoRoot = args[1];
+	const isSupportedRepoPath =
+		repoRoot.startsWith('/') &&
+		(repoRoot.endsWith('support-service-lambdas') ||
+			// This allows the path validation for bare repositories
+			/support-service-lambdas\.git\/[^/]+$/.test(repoRoot));
 
-	if (
-		!fs.existsSync(repoRoot) ||
-		!repoRoot.startsWith('/') ||
-		!repoRoot.endsWith('support-service-lambdas')
-	) {
+	if (!fs.existsSync(repoRoot) || !isSupportedRepoPath) {
 		throw new Error(`Invalid repository root: ${repoRoot}`);
 	}
 

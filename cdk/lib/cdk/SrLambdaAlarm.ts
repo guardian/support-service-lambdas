@@ -6,8 +6,10 @@ import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { Tags } from 'aws-cdk-lib';
 
-export interface SrLambdaAlarmProps
-	extends Omit<GuAlarmProps, 'snsTopicName' | 'actionsEnabled'> {
+export interface SrLambdaAlarmProps extends Omit<
+	GuAlarmProps,
+	'snsTopicName' | 'actionsEnabled'
+> {
 	/**
 	 * lambda(s) that cause this alarm, this is used to generate a log link on the alarm
 	 */

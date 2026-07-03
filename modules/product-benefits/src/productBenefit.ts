@@ -1,7 +1,7 @@
-import type { ProductKey } from '@modules/product-catalog/productCatalog';
-import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import dayjs from 'dayjs';
 import type { InAppPurchaseProductKey } from '@modules/product-benefits/inAppPurchase';
+import type { ProductKey } from '@modules/product-catalog/productCatalog';
+import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import type { ProductBenefit } from './schemas';
 import { productBenefitListSchema } from './schemas';
 

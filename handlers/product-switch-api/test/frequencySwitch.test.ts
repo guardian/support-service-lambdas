@@ -2,6 +2,7 @@
  * Unit tests for frequency switch functionality.
  * Tests the candidate selection logic and edge cases without external API calls.
  */
+import dayjs from 'dayjs';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import type {
 	RatePlanCharge,
@@ -14,7 +15,6 @@ import type {
 	ProductRatePlanChargeId,
 	ProductRatePlanId,
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import dayjs from 'dayjs';
 import { selectCandidateSubscriptionCharge } from '../src/frequencySwitchEndpoint';
 import { productCatalog } from './productCatalogFixture';
 

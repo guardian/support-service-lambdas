@@ -29,6 +29,7 @@ export const dataSubjectRequestCallbackParser = {
 		results_url: z.string().url().nullable(),
 		extensions: z
 			.record(
+				z.string(),
 				z.object({
 					domain: z.string(),
 					name: z.string(),

@@ -1,6 +1,6 @@
+import type { z } from 'zod';
 import { groupMap } from '@modules/arrayFunctions';
 import { logger } from '@modules/logger/logger';
-import type { z } from 'zod';
 
 export class HttpError extends Error {
 	public statusCode: number;
@@ -34,7 +34,7 @@ export type HttpResponse<T> =
 	  };
 
 export type Schema<RESP> =
-	| z.ZodType<RESP, z.ZodTypeDef, unknown>
+	| z.ZodType<RESP>
 	| ((body: string, contentType?: string) => RESP);
 
 export class RestRequestMaker {

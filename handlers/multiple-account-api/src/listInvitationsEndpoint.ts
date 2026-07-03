@@ -1,6 +1,6 @@
+import { z } from 'zod';
 import { logger } from '@modules/logger/logger';
 import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
-import { z } from 'zod';
 import type { InvitationRepository } from './invitationRepository';
 
 export const listInvitationsPathSchema = z.object({

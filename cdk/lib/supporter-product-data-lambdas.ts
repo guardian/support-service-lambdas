@@ -25,6 +25,7 @@ import {
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import {
 	AllowS3CatalogReadPolicy,
+	AllowSecondaryUserTableQueryPolicy,
 	AllowZuoraOAuthSecretsPolicy,
 } from './cdk/policies';
 import { SrLambda } from './cdk/SrLambda';
@@ -150,9 +151,11 @@ export class SupporterProductDataLambdas extends SrStack {
 		);
 		processItem.addPolicies(zuoraCatalogS3Policy);
 		processItem.addToRolePolicy(dynamoWritePolicy);
+		processItem.addPolicies(new AllowSecondaryUserTableQueryPolicy(this));
 		processItem.addPolicies(zuoraOAuthPolicy);
 
 		queue.grantSendMessages(addToQueue);
+		queue.grantSendMessages(processItem); // The process item lambda calls itself for subscriptions with secondary users
 		queue.grantConsumeMessages(processItem);
 		processItem.addEventSource(
 			new SqsEventSource(queue, {

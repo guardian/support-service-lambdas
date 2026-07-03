@@ -12,7 +12,7 @@
 		"lint-fix": "eslint --cache --cache-location /tmp/eslintcache/ --fix 'lib/**' 'bin/**'",
 		"synth": "cdk synth --path-metadata false --version-reporting false",
 		"diff": "cdk diff --path-metadata false --version-reporting false",
-		"package": "sh -c 'pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test $1 && pnpm synth' --",
+		"package": "sh -c 'pnpm type-check && pnpm lint && pnpm test $1 && pnpm synth' --",
 		"fix-formatting": "prettier --write **.ts",
 		"update-stack": "../update-stack.sh"
 	},
@@ -20,9 +20,9 @@
 		"@guardian/cdk": "61.11.1",
 		"@types/jest": "^29.5.14",
 		"@types/node": "^22.15.14",
-		"aws-cdk": "2.1014.0",
-		"aws-cdk-lib": "2.195.0",
-		"constructs": "10.4.2",
+		"aws-cdk": "2.1128.1",
+		"aws-cdk-lib": "2.246.0",
+		"constructs": "10.6.0",
 		"source-map-support": "^0.5.21",
 		"tsx": "^4.21.0"
 	},

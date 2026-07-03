@@ -4,6 +4,9 @@
  * @group integration
  */
 import console from 'console';
+import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import dayjs from 'dayjs';
+import z from 'zod';
 import { invokeFunction } from '@modules/aws/lambda';
 import { ValidationError } from '@modules/errors';
 import { logger } from '@modules/logger/logger';
@@ -13,9 +16,6 @@ import type { ZuoraAccount, ZuoraSubscription } from '@modules/zuora/types';
 import { voidSchema } from '@modules/zuora/types';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import dayjs from 'dayjs';
-import z from 'zod';
 import type { ContributionTestAdditionalOptions } from '../../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import { createContribution } from '../../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import type { PreviewResponse } from '../../src/changePlan/action/preview';
@@ -25,6 +25,7 @@ import type { LegacyProductSwitchRequestBody } from '../../src/changePlan/legacy
 import { legacyContributionToSupporterPlus } from '../../src/changePlan/legacyContributionToSupporterPlusEndpoint';
 import type { ValidTargetProduct } from '../../src/changePlan/prepare/switchCatalogHelper';
 import type { ProductSwitchRequestBody } from '../../src/changePlan/schemas';
+import { ToSingleGuardianSubscription } from '../../src/changePlan/toSingleGuardianSubscription';
 
 // change to true to test the version on CODE instead of local
 const testCODELambda: boolean = false;
@@ -149,6 +150,7 @@ async function testCall(
 	} else {
 		const changePlanEndpoint = new ChangePlanEndpoint(
 			'CODE',
+			await ToSingleGuardianSubscription.build('CODE'),
 			dayjs(),
 			input,
 			testData.zuoraClient,

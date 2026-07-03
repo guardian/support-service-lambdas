@@ -448,6 +448,9 @@ exports[`The User subscription api stack matches the snapshot 1`] = `
         "LambdaRestApiproxy22103CFD",
         "LambdaRestApiANYC3C9D364",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "API Gateway created by CDK",
         "RestApiId": {
@@ -1400,6 +1403,9 @@ exports[`The User subscription api stack matches the snapshot 2`] = `
         "LambdaRestApiproxy22103CFD",
         "LambdaRestApiANYC3C9D364",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "API Gateway created by CDK",
         "RestApiId": {

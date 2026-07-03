@@ -25,11 +25,17 @@ class CatalogWireTest extends AnyFlatSpec with Matchers with ResourceLoader {
     Json.prettyPrint(Json.toJson(wireCatalog)) shouldBe Json.prettyPrint(Json.parse(expected.get))
   }
 
-  def gbpPrice(amount: Int): Map[Currency, AmountMinorUnits] = Map(
-    Currency.GBP -> AmountMinorUnits(amount),
+  def gbpPrice(amount: Int): PlanPrices = PlanPrices(
+    Map(Currency.GBP -> AmountMinorUnits(amount)),
+    None,
   )
 
-  def fakePricesFor(planId: PlanId): Map[Currency, AmountMinorUnits] = planId match {
+  def prices(taxMode: Option[TaxMode], entries: (Currency, AmountMinorUnits)*): PlanPrices =
+    PlanPrices(entries.toMap, taxMode)
+
+  val noPrices: PlanPrices = PlanPrices(Map.empty, None)
+
+  def fakePricesFor(planId: PlanId): PlanPrices = planId match {
     case VoucherWeekendPlus => gbpPrice(2942)
     case VoucherWeekend => gbpPrice(2076)
     case VoucherSunday => gbpPrice(1079)
@@ -39,10 +45,10 @@ class CatalogWireTest extends AnyFlatSpec with Matchers with ResourceLoader {
     case VoucherEveryDayPlus => gbpPrice(5196)
     case VoucherSixDay => gbpPrice(4112)
     case VoucherSixDayPlus => gbpPrice(4762)
-    case MonthlySupporterPlus => Map.empty
-    case AnnualSupporterPlus => Map.empty
-    case MonthlyContribution => Map.empty
-    case AnnualContribution => Map.empty
+    case MonthlySupporterPlus => noPrices
+    case AnnualSupporterPlus => noPrices
+    case MonthlyContribution => noPrices
+    case AnnualContribution => noPrices
     case HomeDeliveryEveryDay => gbpPrice(123)
     case HomeDeliverySaturday => gbpPrice(456)
     case HomeDeliverySunday => gbpPrice(321)
@@ -53,45 +59,29 @@ class CatalogWireTest extends AnyFlatSpec with Matchers with ResourceLoader {
     case HomeDeliverySixDayPlus => gbpPrice(1111)
     case HomeDeliveryWeekendPlus => gbpPrice(2222)
     case DigipackMonthly =>
-      Map(
-        Currency.GBP -> AmountMinorUnits(5555),
-        Currency.USD -> AmountMinorUnits(5554),
-      )
+      prices(None, Currency.GBP -> AmountMinorUnits(5555), Currency.USD -> AmountMinorUnits(5554))
     case DigipackAnnual =>
-      Map(
-        Currency.GBP -> AmountMinorUnits(66666),
-        Currency.USD -> AmountMinorUnits(66665),
-      )
+      prices(None, Currency.GBP -> AmountMinorUnits(66666), Currency.USD -> AmountMinorUnits(66665))
+    case DigipackAnnualTaxExclusive =>
+      prices(Some(TaxMode.TaxExclusive), Currency.CAD -> AmountMinorUnits(11999))
+    case DigipackMonthlyTaxExclusive =>
+      prices(Some(TaxMode.TaxExclusive), Currency.CAD -> AmountMinorUnits(1199))
+    case AnnualSupporterPlusTaxExclusive =>
+      prices(Some(TaxMode.TaxExclusive), Currency.CAD -> AmountMinorUnits(16999))
+    case MonthlySupporterPlusTaxExclusive =>
+      prices(Some(TaxMode.TaxExclusive), Currency.CAD -> AmountMinorUnits(1699))
     case GuardianWeeklyPlusDomesticMonthly =>
-      Map(
-        Currency.GBP -> AmountMinorUnits(1111111),
-        Currency.USD -> AmountMinorUnits(11111111),
-      )
+      prices(None, Currency.GBP -> AmountMinorUnits(1111111), Currency.USD -> AmountMinorUnits(11111111))
     case GuardianWeeklyPlusDomesticQuarterly =>
-      Map(
-        Currency.GBP -> AmountMinorUnits(2222222),
-        Currency.USD -> AmountMinorUnits(22222222),
-      )
+      prices(None, Currency.GBP -> AmountMinorUnits(2222222), Currency.USD -> AmountMinorUnits(22222222))
     case GuardianWeeklyPlusDomesticAnnual =>
-      Map(
-        Currency.GBP -> AmountMinorUnits(3333333),
-        Currency.USD -> AmountMinorUnits(33333333),
-      )
+      prices(None, Currency.GBP -> AmountMinorUnits(3333333), Currency.USD -> AmountMinorUnits(33333333))
     case GuardianWeeklyPlusROWMonthly =>
-      Map(
-        Currency.GBP -> AmountMinorUnits(4444444),
-        Currency.USD -> AmountMinorUnits(44444444),
-      )
+      prices(None, Currency.GBP -> AmountMinorUnits(4444444), Currency.USD -> AmountMinorUnits(44444444))
     case GuardianWeeklyPlusROWQuarterly =>
-      Map(
-        Currency.GBP -> AmountMinorUnits(5555555),
-        Currency.USD -> AmountMinorUnits(55555555),
-      )
+      prices(None, Currency.GBP -> AmountMinorUnits(5555555), Currency.USD -> AmountMinorUnits(55555555))
     case GuardianWeeklyPlusROWAnnual =>
-      Map(
-        Currency.GBP -> AmountMinorUnits(6666666),
-        Currency.USD -> AmountMinorUnits(66666666),
-      )
+      prices(None, Currency.GBP -> AmountMinorUnits(6666666), Currency.USD -> AmountMinorUnits(66666666))
     case DigitalVoucherEveryday => gbpPrice(7001)
     case DigitalVoucherEverydayPlus => gbpPrice(7002)
     case DigitalVoucherSixday => gbpPrice(7003)
