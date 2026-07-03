@@ -1,9 +1,4 @@
-export const newspaperCountries: Record<string, string> = {
-	GB: 'United Kingdom',
-	IM: 'Isle of Man',
-};
-export type IsoCountry = (typeof isoCountries)[number];
-export const isoCountries = [
+export const countryCodes = [
 	'GB',
 	'US',
 	'AU',
@@ -255,9 +250,9 @@ export const isoCountries = [
 	'SH',
 ] as const;
 
-export const isoCountrySet: Set<IsoCountry> = new Set(isoCountries);
+export type CountryCode = (typeof countryCodes)[number];
 
-export const countries: Record<IsoCountry, string> = {
+export const countries: Record<CountryCode, string> = {
 	GB: 'United Kingdom',
 	US: 'United States',
 	AU: 'Australia',
@@ -508,6 +503,12 @@ export const countries: Record<IsoCountry, string> = {
 	JE: 'Jersey',
 	SH: 'Saint Helena',
 };
-export function getCountryNameByIsoCode(code: IsoCountry) {
-	return countries[code] || null;
+
+export const newspaperCountries: Record<string, string> = {
+	GB: 'United Kingdom',
+	IM: 'Isle of Man',
+};
+
+export function getCountryNameByCode(code: CountryCode) {
+	return countries[code];
 }

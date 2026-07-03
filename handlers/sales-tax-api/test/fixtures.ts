@@ -1,4 +1,4 @@
-import { type IsoCountry } from '@modules/internationalisation/country';
+import { type CountryCode } from '@modules/internationalisation/country';
 import type { CaStateCode } from '@modules/internationalisation/state';
 import { caStates } from '@modules/internationalisation/state';
 import type {
@@ -74,6 +74,6 @@ function canadianZuoraTaxRate(
 	};
 }
 
-export const countryStates: Partial<Record<IsoCountry, TaxRatesResponse>> = {
+export const countryStates: Partial<Record<CountryCode, TaxRatesResponse>> = {
 	CA: canadianCountryStates,
 };

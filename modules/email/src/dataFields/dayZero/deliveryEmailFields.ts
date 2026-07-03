@@ -1,5 +1,5 @@
 import type { Dayjs } from 'dayjs';
-import { getCountryNameByIsoCode } from '@modules/internationalisation/country';
+import { getCountryNameByCode } from '@modules/internationalisation/country';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import type { NonDeliveryEmailFields } from './emailFields';
 import { buildNonDeliveryEmailFields } from './emailFields';
@@ -61,7 +61,7 @@ export function buildDeliveryEmailFields({
 		delivery_address_line_2: address.lineTwo ?? '',
 		delivery_address_town: address.city ?? '',
 		delivery_postcode: address.postCode ?? '',
-		delivery_country: getCountryNameByIsoCode(address.country) ?? '',
+		delivery_country: getCountryNameByCode(address.country) ?? '',
 	};
 
 	return {

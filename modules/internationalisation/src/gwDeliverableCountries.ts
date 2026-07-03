@@ -1,8 +1,8 @@
-import type { IsoCountry } from '@modules/internationalisation/country';
+import type { CountryCode } from '@modules/internationalisation/country';
 import { gwCountries } from '@modules/internationalisation/gwCountries';
 import { objectEntries, objectFromEntries } from '@modules/objectFunctions';
 
-const gwNonDeliverableCountries: Set<IsoCountry> = new Set([
+const gwNonDeliverableCountries: Set<CountryCode> = new Set([
 	'AF', // Afghanistan
 	'KI', // Kiribati
 	'LY', // Libya
@@ -16,7 +16,7 @@ const gwNonDeliverableCountries: Set<IsoCountry> = new Set([
 	'YE', // Yemen
 ]);
 
-export const gwDeliverableCountries: Partial<Record<IsoCountry, string>> =
+export const gwDeliverableCountries: Partial<Record<CountryCode, string>> =
 	objectFromEntries(
 		objectEntries(gwCountries).filter(
 			([countryCode]) => !gwNonDeliverableCountries.has(countryCode),
