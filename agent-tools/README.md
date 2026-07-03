@@ -61,42 +61,41 @@ going through `./agent-tool` or its allowlist.
 
 `test` executes repository code. Run it only on packages you trust.
 
-## Note on live output
+## Output modes
 
-Commands do not stream output in real time - the underlying command runs to completion first
-(writing everything to the log file), then the filtered/capped result is printed once, followed
-by the OK/FAIL summary. This is a deliberate simplification for an AI caller, which only ever
-sees a tool call's output after it returns anyway.
+**Default (no flags)**: output streams live. Stops displaying after 100 lines and prints a
+truncation notice pointing at `agent-tools/.last.log`. The full output is always written to the
+log regardless.
 
-If you want to watch a long-running command live (e.g. a slow type-check across many packages),
-open a second terminal and run:
+```
+[showing first 100 lines — full output in agent-tools/.last.log — use ./agent-tool last or read_file agent-tools/.last.log to see everything]
+```
+
+**`--all`**: streams live, uncapped.
+
+**`--tail N`**: runs to completion, then shows the **last N lines** from the log (post-run,
+not streaming). Default when `--tail` is explicit is the N you specify; without `--tail` or
+`--all` the streaming 100-line cap applies.
+
+**`--grep`/`--invert`/`--context`**: always runs to completion (grep needs full input to compute
+context windows). After the command finishes, filters the log and shows the result capped to
+the last 200 lines (or `--tail N` / `--all`).
+
+The full output is always captured to `agent-tools/.last.log` (gitignored, always overwritten),
+regardless of which display mode was used. Use `./agent-tool last` to retrieve it with any
+combination of flags.
+
+If the display filtering/capping pipeline itself fails (e.g. a non-numeric `--tail` value), a
+`WARN output filtering...` message is printed, but the OK/FAIL result and exit code still
+reflect the underlying command only.
+
+## Note on live output for humans
+
+For a long-running command, open a second terminal and watch:
 
 ```bash
 tail -f agent-tools/.last.log
 ```
-
-The log file is gitignored at `agent-tools/.last.log` (always in the same place, easy to find)
-and is overwritten by every new `./agent-tool` invocation.
-
-## Output filtering
-
-- `--grep PATTERN` - only show lines matching the regex
-- `--invert` - show lines NOT matching `--grep` (requires `--grep`)
-- `--context N` - lines of context around each `--grep` match (requires `--grep`)
-- `--tail N` - cap displayed output to the last N lines (default 200)
-- `--all` - show the full output, uncapped
-
-Filtering and capping apply identically to a live run's output and to `last`: filters
-(`--grep`/`--invert`/`--context`) run first, then the result is capped to the last N lines
-(`--tail`, default 200) unless `--all` is given. Every run's full combined stdout/stderr is
-always captured to `agent-tools/.last.log` (gitignored, always overwritten), regardless of
-what's displayed. Use `./agent-tool last` to read it back, re-filtered/re-capped by the same
-flags.
-
-If the display filtering/capping pipeline itself fails (e.g. a non-numeric `--tail` value), a
-`WARN output filtering...` message is printed, but the OK/FAIL result and exit code still
-reflect the underlying command only - a display glitch never causes a genuine pass to appear
-as a failure.
 
 ## Exit codes
 

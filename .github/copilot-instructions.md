@@ -85,16 +85,16 @@ Always scope to the minimum set of affected packages under `handlers/*`, `module
 
 Package arguments must always be given as workspace paths, e.g. `handlers/product-switch-api` or `modules/aws` rather than `product-switch-api`.
 
-Output filtering flags (filters run first, then the result is capped - see below):
+Output filtering flags:
 
-- `--grep PATTERN` to show only lines matching a regex pattern
+- `--grep PATTERN` to show only lines matching a regex pattern (buffers output, runs to completion first)
 - `--invert` to show lines NOT matching `--grep` (requires `--grep`)
 - `--context N` to keep N lines of context around each `--grep` match (requires `--grep`)
-- `--tail N` to cap displayed output to the last N lines (default 200, applies to both live runs and `last`)
-- `--all` to show the full output, uncapped
+- `--tail N` to cap displayed output to the last N lines after filtering (buffers output, runs to completion first)
+- `--all` to show the full output uncapped, streamed live
 - `./agent-tool last` to retrieve the most recently recorded full output for this repository, re-filtered/re-capped by the same flags — every run's full combined output is always captured to `agent-tools/.last.log` (gitignored, in the workspace, always overwritten), regardless of what was displayed
 
-Note: commands do not stream in real time - the underlying command runs to completion, then the filtered/capped output prints once, followed by the OK/FAIL summary.
+Default behaviour (no `--grep`/`--tail`/`--all`): output streams live, stopping after 100 lines with a truncation notice. If truncated, use `./agent-tool last --all` or `read_file agent-tools/.last.log` to see the full output — do not use shell commands to access the file directly.
 
 Recommended order (use the first applicable scoped command):
 

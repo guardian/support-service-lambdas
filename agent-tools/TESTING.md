@@ -70,17 +70,18 @@ The result is unambiguous — a display glitch never causes a genuine pass to ap
 | 3.4 | `$AGENT_TOOL type-check --changed` | Delegates to `pnpm run:changed type-check`; resolves changed packages from git status + their dependents; `OK   type-check --changed (Ns)` |
 | 3.5 | With a clean working tree: `$AGENT_TOOL type-check --changed` | `WARN no changed handlers/*, modules/*, cdk, or buildcheck packages detected` then `OK   type-check --changed (Ns)` (exit code `0` - no changes is not a failure) |
 
-## 4. Output filtering & capping
+## 4. Output modes and capping
 
 | # | Command | Expected |
 |---|---------|----------|
-| 4.1 | `$AGENT_TOOL git-diff-stat` (with >200 lines of diff output) | Output capped to the last 200 lines by default |
-| 4.2 | `$AGENT_TOOL git-diff-stat --tail 5` | Exactly the last 5 lines of the diff-stat output, followed by the OK/FAIL line |
-| 4.3 | `$AGENT_TOOL git-diff-stat --all` | Full uncapped output, however long |
-| 4.4 | `$AGENT_TOOL git-status --grep "^ M "` | Only lines starting with ` M ` (modified files) |
-| 4.5 | `$AGENT_TOOL git-status --grep "^ M " --invert` | All lines **except** those starting with ` M ` (e.g. `??`/` D ` lines) |
-| 4.6 | `$AGENT_TOOL git-status --grep "^ M " --context 1` | Matching lines plus 1 line of context before/after each |
-| 4.7 | Filter-then-cap order: `$AGENT_TOOL git-diff-stat --grep "package.json" --tail 3` | Filters to only `package.json`-related lines first, *then* takes the last 3 of those - not the last 3 raw lines then filtered |
+| 4.1 | `$AGENT_TOOL type-check modules/logger` (default, ≤100 lines output) | Full output streams live, no truncation notice |
+| 4.2 | `$AGENT_TOOL <any command producing >100 lines>` | First 100 lines stream live, then the truncation notice: `[showing first 100 lines — full output in agent-tools/.last.log — use ./agent-tool last or read_file agent-tools/.last.log to see everything]`, then the OK/FAIL line |
+| 4.3 | `$AGENT_TOOL <long command> --all` | Full output streams live, no cap, no truncation notice |
+| 4.4 | `$AGENT_TOOL <long command> --tail 5` | Runs to completion (buffered), then shows the **last** 5 lines |
+| 4.5 | `$AGENT_TOOL <command> --grep PATTERN` | Runs to completion (buffered), filters to matching lines, caps at 200; no streaming |
+| 4.6 | `$AGENT_TOOL git-status --grep "^ M " --invert` | All lines NOT starting with ` M ` |
+| 4.7 | `$AGENT_TOOL git-status --grep "^ M " --context 1` | Matching lines plus 1 line of context |
+| 4.8 | Filter-then-cap order for `--grep`: `$AGENT_TOOL git-diff-stat --grep "package.json" --tail 3` | Filters first, *then* takes the last 3 of those - not the last 3 raw lines then filtered |
 
 ## 5. Exit codes
 
@@ -160,8 +161,8 @@ during implementation showed up here first) - test it directly, not just via `--
 - No bulk/directory-safe `rm` - `git-rm` only handles one tracked file at a time; deleting a
   whole directory or untracked build artifacts (e.g. `node_modules`) still requires raw `rm -rf`
   outside of `agent-tool`, per the explicit decision in `REFACTOR-PLAN.md`.
-- Commands do not stream in real time - the underlying command runs to completion before any
-  output is shown (see README's "Note on live output"). To watch a long command live, use
-  `tail -f agent-tools/.last.log` in a second terminal. This is a deliberate trade-off for an
-  AI-first tool, not a bug.
+- Commands do not stream in real time when `--grep` or `--tail` is used - these require buffering
+  since grep needs full input to compute context windows. The default (no flags) and `--all`
+  modes do stream live. For long-running commands in buffered mode, use
+  `tail -f agent-tools/.last.log` in a second terminal.
 
