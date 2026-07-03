@@ -139,36 +139,50 @@ if [ "$GREP_INVERT" -eq 1 ] && [ -z "$GREP_PATTERN" ]; then
 	exit 1
 fi
 
-LOG_FILE="/tmp/agent-tool-last-$(printf '%s' "$ROOT_DIR" | shasum -a 256 | cut -c1-12).log"
+LOG_FILE="$ROOT_DIR/agent-tools/.last.log"
 DEFAULT_CAP_LINES=200
 
 # Applies --grep/--invert/--context to stdin, or passes it through unchanged.
-# `|| true` stops grep's exit-1-on-no-match from being mistaken for a failure -
-# the underlying command's exit code (captured separately) is what matters.
+# grep's exit code distinguishes "no match" (1, an expected outcome - not a
+# failure) from a real error (2+, e.g. an invalid --context value) - only the
+# latter is reported as a failure to the caller, so `display_log` can tell the
+# difference between "nothing matched" and "the filter itself broke".
 run_grep_filter() {
-	if [ -n "$GREP_PATTERN" ]; then
-		local invert_flag=""
-		[ "$GREP_INVERT" -eq 1 ] && invert_flag="-v"
-		if [ -n "$CONTEXT_LINES" ]; then
-			grep -E $invert_flag -C "$CONTEXT_LINES" "$GREP_PATTERN" || true
-		else
-			grep -E $invert_flag "$GREP_PATTERN" || true
-		fi
-	else
+	if [ -z "$GREP_PATTERN" ]; then
 		cat
+		return 0
 	fi
+	local invert_flag=""
+	[ "$GREP_INVERT" -eq 1 ] && invert_flag="-v"
+	if [ -n "$CONTEXT_LINES" ]; then
+		grep -E $invert_flag -C "$CONTEXT_LINES" "$GREP_PATTERN"
+	else
+		grep -E $invert_flag "$GREP_PATTERN"
+	fi
+	local grep_exit=$?
+	[ "$grep_exit" -le 1 ]
 }
 
 # Renders a log file for display: apply --grep/--invert/--context filtering
 # first, then cap to the last N lines (--tail, default 200) unless --all was
 # given. Used by both a live run's output and by `last`, so both behave
 # identically and share one definition of "the cap".
+#
+# If the filter or the cap itself fails (e.g. a non-numeric --tail/--context
+# value), a clear message is printed rather than the raw tool error, and
+# rather than letting `set -e` silently abort the script before the
+# OK/FAIL summary - the underlying command's exit code is unaffected either
+# way, since it was already captured by run_pipeline before display_log runs.
 display_log() {
 	local log_file="$1"
 	if [ "$SHOW_ALL" -eq 1 ]; then
-		run_grep_filter <"$log_file"
+		if ! run_grep_filter <"$log_file"; then
+			echo "WARN output filtering failed (see error above, e.g. an invalid --context value) - this does not affect the OK/FAIL result below"
+		fi
 	else
-		run_grep_filter <"$log_file" | tail -n "${TAIL_LINES:-$DEFAULT_CAP_LINES}"
+		if ! run_grep_filter <"$log_file" | tail -n "${TAIL_LINES:-$DEFAULT_CAP_LINES}"; then
+			echo "WARN output filtering/capping failed (see error above, e.g. an invalid --tail/--context value) - this does not affect the OK/FAIL result below"
+		fi
 	fi
 }
 

@@ -13,6 +13,10 @@ Use it from the repository root with `./agent-tool <command> [args...]`. Always 
 absolute path (`/path/to/repo/agent-tool ...`), not with `cd` first - it resolves its own
 location internally so the caller's working directory never matters.
 
+See [TESTING.md](TESTING.md) for the full behaviour spec and manual test cases - if you change
+anything under `agent-tools/bin/` or the root `agent-tool` script, work through the relevant
+section(s) there before considering the change done.
+
 ## How it works
 
 - `./agent-tool` (repo root) is the AI's single approved entry point. It validates the
@@ -62,8 +66,17 @@ going through `./agent-tool` or its allowlist.
 Commands do not stream output in real time - the underlying command runs to completion first
 (writing everything to the log file), then the filtered/capped result is printed once, followed
 by the OK/FAIL summary. This is a deliberate simplification for an AI caller, which only ever
-sees a tool call's output after it returns anyway; it does mean a human watching an interactive
-terminal sees nothing until the command finishes.
+sees a tool call's output after it returns anyway.
+
+If you want to watch a long-running command live (e.g. a slow type-check across many packages),
+open a second terminal and run:
+
+```bash
+tail -f agent-tools/.last.log
+```
+
+The log file is gitignored at `agent-tools/.last.log` (always in the same place, easy to find)
+and is overwritten by every new `./agent-tool` invocation.
 
 ## Output filtering
 
@@ -76,10 +89,14 @@ terminal sees nothing until the command finishes.
 Filtering and capping apply identically to a live run's output and to `last`: filters
 (`--grep`/`--invert`/`--context`) run first, then the result is capped to the last N lines
 (`--tail`, default 200) unless `--all` is given. Every run's full combined stdout/stderr is
-always captured to a single, always-overwritten per-repository log file in the OS temp
-directory (named from a hash of the repo root, so different repos never collide), regardless
-of what's displayed. Its path is never printed - use `./agent-tool last` to read it back,
-re-filtered/re-capped by the same flags.
+always captured to `agent-tools/.last.log` (gitignored, always overwritten), regardless of
+what's displayed. Use `./agent-tool last` to read it back, re-filtered/re-capped by the same
+flags.
+
+If the display filtering/capping pipeline itself fails (e.g. a non-numeric `--tail` value), a
+`WARN output filtering...` message is printed, but the OK/FAIL result and exit code still
+reflect the underlying command only - a display glitch never causes a genuine pass to appear
+as a failure.
 
 ## Exit codes
 
@@ -93,6 +110,8 @@ failed, never an artifact of the display step.
 escapes the repository root. Never use `rm`, `git rm`, or `git mv` directly.
 
 ## How to test
+
+See [TESTING.md](TESTING.md) for the full manual test/spec walkthrough. Quick smoke test:
 
 ```bash
 ./agent-tool list-packages

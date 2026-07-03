@@ -48,11 +48,3 @@ awk '
 		if (best != "") print best
 	}
 ' <(printf '%s\n' "$KNOWN_PACKAGES") <(printf '%s\n' "$CHANGED_FILES") | sort -u
-
-
-
-
-
-
-
-
