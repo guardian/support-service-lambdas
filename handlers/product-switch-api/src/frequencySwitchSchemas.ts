@@ -1,5 +1,5 @@
-import { isoCurrencySchema } from '@modules/internationalisation/schemas';
 import { z } from 'zod';
+import { isoCurrencySchema } from '@modules/internationalisation/schemas';
 
 export const frequencySwitchRequestSchema = z.object({
 	preview: z.boolean(),

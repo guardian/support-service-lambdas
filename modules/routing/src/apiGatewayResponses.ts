@@ -1,8 +1,8 @@
+import type { APIGatewayProxyResult } from 'aws-lambda';
+import type { z } from 'zod';
 import { ValidationError } from '@modules/errors';
 import { prettyPrint } from '@modules/prettyPrint';
 import { stringify } from '@modules/stringify';
-import type { APIGatewayProxyResult } from 'aws-lambda';
-import type { z } from 'zod';
 
 function jsonResponse(message: string, statusCode: number) {
 	return {

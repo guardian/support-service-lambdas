@@ -1,7 +1,7 @@
-import { isDeliveryProductPurchase } from '@modules/product-catalog/productCatalog';
-import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
+import { isDeliveryProductPurchase } from '@modules/product-catalog/productCatalog';
+import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 
 const DigitalSubscription = {
 	freeTrialPeriodInDays: 14,

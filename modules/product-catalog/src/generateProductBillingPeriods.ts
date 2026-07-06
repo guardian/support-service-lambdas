@@ -1,13 +1,13 @@
 import { arrayToObject, distinct } from '@modules/arrayFunctions';
 import { objectEntries } from '@modules/objectFunctions';
-import type {
-	ZuoraCatalog,
-	ZuoraProductRatePlan,
-} from '@modules/zuora-catalog/zuoraCatalogSchema';
 import {
 	getZuoraProductKey,
 	isSupportedProduct,
 } from '@modules/product-catalog/zuoraToProductNameMappings';
+import type {
+	ZuoraCatalog,
+	ZuoraProductRatePlan,
+} from '@modules/zuora-catalog/zuoraCatalogSchema';
 import type { StripeProduct, StripeProductKey } from './stripeProducts';
 import { stripeProducts } from './stripeProducts';
 

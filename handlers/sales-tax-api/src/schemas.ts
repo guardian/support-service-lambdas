@@ -1,7 +1,7 @@
+import { z } from 'zod';
 import { caStateCodes } from '@modules/internationalisation/country';
 import { isoCountrySchema } from '@modules/internationalisation/schemas';
 import { productKeySchema } from '@modules/product-catalog/productCatalogSchema';
-import { z } from 'zod';
 
 export const taxRatesRequestSchema = z.object({
 	productKey: productKeySchema,

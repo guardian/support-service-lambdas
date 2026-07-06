@@ -1,3 +1,4 @@
+import type dayjs from 'dayjs';
 import type { GuardianSubscription } from '@modules/guardian-subscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import { getSinglePlanFlattenedSubscriptionOrThrow } from '@modules/guardian-subscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import {
@@ -12,7 +13,6 @@ import type { Stage } from '@modules/stage';
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 import type { ZuoraCatalog } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import type dayjs from 'dayjs';
 
 export class ToSingleGuardianSubscription {
 	constructor(

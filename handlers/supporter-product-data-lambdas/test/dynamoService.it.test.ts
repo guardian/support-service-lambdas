@@ -7,9 +7,9 @@ import {
 	DynamoDBClient,
 	GetItemCommand,
 } from '@aws-sdk/client-dynamodb';
+import dayjs from 'dayjs';
 import { getAwsConfig } from '@modules/aws/config';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
-import dayjs from 'dayjs';
 import { DynamoService } from '../src/services/dynamoService';
 
 const stage = 'CODE';

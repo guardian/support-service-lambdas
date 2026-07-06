@@ -1,5 +1,5 @@
-import { putMetric } from '@modules/aws/cloudwatch';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
+import { putMetric } from '@modules/aws/cloudwatch';
 import { handler } from '../src/index';
 
 jest.mock('@modules/stage', () => ({

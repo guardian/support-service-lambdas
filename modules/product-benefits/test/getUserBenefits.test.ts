@@ -1,6 +1,3 @@
-import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
-import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
-import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
 import {
 	digitalSubscriptionBenefits,
@@ -10,6 +7,9 @@ import {
 	getUserBenefitsFromUserProducts,
 	getValidUserProducts,
 } from '@modules/product-benefits/userBenefits';
+import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
+import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import codeZuoraCatalog from '../../zuora-catalog/test/fixtures/catalog-code.json';
 
 const codeProductCatalog = generateProductCatalog(

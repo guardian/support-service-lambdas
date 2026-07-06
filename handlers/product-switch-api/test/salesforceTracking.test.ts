@@ -7,7 +7,7 @@ test('salesforce tracking data is serialised to the queue correctly', () => {
 	const targetInformation: TargetInformation = {
 		dataExtensionName:
 			DataExtensionNames.recurringContributionToSupporterPlusSwitch,
-		actualTotalPrice: 45.5,
+		ongoingPrice: 45.5,
 		contributionCharge: {
 			id: '',
 			contributionAmount: 10.5,

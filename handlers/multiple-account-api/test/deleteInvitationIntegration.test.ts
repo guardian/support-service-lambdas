@@ -6,9 +6,9 @@
  * @group integration
  */
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import dayjs from 'dayjs';
 import { getAwsConfig } from '@modules/aws/config';
 import type { Stage } from '@modules/stage';
-import dayjs from 'dayjs';
 import { deleteInvitationEndpoint } from '../src/deleteInvitationEndpoint';
 import {
 	type InvitationRecord,

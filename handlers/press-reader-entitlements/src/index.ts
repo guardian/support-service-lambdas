@@ -1,3 +1,9 @@
+import type {
+	APIGatewayProxyEvent,
+	APIGatewayProxyResult,
+	Handler,
+} from 'aws-lambda';
+import dayjs from 'dayjs';
 import { Lazy } from '@modules/lazy';
 import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
@@ -8,12 +14,6 @@ import type { Stage } from '@modules/stage';
 import { stageFromEnvironment } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import { zuoraDateFormat } from '@modules/zuora/utils';
-import type {
-	APIGatewayProxyEvent,
-	APIGatewayProxyResult,
-	Handler,
-} from 'aws-lambda';
-import dayjs from 'dayjs';
 import { getClientAccessToken, getUserDetails } from './identity';
 import { getLatestSubscription } from './supporterProductData';
 import type { Member } from './xmlBuilder';

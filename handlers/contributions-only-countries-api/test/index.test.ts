@@ -1,5 +1,5 @@
-import { contributionsOnlyCountries } from '@modules/internationalisation/contributionsOnlyCountries';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { contributionsOnlyCountries } from '@modules/internationalisation/contributionsOnlyCountries';
 import { handler } from '../src/index';
 
 describe('contributions-only-countries-api handler', () => {

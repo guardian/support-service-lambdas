@@ -1,3 +1,5 @@
+import type { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import { getSingleOrThrow } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
@@ -18,8 +20,6 @@ import type {
 } from '@modules/zuora/types';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { Dayjs } from 'dayjs';
-import dayjs from 'dayjs';
 import type { EmailFields } from './sendEmail';
 import { supporterPlusAmountBands } from './supporterPlusAmountBands';
 import { doEnsureTerm, doUpdate } from './zuoraApi';

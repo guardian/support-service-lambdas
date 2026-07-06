@@ -1,9 +1,9 @@
+import type { SQSRecord } from 'aws-lambda';
 import { logger } from '@modules/logger/logger';
 import type { SecondaryUserRecord } from '@modules/multiple-account/secondaryUserRepository';
 import { secondaryUserTTLFromPrimarySubscriptionTTL } from '@modules/multiple-account/secondaryUserRepository';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import { supporterRatePlanItemSchema } from '@modules/supporter-product-data/supporterProductData';
-import type { SQSRecord } from 'aws-lambda';
 import { addContributionAmountIfNeeded } from '../services/contributions';
 import type { MinimalZuoraSubscription } from '../services/zuoraSubscriptionService';
 

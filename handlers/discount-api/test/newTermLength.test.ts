@@ -1,5 +1,5 @@
-import { getNewTermLengthIfRequired } from '@modules/zuora/discount';
 import dayjs from 'dayjs';
+import { getNewTermLengthIfRequired } from '@modules/zuora/discount';
 
 test('getNewTermLengthIfRequired works out the new term length if the next billing date is after the current end date', () => {
 	const termStartDate = dayjs('2023-12-22');

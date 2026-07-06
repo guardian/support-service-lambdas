@@ -1,3 +1,4 @@
+import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { Lazy } from '@modules/lazy';
 import type { UserBenefitsResponse } from '@modules/product-benefits/schemas';
 import { getUserBenefitsExcludingStaff } from '@modules/product-benefits/userBenefits';
@@ -9,7 +10,6 @@ import {
 } from '@modules/routing/apiGatewayResponses';
 import type { Stage } from '@modules/stage';
 import { stageFromEnvironment } from '@modules/stage';
-import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { buildHttpResponse } from './response';
 import { getTrialInformation } from './trials';
 

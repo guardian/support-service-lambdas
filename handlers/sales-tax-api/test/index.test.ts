@@ -1,3 +1,4 @@
+import type { APIGatewayProxyEvent } from 'aws-lambda';
 import {
 	getZuoraTaxCodes,
 	getZuoraTaxPeriods,
@@ -8,7 +9,6 @@ import type {
 	ZuoraTaxPeriods,
 	ZuoraTaxRates,
 } from '@modules/zuora/types/objects/tax';
-import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { handler } from '../src/index';
 import type { TaxRatesResponse } from '../src/schemas';
 import {
