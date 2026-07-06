@@ -1,8 +1,8 @@
 import fs from 'fs';
-import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 import { generateProductBillingPeriods } from '@modules/product-catalog/generateProductBillingPeriods';
 import { generateProductPurchaseSchema } from '@modules/product-catalog/generateProductPurchaseSchema';
 import { generateSchema } from '@modules/product-catalog/generateSchema';
+import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 
 const writeSchemaToFile = async () => {
 	const prodCatalog = await getZuoraCatalogFromS3('PROD');

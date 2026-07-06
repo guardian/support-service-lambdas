@@ -1,6 +1,5 @@
-import { ValidationError } from '@modules/errors';
-import type { Stage } from '@modules/stage';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { ValidationError } from '@modules/errors';
 import type { IdentityUserDetails } from '@modules/identity/oktaTokenHelper';
 import { SigningKeyNotFoundError } from '@modules/identity/oktaTokenHelper';
 import {
@@ -9,6 +8,7 @@ import {
 	InvalidTokenError,
 	OktaTokenHelper,
 } from '@modules/identity/oktaTokenHelper';
+import type { Stage } from '@modules/stage';
 
 type SuccessfulAuthentication = {
 	type: 'success';

@@ -1,6 +1,6 @@
+import { z } from 'zod';
 import { loadConfig } from '@modules/aws/appConfig';
 import { getIfDefined } from '@modules/nullAndUndefined';
-import { z } from 'zod';
 
 export const ConfigSchema = z.object({
 	workspace: z.object({

@@ -1,3 +1,4 @@
+import type { APIGatewayProxyResult } from 'aws-lambda';
 import { ValidationError } from '@modules/errors';
 import { supportRegionIdFromCountry } from '@modules/internationalisation/countryGroup';
 import { isoCountrySchema } from '@modules/internationalisation/schemas';
@@ -9,7 +10,6 @@ import type { Stage } from '@modules/stage';
 import { getDeliveryFields } from '@modules/zuora/createSubscription/createSubscription';
 import { createSubscriptionWithExistingPaymentMethod } from '@modules/zuora/createSubscription/createSubscriptionWithExistingPaymentMethod';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { APIGatewayProxyResult } from 'aws-lambda';
 import type { CreateSubscriptionRequest } from './requestSchema';
 import type { CreateSubscriptionResponse } from './responseSchema';
 

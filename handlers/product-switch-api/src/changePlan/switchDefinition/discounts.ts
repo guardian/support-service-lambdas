@@ -39,3 +39,17 @@ export const monthlyDigiPlus: Discount = {
 	upToPeriods: 6,
 	upToPeriodsType: 'Months',
 };
+
+export const annualDigiPlus: Discount = {
+	productRatePlanId: {
+		PROD: '8a1296cc9f1ba695019f21feb57a4350',
+		CODE: '71a1b1d5a1f9f1dbccff21fbf2d4001f',
+	},
+	productRatePlanChargeId: {
+		PROD: '8a1296cc9f1ba695019f21feb5cc4352',
+		CODE: '71a1b1d5a1f9f1dbccff21fbf3610020',
+	},
+	name: 'Upsell - Supporter Plus to Digital Plus Switch - Annual Price Match',
+	upToPeriods: 12,
+	upToPeriodsType: 'Months',
+};

@@ -1,6 +1,6 @@
-import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import { productCatalogSchema } from '@modules/product-catalog/productCatalogSchema';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import code from '../../zuora-catalog/test/fixtures/catalog-code.json';
 import prod from '../../zuora-catalog/test/fixtures/catalog-prod.json';
 

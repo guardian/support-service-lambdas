@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/require-await -- this is required to ensure the lambda returns a value*/
-import { getIfDefined } from '@modules/nullAndUndefined';
 import { z } from 'zod';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import { BigQueryResultDataSchema } from '../types';
 
 export const FilterRecordsInputSchema = z

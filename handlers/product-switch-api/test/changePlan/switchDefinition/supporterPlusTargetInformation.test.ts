@@ -29,7 +29,7 @@ describe('getSupporterPlusTargetInformation', () => {
 			switchActionData,
 		);
 
-		expect(result.actualTotalPrice).toBe(previousAmount);
+		expect(result.ongoingPrice).toBe(previousAmount);
 		expect(result.contributionCharge?.contributionAmount).toBe(50);
 		expect(result.productRatePlanId).toBe(annualSupporterPlusRatePlan.id);
 		expect(result.ratePlanName).toBe('Supporter Plus V2 - Annual');
@@ -52,7 +52,7 @@ describe('getSupporterPlusTargetInformation', () => {
 			switchActionData,
 		);
 
-		expect(result.actualTotalPrice).toBe(basePrice);
+		expect(result.ongoingPrice).toBe(basePrice);
 		expect(result.contributionCharge?.contributionAmount).toBe(0);
 	});
 
@@ -71,7 +71,7 @@ describe('getSupporterPlusTargetInformation', () => {
 			switchActionData,
 		);
 
-		expect(result.actualTotalPrice).toBe(userRequestedAmount);
+		expect(result.ongoingPrice).toBe(userRequestedAmount);
 		expect(result.contributionCharge?.contributionAmount).toBe(100);
 	});
 
@@ -111,7 +111,7 @@ describe('getSupporterPlusTargetInformation', () => {
 		);
 
 		expect(result.discount).toBeDefined();
-		expect(result.actualTotalPrice).toBe(discountedPrice);
+		expect(result.ongoingPrice).toBe(basePrice);
 		expect(result.contributionCharge?.contributionAmount).toBe(0);
 		expect(result.discount?.discountPercentage).toBe(
 			annualContribHalfPriceSupporterPlusForOneYear.discountPercentage,
@@ -160,6 +160,6 @@ describe('getSupporterPlusTargetInformation', () => {
 		);
 
 		expect(result.discount).toBeUndefined();
-		expect(result.actualTotalPrice).toBe(basePrice);
+		expect(result.ongoingPrice).toBe(basePrice);
 	});
 });

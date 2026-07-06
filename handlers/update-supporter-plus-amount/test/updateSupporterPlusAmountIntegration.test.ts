@@ -1,10 +1,10 @@
 import console from 'console';
+import dayjs from 'dayjs';
 import { sendEmail } from '@modules/email/email';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import dayjs from 'dayjs';
 import { createThankYouEmail } from '../src/sendEmail';
 import { updateSupporterPlusAmount } from '../src/updateSupporterPlusAmount';
 

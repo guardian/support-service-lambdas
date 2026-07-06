@@ -1,5 +1,11 @@
+import type {
+	APIGatewayProxyEvent,
+	APIGatewayProxyEventHeaders,
+	APIGatewayProxyResult,
+} from 'aws-lambda';
 import { ValidationError } from '@modules/errors';
 import { logger } from '@modules/logger/logger';
+import type { Handler } from '@modules/routing/router';
 import type { Stage } from '@modules/stage';
 import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
@@ -8,12 +14,6 @@ import type {
 	ZuoraSubscription,
 } from '@modules/zuora/types/objects';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type {
-	APIGatewayProxyEvent,
-	APIGatewayProxyEventHeaders,
-	APIGatewayProxyResult,
-} from 'aws-lambda';
-import type { Handler } from '@modules/routing/router';
 
 export function assertIdentityIdMatches(
 	account: ZuoraAccount,

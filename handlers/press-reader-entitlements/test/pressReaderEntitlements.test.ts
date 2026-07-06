@@ -1,7 +1,7 @@
+import dayjs from 'dayjs';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import dayjs from 'dayjs';
 import codeZuoraCatalog from '../../../modules/zuora-catalog/test/fixtures/catalog-code.json';
 import { getLatestValidSubscription } from '../src/supporterProductData';
 import type { Member } from '../src/xmlBuilder';

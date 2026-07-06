@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { DataExtensionNames } from '@modules/email/email';
 import { ValidationError } from '@modules/errors';
 import type { GuardianSubscription } from '@modules/guardian-subscription/getSinglePlanFlattenedSubscriptionOrThrow';
@@ -11,7 +12,6 @@ import {
 	zuoraSubscriptionSchema,
 } from '@modules/zuora/types';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 import type { TargetInformation } from '../../../src/changePlan/prepare/targetInformation';
 import { getTargetInformation } from '../../../src/changePlan/prepare/targetInformation';
@@ -65,7 +65,7 @@ describe('getTargetInformation', () => {
 		);
 
 		expect(targetInfo).toStrictEqual({
-			actualTotalPrice: expectedActualTotalPrice,
+			ongoingPrice: expectedActualTotalPrice,
 			productRatePlanId: targetRatePlan.id,
 			ratePlanName: 'Supporter Plus V2 - Annual',
 			subscriptionChargeId: targetRatePlan.charges.Subscription.id,
@@ -97,12 +97,20 @@ describe('getTargetInformation', () => {
 			productCatalogHelper,
 		);
 
-		expect(targetInfo.actualTotalPrice).toBe(discountedPrice);
-		expect(targetInfo.discount).toMatchObject({
+		const { ongoingPrice, discount, contributionCharge } = targetInfo;
+		const expectedDiscount = {
 			discountPercentage:
 				annualContribHalfPriceSupporterPlusForOneYear.discountPercentage,
+		};
+		expect({
+			ongoingPrice,
+			discount,
+			contributionAmount: contributionCharge?.contributionAmount,
+		}).toMatchObject({
+			ongoingPrice: targetBasePrice,
+			discount: expectedDiscount,
+			contributionAmount: 0,
 		});
-		expect(targetInfo.contributionCharge?.contributionAmount).toBe(0);
 	});
 
 	test('throws when requesting a target product that is not a valid switch', () => {

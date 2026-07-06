@@ -1,12 +1,13 @@
 /**
  * @group integration
  */
-import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
-import type { Stage } from '@modules/stage';
 import {
 	createDigitalSubscription,
 	createSupporterPlusSubscription,
 } from '@modules/zuora/../test/it-helpers/createGuardianSubscription';
+import dayjs from 'dayjs';
+import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
+import type { Stage } from '@modules/stage';
 import { getAccount } from '@modules/zuora/account';
 import {
 	cancelSubscription,
@@ -14,7 +15,6 @@ import {
 } from '@modules/zuora/subscription';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import dayjs from 'dayjs';
 import { previewDiscountHandler } from '../src';
 import { previewDiscountEndpoint } from '../src/discountEndpoint';
 import { validationRequirements } from '../src/eligibilityChecker';

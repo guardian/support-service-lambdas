@@ -1,4 +1,6 @@
 import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
+import dayjs from 'dayjs';
+import { z } from 'zod';
 import { awsConfig } from '@modules/aws/config';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
@@ -9,8 +11,6 @@ import { createQueryResponseSchema } from '@modules/zuora/types';
 import type { RatePlan, ZuoraSubscription } from '@modules/zuora/types';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import dayjs from 'dayjs';
-import { z } from 'zod';
 
 export const getActiveAccountNumbersForIdentityId = async (
 	zuoraClient: ZuoraClient,

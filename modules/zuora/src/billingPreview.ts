@@ -1,7 +1,7 @@
-import { groupBy, sortBy, sumNumbers } from '@modules/arrayFunctions';
-import { getIfDefined } from '@modules/nullAndUndefined';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
+import { groupBy, sortBy, sumNumbers } from '@modules/arrayFunctions';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import type { BillingPreview } from './types';
 import { billingPreviewSchema } from './types';
 import { zuoraDateFormat } from './utils';
@@ -29,6 +29,8 @@ export const itemsForSubscription =
 		);
 
 export type SimpleInvoiceItem = { date: Date; amount: number };
+
+export type SimpleInvoiceTotal = { date: Date; total: number };
 
 export function getNextInvoiceTotal(invoiceItems: SimpleInvoiceItem[]) {
 	return convertItemsToTotal(getNextInvoice(invoiceItems)).total;
@@ -89,10 +91,11 @@ const convertItemsToTotal = ({
 }: {
 	date: Date;
 	items: SimpleInvoiceItem[];
-}) => ({
-	date: new Date(date),
-	total: sumNumbers(items.map((item) => item.amount)),
-});
+}) =>
+	({
+		date: new Date(date),
+		total: sumNumbers(items.map((item) => item.amount)),
+	}) satisfies SimpleInvoiceTotal;
 
 export const toSimpleInvoiceItems = (
 	billingPreviewAfter: BillingPreview['invoiceItems'],

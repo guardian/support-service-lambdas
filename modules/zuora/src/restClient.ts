@@ -1,7 +1,7 @@
+import type { z, ZodType } from 'zod';
 import { groupMap } from '@modules/arrayFunctions';
 import { getCallerInfo } from '@modules/logger/getCallerInfo';
 import { logger } from '@modules/logger/logger';
-import type { z, ZodType } from 'zod';
 import type { BearerTokenProvider } from '@modules/zuora/auth';
 
 export class RestClientError extends Error implements RestResult {

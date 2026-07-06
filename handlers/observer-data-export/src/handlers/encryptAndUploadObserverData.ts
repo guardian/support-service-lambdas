@@ -1,6 +1,6 @@
 import * as crypto from 'crypto';
-import { getFileFromS3, uploadFileToS3 } from '@modules/aws/s3';
 import type { S3Event, SQSEvent } from 'aws-lambda';
+import { getFileFromS3, uploadFileToS3 } from '@modules/aws/s3';
 
 export const handler = async (event: SQSEvent) => {
 	console.log(JSON.stringify(event, null, 2));

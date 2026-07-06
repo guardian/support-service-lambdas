@@ -1,8 +1,8 @@
+import type dayjs from 'dayjs';
 import type { EmailMessageWithUserId } from '@modules/email/email';
 import { DataExtensionNames } from '@modules/email/email';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import type { ProductBillingPeriod } from '@modules/product-catalog/productBillingPeriods';
-import type dayjs from 'dayjs';
 
 export type EmailFields = {
 	nextPaymentDate: dayjs.Dayjs;

@@ -1,10 +1,10 @@
+import type dayjs from 'dayjs';
 import type { EmailMessageWithUserId } from '@modules/email/email';
 import { DataExtensionNames, sendEmail } from '@modules/email/email';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { getCurrencyInfo } from '@modules/internationalisation/currency';
 import type { Stage } from '@modules/stage';
 import type { ZuoraAccount, ZuoraSubscription } from '@modules/zuora/types';
-import type dayjs from 'dayjs';
 
 /**
  * Build the email message for frequency switch confirmation.

@@ -1,8 +1,8 @@
-import type { IsoCurrency } from '@modules/internationalisation/currency';
-import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 import type { Dayjs } from 'dayjs';
 import { DataExtensionNames } from '@modules/email/email';
 import type { EmailMessageWithIdentityUserId } from '@modules/email/email';
+import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 import { buildDeliveryEmailFields } from './deliveryEmailFields';
 import { buildEmailFields } from './emailFields';
 import type {

@@ -1,8 +1,8 @@
+import type dayjs from 'dayjs';
 import type {
 	DataExtensionName,
 	EmailMessageWithUserId,
 } from '@modules/email/email';
-import type dayjs from 'dayjs';
 
 export type EmailFields = {
 	firstDiscountedPaymentDate: dayjs.Dayjs;

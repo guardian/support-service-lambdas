@@ -1,5 +1,5 @@
-import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import type { Dayjs } from 'dayjs';
+import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import type { SwitchInformation } from './changePlan/prepare/switchInformation';
 
 export type ContributionAmount = { amount: number; currency: string };

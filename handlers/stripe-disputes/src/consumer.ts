@@ -1,5 +1,5 @@
-import { Logger } from '@modules/logger/logger';
 import type { SQSEvent } from 'aws-lambda';
+import { Logger } from '@modules/logger/logger';
 import type {
 	ListenDisputeClosedRequestBody,
 	ListenDisputeCreatedRequestBody,

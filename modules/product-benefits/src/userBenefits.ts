@@ -1,13 +1,6 @@
+import dayjs from 'dayjs';
 import { distinct } from '@modules/arrayFunctions';
 import type { IdentityUserDetails } from '@modules/identity/oktaTokenHelper';
-import type {
-	ProductCatalogHelper,
-	ProductKey,
-} from '@modules/product-catalog/productCatalog';
-import type { Stage } from '@modules/stage';
-import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
-import { getSupporterRatePlans } from '@modules/supporter-product-data/supporterProductData';
-import dayjs from 'dayjs';
 import {
 	inAppPurchaseProductKey,
 	isInAppPurchase,
@@ -19,6 +12,13 @@ import {
 	productBenefitMapping,
 } from '@modules/product-benefits/productBenefit';
 import type { ProductBenefit } from '@modules/product-benefits/schemas';
+import type {
+	ProductCatalogHelper,
+	ProductKey,
+} from '@modules/product-catalog/productCatalog';
+import type { Stage } from '@modules/stage';
+import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
+import { getSupporterRatePlans } from '@modules/supporter-product-data/supporterProductData';
 
 export const getUserProducts = async (
 	stage: Stage,

@@ -1,3 +1,6 @@
+import type { APIGatewayProxyResult } from 'aws-lambda';
+import type dayjs from 'dayjs';
+import { sendEmail } from '@modules/email/email';
 import { ValidationError } from '@modules/errors';
 import type { GuardianSubscription } from '@modules/guardian-subscription/getSinglePlanFlattenedSubscriptionOrThrow';
 import { logger } from '@modules/logger/logger';
@@ -10,9 +13,9 @@ import type {
 	ZuoraSubscription,
 } from '@modules/zuora/types/objects';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { APIGatewayProxyResult } from 'aws-lambda';
-import type dayjs from 'dayjs';
 import { removePendingUpdateAmendments } from './action/amendments';
+import { CreateSwitchOrder } from './action/createSwitchOrder';
+import { GetPaymentSchedule } from './action/getPaymentSchedule';
 import { DoPreviewAction } from './action/preview';
 import { DoSwitchAction } from './action/switch';
 import { SwitchOrderRequestBuilder } from './prepare/buildSwitchOrderRequest';
@@ -34,7 +37,14 @@ export class ChangePlanEndpoint {
 		private originalSubscription: ZuoraSubscription,
 		private account: ZuoraAccount,
 	) {
-		this.doSwitchAction = new DoSwitchAction(zuoraClient, stage, today);
+		this.doSwitchAction = new DoSwitchAction(
+			zuoraClient,
+			stage,
+			today,
+			new GetPaymentSchedule(zuoraClient),
+			new CreateSwitchOrder(zuoraClient),
+			sendEmail,
+		);
 		this.doPreviewAction = new DoPreviewAction(zuoraClient, stage, today);
 	}
 
@@ -156,7 +166,6 @@ export class ChangePlanEndpoint {
 			this.body,
 			this.account,
 			subscription,
-			this.stage !== 'PROD',
 		);
 		logger.log(`switching from/to`, {
 			from: {

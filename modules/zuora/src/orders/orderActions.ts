@@ -1,5 +1,5 @@
-import type { TermType } from '@modules/product-catalog/productCatalog';
 import type { Dayjs } from 'dayjs';
+import type { TermType } from '@modules/product-catalog/productCatalog';
 import type { PromotionInputFields } from '@modules/zuora/createSubscription/createSubscription';
 import { zuoraDateFormat } from '../utils/common';
 
