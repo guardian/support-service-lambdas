@@ -1,13 +1,9 @@
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import { ValidationError } from '@modules/errors';
-import type {
-	CaState,
-	IsoCountry,
-} from '@modules/internationalisation/country';
-import {
-	caStates,
-	getCountryNameByIsoCode,
-} from '@modules/internationalisation/country';
+import type { IsoCountry } from '@modules/internationalisation/country';
+import { getCountryNameByIsoCode } from '@modules/internationalisation/country';
+import type { CaStateCode } from '@modules/internationalisation/state';
+import { caStates } from '@modules/internationalisation/state';
 import { logger } from '@modules/logger/logger';
 import type { ProductKey } from '@modules/product-catalog/productCatalog';
 import { ok } from '@modules/routing/apiGatewayResponses';
@@ -137,12 +133,12 @@ function createCadStateTaxRates(
 	cadZuoraTaxRates: ZuoraTaxRate[],
 ): TaxRatesResponse {
 	const stateCodes = caStateSchema.options;
-	const missingStateCodes: CaState[] = [];
+	const missingStateCodes: CaStateCode[] = [];
 
 	const taxCodesByState = stateCodes.reduce<Partial<TaxRatesResponse>>(
 		(
 			memo: Partial<TaxRatesResponse>,
-			stateCode: CaState,
+			stateCode: CaStateCode,
 		): Partial<TaxRatesResponse> => {
 			const zuoraTaxRate = cadZuoraTaxRates.find(
 				(zuoraTaxRate) => caStates[stateCode] === zuoraTaxRate.state,
