@@ -21,10 +21,13 @@ export const addCatalogInformationToPromo = (
 				catalogHelper.findProductDetails(productRatePlanId),
 				`Promotion ${promo.promoCode} references product rate plan id ${productRatePlanId} which does not exist in the product catalog`,
 			);
-			return {
-				productKey: productDetails.zuoraProduct,
-				productRatePlanKey: productDetails.productRatePlan,
-			};
+			// validateOrThrow returns a correlated GuardianCatalogKeys
+			// (productKey constrained to its rate plan key) rather than the widened union
+			// produced by findProductDetails.
+			return catalogHelper.validateOrThrow(
+				productDetails.zuoraProduct,
+				productDetails.productRatePlan,
+			);
 		},
 	);
 
