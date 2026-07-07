@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { getUserByIdentityId } from '@modules/identity/idapi';
 import type { IdentityClient } from '@modules/identity/identityClient';
 import { logger } from '@modules/logger/logger';
@@ -8,7 +9,6 @@ import type {
 import { secondaryUserRecordSchema } from '@modules/multiple-account/secondaryUserRepository';
 import { prettyPrint } from '@modules/prettyPrint';
 import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
-import { z } from 'zod';
 import {
 	invitationRecordSchema,
 	type InvitationRepository,
