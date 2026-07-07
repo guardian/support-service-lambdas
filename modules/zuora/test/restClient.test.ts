@@ -154,9 +154,9 @@ describe('RestClient', () => {
 
 			await expect(client.get('/users/999', schema)).rejects.toMatchObject({
 				name: 'RestClientError',
-				message: 'http call failed',
+				message: 'http call failed: 404',
 				status: 404,
-				responseBody: JSON.stringify(errorBody),
+				responseBody: errorBody,
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- any is ok in a test
 				responseHeaders: expect.objectContaining({ 'x-request-id': 'abc123' }),
 			});
