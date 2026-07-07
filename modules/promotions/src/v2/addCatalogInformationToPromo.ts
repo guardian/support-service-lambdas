@@ -1,3 +1,4 @@
+import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type {
 	ProductCatalogHelper,
@@ -40,11 +41,38 @@ export const addCatalogInformationToPromo = (
 	};
 };
 
+/**
+ * The result of resolving catalog information for a batch of promotions:
+ * `succeeded` contains the enriched promos and `failed` contains the original
+ * promos whose rate plan ids could not be resolved against the catalog.
+ */
+export type AddCatalogInformationResult = {
+	succeeded: PromoWithCatalogInformation[];
+	failed: Promo[];
+};
+
 export const addCatalogInformationToPromos = (
 	promos: Promo[],
 	catalogHelper: ProductCatalogHelper,
-): PromoWithCatalogInformation[] =>
-	promos.map((promo) => addCatalogInformationToPromo(promo, catalogHelper));
+): AddCatalogInformationResult => {
+	const succeeded: PromoWithCatalogInformation[] = [];
+	const failed: Promo[] = [];
+
+	for (const promo of promos) {
+		try {
+			succeeded.push(addCatalogInformationToPromo(promo, catalogHelper));
+		} catch (error) {
+			// Collect promos whose rate plan ids can't be resolved against the
+			// catalog rather than failing the whole batch.
+			logger.log(
+				`Failed to resolve catalog information for promotion ${promo.promoCode}: ${String(error)}`,
+			);
+			failed.push(promo);
+		}
+	}
+
+	return { succeeded, failed };
+};
 
 export const promoAppliesTo = (
 	promo: PromoWithCatalogInformation,

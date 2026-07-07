@@ -69,25 +69,44 @@ describe('addCatalogInformationToPromo', () => {
 
 describe('findPromosForProduct', () => {
 	it('returns only promos whose catalog keys include the queried pair', () => {
-		const promos = addCatalogInformationToPromos(
+		const { succeeded } = addCatalogInformationToPromos(
 			[buildPromo([supporterPlusMonthlyId]), buildPromo([])],
 			catalogHelper,
 		);
 
-		const matches = findPromosForProduct(promos, 'SupporterPlus', 'Monthly');
+		const matches = findPromosForProduct(succeeded, 'SupporterPlus', 'Monthly');
 
 		expect(matches).toHaveLength(1);
 		expect(promoAppliesTo(matches[0]!, 'SupporterPlus', 'Monthly')).toBe(true);
 	});
 
 	it('returns an empty array when no promo applies', () => {
-		const promos = addCatalogInformationToPromos(
+		const { succeeded } = addCatalogInformationToPromos(
 			[buildPromo([supporterPlusMonthlyId])],
 			catalogHelper,
 		);
 
 		expect(
-			findPromosForProduct(promos, 'SupporterPlus', 'Annual'),
+			findPromosForProduct(succeeded, 'SupporterPlus', 'Annual'),
 		).toStrictEqual([]);
+	});
+});
+
+describe('addCatalogInformationToPromos', () => {
+	it('returns enriched promos in succeeded and unresolvable promos in failed', () => {
+		const validPromo = buildPromo([supporterPlusMonthlyId]);
+		const invalidPromo = buildPromo(['not-a-real-id']);
+
+		const { succeeded, failed } = addCatalogInformationToPromos(
+			[validPromo, invalidPromo],
+			catalogHelper,
+		);
+
+		expect(succeeded).toHaveLength(1);
+		expect(succeeded[0]!.appliesTo.catalogRatePlans).toStrictEqual([
+			{ productKey: 'SupporterPlus', productRatePlanKey: 'Monthly' },
+		]);
+
+		expect(failed).toStrictEqual([invalidPromo]);
 	});
 });
