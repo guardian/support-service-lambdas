@@ -37,7 +37,7 @@ export const ratePlanItemSchema = z.object({
 	/** The original ID of the subscription rate plan in the version-1 subscription. */
 	originalRatePlanId: z.string(),
 	/** The number of the rate plan in the subscription. */
-	subscriptionRatePlanNumber: z.string(),
+	subscriptionRatePlanNumber: z.string().nullable(),
 	/** Indicates whether the rate plan has been reverted. */
 	reverted: z.boolean(),
 });
