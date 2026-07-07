@@ -10,12 +10,13 @@ import {
 	promoAppliesTo,
 } from '../../src/v2/addCatalogInformationToPromo';
 
-const catalogHelper = new ProductCatalogHelper(
-	generateProductCatalog(zuoraCatalogSchema.parse(codeZuoraCatalog)),
+const productCatalog = generateProductCatalog(
+	zuoraCatalogSchema.parse(codeZuoraCatalog),
 );
+const catalogHelper = new ProductCatalogHelper(productCatalog);
 
-// SupporterPlus / Monthly in the code catalog
-const supporterPlusMonthlyId = '8ad08cbd8586721c01858804e3275376';
+const supporterPlusMonthlyId =
+	productCatalog.SupporterPlus.ratePlans.Monthly.id;
 
 const buildPromo = (productRatePlanIds: string[]): Promo => ({
 	name: 'Test Promotion',
