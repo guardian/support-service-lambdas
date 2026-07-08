@@ -514,7 +514,7 @@ const countryCodeSet: Set<string> = new Set(countryCodes);
 export function isCountryCode(
 	maybeCountry: string,
 ): maybeCountry is CountryCode {
-	return countryCodeSet.has(maybeCountry);
+	return countryCodeSet.has(maybeCountry.toUpperCase());
 }
 
 export function countryCodeFromString(maybeCountry: string) {
