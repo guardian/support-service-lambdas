@@ -504,7 +504,7 @@ export const countries: Record<CountryCode, string> = {
 	ZW: 'Zimbabwe',
 };
 
-export const newspaperCountries: Record<string, string> = {
+export const newspaperCountries: Partial<Record<CountryCode, string>> = {
 	GB: 'United Kingdom',
 	IM: 'Isle of Man',
 };
