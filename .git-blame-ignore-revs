@@ -14,10 +14,10 @@ c7065a7fd22fc65c30d5c71f7ce819e84133be1b
 42870d8b202ac19404b5de4aaa50a6c510542c91
 
 # Scala Steward: Reformat with scalafmt 3.10.2
-0e6db895da0c3df5e383b5f59ee83cb00a4287e4
+72b49949e03ffb466553774972caf1542b7ae685
 
 # Scala Steward: Reformat with scalafmt 3.10.4
-038ad7cbb7bcd2353cce4ec04273df16f7b6dd07
+e57c956672f2833df3a423d4d6d46c025814f4dd
 
 # Reformat imports after setting all @modules imports to 'internal' for sort purposes
-b5401250344c270d473481f628c26c71699b713f
+7d42af8f182924aaa91a8f1e8aa312aa0447633f
