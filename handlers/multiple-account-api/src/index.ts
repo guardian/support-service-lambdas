@@ -158,11 +158,18 @@ export const handler: Handler = Router([
 	{
 		httpMethod: 'GET',
 		path: '/secondary-user/me',
-		handler: async (event) =>
-			secondaryUserMeEndpoint(
-				event,
+		handler: async (event) => {
+			const maybeAuthenticatedEvent = await authenticate(event);
+
+			if (maybeAuthenticatedEvent.type === 'failure') {
+				return maybeAuthenticatedEvent.response;
+			}
+
+			return secondaryUserMeEndpoint(
+				maybeAuthenticatedEvent.userDetails.identityId,
 				secondaryUserRepository,
 				await lazyZuoraClient.get(),
-			),
+			);
+		},
 	},
 ]);

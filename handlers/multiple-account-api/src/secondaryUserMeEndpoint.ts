@@ -1,10 +1,10 @@
-import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import type { APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
 import type {
 	SecondaryUserRecord,
 	SecondaryUserRepository,
 } from '@modules/multiple-account/secondaryUserRepository';
-import { notFound, ok } from '@modules/routing/apiGatewayResponses';
+import { ok } from '@modules/routing/apiGatewayResponses';
 import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraAccount } from '@modules/zuora/types';
@@ -21,15 +21,10 @@ const responseSchema = z.object({
 });
 
 export async function secondaryUserMeEndpoint(
-	event: APIGatewayProxyEvent,
+	identityId: string,
 	secondaryUserRepository: SecondaryUserRepository,
 	zuoraClient: ZuoraClient,
 ): Promise<APIGatewayProxyResult> {
-	const identityId = event.headers['x-identity-id'];
-	if (!identityId) {
-		return notFound();
-	}
-
 	const secondaryUsers: SecondaryUserRecord[] =
 		await secondaryUserRepository.get(identityId);
 

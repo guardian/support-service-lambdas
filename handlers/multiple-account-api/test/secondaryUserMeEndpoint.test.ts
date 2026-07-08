@@ -1,4 +1,3 @@
-import type { APIGatewayProxyEvent } from 'aws-lambda';
 import type {
 	SecondaryUserRecord,
 	SecondaryUserRepository,
@@ -53,27 +52,8 @@ describe('secondaryUserMeEndpoint', () => {
 				.mockResolvedValue(users),
 		}) as unknown as SecondaryUserRepository;
 
-	const eventWithIdentity = (
-		identityId: string | undefined,
-	): APIGatewayProxyEvent =>
-		({
-			headers: identityId ? { 'x-identity-id': identityId } : {},
-		}) as unknown as APIGatewayProxyEvent;
-
 	beforeEach(() => {
 		jest.clearAllMocks();
-	});
-
-	it('returns 404 when the x-identity-id header is missing', async () => {
-		const result = await secondaryUserMeEndpoint(
-			eventWithIdentity(undefined),
-			makeRepository([]),
-			zuoraClient,
-		);
-
-		expect(result.statusCode).toBe(404);
-		expect(mockGetSubscription).not.toHaveBeenCalled();
-		expect(mockGetAccount).not.toHaveBeenCalled();
 	});
 
 	it('returns the primary user contact details (without zipCode) for each secondary user subscription', async () => {
@@ -89,7 +69,7 @@ describe('secondaryUserMeEndpoint', () => {
 			.mockResolvedValueOnce(makeAccount('Alan', 'Turing', 'alan@example.com'));
 
 		const result = await secondaryUserMeEndpoint(
-			eventWithIdentity('secondary-id'),
+			'secondary-id',
 			makeRepository(secondaryUsers),
 			zuoraClient,
 		);
@@ -123,7 +103,7 @@ describe('secondaryUserMeEndpoint', () => {
 
 	it('returns an empty primaryUsers list when there are no secondary users', async () => {
 		const result = await secondaryUserMeEndpoint(
-			eventWithIdentity('secondary-id'),
+			'secondary-id',
 			makeRepository([]),
 			zuoraClient,
 		);
@@ -139,7 +119,7 @@ describe('secondaryUserMeEndpoint', () => {
 
 		await expect(
 			secondaryUserMeEndpoint(
-				eventWithIdentity('secondary-id'),
+				'secondary-id',
 				makeRepository([makeSecondaryUser('A-S00000001')]),
 				zuoraClient,
 			),
