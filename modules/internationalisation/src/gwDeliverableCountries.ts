@@ -1,24 +1,14 @@
+import { contributionsOnlyCountriesSet } from '@modules/internationalisation/contributionsOnlyCountries';
 import type { CountryCode } from '@modules/internationalisation/country';
-import { gwCountries } from '@modules/internationalisation/gwCountries';
+import { countries } from '@modules/internationalisation/country';
+import { restrictedCountries } from '@modules/internationalisation/restrictedCountries';
 import { objectEntries, objectFromEntries } from '@modules/objectFunctions';
-
-const gwNonDeliverableCountries: Set<CountryCode> = new Set([
-	'AF', // Afghanistan
-	'KI', // Kiribati
-	'LY', // Libya
-	'MD', // Moldova
-	'NR', // Nauru
-	'SD', // Sudan
-	'SS', // South Sudan
-	'SO', // Somalia
-	'SY', // Syria
-	'UA', // Ukraine
-	'YE', // Yemen
-]);
 
 export const gwDeliverableCountries: Partial<Record<CountryCode, string>> =
 	objectFromEntries(
-		objectEntries(gwCountries).filter(
-			([countryCode]) => !gwNonDeliverableCountries.has(countryCode),
+		objectEntries(countries).filter(
+			([countryCode]) =>
+				!restrictedCountries.has(countryCode) &&
+				!contributionsOnlyCountriesSet.has(countryCode),
 		),
 	);

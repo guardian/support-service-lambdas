@@ -61,7 +61,7 @@ export function buildDeliveryEmailFields({
 		delivery_address_line_2: address.lineTwo ?? '',
 		delivery_address_town: address.city ?? '',
 		delivery_postcode: address.postCode ?? '',
-		delivery_country: getCountryNameByCode(address.country) ?? '',
+		delivery_country: getCountryNameByCode(address.country),
 	};
 
 	return {
