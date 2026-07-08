@@ -509,6 +509,21 @@ export const newspaperCountries: Partial<Record<CountryCode, string>> = {
 	IM: 'Isle of Man',
 };
 
+const countryCodeSet: Set<string> = new Set(countryCodes);
+
+export function isCountryCode(
+	maybeCountry: string,
+): maybeCountry is CountryCode {
+	return countryCodeSet.has(maybeCountry);
+}
+
+export function countryCodeFromString(maybeCountry: string) {
+	if (isCountryCode(maybeCountry)) {
+		return maybeCountry;
+	}
+	return undefined;
+}
+
 export function getCountryNameByCode(code: CountryCode) {
 	return countries[code];
 }
