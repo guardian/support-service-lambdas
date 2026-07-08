@@ -3,6 +3,7 @@ import {
 	isoCountrySchema,
 	supportRegionSchema,
 } from '@modules/internationalisation/schemas';
+import type { GuardianCatalogKeys } from '@modules/product-catalog/productCatalog';
 import { optionalDropNulls } from '@modules/schemaUtils';
 
 export const promoCampaignSchema = z.object({
@@ -24,6 +25,8 @@ export const appliesToSchema = z.object({
 	productRatePlanIds: z.array(z.string()),
 	countries: z.array(isoCountrySchema),
 });
+
+export type AppliesTo = z.infer<typeof appliesToSchema>;
 
 export const discountDetailsSchema = z.object({
 	amount: z.number(),
@@ -49,6 +52,19 @@ export const promoSchema = z.object({
 });
 
 export type Promo = z.infer<typeof promoSchema>;
+
+/**
+ * The catalog rate plans a promotion applies to, resolved from the raw
+ * `productRatePlanIds` stored in Dynamo so that promotions can be searched by
+ * ProductKey and ProductRatePlanKey.
+ */
+export type AppliesToCatalogInformation = AppliesTo & {
+	catalogRatePlans: GuardianCatalogKeys[];
+};
+
+export type PromoWithCatalogInformation = Omit<Promo, 'appliesTo'> & {
+	appliesTo: AppliesToCatalogInformation;
+};
 
 export const appliedPromotionSchema = z.object({
 	promoCode: z.string(),
