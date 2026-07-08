@@ -10,6 +10,7 @@ import { Router } from '@modules/routing/router';
 import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
 import { withBodyParser, withPathParser } from '@modules/routing/withParsers';
 import { stageFromEnvironment } from '@modules/stage';
+import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 import {
 	acceptInvitationEndpoint,
@@ -33,6 +34,7 @@ import {
 	listSecondaryUsersPathSchema,
 } from './listSecondaryUsersEndpoint';
 import { mmaPrimarySummaryEndpoint } from './mmaPrimarySummaryEndpoint';
+import { secondaryUserMeEndpoint } from './secondaryUserMeEndpoint';
 
 const stage = stageFromEnvironment();
 const authenticate = buildAuthenticate(stage, []);
@@ -50,6 +52,10 @@ const lazyProductCatalog = new Lazy(
 const lazyZuoraCatalog = new Lazy(
 	async () => await getZuoraCatalogFromS3(stage),
 	'Get Zuora catalog',
+);
+const lazyZuoraClient = new Lazy(
+	async () => await ZuoraClient.create(stage),
+	'Get Zuora client',
 );
 
 export const handler: Handler = Router([
@@ -148,5 +154,15 @@ export const handler: Handler = Router([
 				({ path }) => path.subscriptionName,
 			),
 		),
+	},
+	{
+		httpMethod: 'GET',
+		path: '/secondary-user/me',
+		handler: async (event) =>
+			secondaryUserMeEndpoint(
+				event,
+				secondaryUserRepository,
+				await lazyZuoraClient.get(),
+			),
 	},
 ]);
