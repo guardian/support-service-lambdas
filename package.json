@@ -31,6 +31,7 @@
 		"prettier": "^3.3.3",
 		"ts-jest": "^29.4.11",
 		"typescript": "catalog:",
+		"@typescript/native": "catalog:",
 		"zod": "catalog:"
 	},
 	"pnpm": {
