@@ -62,7 +62,7 @@ test('Supporter Plus subscriptions can have a discount and get an email', async 
 		IdentityUserId: '200175946',
 	};
 
-	expect(response as ApplyDiscountResponseBody).toEqual(expected);
+	expect(response).toEqual(expected);
 	expect(emailPayload).toEqual(expectedEmail);
 
 	console.log('Cancelling the subscription');
@@ -119,7 +119,7 @@ test('digi subs can have a discount but dont get an email', async () => {
 		IdentityUserId: '200175946',
 	};
 
-	expect(response as ApplyDiscountResponseBody).toEqual(expected);
+	expect(response).toEqual(expected);
 	expect(emailPayload).toEqual(expectedEmail);
 
 	console.log('Cancelling the subscription');

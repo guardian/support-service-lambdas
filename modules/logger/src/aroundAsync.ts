@@ -28,10 +28,10 @@ export function aroundAsync<
 		const context = hooks.before(args);
 
 		try {
-		// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- required because generic function implementations erase concrete return typing
-		const result = (await fn(...args)) as Awaited<ReturnType<TFn>>;
-		hooks.after(result, context);
-		return result;
+			// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- required because generic function implementations erase concrete return typing
+			const result = (await fn(...args)) as Awaited<ReturnType<TFn>>;
+			hooks.after(result, context);
+			return result;
 		} catch (error) {
 			hooks.onError(error, context);
 			throw error;
