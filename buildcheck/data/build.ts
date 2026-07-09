@@ -166,6 +166,7 @@ const moduleBigquery: ModuleDefinition = {
 		...devDeps['@types/jest'],
 		...devDeps['jest'],
 		...devDeps['ts-jest'],
+		...devDeps['typescript'],
 	},
 	moduleDependencies: [],
 };
@@ -266,6 +267,7 @@ const moduleSalesforce: ModuleDefinition = {
 		...devDeps['@types/jest'],
 		...devDeps['jest'],
 		...devDeps['ts-jest'],
+		...devDeps['typescript'],
 	},
 	moduleDependencies: [moduleSecretsManager, moduleZuora],
 };
