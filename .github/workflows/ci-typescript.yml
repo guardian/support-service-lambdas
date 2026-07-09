@@ -20,7 +20,7 @@ jobs:
     outputs:
       subprojects: ${{ steps.read-matrix.outputs.subprojects }}
     steps:
-      - uses: actions/checkout@v6.0.1
+      - uses: actions/checkout@v7
       - id: read-matrix
         run: |
           echo "subprojects=$(jq -c '.subproject' .github/workflows/handlerNames.managed.json)" >> "$GITHUB_OUTPUT"
@@ -38,7 +38,7 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@v6.0.1
+      - uses: actions/checkout@v7
       - run: npm install --global corepack@0.31.0
       - run: corepack enable
         shell: bash

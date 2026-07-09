@@ -5,7 +5,7 @@ import type { RestResult } from '@modules/zuora/restClient';
 function mockResponse(status: number, body: unknown): RestResult {
 	return {
 		status: status,
-		responseBody: JSON.stringify(body),
+		responseBody: body,
 		responseHeaders: {},
 	};
 }
@@ -23,7 +23,7 @@ describe('generateZuoraError', () => {
 			],
 		};
 		const response = mockResponse(401, body);
-		const error = generateZuoraError(body, response);
+		const error = generateZuoraError(response);
 
 		expect(error).toBeInstanceOf(ZuoraError);
 
@@ -45,7 +45,7 @@ describe('generateZuoraError', () => {
 			Success: false,
 		};
 		const response = mockResponse(400, body);
-		const error = generateZuoraError(body, response);
+		const error = generateZuoraError(response);
 
 		expect(error?.message).toBe(errorMessage);
 		expect(error?.zuoraErrorDetails[0]?.code).toBe('INVALID_VALUE');
@@ -59,7 +59,7 @@ describe('generateZuoraError', () => {
 			FaultMessage: errorMessage,
 		};
 		const response = mockResponse(400, body);
-		const error = generateZuoraError(body, response);
+		const error = generateZuoraError(response);
 
 		expect(error?.message).toBe(errorMessage);
 		expect(error?.zuoraErrorDetails[0]?.code).toBe('INVALID_FIELD');
@@ -73,7 +73,7 @@ describe('generateZuoraError', () => {
 			message: errorMessage,
 		};
 		const response = mockResponse(400, body);
-		const error = generateZuoraError(body, response);
+		const error = generateZuoraError(response);
 
 		expect(error?.message).toBe(errorMessage);
 		expect(error?.zuoraErrorDetails[0]?.code).toBe('ClientError');
@@ -82,8 +82,8 @@ describe('generateZuoraError', () => {
 
 	it('returns undefined if no schema matches', () => {
 		const json = { unexpected: 'data' };
-		const response = mockResponse(418, "I'm a teapot");
-		const error = generateZuoraError(json, response);
+		const response = mockResponse(418, json);
+		const error = generateZuoraError(response);
 
 		expect(error).toBeUndefined();
 	});

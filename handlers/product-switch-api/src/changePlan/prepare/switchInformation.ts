@@ -20,7 +20,6 @@ export function getSwitchInformation(
 	input: ProductSwitchTargetBody,
 	account: ZuoraAccount,
 	subscription: GuardianSubscription,
-	discountEnabled: boolean,
 ): SwitchInformation {
 	const accountInformation = getAccountInformation(account);
 
@@ -34,7 +33,7 @@ export function getSwitchInformation(
 		subscriptionInformation.previousAmount,
 		subscriptionInformation.includesContribution,
 		productCatalogHelper,
-		discountEnabled || input.discountSwitchEnabled,
+		input.discountSwitchEnabled,
 	);
 
 	return {

@@ -32,6 +32,7 @@ import {
 	listSecondaryUsersEndpoint,
 	listSecondaryUsersPathSchema,
 } from './listSecondaryUsersEndpoint';
+import { mmaPrimarySummaryEndpoint } from './mmaPrimarySummaryEndpoint';
 
 const stage = stageFromEnvironment();
 const authenticate = buildAuthenticate(stage, []);
@@ -123,6 +124,25 @@ export const handler: Handler = Router([
 				stage,
 				async (_body, _zuoraClient, subscription) =>
 					listSecondaryUsersEndpoint(secondaryUserRepository)({
+						subscriptionName: subscription.subscriptionNumber,
+					}),
+				({ path }) => path.subscriptionName,
+			),
+		),
+	},
+	{
+		httpMethod: 'GET',
+		path: '/subscriptions/{subscriptionName}/mma-primary',
+		handler: withPathParser(
+			listSecondaryUsersPathSchema,
+			withMMAIdentityCheck(
+				stage,
+				async (_body, _zuoraClient, subscription) =>
+					mmaPrimarySummaryEndpoint(
+						invitationRepository,
+						secondaryUserRepository,
+						await identityClientPromise,
+					)({
 						subscriptionName: subscription.subscriptionNumber,
 					}),
 				({ path }) => path.subscriptionName,

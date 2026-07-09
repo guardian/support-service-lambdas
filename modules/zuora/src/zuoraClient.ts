@@ -54,14 +54,11 @@ export class ZuoraClient extends RestClient {
 						`Received a 429 rate limit response with response headers ${JSON.stringify(e.responseHeaders)}`,
 					);
 				}
-				let parsedBody: unknown;
-				try {
-					parsedBody = JSON.parse(e.responseBody);
-				} catch {
+				if (typeof e.responseBody === 'string') {
 					// we're not going to be able to extract anything useful from non-json
 					throw e;
 				}
-				const customError = generateZuoraError(parsedBody, e);
+				const customError = generateZuoraError(e);
 				if (customError !== undefined) {
 					throw customError;
 				}

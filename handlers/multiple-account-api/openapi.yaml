@@ -157,6 +157,52 @@ paths:
               schema:
                 type: string
                 example: Internal server error
+  /subscriptions/{subscriptionName}/mma-primary:
+    get:
+      operationId: getMmaPrimarySummary
+      summary: Get primary account summary
+      description: Returns a combined list of pending invitations and active secondary users with identity name information, for display on a manage-my-account screen.
+      security:
+        - identityId: []
+        - apiKey: []
+      parameters:
+        - name: subscriptionName
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Zuora subscription number for the primary user.
+          example: A-S00974337
+      responses:
+        '200':
+          description: Summary returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MmaPrimarySummaryResponse'
+        '400':
+          description: Invalid request or validation failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParserError'
+            text/plain:
+              schema:
+                type: string
+        '404':
+          description: Route not found.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Not Found
+        '500':
+          description: Internal server error.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Internal server error
   /invitation/{invitationCode}:
     delete:
       operationId: deleteInvitation
@@ -332,6 +378,7 @@ components:
         - subscriptionName
         - invitationCode
         - primaryIdentityId
+        - secondaryUserEmail
         - secondaryIdentityId
         - invitedDate
         - expiryDate
@@ -344,10 +391,14 @@ components:
           example: RpwR62kMnAxe
         primaryIdentityId:
           type: string
-          example: 20012345
+          example: '20012345'
+        secondaryUserEmail:
+          type: string
+          format: email
+          example: integration-test2+multiple-account@theguardian.com
         secondaryIdentityId:
           type: string
-          example: 30067890
+          example: '30067890'
         invitedDate:
           type: string
           example: '2026-06-12'
@@ -378,13 +429,66 @@ components:
           example: A-S00974337
         secondaryIdentityId:
           type: string
-          example: 30067890
+          example: '30067890'
         primaryIdentityId:
           type: string
-          example: 20012345
+          example: '20012345'
         acceptedDate:
           type: string
           example: '2026-06-12'
+    SecondaryUserWithName:
+      type: object
+      additionalProperties: false
+      required:
+        - subscriptionName
+        - secondaryIdentityId
+        - primaryIdentityId
+        - acceptedDate
+        - displayName
+        - firstName
+        - lastName
+        - email
+      properties:
+        subscriptionName:
+          type: string
+          example: A-S00974337
+        secondaryIdentityId:
+          type: string
+          example: '30067890'
+        primaryIdentityId:
+          type: string
+          example: '20012345'
+        acceptedDate:
+          type: string
+          example: '2026-06-12'
+        displayName:
+          type: string
+          example: jsmith92
+        firstName:
+          type: string
+          example: Jane
+        lastName:
+          type: string
+          example: Smith
+        email:
+          type: string
+          format: email
+          example: jane.smith@example.com
+    MmaPrimarySummaryResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - invitations
+        - secondaryUsers
+      properties:
+        invitations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Invitation'
+        secondaryUsers:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecondaryUserWithName'
     ListSecondaryUsersResponse:
       type: object
       additionalProperties: false

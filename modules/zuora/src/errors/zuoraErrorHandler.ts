@@ -9,9 +9,9 @@ import type { ZuoraErrorDetail } from './zuoraError';
 import { ZuoraError } from './zuoraError';
 
 export function generateZuoraError(
-	json: unknown,
 	response: RestResult,
 ): ZuoraError | undefined {
+	const json: unknown = response.responseBody;
 	// Format 1: reasons array (authentication, account errors)
 	const lowerCaseParseResult = lowerCaseZuoraErrorSchema.safeParse(json);
 	if (lowerCaseParseResult.success) {
