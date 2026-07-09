@@ -2,13 +2,13 @@
 # Safely renames/moves a tracked file within the repo.
 # Rejects any source or destination path that resolves outside the repository root.
 #
-# Usage: git-mv.sh <source> <destination>
+# Usage: git-mv.sh <repo-root> <source> <destination>
 
 set -euo pipefail
 
-REPO_ROOT="$(git rev-parse --show-toplevel)"
-SRC="${1:?usage: git-mv.sh <source> <destination>}"
-DEST="${2:?usage: git-mv.sh <source> <destination>}"
+REPO_ROOT="${1:?usage: git-mv.sh <repo-root> <source> <destination>}"
+SRC="${2:?usage: git-mv.sh <repo-root> <source> <destination>}"
+DEST="${3:?usage: git-mv.sh <repo-root> <source> <destination>}"
 
 resolve_existing() {
 	local path="$1"

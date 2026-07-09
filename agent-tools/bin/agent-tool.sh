@@ -10,6 +10,9 @@ set -eo pipefail
 
 ROOT_DIR="${1:?BUG: agent-tool wrapper must pass repo root as first argument}"
 shift
+# BIN_DIR is where this script lives - used to call sibling scripts by absolute
+# path, so they work even when ROOT_DIR is a different repo.
+BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR"
 
 PER_PACKAGE_SCRIPTS="type-check lint lint-fix check-formatting fix-formatting test"
@@ -120,7 +123,7 @@ if [ "$GREP_INVERT" -eq 1 ] && [ -z "$GREP_PATTERN" ]; then
 	exit 1
 fi
 
-LOG_FILE="$ROOT_DIR/agent-tools/.last.log"
+LOG_FILE="$BIN_DIR/../.last.log"
 STREAM_CAP_LINES=100
 DEFAULT_LAST_CAP_LINES=200
 TRUNCATION_NOTICE="[showing first $STREAM_CAP_LINES lines — full output in agent-tools/.last.log — use ./agent-tool last or read_file agent-tools/.last.log to see everything]"
@@ -257,7 +260,7 @@ git-rm)
 		echo "FAIL git-rm requires exactly one file path"
 		exit 1
 	}
-	run_pnpm_pipeline "git-rm ${POSITIONALS[0]}" run git-rm "${POSITIONALS[0]}"
+	run_pipeline "git-rm ${POSITIONALS[0]}" bash "$BIN_DIR/git-rm.sh" "$ROOT_DIR" "${POSITIONALS[0]}"
 	;;
 
 git-mv)
@@ -265,11 +268,11 @@ git-mv)
 		echo "FAIL git-mv requires exactly two file paths: <source> <destination>"
 		exit 1
 	}
-	run_pnpm_pipeline "git-mv ${POSITIONALS[*]}" run git-mv "${POSITIONALS[@]}"
+	run_pipeline "git-mv ${POSITIONALS[*]}" bash "$BIN_DIR/git-mv.sh" "$ROOT_DIR" "${POSITIONALS[@]}"
 	;;
 
 list-packages)
-	run_pnpm_pipeline "list-packages" run list-packages
+	run_pipeline "list-packages" bash "$BIN_DIR/list-packages.sh" "$ROOT_DIR"
 	;;
 
 git-status)
@@ -323,9 +326,9 @@ git-diff-target-stat)
 		run_pnpm_pipeline "$CMD" run "$CMD"
 	elif is_per_package_script "$CMD"; then
 		if [ "$CHANGED" -eq 1 ]; then
-			run_pnpm_pipeline "$CMD --changed" run run:changed "$CMD" "${POSITIONALS[@]}"
+			run_pipeline "$CMD --changed" bash "$BIN_DIR/run-changed.sh" "$ROOT_DIR" "$CMD" "${POSITIONALS[@]}"
 		else
-			KNOWN_PACKAGES="$(bash "$ROOT_DIR/agent-tools/bin/list-packages.sh" "$ROOT_DIR")"
+			KNOWN_PACKAGES="$(bash "$BIN_DIR/list-packages.sh" "$ROOT_DIR")"
 			PACKAGES=()
 			EXTRA_ARGS=()
 			for ARG in "${POSITIONALS[@]}"; do

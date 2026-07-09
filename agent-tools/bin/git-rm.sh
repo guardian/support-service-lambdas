@@ -2,12 +2,12 @@
 # Safely removes a tracked file from the repo and stages the deletion.
 # Rejects any path that resolves outside the repository root.
 #
-# Usage: git-rm.sh <file>
+# Usage: git-rm.sh <repo-root> <file>
 
 set -euo pipefail
 
-REPO_ROOT="$(git rev-parse --show-toplevel)"
-TARGET="${1:?usage: git-rm.sh <file>}"
+REPO_ROOT="${1:?usage: git-rm.sh <repo-root> <file>}"
+TARGET="${2:?usage: git-rm.sh <repo-root> <file>}"
 
 ABS_PATH="$(cd "$(dirname "$TARGET")" 2>/dev/null && pwd)/$(basename "$TARGET")" || {
 	echo "FAIL path does not exist: $TARGET"

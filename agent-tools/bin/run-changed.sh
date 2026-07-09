@@ -3,7 +3,7 @@
 # dependents, via pnpm's `...{path}` filter syntax). Developer convenience command,
 # no allowlist - contrast with ./agent-tool, which does apply an allowlist for the AI.
 #
-# Usage: run-changed.sh <script> [extra args]
+# Usage: run-changed.sh <repo-root> <script> [extra args]
 #
 # Note: intentionally does not use `set -u` - macOS ships bash 3.2, which has a
 # long-standing bug where expanding an empty array under `set -u` (e.g. no
@@ -11,12 +11,14 @@
 
 set -eo pipefail
 
-SCRIPT_NAME="${1:?usage: run-changed.sh <script> [extra args]}"
+REPO_ROOT="${1:?usage: run-changed.sh <repo-root> <script> [extra args]}"
+shift
+SCRIPT_NAME="${1:?usage: run-changed.sh <repo-root> <script> [extra args]}"
 shift || true
 EXTRA_ARGS=("$@")
 
-REPO_ROOT="$(git rev-parse --show-toplevel)"
 BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$REPO_ROOT"
 
 CHANGED_PACKAGES=()
 while IFS= read -r PKG; do

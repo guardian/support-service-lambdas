@@ -16,9 +16,7 @@
 		"validate": "pnpm -r run fix-formatting && pnpm -r run lint --fix && pnpm -r run type-check && pnpm -r run test",
 		"snapshot:update": "cd buildcheck && pnpm run snapshot:update",
 		"list-packages": "bash agent-tools/bin/list-packages.sh .",
-		"git-rm": "bash agent-tools/bin/git-rm.sh",
-		"git-mv": "bash agent-tools/bin/git-mv.sh",
-		"run:changed": "bash agent-tools/bin/run-changed.sh"
+		"run:changed": "bash agent-tools/bin/run-changed.sh ."
 	},
 	"devDependencies": {
 		"eslint": "^9.38.0",
