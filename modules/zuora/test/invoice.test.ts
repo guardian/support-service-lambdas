@@ -5,10 +5,7 @@ import {
 	getInvoiceItems,
 	writeOffInvoice,
 } from '@modules/zuora/invoice';
-import type {
-	InvoiceItemAdjustmentSourceType,
-	InvoiceItemAdjustmentType,
-} from '@modules/zuora/types';
+import type { InvoiceItemAdjustmentType } from '@modules/zuora/types';
 import {
 	getInvoiceItemsSchema,
 	getInvoiceSchema,
@@ -81,7 +78,7 @@ describe('invoice', () => {
 				'SRC-123',
 				50.0,
 				'Increase' as InvoiceItemAdjustmentType,
-				'InvoiceDetail' as InvoiceItemAdjustmentSourceType,
+				'InvoiceDetail',
 				'Test adjustment',
 				'REASON-01',
 			);
