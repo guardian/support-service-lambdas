@@ -8,7 +8,12 @@
 
 Source: [src/handlers/promoCodeView.ts](src/handlers/promoCodeView.ts)
 
-This is needed for (tbc - not sure?)
+This lambda populates the `MembershipSub-PromoCode-View` table based on updates to the `support-admin-console-promos` table.
+The `MembershipSub-PromoCode-View` table is used to export data to Salesforce.
+
+It's a bit of a legacy architecture. Historically the promos table was more complex (with multiple promo codes per row), and the `MembershipSub-PromoCode-View` table was a much simplified view with one row per promo code, to enable exports to Salesforce.
+
+Since the migration to the new promos tool (in RRCP) the promos table is simpler (one row per promo code), but keeping the `MembershipSub-PromoCode-View` table (and just changing its source) made migration simpler.
 
 - Consumes DynamoDB stream events from `support-admin-console-promos-{STAGE}`.
 - Reads campaign metadata from `support-admin-console-promo-campaigns-{STAGE}`.
@@ -20,8 +25,7 @@ This is needed for (tbc - not sure?)
 
 Source: [src/handlers/salesforceExport.ts](src/handlers/salesforceExport.ts)
 
-This is needed so CSRs can see the available promo codes so they know more information about
-discounts that customer have.
+Promo codes are exported into Salesforce. This allows new subscription records to be populated with acquisition discount details, for CSR visibility.
 
 They are then synced from SF into BQ via fivetran and ultimately into [the reader revenue data asset](https://console.cloud.google.com/bigquery?ws=!1m5!1m4!4m3!1sdatatech-platform-prod!2sreader_revenue!3sdim_promotion_code)
 
