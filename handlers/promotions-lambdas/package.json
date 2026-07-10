@@ -19,7 +19,7 @@
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
     "@aws-sdk/util-dynamodb": "^3.940.0",
-    "@aws-sdk/client-dynamodb": "^3.940.0",
+    "@aws-sdk/client-dynamodb": "^3.1075.0",
     "aws": "workspace:*",
     "promotions": "workspace:*",
     "salesforce": "workspace:*",
