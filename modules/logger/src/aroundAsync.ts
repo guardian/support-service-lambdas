@@ -31,7 +31,6 @@ export function aroundAsync<
 			// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- required because generic function implementations erase concrete return typing
 			const result = (await fn(...args)) as Awaited<ReturnType<TFn>>;
 			hooks.after(result, context);
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-return -- generic implementation preserves type via the cast above
 			return result;
 		} catch (error) {
 			hooks.onError(error, context);

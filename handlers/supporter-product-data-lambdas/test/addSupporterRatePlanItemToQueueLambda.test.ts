@@ -74,8 +74,8 @@ describe('addSupporterRatePlanItemToQueueLambda', () => {
 				() => 120000,
 				{
 					streamCsvRows: () => streamCsvRows(''),
-					sendMessagesToQueue: noopAsync as never,
-					putLastSuccessfulQueryTime: noopAsync as never,
+					sendMessagesToQueue: noopAsync,
+					putLastSuccessfulQueryTime: noopAsync,
 				},
 			),
 		).rejects.toThrow('was empty');
@@ -104,7 +104,7 @@ describe('addSupporterRatePlanItemToQueueLambda', () => {
 			{
 				streamCsvRows: () => streamCsvRows(csv),
 				sendMessagesToQueue: sendBatch,
-				putLastSuccessfulQueryTime: noopAsync as never,
+				putLastSuccessfulQueryTime: noopAsync,
 			},
 		);
 
@@ -156,7 +156,7 @@ describe('addSupporterRatePlanItemToQueueLambda', () => {
 			{
 				streamCsvRows: () => streamCsvRows(csv),
 				sendMessagesToQueue: sendBatch,
-				putLastSuccessfulQueryTime: noopAsync as never,
+				putLastSuccessfulQueryTime: noopAsync,
 			},
 		);
 
@@ -178,8 +178,8 @@ describe('addSupporterRatePlanItemToQueueLambda', () => {
 				() => 120000,
 				{
 					streamCsvRows: () => streamCsvRows(csv),
-					sendMessagesToQueue: noopAsync as never,
-					putLastSuccessfulQueryTime: noopAsync as never,
+					sendMessagesToQueue: noopAsync,
+					putLastSuccessfulQueryTime: noopAsync,
 				},
 			),
 		).rejects.toBeInstanceOf(CsvDecodeError);
@@ -208,7 +208,7 @@ describe('addSupporterRatePlanItemToQueueLambda', () => {
 					streamCsvRows: () => streamCsvRows(csv),
 					sendMessagesToQueue: () =>
 						Promise.reject(new SqsSendError('SQS unavailable')),
-					putLastSuccessfulQueryTime: noopAsync as never,
+					putLastSuccessfulQueryTime: noopAsync,
 				},
 			),
 		).rejects.toBeInstanceOf(SqsSendError);

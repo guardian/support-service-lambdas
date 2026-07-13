@@ -4,6 +4,7 @@
     "module": "commonjs",
     "lib": ["es2020"],
     "outDir": "dist",
+    "types": ["node", "jest"],
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,

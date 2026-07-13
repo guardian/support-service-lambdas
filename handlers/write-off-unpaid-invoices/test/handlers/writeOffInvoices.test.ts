@@ -6,7 +6,6 @@ import {
 	getInvoiceItems,
 } from '@modules/zuora/invoice';
 import {
-	type CancelSource,
 	cancelSourceToCommentMap,
 	handler,
 	type LambdaEvent,
@@ -37,7 +36,7 @@ describe('writeOffInvoices', () => {
 		Items: [
 			{
 				invoice_id: 'inv123',
-				cancel_source: 'MMA' as CancelSource,
+				cancel_source: 'MMA',
 			},
 		],
 	} as LambdaEvent;

@@ -40,11 +40,9 @@ export const dep = separateDepRecords({
 
 // intended for use in devDependencies
 export const devDeps = separateDepRecords({
-	typescript: 'catalog:',
 	// types
 	'@types/stripe': '^8.0.417',
 	'@types/aws-lambda': '^8.10.147',
-	'@types/jest': '^29.5.14',
 	'@smithy/types': '4.12.0',
 	// dev - for running locally
 	tsx: '^4.21.0',
@@ -53,8 +51,6 @@ export const devDeps = separateDepRecords({
 	'@faker-js/faker': '^9.8.0',
 	'aws-sdk-client-mock': '4.1.0',
 	'fetch-mock': '^11.1.1',
-	jest: '^29.7.0',
-	'ts-jest': '^29.3.2',
 	// linting
 	'eslint-plugin-sort-keys-fix': '^1.1.2',
 	'@redocly/cli': '2.30.5',
