@@ -1,4 +1,4 @@
-import type { Callback, Context } from 'aws-lambda';
+import type { Context } from 'aws-lambda';
 import { handlerBaton } from '../src';
 import type {
 	BatonEventRequest,
@@ -8,10 +8,6 @@ import type {
 export const invokeBatonHandler = async (
 	event: BatonEventRequest,
 ): Promise<BatonEventResponse> => {
-	const result: unknown = await handlerBaton(
-		event,
-		{} as Context,
-		(() => {}) as Callback<unknown>,
-	);
+	const result: unknown = await handlerBaton(event, {} as Context, () => {});
 	return result as BatonEventResponse;
 };

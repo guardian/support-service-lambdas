@@ -1,7 +1,6 @@
 import * as crypto from 'crypto';
 import { faker } from '@faker-js/faker';
 import { X509CertificateGenerator } from '@peculiar/x509';
-import type { AppConfig } from '../src/services/config';
 import { invokeHttpHandler } from './invoke-http-handler';
 import { mockFetchJsonResponse, mockFetchResponse } from './mockFetch';
 
@@ -16,7 +15,7 @@ jest.mock('../src/services/config', () => ({
 			secret: faker.string.nanoid(),
 		},
 		pod: 'EU1',
-	} as AppConfig),
+	}),
 	getEnv: jest.fn(() => 'CODE'),
 }));
 

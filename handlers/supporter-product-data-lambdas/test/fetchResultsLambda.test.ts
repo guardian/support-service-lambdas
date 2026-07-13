@@ -95,7 +95,7 @@ describe('fetchResults', () => {
 					],
 				}),
 				getResultFileResponse: makeGetResultFileResponse('csv-data'),
-				uploadToS3: noopAsync as never,
+				uploadToS3: noopAsync,
 				putLastSuccessfulQueryTime,
 			},
 		);
@@ -119,8 +119,8 @@ describe('fetchResults', () => {
 						batches: [],
 					}),
 					getResultFileResponse: makeGetResultFileResponse(null),
-					uploadToS3: noopAsync as never,
-					putLastSuccessfulQueryTime: noopAsync as never,
+					uploadToS3: noopAsync,
+					putLastSuccessfulQueryTime: noopAsync,
 				},
 			),
 		).rejects.toThrow('Job with id job-789 is still in status executing');

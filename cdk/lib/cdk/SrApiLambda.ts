@@ -1,9 +1,10 @@
 import { Duration } from 'aws-cdk-lib';
-import { ApiKeySourceType, LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
-import type {
-	QuotaSettings,
-	ThrottleSettings,
-} from 'aws-cdk-lib/aws-apigateway/lib/usage-plan';
+import {
+	ApiKeySourceType,
+	LambdaRestApi,
+	type QuotaSettings,
+	type ThrottleSettings,
+} from 'aws-cdk-lib/aws-apigateway';
 import { SrApiGateway5xxAlarm } from './SrApiGateway5xxAlarm';
 import type { SrLambdaProps } from './SrLambda';
 import { getNameWithStage, SrLambda } from './SrLambda';

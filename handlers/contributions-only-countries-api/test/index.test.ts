@@ -26,7 +26,7 @@ describe('contributions-only-countries-api handler', () => {
 			requestContext: {} as never,
 			body: null,
 			isBase64Encoded: false,
-		} as APIGatewayProxyEvent);
+		});
 
 		expect(response.statusCode).toBe(200);
 		expect(JSON.parse(response.body)).toEqual({
