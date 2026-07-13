@@ -7,9 +7,9 @@ import type {
 	ProductKey,
 } from '@modules/product-catalog/productCatalog';
 import { supportsPromotions } from '@modules/product-catalog/productCatalog';
-import type { Stage } from '@modules/stage';
 import type { Promo } from '@modules/promotions/v2/schema';
 import { promoSchema } from '@modules/promotions/v2/schema';
+import type { Stage } from '@modules/stage';
 
 const dynamoClient = new DynamoDBClient(awsConfig);
 

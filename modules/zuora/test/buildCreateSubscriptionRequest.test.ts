@@ -1,15 +1,15 @@
+import dayjs from 'dayjs';
 import { SupportRegionId } from '@modules/internationalisation/countryGroup';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { AppliedPromotion, Promo } from '@modules/promotions/v2/schema';
 import type { Stage } from '@modules/stage';
-import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import dayjs from 'dayjs';
 import { buildCreateSubscriptionRequest } from '@modules/zuora/createSubscription/createSubscription';
 import type { CreateSubscriptionInputFields } from '@modules/zuora/createSubscription/createSubscription';
 import type { CreateSubscriptionOrderAction } from '@modules/zuora/orders/orderActions';
 import type { PaymentGateway } from '@modules/zuora/orders/paymentGateways';
 import type { CreditCardReferenceTransaction } from '@modules/zuora/orders/paymentMethods';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import code from '../../zuora-catalog/test/fixtures/catalog-code.json';
 import { ReaderType } from '../src/createSubscription/readerType';
 

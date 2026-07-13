@@ -19,7 +19,7 @@ export const validSQSRecord: SQSRecord = {
 		queryStringParameters: {},
 		httpMethod: '',
 		path: '',
-	} as ApiGatewayToSqsEvent),
+	}),
 	attributes: {
 		ApproximateReceiveCount: '1',
 		AWSTraceHeader: 'Root=1-66c35630-058f68030b77da7b36b3a909',

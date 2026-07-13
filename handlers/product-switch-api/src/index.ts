@@ -1,10 +1,10 @@
+import type { Handler } from 'aws-lambda';
+import dayjs from 'dayjs';
+import { z } from 'zod';
 import { Router } from '@modules/routing/router';
 import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
 import { withParsers } from '@modules/routing/withParsers';
 import { stageFromEnvironment } from '@modules/stage';
-import type { Handler } from 'aws-lambda';
-import dayjs from 'dayjs';
-import { z } from 'zod';
 import { ChangePlanEndpoint } from './changePlan/changePlanEndpoint';
 import {
 	legacyContributionToSupporterPlusEndpoint,

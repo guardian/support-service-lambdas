@@ -2,9 +2,9 @@
  * @group integration
  */
 
+import dayjs from 'dayjs';
 import { DataExtensionNames } from '@modules/email/email';
 import { sendToSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
-import dayjs from 'dayjs';
 import type { SwitchInformation } from '../src/changePlan/prepare/switchInformation';
 import { supporterRatePlanItemFromSwitchInformation } from '../src/supporterProductData';
 
@@ -36,7 +36,7 @@ test('supporter product data', async () => {
 		target: {
 			productRatePlanId: '8a128ed885fc6ded018602296ace3eb8',
 			subscriptionChargeId: 'subscriptionChargeId',
-			actualTotalPrice: 10,
+			ongoingPrice: 10,
 			ratePlanName: 'Supporter Plus V2 - Monthly',
 			dataExtensionName:
 				DataExtensionNames.recurringContributionToSupporterPlusSwitch,

@@ -11,6 +11,7 @@
  * @group integration
  */
 import console from 'console';
+import dayjs from 'dayjs';
 import { getAccount } from '@modules/zuora/account';
 import {
 	getBillingPreview,
@@ -19,7 +20,6 @@ import {
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import dayjs from 'dayjs';
 import type { ContributionTestAdditionalOptions } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import { createContribution } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import { getSwitchResult } from '../src/frequencySwitchEndpoint';

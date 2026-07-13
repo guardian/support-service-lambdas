@@ -1,10 +1,5 @@
 import { arrayToObject } from '@modules/arrayFunctions';
 import { isBillingPeriod } from '@modules/billingPeriod';
-import {
-	type ZuoraCatalog,
-	type ZuoraProductRatePlan,
-	type ZuoraProductRatePlanCharge,
-} from '@modules/zuora-catalog/zuoraCatalogSchema';
 import { findDiscountRatePlan } from '@modules/product-catalog/generateSchema';
 import type {
 	ProductCatalog,
@@ -30,6 +25,11 @@ import {
 	isSupportedProduct,
 	isSupportedProductRatePlan,
 } from '@modules/product-catalog/zuoraToProductNameMappings';
+import {
+	type ZuoraCatalog,
+	type ZuoraProductRatePlan,
+	type ZuoraProductRatePlanCharge,
+} from '@modules/zuora-catalog/zuoraCatalogSchema';
 
 type NonNullPrice = { currency: string; price: number };
 type PricingObject = Record<string, number>;

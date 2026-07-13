@@ -23,31 +23,22 @@ export const handler = async ({ filePath }: { filePath: string }) => {
 };
 
 const query = `
-    WITH cancellations AS 
-        (SELECT 
-            ame.id AS amendment_id,
-            ame.type AS amendment_type,
-            ame.name AS amendment_name,
-            ame.description as amendment_description,
-            ame.subscription_id AS orig_sub_id,
-            orig_sub.version AS orig_version,
-            orig_sub.name AS orig_sub_number,
-            new_sub.id AS new_sub_id,
-            new_sub.version AS new_version,
-            new_sub.name AS new_sub_number,
-            new_sub.cancellation_reason_c,
-            new_sub.cancel_reason,
-            CASE 
-                WHEN new_sub.cancellation_reason_c = 'System AutoCancel' THEN 'Autocancel'
-                WHEN new_sub.cancellation_reason_c = 'Customer' THEN 'MMA'
+    -- Source cancellations from cancelled subscriptions directly, rather than from
+    -- "Cancellation" amendments. Cancellations completed via the Zuora Orders API
+    -- produce a "Composite" amendment, so the previous amendment-based filter missed
+    -- them (and their leftover unbalanced invoices never got written off).
+    WITH cancellations AS
+        (SELECT DISTINCT
+            sub.name AS orig_sub_number,
+            CASE
+                WHEN sub.cancellation_reason_c = 'System AutoCancel' THEN 'Autocancel'
+                WHEN sub.cancellation_reason_c = 'Customer' THEN 'MMA'
                 ELSE 'Salesforce' END as cancellation_source
-        FROM datatech-fivetran.zuora.amendment ame
-        LEFT JOIN datatech-fivetran.zuora.subscription orig_sub ON ame.subscription_id = orig_sub.id
-        LEFT JOIN datatech-fivetran.zuora.subscription new_sub ON (new_sub.name = orig_sub.name AND new_sub.version = orig_sub.version + 1)
+        FROM datatech-fivetran.zuora.subscription sub
         WHERE
-            ame.type = "Cancellation"
-            AND DATE(ame.created_date) >= DATE_SUB(CURRENT_DATE, INTERVAL 5 DAY)
-            AND DATE(ame.created_date) <= DATE_SUB(CURRENT_DATE, INTERVAL 1 DAY)
+            sub.status = 'Cancelled'
+            AND DATE(sub.created_date) >= DATE_SUB(CURRENT_DATE, INTERVAL 5 DAY)
+            AND DATE(sub.created_date) <= DATE_SUB(CURRENT_DATE, INTERVAL 1 DAY)
         )
     ,
 

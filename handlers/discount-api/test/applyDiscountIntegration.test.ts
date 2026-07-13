@@ -1,6 +1,7 @@
 /**
  * @group integration
  */
+import dayjs from 'dayjs';
 import type { EmailMessageWithUserId } from '@modules/email/email';
 import type { Stage } from '@modules/stage';
 import { getAccount } from '@modules/zuora/account';
@@ -10,7 +11,6 @@ import {
 } from '@modules/zuora/subscription';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import dayjs from 'dayjs';
 import {
 	createDigitalSubscription,
 	createSupporterPlusSubscription,
@@ -62,7 +62,7 @@ test('Supporter Plus subscriptions can have a discount and get an email', async 
 		IdentityUserId: '200175946',
 	};
 
-	expect(response as ApplyDiscountResponseBody).toEqual(expected);
+	expect(response).toEqual(expected);
 	expect(emailPayload).toEqual(expectedEmail);
 
 	console.log('Cancelling the subscription');
@@ -119,7 +119,7 @@ test('digi subs can have a discount but dont get an email', async () => {
 		IdentityUserId: '200175946',
 	};
 
-	expect(response as ApplyDiscountResponseBody).toEqual(expected);
+	expect(response).toEqual(expected);
 	expect(emailPayload).toEqual(expectedEmail);
 
 	console.log('Cancelling the subscription');

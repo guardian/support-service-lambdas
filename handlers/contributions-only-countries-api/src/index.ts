@@ -1,12 +1,12 @@
-import { contributionsOnlyCountries } from '@modules/internationalisation/contributionsOnlyCountries';
-import { logger } from '@modules/logger/logger';
-import { ok } from '@modules/routing/apiGatewayResponses';
-import { Router } from '@modules/routing/router';
 import type {
 	APIGatewayProxyEvent,
 	APIGatewayProxyResult,
 	Handler,
 } from 'aws-lambda';
+import { contributionsOnlyCountries } from '@modules/internationalisation/contributionsOnlyCountries';
+import { logger } from '@modules/logger/logger';
+import { ok } from '@modules/routing/apiGatewayResponses';
+import { Router } from '@modules/routing/router';
 
 const contributionsOnlyCountriesPath = '/contributions-only-countries';
 

@@ -18,7 +18,7 @@ import {
 } from './switchCatalogHelper';
 
 export type TargetInformation = {
-	actualTotalPrice: number; // email, sf tracking
+	ongoingPrice: number; // sf tracking
 	productRatePlanId: string; // order, supporter product data
 	ratePlanName: string; // supporter product data
 	dataExtensionName: DataExtensionName; // email
@@ -63,7 +63,7 @@ export const getTargetInformation = (
 	includesContribution: boolean,
 	productCatalogHelper: ProductCatalogHelper,
 	discountEnabled?: boolean,
-): Promise<TargetInformation> => {
+): TargetInformation => {
 	const targetProductKeys: GuardianCatalogKeys<typeof input.targetProduct> =
 		productCatalogHelper.validateOrThrow(
 			input.targetProduct,
@@ -108,7 +108,7 @@ function getSwitchSpecificTargetInformationOrThrow<
 	sourceProductKeys: GuardianCatalogKeys<SP>,
 	targetProductKeys: GuardianCatalogKeys<TP>,
 	switchActionData: SwitchActionData,
-): Promise<TargetInformation> {
+): TargetInformation {
 	const validSwitches: AvailableTargetProducts = getAvailableTargetProducts(
 		sourceProductKeys.productKey,
 		sourceProductKeys.productRatePlanKey,

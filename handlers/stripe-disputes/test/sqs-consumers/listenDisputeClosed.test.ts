@@ -349,7 +349,7 @@ describe('handleListenDisputeClosed', () => {
 			data: {
 				object: {
 					...mockWebhookData.data.object,
-					payment_method_details: undefined as any,
+					payment_method_details: undefined,
 				},
 			},
 		};

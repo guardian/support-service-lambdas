@@ -1,4 +1,5 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import type { Handler } from 'aws-lambda';
 import { awsConfig } from '@modules/aws/config';
 import { buildAuthenticate } from '@modules/identity/apiGateway';
 import { IdentityClient } from '@modules/identity/identityClient';
@@ -9,8 +10,8 @@ import { Router } from '@modules/routing/router';
 import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
 import { withBodyParser, withPathParser } from '@modules/routing/withParsers';
 import { stageFromEnvironment } from '@modules/stage';
+import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
-import type { Handler } from 'aws-lambda';
 import {
 	acceptInvitationEndpoint,
 	acceptInvitationPathSchema,
@@ -32,6 +33,8 @@ import {
 	listSecondaryUsersEndpoint,
 	listSecondaryUsersPathSchema,
 } from './listSecondaryUsersEndpoint';
+import { mmaPrimarySummaryEndpoint } from './mmaPrimarySummaryEndpoint';
+import { secondaryUserMeEndpoint } from './secondaryUserMeEndpoint';
 
 const stage = stageFromEnvironment();
 const authenticate = buildAuthenticate(stage, []);
@@ -49,6 +52,10 @@ const lazyProductCatalog = new Lazy(
 const lazyZuoraCatalog = new Lazy(
 	async () => await getZuoraCatalogFromS3(stage),
 	'Get Zuora catalog',
+);
+const lazyZuoraClient = new Lazy(
+	async () => await ZuoraClient.create(stage),
+	'Get Zuora client',
 );
 
 export const handler: Handler = Router([
@@ -128,5 +135,41 @@ export const handler: Handler = Router([
 				({ path }) => path.subscriptionName,
 			),
 		),
+	},
+	{
+		httpMethod: 'GET',
+		path: '/subscriptions/{subscriptionName}/mma-primary',
+		handler: withPathParser(
+			listSecondaryUsersPathSchema,
+			withMMAIdentityCheck(
+				stage,
+				async (_body, _zuoraClient, subscription) =>
+					mmaPrimarySummaryEndpoint(
+						invitationRepository,
+						secondaryUserRepository,
+						await identityClientPromise,
+					)({
+						subscriptionName: subscription.subscriptionNumber,
+					}),
+				({ path }) => path.subscriptionName,
+			),
+		),
+	},
+	{
+		httpMethod: 'GET',
+		path: '/secondary-user/me',
+		handler: async (event) => {
+			const maybeAuthenticatedEvent = await authenticate(event);
+
+			if (maybeAuthenticatedEvent.type === 'failure') {
+				return maybeAuthenticatedEvent.response;
+			}
+
+			return secondaryUserMeEndpoint(
+				maybeAuthenticatedEvent.userDetails.identityId,
+				secondaryUserRepository,
+				await lazyZuoraClient.get(),
+			);
+		},
 	},
 ]);

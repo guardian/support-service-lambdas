@@ -4,6 +4,8 @@
  * @group integration
  */
 
+import dayjs from 'dayjs';
+import { z } from 'zod';
 import { SupportRegionId } from '@modules/internationalisation/countryGroup';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { getIfDefined } from '@modules/nullAndUndefined';
@@ -11,9 +13,6 @@ import { generateProductCatalog } from '@modules/product-catalog/generateProduct
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 import { getPromotion } from '@modules/promotions/v2/getPromotion';
 import type { Promo } from '@modules/promotions/v2/schema';
-import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import dayjs from 'dayjs';
-import { z } from 'zod';
 import type { CreateSubscriptionInputFields } from '@modules/zuora/createSubscription/createSubscription';
 import { createSubscription } from '@modules/zuora/createSubscription/createSubscription';
 import type { PreviewCreateSubscriptionInputFields } from '@modules/zuora/createSubscription/previewCreateSubscription';
@@ -27,6 +26,7 @@ import type {
 import { getSubscription } from '@modules/zuora/subscription';
 import { zuoraSubscriptionSchema } from '@modules/zuora/types/objects/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import code from '../../zuora-catalog/test/fixtures/catalog-code.json';
 
 describe('createSubscription integration', () => {
@@ -290,8 +290,7 @@ describe('createSubscription integration', () => {
 		expect(
 			digitalPackInvoiceItems.every(
 				(item) =>
-					firstDigitalPackItem !== undefined &&
-					item.amountWithoutTax === firstDigitalPackItem.amountWithoutTax,
+					item.amountWithoutTax === firstDigitalPackItem?.amountWithoutTax,
 			),
 		).toBe(true);
 	});

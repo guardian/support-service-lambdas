@@ -15,26 +15,25 @@ export type SwitchInformation = {
 	target: TargetInformation;
 };
 
-export async function getSwitchInformation(
+export function getSwitchInformation(
 	productCatalogHelper: ProductCatalogHelper,
 	input: ProductSwitchTargetBody,
 	account: ZuoraAccount,
 	subscription: GuardianSubscription,
-	discountEnabled: boolean,
-): Promise<SwitchInformation> {
+): SwitchInformation {
 	const accountInformation = getAccountInformation(account);
 
 	const subscriptionInformation: SubscriptionInformation =
 		getSubscriptionInformation(subscription);
 
-	const targetInformation = await getTargetInformation(
+	const targetInformation = getTargetInformation(
 		input,
 		subscription.ratePlan,
 		accountInformation.currency,
 		subscriptionInformation.previousAmount,
 		subscriptionInformation.includesContribution,
 		productCatalogHelper,
-		discountEnabled || input.discountSwitchEnabled,
+		input.discountSwitchEnabled,
 	);
 
 	return {

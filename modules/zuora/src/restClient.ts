@@ -1,12 +1,13 @@
+import type { z, ZodType } from 'zod';
 import { groupMap } from '@modules/arrayFunctions';
 import { getCallerInfo } from '@modules/logger/getCallerInfo';
 import { logger } from '@modules/logger/logger';
-import type { z, ZodType } from 'zod';
 import type { BearerTokenProvider } from '@modules/zuora/auth';
 
 export class RestClientError extends Error implements RestResult {
 	public status: number;
-	public responseBody: string;
+	// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents -- either body string or json
+	public responseBody: string | unknown;
 	public responseHeaders: Record<string, string>;
 
 	constructor(message: string, restResult: RestResult, cause?: unknown) {
@@ -20,7 +21,8 @@ export class RestClientError extends Error implements RestResult {
 
 export type RestResult = {
 	status: number;
-	responseBody: string;
+	// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents -- either string or json
+	responseBody: string | unknown;
 	responseHeaders: Record<string, string>;
 };
 
@@ -156,15 +158,30 @@ export abstract class RestClient {
 			responseBody,
 			responseHeaders,
 		};
+
+		let json: unknown;
+		try {
+			json = responseBody ? JSON.parse(responseBody) : {};
+		} catch (e) {
+			if (!response.ok) {
+				throw new RestClientError(`http call failed: ${result.status}`, result);
+			}
+
+			throw new RestClientError('json parsing failure', result, e);
+		}
+
+		const jsonResult: RestResult = { ...result, responseBody: json };
 		if (!response.ok) {
-			throw new RestClientError('http call failed', result);
+			throw new RestClientError(
+				`http call failed: ${result.status}`,
+				jsonResult,
+			);
 		}
 
 		try {
-			const json: unknown = responseBody ? JSON.parse(responseBody) : {};
 			return schema.parse(json);
 		} catch (e) {
-			throw new RestClientError('parsing failure', result, e);
+			throw new RestClientError('schema parsing failure', jsonResult, e);
 		}
 	}
 }

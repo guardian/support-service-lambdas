@@ -1,5 +1,5 @@
-import type { BillingPreviewInvoiceItem } from '@modules/zuora/types';
 import dayjs from 'dayjs';
+import type { BillingPreviewInvoiceItem } from '@modules/zuora/types';
 
 export const calculateTotalAmount = (records: BillingPreviewInvoiceItem[]) => {
 	return records.reduce(

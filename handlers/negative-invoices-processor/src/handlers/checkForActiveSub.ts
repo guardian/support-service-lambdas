@@ -1,8 +1,8 @@
+import { z } from 'zod';
 import { stageFromEnvironment } from '@modules/stage';
 import { doQuery } from '@modules/zuora/query';
 import { createQueryResponseSchema } from '@modules/zuora/types';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { z } from 'zod';
 import type { CheckForActiveSubInput, CheckForActiveSubOutput } from '../types';
 import { CheckForActiveSubInputSchema } from '../types';
 

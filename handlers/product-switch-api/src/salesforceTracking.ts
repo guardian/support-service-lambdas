@@ -37,7 +37,7 @@ export function createSQSMessageBody(
 	const salesforceTrackingInput: SalesforceTrackingInput = {
 		subscriptionName: subscriptionNumber,
 		previousAmount,
-		newAmount: targetInformation.actualTotalPrice,
+		newAmount: targetInformation.ongoingPrice,
 		previousProductName: previousProductName,
 		previousRatePlanName: previousRatePlanName,
 		newRatePlanName: targetInformation.ratePlanName.startsWith('Supporter Plus')

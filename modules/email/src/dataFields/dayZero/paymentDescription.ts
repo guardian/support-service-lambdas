@@ -1,8 +1,8 @@
+import dayjs from 'dayjs';
 import { partition } from '@modules/arrayFunctions';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { getCurrencyInfo } from '@modules/internationalisation/currency';
 import { getNonEmptyOrThrow, isNonEmpty } from '@modules/nullAndUndefined';
-import dayjs from 'dayjs';
 import type { EmailBillingPeriod, EmailPaymentSchedule } from './types';
 
 type Payment = EmailPaymentSchedule['payments'][number];

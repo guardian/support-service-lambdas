@@ -1,7 +1,7 @@
-import type { IsoCurrency } from '@modules/internationalisation/currency';
 import type { Dayjs } from 'dayjs';
 import type { EmailMessageWithIdentityUserId } from '@modules/email/email';
 import { DataExtensionNames } from '@modules/email/email';
+import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { buildEmailFields, buildNonDeliveryEmailFields } from './emailFields';
 import type {
 	EmailPaymentMethod,

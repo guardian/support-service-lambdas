@@ -1,6 +1,6 @@
 import type { MetricAlarm } from '@aws-sdk/client-cloudwatch';
-import { getIfDefined } from '@modules/nullAndUndefined';
 import dayjs from 'dayjs';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import { buildDiagnosticLinks } from './buildDiagnosticLinks';
 import { buildAlarmUrl, buildText } from './buildRow';
 

@@ -82,7 +82,6 @@ const moduleProductCatalog: ModuleDefinition = {
 		...devDeps['tsconfig-paths'],
 		...dep['zod'],
 		...devDeps['eslint-plugin-sort-keys-fix'],
-		...devDeps['typescript'],
 	},
 	extraScripts: {
 		generateFiles: 'tsx src/generateSchemaCommand.ts',
@@ -161,11 +160,6 @@ const moduleBigquery: ModuleDefinition = {
 		...deprecatedDeps['aws-sdk'],
 		...dep['google-auth-library'],
 		...dep.zod,
-	},
-	devDependencies: {
-		...devDeps['@types/jest'],
-		...devDeps['jest'],
-		...devDeps['ts-jest'],
 	},
 	moduleDependencies: [],
 };
@@ -261,11 +255,6 @@ const moduleSalesforce: ModuleDefinition = {
 	name: 'salesforce',
 	dependencies: {
 		...dep['zod'],
-	},
-	devDependencies: {
-		...devDeps['@types/jest'],
-		...devDeps['jest'],
-		...devDeps['ts-jest'],
 	},
 	moduleDependencies: [moduleSecretsManager, moduleZuora],
 };

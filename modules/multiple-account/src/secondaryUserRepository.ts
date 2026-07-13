@@ -7,12 +7,12 @@ import {
 	UpdateItemCommand,
 } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
-import { logger } from '@modules/logger/logger';
-import type { Stage } from '@modules/stage';
 import type { Dayjs } from 'dayjs';
 import { z } from 'zod';
+import { logger } from '@modules/logger/logger';
+import type { Stage } from '@modules/stage';
 
-const secondaryUserRecordSchema = z.object({
+export const secondaryUserRecordSchema = z.object({
 	subscriptionName: z.string(),
 	secondaryIdentityId: z.string(),
 	primaryIdentityId: z.string(),

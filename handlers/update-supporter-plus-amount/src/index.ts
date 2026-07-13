@@ -1,3 +1,6 @@
+import type { APIGatewayProxyResult, Handler } from 'aws-lambda';
+import dayjs from 'dayjs';
+import { z } from 'zod';
 import { sendEmail } from '@modules/email/email';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ok } from '@modules/routing/apiGatewayResponses';
@@ -10,9 +13,6 @@ import type {
 	ZuoraSubscription,
 } from '@modules/zuora/types/objects';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { APIGatewayProxyResult, Handler } from 'aws-lambda';
-import dayjs from 'dayjs';
-import { z } from 'zod';
 import type { RequestBody } from './schema';
 import { requestBodySchema } from './schema';
 import { createThankYouEmail } from './sendEmail';

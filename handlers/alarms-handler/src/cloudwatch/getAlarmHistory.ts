@@ -7,6 +7,7 @@ import {
 	DescribeAlarmsCommand,
 	HistoryItemType,
 } from '@aws-sdk/client-cloudwatch';
+import type { Dayjs } from 'dayjs';
 import {
 	chunkArray,
 	flatten,
@@ -18,7 +19,6 @@ import { Lazy } from '@modules/lazy';
 import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { objectInnerJoin, objectKeys } from '@modules/objectFunctions';
-import type { Dayjs } from 'dayjs';
 import type { Tags } from './getTags';
 import { getTags } from './getTags';
 

@@ -1,5 +1,5 @@
-import { contributionsOnlyCountries } from '@modules/internationalisation/contributionsOnlyCountries';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { contributionsOnlyCountries } from '@modules/internationalisation/contributionsOnlyCountries';
 import { handler } from '../src/index';
 
 describe('contributions-only-countries-api handler', () => {
@@ -26,7 +26,7 @@ describe('contributions-only-countries-api handler', () => {
 			requestContext: {} as never,
 			body: null,
 			isBase64Encoded: false,
-		} as APIGatewayProxyEvent);
+		});
 
 		expect(response.statusCode).toBe(200);
 		expect(JSON.parse(response.body)).toEqual({

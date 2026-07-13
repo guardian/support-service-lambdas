@@ -1,3 +1,5 @@
+import type { DynamoDBRecord, Handler, SQSEvent } from 'aws-lambda';
+import dayjs from 'dayjs';
 import { Lazy } from '@modules/lazy';
 import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
@@ -7,8 +9,6 @@ import type { Stage } from '@modules/stage';
 import { stageFromEnvironment } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import { sendToSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
-import type { DynamoDBRecord, Handler, SQSEvent } from 'aws-lambda';
-import dayjs from 'dayjs';
 import type { Config } from './config';
 import { getConfig } from './config';
 import { fetchSubscription } from './mobileProductPurchasesApi';
