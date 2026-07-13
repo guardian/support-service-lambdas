@@ -36,7 +36,8 @@
           "sizeInDays" : 1
         }
       },
-      "paymentPlans" : [ ]
+      "paymentPlans" : [ ],
+      "notAvailableForBillingCountries" : [ "Canada" ]
     }, {
       "id" : "annual_supporter_plus",
       "label" : "Annual",
@@ -47,7 +48,8 @@
           "sizeInDays" : 1
         }
       },
-      "paymentPlans" : [ ]
+      "paymentPlans" : [ ],
+      "notAvailableForBillingCountries" : [ "Canada" ]
     }, {
       "id" : "monthly_supporter_plus_tax_exclusive",
       "label" : "Monthly (Tax Exclusive)",
@@ -108,7 +110,8 @@
         "billingPeriod" : "Annual",
         "description" : "USD 666.65 every 12 months"
       } ],
-      "paymentPlan" : "GBP 666.66 every 12 months"
+      "paymentPlan" : "GBP 666.66 every 12 months",
+      "notAvailableForBillingCountries" : [ "Canada" ]
     }, {
       "id" : "digipack_monthly",
       "label" : "Monthly",
@@ -130,7 +133,8 @@
         "billingPeriod" : "Monthly",
         "description" : "USD 55.54 every month"
       } ],
-      "paymentPlan" : "GBP 55.55 every month"
+      "paymentPlan" : "GBP 55.55 every month",
+      "notAvailableForBillingCountries" : [ "Canada" ]
     }, {
       "id" : "digipack_annual_tax_exclusive",
       "label" : "Annual (Tax Exclusive)",

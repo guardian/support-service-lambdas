@@ -38,6 +38,7 @@ object WireModel {
       paymentPlans: List[WirePaymentPlan],
       paymentPlan: Option[String], // todo legacy field, remove once salesforce is reading from paymentPlans
       enabledForBillingCountries: Option[List[String]],
+      notAvailableForBillingCountries: Option[List[String]],
   )
 
   case class WirePaymentPlan(
@@ -143,6 +144,13 @@ object WireModel {
         case _ => None
       }
 
+      val notAvailableForBillingCountries = plan.id match {
+        case PlanId.DigipackAnnual | PlanId.DigipackMonthly | PlanId.AnnualSupporterPlus |
+            PlanId.MonthlySupporterPlus =>
+          Some(List(Country.Canada.name))
+        case _ => None
+      }
+
       WirePlanInfo(
         id = plan.id.name,
         label = plan.description.value,
@@ -150,6 +158,7 @@ object WireModel {
         paymentPlans = paymentPlans.toList,
         paymentPlan = legacyPaymentPlan,
         enabledForBillingCountries = enabledForBillingCountries,
+        notAvailableForBillingCountries = notAvailableForBillingCountries,
       )
     }
   }
