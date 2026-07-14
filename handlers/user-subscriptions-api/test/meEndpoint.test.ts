@@ -4,7 +4,7 @@ import largeAccountResponse from '../../../modules/zuora/test/objectQuery/largeA
 import { MeEndpoint } from '../src/meEndpoint';
 
 test('me static endpoint', async () => {
-	mockZuoraClient.get = jest.fn().mockResolvedValueOnce(largeAccountResponse);
+	mockZuoraClient.get.mockResolvedValueOnce(largeAccountResponse);
 	const testIdentityId = '123';
 	const result = await new MeEndpoint(mockZuoraClient).handle(testIdentityId);
 

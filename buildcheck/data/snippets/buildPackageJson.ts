@@ -26,13 +26,23 @@ export function buildPackageJson(
 ) {
 	assertNoDisallowedLibs(pkg.name, pkg.dependencies);
 	assertNoDisallowedLibs(pkg.name, pkg.devDependencies);
+
+	const testScripts =
+		pkg.testRunner === 'jest'
+			? {
+					test: 'jest --group=-integration',
+					'it-test':
+						'NODE_OPTIONS="$NODE_OPTIONS --experimental-vm-modules" jest --group=integration',
+				}
+			: {
+					test: 'vitest run',
+					'it-test': 'vitest run --config vitest.integration.config.ts',
+				};
+
 	return {
 		name: `${pkg.name}`,
 		scripts: {
-			test: 'jest --group=-integration',
-			'it-test':
-				'NODE_OPTIONS="$NODE_OPTIONS --experimental-vm-modules" jest --group=integration',
-
+			...testScripts,
 			'type-check': 'tsc --noEmit',
 			lint: "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
 			'check-formatting': 'prettier --check "**/*.ts"',

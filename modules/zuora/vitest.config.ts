@@ -1,3 +1,4 @@
+// MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/module/vitest.config.ts.ts
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({

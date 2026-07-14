@@ -10,7 +10,8 @@ The files listed below are managed by buildcheck and their content is checked by
 For further details, see [buildcheck/README.md](../../buildcheck/README.md)
 
 ## Generated file list:
-- [jest.config.js](jest.config.js)
 - [package.json](package.json)
 - [tsconfig.json](tsconfig.json)
+- [vitest.config.ts](vitest.config.ts)
+- [vitest.integration.config.ts](vitest.integration.config.ts)
 - [BUILDCHECK.md](BUILDCHECK.md)

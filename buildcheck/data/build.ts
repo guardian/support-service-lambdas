@@ -23,6 +23,8 @@ export interface ModuleDefinition {
 	tsConfigExtra?: Record<string, unknown>;
 	testTimeoutSeconds?: number;
 	jestClearMocks?: boolean;
+	/** Opt out of vitest (the default) back to jest. Remove once migrated. */
+	testRunner?: 'jest';
 	moduleDependencies: ModuleDefinition[];
 }
 
@@ -41,6 +43,7 @@ const moduleLogger: ModuleDefinition = {
 
 const moduleAws: ModuleDefinition = {
 	name: 'aws',
+	testRunner: 'jest',
 	dependencies: {
 		...dep['@aws-sdk/client-cloudwatch'],
 		...dep['@aws-sdk/client-lambda'],
@@ -56,6 +59,7 @@ const moduleAws: ModuleDefinition = {
 
 const moduleZuoraCatalog: ModuleDefinition = {
 	name: 'zuora-catalog',
+	testRunner: 'jest',
 	dependencies: {
 		...dep['@aws-sdk/client-s3'],
 		...dep['zod'],
@@ -68,6 +72,7 @@ const moduleZuoraCatalog: ModuleDefinition = {
 
 const moduleInternationalisation: ModuleDefinition = {
 	name: 'internationalisation',
+	testRunner: 'jest',
 	dependencies: {
 		...dep['zod'],
 	},
@@ -77,6 +82,7 @@ const moduleInternationalisation: ModuleDefinition = {
 
 const moduleProductCatalog: ModuleDefinition = {
 	name: 'product-catalog',
+	testRunner: 'jest',
 	devDependencies: {
 		...devDeps['tsx'],
 		...devDeps['tsconfig-paths'],
@@ -109,6 +115,7 @@ const moduleProductCatalog: ModuleDefinition = {
 
 const modulePromotions: ModuleDefinition = {
 	name: 'promotions',
+	testRunner: 'jest',
 	dependencies: {
 		...dep['@aws-sdk/client-dynamodb'],
 		...dep['@aws-sdk/util-dynamodb'],
@@ -142,6 +149,7 @@ const moduleZuora: ModuleDefinition = {
 
 const moduleRouting: ModuleDefinition = {
 	name: 'routing',
+	testRunner: 'jest',
 	dependencies: {
 		...dep['zod'],
 		...dep['dayjs'],
@@ -154,6 +162,7 @@ const moduleRouting: ModuleDefinition = {
 
 const moduleBigquery: ModuleDefinition = {
 	name: 'bigquery',
+	testRunner: 'jest',
 	dependencies: {
 		...dep['@aws-sdk/client-s3'],
 		...dep['@google-cloud/bigquery'],
@@ -166,6 +175,7 @@ const moduleBigquery: ModuleDefinition = {
 
 const moduleEmail: ModuleDefinition = {
 	name: 'email',
+	testRunner: 'jest',
 	dependencies: {
 		...dep['@aws-sdk/client-sqs'],
 		...dep['dayjs'],
@@ -179,6 +189,7 @@ const moduleEmail: ModuleDefinition = {
 
 const moduleSecretsManager: ModuleDefinition = {
 	name: 'secrets-manager',
+	testRunner: 'jest',
 	dependencies: {
 		...dep['@aws-sdk/client-secrets-manager'],
 		...devDeps['aws-sdk-client-mock'],
@@ -188,6 +199,7 @@ const moduleSecretsManager: ModuleDefinition = {
 
 const moduleGuardianSubscription: ModuleDefinition = {
 	name: 'guardian-subscription',
+	testRunner: 'jest',
 	dependencies: { ...dep['dayjs'] },
 	devDependencies: {
 		...dep['@aws-sdk/client-cloudwatch-logs'],
@@ -203,6 +215,7 @@ const moduleGuardianSubscription: ModuleDefinition = {
 
 const moduleIdentity: ModuleDefinition = {
 	name: 'identity',
+	testRunner: 'jest',
 	dependencies: {
 		...dep['@okta/jwt-verifier'],
 		...dep['zod'],
@@ -215,6 +228,7 @@ const moduleIdentity: ModuleDefinition = {
 
 const moduleSupporterProductData: ModuleDefinition = {
 	name: 'supporter-product-data',
+	testRunner: 'jest',
 	devDependencies: {
 		...dep['@aws-sdk/client-dynamodb'],
 		...dep['@aws-sdk/util-dynamodb'],
@@ -229,6 +243,7 @@ const moduleSupporterProductData: ModuleDefinition = {
 
 const moduleMultipleAccount: ModuleDefinition = {
 	name: 'multiple-account',
+	testRunner: 'jest',
 	devDependencies: {
 		...dep['@aws-sdk/client-dynamodb'],
 		...dep['@aws-sdk/util-dynamodb'],
@@ -240,6 +255,7 @@ const moduleMultipleAccount: ModuleDefinition = {
 
 const moduleProductBenefits: ModuleDefinition = {
 	name: 'product-benefits',
+	testRunner: 'jest',
 	dependencies: {
 		...dep['zod'],
 		...dep['dayjs'],
@@ -253,6 +269,7 @@ const moduleProductBenefits: ModuleDefinition = {
 
 const moduleSalesforce: ModuleDefinition = {
 	name: 'salesforce',
+	testRunner: 'jest',
 	dependencies: {
 		...dep['zod'],
 	},
@@ -261,6 +278,7 @@ const moduleSalesforce: ModuleDefinition = {
 
 const moduleSyncSupporterProductData: ModuleDefinition = {
 	name: 'sync-supporter-product-data',
+	testRunner: 'jest',
 	dependencies: {
 		...dep['zod'],
 	},
@@ -278,6 +296,7 @@ const moduleSyncSupporterProductData: ModuleDefinition = {
 
 const moduleTestUsers: ModuleDefinition = {
 	name: 'test-users',
+	testRunner: 'jest',
 	devDependencies: {
 		...dep['dayjs'],
 		...devDeps['tsx'],
@@ -298,6 +317,7 @@ const moduleTestUsers: ModuleDefinition = {
 
 const alarmsHandler: HandlerDefinition = {
 	name: 'alarms-handler',
+	testRunner: 'jest',
 	functionNames: [
 		'alarms-handler-',
 		'alarms-handler-scheduled-',
@@ -318,6 +338,7 @@ const alarmsHandler: HandlerDefinition = {
 
 const discountApi: HandlerDefinition = {
 	name: 'discount-api',
+	testRunner: 'jest',
 	dependencies: {
 		...dep.dayjs,
 		...dep.zod,
@@ -335,6 +356,7 @@ const discountApi: HandlerDefinition = {
 
 const discountExpiryNotifier: HandlerDefinition = {
 	name: 'discount-expiry-notifier',
+	testRunner: 'jest',
 	functionNames: [
 		'discount-expiry-notifier-get-expiring-discounts-',
 		'discount-expiry-notifier-filter-records-',
@@ -363,6 +385,7 @@ const discountExpiryNotifier: HandlerDefinition = {
 
 const generateProductCatalog: HandlerDefinition = {
 	name: 'generate-product-catalog',
+	testRunner: 'jest',
 	devDependencies: {
 		...dep['@aws-sdk/client-s3'],
 		...devDeps['@types/aws-lambda'],
@@ -372,6 +395,7 @@ const generateProductCatalog: HandlerDefinition = {
 
 const imovoVoucherApi: HandlerDefinition = {
 	name: 'imovo-voucher-api',
+	testRunner: 'jest',
 	dependencies: {
 		...dep['@aws-sdk/client-secrets-manager'],
 		...dep['@aws-sdk/client-dynamodb'],
@@ -390,6 +414,7 @@ const imovoVoucherApi: HandlerDefinition = {
 
 const metricPushApi: HandlerDefinition = {
 	name: 'metric-push-api',
+	testRunner: 'jest',
 	jestClearMocks: true,
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
@@ -399,6 +424,7 @@ const metricPushApi: HandlerDefinition = {
 
 const mobilePurchasesToSupporterProductData: HandlerDefinition = {
 	name: 'mobile-purchases-to-supporter-product-data',
+	testRunner: 'jest',
 	testTimeoutSeconds: 15,
 	dependencies: {
 		...dep['@aws-sdk/client-dynamodb'],
@@ -423,6 +449,7 @@ const mobilePurchasesToSupporterProductData: HandlerDefinition = {
 
 const mparticleApi: HandlerDefinition = {
 	name: 'mparticle-api',
+	testRunner: 'jest',
 	functionNames: [
 		'mparticle-api-http-',
 		'mparticle-api-baton-',
@@ -447,6 +474,7 @@ const mparticleApi: HandlerDefinition = {
 
 const negativeInvoicesProcessor: HandlerDefinition = {
 	name: 'negative-invoices-processor',
+	testRunner: 'jest',
 	functionNames: [
 		'negative-invoices-processor-get-invoices-',
 		'negative-invoices-processor-check-for-active-sub-',
@@ -473,6 +501,7 @@ const negativeInvoicesProcessor: HandlerDefinition = {
 
 const observerDataExport: HandlerDefinition = {
 	name: 'observer-data-export',
+	testRunner: 'jest',
 	functionNames: ['encrypt-and-upload-observer-data-'],
 	entryPoints: ['src/handlers/*.ts'],
 	dependencies: {
@@ -483,6 +512,7 @@ const observerDataExport: HandlerDefinition = {
 
 const pressReaderEntitlements: HandlerDefinition = {
 	name: 'press-reader-entitlements',
+	testRunner: 'jest',
 	dependencies: {
 		...dep['@aws-sdk/client-dynamodb'],
 		...dep['@aws-sdk/client-ssm'],
@@ -531,6 +561,7 @@ const productSwitchApi: HandlerDefinition = {
 
 const promotionsLambdas: HandlerDefinition = {
 	name: 'promotions-lambdas',
+	testRunner: 'jest',
 	functionNames: [
 		'promotions-lambdas-promo-code-view-',
 		'promotions-lambdas-salesforce-export-',
@@ -553,6 +584,7 @@ const promotionsLambdas: HandlerDefinition = {
 
 const salesforceDisasterRecovery: HandlerDefinition = {
 	name: 'salesforce-disaster-recovery',
+	testRunner: 'jest',
 	stack: 'membership',
 	functionNames: [
 		'save-failed-rows-to-s3-',
@@ -575,6 +607,7 @@ const salesforceDisasterRecovery: HandlerDefinition = {
 
 const salesforceDisasterRecoveryHealthCheck: HandlerDefinition = {
 	name: 'salesforce-disaster-recovery-health-check',
+	testRunner: 'jest',
 	stack: 'membership',
 	functionNames: ['salesforce-disaster-recovery-health-check-'],
 	entryPoints: ['src/handlers/*.ts'],
@@ -590,6 +623,7 @@ const salesforceDisasterRecoveryHealthCheck: HandlerDefinition = {
 
 const stripeDisputes: HandlerDefinition = {
 	name: 'stripe-disputes',
+	testRunner: 'jest',
 	functionNames: ['stripe-disputes-producer-', 'stripe-disputes-consumer-'],
 	entryPoints: ['src/producer.ts', 'src/consumer.ts'],
 	dependencies: {
@@ -613,6 +647,7 @@ const stripeDisputes: HandlerDefinition = {
 
 const ticketTailorWebhook: HandlerDefinition = {
 	name: 'ticket-tailor-webhook',
+	testRunner: 'jest',
 	dependencies: {
 		...dep['@aws-sdk/client-cloudwatch'],
 		...dep['@aws-sdk/client-secrets-manager'],
@@ -627,6 +662,7 @@ const ticketTailorWebhook: HandlerDefinition = {
 
 const updateSupporterPlusAmount: HandlerDefinition = {
 	name: 'update-supporter-plus-amount',
+	testRunner: 'jest',
 	dependencies: {
 		...dep['@aws-sdk/client-sqs'],
 		...dep.dayjs,
@@ -646,6 +682,7 @@ const updateSupporterPlusAmount: HandlerDefinition = {
 
 const userBenefits: HandlerDefinition = {
 	name: 'user-benefits',
+	testRunner: 'jest',
 	functionNames: [
 		'user-benefits-me-',
 		'user-benefits-identity-id-',
@@ -664,6 +701,7 @@ const userBenefits: HandlerDefinition = {
 
 const writeOffUnpaidInvoices: HandlerDefinition = {
 	name: 'write-off-unpaid-invoices',
+	testRunner: 'jest',
 	functionNames: ['get-unpaid-invoices-', 'write-off-invoices-'],
 	entryPoints: ['src/handlers/*.ts'],
 	dependencies: {
@@ -675,6 +713,7 @@ const writeOffUnpaidInvoices: HandlerDefinition = {
 
 const zuoraSalesforceLinkRemover: HandlerDefinition = {
 	name: 'zuora-salesforce-link-remover',
+	testRunner: 'jest',
 	stack: 'membership',
 	functionNames: [
 		'zuora-salesforce-link-remover-get-billing-accounts-',
@@ -695,6 +734,7 @@ const zuoraSalesforceLinkRemover: HandlerDefinition = {
 
 const newSubscriptionApi: HandlerDefinition = {
 	name: 'new-subscription-api',
+	testRunner: 'jest',
 	dependencies: {
 		...dep.zod,
 	},
@@ -712,6 +752,7 @@ const newSubscriptionApi: HandlerDefinition = {
 
 const newsletterAcquisition: HandlerDefinition = {
 	name: 'newsletter-acquisition',
+	testRunner: 'jest',
 	dependencies: {
 		...dep['@aws-sdk/client-dynamodb'],
 		...dep['@aws-sdk/util-dynamodb'],
@@ -725,6 +766,7 @@ const newsletterAcquisition: HandlerDefinition = {
 
 const multipleAccountApi: HandlerDefinition = {
 	name: 'multiple-account-api',
+	testRunner: 'jest',
 	dependencies: {
 		...dep['@aws-sdk/client-dynamodb'],
 		...dep['@aws-sdk/util-dynamodb'],
@@ -752,6 +794,7 @@ const multipleAccountApi: HandlerDefinition = {
 
 const observerBenefitsApi: HandlerDefinition = {
 	name: 'observer-benefits-api',
+	testRunner: 'jest',
 	dependencies: {
 		...dep.zod,
 		...dep.dayjs,
@@ -779,6 +822,7 @@ const observerBenefitsApi: HandlerDefinition = {
 
 const contributionsOnlyCountriesApi: HandlerDefinition = {
 	name: 'contributions-only-countries-api',
+	testRunner: 'jest',
 	dependencies: {
 		...dep.zod,
 	},
@@ -790,6 +834,7 @@ const contributionsOnlyCountriesApi: HandlerDefinition = {
 
 const userSubscriptionsApi: HandlerDefinition = {
 	name: 'user-subscriptions-api',
+	testRunner: 'jest',
 	dependencies: {
 		...dep.zod,
 	},
@@ -807,6 +852,7 @@ const userSubscriptionsApi: HandlerDefinition = {
 
 const salesTaxApi: HandlerDefinition = {
 	name: 'sales-tax-api',
+	testRunner: 'jest',
 	dependencies: {
 		...dep.zod,
 	},
@@ -829,6 +875,7 @@ const salesTaxApi: HandlerDefinition = {
 
 const supporterProductDataLambdas: HandlerDefinition = {
 	name: 'supporter-product-data-lambdas',
+	testRunner: 'jest',
 	functionNames: [
 		'supporterProductData-QueryZuora-',
 		'supporterProductData-FetchResults-',
@@ -863,6 +910,7 @@ const supporterProductDataLambdas: HandlerDefinition = {
 
 const brazeAcquisitionEventsSync: HandlerDefinition = {
 	name: 'braze-acquisition-events-sync',
+	testRunner: 'jest',
 	dependencies: {
 		...dep.zod,
 	},
