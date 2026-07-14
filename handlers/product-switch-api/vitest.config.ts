@@ -6,6 +6,7 @@ export default defineConfig({
 	test: {
 		globals: true,
 		environment: 'node',
+		include: ['test/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
 		exclude: [
 			'**/node_modules/**',
 			'**/*Integration.test.ts',

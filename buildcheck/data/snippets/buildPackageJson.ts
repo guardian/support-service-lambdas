@@ -27,18 +27,15 @@ export function buildPackageJson(
 	assertNoDisallowedLibs(pkg.name, pkg.dependencies);
 	assertNoDisallowedLibs(pkg.name, pkg.devDependencies);
 
-	const passWithNoTests = pkg.noTests ? ' --passWithNoTests' : '';
-	const testScripts =
-		pkg.testRunner === 'jest'
-			? {
-					test: `jest --group=-integration${passWithNoTests}`,
-					'it-test':
-						'NODE_OPTIONS="$NODE_OPTIONS --experimental-vm-modules" jest --group=integration',
-				}
-			: {
-					test: `vitest run${passWithNoTests}`,
-					'it-test': 'vitest run --config vitest.integration.config.ts',
-				};
+	const jestScripts = {
+		test: `jest --group=-integration${pkg.noTests ? ' --passWithNoTests' : ''}`,
+		'it-test':
+			'NODE_OPTIONS="$NODE_OPTIONS --experimental-vm-modules" jest --group=integration',
+	};
+	const viTestScripts = {
+		test: `vitest run${pkg.noTests ? ' --passWithNoTests' : ''}`,
+		'it-test': 'vitest run --config vitest.integration.config.ts',
+	};
 
 	const lintGlobs = pkg.noTests
 		? "'src/**/*.ts'"
@@ -47,7 +44,7 @@ export function buildPackageJson(
 	return {
 		name: `${pkg.name}`,
 		scripts: {
-			...testScripts,
+			...(pkg.testRunner === 'jest' ? jestScripts : viTestScripts),
 			'type-check': 'tsc --noEmit',
 			lint: `eslint --cache --cache-location /tmp/eslintcache/ ${lintGlobs}`,
 			'check-formatting': 'prettier --check "**/*.ts"',
