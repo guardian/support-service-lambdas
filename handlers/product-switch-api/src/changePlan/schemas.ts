@@ -4,7 +4,6 @@ import { validTargetProductKeys } from './prepare/switchCatalogHelper';
 export const productSwitchCommonRequestSchema = z.object({
 	csrUserId: z.optional(z.string()),
 	caseId: z.optional(z.string()),
-	discountSwitchEnabled: z.optional(z.boolean()),
 });
 
 export const productSwitchRequestSchema = z.discriminatedUnion('mode', [
@@ -38,11 +37,11 @@ export type ProductSwitchRequestBody = z.infer<
 export type ProductSwitchTargetBody =
 	| Pick<
 			Extract<ProductSwitchRequestBody, { mode: 'switchToBasePrice' | 'save' }>,
-			'mode' | 'targetProduct' | 'discountSwitchEnabled'
+			'mode' | 'targetProduct'
 	  >
 	| Pick<
 			Extract<ProductSwitchRequestBody, { mode: 'switchWithPriceOverride' }>,
-			'mode' | 'targetProduct' | 'newAmount' | 'discountSwitchEnabled'
+			'mode' | 'targetProduct' | 'newAmount'
 	  >;
 
 export const zuoraSwitchResponseSchema = z.object({});

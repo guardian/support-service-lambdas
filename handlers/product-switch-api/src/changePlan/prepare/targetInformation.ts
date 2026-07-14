@@ -38,7 +38,6 @@ export type TargetContribution = {
 export type SwitchActionData = {
 	mode: SwitchMode;
 	currency: IsoCurrency;
-	discountEnabled?: boolean; // switch
 } & (
 	| {
 			mode: 'switchToBasePrice' | 'save';
@@ -62,7 +61,6 @@ export const getTargetInformation = (
 	previousAmount: number,
 	includesContribution: boolean,
 	productCatalogHelper: ProductCatalogHelper,
-	discountEnabled?: boolean,
 ): TargetInformation => {
 	const targetProductKeys: GuardianCatalogKeys<typeof input.targetProduct> =
 		productCatalogHelper.validateOrThrow(
@@ -77,7 +75,6 @@ export const getTargetInformation = (
 			switchActionData = {
 				mode: input.mode,
 				currency,
-				discountEnabled,
 				previousAmount,
 				includesContribution,
 			};
@@ -86,7 +83,6 @@ export const getTargetInformation = (
 			switchActionData = {
 				mode: input.mode,
 				currency,
-				discountEnabled,
 				userRequestedAmount: input.newAmount,
 			};
 			break;
