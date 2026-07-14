@@ -3,7 +3,7 @@ const isNotDSGift =
 const isRedeemedDSGift =
 	"(Subscription.RedemptionCode__c like '_%' AND Subscription.GifteeIdentityId__c like '_%')";
 
-const excludeDiscountProductRatePlans = (
+const removeExcludedProductRatePlans = (
 	discountProductRatePlanIds: string[],
 ): string =>
 	discountProductRatePlanIds.length === 0
@@ -15,7 +15,7 @@ const excludeDiscountProductRatePlans = (
 export const selectActiveRatePlansQueryName = 'select-active-rate-plans';
 
 export const buildSelectActiveRatePlansQuery = (
-	discountProductRatePlanIds: string[],
+	excludedProductRatePlanIds: string[],
 ): string => `SELECT
       Subscription.Name,
       Subscription.Version,
@@ -28,10 +28,10 @@ export const buildSelectActiveRatePlansQuery = (
       Subscription.Status
       FROM
       rateplan
-      WHERE
-      (Subscription.Status = 'Active' OR Subscription.Status = 'Cancelled') AND
-      (RatePlan.AmendmentType is null OR RatePlan.AmendmentType = 'NewProduct' OR RatePlan.AmendmentType = 'UpdateProduct') AND
-      ${excludeDiscountProductRatePlans(discountProductRatePlanIds)} AND
+              WHERE
+      (Subscription.Status = 'Active' OR Subscription.Status = 'Cancelled')AND
+      (RatePlan.AmendmentType is null OR RatePlan.AmendmentType = 'NewProduct' OR RatePlan.AmendmentType = 'UpdateProduct')AND
+      ${removeExcludedProductRatePlans(excludedProductRatePlanIds)}AND
       Account.IdentityId__c like '_%' AND
       (${isNotDSGift} OR ${isRedeemedDSGift})
       ORDER BY Account.IdentityId__c, Subscription.ContractEffectiveDate, Subscription.Name, Subscription.Version`;
