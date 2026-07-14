@@ -27,24 +27,29 @@ export function buildPackageJson(
 	assertNoDisallowedLibs(pkg.name, pkg.dependencies);
 	assertNoDisallowedLibs(pkg.name, pkg.devDependencies);
 
+	const passWithNoTests = pkg.noTests ? ' --passWithNoTests' : '';
 	const testScripts =
 		pkg.testRunner === 'jest'
 			? {
-					test: 'jest --group=-integration',
+					test: `jest --group=-integration${passWithNoTests}`,
 					'it-test':
 						'NODE_OPTIONS="$NODE_OPTIONS --experimental-vm-modules" jest --group=integration',
 				}
 			: {
-					test: 'vitest run',
+					test: `vitest run${passWithNoTests}`,
 					'it-test': 'vitest run --config vitest.integration.config.ts',
 				};
+
+	const lintGlobs = pkg.noTests
+		? "'src/**/*.ts'"
+		: "'src/**/*.ts' 'test/**/*.ts'";
 
 	return {
 		name: `${pkg.name}`,
 		scripts: {
 			...testScripts,
 			'type-check': 'tsc --noEmit',
-			lint: "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
+			lint: `eslint --cache --cache-location /tmp/eslintcache/ ${lintGlobs}`,
 			'check-formatting': 'prettier --check "**/*.ts"',
 			'fix-formatting': 'prettier --write "**/*.ts"',
 			...extraScripts,

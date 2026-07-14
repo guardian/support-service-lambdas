@@ -1,5 +1,5 @@
 import { dep, deprecatedDeps, devDeps } from './dependencies';
-import { openApiScripts, srcOnly } from './scripts';
+import { openApiScripts } from './scripts';
 
 /*
 This is the main build definition for all handlers.
@@ -25,6 +25,8 @@ export interface ModuleDefinition {
 	jestClearMocks?: boolean;
 	/** Opt out of vitest (the default) back to jest. Remove once migrated. */
 	testRunner?: 'jest';
+	/** Module has no test files: passes with no tests found and lints src/ only. */
+	noTests?: boolean;
 	moduleDependencies: ModuleDefinition[];
 }
 
@@ -72,11 +74,10 @@ const moduleZuoraCatalog: ModuleDefinition = {
 
 const moduleInternationalisation: ModuleDefinition = {
 	name: 'internationalisation',
-	testRunner: 'jest',
+	noTests: true,
 	dependencies: {
 		...dep['zod'],
 	},
-	extraScripts: srcOnly,
 	moduleDependencies: [],
 };
 
@@ -279,6 +280,7 @@ const moduleSalesforce: ModuleDefinition = {
 const moduleSyncSupporterProductData: ModuleDefinition = {
 	name: 'sync-supporter-product-data',
 	testRunner: 'jest',
+	noTests: true,
 	dependencies: {
 		...dep['zod'],
 	},
@@ -288,7 +290,6 @@ const moduleSyncSupporterProductData: ModuleDefinition = {
 		...devDeps['tsx'],
 	},
 	extraScripts: {
-		...srcOnly,
 		'sync-user': 'tsx ./src/syncUser.ts',
 	},
 	moduleDependencies: [moduleAws, moduleProductCatalog, moduleZuora],
@@ -297,13 +298,13 @@ const moduleSyncSupporterProductData: ModuleDefinition = {
 const moduleTestUsers: ModuleDefinition = {
 	name: 'test-users',
 	testRunner: 'jest',
+	noTests: true,
 	devDependencies: {
 		...dep['dayjs'],
 		...devDeps['tsx'],
 		...devDeps['tsconfig-paths'],
 	},
 	extraScripts: {
-		...srcOnly,
 		createDigitalSubscription: 'tsx ./src/createDigitalSubscription.ts',
 		createAnnualContribution: 'tsx ./src/createAnnualContribution.ts',
 		createMonthlyContribution: 'tsx ./src/createMonthlyContribution.ts',
