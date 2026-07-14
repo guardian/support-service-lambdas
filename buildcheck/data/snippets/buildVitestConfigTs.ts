@@ -14,10 +14,7 @@ export default defineConfig({
 		globals: true,
 		environment: 'node',
 		include: ['test/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
-		exclude: [
-			'**/*Integration.test.ts',
-			'**/*.it.test.ts',
-		],
+		exclude: ['**/*Integration.test.ts', '**/*.it.test.ts'],
 	},
 });
 `;

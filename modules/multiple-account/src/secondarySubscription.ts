@@ -3,7 +3,7 @@ import type { Stage } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import { sendToSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
 
-const secondarySubscriptionName = (
+export const secondarySubscriptionName = (
 	primarySubscriptionName: string,
 	secondaryIdentityId: string,
 ): string => `${primarySubscriptionName}-${secondaryIdentityId}`;

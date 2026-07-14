@@ -24,6 +24,10 @@ import {
 	deleteInvitationEndpoint,
 	deleteInvitationPathSchema,
 } from './deleteInvitationEndpoint';
+import {
+	deleteSecondaryUserEndpoint,
+	deleteSecondaryUserPathSchema,
+} from './deleteSecondaryUserEndpoint';
 import { InvitationRepository } from './invitationRepository';
 import {
 	listInvitationsEndpoint,
@@ -131,6 +135,26 @@ export const handler: Handler = Router([
 				async (_body, _zuoraClient, subscription) =>
 					listSecondaryUsersEndpoint(secondaryUserRepository)({
 						subscriptionName: subscription.subscriptionNumber,
+					}),
+				({ path }) => path.subscriptionName,
+			),
+		),
+	},
+	{
+		httpMethod: 'DELETE',
+		path: '/subscriptions/{subscriptionName}/secondary-users/{secondaryIdentityId}',
+		handler: withPathParser(
+			deleteSecondaryUserPathSchema,
+			withMMAIdentityCheck(
+				stage,
+				async (_body, _zuoraClient, subscription, _account, path) =>
+					deleteSecondaryUserEndpoint(
+						stage,
+						secondaryUserRepository,
+						dynamoClient,
+					)({
+						subscriptionName: subscription.subscriptionNumber,
+						secondaryIdentityId: path.secondaryIdentityId,
 					}),
 				({ path }) => path.subscriptionName,
 			),
