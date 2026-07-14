@@ -28,6 +28,7 @@
 		"hygen": "^6.2.11",
 		"jest": "^29.7.0",
 		"jest-runner-groups": "^2.2.0",
+		"vitest": "^4.1.10",
 		"prettier": "^3.3.3",
 		"ts-jest": "^29.4.11",
 		"typescript": "catalog:",
