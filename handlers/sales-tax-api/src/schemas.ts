@@ -1,11 +1,11 @@
 import { z } from 'zod';
-import { isoCountrySchema } from '@modules/internationalisation/schemas';
+import { countryCodeSchema } from '@modules/internationalisation/schemas';
 import { caStateCodes } from '@modules/internationalisation/state';
 import { productKeySchema } from '@modules/product-catalog/productCatalogSchema';
 
 export const taxRatesRequestSchema = z.object({
 	productKey: productKeySchema,
-	country: isoCountrySchema,
+	country: countryCodeSchema,
 });
 export type TaxRatesRequest = z.infer<typeof taxRatesRequestSchema>;
 

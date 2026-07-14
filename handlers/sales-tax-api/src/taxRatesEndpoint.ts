@@ -1,7 +1,7 @@
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import { ValidationError } from '@modules/errors';
-import type { IsoCountry } from '@modules/internationalisation/country';
-import { getCountryNameByIsoCode } from '@modules/internationalisation/country';
+import type { CountryCode } from '@modules/internationalisation/country';
+import { getCountryNameByCode } from '@modules/internationalisation/country';
 import type { CaStateCode } from '@modules/internationalisation/state';
 import { caStates } from '@modules/internationalisation/state';
 import { logger } from '@modules/logger/logger';
@@ -122,10 +122,10 @@ function getZuoraTaxPeriod(
 
 function extractZuoraTaxRatesForCountry(
 	zuoraTaxRates: ZuoraTaxRate[],
-	country: IsoCountry,
+	country: CountryCode,
 ): ZuoraTaxRate[] {
 	return zuoraTaxRates.filter(
-		(zuoraTaxRate) => zuoraTaxRate.country === getCountryNameByIsoCode(country),
+		(zuoraTaxRate) => zuoraTaxRate.country === getCountryNameByCode(country),
 	);
 }
 
