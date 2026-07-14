@@ -3,16 +3,6 @@ import type {
 	APIGatewayProxyEventHeaders,
 	APIGatewayProxyResult,
 } from 'aws-lambda';
-import type {
-	APIGatewayProxyEvent,
-	APIGatewayProxyEventHeaders,
-	APIGatewayProxyResult,
-} from 'aws-lambda';
-import type {
-	APIGatewayProxyEvent,
-	APIGatewayProxyEventHeaders,
-	APIGatewayProxyResult,
-} from 'aws-lambda';
 import { ValidationError } from '@modules/errors';
 import { logger } from '@modules/logger/logger';
 import type { Handler } from '@modules/routing/router';

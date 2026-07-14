@@ -157,7 +157,7 @@ paths:
               schema:
                 type: string
                 example: Internal server error
-  /subscriptions/{subscriptionName}/secondary-users/{secondaryIdentityId}:
+    /subscriptions/{subscriptionName}/secondary-users/{secondaryIdentityId}:
     delete:
       operationId: deleteSecondaryUser
       summary: Delete secondary user
@@ -184,6 +184,19 @@ paths:
         '204':
           description: Secondary user deleted.
         '404':
+          description: Route not found.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Not Found
+        '500':
+          description: Internal server error.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Internal server error
   /subscriptions/{subscriptionName}/mma-primary:
     get:
       operationId: getMmaPrimarySummary

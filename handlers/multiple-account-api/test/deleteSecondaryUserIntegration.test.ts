@@ -6,6 +6,7 @@
  */
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { IdentityClient } from '@modules/identity/identityClient';
+import { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import {
 	deleteSupporterRatePlan,
@@ -19,7 +20,6 @@ import { acceptInvitationEndpoint } from '../src/acceptInvitationEndpoint';
 import { createInvitationEndpoint } from '../src/createInvitationEndpoint';
 import { deleteSecondaryUserEndpoint } from '../src/deleteSecondaryUserEndpoint';
 import { InvitationRepository } from '../src/invitationRepository';
-import { SecondaryUserRepository } from '../src/secondaryUserRepository';
 
 const stage = 'CODE';
 const subscriptionName = 'A-S00974337';
