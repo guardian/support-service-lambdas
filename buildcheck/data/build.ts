@@ -81,7 +81,6 @@ const moduleInternationalisation: ModuleDefinition = {
 
 const moduleProductCatalog: ModuleDefinition = {
 	name: 'product-catalog',
-	testRunner: 'jest',
 	devDependencies: {
 		...devDeps['tsx'],
 		...devDeps['tsconfig-paths'],
@@ -107,7 +106,7 @@ const moduleProductCatalog: ModuleDefinition = {
 		buildGeneratedFiles: 'tsc --noEmit --skipLibCheck',
 		generateSchema:
 			'pnpm run generateFiles && pnpm run validateSchemas && pnpm run buildGeneratedFiles',
-		updateSnapshots: 'jest -u --group=-integration',
+		updateSnapshots: 'vitest run --update',
 	},
 	moduleDependencies: [moduleLogger, moduleZuoraCatalog],
 };

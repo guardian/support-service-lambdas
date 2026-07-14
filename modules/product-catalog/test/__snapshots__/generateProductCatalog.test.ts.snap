@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`generateProductCatalog function code Generated product billing period types match snapshot 1`] = `
+exports[`generateProductCatalog function > code > Generated product billing period types match snapshot 1`] = `
 "
 // ---------- This file is auto-generated. Do not edit manually. -------------
 
@@ -13,7 +13,7 @@ import type { ProductKey } from '@modules/product-catalog/productCatalog';
 	"
 `;
 
-exports[`generateProductCatalog function code Generated product catalog matches snapshot 1`] = `
+exports[`generateProductCatalog function > code > Generated product catalog matches snapshot 1`] = `
 {
   "Contribution": {
     "active": true,
@@ -2425,7 +2425,7 @@ exports[`generateProductCatalog function code Generated product catalog matches 
 }
 `;
 
-exports[`generateProductCatalog function prod Generated product billing types match snapshot 1`] = `
+exports[`generateProductCatalog function > prod > Generated product billing types match snapshot 1`] = `
 "
 // ---------- This file is auto-generated. Do not edit manually. -------------
 
@@ -2438,7 +2438,7 @@ import type { ProductKey } from '@modules/product-catalog/productCatalog';
 	"
 `;
 
-exports[`generateProductCatalog function prod Generated product catalog matches snapshot 1`] = `
+exports[`generateProductCatalog function > prod > Generated product catalog matches snapshot 1`] = `
 {
   "Contribution": {
     "active": true,
