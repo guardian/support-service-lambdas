@@ -3,12 +3,12 @@ import { doRefund } from '@modules/zuora/refund';
 import { zuoraUpperCaseSuccessSchema } from '@modules/zuora/types';
 import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
 
-jest.mock('@modules/zuora/zuoraClient');
+vi.mock('@modules/zuora/zuoraClient');
 
 describe('doRefund', () => {
 	it('should process a successful refund', async () => {
 		const mockResponse = { Success: true };
-		mockZuoraClient.post = jest.fn().mockResolvedValue(mockResponse);
+		mockZuoraClient.post = vi.fn().mockResolvedValue(mockResponse);
 
 		const body = JSON.stringify({
 			Amount: 10,
@@ -22,7 +22,7 @@ describe('doRefund', () => {
 
 	it('should throw if zuoraClient.post rejects', async () => {
 		const error = new Error('Refund failed');
-		mockZuoraClient.post = jest.fn().mockRejectedValue(error);
+		mockZuoraClient.post = vi.fn().mockRejectedValue(error);
 
 		const body = JSON.stringify({
 			Amount: 10,
@@ -38,7 +38,7 @@ describe('doRefund', () => {
 	describe('dynamic typing', () => {
 		it('should use default zuoraResponseSchema when no schema provided', async () => {
 			const mockResponse = { success: true, code: 'SUCCESS' };
-			mockZuoraClient.post = jest.fn().mockResolvedValue(mockResponse);
+			mockZuoraClient.post = vi.fn().mockResolvedValue(mockResponse);
 
 			const body = JSON.stringify({
 				Amount: 10,
@@ -62,7 +62,7 @@ describe('doRefund', () => {
 				amount: z.number(),
 			});
 			const mockResponse = { customField: 'test', amount: 10 };
-			mockZuoraClient.post = jest.fn().mockResolvedValue(mockResponse);
+			mockZuoraClient.post = vi.fn().mockResolvedValue(mockResponse);
 
 			const body = JSON.stringify({
 				Amount: 10,
@@ -92,7 +92,7 @@ describe('doRefund', () => {
 				refundId: 'REF-123',
 				status: 'COMPLETED' as const,
 			};
-			mockZuoraClient.post = jest.fn().mockResolvedValue(mockResponse);
+			mockZuoraClient.post = vi.fn().mockResolvedValue(mockResponse);
 
 			const body = JSON.stringify({
 				Amount: 10,

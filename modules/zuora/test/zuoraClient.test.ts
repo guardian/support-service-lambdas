@@ -1,22 +1,24 @@
+import type { Mocked } from 'vitest';
 import { z } from 'zod';
 import type { Authorisation, BearerTokenProvider } from '@modules/zuora/auth';
 import { ZuoraError } from '@modules/zuora/errors';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 // Mock fetch globally
-global.fetch = jest.fn();
+const fetchMock = vi.fn();
+global.fetch = fetchMock;
 
 // Mock the dependencies
-jest.mock('../src/auth/oAuthCredentials', () => ({
-	getOAuthClientCredentials: jest.fn().mockResolvedValue({
+vi.mock('../src/auth/oAuthCredentials', () => ({
+	getOAuthClientCredentials: vi.fn().mockResolvedValue({
 		client_id: 'test_client',
 		client_secret: 'test_secret',
 	}),
 }));
 
-jest.mock('../src/auth/bearerTokenProvider');
-jest.mock('../src/utils', () => ({
-	zuoraServerUrl: jest.fn(() => 'https://rest.apisandbox.zuora.com'),
+vi.mock('../src/auth/bearerTokenProvider');
+vi.mock('../src/utils', () => ({
+	zuoraServerUrl: vi.fn(() => 'https://rest.apisandbox.zuora.com'),
 }));
 
 // Test schema for responses
@@ -26,13 +28,13 @@ const testSchema = z.object({
 
 describe('ZuoraClient fetch method error handling', () => {
 	let zuoraClient: ZuoraClient;
-	let mockTokenProvider: jest.Mocked<BearerTokenProvider>;
+	let mockTokenProvider: Mocked<BearerTokenProvider>;
 
 	beforeEach(() => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 
 		mockTokenProvider = {
-			getAuthorisation: jest.fn().mockResolvedValue({
+			getAuthorisation: vi.fn().mockResolvedValue({
 				baseUrl: '',
 				authHeaders: { Authorization: 'Bearer test_token' },
 			} satisfies Authorisation),
@@ -50,7 +52,7 @@ describe('ZuoraClient fetch method error handling', () => {
 				status: 400,
 				statusText: 'Bad Request',
 				headers: { entries: () => [] },
-				text: jest.fn().mockResolvedValue(
+				text: vi.fn().mockResolvedValue(
 					JSON.stringify({
 						Errors: [
 							{
@@ -63,7 +65,7 @@ describe('ZuoraClient fetch method error handling', () => {
 				),
 			};
 
-			(fetch as jest.Mock).mockResolvedValue(mockResponse);
+			fetchMock.mockResolvedValue(mockResponse);
 
 			await expect(
 				zuoraClient.post(
@@ -92,7 +94,7 @@ describe('ZuoraClient fetch method error handling', () => {
 				status: 400,
 				statusText: 'Bad Request',
 				headers: { entries: () => [] },
-				text: jest.fn().mockResolvedValue(
+				text: vi.fn().mockResolvedValue(
 					JSON.stringify({
 						FaultCode: 'INVALID_FIELD',
 						FaultMessage: errorMessage,
@@ -100,7 +102,7 @@ describe('ZuoraClient fetch method error handling', () => {
 				),
 			};
 
-			(fetch as jest.Mock).mockResolvedValue(mockResponse);
+			fetchMock.mockResolvedValue(mockResponse);
 
 			await expect(
 				zuoraClient.post('v1/action/query', 'body', testSchema),
@@ -121,7 +123,7 @@ describe('ZuoraClient fetch method error handling', () => {
 				status: 400,
 				statusText: 'Bad Request',
 				headers: { entries: () => [] },
-				text: jest.fn().mockResolvedValue(
+				text: vi.fn().mockResolvedValue(
 					JSON.stringify({
 						code: 'ClientError',
 						message: errorMessage,
@@ -129,7 +131,7 @@ describe('ZuoraClient fetch method error handling', () => {
 				),
 			};
 
-			(fetch as jest.Mock).mockResolvedValue(mockResponse);
+			fetchMock.mockResolvedValue(mockResponse);
 
 			await expect(
 				zuoraClient.post('v1/action/query1', 'body', testSchema),
@@ -152,7 +154,7 @@ describe('ZuoraClient fetch method error handling', () => {
 				status: 401,
 				statusText: 'Unauthorized',
 				headers: { entries: () => [] },
-				text: jest.fn().mockResolvedValue(
+				text: vi.fn().mockResolvedValue(
 					JSON.stringify({
 						success: false,
 						reasons: [
@@ -165,7 +167,7 @@ describe('ZuoraClient fetch method error handling', () => {
 				),
 			};
 
-			(fetch as jest.Mock).mockResolvedValue(mockResponse);
+			fetchMock.mockResolvedValue(mockResponse);
 
 			await expect(
 				zuoraClient.post(
@@ -195,7 +197,7 @@ describe('ZuoraClient fetch method error handling', () => {
 				status: 200,
 				statusText: 'OK',
 				headers: { entries: () => [] },
-				text: jest.fn().mockResolvedValue(
+				text: vi.fn().mockResolvedValue(
 					JSON.stringify({
 						success: false,
 						processId: '8CF944C78E50988F',
@@ -210,7 +212,7 @@ describe('ZuoraClient fetch method error handling', () => {
 				),
 			};
 
-			(fetch as jest.Mock).mockResolvedValue(mockResponse);
+			fetchMock.mockResolvedValue(mockResponse);
 
 			await expect(
 				zuoraClient.get('v1/accounts/xxx/payment-methods', testSchema),
@@ -223,7 +225,7 @@ describe('ZuoraClient fetch method error handling', () => {
 				status: 200,
 				statusText: 'OK',
 				headers: { entries: () => [] },
-				text: jest.fn().mockResolvedValue(
+				text: vi.fn().mockResolvedValue(
 					JSON.stringify({
 						success: false,
 						processId: '0D252DA3B536A5E4',
@@ -239,7 +241,7 @@ describe('ZuoraClient fetch method error handling', () => {
 				),
 			};
 
-			(fetch as jest.Mock).mockResolvedValue(mockResponse);
+			fetchMock.mockResolvedValue(mockResponse);
 			await expect(
 				zuoraClient.get(
 					'v1/accounts/8ad09b7d83a313110183a8769afd1bf3/payment-methods-invalid-endpoint',
@@ -261,7 +263,7 @@ describe('ZuoraClient fetch method error handling', () => {
 					['x-ratelimit-limit', '1000'],
 					['x-ratelimit-remaining', '0'],
 				]),
-				text: jest.fn().mockResolvedValue(
+				text: vi.fn().mockResolvedValue(
 					JSON.stringify({
 						success: false,
 						code: 'RATE_LIMIT_EXCEEDED',
@@ -270,7 +272,7 @@ describe('ZuoraClient fetch method error handling', () => {
 				),
 			};
 
-			(fetch as jest.Mock).mockResolvedValue(mockResponse);
+			fetchMock.mockResolvedValue(mockResponse);
 
 			await expect(
 				zuoraClient.get('v1/accounts/test/payment-methods', testSchema),
@@ -292,14 +294,14 @@ describe('ZuoraClient fetch method error handling', () => {
 				status: 200,
 				statusText: 'OK',
 				headers: { entries: () => [] },
-				text: jest.fn().mockResolvedValue(
+				text: vi.fn().mockResolvedValue(
 					JSON.stringify({
 						success: true,
 					}),
 				),
 			};
 
-			(fetch as jest.Mock).mockResolvedValue(mockResponse);
+			fetchMock.mockResolvedValue(mockResponse);
 
 			const result = await zuoraClient.get(
 				'v1/accounts/test/payment-methods',

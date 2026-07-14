@@ -1,17 +1,18 @@
+import type { Mock, Mocked } from 'vitest';
 import { clonePaymentMethod } from '@modules/zuora/createSubscription/clonePaymentMethod';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 const buildMockZuoraClient = (
-	mockGet: jest.Mock,
-	mockPost: jest.Mock,
-): jest.Mocked<ZuoraClient> =>
+	mockGet: Mock,
+	mockPost: Mock,
+): Mocked<ZuoraClient> =>
 	({
 		get: mockGet,
 		post: mockPost,
-		put: jest.fn(),
-		delete: jest.fn(),
-		fetch: jest.fn(),
-	}) as unknown as jest.Mocked<ZuoraClient>;
+		put: vi.fn(),
+		delete: vi.fn(),
+		fetch: vi.fn(),
+	}) as unknown as Mocked<ZuoraClient>;
 
 const ccrtPaymentMethodById = {
 	Id: 'pm-ccrt-id',
@@ -45,8 +46,8 @@ const creditCardPaymentMethodById = {
 describe('clonePaymentMethod', () => {
 	describe('requiresCloning: false', () => {
 		it('returns the existing id without making any API calls', async () => {
-			const mockGet = jest.fn();
-			const client = buildMockZuoraClient(mockGet, jest.fn());
+			const mockGet = vi.fn();
+			const client = buildMockZuoraClient(mockGet, vi.fn());
 
 			const result = await clonePaymentMethod(client, {
 				id: 'pm-existing-id',
@@ -63,8 +64,8 @@ describe('clonePaymentMethod', () => {
 
 	describe('requiresCloning: true', () => {
 		it('returns ClonedCreditCardReferenceTransaction for CreditCardReferenceTransaction', async () => {
-			const mockGet = jest.fn().mockResolvedValueOnce(ccrtPaymentMethodById);
-			const client = buildMockZuoraClient(mockGet, jest.fn());
+			const mockGet = vi.fn().mockResolvedValueOnce(ccrtPaymentMethodById);
+			const client = buildMockZuoraClient(mockGet, vi.fn());
 
 			const result = await clonePaymentMethod(client, {
 				id: 'pm-ccrt-id',
@@ -79,10 +80,10 @@ describe('clonePaymentMethod', () => {
 		});
 
 		it('creates an orphan BankTransfer payment method and returns its id', async () => {
-			const mockGet = jest
+			const mockGet = vi
 				.fn()
 				.mockResolvedValueOnce(bankTransferPaymentMethodById);
-			const mockPost = jest.fn().mockResolvedValueOnce({ Id: 'new-pm-id' });
+			const mockPost = vi.fn().mockResolvedValueOnce({ Id: 'new-pm-id' });
 			const client = buildMockZuoraClient(mockGet, mockPost);
 
 			const result = await clonePaymentMethod(client, {
@@ -103,8 +104,8 @@ describe('clonePaymentMethod', () => {
 		});
 
 		it('throws for PayPal payment method', async () => {
-			const mockGet = jest.fn().mockResolvedValueOnce(paypalPaymentMethodById);
-			const client = buildMockZuoraClient(mockGet, jest.fn());
+			const mockGet = vi.fn().mockResolvedValueOnce(paypalPaymentMethodById);
+			const client = buildMockZuoraClient(mockGet, vi.fn());
 
 			await expect(
 				clonePaymentMethod(client, { id: 'pm-pp-id', requiresCloning: true }),
@@ -112,10 +113,10 @@ describe('clonePaymentMethod', () => {
 		});
 
 		it('throws for CreditCard payment method', async () => {
-			const mockGet = jest
+			const mockGet = vi
 				.fn()
 				.mockResolvedValueOnce(creditCardPaymentMethodById);
-			const client = buildMockZuoraClient(mockGet, jest.fn());
+			const client = buildMockZuoraClient(mockGet, vi.fn());
 
 			await expect(
 				clonePaymentMethod(client, { id: 'pm-cc-id', requiresCloning: true }),
@@ -123,11 +124,11 @@ describe('clonePaymentMethod', () => {
 		});
 
 		it('throws for unknown payment method type', async () => {
-			const mockGet = jest.fn().mockResolvedValueOnce({
+			const mockGet = vi.fn().mockResolvedValueOnce({
 				Id: 'pm-unknown-id',
 				Type: 'SomeUnknownType',
 			});
-			const client = buildMockZuoraClient(mockGet, jest.fn());
+			const client = buildMockZuoraClient(mockGet, vi.fn());
 
 			await expect(
 				clonePaymentMethod(client, {

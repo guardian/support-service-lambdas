@@ -6,12 +6,12 @@ class MockZuoraClient extends ZuoraClient {
 		super('https://mock.zuora.com' as unknown as BearerTokenProvider);
 	}
 
-	get = jest.fn();
-	post = jest.fn();
-	put = jest.fn();
-	patch = jest.fn();
-	delete = jest.fn();
-	fetchWithLogging = jest.fn();
+	get = vi.fn();
+	post = vi.fn();
+	put = vi.fn();
+	patch = vi.fn();
+	delete = vi.fn();
+	fetchWithLogging = vi.fn();
 }
 
 export const mockZuoraClient = new MockZuoraClient();

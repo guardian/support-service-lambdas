@@ -16,8 +16,8 @@ import { ReaderType } from '../src/createSubscription/readerType';
 const contractEffectiveDate = dayjs('2025-09-01');
 const customerAcceptanceDate = dayjs('2025-09-05');
 
-jest.mock('../src/createSubscription/subscriptionDates', () => ({
-	getSubscriptionDates: jest.fn(() => ({
+vi.mock('../src/createSubscription/subscriptionDates', () => ({
+	getSubscriptionDates: vi.fn(() => ({
 		contractEffectiveDate: dayjs(contractEffectiveDate),
 		customerAcceptanceDate: dayjs(customerAcceptanceDate),
 	})),

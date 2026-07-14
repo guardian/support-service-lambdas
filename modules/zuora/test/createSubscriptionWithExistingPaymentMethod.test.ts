@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import type { Mock, Mocked } from 'vitest';
 import { SupportRegionId } from '@modules/internationalisation/countryGroup';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { Promo } from '@modules/promotions/v2/schema';
@@ -9,17 +10,17 @@ import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import code from '../../zuora-catalog/test/fixtures/catalog-code.json';
 
 const buildMockZuoraClient = (
-	mockGet: jest.Mock,
-	mockPost: jest.Mock,
-	mockPut?: jest.Mock,
-): jest.Mocked<ZuoraClient> =>
+	mockGet: Mock,
+	mockPost: Mock,
+	mockPut?: Mock,
+): Mocked<ZuoraClient> =>
 	({
 		get: mockGet,
 		post: mockPost,
-		put: mockPut ?? jest.fn(),
-		delete: jest.fn(),
-		fetch: jest.fn(),
-	}) as unknown as jest.Mocked<ZuoraClient>;
+		put: mockPut ?? vi.fn(),
+		delete: vi.fn(),
+		fetch: vi.fn(),
+	}) as unknown as Mocked<ZuoraClient>;
 
 const productCatalog = generateProductCatalog(zuoraCatalogSchema.parse(code));
 
@@ -71,9 +72,9 @@ const bankTransferPaymentMethodById = {
 describe('createSubscriptionWithExistingPaymentMethod', () => {
 	describe('requiresCloning: false', () => {
 		it('creates account with hpmCreditCardPaymentMethodId, autoPay:true, runBilling+collectPayment in a single call', async () => {
-			const mockGet = jest.fn();
-			const mockPost = jest.fn().mockResolvedValueOnce(orderResponse);
-			const mockPut = jest.fn();
+			const mockGet = vi.fn();
+			const mockPost = vi.fn().mockResolvedValueOnce(orderResponse);
+			const mockPut = vi.fn();
 			const client = buildMockZuoraClient(mockGet, mockPost, mockPut);
 
 			await createSubscriptionWithExistingPaymentMethod(
@@ -103,8 +104,8 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 		});
 
 		it('sets runBilling:false and collectPayment:false in processingOptions when runBilling is false', async () => {
-			const mockGet = jest.fn();
-			const mockPost = jest.fn().mockResolvedValueOnce(orderResponse);
+			const mockGet = vi.fn();
+			const mockPost = vi.fn().mockResolvedValueOnce(orderResponse);
 			const client = buildMockZuoraClient(mockGet, mockPost);
 
 			await createSubscriptionWithExistingPaymentMethod(
@@ -131,8 +132,8 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 
 	describe('requiresCloning: true', () => {
 		it('fetches PM by ID and embeds CCRT inline in Orders API', async () => {
-			const mockGet = jest.fn().mockResolvedValueOnce(ccrtPaymentMethodById);
-			const mockPost = jest.fn().mockResolvedValueOnce(orderResponse);
+			const mockGet = vi.fn().mockResolvedValueOnce(ccrtPaymentMethodById);
+			const mockPost = vi.fn().mockResolvedValueOnce(orderResponse);
 			const client = buildMockZuoraClient(mockGet, mockPost);
 
 			const result = await createSubscriptionWithExistingPaymentMethod(
@@ -166,14 +167,14 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 		});
 
 		it('uses two-step flow for BankTransfer: creates orphan PM then assigns via hpmCreditCardPaymentMethodId', async () => {
-			const mockGet = jest
+			const mockGet = vi
 				.fn()
 				.mockResolvedValueOnce(bankTransferPaymentMethodById);
-			const mockPost = jest
+			const mockPost = vi
 				.fn()
 				.mockResolvedValueOnce({ Id: 'new-pm-id' }) // POST /v1/object/payment-method (orphan)
 				.mockResolvedValueOnce(orderResponse); // POST /v1/orders
-			const mockPut = jest.fn();
+			const mockPut = vi.fn();
 			const client = buildMockZuoraClient(mockGet, mockPost, mockPut);
 
 			const result = await createSubscriptionWithExistingPaymentMethod(
@@ -215,8 +216,8 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 		});
 
 		it('passes createdRequestId as idempotency key to the order call', async () => {
-			const mockGet = jest.fn().mockResolvedValueOnce(ccrtPaymentMethodById);
-			const mockPost = jest.fn().mockResolvedValueOnce(orderResponse);
+			const mockGet = vi.fn().mockResolvedValueOnce(ccrtPaymentMethodById);
+			const mockPost = vi.fn().mockResolvedValueOnce(orderResponse);
 			const client = buildMockZuoraClient(mockGet, mockPost);
 
 			await createSubscriptionWithExistingPaymentMethod(
@@ -240,8 +241,8 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 		});
 
 		it('sets all custom fields on the account, subscription and soldToContact', async () => {
-			const mockGet = jest.fn().mockResolvedValueOnce(ccrtPaymentMethodById);
-			const mockPost = jest.fn().mockResolvedValueOnce(orderResponse);
+			const mockGet = vi.fn().mockResolvedValueOnce(ccrtPaymentMethodById);
+			const mockPost = vi.fn().mockResolvedValueOnce(orderResponse);
 			const client = buildMockZuoraClient(mockGet, mockPost);
 
 			const promotion: Promo = {

@@ -21,11 +21,11 @@ import type {
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
 
-jest.mock('@modules/zuora/zuoraClient');
+vi.mock('@modules/zuora/zuoraClient');
 
 describe('subscription', () => {
 	beforeEach(() => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	});
 
 	describe('cancelSubscription', () => {
@@ -34,7 +34,7 @@ describe('subscription', () => {
 				invoiceId: 'INV-12345',
 			};
 
-			mockZuoraClient.put = jest.fn().mockResolvedValue(mockResponse);
+			mockZuoraClient.put = vi.fn().mockResolvedValue(mockResponse);
 
 			const contractEffectiveDate = dayjs('2025-08-01');
 			const result = await cancelSubscription(
@@ -70,7 +70,7 @@ describe('subscription', () => {
 				invoiceId: 'INV-67890',
 			};
 
-			mockZuoraClient.put = jest.fn().mockResolvedValue(mockResponse);
+			mockZuoraClient.put = vi.fn().mockResolvedValue(mockResponse);
 
 			const contractEffectiveDate = dayjs('2025-08-02');
 			const result = await cancelSubscription(
@@ -138,7 +138,7 @@ describe('subscription', () => {
 
 		it('should throw if zuoraClient.put rejects', async () => {
 			const error = new Error('Cancellation failed');
-			mockZuoraClient.put = jest.fn().mockRejectedValue(error);
+			mockZuoraClient.put = vi.fn().mockRejectedValue(error);
 
 			const contractEffectiveDate = dayjs('2025-08-01');
 
@@ -170,7 +170,7 @@ describe('subscription', () => {
 				subscriptionEndDate: new Date('2024-07-03'),
 				lastBookingDate: new Date('2024-07-03'),
 			};
-			mockZuoraClient.get = jest.fn().mockResolvedValue(mockSubscription);
+			mockZuoraClient.get = vi.fn().mockResolvedValue(mockSubscription);
 
 			const result = await getSubscription(mockZuoraClient, 'SUB-12345');
 
@@ -183,7 +183,7 @@ describe('subscription', () => {
 
 		it('should throw if zuoraClient.get rejects', async () => {
 			const error = new Error('Subscription not found');
-			mockZuoraClient.get = jest.fn().mockRejectedValue(error);
+			mockZuoraClient.get = vi.fn().mockRejectedValue(error);
 
 			await expect(
 				getSubscription(mockZuoraClient, 'SUB-INVALID'),
@@ -230,7 +230,7 @@ describe('subscription', () => {
 				subscriptions: mockSubscriptions,
 			};
 
-			mockZuoraClient.get = jest.fn().mockResolvedValue(mockResponse);
+			mockZuoraClient.get = vi.fn().mockResolvedValue(mockResponse);
 
 			const result = await getSubscriptionsByAccountNumber(
 				mockZuoraClient,
@@ -245,7 +245,7 @@ describe('subscription', () => {
 		});
 
 		it('should throw if the account number does not exist', async () => {
-			mockZuoraClient.get = jest.fn().mockImplementation(() => {
+			mockZuoraClient.get = vi.fn().mockImplementation(() => {
 				throw new ZuoraError(
 					"Cannot find entity by key: '8ad09b7d83a313110183a8769afd1bf31'.",
 					{ status: 200, responseBody: '', responseHeaders: {} },
@@ -312,7 +312,7 @@ describe('subscription', () => {
 				],
 			};
 
-			mockZuoraClient.get = jest.fn().mockResolvedValue(mockResponse);
+			mockZuoraClient.get = vi.fn().mockResolvedValue(mockResponse);
 
 			const result = await getSubscriptionsByAccountNumber(
 				mockZuoraClient,
@@ -324,7 +324,7 @@ describe('subscription', () => {
 
 		it('should throw if zuoraClient.get rejects', async () => {
 			const error = new Error('Account not found');
-			mockZuoraClient.get = jest.fn().mockRejectedValue(error);
+			mockZuoraClient.get = vi.fn().mockRejectedValue(error);
 
 			await expect(
 				getSubscriptionsByAccountNumber(mockZuoraClient, 'ACC-INVALID'),

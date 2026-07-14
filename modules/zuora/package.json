@@ -1,8 +1,8 @@
 {
   "name": "zuora",
   "scripts": {
-    "test": "jest --group=-integration",
-    "it-test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --group=integration",
+    "test": "vitest run",
+    "it-test": "vitest run --config vitest.integration.config.ts",
     "type-check": "tsc --noEmit",
     "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
     "check-formatting": "prettier --check \"**/*.ts\"",

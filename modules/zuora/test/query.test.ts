@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { doQuery } from '../src/query';
 import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
 
-jest.mock('@modules/zuora/zuoraClient');
+vi.mock('@modules/zuora/zuoraClient');
 
 describe('doQuery', () => {
 	const mockQuery = 'SELECT Id, Name FROM Account';
@@ -17,7 +17,7 @@ describe('doQuery', () => {
 	};
 
 	it('should execute query successfully and return parsed response', async () => {
-		mockZuoraClient.post = jest.fn().mockResolvedValue(mockSuccessfulResponse);
+		mockZuoraClient.post = vi.fn().mockResolvedValue(mockSuccessfulResponse);
 
 		const response = await doQuery(mockZuoraClient, mockQuery, mockSchema);
 

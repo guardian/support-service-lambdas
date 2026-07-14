@@ -1,22 +1,23 @@
+import type { Mocked } from 'vitest';
 import { getPaymentMethods } from '@modules/zuora/paymentMethod';
 import { voidSchema } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 describe('getPaymentMethods', () => {
-	const mockGet = jest.fn();
+	const mockGet = vi.fn();
 
-	function buildMockZuoraClient(): jest.Mocked<ZuoraClient> {
+	function buildMockZuoraClient(): Mocked<ZuoraClient> {
 		return {
 			zuoraServerUrl: 'https://zuora.example',
 			tokenProvider: {
-				getToken: jest.fn().mockResolvedValue('test-token'),
+				getToken: vi.fn().mockResolvedValue('test-token'),
 			},
 			get: mockGet,
-			post: jest.fn(),
-			put: jest.fn(),
-			delete: jest.fn(),
-			fetch: jest.fn(),
-		} as unknown as jest.Mocked<ZuoraClient>;
+			post: vi.fn(),
+			put: vi.fn(),
+			delete: vi.fn(),
+			fetch: vi.fn(),
+		} as unknown as Mocked<ZuoraClient>;
 	}
 
 	const mockZuoraClient = buildMockZuoraClient();
@@ -25,7 +26,7 @@ describe('getPaymentMethods', () => {
 	const mockResponse = { some: 'response' };
 
 	beforeEach(() => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	});
 
 	it('calls zuoraClient.get with correct path and schema', async () => {
