@@ -1,7 +1,7 @@
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import { ValidationError } from '@modules/errors';
 import { supportRegionIdFromCountry } from '@modules/internationalisation/countryGroup';
-import { isoCountrySchema } from '@modules/internationalisation/schemas';
+import { countryCodeSchema } from '@modules/internationalisation/schemas';
 import { logger } from '@modules/logger/logger';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { getPromotion } from '@modules/promotions/v2/getPromotion';
@@ -26,7 +26,7 @@ async function fetchPromotionAndAppliedPromotionFromPromoCode(
 	const promotion = await getPromotion(promoCode, stage);
 	logger.log('Promotion fetched successfully');
 	const deliveryDetails = getDeliveryFields(requestBody.productPurchase);
-	const supportRegionCountry = isoCountrySchema.parse(
+	const supportRegionCountry = countryCodeSchema.parse(
 		deliveryDetails.deliveryContact?.country ??
 			requestBody.billToContact.country,
 	);

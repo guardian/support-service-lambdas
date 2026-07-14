@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import {
-	isoCountrySchema,
+	countryCodeSchema,
 	supportRegionSchema,
 } from '@modules/internationalisation/schemas';
 import type { GuardianCatalogKeys } from '@modules/product-catalog/productCatalog';
@@ -23,7 +23,7 @@ export type PromoCampaign = z.infer<typeof promoCampaignSchema>;
 
 export const appliesToSchema = z.object({
 	productRatePlanIds: z.array(z.string()),
-	countries: z.array(isoCountrySchema),
+	countries: z.array(countryCodeSchema),
 });
 
 export type AppliesTo = z.infer<typeof appliesToSchema>;
