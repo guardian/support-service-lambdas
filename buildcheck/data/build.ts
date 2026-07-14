@@ -147,7 +147,6 @@ const moduleZuora: ModuleDefinition = {
 
 const moduleRouting: ModuleDefinition = {
 	name: 'routing',
-	testRunner: 'jest',
 	dependencies: {
 		...dep['zod'],
 		...dep['dayjs'],
@@ -173,7 +172,6 @@ const moduleBigquery: ModuleDefinition = {
 
 const moduleEmail: ModuleDefinition = {
 	name: 'email',
-	testRunner: 'jest',
 	dependencies: {
 		...dep['@aws-sdk/client-sqs'],
 		...dep['dayjs'],
@@ -197,7 +195,6 @@ const moduleSecretsManager: ModuleDefinition = {
 
 const moduleGuardianSubscription: ModuleDefinition = {
 	name: 'guardian-subscription',
-	testRunner: 'jest',
 	dependencies: { ...dep['dayjs'] },
 	devDependencies: {
 		...dep['@aws-sdk/client-cloudwatch-logs'],
@@ -226,7 +223,6 @@ const moduleIdentity: ModuleDefinition = {
 
 const moduleSupporterProductData: ModuleDefinition = {
 	name: 'supporter-product-data',
-	testRunner: 'jest',
 	devDependencies: {
 		...dep['@aws-sdk/client-dynamodb'],
 		...dep['@aws-sdk/util-dynamodb'],
@@ -234,7 +230,7 @@ const moduleSupporterProductData: ModuleDefinition = {
 		...dep['zod'],
 	},
 	extraScripts: {
-		test: 'NODE_OPTIONS="$NODE_OPTIONS --experimental-vm-modules" jest --group=-integration',
+		test: 'vitest run --passWithNoTests',
 	},
 	moduleDependencies: [moduleAws, moduleLogger, moduleZuora],
 };
