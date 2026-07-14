@@ -60,7 +60,6 @@ const moduleAws: ModuleDefinition = {
 
 const moduleZuoraCatalog: ModuleDefinition = {
 	name: 'zuora-catalog',
-	testRunner: 'jest',
 	dependencies: {
 		...dep['@aws-sdk/client-s3'],
 		...dep['zod'],
