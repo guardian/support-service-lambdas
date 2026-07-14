@@ -11,6 +11,7 @@ import {
 import {
 	AllowS3CatalogReadPolicy,
 	AllowSqsSendPolicy,
+	AllowSupporterProductDataDeletePolicy,
 	AllowSupporterProductDataQueryPolicy,
 	AllowZuoraOAuthSecretsPolicy,
 } from './cdk/policies';
@@ -46,6 +47,7 @@ export class MultipleAccountApi extends SrStack {
 		lambda.addPolicies(new AllowZuoraOAuthSecretsPolicy(this));
 		lambda.addPolicies(new AllowS3CatalogReadPolicy(this));
 		lambda.addPolicies(new AllowSupporterProductDataQueryPolicy(this));
+		lambda.addPolicies(new AllowSupporterProductDataDeletePolicy(this));
 		lambda.addPolicies(
 			AllowSqsSendPolicy.create(this, 'supporter-product-data'),
 		);

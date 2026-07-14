@@ -31,26 +31,28 @@ export const acceptInvitationEndpoint = async (
 ) => {
 	try {
 		const invitation = await invitationRepository.get(invitationCode);
+
 		if (!invitation) {
 			return notFound();
 		}
+
 		if (signedInUserId !== invitation.secondaryIdentityId) {
 			return badRequest('Incorrect user');
 		}
+
+		const { subscriptionName, secondaryIdentityId, primaryIdentityId } =
+			invitation;
+
 		const parentSupporterProductDataRecord = getIfDefined(
-			await getSupporterRatePlan(
-				stage,
-				invitation.primaryIdentityId,
-				invitation.subscriptionName,
-			),
-			`Supporter rate plan record not found for ${invitation.subscriptionName} and identity ${invitation.primaryIdentityId}`,
+			await getSupporterRatePlan(stage, primaryIdentityId, subscriptionName),
+			`Supporter rate plan record not found for ${subscriptionName} and identity ${primaryIdentityId}`,
 		);
 		const today = dayjs();
 
 		const secondaryUserRecord = {
-			subscriptionName: invitation.subscriptionName,
-			secondaryIdentityId: invitation.secondaryIdentityId,
-			primaryIdentityId: invitation.primaryIdentityId,
+			subscriptionName,
+			secondaryIdentityId,
+			primaryIdentityId,
 			acceptedDate: zuoraDateFormat(today),
 			expiryDate: secondaryUserTTLFromPrimarySubscriptionTTL(
 				parentSupporterProductDataRecord.termEndDate,
@@ -87,7 +89,7 @@ export const acceptInvitationEndpoint = async (
 
 		// TODO: email?
 		return ok({
-			identityId: invitation.secondaryIdentityId,
+			identityId: secondaryIdentityId,
 			secondarySubscriptionName,
 		});
 	} catch (error) {
