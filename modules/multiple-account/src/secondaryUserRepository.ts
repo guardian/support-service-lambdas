@@ -97,6 +97,21 @@ export class SecondaryUserRepository {
 		);
 	}
 
+	getDeleteTransaction(
+		subscriptionName: string,
+		secondaryIdentityId: string,
+	): TransactWriteItem {
+		return {
+			Delete: {
+				TableName: this.tableName,
+				Key: {
+					subscriptionName: { S: subscriptionName },
+					secondaryIdentityId: { S: secondaryIdentityId },
+				},
+			},
+		};
+	}
+
 	async updateTTL(
 		subscriptionName: string,
 		secondaryIdentityId: string,
