@@ -21,9 +21,9 @@ import subscriptionJson from '../../../fixtures/pendingAmendments.json';
 import { loadSubscription } from '../../prepare/subscriptionInformation.test';
 
 const mockZuoraClient = {
-	get: jest.fn(),
-	post: jest.fn(),
-	delete: jest.fn(),
+	get: vi.fn(),
+	post: vi.fn(),
+	delete: vi.fn(),
 };
 
 const productCatalog = generateProductCatalog(
@@ -74,7 +74,7 @@ const zeroAmountInvoice: GetInvoiceResponse = {
 const buildDoSwitchAction = (
 	createSwitchOrder: CreateSwitchOrder,
 	getPaymentSchedule: GetPaymentSchedule,
-	sendEmail = jest.fn().mockResolvedValue(undefined),
+	sendEmail = vi.fn().mockResolvedValue(undefined),
 ) =>
 	new DoSwitchAction(
 		mockZuoraClient as unknown as ZuoraClient,
@@ -87,7 +87,7 @@ const buildDoSwitchAction = (
 
 describe('DoSwitchAction', () => {
 	beforeEach(() => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	});
 
 	test('sequences switch order then billing preview, and passes preview result into email', async () => {
@@ -98,14 +98,14 @@ describe('DoSwitchAction', () => {
 		mockZuoraClient.get.mockResolvedValueOnce(zeroAmountInvoice);
 
 		const createSwitchOrderMock = {
-			execute: jest.fn().mockImplementation(() => {
+			execute: vi.fn().mockImplementation(() => {
 				callOrder.push('createSwitchOrder');
 				return Promise.resolve('invoice-id');
 			}),
 		} as unknown as CreateSwitchOrder;
 
 		const getPaymentSchedule = {
-			execute: jest.fn().mockImplementation(() => {
+			execute: vi.fn().mockImplementation(() => {
 				callOrder.push('getNextPayment');
 				return Promise.resolve([
 					{
@@ -120,7 +120,7 @@ describe('DoSwitchAction', () => {
 			}),
 		} as unknown as GetPaymentSchedule;
 
-		const sendEmailMock = jest.fn().mockResolvedValue(undefined);
+		const sendEmailMock = vi.fn().mockResolvedValue(undefined);
 
 		await buildDoSwitchAction(
 			createSwitchOrderMock,

@@ -2,7 +2,7 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getLastAmendment } from '../../../src/changePlan/action/amendments';
 
 test('should return undefined when subscription has no amendment (code 50000040)', async () => {
-	const mockFetch = jest.fn().mockResolvedValue({
+	const mockFetch = vi.fn().mockResolvedValue({
 		ok: true,
 		headers: {
 			entries: () => [['Content-Type', 'application/json; charset=utf-8']],

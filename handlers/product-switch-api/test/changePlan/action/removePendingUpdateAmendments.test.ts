@@ -3,8 +3,8 @@ import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { removePendingUpdateAmendments } from '../../../src/changePlan/action/amendments';
 
 const mockZuoraClient = {
-	get: jest.fn(),
-	delete: jest.fn(),
+	get: vi.fn(),
+	delete: vi.fn(),
 };
 
 const today = dayjs('2025-09-16');
@@ -18,7 +18,7 @@ const pendingUpdateAmendment = {
 
 describe('removePendingUpdateAmendments', () => {
 	beforeEach(() => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	});
 
 	test('deletes a pending amendment then rechecks and stops when none remain', async () => {
