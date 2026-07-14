@@ -229,6 +229,7 @@ const moduleSupporterProductData: ModuleDefinition = {
 		...dep['dayjs'],
 		...dep['zod'],
 	},
+	noTests: true,
 	moduleDependencies: [moduleAws, moduleLogger, moduleZuora],
 };
 
