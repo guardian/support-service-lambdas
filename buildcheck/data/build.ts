@@ -229,9 +229,6 @@ const moduleSupporterProductData: ModuleDefinition = {
 		...dep['dayjs'],
 		...dep['zod'],
 	},
-	extraScripts: {
-		test: 'vitest run --passWithNoTests',
-	},
 	moduleDependencies: [moduleAws, moduleLogger, moduleZuora],
 };
 
