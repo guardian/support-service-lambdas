@@ -45,7 +45,6 @@ const moduleLogger: ModuleDefinition = {
 
 const moduleAws: ModuleDefinition = {
 	name: 'aws',
-	testRunner: 'jest',
 	dependencies: {
 		...dep['@aws-sdk/client-cloudwatch'],
 		...dep['@aws-sdk/client-lambda'],

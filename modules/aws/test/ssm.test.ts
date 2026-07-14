@@ -1,15 +1,15 @@
 import { SSMClient } from '@aws-sdk/client-ssm';
 import { getSSMParam } from '../src/ssm';
 
-jest.mock('@aws-sdk/client-ssm');
+vi.mock('@aws-sdk/client-ssm');
 
-const mockGetParameter = jest.fn();
+const mockGetParameter = vi.fn();
 
 SSMClient.prototype.send = mockGetParameter;
 
 describe('getSSMParam', () => {
 	beforeEach(() => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	});
 
 	it('should return the parameter value when found', async () => {

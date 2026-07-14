@@ -7,7 +7,7 @@ describe('S3 functions', () => {
 
 	describe('uploadFileToS3', () => {
 		test('should upload file to S3', async () => {
-			const mockSend = jest.fn();
+			const mockSend = vi.fn();
 			mockSend.mockResolvedValue({});
 
 			const result = await uploadFileToS3({
@@ -22,7 +22,7 @@ describe('S3 functions', () => {
 		});
 
 		test('should throw error if S3 request fails', async () => {
-			const mockSend = jest.fn();
+			const mockSend = vi.fn();
 			const errorMessage = 'Failed to upload file';
 
 			mockSend.mockRejectedValue(new Error(errorMessage));
@@ -35,10 +35,10 @@ describe('S3 functions', () => {
 
 	describe('getFileFromS3', () => {
 		test('should retrieve file content from S3', async () => {
-			const mockSend = jest.fn();
+			const mockSend = vi.fn();
 			const getObjectResponse = {
 				Body: {
-					transformToString: jest.fn().mockReturnValue(content),
+					transformToString: vi.fn().mockReturnValue(content),
 				},
 			};
 
@@ -55,7 +55,7 @@ describe('S3 functions', () => {
 		});
 
 		test('should throw error if S3 request fails', async () => {
-			const mockSend = jest.fn();
+			const mockSend = vi.fn();
 			const errorMessage = 'Failed to retrieve file';
 
 			mockSend.mockRejectedValue(new Error(errorMessage));
@@ -66,7 +66,7 @@ describe('S3 functions', () => {
 		});
 
 		test('should throw error if file content is empty', async () => {
-			const mockSend = jest.fn();
+			const mockSend = vi.fn();
 			mockSend.mockResolvedValue({ Body: undefined });
 
 			await expect(

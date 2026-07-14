@@ -4,7 +4,7 @@ import { sendMessageToQueue } from '../src/sqs';
 describe('sqsModule', () => {
 	describe('sendMessageToQueue', () => {
 		it('should successfully send a message to the queue', async () => {
-			const mockSend = jest.fn();
+			const mockSend = vi.fn();
 			const queueName = 'test-queue';
 			const mockQueueUrl = `https://sqs.us-east-1.amazonaws.com/123456789012/${queueName}`;
 			const messageBody = JSON.stringify({ key: 'value' });
@@ -36,7 +36,7 @@ describe('sqsModule', () => {
 		});
 
 		it('should throw an error when queue URL is not found', async () => {
-			const mockSend = jest.fn();
+			const mockSend = vi.fn();
 			mockSend.mockResolvedValueOnce({ QueueUrl: undefined });
 
 			await expect(
@@ -52,7 +52,7 @@ describe('sqsModule', () => {
 		});
 
 		it('should throw an error when GetQueueUrlCommand fails', async () => {
-			const mockSend = jest.fn();
+			const mockSend = vi.fn();
 			const mockError = new Error('Queue not found');
 			mockSend.mockRejectedValueOnce(mockError);
 
@@ -68,7 +68,7 @@ describe('sqsModule', () => {
 		});
 
 		it('should throw an error when SendMessageCommand fails', async () => {
-			const mockSend = jest.fn();
+			const mockSend = vi.fn();
 			const mockQueueUrl =
 				'https://sqs.us-east-1.amazonaws.com/123456789012/test-queue';
 			const mockError = new Error('Send message failed');
@@ -89,7 +89,7 @@ describe('sqsModule', () => {
 		});
 
 		it('should pass correct parameters to GetQueueUrlCommand', async () => {
-			const mockSend = jest.fn();
+			const mockSend = vi.fn();
 			const mockQueueUrl =
 				'https://sqs.us-east-1.amazonaws.com/123456789012/test-queue';
 
@@ -111,7 +111,7 @@ describe('sqsModule', () => {
 		});
 
 		it('should pass correct parameters to SendMessageCommand', async () => {
-			const mockSend = jest.fn();
+			const mockSend = vi.fn();
 			const mockQueueUrl =
 				'https://sqs.us-east-1.amazonaws.com/123456789012/test-queue';
 			const testMessage = 'Hello from SQS test';

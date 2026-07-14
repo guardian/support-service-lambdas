@@ -3,9 +3,9 @@ import { z } from 'zod';
 import type { PathArrayWithValue, SSMKeyValuePairs } from '../src/appConfig';
 import { getTreeFromPaths, parseSSMConfigToObject } from '../src/appConfig';
 
-jest.mock('@aws-sdk/client-ssm');
+vi.mock('@aws-sdk/client-ssm');
 
-const mockGetParameter = jest.fn();
+const mockGetParameter = vi.fn();
 
 SSMClient.prototype.send = mockGetParameter;
 
