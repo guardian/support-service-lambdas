@@ -29,7 +29,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 		const writeItem = jest.fn(() => Promise.resolve());
 
 		await processItem(item, {
-			isDiscountRatePlanItem: (item) => item.productRatePlanId === 'prp-1',
+			isExcludedRatePlanItem: (item) => item.productRatePlanId === 'prp-1',
 			contributionIds: [],
 			getSubscription: () =>
 				Promise.resolve({ subscriptionNumber: 'sub-number', ratePlans: [] }),
@@ -51,7 +51,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 		await processItem(
 			{ ...item, productRatePlanId: 'contribution-product-rate-plan-id' },
 			{
-				isDiscountRatePlanItem: () => false,
+				isExcludedRatePlanItem: () => false,
 				contributionIds: ['contribution-product-rate-plan-id'],
 				getSubscription: () =>
 					Promise.resolve({
@@ -83,7 +83,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 		const writeItem = jest.fn(() => Promise.resolve());
 
 		await processItem(item, {
-			isDiscountRatePlanItem: () => false,
+			isExcludedRatePlanItem: () => false,
 			contributionIds: [],
 			getSubscription: () =>
 				Promise.resolve({ subscriptionNumber: 'sub-number', ratePlans: [] }),
@@ -120,7 +120,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 		const getSecondaryUsers = jest.fn(() => Promise.resolve(secondaryUsers));
 
 		await processItem(item, {
-			isDiscountRatePlanItem: () => false,
+			isExcludedRatePlanItem: () => false,
 			contributionIds: [],
 			getSubscription: () =>
 				Promise.resolve({ subscriptionNumber: 'sub-number', ratePlans: [] }),

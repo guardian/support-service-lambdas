@@ -45,6 +45,7 @@ export const zuoraCatalogSchema = z.object({
 					effectiveEndDate: z.string(),
 					TermType__c: z.string().nullable(),
 					DefaultTerm__c: z.string().nullable(),
+					FrontendId__c: z.string().nullable(),
 
 					productRatePlanCharges: z.array(
 						z.object({

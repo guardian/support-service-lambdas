@@ -7,11 +7,11 @@ import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { stageFromEnvironment } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
-import {
-	getDiscountProductRatePlanIds,
-	isDiscountProductRatePlanItem,
-} from '../services/discounts';
 import { DynamoService } from '../services/dynamoService';
+import {
+	getExcludedProductRatePlanIds,
+	isExcludedProductRatePlanItem,
+} from '../services/excludedRatePlans';
 import { ZuoraSubscriptionService } from '../services/zuoraSubscriptionService';
 import {
 	processEvent,
@@ -28,11 +28,12 @@ const buildDependencies = async (): Promise<ProcessItemDependencies> => {
 
 	const zuoraCatalog = await getZuoraCatalogFromS3(stage);
 	const productCatalog = await getProductCatalogFromApi(stage);
-	const discountIds = getDiscountProductRatePlanIds(zuoraCatalog);
+	const excludedProductRatePlanIds =
+		getExcludedProductRatePlanIds(zuoraCatalog);
 
 	return {
-		isDiscountRatePlanItem: (item) =>
-			isDiscountProductRatePlanItem(discountIds, item),
+		isExcludedRatePlanItem: (item) =>
+			isExcludedProductRatePlanItem(excludedProductRatePlanIds, item),
 		contributionIds: [
 			productCatalog.Contribution.ratePlans.Annual.id,
 			productCatalog.Contribution.ratePlans.Monthly.id,
