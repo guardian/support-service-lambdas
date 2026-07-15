@@ -28,7 +28,7 @@ export const buildSelectActiveRatePlansQuery = (
       Subscription.Status
       FROM
       rateplan
-              WHERE
+      WHERE
       (Subscription.Status = 'Active' OR Subscription.Status = 'Cancelled')AND
       (RatePlan.AmendmentType is null OR RatePlan.AmendmentType = 'NewProduct' OR RatePlan.AmendmentType = 'UpdateProduct')AND
       ${removeExcludedProductRatePlans(excludedProductRatePlanIds)}AND

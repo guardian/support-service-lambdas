@@ -35,7 +35,9 @@ export const processItem = async (
 	logger.log('Processing supporter rate plan item', item);
 
 	if (dependencies.isExcludedRatePlanItem(item)) {
-		logger.log('Supporter rate plan item is a discount and will be skipped');
+		logger.log(
+			'Supporter rate plan item is an excluded rate plan so will be skipped',
+		);
 		return;
 	}
 

@@ -28,11 +28,12 @@ const buildDependencies = async (): Promise<ProcessItemDependencies> => {
 
 	const zuoraCatalog = await getZuoraCatalogFromS3(stage);
 	const productCatalog = await getProductCatalogFromApi(stage);
-	const discountIds = getExcludedProductRatePlanIds(zuoraCatalog);
+	const excludedProductRatePlanIds =
+		getExcludedProductRatePlanIds(zuoraCatalog);
 
 	return {
 		isExcludedRatePlanItem: (item) =>
-			isExcludedProductRatePlanItem(discountIds, item),
+			isExcludedProductRatePlanItem(excludedProductRatePlanIds, item),
 		contributionIds: [
 			productCatalog.Contribution.ratePlans.Annual.id,
 			productCatalog.Contribution.ratePlans.Monthly.id,
