@@ -4,8 +4,8 @@ import { isDeliveryProductPurchase } from '@modules/product-catalog/productCatal
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 
 const DigitalSubscription = {
-	freeTrialPeriodInDays: 14,
-	paymentGracePeriodInDays: 2,
+	freeTrialPeriodInDays: 0,
+	paymentGracePeriodInDays: 0,
 };
 
 const GuardianAdLite = {
