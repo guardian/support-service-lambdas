@@ -25,7 +25,11 @@ function getSixForSixProductRatePlanIds(zuoraCatalog: ZuoraCatalog): string[] {
 	const guardianWeeklyProducts = zuoraCatalog.products.filter((product) =>
 		product.name.startsWith('Guardian Weekly'),
 	);
-	if (guardianWeeklyProducts.length !== 5) {
+	const numberOfGuardianWeeklyProductsInZuoraCatalog = 5; // The current Domestic & ROW plus three old Zone based ones
+	if (
+		guardianWeeklyProducts.length !==
+		numberOfGuardianWeeklyProductsInZuoraCatalog
+	) {
 		throw new Error(
 			`Only ${guardianWeeklyProducts.length} Guardian Weekly products found in catalog`,
 		);
