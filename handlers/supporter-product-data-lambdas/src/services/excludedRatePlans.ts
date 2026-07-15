@@ -31,7 +31,9 @@ function getSixForSixProductRatePlanIds(zuoraCatalog: ZuoraCatalog): string[] {
 		);
 	}
 	return guardianWeeklyProducts.flatMap((product) =>
-		product.productRatePlans.map((plan) => plan.id),
+		product.productRatePlans
+			.filter((plan) => plan.FrontendId__c === 'SixWeeks')
+			.map((plan) => plan.id),
 	);
 }
 export function isExcludedProductRatePlanItem(
