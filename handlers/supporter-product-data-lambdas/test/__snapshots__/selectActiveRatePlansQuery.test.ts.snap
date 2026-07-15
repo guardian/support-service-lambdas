@@ -1,0 +1,115 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildSelectActiveRatePlansQuery with excluded rate plans 1`] = `
+"SELECT
+      Subscription.Name,
+      Subscription.Version,
+      Account.IdentityId__c,
+      Subscription.GifteeIdentityId__c,
+      ProductRatePlan.Id,
+      ProductRatePlan.Name,
+      Subscription.ContractEffectiveDate,
+      Subscription.TermEndDate,
+      Subscription.Status
+      FROM
+      rateplan
+      WHERE
+      (Subscription.Status = 'Active' OR Subscription.Status = 'Cancelled')AND
+      (RatePlan.AmendmentType is null OR RatePlan.AmendmentType = 'NewProduct' OR RatePlan.AmendmentType = 'UpdateProduct')AND
+      ProductRatePlan.Id != '8a1282d4880a889501880f817b9d5c7a' AND
+ProductRatePlan.Id != '8a128eb499f14134019a2a5fa1a06c14' AND
+ProductRatePlan.Id != '8a1292628e75d7dc018e80b09ec3756b' AND
+ProductRatePlan.Id != '8a1288018b37ad08018b388709951c46' AND
+ProductRatePlan.Id != '2c92a0086f1426d1016f18a9c71058a5' AND
+ProductRatePlan.Id != '2c92a0fe5fe26834015fe33c70a24f50' AND
+ProductRatePlan.Id != '8a12994695aa4f680195ae2dc9d221d8' AND
+ProductRatePlan.Id != '2c92a0fd6f1426ef016f18a86c515ed7' AND
+ProductRatePlan.Id != '8a128adf8b64bcfd018b6b6fdc7674f5' AND
+ProductRatePlan.Id != '2c92a0ff64176cd40164232c8ec97661' AND
+ProductRatePlan.Id != '8a1286eb9ce101e4019ce7d24cc4683e' AND
+ProductRatePlan.Id != '2c92a00864176ce90164232ac0d90fc1' AND
+ProductRatePlan.Id != '8a1299c28fb956e8018fe2c0e12c3ae4' AND
+ProductRatePlan.Id != '2c92a0086b25c750016b32548239308d' AND
+ProductRatePlan.Id != '2c92a0ff5e09bd67015e0a93efe86d2e' AND
+ProductRatePlan.Id != '2c92a00d6f9de7f6016f9f6f52765aa4' AND
+ProductRatePlan.Id != '2c92a0fe7375d60901737c64808e4be1' AND
+ProductRatePlan.Id != '8a12904195dbb37b019610e4faa408b7' AND
+ProductRatePlan.Id != '8a1299c28aff1e73018b004582a22581' AND
+ProductRatePlan.Id != '2c92a0fe750b35d001750d4522f43817' AND
+ProductRatePlan.Id != '8a12817595db977f019610de92e23fde' AND
+ProductRatePlan.Id != '2c92a0076ae9189c016b080c930a6186' AND
+ProductRatePlan.Id != '2c92a00f7468817d01748bd88f0d1d6c' AND
+ProductRatePlan.Id != '8a12994695dbb387019610e2556647ac' AND
+ProductRatePlan.Id != '8a128e208aff0721018b003d0dfe59d9' AND
+ProductRatePlan.Id != '2c92a0117468816901748bdb3a8c1ac4' AND
+ProductRatePlan.Id != '8a12994695dbb387019610e3b64b4985' AND
+ProductRatePlan.Id != '2c92a0ff74296d7201742b7daf20123d' AND
+ProductRatePlan.Id != '2c92a0fe65f0ac1f0165f2189bca248c' AND
+ProductRatePlan.Id != '8a128912932f457d0193305175f47b1a' AND
+ProductRatePlan.Id != '2c92a0fe56fe33ff015723143e4778be' AND
+ProductRatePlan.Id != '8a12894e8d3ff418018d54d55b0777fe' AND
+ProductRatePlan.Id != '8a1281f38d3ff42c018d54d7e74529d0' AND
+ProductRatePlan.Id != '8a129b298d4011df018d54c3070276a5' AND
+ProductRatePlan.Id != '8a1292628d4011e9018d54c591d51998' AND
+ProductRatePlan.Id != '2c92a0fe62b7edde0162dd29b8124a8e' AND
+ProductRatePlan.Id != '2c92a0fc6ae918b6016b080950e96d75' AND
+ProductRatePlan.Id != '2c92a0fc5b42d2c9015b6259f7f40040' AND
+ProductRatePlan.Id != '2c92a0ff65c757150165c8eab88b788e' AND
+ProductRatePlan.Id != '2c92a0fc569c311201569dfbecb4215f' AND
+ProductRatePlan.Id != '2c92a0fc596d31ea01598d623a297897' AND
+ProductRatePlan.Id != '8a12994697aef8290197ea05c37f1448' AND
+ProductRatePlan.Id != '8a12979797aef84b0197ea0b13281571' AND
+ProductRatePlan.Id != '8a1296cc9ca46135019cade72cda45b3' AND
+ProductRatePlan.Id != '2c92a00772c5c2e90172c7ebd62a68c4' AND
+ProductRatePlan.Id != '2c92a01072c5c2e20172c7ee96b91a7c' AND
+ProductRatePlan.Id != '2c92a0fe72c5c3480172c7f1fb545f81' AND
+ProductRatePlan.Id != '2c92a00872c5d4770172c7f140a32d62' AND
+ProductRatePlan.Id != '2c92a01072c5c2e30172c7f0764772c9' AND
+ProductRatePlan.Id != '2c92a01072c5c2e20172c7efe01125c6' AND
+ProductRatePlan.Id != '8a12892d8021d0dc018022d4b6f94f05' AND
+ProductRatePlan.Id != '8a1297638021d0d7018022d4bb3342c2' AND
+ProductRatePlan.Id != '8a128e2d8021d0d4018022d4bf72421e' AND
+ProductRatePlan.Id != '8a12972d8021d0d3018022d4c2a36f0c' AND
+ProductRatePlan.Id != '8a128f138021d0d6018022d4c65b0384' AND
+ProductRatePlan.Id != '8a1295918021d0d2018022d4ca0c4aac' AND
+ProductRatePlan.Id != '8a12801c8021d0e8018022d4a1815301' AND
+ProductRatePlan.Id != '8a128aa88021da2d018022d4a6856101' AND
+ProductRatePlan.Id != '8a128eda8021d0d4018022d4aab842f9' AND
+ProductRatePlan.Id != '8a128eda8021d0d4018022d4af5e4318' AND
+ProductRatePlan.Id != '8a128aa88021da2d018022d4b38b613e' AND
+ProductRatePlan.Id != '8a12902787109bb7018712c479592ee9' AND
+ProductRatePlan.Id != '8a12989f87109bb0018712c33dc63674' AND
+ProductRatePlan.Id != '8a128432880a889f01880f873d2b1b7a' AND
+ProductRatePlan.Id != '8a1290f1880a9e7401880f834fb70bce' AND
+ProductRatePlan.Id != '8a12867b880a888901880f7f007913f6' AND
+ProductRatePlan.Id != '8a12904199f170ca019a2a5e2f3b01ba' AND
+ProductRatePlan.Id != '8a12865b8021d0d9018022d2a2e52c74' AND
+ProductRatePlan.Id != '2c92a0ff5345f9220153559d915d5c26' AND
+ProductRatePlan.Id != '2c92a0ff56fe33f301572314aed277fb' AND
+ProductRatePlan.Id != '8a1280be98447498019856687f061c9c' AND
+ProductRatePlan.Id != '8a12904198448d67019856698d7a27ef' AND
+ProductRatePlan.Id != '8a12826b995c421101999ab7fe3d19ad' AND
+ProductRatePlan.Id != '8a129797995c5ff801999b29c5df5937' AND
+ProductRatePlan.Id != '8a12826b995c421101999b06a77f765a' AND
+ProductRatePlan.Id != '8a12826b995c421101999b08b5087b5d' AND
+ProductRatePlan.Id != '8a129797995c5ff801999b28eb2b5779' AND
+ProductRatePlan.Id != '8a128eb497aeddd50197d51df0ea45ea' AND
+ProductRatePlan.Id != '8a12817597aeddca0197d51f4efd5785' AND
+ProductRatePlan.Id != '8a1283368d3ff41b018d54f96e325e6b' AND
+ProductRatePlan.Id != '8a1283368d3ff41b018d54fa92796248' AND
+ProductRatePlan.Id != '8a1282048d3ff42a018d54ed05b43526' AND
+ProductRatePlan.Id != '8a129b298d4011df018d54ef691b5214' AND
+ProductRatePlan.Id != '2c92a0fc610e738901612d83fce461fd' AND
+ProductRatePlan.Id != '8a129c2590e312f40190ea3c3a242f74' AND
+ProductRatePlan.Id != '8a1295b090e312ee0190ea3138c534f0' AND
+ProductRatePlan.Id != '8a129c2590e312f40190ea33e45615c3' AND
+ProductRatePlan.Id != '8a12831490e2f94c0190ea2da5d65284' AND
+ProductRatePlan.Id != '2c92a0086619bf8901661aaac94257fe' AND
+ProductRatePlan.Id != '2c92a0086619bf8901661ab545f51b21' AND
+ProductRatePlan.Id != '2c92a0ff59d9d540015a41a40b3e07d3' AND
+ProductRatePlan.Id != '2c92a0fe5a5ad344015a5c67b1144250' AND
+ProductRatePlan.Id != '2c92a0fc5a2a49f0015a41f473da233a'AND
+      Account.IdentityId__c like '_%' AND
+      ((Subscription.RedemptionCode__c = '' OR Subscription.RedemptionCode__c is null) OR (Subscription.RedemptionCode__c like '_%' AND Subscription.GifteeIdentityId__c like '_%'))
+      ORDER BY Account.IdentityId__c, Subscription.ContractEffectiveDate, Subscription.Name, Subscription.Version"
+`;
