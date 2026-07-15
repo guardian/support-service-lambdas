@@ -37,6 +37,7 @@ export const processItem = async (
 	if (dependencies.isExcludedRatePlanItem(item)) {
 		logger.log(
 			'Supporter rate plan item is an excluded rate plan so will be skipped',
+			item,
 		);
 		return;
 	}
