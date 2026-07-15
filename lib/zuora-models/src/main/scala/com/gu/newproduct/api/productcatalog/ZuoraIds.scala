@@ -29,6 +29,8 @@ object ZuoraIds {
       annual: PlanAndCharge,
       annualV2: PlanAndCharges,
       student: PlanAndCharge,
+      taxExclusiveMonthly: PlanAndCharges,
+      taxExclusiveAnnual: PlanAndCharges,
   ) {
     val planAndChargeByApiPlanId: Map[PlanId, PlanAndCharges] = Map(
       MonthlySupporterPlus -> monthlyV2,
@@ -250,6 +252,16 @@ object ZuoraIds {
             productRatePlanId = ProductRatePlanId("8a129797980d634c019818808a4c7668"),
             productRatePlanChargeId = ProductRatePlanChargeId("8a129797980d634c019818808aef7672"),
           ),
+          taxExclusiveMonthly = PlanAndCharges(
+            productRatePlanId = ProductRatePlanId("TODO ssss"),
+            productRatePlanChargeId = ProductRatePlanChargeId("eeee"),
+            contributionProductRatePlanChargeId = ProductRatePlanChargeId("rrrr"),
+          ),
+          taxExclusiveAnnual = PlanAndCharges(
+            productRatePlanId = ProductRatePlanId("cccc"),
+            productRatePlanChargeId = ProductRatePlanChargeId("tttt"),
+            contributionProductRatePlanChargeId = ProductRatePlanChargeId("yyyy"),
+          ),
         ),
         ContributionsZuoraIds(
           monthly = PlanAndCharge(
@@ -346,6 +358,16 @@ object ZuoraIds {
           student = PlanAndCharge(
             productRatePlanId = ProductRatePlanId("71a10c6269b981784c9817e1887c0000"),
             productRatePlanChargeId = ProductRatePlanChargeId("71a10c6269b981784c9817e188d60001"),
+          ),
+          taxExclusiveMonthly = PlanAndCharges(
+            productRatePlanId = ProductRatePlanId("TODO ssss"),
+            productRatePlanChargeId = ProductRatePlanChargeId("eeee"),
+            contributionProductRatePlanChargeId = ProductRatePlanChargeId("rrrr"),
+          ),
+          taxExclusiveAnnual = PlanAndCharges(
+            productRatePlanId = ProductRatePlanId("cccc"),
+            productRatePlanChargeId = ProductRatePlanChargeId("tttt"),
+            contributionProductRatePlanChargeId = ProductRatePlanChargeId("yyyy"),
           ),
         ),
         ContributionsZuoraIds(
