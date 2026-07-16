@@ -33,8 +33,12 @@ export type EmailPaymentMethod =
 			Type: 'PayPal';
 	  };
 
+export type Payment = {
+	date: Date; amount: number; amountWithoutTax: number; taxAmount: number;
+}
+
 export type EmailPaymentSchedule = {
-	payments: Array<{ date: Date; amount: number }>;
+	payments: Payment[];
 };
 
 export type EmailGiftRecipient = {

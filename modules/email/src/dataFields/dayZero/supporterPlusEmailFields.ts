@@ -20,6 +20,7 @@ export function buildSupporterPlusEmailFields({
 	paymentMethod,
 	isFixedTerm,
 	mandateId,
+	taxMode,
 }: {
 	today: dayjs.Dayjs;
 	user: EmailUser;
@@ -30,6 +31,7 @@ export function buildSupporterPlusEmailFields({
 	paymentMethod: EmailPaymentMethod;
 	isFixedTerm: boolean;
 	mandateId?: string;
+	taxMode: string | undefined | null;
 }) {
 	const nonDeliveryEmailFields = buildNonDeliveryEmailFields({
 		today: today,
@@ -41,6 +43,7 @@ export function buildSupporterPlusEmailFields({
 		paymentSchedule,
 		mandateId,
 		isFixedTerm,
+		taxMode,
 	});
 	const oldNonStandardPaymentFields = getPaymentMethodFieldsSupporterPlus(
 		paymentMethod,

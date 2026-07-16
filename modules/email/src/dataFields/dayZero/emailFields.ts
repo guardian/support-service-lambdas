@@ -34,6 +34,7 @@ export function buildNonDeliveryEmailFields({
 	paymentSchedule,
 	isFixedTerm,
 	mandateId,
+	taxMode,
 }: {
 	today: Dayjs;
 	user: EmailUser;
@@ -44,6 +45,7 @@ export function buildNonDeliveryEmailFields({
 	paymentSchedule: EmailPaymentSchedule;
 	isFixedTerm: boolean;
 	mandateId?: string;
+	taxMode: string | undefined | null;
 }): NonDeliveryEmailFields {
 	const paymentFields = getPaymentFields(
 		today,
@@ -56,6 +58,7 @@ export function buildNonDeliveryEmailFields({
 		billingPeriod,
 		currency,
 		isFixedTerm,
+		taxMode,
 	);
 	return {
 		first_name: user.firstName,

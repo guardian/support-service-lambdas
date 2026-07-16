@@ -75,17 +75,22 @@ function monthsBetween(start: Date, end: Date): number {
 	return endD.diff(startD, 'month');
 }
 
+function getRelevantAmountFromPayment(taxMode: string | undefined | null, payment: Payment) {
+	return taxMode === "TaxExclusive" ? payment.amountWithoutTax : payment.amount;
+}
+
 export function describePayments(
 	paymentSchedule: EmailPaymentSchedule,
 	billingPeriod: EmailBillingPeriod,
 	currency: IsoCurrency,
 	isFixedTerm: boolean,
+	taxMode: string | undefined | null,
 ): string {
-	const initialPrice = firstPayment(paymentSchedule).amount;
+	const initialPrice = getRelevantAmountFromPayment(taxMode, firstPayment(paymentSchedule));
 
 	const [paymentsWithInitialPrice, paymentsWithDifferentPrice] = partition(
 		paymentSchedule.payments,
-		(payment) => payment.amount === initialPrice,
+		(payment) => getRelevantAmountFromPayment(taxMode, payment) === initialPrice,
 	);
 
 	const noun = billingPeriodNoun(billingPeriod);
@@ -110,6 +115,7 @@ export function describePayments(
 			currency,
 			initialPrice,
 			billingPeriod,
+			taxMode,
 		);
 	}
 	return descriptionWithMultipleIntroductoryPeriods(
@@ -124,6 +130,7 @@ export function describePayments(
 		currency,
 		initialPrice,
 		billingPeriod,
+		taxMode,
 	);
 }
 
@@ -132,6 +139,7 @@ function descriptionWithSingleIntroductoryPeriod(
 	currency: IsoCurrency,
 	initialPrice: number,
 	billingPeriod: EmailBillingPeriod,
+	taxMode: string | undefined | null,
 ) {
 	const firstDifferent = paymentsWithDifferentPrice[0];
 	return `${priceWithCurrency(
@@ -141,7 +149,7 @@ function descriptionWithSingleIntroductoryPeriod(
 		billingPeriod,
 	)}, then ${priceWithCurrency(
 		currency,
-		firstDifferent.amount,
+		getRelevantAmountFromPayment(taxMode, firstDifferent),
 	)} every ${billingPeriodNoun(billingPeriod)}`;
 }
 
@@ -151,6 +159,7 @@ function descriptionWithMultipleIntroductoryPeriods(
 	currency: IsoCurrency,
 	initialPrice: number,
 	billingPeriod: EmailBillingPeriod,
+	taxMode: string | undefined | null,
 ) {
 	const firstIntroductoryPayment = earliestPayment(paymentsWithInitialPrice);
 	const firstDifferentPayment = earliestPayment(paymentsWithDifferentPrice);
@@ -185,6 +194,6 @@ function descriptionWithMultipleIntroductoryPeriods(
 		billingPeriod,
 	)} for ${timespan}, then ${priceWithCurrency(
 		currency,
-		earliestPayment(paymentsWithDifferentPrice).amount,
+		getRelevantAmountFromPayment(taxMode, earliestPayment(paymentsWithDifferentPrice)),
 	)} every ${billingPeriodNoun(billingPeriod)}`;
 }
