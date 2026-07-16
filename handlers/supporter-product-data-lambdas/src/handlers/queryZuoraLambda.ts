@@ -4,7 +4,7 @@ import { stageFromEnvironment } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 import { ConfigService } from '../services/configService';
-import { getDiscountProductRatePlanIds } from '../services/discounts';
+import { getExcludedProductRatePlanIds } from '../services/excludedRatePlans';
 import { ZuoraQuerierService } from '../services/zuoraQuerierService';
 import { queryZuora, type QueryZuoraDependencies } from './queryZuora';
 import type { FetchResultsState, QueryZuoraState } from './types';
@@ -21,7 +21,7 @@ const buildDependencies = async (): Promise<QueryZuoraDependencies> => {
 		partnerId: await configService.getPartnerId(),
 		getLastSuccessfulQueryTime: () =>
 			configService.getLastSuccessfulQueryTime(),
-		discountProductRatePlanIds: getDiscountProductRatePlanIds(zuoraCatalog),
+		excludedProductRatePlanIds: getExcludedProductRatePlanIds(zuoraCatalog),
 		postQuery: (request) => service.postQuery(request),
 	};
 };
