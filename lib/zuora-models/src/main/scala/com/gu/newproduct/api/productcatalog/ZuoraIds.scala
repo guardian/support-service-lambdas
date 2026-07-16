@@ -29,6 +29,8 @@ object ZuoraIds {
       annual: PlanAndCharge,
       annualV2: PlanAndCharges,
       student: PlanAndCharge,
+      taxExclusiveMonthly: PlanAndCharges,
+      taxExclusiveAnnual: PlanAndCharges,
   ) {
     val planAndChargeByApiPlanId: Map[PlanId, PlanAndCharges] = Map(
       MonthlySupporterPlus -> monthlyV2,
@@ -250,6 +252,16 @@ object ZuoraIds {
             productRatePlanId = ProductRatePlanId("8a129797980d634c019818808a4c7668"),
             productRatePlanChargeId = ProductRatePlanChargeId("8a129797980d634c019818808aef7672"),
           ),
+          taxExclusiveMonthly = PlanAndCharges(
+            productRatePlanId = ProductRatePlanId("8a1296cc9e981ec9019eab9092864ae0"),
+            productRatePlanChargeId = ProductRatePlanChargeId("8a1288599e9807af019eab9686c63ad0"),
+            contributionProductRatePlanChargeId = ProductRatePlanChargeId("8a1288599e9807af019eab996b4c3cba"),
+          ),
+          taxExclusiveAnnual = PlanAndCharges(
+            productRatePlanId = ProductRatePlanId("8a128e579e9807b1019eab92efee3f74"),
+            productRatePlanChargeId = ProductRatePlanChargeId("8a128e579e9807b1019eabb9260a6149"),
+            contributionProductRatePlanChargeId = ProductRatePlanChargeId("8a1288599e9807af019eabbc75735616"),
+          ),
         ),
         ContributionsZuoraIds(
           monthly = PlanAndCharge(
@@ -346,6 +358,16 @@ object ZuoraIds {
           student = PlanAndCharge(
             productRatePlanId = ProductRatePlanId("71a10c6269b981784c9817e1887c0000"),
             productRatePlanChargeId = ProductRatePlanChargeId("71a10c6269b981784c9817e188d60001"),
+          ),
+          taxExclusiveMonthly = PlanAndCharges(
+            productRatePlanId = ProductRatePlanId("7a825d4a79bb49ec9a36883cad075fde"),
+            productRatePlanChargeId = ProductRatePlanChargeId("9f2e630322be485286a27bbdac41f71a"),
+            contributionProductRatePlanChargeId = ProductRatePlanChargeId("e277d53d8b624e919ff60877725c5f01"),
+          ),
+          taxExclusiveAnnual = PlanAndCharges(
+            productRatePlanId = ProductRatePlanId("f59be1a754254cf7bff266358fa14e7b"),
+            productRatePlanChargeId = ProductRatePlanChargeId("c632489d85ab4e5284fddd38e82b8ae4"),
+            contributionProductRatePlanChargeId = ProductRatePlanChargeId("0582f3109d24425b843c890eaae5b595"),
           ),
         ),
         ContributionsZuoraIds(

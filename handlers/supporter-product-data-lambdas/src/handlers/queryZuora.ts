@@ -20,7 +20,7 @@ export type QueryZuoraDependencies = {
 	// This needs to be a function rather than a value because the dependencies
 	// are cached at the lambda level but we need the fresh value of this
 	getLastSuccessfulQueryTime: () => Promise<string>;
-	discountProductRatePlanIds: string[];
+	excludedProductRatePlanIds: string[];
 	postQuery: (request: BatchQueryRequest) => Promise<{ id: string }>;
 };
 
@@ -53,15 +53,15 @@ const buildBatchQueryRequest = async (
 		queryType,
 		incrementalTime,
 		partnerId: dependencies.partnerId,
-		discountProductRatePlanIdCount:
-			dependencies.discountProductRatePlanIds.length,
+		excludedProductRatePlanIdCount:
+			dependencies.excludedProductRatePlanIds.length,
 	});
 
 	const queries: ZoqlExportQuery[] = [
 		{
 			name: `${selectActiveRatePlansQueryName}-${incrementalTime}`,
 			query: buildSelectActiveRatePlansQuery(
-				dependencies.discountProductRatePlanIds,
+				dependencies.excludedProductRatePlanIds,
 			),
 			type: 'zoqlexport',
 		},
