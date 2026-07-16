@@ -811,6 +811,9 @@ importers:
       '@types/aws-lambda':
         specifier: ^8.10.147
         version: 8.10.161
+      tsx:
+        specifier: ^4.21.0
+        version: 4.22.4
 
   handlers/ticket-tailor-webhook:
     dependencies:

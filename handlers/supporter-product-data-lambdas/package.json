@@ -13,7 +13,8 @@
     "cdk:test": "pnpm --filter cdk test supporter-product-data-lambdas",
     "cdk:test-update": "pnpm --filter cdk test-update supporter-product-data-lambdas",
     "update-lambda": "../../update-lambda.sh \"supporter-product-data-lambdas\" supporterProductData-QueryZuora- supporterProductData-FetchResults- supporterProductData-AddToQueue- supporterProductData-ProcessItem-",
-    "update-stack": "../../update-stack.sh \"supporter-product-data-lambdas\""
+    "update-stack": "../../update-stack.sh \"supporter-product-data-lambdas\"",
+    "download-query-results": "tsx src/downloadQueryResultsCommand.ts"
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
@@ -36,6 +37,7 @@
     "supporter-product-data": "workspace:*"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.147"
+    "@types/aws-lambda": "^8.10.147",
+    "tsx": "^4.21.0"
   }
 }
