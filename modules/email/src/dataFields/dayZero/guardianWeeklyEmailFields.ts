@@ -31,6 +31,7 @@ export function buildGuardianWeeklyEmailFields({
 	isFixedTerm,
 	mandateId,
 	giftRecipient,
+	taxMode,
 }: {
 	today: Dayjs;
 	user: EmailUser;
@@ -42,6 +43,7 @@ export function buildGuardianWeeklyEmailFields({
 	isFixedTerm: boolean;
 	mandateId?: string;
 	giftRecipient?: EmailGiftRecipient;
+	taxMode: string | undefined | null;
 }): EmailMessageWithIdentityUserId {
 	const gifteeFields = giftRecipient
 		? {
@@ -68,6 +70,7 @@ export function buildGuardianWeeklyEmailFields({
 		paymentSchedule: paymentSchedule,
 		isFixedTerm: isFixedTerm,
 		mandateId: mandateId,
+		taxMode,
 	});
 	const productFields = {
 		...secondPaymentFields,

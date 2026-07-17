@@ -17,6 +17,7 @@ export function buildGuardianAdLiteEmailFields({
 	paymentMethod,
 	paymentSchedule,
 	mandateId,
+	taxMode,
 }: {
 	today: Dayjs;
 	user: EmailUser;
@@ -25,6 +26,7 @@ export function buildGuardianAdLiteEmailFields({
 	paymentMethod: EmailPaymentMethod;
 	paymentSchedule: EmailPaymentSchedule;
 	mandateId?: string;
+	taxMode: string | undefined | null;
 }): EmailMessageWithIdentityUserId {
 	const nonDeliveryEmailFields = buildNonDeliveryEmailFields({
 		today: today,
@@ -36,6 +38,7 @@ export function buildGuardianAdLiteEmailFields({
 		paymentSchedule,
 		mandateId: mandateId,
 		isFixedTerm: false, // Guardian Ad-Lite has no fixed term rate plans
+		taxMode,
 	});
 
 	return buildEmailFields(

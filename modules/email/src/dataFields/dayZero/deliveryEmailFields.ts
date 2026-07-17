@@ -30,6 +30,7 @@ export function buildDeliveryEmailFields({
 	paymentSchedule,
 	isFixedTerm,
 	mandateId,
+	taxMode,
 }: {
 	today: Dayjs;
 	user: EmailUser;
@@ -40,6 +41,7 @@ export function buildDeliveryEmailFields({
 	paymentSchedule: EmailPaymentSchedule;
 	isFixedTerm: boolean;
 	mandateId?: string;
+	taxMode: string | undefined | null;
 }): DeliveryEmailFields {
 	const nonDeliveryFields: NonDeliveryEmailFields = buildNonDeliveryEmailFields(
 		{
@@ -52,6 +54,7 @@ export function buildDeliveryEmailFields({
 			paymentSchedule: paymentSchedule,
 			isFixedTerm: isFixedTerm,
 			mandateId: mandateId,
+			taxMode,
 		},
 	);
 

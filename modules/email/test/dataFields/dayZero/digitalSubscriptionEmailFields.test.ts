@@ -19,10 +19,18 @@ describe('digitalSubscriptionEmailFields', () => {
 			billingPeriod: 'Annual',
 			subscriptionNumber: subscriptionNumber,
 			paymentSchedule: {
-				payments: [{ date: new Date('2025-11-11'), amount: 119.9 }],
+				payments: [
+					{
+						date: new Date('2025-11-11'),
+						amount: 119.9,
+						amountWithoutTax: 110,
+						taxAmount: 9.9,
+					},
+				],
 			},
 			paymentMethod: directDebitPaymentMethod,
 			mandateId: mandateId,
+			taxMode: 'TaxInclusive',
 		});
 		const expected = {
 			To: {

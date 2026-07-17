@@ -18,11 +18,22 @@ describe('guardianAdLiteEmailFields', () => {
 			subscriptionNumber: subscriptionNumber,
 			paymentSchedule: {
 				payments: [
-					{ date: new Date('2025-11-11'), amount: 10 },
-					{ date: new Date('2025-12-11'), amount: 10 },
+					{
+						date: new Date('2025-11-11'),
+						amount: 10,
+						amountWithoutTax: 8,
+						taxAmount: 2,
+					},
+					{
+						date: new Date('2025-12-11'),
+						amount: 10,
+						amountWithoutTax: 8,
+						taxAmount: 2,
+					},
 				],
 			},
 			paymentMethod: creditCardPaymentMethod,
+			taxMode: 'TaxInclusive',
 		});
 		const expected = {
 			To: {

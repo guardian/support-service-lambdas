@@ -19,6 +19,7 @@ export function buildDigitalSubscriptionEmailFields({
 	paymentSchedule,
 	paymentMethod,
 	mandateId,
+	taxMode,
 }: {
 	today: Dayjs;
 	user: EmailUser;
@@ -28,6 +29,7 @@ export function buildDigitalSubscriptionEmailFields({
 	paymentSchedule: EmailPaymentSchedule;
 	paymentMethod: EmailPaymentMethod;
 	mandateId?: string;
+	taxMode: string | undefined | null;
 }): EmailMessageWithIdentityUserId {
 	const nonDeliveryEmailFields = buildNonDeliveryEmailFields({
 		today: today,
@@ -39,6 +41,7 @@ export function buildDigitalSubscriptionEmailFields({
 		paymentSchedule,
 		mandateId,
 		isFixedTerm: false, // There are no fixed term Digital subscription rate plans
+		taxMode,
 	});
 
 	const productFields = {

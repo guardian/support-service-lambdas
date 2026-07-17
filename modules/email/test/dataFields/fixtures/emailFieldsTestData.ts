@@ -61,10 +61,14 @@ export const paymentSchedule = {
 		{
 			date: dayjs('2025-12-11').toDate(),
 			amount: 10.0,
+			amountWithoutTax: 8.0,
+			taxAmount: 2.0,
 		},
 		{
 			date: dayjs('2026-01-11').toDate(),
 			amount: 12.0,
+			amountWithoutTax: 8.0,
+			taxAmount: 2.0,
 		},
 	],
 };
@@ -74,6 +78,8 @@ export const fixedTermPaymentSchedule = {
 		{
 			date: dayjs('2025-12-11').toDate(),
 			amount: 9,
+			amountWithoutTax: 8.0,
+			taxAmount: 1.0,
 		},
 	],
 };
@@ -83,10 +89,14 @@ export const paperPaymentSchedule = {
 		{
 			date: dayjs('2025-11-18').toDate(),
 			amount: 10.0,
+			amountWithoutTax: 8,
+			taxAmount: 2,
 		},
 		{
 			date: dayjs('2025-12-18').toDate(),
 			amount: 10.0,
+			amountWithoutTax: 8,
+			taxAmount: 2,
 		},
 	],
 };

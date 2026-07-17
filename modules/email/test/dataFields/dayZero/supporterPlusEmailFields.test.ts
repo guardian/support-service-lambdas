@@ -26,6 +26,7 @@ describe('Supporter plus thank you email fields', () => {
 			paymentMethod: directDebitPaymentMethod,
 			isFixedTerm: false,
 			mandateId: mandateId,
+			taxMode: 'TaxInclusive',
 		});
 
 		const expected = {
@@ -80,6 +81,7 @@ describe('Supporter plus thank you email fields', () => {
 			paymentSchedule: paymentSchedule,
 			paymentMethod: creditCardPaymentMethod,
 			isFixedTerm: false,
+			taxMode: 'TaxInclusive',
 		});
 		const expected = {
 			To: {
@@ -116,6 +118,7 @@ describe('Supporter plus thank you email fields', () => {
 			paymentMethod: directDebitPaymentMethod,
 			isFixedTerm: true,
 			mandateId: '65HK26E',
+			taxMode: 'TaxInclusive',
 		});
 
 		const expected = {

@@ -30,6 +30,7 @@ export function buildPaperEmailFields({
 	mandateId,
 	productInformation,
 	deliveryAgentDetails,
+	taxMode,
 }: {
 	today: Dayjs;
 	user: EmailUser;
@@ -40,6 +41,7 @@ export function buildPaperEmailFields({
 	mandateId?: string;
 	productInformation: PaperProductPurchase;
 	deliveryAgentDetails?: EmailDeliveryAgentDetails;
+	taxMode: string | undefined | null;
 }): EmailMessageWithIdentityUserId {
 	const deliveryAgentFields =
 		productInformation.product === 'NationalDelivery' && deliveryAgentDetails
@@ -65,6 +67,7 @@ export function buildPaperEmailFields({
 		paymentSchedule: paymentSchedule,
 		isFixedTerm: false, // There are no fixed term paper rate plans
 		mandateId: mandateId,
+		taxMode,
 	});
 	const productFields = {
 		package: productInformation.ratePlan,

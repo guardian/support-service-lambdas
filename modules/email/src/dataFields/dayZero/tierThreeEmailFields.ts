@@ -26,6 +26,7 @@ export function buildTierThreeEmailFields({
 	paymentSchedule,
 	paymentMethod,
 	mandateId,
+	taxMode,
 }: {
 	today: Dayjs;
 	user: EmailUser;
@@ -35,6 +36,7 @@ export function buildTierThreeEmailFields({
 	paymentSchedule: EmailPaymentSchedule;
 	paymentMethod: EmailPaymentMethod;
 	mandateId?: string;
+	taxMode: string | undefined | null;
 }): EmailMessageWithIdentityUserId {
 	const deliveryFields = buildDeliveryEmailFields({
 		today: today,
@@ -46,6 +48,7 @@ export function buildTierThreeEmailFields({
 		paymentSchedule: paymentSchedule,
 		isFixedTerm: false,
 		mandateId: mandateId,
+		taxMode,
 	});
 	const additionalFields: Record<string, string> = {
 		billing_period: billingPeriod.toLowerCase(),

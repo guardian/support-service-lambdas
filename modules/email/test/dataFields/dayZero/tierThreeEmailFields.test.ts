@@ -23,6 +23,7 @@ describe('Tier three thank you email fields', () => {
 			paymentSchedule: paperPaymentSchedule,
 			paymentMethod: creditCardPaymentMethod,
 			mandateId: undefined,
+			taxMode: 'TaxInclusive',
 		});
 
 		const expected = {
