@@ -67,7 +67,7 @@ export const paymentSchedule = {
 		{
 			date: dayjs('2026-01-11').toDate(),
 			amount: 12.0,
-			amountWithoutTax: 8.0,
+			amountWithoutTax: 10.0,
 			taxAmount: 2.0,
 		},
 	],
