@@ -14,6 +14,7 @@ shift
 # path, so they work even when ROOT_DIR is a different repo.
 BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR"
+LOG_FILE="$(cd "$BIN_DIR/.." && pwd -P)/.last.log"
 
 PER_PACKAGE_SCRIPTS="type-check lint lint-fix check-formatting fix-formatting test"
 ROOT_SCRIPTS="snapshot:update install"
@@ -123,10 +124,9 @@ if [ "$GREP_INVERT" -eq 1 ] && [ -z "$GREP_PATTERN" ]; then
 	exit 1
 fi
 
-LOG_FILE="$BIN_DIR/../.last.log"
 STREAM_CAP_LINES=100
 DEFAULT_LAST_CAP_LINES=200
-TRUNCATION_NOTICE="[showing first $STREAM_CAP_LINES lines — full output in agent-tools/.last.log — use ./agent-tool last or read_file agent-tools/.last.log to see everything]"
+TRUNCATION_NOTICE="[showing first $STREAM_CAP_LINES lines — full output in $LOG_FILE — use ./agent-tool last with --grep, --last or --all]"
 
 # Applies --grep/--invert/--context to stdin, or passes it through unchanged.
 # grep's exit code distinguishes "no match" (1, an expected outcome - not a
