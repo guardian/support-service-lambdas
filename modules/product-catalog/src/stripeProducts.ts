@@ -92,6 +92,7 @@ export const stripeProductsSchema = `GuardianPatron: z.object({
 				}),
 			}),
 			billingPeriod: z.literal('Month'),
+			taxMode: z.literal('TaxInclusive'),
 		}),
 	}),
 }),
@@ -112,6 +113,7 @@ OneTimeContribution: z.object({
 				}),
 			}),
 			billingPeriod: z.literal('OneTime'),
+			taxMode: z.literal('TaxInclusive'),
 		}),
 	}),
 })`;
