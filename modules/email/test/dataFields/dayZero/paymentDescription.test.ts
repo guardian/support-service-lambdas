@@ -113,7 +113,7 @@ describe('paymentDescription.describe', () => {
 			date: addMonths(referenceDate, 3),
 			amount: 11.99,
 			taxAmount: 1.99,
-			amountWithoutTax: 9.0,
+			amountWithoutTax: 10.0,
 		};
 		const scheduleList: Payment[] = [
 			...payments(firstDiscountedPayment, [1, 2]),

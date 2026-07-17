@@ -75,8 +75,13 @@ function monthsBetween(start: Date, end: Date): number {
 	return endD.diff(startD, 'month');
 }
 
-function getRelevantAmountFromPayment(taxMode: string | undefined | null, payment: Payment) {
-	return taxMode === "TaxExclusive" ? payment.amountWithoutTax : payment.amount;
+function getRelevantAmountFromPayment(
+	taxMode: string | undefined | null,
+	payment: Payment,
+) {
+	return taxMode === 'TaxExclusive'
+		? payment.amountWithoutTax
+		: payment.amountWithoutTax + payment.taxAmount;
 }
 
 export function describePayments(
@@ -86,11 +91,15 @@ export function describePayments(
 	isFixedTerm: boolean,
 	taxMode: string | undefined | null,
 ): string {
-	const initialPrice = getRelevantAmountFromPayment(taxMode, firstPayment(paymentSchedule));
+	const initialPrice = getRelevantAmountFromPayment(
+		taxMode,
+		firstPayment(paymentSchedule),
+	);
 
 	const [paymentsWithInitialPrice, paymentsWithDifferentPrice] = partition(
 		paymentSchedule.payments,
-		(payment) => getRelevantAmountFromPayment(taxMode, payment) === initialPrice,
+		(payment) =>
+			getRelevantAmountFromPayment(taxMode, payment) === initialPrice,
 	);
 
 	const noun = billingPeriodNoun(billingPeriod);
@@ -194,6 +203,9 @@ function descriptionWithMultipleIntroductoryPeriods(
 		billingPeriod,
 	)} for ${timespan}, then ${priceWithCurrency(
 		currency,
-		getRelevantAmountFromPayment(taxMode, earliestPayment(paymentsWithDifferentPrice)),
+		getRelevantAmountFromPayment(
+			taxMode,
+			earliestPayment(paymentsWithDifferentPrice),
+		),
 	)} every ${billingPeriodNoun(billingPeriod)}`;
 }
