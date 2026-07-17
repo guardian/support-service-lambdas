@@ -23,13 +23,16 @@ section(s) there before considering the change done.
   requested script against a small allowlist, resolves packages (explicit paths or
   `--changed`), and runs a single `pnpm`/`git` invocation per command, redirecting its full
   output to the per-repo log file before applying any display filtering/capping.
-- `agent-tools/bin/*.sh` are small, focused helper scripts:
+- `agent-tools/bin/` contains the main script and its internal helpers:
+  - `agent-tool.sh` - the main logic, called by the root `./agent-tool` wrapper
   - `changed-packages.sh` - prints git-changed workspace packages (reads `pnpm-workspace.yaml`)
-  - `list-packages.sh` - prints every known workspace package
-  - `run-changed.sh` - developer convenience: run a script across changed packages (+ dependents),
-    no allowlist. Also exposed as the root pnpm script `run:changed`.
-  - `git-rm.sh` / `git-mv.sh` - path-safe file operations, exposed as root pnpm scripts
+  - `run-changed.sh` - runs a script across changed packages (+ dependents); also exposed as
+    the root pnpm script `run:changed` for developers to call directly
   - `lib.sh` - shared helpers sourced by the scripts above
+- `agent-tools/cmd/` contains the user-facing command scripts delegated to by `./agent-tool`:
+  - `list-packages.sh` - prints every known workspace package
+  - `git-rm.sh` / `git-mv.sh` - path-safe file operations
+  - `git-show.sh` - shows a file's content at a given git ref, with merge-base resolution for `main`
 
 ## Usage
 
@@ -54,9 +57,9 @@ Packages: `handlers/<name>`, `modules/<name>`, `cdk`, `buildcheck`
 
 `--changed` resolves git-modified files to their containing workspace packages and includes
 their downstream dependents (via pnpm's `...{path}` filter syntax), so a change to a shared
-module also re-checks everything that depends on it. It delegates to the root pnpm script
-`run:changed`, which developers can also call directly (`pnpm run:changed <script>`) without
-going through `./agent-tool` or its allowlist.
+module also re-checks everything that depends on it. The same logic is also available as the
+root pnpm script `run:changed` (`pnpm run:changed <script>`) for developers who prefer to call
+it directly.
 
 ## Safety note
 
@@ -80,7 +83,7 @@ not streaming). Default when `--tail` is explicit is the N you specify; without 
 
 **`--grep`/`--invert`/`--context`**: always runs to completion (grep needs full input to compute
 context windows). After the command finishes, filters the log and shows the result capped to
-the last 200 lines (or `--tail N` / `--all`).
+the first 100 lines (or `--tail N` / `--all`).
 
 The full output is always captured to `agent-tools/.last.log` (gitignored, always overwritten),
 regardless of which display mode was used. Use `./agent-tool last` to retrieve it with any

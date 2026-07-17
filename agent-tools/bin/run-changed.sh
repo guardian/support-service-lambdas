@@ -4,10 +4,6 @@
 # no allowlist - contrast with ./agent-tool, which does apply an allowlist for the AI.
 #
 # Usage: run-changed.sh <repo-root> <script> [extra args]
-#
-# Note: intentionally does not use `set -u` - macOS ships bash 3.2, which has a
-# long-standing bug where expanding an empty array under `set -u` (e.g. no
-# changed packages, no extra args) throws "unbound variable".
 
 set -eo pipefail
 

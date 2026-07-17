@@ -39,7 +39,7 @@ Flags:
   --grep PATTERN   only show lines matching the regex
   --invert         show lines NOT matching --grep (requires --grep)
   --context N      lines of context around --grep matches (requires --grep)
-  --tail N         cap displayed output to the last N lines (default 200)
+  --tail N         cap displayed output to the last N lines
   --all            show the full output, uncapped
 
 Default behaviour (no --grep/--tail/--all): output streams live, stopping after 100 lines with

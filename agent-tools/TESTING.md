@@ -77,7 +77,7 @@ The result is unambiguous — a display glitch never causes a genuine pass to ap
 | 4.2 | `$AGENT_TOOL <any command producing >100 lines>` | First 100 lines stream live, then the truncation notice: `[showing first 100 lines — full output in <abs-path>/.last.log — use ./agent-tool last or read_file <abs-path>/.last.log to see everything]`, then the OK/FAIL line |
 | 4.3 | `$AGENT_TOOL <long command> --all` | Full output streams live, no cap, no truncation notice |
 | 4.4 | `$AGENT_TOOL <long command> --tail 5` | Runs to completion (buffered), then shows the **last** 5 lines |
-| 4.5 | `$AGENT_TOOL <command> --grep PATTERN` | Runs to completion (buffered), filters to matching lines, caps at 200; no streaming |
+| 4.5 | `$AGENT_TOOL <command> --grep PATTERN` | Runs to completion (buffered), filters to matching lines, caps at 100; no streaming |
 | 4.6 | `$AGENT_TOOL git-status --grep "^ M " --invert` | All lines NOT starting with ` M ` |
 | 4.7 | `$AGENT_TOOL git-status --grep "^ M " --context 1` | Matching lines plus 1 line of context |
 | 4.8 | Filter-then-cap order for `--grep`: `$AGENT_TOOL git-diff-stat --grep "package.json" --tail 3` | Filters first, *then* takes the last 3 of those - not the last 3 raw lines then filtered |
@@ -148,7 +148,7 @@ during implementation showed up here first) - test it directly, not just via `--
 | 10.2 | Modify a file in `modules/logger/src/`, then run 10.1 | Prints `modules/logger` (only) |
 | 10.3 | Modify files in two different packages, then run 10.1 | Prints both package paths, one per line, sorted, deduplicated |
 | 10.4 | Modify a file directly in `modules/` (not inside a package subfolder, e.g. `modules/errors.ts`) | Prints nothing for that file - it doesn't belong to any package (matches `list-packages`' package.json-presence rule) |
-| 10.5 | `bash agent-tools/bin/list-packages.sh .` | Same package-discovery logic, unconditional (not git-dependent) - cross-check its output is a superset consistent with 10.1-10.4 |
+| 10.5 | `bash agent-tools/cmd/list-packages.sh .` | Same package-discovery logic, unconditional (not git-dependent) - cross-check its output is a superset consistent with 10.1-10.4 |
 
 ## 11. `git-show`
 
