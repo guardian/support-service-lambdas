@@ -29,6 +29,7 @@ import {
 	deleteSecondaryUserEndpoint,
 	deleteSecondaryUserPathSchema,
 } from './deleteSecondaryUserEndpoint';
+import { getInvitationEndpoint } from './getInvitationEndpoint';
 import { InvitationRepository } from './invitationRepository';
 import {
 	listInvitationsEndpoint,
@@ -82,6 +83,13 @@ export const handler: Handler = Router([
 				},
 				({ body }) => body.subscriptionName,
 			),
+		),
+	},
+	{
+		httpMethod: 'GET',
+		path: '/invitation/{invitationCode}',
+		handler: withPathParser(deleteInvitationPathSchema, async (_event, path) =>
+			getInvitationEndpoint(invitationRepository)(path),
 		),
 	},
 	{
