@@ -34,8 +34,11 @@ export type EmailPaymentMethod =
 	  };
 
 export type Payment = {
-	date: Date; amount: number; amountWithoutTax: number; taxAmount: number;
-}
+	date: Date;
+	amount: number;
+	amountWithoutTax: number;
+	taxAmount: number;
+};
 
 export type EmailPaymentSchedule = {
 	payments: Payment[];
