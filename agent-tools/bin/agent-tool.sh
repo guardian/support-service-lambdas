@@ -120,7 +120,6 @@ if [ "$GREP_INVERT" -eq 1 ] && [ -z "$GREP_PATTERN" ]; then
 fi
 
 STREAM_CAP_LINES=100
-DEFAULT_LAST_CAP_LINES=200
 TRUNCATION_NOTICE="[showing first $STREAM_CAP_LINES lines — full output in $LOG_FILE — use ./agent-tool last with --grep, --last or --all]"
 
 run_grep_filter() {
@@ -158,37 +157,32 @@ stream_with_cap() {
 	done
 }
 
-# Renders a log file for display: apply --grep/--invert/--context filtering
-# first, then cap to the last N lines (--tail, default 200) unless --all was
-# given. Used when --grep or --tail is set (post-run, not streaming).
+# Applies grep filtering and the appropriate output limiter to stdin.
+# Used both by run_pipeline (piped from tee) and by the 'last' command
+# (reading from the log file directly).
 #
-# If the filter or the cap itself fails (e.g. a non-numeric --tail/--context
-# value), a clear message is printed rather than the raw tool error, and
-# rather than letting `set -e` silently abort the script before the
-# OK/FAIL summary - the underlying command's exit code is unaffected either
-# way, since it was already captured by run_pipeline before display_log runs.
-display_log() {
-	local log_file="$1"
+#   --all:    pass everything through (after grep filter)
+#   --tail N: grep filter then tail -n N (tail buffers until input closes)
+#   default:  grep filter then stream_with_cap (live, capped at STREAM_CAP_LINES)
+display_stream() {
 	if [ "$SHOW_ALL" -eq 1 ]; then
-		if ! run_grep_filter <"$log_file"; then
-			echo "WARN output filtering failed (see error above, e.g. an invalid --context value) - this does not affect the OK/FAIL result below"
-		fi
+		run_grep_filter
+	elif [ -n "$TAIL_LINES" ]; then
+		run_grep_filter | tail -n "$TAIL_LINES"
 	else
-		if ! run_grep_filter <"$log_file" | tail -n "${TAIL_LINES:-$DEFAULT_LAST_CAP_LINES}"; then
-			echo "WARN output filtering/capping failed (see error above, e.g. an invalid --tail/--context value) - this does not affect the OK/FAIL result below"
-		fi
+		run_grep_filter | stream_with_cap
 	fi
 }
 
-# Runs `"$exe" "$@"`, writes full output to the per-repo log, and displays it.
+# Runs `"$exe" "$@"`, tees full output to the per-repo log, and pipes through
+# display_stream for live display. Always exits with the underlying command's
+# exit code.
 #
-# Display mode depends on flags:
-#   default (no flags): stream live via tee, cap at STREAM_CAP_LINES lines,
-#                       print truncation notice if longer
-#   --all:              stream live via tee, uncapped
-#   --tail N or --grep: run to completion, then display_log (post-run, filtered/capped)
-#
-# Always exits with the underlying command's exit code.
+# Display mode depends on flags (see display_stream):
+#   default (no flags): stream live, capped at STREAM_CAP_LINES lines
+#   --all:              stream live, uncapped
+#   --grep PATTERN:     filter through grep live as output arrives
+#   --tail N:           tail buffers internally, shows last N lines on completion
 run_pipeline() {
 	local description="$1"
 	local exe="$2"
@@ -196,26 +190,12 @@ run_pipeline() {
 	local start=$SECONDS
 	local cmd_exit
 	set +o errexit
+	set -o pipefail
 
-	if [ -z "$GREP_PATTERN" ] && [ -z "$TAIL_LINES" ]; then
-		# Streaming mode: tee full output to log while displaying live.
-		# set -o pipefail so a tee/stream failure is visible, but the
-		# important exit code is pnpm's, captured from PIPESTATUS[0].
-		set -o pipefail
-		if [ "$SHOW_ALL" -eq 1 ]; then
-			"$exe" "$@" 2>&1 | tee "$LOG_FILE"
-		else
-			"$exe" "$@" 2>&1 | tee "$LOG_FILE" | stream_with_cap
-		fi
-		cmd_exit=${PIPESTATUS[0]}
-		set +o pipefail
-	else
-		# Buffered mode: capture everything, then display_log filters/caps.
-		"$exe" "$@" >"$LOG_FILE" 2>&1
-		cmd_exit=$?
-		display_log "$LOG_FILE"
-	fi
+	"$exe" "$@" 2>&1 | tee "$LOG_FILE" | display_stream
+	cmd_exit=${PIPESTATUS[0]}
 
+	set +o pipefail
 	set -o errexit
 	local duration=$((SECONDS - start))
 	if [ "$cmd_exit" -eq 0 ]; then
@@ -232,7 +212,9 @@ last)
 		echo "FAIL no previous command output recorded for this repository"
 		exit 1
 	fi
-	display_log "$LOG_FILE"
+	# Default to showing all output for 'last' unless --tail was explicitly requested
+	[ "$SHOW_ALL" -eq 0 ] && [ -z "$TAIL_LINES" ] && SHOW_ALL=1
+	display_stream <"$LOG_FILE"
 	exit 0
 	;;
 
