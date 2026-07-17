@@ -22,8 +22,8 @@ export type StripeProduct = {
 			billingPeriod: 'Month' | 'OneTime';
 			termType: 'Recurring' | 'FixedTerm';
 			termLengthInMonths: number;
-			// This needs to be present to match the rest of the catalog, but is always null
-			taxMode: null;
+			// Stripe products are always TaxInclusive
+			taxMode: 'TaxInclusive';
 		}
 	>;
 };
@@ -48,7 +48,7 @@ export const stripeProducts: Partial<
 				billingPeriod: 'Month',
 				termType: 'Recurring',
 				termLengthInMonths: 12,
-				taxMode: null,
+				taxMode: 'TaxInclusive',
 			},
 		},
 	},
@@ -69,7 +69,7 @@ export const stripeProducts: Partial<
 				billingPeriod: 'OneTime',
 				termType: 'FixedTerm',
 				termLengthInMonths: 0,
-				taxMode: null,
+				taxMode: 'TaxInclusive',
 			},
 		},
 	},
