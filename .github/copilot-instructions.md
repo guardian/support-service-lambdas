@@ -50,8 +50,9 @@ Last choice: arbitrary/ad hoc shell commmands
 
 Always run type-check, fix-formatting and lint-fix as well as all relevant tests after making changes to Typescript code.
 
-`./agent-tool` is the AI's single approved entry point for repo-safe checks, git inspection,
-and file operations - never call `pnpm`, `git`, `rm`, `tsc`, `eslint`, `jest`, etc. directly.
+### agent-tool
+
+Always use `agent-tool` in place of commands like `pnpm`, `git`, `rm`, `tsc`, `eslint`, `jest`, `grep`, `tail` if it supports what's necessary.
 Call it by absolute path rather than calling `cd` first, e.g.
 `/Users/john_duffell/code/support-service-lambdas/agent-tool <command>`.
 
@@ -65,9 +66,8 @@ tests, git inspection) - do not keep using raw `pnpm`/`git` for those out of hab
 Usage:
 
 ```
-./agent-tool <script> <package...> [--grep PATTERN] [--invert] [--context N]
-./agent-tool <script> --changed [pattern] [--grep PATTERN] [--invert] [--context N]
-./agent-tool last [--tail N] [--all] [--grep PATTERN] [--invert] [--context N]
+./agent-tool <script> <package...>
+./agent-tool <script> --changed [pattern]
 ./agent-tool list-packages
 ./agent-tool snapshot:update
 ./agent-tool install
@@ -77,6 +77,7 @@ Usage:
 ./agent-tool git-status-target <package>
 ./agent-tool git-diff / git-diff-staged / git-diff-stat / git-diff-staged-stat
 ./agent-tool git-diff-target <package> / git-diff-target-stat <package>
+./agent-tool git-show <ref> <file>
 ```
 
 Scripts: `type-check`, `lint`, `lint-fix`, `check-formatting`, `fix-formatting`, `test`
@@ -85,33 +86,32 @@ Always scope to the minimum set of affected packages under `handlers/*`, `module
 
 Package arguments must always be given as workspace paths, e.g. `handlers/product-switch-api` or `modules/aws` rather than `product-switch-api`.
 
-Output filtering flags:
+Optional output filtering flags supported by all commands:
 
 - `--grep PATTERN` to show only lines matching a regex pattern (buffers output, runs to completion first)
 - `--invert` to show lines NOT matching `--grep` (requires `--grep`)
 - `--context N` to keep N lines of context around each `--grep` match (requires `--grep`)
 - `--tail N` to cap displayed output to the last N lines after filtering (buffers output, runs to completion first)
 - `--all` to show the full output uncapped, streamed live
-- `./agent-tool last` to retrieve the most recently recorded full output for this repository, re-filtered/re-capped by the same flags — every run's full combined output is always captured to `agent-tools/.last.log` (gitignored, in the workspace, always overwritten), regardless of what was displayed
+- `./agent-tool last [--tail N] [--all] [--grep PATTERN] [--invert] [--context N]` to retrieve the most recently recorded full output for this repository, re-filtered/re-capped by the same flags — every run's full combined output is always captured to `agent-tools/.last.log` (gitignored, in the workspace, always overwritten), regardless of what was displayed
 
 Default behaviour (no `--grep`/`--tail`/`--all`): output streams live, stopping after 100 lines with a truncation notice. If truncated, use `./agent-tool last --all` or `read_file agent-tools/.last.log` to see the full output — do not use shell commands to access the file directly.
 
 Recommended order (use the first applicable scoped command):
 
 1. `./agent-tool list-packages` if the package scope is unclear
-2. `./agent-tool git-diff-stat` or `./agent-tool git-diff-target-stat <package>`
-3. `./agent-tool fix-formatting --changed` / `./agent-tool lint-fix --changed` / `./agent-tool type-check --changed` (run all three after making changes)
-4. `./agent-tool test --changed` (or `./agent-tool test <packages...> [pattern]`) when tests are needed
+1. `./agent-tool git-diff-stat` or `./agent-tool git-diff-target-stat <package>`
+1. `./agent-tool fix-formatting --changed` / `./agent-tool lint-fix --changed` / `./agent-tool type-check --changed` (run all three after making changes)
+1. `./agent-tool test --changed` (or `./agent-tool test <packages...> [pattern]`) when tests are needed
    - The optional pattern is a Jest path filter, e.g. `./agent-tool test handlers/product-switch-api test/changePlan/action/pendingAmendments.test.ts`
-5. `./agent-tool git-diff` or `./agent-tool git-diff-target <package>` when full diff detail is needed; `./agent-tool git-status-target <package>` for a status scoped to one package
-6. `./agent-tool git-rm <file>` to delete a tracked file (staged automatically); `./agent-tool git-mv <source> <destination>` to rename/move one
-   - Both commands validate the path(s) are inside the repository — never use `rm` or `git rm` directly
-7. `./agent-tool snapshot:update` when buildcheck-managed snapshots are expected
-8. `./agent-tool install` when dependencies or lockfiles need updating
+1. `./agent-tool git-diff` or `./agent-tool git-diff-target <package>` when full diff detail is needed; `./agent-tool git-status-target <package>` for a status scoped to one package
+1. `./agent-tool git-show <ref> <file>` shows a file's content at a given ref; the special ref `main` resolves to `git merge-base HEAD origin/main` (the state of the file on main before any of your branch's changes)
+1. `./agent-tool git-rm <file>` to delete a tracked file (staged automatically); `./agent-tool git-mv <source> <destination>` to rename/move one
+1. `./agent-tool snapshot:update` when buildcheck-managed snapshots are expected
+1. `./agent-tool install` when dependencies or lockfiles need updating
 
 `--changed` resolves the changed packages from git and also runs checks on their downstream dependents via pnpm's dependency graph, catching breakage in consumers of a changed module. Prefer it over explicit package names for verification commands.
 
 `./agent-tool` exits with the underlying command's exit code, captured before any display filtering/capping - a non-zero result always means the command genuinely failed.
 
-If `agent-tool` is missing a safer or more efficient command, suggest adding it (as a small script under `agent-tools/bin/`) rather than working around it with ad-hoc shell commands.
-
+When summarising changes made, if ad-hoc shell commands were needed, suggest adding suitable commands to `agent-tool` for future use.

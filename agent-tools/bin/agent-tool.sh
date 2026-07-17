@@ -34,6 +34,7 @@ Usage:
   ./agent-tool git-status-target <package>
   ./agent-tool git-diff / git-diff-staged / git-diff-stat / git-diff-staged-stat
   ./agent-tool git-diff-target <package> / git-diff-target-stat <package>
+  ./agent-tool git-show <ref> <file>
 
 Scripts:  type-check lint lint-fix check-formatting fix-formatting test
 Packages: handlers/<name>, modules/<name>, cdk, buildcheck
@@ -317,6 +318,14 @@ git-diff-target-stat)
 		exit 1
 	}
 	run_pipeline "git-diff-target-stat ${POSITIONALS[0]}" git --no-pager diff --stat -- "${POSITIONALS[0]}"
+	;;
+
+git-show)
+	[ "${#POSITIONALS[@]}" -eq 2 ] || {
+		echo "FAIL git-show requires exactly two arguments: <ref> <file>"
+		exit 1
+	}
+	run_pipeline "git-show ${POSITIONALS[0]} ${POSITIONALS[1]}" bash "$BIN_DIR/git-show.sh" "$ROOT_DIR" "${POSITIONALS[0]}" "${POSITIONALS[1]}"
 	;;
 
 *)

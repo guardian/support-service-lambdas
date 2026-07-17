@@ -46,6 +46,7 @@ section(s) there before considering the change done.
 ./agent-tool git-status-target <package>
 ./agent-tool git-diff / git-diff-staged / git-diff-stat / git-diff-staged-stat
 ./agent-tool git-diff-target <package> / git-diff-target-stat <package>
+./agent-tool git-show <ref> <file>
 ```
 
 Scripts: `type-check`, `lint`, `lint-fix`, `check-formatting`, `fix-formatting`, `test`
@@ -107,6 +108,12 @@ failed, never an artifact of the display step.
 
 `git-rm`/`git-mv` canonicalise and validate paths before acting - both reject any path that
 escapes the repository root. Never use `rm`, `git rm`, or `git mv` directly.
+
+`git-show <ref> <file>` shows a file's content at a given ref. The special ref `main` resolves
+via `git merge-base HEAD origin/main` (falling back to local `main`) — this gives the state of
+the file at the point main was last merged into the current branch, unaffected by any changes
+made in the current branch. Accepts repo-relative or absolute paths; rejects paths outside the
+repository root. This is an `agent-tool` subcommand, not a raw `git show` invocation.
 
 ## How to test
 
