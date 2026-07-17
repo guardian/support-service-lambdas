@@ -8,6 +8,7 @@ import {
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { z } from 'zod';
 import { getMaybeSingleOrThrow } from '@modules/arrayFunctions';
+import { cancelledBySchema } from '@modules/multiple-account/cancelledBySchema';
 import type { Stage } from '@modules/stage';
 
 export const invitationRecordSchema = z.object({
@@ -18,6 +19,7 @@ export const invitationRecordSchema = z.object({
 	secondaryIdentityId: z.string(),
 	invitedDate: z.string(),
 	expiryDate: z.number(),
+	cancelledBy: cancelledBySchema.optional(),
 });
 
 export type InvitationRecord = z.infer<typeof invitationRecordSchema>;
