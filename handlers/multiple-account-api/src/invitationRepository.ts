@@ -4,12 +4,24 @@ import {
 	PutItemCommand,
 	QueryCommand,
 	type TransactWriteItem,
+	UpdateItemCommand,
 } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
+import dayjs from 'dayjs';
 import { z } from 'zod';
 import { getMaybeSingleOrThrow } from '@modules/arrayFunctions';
-import { cancelledBySchema } from '@modules/multiple-account/cancelledBySchema';
+import {
+	type CancelledBy,
+	cancelledBySchema,
+} from '@modules/multiple-account/cancelledBySchema';
 import type { Stage } from '@modules/stage';
+
+// When an invitation is cancelled/rejected we keep the
+// record for a short period (rather than hard deleting it) so we can tell who
+// cancelled it, then let DynamoDB's TTL (expiryDate) remove it automatically.
+export function invitationCancellationTTL(): number {
+	return dayjs().add(2, 'weeks').unix();
+}
 
 export const invitationRecordSchema = z.object({
 	subscriptionName: z.string(),
@@ -96,6 +108,28 @@ export class InvitationRepository {
 				Key: {
 					subscriptionName: { S: subscriptionName },
 					invitationCode: { S: invitationCode },
+				},
+			}),
+		);
+	}
+
+	async softDelete(
+		subscriptionName: string,
+		invitationCode: string,
+		cancelledBy: CancelledBy,
+	): Promise<void> {
+		await this.client.send(
+			new UpdateItemCommand({
+				TableName: this.tableName,
+				Key: {
+					subscriptionName: { S: subscriptionName },
+					invitationCode: { S: invitationCode },
+				},
+				UpdateExpression:
+					'SET expiryDate = :expiryDate, cancelledBy = :cancelledBy',
+				ExpressionAttributeValues: {
+					':expiryDate': { N: invitationCancellationTTL().toString() },
+					':cancelledBy': { S: cancelledBy },
 				},
 			}),
 		);

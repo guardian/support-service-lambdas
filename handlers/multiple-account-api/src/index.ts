@@ -6,6 +6,7 @@ import { IdentityClient } from '@modules/identity/identityClient';
 import { Lazy } from '@modules/lazy';
 import { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
+import { badRequest } from '@modules/routing/apiGatewayResponses';
 import { Router } from '@modules/routing/router';
 import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
 import { withBodyParser, withPathParser } from '@modules/routing/withParsers';
@@ -86,9 +87,18 @@ export const handler: Handler = Router([
 	{
 		httpMethod: 'DELETE',
 		path: '/invitation/{invitationCode}',
-		handler: withPathParser(deleteInvitationPathSchema, async (_event, path) =>
-			deleteInvitationEndpoint(invitationRepository)(path),
-		),
+		handler: withPathParser(deleteInvitationPathSchema, async (event, path) => {
+			// Both the primary (cancelling) and secondary (rejecting) users send
+			// their identity id in the 'x-identity-id' header.
+			const identityId = event.headers['x-identity-id'];
+			if (!identityId) {
+				return badRequest('The x-identity-id header is required');
+			}
+			return deleteInvitationEndpoint(invitationRepository)(
+				path.invitationCode,
+				identityId,
+			);
+		}),
 	},
 	{
 		httpMethod: 'POST',

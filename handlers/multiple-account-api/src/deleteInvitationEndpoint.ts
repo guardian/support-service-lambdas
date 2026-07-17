@@ -2,6 +2,7 @@ import type { APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
 import { logger } from '@modules/logger/logger';
 import {
+	badRequest,
 	internalServerError,
 	notFound,
 } from '@modules/routing/apiGatewayResponses';
@@ -11,12 +12,12 @@ export const deleteInvitationPathSchema = z.object({
 	invitationCode: z.string(),
 });
 
-export type DeleteInvitationPath = z.infer<typeof deleteInvitationPathSchema>;
-
 export const deleteInvitationEndpoint =
 	(invitationRepository: InvitationRepository) =>
-	async (path: DeleteInvitationPath): Promise<APIGatewayProxyResult> => {
-		const { invitationCode } = path;
+	async (
+		invitationCode: string,
+		identityId: string,
+	): Promise<APIGatewayProxyResult> => {
 		logger.mutableAddContext(invitationCode);
 
 		try {
@@ -26,9 +27,22 @@ export const deleteInvitationEndpoint =
 				return notFound();
 			}
 
-			await invitationRepository.delete(
+			if (
+				identityId != invitation.primaryIdentityId &&
+				identityId != invitation.secondaryIdentityId
+			) {
+				return badRequest(
+					'The x-identity-id does not match the primary or secondary user of this invitation',
+				);
+			}
+
+			const cancelledBy =
+				identityId === invitation.primaryIdentityId ? 'primary' : 'secondary';
+
+			await invitationRepository.softDelete(
 				invitation.subscriptionName,
 				invitationCode,
+				cancelledBy,
 			);
 
 			return {

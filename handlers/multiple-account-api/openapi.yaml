@@ -157,7 +157,7 @@ paths:
               schema:
                 type: string
                 example: Internal server error
-    /subscriptions/{subscriptionName}/secondary-users/{secondaryIdentityId}:
+  /subscriptions/{subscriptionName}/secondary-users/{secondaryIdentityId}:
     delete:
       operationId: deleteSecondaryUser
       summary: Delete secondary user
@@ -309,7 +309,12 @@ paths:
     delete:
       operationId: deleteInvitation
       summary: Delete invitation
-      description: Deletes an invitation by invitation code.
+      description: >-
+        Deletes (soft deletes) an invitation by invitation code. The
+        'x-identity-id' header is required and must match either the primary or
+        secondary user of the invitation. Whether the invitation was cancelled
+        by the primary or rejected by the secondary is derived from which of the
+        two the identity id matches.
       security:
         - apiKey: []
       parameters:
@@ -319,17 +324,28 @@ paths:
           schema:
             type: string
           description: The invitation code to delete.
+        - name: x-identity-id
+          in: header
+          required: true
+          schema:
+            type: string
+          description: >-
+            The identity id of the primary or secondary user of the invitation.
+            When it matches the primary user the cancellation is recorded as
+            'primary'; when it matches the secondary user it is recorded as
+            'secondary'.
       responses:
         '204':
           description: Invitation deleted.
+        '400':
+          description: >-
+            Missing 'x-identity-id' header, or the identity id does not match
+            the primary or secondary user of the invitation.
           content:
-            application/json:
+            text/plain:
               schema:
-                $ref: '#/components/schemas/DeleteInvitationResponse'
-              examples:
-                default:
-                  value:
-                    message: Deleted
+                type: string
+                example: The x-identity-id header is required
         '404':
           description: Invitation not found.
           content:
@@ -464,15 +480,6 @@ components:
           pattern: '^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{12}$'
           description: 12-character Base58 invitation code.
           example: RpwR62kMnAxe
-    DeleteInvitationResponse:
-      type: object
-      additionalProperties: false
-      required:
-        - message
-      properties:
-        message:
-          type: string
-          example: Deleted
     Invitation:
       type: object
       additionalProperties: false
