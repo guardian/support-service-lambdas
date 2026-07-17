@@ -12,7 +12,7 @@ cd "$ROOT_DIR"
 LOG_FILE="$(cd "$BIN_DIR/.." && pwd -P)/.last.log"
 
 PER_PACKAGE_SCRIPTS="type-check lint lint-fix check-formatting fix-formatting test"
-ROOT_SCRIPTS="snapshot:update install"
+ROOT_SCRIPTS="snapshot:update"
 
 usage() {
 	cat <<'EOF'
@@ -290,10 +290,12 @@ git-show)
 	run_pipeline "git-show ${POSITIONALS[0]} ${POSITIONALS[1]}" bash "$BIN_DIR/git-show.sh" "$ROOT_DIR" "${POSITIONALS[0]}" "${POSITIONALS[1]}"
 	;;
 
+install)
+	run_pipeline "install" pnpm install
+	;;
+
 *)
-	if [ "$CMD" = "install" ]; then
-		run_pipeline "install" pnpm install
-	elif is_root_script "$CMD"; then
+	if is_root_script "$CMD"; then
 		run_pipeline "$CMD" pnpm run "$CMD"
 	elif is_per_package_script "$CMD"; then
 		if [ "$CHANGED" -eq 1 ]; then
