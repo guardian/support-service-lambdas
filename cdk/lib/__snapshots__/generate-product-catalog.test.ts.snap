@@ -272,7 +272,7 @@ def sort_filter_rules(json_obj):
     },
     "FailedProductCatalogLambdaAlarm543E56AB": {
       "Properties": {
-        "ActionsEnabled": false,
+        "ActionsEnabled": true,
         "AlarmActions": [
           {
             "Fn::Join": [
