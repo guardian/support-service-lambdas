@@ -1,17 +1,12 @@
 #!/usr/bin/env bash
 # Main logic for ./agent-tool. Called by the thin wrapper at the repo root,
-# which passes the repo root as the first argument.
-# See agent-tools/README.md for full usage documentation.
+# which inserts the repo root as the first argument.
 
 set -eo pipefail
-# Note: intentionally not using `set -u` - macOS ships bash 3.2, which has a
-# long-standing bug where expanding an empty array (e.g. no extra positional
-# args) under `set -u` throws "unbound variable".
 
 ROOT_DIR="${1:?BUG: agent-tool wrapper must pass repo root as first argument}"
 shift
-# BIN_DIR is where this script lives - used to call sibling scripts by absolute
-# path, so they work even when ROOT_DIR is a different repo.
+# BIN_DIR is where all the scripts live, doesn't have to be in the current repo root.
 BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR"
 LOG_FILE="$(cd "$BIN_DIR/.." && pwd -P)/.last.log"
@@ -22,8 +17,8 @@ ROOT_SCRIPTS="snapshot:update install"
 usage() {
 	cat <<'EOF'
 Usage:
-  ./agent-tool <script> <package...> [--grep PATTERN] [--invert] [--context N]
-  ./agent-tool <script> --changed [pattern] [--grep PATTERN] [--invert] [--context N]
+  ./agent-tool <script> <package...>
+  ./agent-tool <script> --changed [pattern]
   ./agent-tool last [--tail N] [--all] [--grep PATTERN] [--invert] [--context N]
   ./agent-tool list-packages
   ./agent-tool snapshot:update
@@ -37,7 +32,6 @@ Usage:
   ./agent-tool git-show <ref> <file>
 
 Scripts:  type-check lint lint-fix check-formatting fix-formatting test
-Packages: handlers/<name>, modules/<name>, cdk, buildcheck
 
 Flags:
   --grep PATTERN   only show lines matching the regex
@@ -48,7 +42,7 @@ Flags:
 
 Default behaviour (no --grep/--tail/--all): output streams live, stopping after 100 lines with
 a truncation notice. If truncated, use ./agent-tool last --all or read_file agent-tools/.last.log
-to see the full output - do not use shell commands to access the file directly.
+to see the full output - avoid using shell commands to access the file directly.
 EOF
 }
 
@@ -129,11 +123,6 @@ STREAM_CAP_LINES=100
 DEFAULT_LAST_CAP_LINES=200
 TRUNCATION_NOTICE="[showing first $STREAM_CAP_LINES lines — full output in $LOG_FILE — use ./agent-tool last with --grep, --last or --all]"
 
-# Applies --grep/--invert/--context to stdin, or passes it through unchanged.
-# grep's exit code distinguishes "no match" (1, an expected outcome - not a
-# failure) from a real error (2+, e.g. an invalid --context value) - only the
-# latter is reported as a failure to the caller, so `display_log` can tell the
-# difference between "nothing matched" and "the filter itself broke".
 run_grep_filter() {
 	if [ -z "$GREP_PATTERN" ]; then
 		cat
@@ -147,11 +136,9 @@ run_grep_filter() {
 		grep -E $invert_flag "$GREP_PATTERN"
 	fi
 	local grep_exit=$?
-	[ "$grep_exit" -le 1 ]
+	[ "$grep_exit" -le 1 ] # 0 and 1 are both successful tool runs
 }
 
-# Streams stdin live to stdout, stopping after STREAM_CAP_LINES lines and
-# printing the truncation notice. Returns 0 whether or not truncation occurred.
 stream_with_cap() {
 	local line_count=0
 	local truncated=0
@@ -160,15 +147,15 @@ stream_with_cap() {
 			echo "$line"
 			line_count=$((line_count + 1))
 		else
+      if [ "$truncated" -eq 0 ]; then
+        echo "$TRUNCATION_NOTICE"
+      fi
 			truncated=1
 			# drain remaining input so tee can finish writing the log
 			while IFS= read -r _; do :; done
 			break
 		fi
 	done
-	if [ "$truncated" -eq 1 ]; then
-		echo "$TRUNCATION_NOTICE"
-	fi
 }
 
 # Renders a log file for display: apply --grep/--invert/--context filtering
@@ -237,13 +224,6 @@ run_pipeline() {
 		echo "FAIL $description (${duration}s)"
 	fi
 	exit "$cmd_exit"
-}
-
-# Back-compat name used throughout for pnpm-specific calls.
-run_pnpm_pipeline() {
-	local description="$1"
-	shift
-	run_pipeline "$description" pnpm "$@"
 }
 
 case "$CMD" in
@@ -330,9 +310,9 @@ git-show)
 
 *)
 	if [ "$CMD" = "install" ]; then
-		run_pnpm_pipeline "install" install
+		run_pipeline "install" pnpm install
 	elif is_root_script "$CMD"; then
-		run_pnpm_pipeline "$CMD" run "$CMD"
+		run_pipeline "$CMD" pnpm run "$CMD"
 	elif is_per_package_script "$CMD"; then
 		if [ "$CHANGED" -eq 1 ]; then
 			run_pipeline "$CMD --changed" bash "$BIN_DIR/run-changed.sh" "$ROOT_DIR" "$CMD" "${POSITIONALS[@]}"
@@ -360,7 +340,7 @@ git-show)
 			for PKG in "${PACKAGES[@]}"; do
 				FILTER_ARGS+=(--filter "./$PKG")
 			done
-			run_pnpm_pipeline "$CMD ${PACKAGES[*]}" "${FILTER_ARGS[@]}" run --if-present "$CMD" "${EXTRA_ARGS[@]}"
+			run_pipeline "$CMD ${PACKAGES[*]}" pnpm "${FILTER_ARGS[@]}" run --if-present "$CMD" "${EXTRA_ARGS[@]}"
 		fi
 	else
 		echo "FAIL unknown command: $CMD"
