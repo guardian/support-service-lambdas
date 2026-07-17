@@ -36,7 +36,7 @@ describe('ZuoraClient fetch method error handling', () => {
 				baseUrl: '',
 				authHeaders: { Authorization: 'Bearer test_token' },
 			} satisfies Authorisation),
-		} as unknown as jest.Mocked<BearerTokenProvider>;
+		};
 
 		zuoraClient = new ZuoraClient(mockTokenProvider);
 	});

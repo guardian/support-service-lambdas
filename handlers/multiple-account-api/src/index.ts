@@ -10,6 +10,7 @@ import { Router } from '@modules/routing/router';
 import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
 import { withBodyParser, withPathParser } from '@modules/routing/withParsers';
 import { stageFromEnvironment } from '@modules/stage';
+import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 import {
 	acceptInvitationEndpoint,
@@ -23,6 +24,10 @@ import {
 	deleteInvitationEndpoint,
 	deleteInvitationPathSchema,
 } from './deleteInvitationEndpoint';
+import {
+	deleteSecondaryUserEndpoint,
+	deleteSecondaryUserPathSchema,
+} from './deleteSecondaryUserEndpoint';
 import { InvitationRepository } from './invitationRepository';
 import {
 	listInvitationsEndpoint,
@@ -33,6 +38,7 @@ import {
 	listSecondaryUsersPathSchema,
 } from './listSecondaryUsersEndpoint';
 import { mmaPrimarySummaryEndpoint } from './mmaPrimarySummaryEndpoint';
+import { secondaryUserMeEndpoint } from './secondaryUserMeEndpoint';
 
 const stage = stageFromEnvironment();
 const authenticate = buildAuthenticate(stage, []);
@@ -50,6 +56,10 @@ const lazyProductCatalog = new Lazy(
 const lazyZuoraCatalog = new Lazy(
 	async () => await getZuoraCatalogFromS3(stage),
 	'Get Zuora catalog',
+);
+const lazyZuoraClient = new Lazy(
+	async () => await ZuoraClient.create(stage),
+	'Get Zuora client',
 );
 
 export const handler: Handler = Router([
@@ -131,6 +141,26 @@ export const handler: Handler = Router([
 		),
 	},
 	{
+		httpMethod: 'DELETE',
+		path: '/subscriptions/{subscriptionName}/secondary-users/{secondaryIdentityId}',
+		handler: withPathParser(
+			deleteSecondaryUserPathSchema,
+			withMMAIdentityCheck(
+				stage,
+				async (_body, _zuoraClient, subscription, _account, path) =>
+					deleteSecondaryUserEndpoint(
+						stage,
+						secondaryUserRepository,
+						dynamoClient,
+					)({
+						subscriptionName: subscription.subscriptionNumber,
+						secondaryIdentityId: path.secondaryIdentityId,
+					}),
+				({ path }) => path.subscriptionName,
+			),
+		),
+	},
+	{
 		httpMethod: 'GET',
 		path: '/subscriptions/{subscriptionName}/mma-primary',
 		handler: withPathParser(
@@ -148,5 +178,22 @@ export const handler: Handler = Router([
 				({ path }) => path.subscriptionName,
 			),
 		),
+	},
+	{
+		httpMethod: 'GET',
+		path: '/secondary-user/me',
+		handler: async (event) => {
+			const maybeAuthenticatedEvent = await authenticate(event);
+
+			if (maybeAuthenticatedEvent.type === 'failure') {
+				return maybeAuthenticatedEvent.response;
+			}
+
+			return secondaryUserMeEndpoint(
+				maybeAuthenticatedEvent.userDetails.identityId,
+				secondaryUserRepository,
+				await lazyZuoraClient.get(),
+			);
+		},
 	},
 ]);

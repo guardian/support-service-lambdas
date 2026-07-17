@@ -5,7 +5,6 @@ import type {
 	InitiationReference,
 } from '../src/routers/baton/initiationReference';
 import type { BatonS3Writer } from '../src/services/batonS3Writer';
-import type { AppConfig } from '../src/services/config';
 import type {
 	DataSubjectAPI,
 	MParticleClient,
@@ -32,7 +31,7 @@ jest.mock('../src/services/config', () => ({
 			secret: faker.string.nanoid(),
 		},
 		pod: 'EU1',
-	} as AppConfig),
+	}),
 	getEnv: jest.fn(() => 'CODE'),
 }));
 

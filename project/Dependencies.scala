@@ -6,7 +6,7 @@ import sbtassembly.PathList
 
 object Dependencies {
 
-  val awsSdkVersion = "2.45.0"
+  val awsSdkVersion = "2.45.1"
 
   val circeVersion = "0.14.16"
   val sttpVersion = "3.11.0"
@@ -41,7 +41,7 @@ object Dependencies {
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.3.0"
 
   // GCP
-  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.67.0"
+  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.68.0"
   val grpcNettyOverride = "io.grpc" % "grpc-netty-shaded" % "1.82.0"
 
   // Cats
@@ -104,7 +104,7 @@ object Dependencies {
   // CVE-2026-33871: Netty HTTP/2 CONTINUATION frame flood DoS; patched in 4.1.132.Final
   // CVE-2026-33870: Netty HTTP Request Smuggling via Chunked Extension Quoted-String Parsing
   // Affects io.netty:netty-codec-http < 4.1.132.Final, pulled in transitively by async-http-client and aws-sdk netty-nio-client
-  val nettyVersion = "4.2.15.Final"
+  val nettyVersion = "4.2.16.Final"
   val nettyOverrides: Seq[ModuleID] = Seq(
     "io.netty" % "netty-buffer" % nettyVersion,
     "io.netty" % "netty-codec" % nettyVersion,
@@ -120,7 +120,7 @@ object Dependencies {
   )
 
   // play-json still uses an old version of jackson-core which has a vulnerability - https://security.snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-7569538
-  val jacksonVersion = "2.18.6"
+  val jacksonVersion = "2.18.9"
 
   val jacksonDependencies: Seq[ModuleID] = Seq(
     "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,

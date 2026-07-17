@@ -290,8 +290,7 @@ describe('createSubscription integration', () => {
 		expect(
 			digitalPackInvoiceItems.every(
 				(item) =>
-					firstDigitalPackItem !== undefined &&
-					item.amountWithoutTax === firstDigitalPackItem.amountWithoutTax,
+					item.amountWithoutTax === firstDigitalPackItem?.amountWithoutTax,
 			),
 		).toBe(true);
 	});

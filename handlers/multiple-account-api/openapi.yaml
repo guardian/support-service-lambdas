@@ -157,6 +157,46 @@ paths:
               schema:
                 type: string
                 example: Internal server error
+    /subscriptions/{subscriptionName}/secondary-users/{secondaryIdentityId}:
+    delete:
+      operationId: deleteSecondaryUser
+      summary: Delete secondary user
+      description: Removes a secondary user from a primary subscription.
+      security:
+        - identityId: []
+        - apiKey: []
+      parameters:
+        - name: subscriptionName
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Zuora subscription number for the primary user.
+          example: A-S00974337
+        - name: secondaryIdentityId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Identity ID of the secondary user to remove.
+          example: '30067890'
+      responses:
+        '204':
+          description: Secondary user deleted.
+        '404':
+          description: Route not found.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Not Found
+        '500':
+          description: Internal server error.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Internal server error
   /subscriptions/{subscriptionName}/mma-primary:
     get:
       operationId: getMmaPrimarySummary
@@ -189,6 +229,68 @@ paths:
             text/plain:
               schema:
                 type: string
+        '404':
+          description: Route not found.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Not Found
+        '500':
+          description: Internal server error.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Internal server error
+  /secondary-user/me:
+    get:
+      operationId: getSecondaryUserMe
+      summary: Get primary users for the signed-in secondary user
+      description: >-
+        Returns the contact details of the primary user for each subscription
+        the signed-in secondary user is linked to. The secondary user is
+        identified by their Okta bearer token.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Primary users returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecondaryUserMeResponse'
+              examples:
+                default:
+                  value:
+                    primaryUsers:
+                      - firstName: Jane
+                        lastName: Smith
+                        workEmail: jane.smith@example.com
+        '401':
+          description: Missing, expired, or invalid Okta token.
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                noToken:
+                  value: No Authorization header provided
+                expired:
+                  value: Token has expired
+                invalid:
+                  value: Token is invalid
+                signingKey:
+                  value: Unable to find a signing key for the token
+        '403':
+          description: Token does not have the required scopes.
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                invalidScopes:
+                  value: Token does not have the required scopes
         '404':
           description: Route not found.
           content:
@@ -499,6 +601,34 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SecondaryUser'
+    PrimaryUser:
+      type: object
+      additionalProperties: false
+      required:
+        - firstName
+        - lastName
+        - workEmail
+      properties:
+        firstName:
+          type: string
+          example: Jane
+        lastName:
+          type: string
+          example: Smith
+        workEmail:
+          type: string
+          format: email
+          example: jane.smith@example.com
+    SecondaryUserMeResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - primaryUsers
+      properties:
+        primaryUsers:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrimaryUser'
     ParserError:
       type: object
       additionalProperties: true

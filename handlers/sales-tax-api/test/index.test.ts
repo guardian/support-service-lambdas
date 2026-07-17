@@ -7,7 +7,6 @@ import {
 import type {
 	ZuoraTaxCodes,
 	ZuoraTaxPeriods,
-	ZuoraTaxRates,
 } from '@modules/zuora/types/objects/tax';
 import { handler } from '../src/index';
 import type { TaxRatesResponse } from '../src/schemas';
@@ -54,7 +53,7 @@ describe('SalesTax API', () => {
 	} as unknown as ZuoraTaxPeriods;
 
 	const mockGetZuoraTaxRates = jest.mocked(getZuoraTaxRates);
-	const mockZuoraTaxRates = canadianZuoraTaxRates() as unknown as ZuoraTaxRates;
+	const mockZuoraTaxRates = canadianZuoraTaxRates();
 
 	const baseTaxRatesEvent: Partial<APIGatewayProxyEvent> = {
 		path: '/tax-rates',

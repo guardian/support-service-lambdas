@@ -8,7 +8,7 @@ import { addContributionAmountIfNeeded } from '../services/contributions';
 import type { MinimalZuoraSubscription } from '../services/zuoraSubscriptionService';
 
 export type ProcessItemDependencies = {
-	isDiscountRatePlanItem: (item: SupporterRatePlanItem) => boolean;
+	isExcludedRatePlanItem: (item: SupporterRatePlanItem) => boolean;
 	contributionIds: string[];
 	getSubscription: (
 		subscriptionName: string,
@@ -34,8 +34,11 @@ export const processItem = async (
 ): Promise<void> => {
 	logger.log('Processing supporter rate plan item', item);
 
-	if (dependencies.isDiscountRatePlanItem(item)) {
-		logger.log('Supporter rate plan item is a discount and will be skipped');
+	if (dependencies.isExcludedRatePlanItem(item)) {
+		logger.log(
+			'Supporter rate plan item is an excluded rate plan so will be skipped',
+			item,
+		);
 		return;
 	}
 

@@ -1,7 +1,6 @@
 import type {
 	APIGatewayProxyEvent,
 	APIGatewayProxyEventHeaders,
-	Callback,
 	Context,
 } from 'aws-lambda';
 import { handlerHttp } from '../src';
@@ -28,7 +27,7 @@ export const invokeHttpHandler = async ({
 			headers: headers ?? {},
 		} as APIGatewayProxyEvent,
 		{} as Context,
-		(() => {}) as Callback<unknown>,
+		() => {},
 	);
 	return result as {
 		statusCode: number;

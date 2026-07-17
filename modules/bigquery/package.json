@@ -18,10 +18,5 @@
     "aws-sdk": "^2.1692.0",
     "google-auth-library": "^9.15.0",
     "zod": "catalog:"
-  },
-  "devDependencies": {
-    "@types/jest": "^29.5.14",
-    "jest": "^29.7.0",
-    "ts-jest": "^29.3.2"
   }
 }

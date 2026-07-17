@@ -4,7 +4,7 @@ import { RestClient, RestClientError } from '../src/restClient';
 
 class TestRestClient extends RestClient {
 	constructor(baseUrl: string, authHeaders: Record<string, string> = {}) {
-		const mockTokenProvider: jest.Mocked<BearerTokenProvider> = {
+		const mockTokenProvider = {
 			getAuthorisation: jest
 				.fn()
 				.mockResolvedValue({ baseUrl, authHeaders } satisfies Authorisation),

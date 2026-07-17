@@ -140,12 +140,19 @@ class SubscriptionCancelEndpointSteps(
       charges: NonEmptyList[RatePlanCharge],
       ids: SupporterPlusZuoraIds,
   ): Task[RatePlanCharge] = {
+    val cancellableSubscriptionCharges = List(
+      ids.annual,
+      ids.monthly,
+      ids.annualV2,
+      ids.monthlyV2,
+      ids.taxExclusiveAnnual,
+      ids.taxExclusiveMonthly,
+      ids.student,
+    )
     val supporterPlusCharge = charges.find(charge =>
-      charge.productRatePlanChargeId == ids.annual.productRatePlanChargeId.value ||
-        charge.productRatePlanChargeId == ids.monthly.productRatePlanChargeId.value ||
-        charge.productRatePlanChargeId == ids.monthlyV2.productRatePlanChargeId.value ||
-        charge.productRatePlanChargeId == ids.annualV2.productRatePlanChargeId.value ||
-        charge.productRatePlanChargeId == ids.student.productRatePlanChargeId.value,
+      cancellableSubscriptionCharges
+        .map(_.productRatePlanChargeId)
+        .contains(ZuoraIds.ProductRatePlanChargeId(charge.productRatePlanChargeId)),
     )
     supporterPlusCharge
       .map(ZIO.succeed(_))
