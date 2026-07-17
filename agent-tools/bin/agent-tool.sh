@@ -6,8 +6,10 @@ set -eo pipefail
 
 ROOT_DIR="${1:?BUG: agent-tool wrapper must pass repo root as first argument}"
 shift
-# BIN_DIR is where all the scripts live, doesn't have to be in the current repo root.
+# BIN_DIR is where the internal helper scripts live.
 BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# CMD_DIR is where the user-facing command scripts live.
+CMD_DIR="$(cd "$BIN_DIR/../cmd" && pwd)"
 cd "$ROOT_DIR"
 LOG_FILE="$(cd "$BIN_DIR/.." && pwd -P)/.last.log"
 
@@ -268,16 +270,16 @@ install)
 	;;
 
 *)
-	BIN_SCRIPTS="$(cd "$BIN_DIR" && ls ./*.sh 2>/dev/null | sed 's|^\./||; s|\.sh$||')"
-	if echo "$BIN_SCRIPTS" | grep -qxF "$CMD"; then
-		run_pipeline "$CMD ${POSITIONALS[*]}" bash "$BIN_DIR/$CMD.sh" "$ROOT_DIR" "${POSITIONALS[@]}"
+	CMD_SCRIPTS="$(cd "$CMD_DIR" && ls ./*.sh 2>/dev/null | sed 's|^\./||; s|\.sh$||')"
+	if echo "$CMD_SCRIPTS" | grep -qxF "$CMD"; then
+		run_pipeline "$CMD ${POSITIONALS[*]}" bash "$CMD_DIR/$CMD.sh" "$ROOT_DIR" "${POSITIONALS[@]}"
 	elif is_root_script "$CMD"; then
 		run_pipeline "$CMD" pnpm run "$CMD"
 	elif is_per_package_script "$CMD"; then
 		if [ "$CHANGED" -eq 1 ]; then
 			run_pipeline "$CMD --changed" bash "$BIN_DIR/run-changed.sh" "$ROOT_DIR" "$CMD" "${POSITIONALS[@]}"
 		else
-			KNOWN_PACKAGES="$(bash "$BIN_DIR/list-packages.sh" "$ROOT_DIR")"
+			KNOWN_PACKAGES="$(bash "$CMD_DIR/list-packages.sh" "$ROOT_DIR")"
 			PACKAGES=()
 			EXTRA_ARGS=()
 			for ARG in "${POSITIONALS[@]}"; do

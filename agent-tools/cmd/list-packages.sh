@@ -11,7 +11,7 @@ cd "$ROOT_DIR"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=agent-tools/bin/lib.sh
-source "$SCRIPT_DIR/lib.sh"
+source "$SCRIPT_DIR/../bin/lib.sh"
 
 list_known_packages
 
