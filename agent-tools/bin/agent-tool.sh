@@ -218,25 +218,6 @@ last)
 	exit 0
 	;;
 
-git-rm)
-	[ "${#POSITIONALS[@]}" -eq 1 ] || {
-		echo "FAIL git-rm requires exactly one file path"
-		exit 1
-	}
-	run_pipeline "git-rm ${POSITIONALS[0]}" bash "$BIN_DIR/git-rm.sh" "$ROOT_DIR" "${POSITIONALS[0]}"
-	;;
-
-git-mv)
-	[ "${#POSITIONALS[@]}" -eq 2 ] || {
-		echo "FAIL git-mv requires exactly two file paths: <source> <destination>"
-		exit 1
-	}
-	run_pipeline "git-mv ${POSITIONALS[*]}" bash "$BIN_DIR/git-mv.sh" "$ROOT_DIR" "${POSITIONALS[@]}"
-	;;
-
-list-packages)
-	run_pipeline "list-packages" bash "$BIN_DIR/list-packages.sh" "$ROOT_DIR"
-	;;
 
 git-status)
 	run_pipeline "git-status" git --no-pager status --short
@@ -282,20 +263,15 @@ git-diff-target-stat)
 	run_pipeline "git-diff-target-stat ${POSITIONALS[0]}" git --no-pager diff --stat -- "${POSITIONALS[0]}"
 	;;
 
-git-show)
-	[ "${#POSITIONALS[@]}" -eq 2 ] || {
-		echo "FAIL git-show requires exactly two arguments: <ref> <file>"
-		exit 1
-	}
-	run_pipeline "git-show ${POSITIONALS[0]} ${POSITIONALS[1]}" bash "$BIN_DIR/git-show.sh" "$ROOT_DIR" "${POSITIONALS[0]}" "${POSITIONALS[1]}"
-	;;
-
 install)
 	run_pipeline "install" pnpm install
 	;;
 
 *)
-	if is_root_script "$CMD"; then
+	BIN_SCRIPTS="$(cd "$BIN_DIR" && ls ./*.sh 2>/dev/null | sed 's|^\./||; s|\.sh$||')"
+	if echo "$BIN_SCRIPTS" | grep -qxF "$CMD"; then
+		run_pipeline "$CMD ${POSITIONALS[*]}" bash "$BIN_DIR/$CMD.sh" "$ROOT_DIR" "${POSITIONALS[@]}"
+	elif is_root_script "$CMD"; then
 		run_pipeline "$CMD" pnpm run "$CMD"
 	elif is_per_package_script "$CMD"; then
 		if [ "$CHANGED" -eq 1 ]; then
