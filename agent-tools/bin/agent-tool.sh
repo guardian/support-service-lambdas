@@ -120,7 +120,7 @@ if [ "$GREP_INVERT" -eq 1 ] && [ -z "$GREP_PATTERN" ]; then
 fi
 
 STREAM_CAP_LINES=100
-TRUNCATION_NOTICE="[showing first $STREAM_CAP_LINES lines — full output in $LOG_FILE — use ./agent-tool last with --grep, --last or --all]"
+TRUNCATION_NOTICE="[showing first $STREAM_CAP_LINES lines — full output in $LOG_FILE — use ./agent-tool last or read_file $LOG_FILE to see everything]"
 
 run_grep_filter() {
 	if [ -z "$GREP_PATTERN" ]; then

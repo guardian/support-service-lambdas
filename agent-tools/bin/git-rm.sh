@@ -6,8 +6,12 @@
 
 set -euo pipefail
 
-REPO_ROOT="${1:?usage: git-rm.sh <repo-root> <file>}"
-TARGET="${2:?usage: git-rm.sh <repo-root> <file>}"
+if [ $# -lt 2 ]; then
+	echo "FAIL git-rm requires exactly one file path"
+	exit 1
+fi
+REPO_ROOT="$1"
+TARGET="$2"
 
 ABS_PATH="$(cd "$(dirname "$TARGET")" 2>/dev/null && pwd)/$(basename "$TARGET")" || {
 	echo "FAIL path does not exist: $TARGET"

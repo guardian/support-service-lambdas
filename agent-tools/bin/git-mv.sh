@@ -6,9 +6,13 @@
 
 set -euo pipefail
 
-REPO_ROOT="${1:?usage: git-mv.sh <repo-root> <source> <destination>}"
-SRC="${2:?usage: git-mv.sh <repo-root> <source> <destination>}"
-DEST="${3:?usage: git-mv.sh <repo-root> <source> <destination>}"
+if [ $# -lt 3 ]; then
+	echo "FAIL git-mv requires exactly two file paths: <source> <destination>"
+	exit 1
+fi
+REPO_ROOT="$1"
+SRC="$2"
+DEST="$3"
 
 resolve_existing() {
 	local path="$1"

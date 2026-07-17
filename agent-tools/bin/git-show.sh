@@ -14,9 +14,13 @@
 
 set -euo pipefail
 
-REPO_ROOT="${1:?usage: git-show.sh <repo-root> <ref> <file>}"
-REF="${2:?usage: git-show.sh <repo-root> <ref> <file>}"
-FILE="${3:?usage: git-show.sh <repo-root> <ref> <file>}"
+if [ $# -lt 3 ]; then
+	echo "FAIL git-show requires exactly two arguments: <ref> <file>"
+	exit 1
+fi
+REPO_ROOT="$1"
+REF="$2"
+FILE="$3"
 
 # Resolve "main" to the merge-base against origin/main (preferred) or local main.
 if [ "$REF" = "main" ]; then
@@ -53,4 +57,5 @@ case "$FILE" in
 esac
 
 git -C "$REPO_ROOT" show "${REF}:${FILE}"
+
 

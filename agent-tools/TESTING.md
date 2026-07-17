@@ -37,7 +37,7 @@ real tracked files.
 | 1.3 | `$AGENT_TOOL type-check` (no package, no `--changed`) | `FAIL type-check requires at least one package or --changed` + a hint line about workspace paths, exit code `1` |
 | 1.4 | `$AGENT_TOOL type-check modules/not-a-real-package` | Same as 1.3 - an unrecognised package is treated as "no package given" since it doesn't match any known package, not as an error naming the specific bad path |
 | 1.5 | `$AGENT_TOOL type-check handlers/product-switch-api some-unexpected-arg` | `FAIL unexpected arguments for type-check: some-unexpected-arg`, exit code `1` (only `test` accepts a trailing non-package argument, as a Jest pattern) |
-| 1.6 | `$AGENT_TOOL --context 3` (no command at all) | `FAIL --context requires --grep`, exit code `1` - flag validation happens before command dispatch |
+| 1.6 | `$AGENT_TOOL --context 3` (no command at all) | `FAIL unknown command: --context` then usage, exit code `1` - flags without a command are treated as an unknown command name (flag-before-command validation is not implemented) |
 
 ## 2. `--context`/`--invert` validation
 
@@ -49,12 +49,11 @@ real tracked files.
 | 2.4 | `$AGENT_TOOL type-check modules/logger --grep OK --invert` | Runs normally; passes validation |
 
 **Known gap** (documented, not yet fixed): `--tail`/`--context` values are not validated as
-numeric up front. If a non-numeric value is given, the display step prints a clear WARN but the
-OK/FAIL result and exit code still correctly reflect the underlying command's outcome:
+numeric up front. If a non-numeric value is given, the raw `tail`/`grep` error is printed but
+the OK/FAIL result and exit code still correctly reflect the underlying command's outcome:
 
 ```
 tail: illegal offset -- abc: Invalid argument
-WARN output filtering/capping failed (see error above, e.g. an invalid --tail/--context value) - this does not affect the OK/FAIL result below
 OK   type-check modules/logger (Ns)
 ```
 
@@ -75,7 +74,7 @@ The result is unambiguous — a display glitch never causes a genuine pass to ap
 | # | Command | Expected |
 |---|---------|----------|
 | 4.1 | `$AGENT_TOOL type-check modules/logger` (default, ≤100 lines output) | Full output streams live, no truncation notice |
-| 4.2 | `$AGENT_TOOL <any command producing >100 lines>` | First 100 lines stream live, then the truncation notice: `[showing first 100 lines — full output in agent-tools/.last.log — use ./agent-tool last or read_file agent-tools/.last.log to see everything]`, then the OK/FAIL line |
+| 4.2 | `$AGENT_TOOL <any command producing >100 lines>` | First 100 lines stream live, then the truncation notice: `[showing first 100 lines — full output in <abs-path>/.last.log — use ./agent-tool last or read_file <abs-path>/.last.log to see everything]`, then the OK/FAIL line |
 | 4.3 | `$AGENT_TOOL <long command> --all` | Full output streams live, no cap, no truncation notice |
 | 4.4 | `$AGENT_TOOL <long command> --tail 5` | Runs to completion (buffered), then shows the **last** 5 lines |
 | 4.5 | `$AGENT_TOOL <command> --grep PATTERN` | Runs to completion (buffered), filters to matching lines, caps at 200; no streaming |
@@ -151,13 +150,23 @@ during implementation showed up here first) - test it directly, not just via `--
 | 10.4 | Modify a file directly in `modules/` (not inside a package subfolder, e.g. `modules/errors.ts`) | Prints nothing for that file - it doesn't belong to any package (matches `list-packages`' package.json-presence rule) |
 | 10.5 | `bash agent-tools/bin/list-packages.sh .` | Same package-discovery logic, unconditional (not git-dependent) - cross-check its output is a superset consistent with 10.1-10.4 |
 
+## 11. `git-show`
+
+| # | Command | Expected |
+|---|---------|----------|
+| 11.1 | `$AGENT_TOOL git-show HEAD modules/logger/src/logger.ts` | Prints the file contents at HEAD; `OK   git-show HEAD modules/logger/src/logger.ts (Ns)`, exit code `0` |
+| 11.2 | `$AGENT_TOOL git-show main modules/logger/src/logger.ts` | Special ref: resolves to `git merge-base HEAD origin/main` (falls back to local `main`); prints file at that commit, `OK`, exit code `0` |
+| 11.3 | `$AGENT_TOOL git-show HEAD modules/logger/src/logger.ts --tail 5` | Same as 11.1 but only last 5 lines shown - confirms output flags work with git-show |
+| 11.4 | `$AGENT_TOOL git-show` (no args) | `FAIL git-show requires exactly two arguments: <ref> <file>`, exit code `1` |
+| 11.5 | `$AGENT_TOOL git-show HEAD` (only ref, no file) | `FAIL git-show requires exactly two arguments: <ref> <file>`, exit code `1` |
+
 ---
 
 ## Known gaps (intentional, or not yet addressed)
 
 - `--tail`/`--context` values are not validated as numeric up front (see section 2) - produces
-  a WARN with a raw `tail`/`grep` error message and broken/empty filtered output, but the
-  OK/FAIL result and exit code are always correct.
+  a raw `tail`/`grep` error message printed before OK/FAIL, but the OK/FAIL result and exit
+  code are always correct.
 - No bulk/directory-safe `rm` - `git-rm` only handles one tracked file at a time; deleting a
   whole directory or untracked build artifacts (e.g. `node_modules`) still requires raw `rm -rf`
   outside of `agent-tool`, per the explicit decision in `REFACTOR-PLAN.md`.
@@ -165,4 +174,7 @@ during implementation showed up here first) - test it directly, not just via `--
   since grep needs full input to compute context windows. The default (no flags) and `--all`
   modes do stream live. For long-running commands in buffered mode, use
   `tail -f agent-tools/.last.log` in a second terminal.
+- Flags given as the first argument (e.g. `./agent-tool --context 3`) are treated as an unknown
+  command name rather than producing a flag-validation error. This is an edge case with no
+  practical impact since flags are only meaningful after a valid command.
 
