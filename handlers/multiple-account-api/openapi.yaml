@@ -314,7 +314,8 @@ paths:
         'x-identity-id' header is required and must match either the primary or
         secondary user of the invitation. Whether the invitation was cancelled
         by the primary or rejected by the secondary is derived from which of the
-        two the identity id matches.
+        two the identity id matches. An invitation that has already been
+        cancelled is treated as not found and cannot be cancelled again.
       security:
         - apiKey: []
       parameters:
@@ -347,7 +348,9 @@ paths:
                 type: string
                 example: The x-identity-id header is required
         '404':
-          description: Invitation not found.
+          description: >-
+            Invitation not found. Also returned when the invitation has already
+            been cancelled.
           content:
             text/plain:
               schema:
@@ -364,7 +367,10 @@ paths:
     post:
       operationId: acceptInvitation
       summary: Accept invitation
-      description: Accepts an invitation for the signed-in secondary user, linking them to the subscription.
+      description: >-
+        Accepts an invitation for the signed-in secondary user, linking them to
+        the subscription. An invitation that has already been cancelled cannot
+        be accepted.
       security:
         - bearerAuth: []
       parameters:
@@ -384,10 +390,16 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: false
+                $ref: '#/components/schemas/AcceptInvitationResponse'
+              examples:
+                default:
+                  value:
+                    identityId: '30067890'
+                    secondarySubscriptionName: A-S00974338
         '400':
-          description: Invalid request or the signed-in user does not match the invited user.
+          description: >-
+            Invalid request, the signed-in user does not match the invited user,
+            or the invitation has already been cancelled.
           content:
             text/plain:
               schema:
@@ -395,6 +407,8 @@ paths:
               examples:
                 incorrectUser:
                   value: Incorrect user
+                cancelled:
+                  value: Invitation has been cancelled by the primary user
             application/json:
               schema:
                 $ref: '#/components/schemas/ParserError'
@@ -480,6 +494,21 @@ components:
           pattern: '^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{12}$'
           description: 12-character Base58 invitation code.
           example: RpwR62kMnAxe
+    AcceptInvitationResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - identityId
+        - secondarySubscriptionName
+      properties:
+        identityId:
+          type: string
+          description: Identity id of the secondary user who accepted the invitation.
+          example: '30067890'
+        secondarySubscriptionName:
+          type: string
+          description: Zuora subscription number created for the secondary user.
+          example: A-S00974338
     Invitation:
       type: object
       additionalProperties: false
