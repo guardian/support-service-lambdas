@@ -2,6 +2,7 @@ import type { Dayjs } from 'dayjs';
 import { DataExtensionNames } from '@modules/email/email';
 import type { EmailMessageWithIdentityUserId } from '@modules/email/email';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { TaxMode } from '@modules/product-catalog/productCatalog';
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 import { buildDeliveryEmailFields } from './deliveryEmailFields';
 import { buildEmailFields } from './emailFields';
@@ -10,7 +11,6 @@ import type {
 	EmailPaymentMethod,
 	EmailPaymentSchedule,
 	EmailUser,
-	TaxMode,
 } from './types';
 
 export type GuardianWeeklyProductPurchase = Extract<

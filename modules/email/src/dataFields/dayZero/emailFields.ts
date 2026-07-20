@@ -5,6 +5,7 @@ import type {
 	EmailMessageWithIdentityUserId,
 } from '@modules/email/email';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { TaxMode } from '@modules/product-catalog/productCatalog';
 import { describePayments, firstPayment } from './paymentDescription';
 import type { EmailPaymentFields } from './paymentEmailFields';
 import { getPaymentFields } from './paymentEmailFields';
@@ -13,7 +14,6 @@ import type {
 	EmailPaymentMethod,
 	EmailPaymentSchedule,
 	EmailUser,
-	TaxMode,
 } from './types';
 
 type EmailCommonFields = {

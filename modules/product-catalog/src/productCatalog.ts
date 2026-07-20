@@ -245,3 +245,5 @@ export class ProductCatalogHelper {
 		return productRatePlanKey in ratePlans;
 	}
 }
+
+export type TaxMode = 'TaxInclusive' | 'TaxExclusive' | null | undefined;

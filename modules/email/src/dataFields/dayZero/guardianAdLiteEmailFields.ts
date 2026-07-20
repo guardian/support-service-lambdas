@@ -2,12 +2,12 @@ import type { Dayjs } from 'dayjs';
 import type { EmailMessageWithIdentityUserId } from '@modules/email/email';
 import { DataExtensionNames } from '@modules/email/email';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { TaxMode } from '@modules/product-catalog/productCatalog';
 import { buildEmailFields, buildNonDeliveryEmailFields } from './emailFields';
 import type {
 	EmailPaymentMethod,
 	EmailPaymentSchedule,
 	EmailUser,
-	TaxMode,
 } from './types';
 
 export function buildGuardianAdLiteEmailFields({

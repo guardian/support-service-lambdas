@@ -1,6 +1,7 @@
 import type { Dayjs } from 'dayjs';
 import { getCountryNameByCode } from '@modules/internationalisation/country';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { TaxMode } from '@modules/product-catalog/productCatalog';
 import type { NonDeliveryEmailFields } from './emailFields';
 import { buildNonDeliveryEmailFields } from './emailFields';
 import type {
@@ -8,7 +9,6 @@ import type {
 	EmailPaymentMethod,
 	EmailPaymentSchedule,
 	EmailUser,
-	TaxMode,
 } from './types';
 
 type DeliveryFields = {

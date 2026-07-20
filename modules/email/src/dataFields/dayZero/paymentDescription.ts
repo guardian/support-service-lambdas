@@ -3,11 +3,8 @@ import { partition } from '@modules/arrayFunctions';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { getCurrencyInfo } from '@modules/internationalisation/currency';
 import { getNonEmptyOrThrow, isNonEmpty } from '@modules/nullAndUndefined';
-import type {
-	EmailBillingPeriod,
-	EmailPaymentSchedule,
-	TaxMode,
-} from './types';
+import type { TaxMode } from '@modules/product-catalog/productCatalog';
+import type { EmailBillingPeriod, EmailPaymentSchedule } from './types';
 
 type Payment = EmailPaymentSchedule['payments'][number];
 
