@@ -17,6 +17,12 @@ export const supporterPlusTargetInformation: SwitchTargetInformation<
 		productRatePlan: ProductRatePlan<'SupporterPlus', 'Annual' | 'Monthly'>,
 		switchActionData: SwitchActionData,
 	): TargetInformation => {
+		if (switchActionData.currency === 'CAD') {
+			throw new ValidationError(
+				'cannot currently switch to CAD supporter plus rate plans',
+			);
+		}
+
 		const targetCatalogBasePrice =
 			productRatePlan.pricing[switchActionData.currency];
 
