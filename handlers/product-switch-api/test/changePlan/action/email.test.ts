@@ -9,8 +9,18 @@ import type { TargetInformation } from '../../../src/changePlan/prepare/targetIn
 
 test('Email message body is correct', () => {
 	const testPaymentSchedule = [
-		{ date: new Date(2026, 5, 29), total: 12.21 },
-		{ date: new Date(2027, 5, 29), total: 12.21 },
+		{
+			date: new Date(2026, 5, 29),
+			total: 12.21,
+			amountWithoutTax: 10,
+			taxAmount: 2.21,
+		},
+		{
+			date: new Date(2027, 5, 29),
+			total: 12.21,
+			amountWithoutTax: 10,
+			taxAmount: 2.21,
+		},
 	];
 
 	const dateOfFirstPayment = dayjs('2024-04-16');
@@ -47,8 +57,18 @@ test('Email message body is correct', () => {
 
 test('Email subscription_rate is correct during a discount', () => {
 	const testDiscountedPaymentSchedule = [
-		{ date: new Date(2026, 5, 29), total: 8.21 },
-		{ date: new Date(2027, 5, 29), total: 12.21 },
+		{
+			date: new Date(2026, 5, 29),
+			total: 8.21,
+			amountWithoutTax: 7,
+			taxAmount: 1.21,
+		},
+		{
+			date: new Date(2027, 5, 29),
+			total: 12.21,
+			amountWithoutTax: 10,
+			taxAmount: 2.21,
+		},
 	];
 
 	const dateOfFirstPayment = dayjs('2024-04-16');
