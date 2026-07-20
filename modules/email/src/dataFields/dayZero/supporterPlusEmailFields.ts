@@ -8,6 +8,7 @@ import type {
 	EmailPaymentMethod,
 	EmailPaymentSchedule,
 	EmailUser,
+	TaxMode,
 } from './types';
 
 export function buildSupporterPlusEmailFields({
@@ -31,7 +32,7 @@ export function buildSupporterPlusEmailFields({
 	paymentMethod: EmailPaymentMethod;
 	isFixedTerm: boolean;
 	mandateId?: string;
-	taxMode: 'TaxInclusive' | 'TaxExclusive' | undefined | null;
+	taxMode: TaxMode;
 }) {
 	const nonDeliveryEmailFields = buildNonDeliveryEmailFields({
 		today: today,

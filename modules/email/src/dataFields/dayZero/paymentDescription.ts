@@ -3,7 +3,11 @@ import { partition } from '@modules/arrayFunctions';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { getCurrencyInfo } from '@modules/internationalisation/currency';
 import { getNonEmptyOrThrow, isNonEmpty } from '@modules/nullAndUndefined';
-import type { EmailBillingPeriod, EmailPaymentSchedule } from './types';
+import type {
+	EmailBillingPeriod,
+	EmailPaymentSchedule,
+	TaxMode,
+} from './types';
 
 type Payment = EmailPaymentSchedule['payments'][number];
 
@@ -75,10 +79,7 @@ function monthsBetween(start: Date, end: Date): number {
 	return endD.diff(startD, 'month');
 }
 
-function getRelevantAmountFromPayment(
-	taxMode: 'TaxInclusive' | 'TaxExclusive' | undefined | null,
-	payment: Payment,
-) {
+function getRelevantAmountFromPayment(taxMode: TaxMode, payment: Payment) {
 	return taxMode === 'TaxExclusive'
 		? payment.amountWithoutTax
 		: payment.amountWithoutTax + payment.taxAmount;
@@ -89,7 +90,7 @@ export function describePayments(
 	billingPeriod: EmailBillingPeriod,
 	currency: IsoCurrency,
 	isFixedTerm: boolean,
-	taxMode: 'TaxInclusive' | 'TaxExclusive' | undefined | null,
+	taxMode: TaxMode,
 ): string {
 	const initialPrice = getRelevantAmountFromPayment(
 		taxMode,
@@ -148,7 +149,7 @@ function descriptionWithSingleIntroductoryPeriod(
 	currency: IsoCurrency,
 	initialPrice: number,
 	billingPeriod: EmailBillingPeriod,
-	taxMode: 'TaxInclusive' | 'TaxExclusive' | undefined | null,
+	taxMode: TaxMode,
 ) {
 	const firstDifferent = paymentsWithDifferentPrice[0];
 	return `${priceWithCurrency(
@@ -168,7 +169,7 @@ function descriptionWithMultipleIntroductoryPeriods(
 	currency: IsoCurrency,
 	initialPrice: number,
 	billingPeriod: EmailBillingPeriod,
-	taxMode: 'TaxInclusive' | 'TaxExclusive' | undefined | null,
+	taxMode: TaxMode,
 ) {
 	const firstIntroductoryPayment = earliestPayment(paymentsWithInitialPrice);
 	const firstDifferentPayment = earliestPayment(paymentsWithDifferentPrice);

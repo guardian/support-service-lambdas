@@ -13,6 +13,7 @@ import type {
 	EmailPaymentMethod,
 	EmailPaymentSchedule,
 	EmailUser,
+	TaxMode,
 } from './types';
 
 export type PaperProductPurchase = Extract<
@@ -41,7 +42,7 @@ export function buildPaperEmailFields({
 	mandateId?: string;
 	productInformation: PaperProductPurchase;
 	deliveryAgentDetails?: EmailDeliveryAgentDetails;
-	taxMode: 'TaxInclusive' | 'TaxExclusive' | undefined | null;
+	taxMode: TaxMode;
 }): EmailMessageWithIdentityUserId {
 	const deliveryAgentFields =
 		productInformation.product === 'NationalDelivery' && deliveryAgentDetails

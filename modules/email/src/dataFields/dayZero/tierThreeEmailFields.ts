@@ -10,6 +10,7 @@ import type {
 	EmailPaymentMethod,
 	EmailPaymentSchedule,
 	EmailUser,
+	TaxMode,
 } from './types';
 
 export type TierThreeProductPurchase = Extract<
@@ -36,7 +37,7 @@ export function buildTierThreeEmailFields({
 	paymentSchedule: EmailPaymentSchedule;
 	paymentMethod: EmailPaymentMethod;
 	mandateId?: string;
-	taxMode: 'TaxInclusive' | 'TaxExclusive' | undefined | null;
+	taxMode: TaxMode;
 }): EmailMessageWithIdentityUserId {
 	const deliveryFields = buildDeliveryEmailFields({
 		today: today,

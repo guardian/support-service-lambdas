@@ -7,6 +7,7 @@ import type {
 	EmailPaymentMethod,
 	EmailPaymentSchedule,
 	EmailUser,
+	TaxMode,
 } from './types';
 
 export function buildGuardianAdLiteEmailFields({
@@ -26,7 +27,7 @@ export function buildGuardianAdLiteEmailFields({
 	paymentMethod: EmailPaymentMethod;
 	paymentSchedule: EmailPaymentSchedule;
 	mandateId?: string;
-	taxMode: 'TaxInclusive' | 'TaxExclusive' | undefined | null;
+	taxMode: TaxMode;
 }): EmailMessageWithIdentityUserId {
 	const nonDeliveryEmailFields = buildNonDeliveryEmailFields({
 		today: today,

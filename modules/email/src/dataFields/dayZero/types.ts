@@ -2,6 +2,8 @@ import type { CountryCode } from '@modules/internationalisation/country';
 
 export type EmailBillingPeriod = 'Annual' | 'Monthly' | 'Quarterly';
 
+export type TaxMode = 'TaxInclusive' | 'TaxExclusive' | undefined | null;
+
 export type PostalAddress = {
 	lineOne?: string;
 	lineTwo?: string;

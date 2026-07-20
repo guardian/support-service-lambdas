@@ -13,6 +13,7 @@ import type {
 	EmailPaymentMethod,
 	EmailPaymentSchedule,
 	EmailUser,
+	TaxMode,
 } from './types';
 
 export type GuardianWeeklyProductPurchase = Extract<
@@ -43,7 +44,7 @@ export function buildGuardianWeeklyEmailFields({
 	isFixedTerm: boolean;
 	mandateId?: string;
 	giftRecipient?: EmailGiftRecipient;
-	taxMode: 'TaxInclusive' | 'TaxExclusive' | undefined | null;
+	taxMode: TaxMode;
 }): EmailMessageWithIdentityUserId {
 	const gifteeFields = giftRecipient
 		? {
