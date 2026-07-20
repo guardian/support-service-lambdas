@@ -36,7 +36,7 @@ export function buildTierThreeEmailFields({
 	paymentSchedule: EmailPaymentSchedule;
 	paymentMethod: EmailPaymentMethod;
 	mandateId?: string;
-	taxMode: string | undefined | null;
+	taxMode: 'TaxInclusive' | 'TaxExclusive' | undefined | null;
 }): EmailMessageWithIdentityUserId {
 	const deliveryFields = buildDeliveryEmailFields({
 		today: today,

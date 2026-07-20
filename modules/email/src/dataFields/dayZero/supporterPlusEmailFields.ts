@@ -31,7 +31,7 @@ export function buildSupporterPlusEmailFields({
 	paymentMethod: EmailPaymentMethod;
 	isFixedTerm: boolean;
 	mandateId?: string;
-	taxMode: string | undefined | null;
+	taxMode: 'TaxInclusive' | 'TaxExclusive' | undefined | null;
 }) {
 	const nonDeliveryEmailFields = buildNonDeliveryEmailFields({
 		today: today,

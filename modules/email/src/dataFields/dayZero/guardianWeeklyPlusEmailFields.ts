@@ -38,7 +38,7 @@ export function buildGuardianWeeklyPlusEmailFields({
 	paymentMethod: EmailPaymentMethod;
 	isFixedTerm: boolean;
 	mandateId?: string;
-	taxMode: string | undefined | null;
+	taxMode: 'TaxInclusive' | 'TaxExclusive' | undefined | null;
 }): EmailMessageWithIdentityUserId {
 	const deliveryFields = buildDeliveryEmailFields({
 		today: today,

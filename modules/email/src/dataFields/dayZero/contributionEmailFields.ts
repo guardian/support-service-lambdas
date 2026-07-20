@@ -31,7 +31,7 @@ export function buildContributionEmailFields({
 	paymentSchedule: EmailPaymentSchedule;
 	paymentMethod: EmailPaymentMethod;
 	mandateId?: string;
-	taxMode: string | undefined | null;
+	taxMode: 'TaxInclusive' | 'TaxExclusive' | undefined | null;
 }): EmailMessageWithIdentityUserId {
 	const nonDeliveryEmailFields = buildNonDeliveryEmailFields({
 		today: today,

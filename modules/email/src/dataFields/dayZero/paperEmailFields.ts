@@ -41,7 +41,7 @@ export function buildPaperEmailFields({
 	mandateId?: string;
 	productInformation: PaperProductPurchase;
 	deliveryAgentDetails?: EmailDeliveryAgentDetails;
-	taxMode: string | undefined | null;
+	taxMode: 'TaxInclusive' | 'TaxExclusive' | undefined | null;
 }): EmailMessageWithIdentityUserId {
 	const deliveryAgentFields =
 		productInformation.product === 'NationalDelivery' && deliveryAgentDetails

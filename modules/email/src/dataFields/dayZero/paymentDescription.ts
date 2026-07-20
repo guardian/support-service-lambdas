@@ -76,7 +76,7 @@ function monthsBetween(start: Date, end: Date): number {
 }
 
 function getRelevantAmountFromPayment(
-	taxMode: string | undefined | null,
+	taxMode: 'TaxInclusive' | 'TaxExclusive' | undefined | null,
 	payment: Payment,
 ) {
 	return taxMode === 'TaxExclusive'
@@ -89,7 +89,7 @@ export function describePayments(
 	billingPeriod: EmailBillingPeriod,
 	currency: IsoCurrency,
 	isFixedTerm: boolean,
-	taxMode: string | undefined | null,
+	taxMode: 'TaxInclusive' | 'TaxExclusive' | undefined | null,
 ): string {
 	const initialPrice = getRelevantAmountFromPayment(
 		taxMode,
@@ -148,7 +148,7 @@ function descriptionWithSingleIntroductoryPeriod(
 	currency: IsoCurrency,
 	initialPrice: number,
 	billingPeriod: EmailBillingPeriod,
-	taxMode: string | undefined | null,
+	taxMode: 'TaxInclusive' | 'TaxExclusive' | undefined | null,
 ) {
 	const firstDifferent = paymentsWithDifferentPrice[0];
 	return `${priceWithCurrency(
@@ -168,7 +168,7 @@ function descriptionWithMultipleIntroductoryPeriods(
 	currency: IsoCurrency,
 	initialPrice: number,
 	billingPeriod: EmailBillingPeriod,
-	taxMode: string | undefined | null,
+	taxMode: 'TaxInclusive' | 'TaxExclusive' | undefined | null,
 ) {
 	const firstIntroductoryPayment = earliestPayment(paymentsWithInitialPrice);
 	const firstDifferentPayment = earliestPayment(paymentsWithDifferentPrice);

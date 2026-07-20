@@ -43,7 +43,7 @@ export function buildGuardianWeeklyEmailFields({
 	isFixedTerm: boolean;
 	mandateId?: string;
 	giftRecipient?: EmailGiftRecipient;
-	taxMode: string | undefined | null;
+	taxMode: 'TaxInclusive' | 'TaxExclusive' | undefined | null;
 }): EmailMessageWithIdentityUserId {
 	const gifteeFields = giftRecipient
 		? {
