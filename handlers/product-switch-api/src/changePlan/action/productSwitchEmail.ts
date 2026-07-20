@@ -25,14 +25,20 @@ export const buildEmailMessage = (
 
 	const subscriptionRate = describePayments(
 		{
-			payments: paymentSchedule.map(({ date, total }) => ({
-				date,
-				amount: total,
-			})),
+			payments: paymentSchedule.map(
+				({ date, total, amountWithoutTax, taxAmount }) => ({
+					date,
+					amount: total,
+					amountWithoutTax,
+					taxAmount,
+				}),
+			),
 		},
 		productRatePlanKey,
 		currency,
 		false,
+		// TODO: make this dynamic
+		'TaxInclusive',
 	);
 	const nextPaymentDate = paymentSchedule[0]?.date;
 
