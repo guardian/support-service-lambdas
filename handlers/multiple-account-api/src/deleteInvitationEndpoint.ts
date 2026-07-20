@@ -23,7 +23,7 @@ export const deleteInvitationEndpoint =
 		try {
 			const invitation = await invitationRepository.get(invitationCode);
 
-			if (!invitation) {
+			if (!invitation || invitation.cancelledBy !== undefined) {
 				return notFound();
 			}
 
