@@ -37,8 +37,7 @@ export const buildEmailMessage = (
 		productRatePlanKey,
 		currency,
 		false,
-		// TODO: make this dynamic
-		'TaxInclusive',
+		switchInformation.target.taxMode,
 	);
 	const nextPaymentDate = paymentSchedule[0]?.date;
 

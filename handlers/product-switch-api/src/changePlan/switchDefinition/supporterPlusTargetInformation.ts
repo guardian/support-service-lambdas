@@ -78,6 +78,7 @@ export const supporterPlusTargetInformation: SwitchTargetInformation<
 			discount,
 			dataExtensionName:
 				DataExtensionNames.recurringContributionToSupporterPlusSwitch,
+			taxMode: productRatePlan.taxMode,
 		} satisfies TargetInformation;
 	},
 };

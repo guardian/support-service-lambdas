@@ -43,6 +43,7 @@ export const digitalSubscriptionTargetInformation: SwitchTargetInformation<
 			contributionCharge: undefined,
 			subscriptionChargeId: productRatePlan.charges.Subscription.id,
 			dataExtensionName: DataExtensionNames.supporterPlusToDigitalPlusSwitch,
+			taxMode: productRatePlan.taxMode,
 		} satisfies TargetInformation;
 	},
 };

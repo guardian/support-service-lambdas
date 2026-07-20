@@ -121,6 +121,7 @@ const testTargetInformation: TargetInformation = {
 	productRatePlanId: '',
 	ratePlanName: '',
 	subscriptionChargeId: '',
+	taxMode: 'TaxInclusive',
 };
 
 const testSwitchInformation: SwitchInformation = {
