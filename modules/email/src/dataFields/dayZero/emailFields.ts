@@ -6,7 +6,11 @@ import type {
 } from '@modules/email/email';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import type { TaxMode } from '@modules/product-catalog/productCatalog';
-import { describePayments, firstPayment } from './paymentDescription';
+import {
+	describePayments,
+	firstPayment,
+	simplifyPaymentSchedule,
+} from './paymentDescription';
 import type { EmailPaymentFields } from './paymentEmailFields';
 import { getPaymentFields } from './paymentEmailFields';
 import type {
@@ -48,18 +52,21 @@ export function buildNonDeliveryEmailFields({
 	mandateId?: string;
 	taxMode: TaxMode;
 }): NonDeliveryEmailFields {
+	const simplifiedPaymentSchedule = simplifyPaymentSchedule(
+		taxMode,
+		paymentSchedule,
+	);
 	const paymentFields = getPaymentFields(
 		today,
 		paymentMethod,
-		dayjs(firstPayment(paymentSchedule).date),
+		dayjs(firstPayment(simplifiedPaymentSchedule).date),
 		mandateId,
 	);
 	const subscriptionDetails = describePayments(
-		paymentSchedule,
+		simplifiedPaymentSchedule,
 		billingPeriod,
 		currency,
 		isFixedTerm,
-		taxMode,
 	);
 	return {
 		first_name: user.firstName,

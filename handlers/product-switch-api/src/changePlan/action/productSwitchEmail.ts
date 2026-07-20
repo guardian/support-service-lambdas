@@ -1,5 +1,8 @@
 import dayjs from 'dayjs';
-import { describePayments } from '@modules/email/dataFields/dayZero/paymentDescription';
+import {
+	describePayments,
+	simplifyPaymentSchedule,
+} from '@modules/email/dataFields/dayZero/paymentDescription';
 import type { EmailMessageWithUserId } from '@modules/email/email';
 import { getCurrencyInfo } from '@modules/internationalisation/currency';
 import type { SimpleInvoiceTotal } from '@modules/zuora/billingPreview';
@@ -23,21 +26,24 @@ export const buildEmailMessage = (
 	const { subscriptionNumber, productRatePlanKey } =
 		switchInformation.subscription;
 
+	const payments = paymentSchedule.map(
+		({ date, total, amountWithoutTax, taxAmount }) => ({
+			date,
+			amount: total,
+			amountWithoutTax,
+			taxAmount,
+		}),
+	);
+	const simplifiedPaymentSchedule = simplifyPaymentSchedule(
+		switchInformation.target.taxMode,
+		{ payments },
+	);
+
 	const subscriptionRate = describePayments(
-		{
-			payments: paymentSchedule.map(
-				({ date, total, amountWithoutTax, taxAmount }) => ({
-					date,
-					amount: total,
-					amountWithoutTax,
-					taxAmount,
-				}),
-			),
-		},
+		simplifiedPaymentSchedule,
 		productRatePlanKey,
 		currency,
 		false,
-		switchInformation.target.taxMode,
 	);
 	const nextPaymentDate = paymentSchedule[0]?.date;
 

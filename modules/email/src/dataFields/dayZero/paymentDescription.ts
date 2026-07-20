@@ -30,16 +30,20 @@ export function priceWithCurrency(
 	return `${getCurrencyInfo(currency).glyph}${formatPrice(amount)}`;
 }
 
-export function firstPayment(paymentSchedule: EmailPaymentSchedule): Payment {
-	if (isNonEmpty(paymentSchedule.payments)) {
-		return earliestPayment(paymentSchedule.payments);
+export function firstPayment(
+	paymentSchedule: SimplifiedPaymentScheduleItem[],
+): SimplifiedPaymentScheduleItem {
+	if (isNonEmpty(paymentSchedule)) {
+		return earliestPayment(paymentSchedule);
 	}
 	throw new Error('Payment schedule has no payments');
 }
 
 // Helper that asserts a non-empty array of payments and returns the earliest one
-function earliestPayment(payments: [Payment, ...Payment[]]): Payment {
-	return payments.reduce<Payment>(
+function earliestPayment(
+	payments: [SimplifiedPaymentScheduleItem, ...SimplifiedPaymentScheduleItem[]],
+): SimplifiedPaymentScheduleItem {
+	return payments.reduce<SimplifiedPaymentScheduleItem>(
 		(min, payment) => (payment.date < min.date ? payment : min),
 		payments[0],
 	);
@@ -76,28 +80,37 @@ function monthsBetween(start: Date, end: Date): number {
 	return endD.diff(startD, 'month');
 }
 
-function getRelevantAmountFromPayment(taxMode: TaxMode, payment: Payment) {
-	return taxMode === 'TaxExclusive'
-		? payment.amountWithoutTax
-		: payment.amountWithoutTax + payment.taxAmount;
+export type SimplifiedPaymentScheduleItem = {
+	date: Date;
+	amountWithTaxResolved: number;
+};
+
+export function simplifyPaymentSchedule(
+	taxMode: TaxMode,
+	paymentSchedule: EmailPaymentSchedule,
+): SimplifiedPaymentScheduleItem[] {
+	return paymentSchedule.payments.map((payment: Payment) => {
+		return {
+			date: payment.date,
+			amountWithTaxResolved:
+				taxMode === 'TaxExclusive'
+					? payment.amountWithoutTax
+					: payment.amountWithoutTax + payment.taxAmount,
+		};
+	});
 }
 
 export function describePayments(
-	paymentSchedule: EmailPaymentSchedule,
+	paymentSchedule: SimplifiedPaymentScheduleItem[],
 	billingPeriod: EmailBillingPeriod,
 	currency: IsoCurrency,
 	isFixedTerm: boolean,
-	taxMode: TaxMode,
 ): string {
-	const initialPrice = getRelevantAmountFromPayment(
-		taxMode,
-		firstPayment(paymentSchedule),
-	);
+	const initialPrice = firstPayment(paymentSchedule).amountWithTaxResolved;
 
 	const [paymentsWithInitialPrice, paymentsWithDifferentPrice] = partition(
-		paymentSchedule.payments,
-		(payment) =>
-			getRelevantAmountFromPayment(taxMode, payment) === initialPrice,
+		paymentSchedule,
+		(payment) => payment.amountWithTaxResolved === initialPrice,
 	);
 
 	const noun = billingPeriodNoun(billingPeriod);
@@ -107,7 +120,7 @@ export function describePayments(
 			billingPeriod,
 		)}`;
 	}
-	if (paymentSchedule.payments.length === 1) {
+	if (paymentSchedule.length === 1) {
 		return `${priceWithCurrency(currency, initialPrice)} for the first ${noun}`;
 	}
 	if (paymentsWithDifferentPrice.length === 0) {
@@ -122,7 +135,6 @@ export function describePayments(
 			currency,
 			initialPrice,
 			billingPeriod,
-			taxMode,
 		);
 	}
 	return descriptionWithMultipleIntroductoryPeriods(
@@ -137,16 +149,17 @@ export function describePayments(
 		currency,
 		initialPrice,
 		billingPeriod,
-		taxMode,
 	);
 }
 
 function descriptionWithSingleIntroductoryPeriod(
-	paymentsWithDifferentPrice: [Payment, ...Payment[]],
+	paymentsWithDifferentPrice: [
+		SimplifiedPaymentScheduleItem,
+		...SimplifiedPaymentScheduleItem[],
+	],
 	currency: IsoCurrency,
 	initialPrice: number,
 	billingPeriod: EmailBillingPeriod,
-	taxMode: TaxMode,
 ) {
 	const firstDifferent = paymentsWithDifferentPrice[0];
 	return `${priceWithCurrency(
@@ -156,17 +169,22 @@ function descriptionWithSingleIntroductoryPeriod(
 		billingPeriod,
 	)}, then ${priceWithCurrency(
 		currency,
-		getRelevantAmountFromPayment(taxMode, firstDifferent),
+		firstDifferent.amountWithTaxResolved,
 	)} every ${billingPeriodNoun(billingPeriod)}`;
 }
 
 function descriptionWithMultipleIntroductoryPeriods(
-	paymentsWithInitialPrice: [Payment, ...Payment[]],
-	paymentsWithDifferentPrice: [Payment, ...Payment[]],
+	paymentsWithInitialPrice: [
+		SimplifiedPaymentScheduleItem,
+		...SimplifiedPaymentScheduleItem[],
+	],
+	paymentsWithDifferentPrice: [
+		SimplifiedPaymentScheduleItem,
+		...SimplifiedPaymentScheduleItem[],
+	],
 	currency: IsoCurrency,
 	initialPrice: number,
 	billingPeriod: EmailBillingPeriod,
-	taxMode: TaxMode,
 ) {
 	const firstIntroductoryPayment = earliestPayment(paymentsWithInitialPrice);
 	const firstDifferentPayment = earliestPayment(paymentsWithDifferentPrice);
@@ -201,9 +219,6 @@ function descriptionWithMultipleIntroductoryPeriods(
 		billingPeriod,
 	)} for ${timespan}, then ${priceWithCurrency(
 		currency,
-		getRelevantAmountFromPayment(
-			taxMode,
-			earliestPayment(paymentsWithDifferentPrice),
-		),
+		earliestPayment(paymentsWithDifferentPrice).amountWithTaxResolved,
 	)} every ${billingPeriodNoun(billingPeriod)}`;
 }
