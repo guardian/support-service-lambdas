@@ -1,10 +1,10 @@
 {
   "name": "supporter-product-data",
   "scripts": {
-    "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --group=-integration",
-    "it-test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --group=integration",
+    "test": "vitest run --passWithNoTests",
+    "it-test": "vitest run --config vitest.integration.config.ts",
     "type-check": "tsc --noEmit",
-    "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
+    "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts'",
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
     "build": "tsc --noEmit"

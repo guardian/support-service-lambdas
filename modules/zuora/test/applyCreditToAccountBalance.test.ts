@@ -3,10 +3,10 @@ import { applyCreditToAccountBalance } from '@modules/zuora/creditBalanceAdjustm
 import { zuoraUpperCaseSuccessSchema } from '@modules/zuora/types';
 import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
 
-jest.mock('@modules/zuora/zuoraClient');
+vi.mock('@modules/zuora/zuoraClient');
 
-jest.mock('@modules/stage', () => ({
-	stageFromEnvironment: jest.fn().mockReturnValue('PROD'),
+vi.mock('@modules/stage', () => ({
+	stageFromEnvironment: vi.fn().mockReturnValue('PROD'),
 }));
 
 describe('applyCreditToAccountBalance', () => {
@@ -15,7 +15,7 @@ describe('applyCreditToAccountBalance', () => {
 			Id: '8a12865f9836b7d7019836f101057d47',
 			Success: true,
 		};
-		mockZuoraClient.post = jest.fn().mockResolvedValue(mockResponse);
+		mockZuoraClient.post = vi.fn().mockResolvedValue(mockResponse);
 
 		const body = JSON.stringify({
 			Amount: 1,
@@ -35,7 +35,7 @@ describe('applyCreditToAccountBalance', () => {
 
 	it('should throw if zuoraClient.post rejects', async () => {
 		const error = new Error('Network error');
-		mockZuoraClient.post = jest.fn().mockRejectedValue(error);
+		mockZuoraClient.post = vi.fn().mockRejectedValue(error);
 
 		const body = JSON.stringify({
 			Amount: 1,
@@ -50,7 +50,7 @@ describe('applyCreditToAccountBalance', () => {
 
 	it('should validate response schema', async () => {
 		const invalidResponse = { NotSuccess: false };
-		mockZuoraClient.post = jest.fn().mockResolvedValue(invalidResponse);
+		mockZuoraClient.post = vi.fn().mockResolvedValue(invalidResponse);
 
 		const body = JSON.stringify({
 			Amount: 1,
@@ -69,7 +69,7 @@ describe('applyCreditToAccountBalance', () => {
 				Id: '8a12865f9836b7d7019836f101057d47',
 				Success: true,
 			};
-			mockZuoraClient.post = jest.fn().mockResolvedValue(mockResponse);
+			mockZuoraClient.post = vi.fn().mockResolvedValue(mockResponse);
 
 			const body = JSON.stringify({
 				Amount: 1,
@@ -96,7 +96,7 @@ describe('applyCreditToAccountBalance', () => {
 				Id: '8a12865f9836b7d7019836f101057d47',
 				Success: true,
 			};
-			mockZuoraClient.post = jest.fn().mockResolvedValue(mockResponse);
+			mockZuoraClient.post = vi.fn().mockResolvedValue(mockResponse);
 
 			const body = JSON.stringify({
 				Amount: 1,
@@ -132,7 +132,7 @@ describe('applyCreditToAccountBalance', () => {
 				status: 'PROCESSED' as const,
 				amount: 1,
 			};
-			mockZuoraClient.post = jest.fn().mockResolvedValue(mockResponse);
+			mockZuoraClient.post = vi.fn().mockResolvedValue(mockResponse);
 
 			const body = JSON.stringify({
 				Amount: 1,

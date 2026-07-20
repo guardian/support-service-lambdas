@@ -24,7 +24,7 @@ import { productCatalog } from './productCatalogFixture';
  */
 function makeMockZuoraClient(): ZuoraClient {
 	return {
-		post: jest.fn().mockResolvedValue({
+		post: vi.fn().mockResolvedValue({
 			invoiceItems: [
 				{
 					subscriptionNumber: 'A-SUB123',
@@ -34,8 +34,8 @@ function makeMockZuoraClient(): ZuoraClient {
 				},
 			],
 		}),
-		get: jest.fn(),
-		delete: jest.fn(),
+		get: vi.fn(),
+		delete: vi.fn(),
 	} as unknown as ZuoraClient;
 }
 
@@ -409,7 +409,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 		const account = makeAccount();
 		// Mock billing preview with a negative item (discount)
 		const zuoraClient = {
-			post: jest.fn().mockResolvedValue({
+			post: vi.fn().mockResolvedValue({
 				invoiceItems: [
 					{
 						subscriptionNumber: 'A-SUB123',
@@ -425,8 +425,8 @@ describe('selectCandidateSubscriptionCharge', () => {
 					},
 				],
 			}),
-			get: jest.fn(),
-			delete: jest.fn(),
+			get: vi.fn(),
+			delete: vi.fn(),
 		} as unknown as ZuoraClient;
 
 		await expect(

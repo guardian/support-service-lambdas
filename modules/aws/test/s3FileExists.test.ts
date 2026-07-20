@@ -6,12 +6,12 @@ describe('checkFileExistsInS3', () => {
 	const filePath = 'path/to/file.txt';
 
 	beforeEach(() => {
-		jest.resetAllMocks();
-		console.error = jest.fn();
+		vi.resetAllMocks();
+		console.error = vi.fn();
 	});
 
 	test('should return true when file exists', async () => {
-		const mockSend = jest.fn();
+		const mockSend = vi.fn();
 		mockSend.mockResolvedValue({});
 
 		const result = await checkFileExistsInS3({
@@ -25,7 +25,7 @@ describe('checkFileExistsInS3', () => {
 	});
 
 	test('should return false when file does not exist (NoSuchKey)', async () => {
-		const mockSend = jest.fn();
+		const mockSend = vi.fn();
 		const error = new NoSuchKey({
 			$metadata: {},
 			message: 'No Such Key',
@@ -42,7 +42,7 @@ describe('checkFileExistsInS3', () => {
 	});
 
 	test('should return false when file does not exist (NotFound)', async () => {
-		const mockSend = jest.fn();
+		const mockSend = vi.fn();
 		const error = new NotFound({
 			$metadata: {},
 			message: 'Not Found',
@@ -59,7 +59,7 @@ describe('checkFileExistsInS3', () => {
 	});
 
 	test('should throw error for non-existence related errors', async () => {
-		const mockSend = jest.fn();
+		const mockSend = vi.fn();
 		const error = new InvalidRequest({
 			$metadata: {},
 			message: 'Access Denied',

@@ -1,6 +1,9 @@
 import type { ModuleDefinition } from '../build';
 
-export function buildJestConfigJs(pkg: ModuleDefinition) {
+export function buildJestConfigJs(pkg: ModuleDefinition): string | undefined {
+	if (pkg.testRunner !== 'jest') {
+		return undefined;
+	}
 	return `/** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
 	preset: 'ts-jest',

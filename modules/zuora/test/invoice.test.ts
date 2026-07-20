@@ -14,16 +14,16 @@ import {
 } from '@modules/zuora/types';
 import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
 
-jest.mock('@modules/zuora/zuoraClient');
-jest.mock('dayjs', () => {
-	return () => ({
-		format: jest.fn(() => '2023-11-04'),
-	});
-});
+vi.mock('@modules/zuora/zuoraClient');
+vi.mock('dayjs', () => ({
+	default: () => ({
+		format: vi.fn(() => '2023-11-04'),
+	}),
+}));
 
 describe('invoice', () => {
 	beforeEach(() => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	});
 
 	describe('getInvoice', () => {
@@ -33,7 +33,7 @@ describe('invoice', () => {
 				invoiceNumber: 'INV-2023-001',
 				amount: 99.99,
 			};
-			mockZuoraClient.get = jest.fn().mockResolvedValue(mockResponse);
+			mockZuoraClient.get = vi.fn().mockResolvedValue(mockResponse);
 
 			const result = await getInvoice(mockZuoraClient, 'INV-123');
 
@@ -53,7 +53,7 @@ describe('invoice', () => {
 					{ id: 'II-2', amount: 49.99 },
 				],
 			};
-			mockZuoraClient.get = jest.fn().mockResolvedValue(mockResponse);
+			mockZuoraClient.get = vi.fn().mockResolvedValue(mockResponse);
 
 			const result = await getInvoiceItems(mockZuoraClient, 'INV-123');
 
@@ -68,7 +68,7 @@ describe('invoice', () => {
 	describe('creditInvoice', () => {
 		it('should create invoice item adjustment', async () => {
 			const mockResponse = { Success: true, Id: 'ADJ-123' };
-			mockZuoraClient.post = jest.fn().mockResolvedValue(mockResponse);
+			mockZuoraClient.post = vi.fn().mockResolvedValue(mockResponse);
 
 			const adjustmentDate = dayjs('2023-11-04');
 			const result = await creditInvoice(
@@ -94,7 +94,7 @@ describe('invoice', () => {
 
 	describe('writeOffInvoice', () => {
 		it('should write off invoice with comment and current date', async () => {
-			mockZuoraClient.put = jest.fn();
+			mockZuoraClient.put = vi.fn();
 
 			const comment = 'Dispute closure write-off';
 			await writeOffInvoice(mockZuoraClient, 'INV-12345', comment);
@@ -112,7 +112,7 @@ describe('invoice', () => {
 
 		it('should handle invoice numbers and IDs', async () => {
 			const mockResponse = { Success: true };
-			mockZuoraClient.put = jest.fn().mockResolvedValue(mockResponse);
+			mockZuoraClient.put = vi.fn().mockResolvedValue(mockResponse);
 
 			await writeOffInvoice(
 				mockZuoraClient,
@@ -129,7 +129,7 @@ describe('invoice', () => {
 
 		it('should handle Zuora API errors', async () => {
 			const error = new Error('Invoice not found');
-			mockZuoraClient.put = jest.fn().mockRejectedValue(error);
+			mockZuoraClient.put = vi.fn().mockRejectedValue(error);
 
 			await expect(
 				writeOffInvoice(mockZuoraClient, 'INV-12345', 'Test comment'),

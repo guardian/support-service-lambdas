@@ -3,17 +3,17 @@ import { ZuoraError } from '@modules/zuora/errors/zuoraError';
 import { createPayment, rejectPayment } from '../src/payment';
 import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
 
-jest.mock('@modules/zuora/zuoraClient');
+vi.mock('@modules/zuora/zuoraClient');
 
 describe('payment', () => {
 	beforeEach(() => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	});
 
 	describe('createPayment', () => {
 		it('should create payment successfully', async () => {
 			const mockResponse = { Success: true, Id: 'payment_123' };
-			mockZuoraClient.post = jest.fn().mockResolvedValue(mockResponse);
+			mockZuoraClient.post = vi.fn().mockResolvedValue(mockResponse);
 			const effectiveDate = dayjs('2023-11-04');
 
 			await createPayment(
@@ -33,7 +33,7 @@ describe('payment', () => {
 		});
 
 		it('should throw error when payment creation fails', async () => {
-			mockZuoraClient.post = jest.fn().mockImplementation(() => {
+			mockZuoraClient.post = vi.fn().mockImplementation(() => {
 				throw new ZuoraError(
 					'An error occurred while creating the payment',
 					{ status: 123, responseBody: '', responseHeaders: {} },
@@ -56,7 +56,7 @@ describe('payment', () => {
 
 		it('should handle API errors', async () => {
 			const error = new Error('Zuora API error');
-			mockZuoraClient.post = jest.fn().mockRejectedValue(error);
+			mockZuoraClient.post = vi.fn().mockRejectedValue(error);
 			const effectiveDate = dayjs('2023-11-04');
 
 			await expect(
@@ -75,7 +75,7 @@ describe('payment', () => {
 	describe('rejectPayment', () => {
 		it('should reject payment with default chargeback reason', async () => {
 			const mockResponse = { Success: true, Id: 'rejection_123' };
-			mockZuoraClient.post = jest.fn().mockResolvedValue(mockResponse);
+			mockZuoraClient.post = vi.fn().mockResolvedValue(mockResponse);
 
 			await rejectPayment(mockZuoraClient, 'P-12345');
 
@@ -93,7 +93,7 @@ describe('payment', () => {
 
 		it('should reject payment with custom reason', async () => {
 			const mockResponse = { Success: true };
-			mockZuoraClient.post = jest.fn().mockResolvedValue(mockResponse);
+			mockZuoraClient.post = vi.fn().mockResolvedValue(mockResponse);
 
 			await rejectPayment(mockZuoraClient, 'P-67890', 'insufficient_funds');
 
@@ -103,7 +103,7 @@ describe('payment', () => {
 				expect.any(Object),
 			);
 
-			const callArgs = mockZuoraClient.post.mock.calls[0] as string;
+			const callArgs = mockZuoraClient.post.mock.calls[0] as unknown as string;
 			const requestBody = JSON.parse(callArgs[1] ?? '') as Record<
 				string,
 				string
@@ -116,7 +116,7 @@ describe('payment', () => {
 
 		it('should handle different payment numbers', async () => {
 			const mockResponse = { Success: true };
-			mockZuoraClient.post = jest.fn().mockResolvedValue(mockResponse);
+			mockZuoraClient.post = vi.fn().mockResolvedValue(mockResponse);
 
 			await rejectPayment(
 				mockZuoraClient,
@@ -133,7 +133,7 @@ describe('payment', () => {
 
 		it('should handle Zuora API errors', async () => {
 			const error = new Error('Payment not found');
-			mockZuoraClient.post = jest.fn().mockRejectedValue(error);
+			mockZuoraClient.post = vi.fn().mockRejectedValue(error);
 
 			await expect(rejectPayment(mockZuoraClient, 'P-12345')).rejects.toThrow(
 				'Payment not found',
@@ -141,11 +141,11 @@ describe('payment', () => {
 		});
 
 		it('should include all required fields in request body', async () => {
-			mockZuoraClient.post = jest.fn().mockResolvedValue({ Success: true });
+			mockZuoraClient.post = vi.fn().mockResolvedValue({ Success: true });
 
 			await rejectPayment(mockZuoraClient, 'P-12345', 'fraud');
 
-			const callArgs = mockZuoraClient.post.mock.calls[0] as string;
+			const callArgs = mockZuoraClient.post.mock.calls[0] as unknown as string;
 			const requestBody = JSON.parse(callArgs[1] ?? '') as Record<
 				string,
 				string

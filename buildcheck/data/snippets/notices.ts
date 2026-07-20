@@ -31,4 +31,8 @@ export const contentPostProcessor: Record<string, ContentPostProcessor> = {
 		prefix: (templatePath) => '// ' + notice(templatePath) + '\n',
 		write: undefined, // cant be templated as an object
 	},
+	'.ts': {
+		prefix: (templatePath) => '// ' + notice(templatePath) + '\n',
+		write: undefined, // cant be templated as an object
+	},
 };

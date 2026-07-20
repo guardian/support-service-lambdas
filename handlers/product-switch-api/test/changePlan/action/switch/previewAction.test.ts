@@ -16,9 +16,9 @@ import pendingAmendmentsJson from '../../../fixtures/pendingAmendments.json';
 import { loadSubscription } from '../../prepare/subscriptionInformation.test';
 
 const mockZuoraClient = {
-	get: jest.fn(),
-	post: jest.fn(),
-	delete: jest.fn(),
+	get: vi.fn(),
+	post: vi.fn(),
+	delete: vi.fn(),
 };
 
 const productCatalog = generateProductCatalog(
@@ -52,7 +52,7 @@ function getOrderData() {
 // pending amendment means the chargedThroughDate disappears to null, and the effective start date goes to "next payment date"
 describe('DoPreviewAction with a pending amendment subscription', () => {
 	beforeEach(() => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	});
 
 	test('preview calculates correct amounts and dates', async () => {

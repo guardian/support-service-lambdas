@@ -1,3 +1,4 @@
+import type { Mocked, MockedFunction } from 'vitest';
 import { z, ZodError } from 'zod';
 import type { Authorisation, BearerTokenProvider } from '@modules/zuora/auth';
 import { RestClient, RestClientError } from '../src/restClient';
@@ -5,10 +6,10 @@ import { RestClient, RestClientError } from '../src/restClient';
 class TestRestClient extends RestClient {
 	constructor(baseUrl: string, authHeaders: Record<string, string> = {}) {
 		const mockTokenProvider = {
-			getAuthorisation: jest
+			getAuthorisation: vi
 				.fn()
 				.mockResolvedValue({ baseUrl, authHeaders } satisfies Authorisation),
-		} as unknown as jest.Mocked<BearerTokenProvider>;
+		} as unknown as Mocked<BearerTokenProvider>;
 
 		super(mockTokenProvider);
 	}
@@ -17,7 +18,7 @@ class TestRestClient extends RestClient {
 describe('RestClient', () => {
 	const mockBaseUrl = 'https://api.example.com';
 	let client: TestRestClient;
-	let fetchMock: jest.MockedFunction<typeof fetch>;
+	let fetchMock: MockedFunction<typeof fetch>;
 
 	const mockFetchResponse = (
 		overrides: Partial<{
@@ -40,7 +41,7 @@ describe('RestClient', () => {
 
 	beforeEach(() => {
 		client = new TestRestClient(mockBaseUrl);
-		fetchMock = jest.fn();
+		fetchMock = vi.fn();
 		global.fetch = fetchMock;
 	});
 

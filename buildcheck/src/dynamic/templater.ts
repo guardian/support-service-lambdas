@@ -6,7 +6,10 @@ export type TemplateContent = string | Record<string, unknown>;
 
 export interface Template<Definition> {
 	targetPath: string;
-	value: TemplateContent | ((data: Definition) => TemplateContent);
+	value:
+		| TemplateContent
+		| undefined
+		| ((data: Definition) => TemplateContent | undefined);
 	templateFilename: string;
 }
 
@@ -14,11 +17,15 @@ export function applyTemplates<Definition>(
 	pkg: Definition,
 	templates: Array<Template<Definition>>,
 ): GeneratedFile[] {
-	return templates.map((template) => {
+	return templates.flatMap((template) => {
 		const rawContent =
 			typeof template.value === 'function'
 				? template.value(pkg)
 				: template.value;
+
+		if (rawContent === undefined) {
+			return [];
+		}
 
 		const content = serializeContent(
 			rawContent,
@@ -26,10 +33,12 @@ export function applyTemplates<Definition>(
 			template.templateFilename,
 		);
 
-		return {
-			content,
-			...template,
-		};
+		return [
+			{
+				content,
+				...template,
+			},
+		];
 	});
 }
 

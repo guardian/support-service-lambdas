@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`the buildCreateSubscriptionRequest function builds request with applied promotion 1`] = `
+exports[`the buildCreateSubscriptionRequest function > builds request with applied promotion 1`] = `
 {
   "description": "Created by createSubscription.ts in support-service-lambdas",
   "newAccount": {
@@ -118,7 +118,7 @@ exports[`the buildCreateSubscriptionRequest function builds request with applied
 }
 `;
 
-exports[`the buildCreateSubscriptionRequest function builds request with gift recipient 1`] = `
+exports[`the buildCreateSubscriptionRequest function > builds request with gift recipient 1`] = `
 {
   "description": "Created by createSubscription.ts in support-service-lambdas",
   "newAccount": {
@@ -218,7 +218,7 @@ exports[`the buildCreateSubscriptionRequest function builds request with gift re
 }
 `;
 
-exports[`the buildCreateSubscriptionRequest function builds request without promotion or gift 1`] = `
+exports[`the buildCreateSubscriptionRequest function > builds request without promotion or gift 1`] = `
 {
   "description": "Created by createSubscription.ts in support-service-lambdas",
   "newAccount": {
@@ -318,7 +318,7 @@ exports[`the buildCreateSubscriptionRequest function builds request without prom
 }
 `;
 
-exports[`the buildCreateSubscriptionRequest function sets delivery instructions and delivery agent for a delivery product 1`] = `
+exports[`the buildCreateSubscriptionRequest function > sets delivery instructions and delivery agent for a delivery product 1`] = `
 {
   "description": "Created by createSubscription.ts in support-service-lambdas",
   "newAccount": {
