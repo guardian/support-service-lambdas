@@ -12,10 +12,11 @@ export class IamPolicies extends SrStack {
 		new GuDeveloperPolicyExperimental(this, 'LocalDevelopmentPolicy', {
 			friendlyName: 'Local Development',
 			grantId: 'membership-local-dev',
+			withoutPolicyChecks: true,
 			statements: [
 				new AllowCodeS3ConfigReadPolicy(),
 				new AllowCodeParameterStoreReadPolicy(this),
-				// todo secrets manager zuora creds
+				new AllowCodeSecretsManagerReadPolicy(this),
 			],
 		});
 	}
@@ -29,7 +30,6 @@ class AllowCodeS3ConfigReadPolicy extends PolicyStatement {
 			(path) => `arn:aws:s3:::${bucketName}/${path}`,
 		);
 		super({
-			effect: Effect.ALLOW,
 			actions: ['s3:GetObject'],
 			resources: s3Resources,
 		});
@@ -43,6 +43,18 @@ class AllowCodeParameterStoreReadPolicy extends PolicyStatement {
 			resources: [
 				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/DEV/*`,
 				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/CODE/*`,
+			],
+		});
+	}
+}
+
+class AllowCodeSecretsManagerReadPolicy extends PolicyStatement {
+	constructor(scope: GuStack) {
+		super({
+			actions: ['secretsmanager:GetSecretValue'],
+			resources: [
+				`arn:aws:secretsmanager:${scope.region}:${scope.account}:secret:DEV/*`,
+				`arn:aws:secretsmanager:${scope.region}:${scope.account}:secret:CODE/*`,
 			],
 		});
 	}
