@@ -6,7 +6,7 @@ allowedStages:
   - CODE
   - PROD
 deployments:
-  cfn:
+  iam-policies-cloudformation:
     type: cloud-formation
     app: iam-policies
     parameters:
