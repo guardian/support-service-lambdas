@@ -20,44 +20,43 @@ export type DeleteSecondaryUserPath = z.infer<
 	typeof deleteSecondaryUserPathSchema
 >;
 
-export const deleteSecondaryUserEndpoint =
-	(
-		stage: Stage,
-		secondaryUserRepository: SecondaryUserRepository,
-		dynamoClient: DynamoDBClient,
-	) =>
-	async (path: DeleteSecondaryUserPath): Promise<APIGatewayProxyResult> => {
-		try {
-			const { subscriptionName, secondaryIdentityId } = path;
-			const composedSubscriptionName = secondarySubscriptionName(
-				subscriptionName,
-				secondaryIdentityId,
-			);
-			logger.mutableAddContext(composedSubscriptionName);
+export const deleteSecondaryUserEndpoint = async (
+	stage: Stage,
+	secondaryUserRepository: SecondaryUserRepository,
+	dynamoClient: DynamoDBClient,
+	path: DeleteSecondaryUserPath,
+): Promise<APIGatewayProxyResult> => {
+	try {
+		const { subscriptionName, secondaryIdentityId } = path;
+		const composedSubscriptionName = secondarySubscriptionName(
+			subscriptionName,
+			secondaryIdentityId,
+		);
+		logger.mutableAddContext(composedSubscriptionName);
 
-			// Carry out the secondary user deletion and deletion of the support product data record
-			// in a transaction to keep them atomic
-			await dynamoClient.send(
-				new TransactWriteItemsCommand({
-					TransactItems: [
-						secondaryUserRepository.getDeleteTransaction(
-							subscriptionName,
-							secondaryIdentityId,
-						),
-						getDeleteSupporterRatePlanTransaction(
-							stage,
-							secondaryIdentityId,
-							composedSubscriptionName,
-						),
-					],
-				}),
-			);
+		// Carry out the secondary user deletion and deletion of the support product data record
+		// in a transaction to keep them atomic
+		await dynamoClient.send(
+			new TransactWriteItemsCommand({
+				TransactItems: [
+					secondaryUserRepository.getDeleteTransaction(
+						subscriptionName,
+						secondaryIdentityId,
+					),
+					getDeleteSupporterRatePlanTransaction(
+						stage,
+						secondaryIdentityId,
+						composedSubscriptionName,
+					),
+				],
+			}),
+		);
 
-			return {
-				statusCode: 204,
-				body: '',
-			};
-		} catch (error) {
-			return buildErrorResponse(error);
-		}
-	};
+		return {
+			statusCode: 204,
+			body: '',
+		};
+	} catch (error) {
+		return buildErrorResponse(error);
+	}
+};
