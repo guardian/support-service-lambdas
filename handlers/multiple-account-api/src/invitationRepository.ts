@@ -99,6 +99,12 @@ export class InvitationRepository {
 		);
 	}
 
+	async listNonCancelled(subscriptionName: string) {
+		return (await this.list(subscriptionName)).filter(
+			(invitation) => invitation.cancelledBy === undefined,
+		);
+	}
+
 	async delete(
 		subscriptionName: string,
 		invitationCode: string,

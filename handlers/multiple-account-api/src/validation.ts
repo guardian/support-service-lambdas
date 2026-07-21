@@ -48,10 +48,10 @@ export async function validateInvitationInformation(
 ) {
 	logger.log('Validating invitation information');
 
-	const currentInvites = await repo.list(subscriptionName);
+	const nonCancelledInvites = await repo.listNonCancelled(subscriptionName);
 
 	// Check the secondary user has not been invited already
-	const inviteAlreadyExistsForUser = currentInvites.find(
+	const inviteAlreadyExistsForUser = nonCancelledInvites.find(
 		(invite) => invite.secondaryIdentityId === secondaryIdentityId,
 	);
 
@@ -63,7 +63,7 @@ export async function validateInvitationInformation(
 
 	// Check the subscription still has free invites
 	const subscriptionHasAvailableInvites =
-		currentInvites.length < MAXIMUM_NUMBER_OF_INVITES_PER_SUBSCRIPTION;
+		nonCancelledInvites.length < MAXIMUM_NUMBER_OF_INVITES_PER_SUBSCRIPTION;
 
 	if (!subscriptionHasAvailableInvites) {
 		throw new ValidationError(

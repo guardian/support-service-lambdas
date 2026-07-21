@@ -39,9 +39,8 @@ export const mmaPrimarySummaryEndpoint =
 		try {
 			logger.mutableAddContext(subscriptionName);
 
-			const nonCancelledInvitations = (
-				await invitationRepository.list(subscriptionName)
-			).filter((invitation) => !invitation.cancelledBy);
+			const nonCancelledInvitations =
+				await invitationRepository.listNonCancelled(subscriptionName);
 
 			const secondaryUsers = await getSecondaryUserListWithNames(
 				subscriptionName,
