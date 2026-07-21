@@ -1,0 +1,8 @@
+{
+	"name": "iam-policies",
+	"description": "Janus developer policies",
+	"scripts": {
+		"packageQuick": "mkdir target && touch target/iam-policies.zip"
+	},
+	"dependencies": {}
+}

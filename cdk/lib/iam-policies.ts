@@ -1,0 +1,49 @@
+import type { GuStack } from '@guardian/cdk/lib/constructs/core';
+import { GuDeveloperPolicyExperimental } from '@guardian/cdk/lib/experimental/constructs/iam/policies';
+import { type App } from 'aws-cdk-lib';
+import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import type { SrStageNames } from './cdk/SrStack';
+import { SrStack } from './cdk/SrStack';
+
+export class IamPolicies extends SrStack {
+	constructor(scope: App, stage: SrStageNames) {
+		super(scope, { app: 'iam-policies', stage });
+
+		new GuDeveloperPolicyExperimental(this, 'LocalDevelopmentPolicy', {
+			friendlyName: 'Local Development',
+			grantId: 'membership-local-dev',
+			statements: [
+				new AllowCodeS3ConfigReadPolicy(),
+				new AllowCodeParameterStoreReadPolicy(this),
+				// todo secrets manager zuora creds
+			],
+		});
+	}
+}
+
+class AllowCodeS3ConfigReadPolicy extends PolicyStatement {
+	constructor() {
+		const bucketName = 'gu-reader-revenue-private';
+		const paths = ['*/DEV/*', '*/CODE/*'];
+		const s3Resources: string[] = paths.map(
+			(path) => `arn:aws:s3:::${bucketName}/${path}`,
+		);
+		super({
+			effect: Effect.ALLOW,
+			actions: ['s3:GetObject'],
+			resources: s3Resources,
+		});
+	}
+}
+
+class AllowCodeParameterStoreReadPolicy extends PolicyStatement {
+	constructor(scope: GuStack) {
+		super({
+			actions: ['ssm:GetParameters', 'ssm:GetParameter'],
+			resources: [
+				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/DEV/*`,
+				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/CODE/*`,
+			],
+		});
+	}
+}

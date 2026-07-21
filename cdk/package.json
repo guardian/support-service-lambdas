@@ -16,7 +16,7 @@
 		"update-stack": "../update-stack.sh"
 	},
 	"devDependencies": {
-		"@guardian/cdk": "61.11.1",
+		"@guardian/cdk": "64.1.0",
 		"@types/jest": "^29.5.14",
 		"@types/node": "^22.15.14",
 		"aws-cdk": "2.1128.1",
