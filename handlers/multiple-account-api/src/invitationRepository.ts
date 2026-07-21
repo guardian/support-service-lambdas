@@ -32,6 +32,7 @@ export const invitationRecordSchema = z.object({
 	invitedDate: z.string(),
 	expiryDate: z.number(),
 	cancelledBy: cancelledBySchema.optional(),
+	cancelledDate: z.iso.datetime().optional(),
 });
 
 export type InvitationRecord = z.infer<typeof invitationRecordSchema>;
@@ -126,10 +127,11 @@ export class InvitationRepository {
 					invitationCode: { S: invitationCode },
 				},
 				UpdateExpression:
-					'SET expiryDate = :expiryDate, cancelledBy = :cancelledBy',
+					'SET expiryDate = :expiryDate, cancelledBy = :cancelledBy, cancelledDate = :cancelledDate',
 				ExpressionAttributeValues: {
 					':expiryDate': { N: invitationCancellationTTL().toString() },
 					':cancelledBy': { S: cancelledBy },
+					':cancelledDate': { S: dayjs().toISOString() },
 				},
 			}),
 		);

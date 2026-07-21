@@ -16,7 +16,9 @@ import {
 import type { ListSecondaryUsersBody } from './listSecondaryUsersEndpoint';
 
 export const mmaPrimarySummaryResponseSchema = z.object({
-	invitations: z.array(invitationRecordSchema.omit({ cancelledBy: true })),
+	invitations: z.array(
+		invitationRecordSchema.omit({ cancelledBy: true, cancelledDate: true }),
+	),
 	secondaryUsers: z.array(
 		secondaryUserRecordSchema.extend({
 			email: z.string().optional(),

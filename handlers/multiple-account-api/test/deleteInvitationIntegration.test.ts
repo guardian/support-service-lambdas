@@ -61,10 +61,12 @@ test('deleteInvitationEndpoint soft deletes invitation and returns 204', async (
 
 	expect(result.statusCode).toBe(204);
 
-	// The record is soft deleted: it still exists but now has cancelledBy set
-	// and an updated TTL (expiryDate) roughly 2 weeks in the future.
+	// The record is soft deleted: it still exists but now has cancelledBy and
+	// cancelledDate set and an updated TTL (expiryDate) roughly 2 weeks in the future.
 	const softDeleted = await repo.get(invitationCode);
 	expect(softDeleted?.cancelledBy).toBe('primary');
+	expect(softDeleted?.cancelledDate).toBeDefined();
+	expect(dayjs(softDeleted?.cancelledDate).isValid()).toBe(true);
 	expect(softDeleted?.expiryDate).toBeGreaterThan(
 		dayjs().add(13, 'days').unix(),
 	);
@@ -82,6 +84,8 @@ test('deleteInvitationEndpoint records cancelledBy as secondary when the seconda
 
 	const softDeleted = await repo.get(invitationCode);
 	expect(softDeleted?.cancelledBy).toBe('secondary');
+	expect(softDeleted?.cancelledDate).toBeDefined();
+	expect(dayjs(softDeleted?.cancelledDate).isValid()).toBe(true);
 });
 
 test('deleteInvitationEndpoint returns 400 when the identity id matches neither user', async () => {
