@@ -1,7 +1,7 @@
 import type { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuDeveloperPolicyExperimental } from '@guardian/cdk/lib/experimental/constructs/iam/policies';
 import { type App } from 'aws-cdk-lib';
-import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
 
