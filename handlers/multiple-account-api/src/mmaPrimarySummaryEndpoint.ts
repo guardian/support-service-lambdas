@@ -16,7 +16,7 @@ import {
 import type { ListSecondaryUsersBody } from './listSecondaryUsersEndpoint';
 
 export const mmaPrimarySummaryResponseSchema = z.object({
-	invitations: z.array(invitationRecordSchema),
+	invitations: z.array(invitationRecordSchema.omit({ cancelledBy: true })),
 	secondaryUsers: z.array(
 		secondaryUserRecordSchema.extend({
 			email: z.string().optional(),
@@ -36,7 +36,11 @@ export const mmaPrimarySummaryEndpoint =
 	async ({ subscriptionName }: ListSecondaryUsersBody) => {
 		try {
 			logger.mutableAddContext(subscriptionName);
-			const invitations = await invitationRepository.list(subscriptionName);
+
+			const nonCancelledInvitations = (
+				await invitationRepository.list(subscriptionName)
+			).filter((invitation) => !invitation.cancelledBy);
+
 			const secondaryUsers = await getSecondaryUserListWithNames(
 				subscriptionName,
 				secondaryUserRepository,
@@ -44,7 +48,7 @@ export const mmaPrimarySummaryEndpoint =
 			);
 
 			return ok(
-				{ invitations, secondaryUsers },
+				{ invitations: nonCancelledInvitations, secondaryUsers },
 				mmaPrimarySummaryResponseSchema,
 			);
 		} catch (error) {
