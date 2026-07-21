@@ -543,6 +543,17 @@ components:
         expiryDate:
           type: number
           example: 1781222400000
+        cancelledBy:
+          type: string
+          enum:
+            - primary
+            - secondary
+          description: >-
+            Present in the list-invitations response when the invitation has
+            been cancelled by the primary user or rejected by the secondary
+            user. Absent for pending invitations, and never returned by the
+            mma-primary summary (which excludes cancelled invitations).
+          example: primary
     ListInvitationsResponse:
       type: object
       additionalProperties: false
