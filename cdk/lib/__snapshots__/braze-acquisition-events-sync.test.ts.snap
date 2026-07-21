@@ -54,28 +54,6 @@ exports[`The braze acquisition events sync stack matches the snapshot 1`] = `
         },
         "Name": "braze-acquisition-events-sync-CODE",
         "State": "ENABLED",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "braze-acquisition-events-sync",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
         "Targets": [
           {
             "Arn": {
@@ -408,84 +386,6 @@ exports[`The braze acquisition events sync stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "LambdaErrorAlarm646BFA4C": {
-      "Properties": {
-        "ActionsEnabled": false,
-        "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-CODE",
-              ],
-            ],
-          },
-        ],
-        "AlarmDescription": "braze-acquisition-events-sync failed. Quick triage: inspect lambda logs for error stack and identityId context, check IDAPI lookup result for missing braze-uuid, and confirm Braze /users/track request and response payloads. Impact: an eligible user may not have suppression-related Braze updates applied to their profile, which may result in them receiving marketing communications they should not receive",
-        "AlarmName": "CODE braze-acquisition-events-sync lambda errors",
-        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
-        "Dimensions": [
-          {
-            "Name": "FunctionName",
-            "Value": {
-              "Ref": "LambdaD247545B",
-            },
-          },
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "Errors",
-        "Namespace": "AWS/Lambda",
-        "Period": 300,
-        "Statistic": "Sum",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "braze-acquisition-events-sync",
-          },
-          {
-            "Key": "DiagnosticLinks",
-            "Value": {
-              "Fn::Join": [
-                "",
-                [
-                  "lambda:",
-                  {
-                    "Ref": "LambdaD247545B",
-                  },
-                ],
-              ],
-            },
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "Threshold": 1,
-        "TreatMissingData": "notBreaching",
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
     "LambdaRestApi687C4D83": {
       "Properties": {
         "ApiKeySourceType": "HEADER",
@@ -754,9 +654,6 @@ exports[`The braze acquisition events sync stack matches the snapshot 1`] = `
         "LambdaRestApiproxy22103CFD",
         "LambdaRestApiANYC3C9D364",
       ],
-      "Metadata": {
-        "aws:cdk:do-not-refactor": true,
-      },
       "Properties": {
         "Description": "API Gateway created by CDK",
         "RestApiId": {
@@ -1203,28 +1100,6 @@ exports[`The braze acquisition events sync stack matches the snapshot 2`] = `
         },
         "Name": "braze-acquisition-events-sync-PROD",
         "State": "ENABLED",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "braze-acquisition-events-sync",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
         "Targets": [
           {
             "Arn": {
@@ -1633,84 +1508,6 @@ exports[`The braze acquisition events sync stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "LambdaErrorAlarm646BFA4C": {
-      "Properties": {
-        "ActionsEnabled": true,
-        "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-PROD",
-              ],
-            ],
-          },
-        ],
-        "AlarmDescription": "braze-acquisition-events-sync failed. Quick triage: inspect lambda logs for error stack and identityId context, check IDAPI lookup result for missing braze-uuid, and confirm Braze /users/track request and response payloads. Impact: an eligible user may not have suppression-related Braze updates applied to their profile, which may result in them receiving marketing communications they should not receive",
-        "AlarmName": "PROD braze-acquisition-events-sync lambda errors",
-        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
-        "Dimensions": [
-          {
-            "Name": "FunctionName",
-            "Value": {
-              "Ref": "LambdaD247545B",
-            },
-          },
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "Errors",
-        "Namespace": "AWS/Lambda",
-        "Period": 300,
-        "Statistic": "Sum",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "braze-acquisition-events-sync",
-          },
-          {
-            "Key": "DiagnosticLinks",
-            "Value": {
-              "Fn::Join": [
-                "",
-                [
-                  "lambda:",
-                  {
-                    "Ref": "LambdaD247545B",
-                  },
-                ],
-              ],
-            },
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "Threshold": 1,
-        "TreatMissingData": "notBreaching",
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
     "LambdaRestApi687C4D83": {
       "Properties": {
         "ApiKeySourceType": "HEADER",
@@ -1979,9 +1776,6 @@ exports[`The braze acquisition events sync stack matches the snapshot 2`] = `
         "LambdaRestApiproxy22103CFD",
         "LambdaRestApiANYC3C9D364",
       ],
-      "Metadata": {
-        "aws:cdk:do-not-refactor": true,
-      },
       "Properties": {
         "Description": "API Gateway created by CDK",
         "RestApiId": {

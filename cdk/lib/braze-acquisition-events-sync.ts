@@ -65,23 +65,6 @@ export class BrazeAcquisitionEventsSync extends SrStack {
 
 		const alarmsEnabled = this.stage === 'PROD';
 
-		new SrLambdaAlarm(this, 'LambdaErrorAlarm', {
-			app: this.app,
-			alarmName: `${this.stage} braze-acquisition-events-sync lambda errors`,
-			alarmDescription:
-				'braze-acquisition-events-sync failed. Quick triage: inspect lambda logs for error stack and identityId context, check IDAPI lookup result for missing braze-uuid, and confirm Braze /users/track request and response payloads. Impact: an eligible user may not have suppression-related Braze updates applied to their profile, which may result in them receiving marketing communications they should not receive',
-			lambdaFunctionNames: lambda.functionName,
-			metric: lambda.metricErrors({
-				period: Duration.minutes(5),
-				statistic: 'Sum',
-			}),
-			threshold: 1,
-			evaluationPeriods: 1,
-			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-			treatMissingData: TreatMissingData.NOT_BREACHING,
-			actionsEnabled: alarmsEnabled,
-		});
-
 		new SrLambdaAlarm(this, 'EventBridgeDlqAlarm', {
 			app: this.app,
 			alarmName: `${this.stage} braze-acquisition-events-sync eventbridge dlq has messages`,
