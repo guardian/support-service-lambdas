@@ -22,9 +22,10 @@ describe('listSecondaryUsersEndpoint', () => {
 			list: mockList,
 		} as unknown as SecondaryUserRepository;
 
-		const result = await listSecondaryUsersEndpoint(secondaryUserRepository)({
-			subscriptionName: 'A-S00974337',
-		});
+		const result = await listSecondaryUsersEndpoint(
+			secondaryUserRepository,
+			'A-S00974337',
+		);
 
 		expect(result.statusCode).toBe(200);
 		expect(JSON.parse(result.body)).toEqual({ secondaryUsers });
@@ -39,9 +40,10 @@ describe('listSecondaryUsersEndpoint', () => {
 			list: mockList,
 		} as unknown as SecondaryUserRepository;
 
-		const result = await listSecondaryUsersEndpoint(secondaryUserRepository)({
-			subscriptionName: 'A-S00974337',
-		});
+		const result = await listSecondaryUsersEndpoint(
+			secondaryUserRepository,
+			'A-S00974337',
+		);
 
 		expect(result.statusCode).toBe(500);
 		expect(JSON.parse(result.body)).toEqual({

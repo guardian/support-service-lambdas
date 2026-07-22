@@ -71,11 +71,11 @@ beforeEach(async () => {
 
 	const acceptResult = await acceptInvitationEndpoint(
 		stage,
-		secondaryIdentityId,
-		invitationCode,
 		invitationRepository,
 		secondaryUserRepository,
 		dynamoClient,
+		secondaryIdentityId,
+		invitationCode,
 	);
 
 	expect(acceptResult.statusCode).toBe(200);
@@ -124,16 +124,15 @@ test('deleteSecondaryUserEndpoint deletes secondary user and supporter product d
 		);
 	expect(subscriptionRecordBeforeDelete).toBeDefined();
 
-	const endpoint = deleteSecondaryUserEndpoint(
+	const result = await deleteSecondaryUserEndpoint(
 		stage,
 		secondaryUserRepository,
 		dynamoClient,
+		{
+			subscriptionName,
+			secondaryIdentityId,
+		},
 	);
-
-	const result = await endpoint({
-		subscriptionName,
-		secondaryIdentityId,
-	});
 
 	expect(result.statusCode).toBe(204);
 

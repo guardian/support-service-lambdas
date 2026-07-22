@@ -89,11 +89,11 @@ afterEach(async () => {
 test('acceptInvitationEndpoint accepts an invitation and creates a secondary user record', async () => {
 	const result = await acceptInvitationEndpoint(
 		stage,
-		secondaryIdentityId,
-		invitationCode,
 		invitationRepository,
 		secondaryUserRepository,
 		dynamoClient,
+		secondaryIdentityId,
+		invitationCode,
 	);
 
 	expect(result.statusCode).toBe(200);
