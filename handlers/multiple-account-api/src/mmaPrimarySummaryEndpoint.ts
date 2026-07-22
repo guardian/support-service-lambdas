@@ -10,14 +10,12 @@ import { secondaryUserRecordSchema } from '@modules/multiple-account/secondaryUs
 import { prettyPrint } from '@modules/prettyPrint';
 import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
 import {
-	invitationRecordSchema,
 	type InvitationRepository,
+	nonCancelledInvitationRecordSchema,
 } from './invitationRepository';
 
 export const mmaPrimarySummaryResponseSchema = z.object({
-	invitations: z.array(
-		invitationRecordSchema.omit({ cancelledBy: true, cancelledDate: true }),
-	),
+	invitations: z.array(nonCancelledInvitationRecordSchema),
 	secondaryUsers: z.array(
 		secondaryUserRecordSchema.extend({
 			email: z.string().optional(),
