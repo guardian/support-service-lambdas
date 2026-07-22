@@ -13,7 +13,6 @@ import {
 	invitationRecordSchema,
 	type InvitationRepository,
 } from './invitationRepository';
-import type { ListSecondaryUsersBody } from './listSecondaryUsersEndpoint';
 
 export const mmaPrimarySummaryResponseSchema = z.object({
 	invitations: z.array(
@@ -29,33 +28,32 @@ export const mmaPrimarySummaryResponseSchema = z.object({
 	),
 });
 
-export const mmaPrimarySummaryEndpoint =
-	(
-		invitationRepository: InvitationRepository,
-		secondaryUserRepository: SecondaryUserRepository,
-		identityClient: IdentityClient,
-	) =>
-	async ({ subscriptionName }: ListSecondaryUsersBody) => {
-		try {
-			logger.mutableAddContext(subscriptionName);
+export const mmaPrimarySummaryEndpoint = async (
+	invitationRepository: InvitationRepository,
+	secondaryUserRepository: SecondaryUserRepository,
+	identityClient: IdentityClient,
+	subscriptionName: string,
+) => {
+	try {
+		logger.mutableAddContext(subscriptionName);
 
-			const nonCancelledInvitations =
-				await invitationRepository.listNonCancelled(subscriptionName);
+		const nonCancelledInvitations =
+			await invitationRepository.listNonCancelled(subscriptionName);
 
-			const secondaryUsers = await getSecondaryUserListWithNames(
-				subscriptionName,
-				secondaryUserRepository,
-				identityClient,
-			);
+		const secondaryUsers = await getSecondaryUserListWithNames(
+			subscriptionName,
+			secondaryUserRepository,
+			identityClient,
+		);
 
-			return ok(
-				{ invitations: nonCancelledInvitations, secondaryUsers },
-				mmaPrimarySummaryResponseSchema,
-			);
-		} catch (error) {
-			return buildErrorResponse(error);
-		}
-	};
+		return ok(
+			{ invitations: nonCancelledInvitations, secondaryUsers },
+			mmaPrimarySummaryResponseSchema,
+		);
+	} catch (error) {
+		return buildErrorResponse(error);
+	}
+};
 
 const getSecondaryUserListWithNames = async (
 	subscriptionName: string,
