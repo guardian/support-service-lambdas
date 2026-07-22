@@ -23,6 +23,12 @@ export class IamPolicies extends SrStack {
 				new AllowCodeParameterStoreReadPolicy(this),
 				new AllowCodeSecretsManagerReadPolicy(this),
 				new AllowS3GetPolicy('gu-zuora-catalog', [`PROD/Zuora-CODE/*`]),
+				new AllowS3GetPolicy('support-admin-console', [
+					'google-auth-service-account-certificate.json', // needed to run locally
+					'DEV/*',
+					'CODE/*',
+				]),
+				new AllowDynamoTableFullAccessPolicy(this),
 			],
 		});
 	}
@@ -56,6 +62,30 @@ class AllowCodeSecretsManagerReadPolicy extends PolicyStatement {
 			resources: [
 				`arn:aws:secretsmanager:${scope.region}:${scope.account}:secret:DEV/*`,
 				`arn:aws:secretsmanager:${scope.region}:${scope.account}:secret:CODE/*`,
+			],
+		});
+	}
+}
+
+class AllowDynamoTableFullAccessPolicy extends PolicyStatement {
+	constructor(scope: GuStack) {
+		super({
+			actions: [
+				'BatchGetItem',
+				'GetItem',
+				'Scan',
+				'Query',
+				'GetRecords',
+				'BatchWriteItem',
+				'PutItem',
+				'DeleteItem',
+				'UpdateItem',
+			].map((a) => `dynamodb:${a}`),
+			resources: [
+				`arn:aws:dynamodb:${scope.region}:${scope.account}:table/*-DEV`,
+				`arn:aws:dynamodb:${scope.region}:${scope.account}:table/*-DEV/index/*`,
+				`arn:aws:dynamodb:${scope.region}:${scope.account}:table/*-CODE`,
+				`arn:aws:dynamodb:${scope.region}:${scope.account}:table/*-CODE/index/*`,
 			],
 		});
 	}

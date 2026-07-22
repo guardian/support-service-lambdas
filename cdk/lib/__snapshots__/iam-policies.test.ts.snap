@@ -107,6 +107,15 @@ exports[`The IamPolicies stack matches the snapshot 1`] = `
               "Effect": "Allow",
               "Resource": "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-CODE/*",
             },
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:s3:::support-admin-console/google-auth-service-account-certificate.json",
+                "arn:aws:s3:::support-admin-console/DEV/*",
+                "arn:aws:s3:::support-admin-console/CODE/*",
+              ],
+            },
           ],
           "Version": "2012-10-17",
         },
@@ -223,6 +232,15 @@ exports[`The IamPolicies stack matches the snapshot 2`] = `
               "Action": "s3:GetObject",
               "Effect": "Allow",
               "Resource": "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-CODE/*",
+            },
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:s3:::support-admin-console/google-auth-service-account-certificate.json",
+                "arn:aws:s3:::support-admin-console/DEV/*",
+                "arn:aws:s3:::support-admin-console/CODE/*",
+              ],
             },
           ],
           "Version": "2012-10-17",
