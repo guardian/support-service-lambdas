@@ -12,30 +12,27 @@ export class IamPolicies extends SrStack {
 		new GuDeveloperPolicyExperimental(this, 'LocalDevelopmentPolicy', {
 			friendlyName:
 				'Local Development' +
-				(stage === 'PROD'
-					? ''
-					: ` (${stage} policy - use PROD version for general use)`),
-			grantId: `membership-local-dev` + (stage === 'PROD' ? '' : `-${stage}`),
+				(stage === 'PROD' ? '' : ` ${stage} (for testing the policy itself)`),
+			grantId: `membership-local-dev`,
 			withoutPolicyChecks: true,
 			statements: [
-				new AllowCodeS3ConfigReadPolicy(),
+				new AllowS3GetPolicy('gu-reader-revenue-private', [
+					'*/DEV/*',
+					'*/CODE/*',
+				]),
 				new AllowCodeParameterStoreReadPolicy(this),
 				new AllowCodeSecretsManagerReadPolicy(this),
+				new AllowS3GetPolicy('gu-zuora-catalog', [`PROD/Zuora-CODE/*`]),
 			],
 		});
 	}
 }
 
-class AllowCodeS3ConfigReadPolicy extends PolicyStatement {
-	constructor() {
-		const bucketName = 'gu-reader-revenue-private';
-		const paths = ['*/DEV/*', '*/CODE/*'];
-		const s3Resources: string[] = paths.map(
-			(path) => `arn:aws:s3:::${bucketName}/${path}`,
-		);
+class AllowS3GetPolicy extends PolicyStatement {
+	constructor(bucketName: string, paths: string[]) {
 		super({
 			actions: ['s3:GetObject'],
-			resources: s3Resources,
+			resources: paths.map((path) => `arn:aws:s3:::${bucketName}/${path}`),
 		});
 	}
 }

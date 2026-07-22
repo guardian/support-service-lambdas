@@ -2,7 +2,8 @@
 	"name": "iam-policies",
 	"description": "Janus developer policies",
 	"scripts": {
-		"packageQuick": "mkdir target && touch target/iam-policies.zip"
+		"packageQuick": "mkdir target && touch target/iam-policies.zip",
+		"update-stack": "../../update-stack.sh \"iam-policies\""
 	},
 	"dependencies": {}
 }

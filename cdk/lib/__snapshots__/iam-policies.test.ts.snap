@@ -11,7 +11,7 @@ exports[`The IamPolicies stack matches the snapshot 1`] = `
   "Resources": {
     "LocalDevelopmentPolicy680ECA4A": {
       "Properties": {
-        "Description": "Local Development",
+        "Description": "Local Development CODE (for testing the policy itself)",
         "Path": "/developer-policy/guardian/support-service-lambdas/support/CODE/membership-local-dev/",
         "PolicyDocument": {
           "Statement": [
@@ -101,6 +101,11 @@ exports[`The IamPolicies stack matches the snapshot 1`] = `
                   ],
                 },
               ],
+            },
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-CODE/*",
             },
           ],
           "Version": "2012-10-17",
@@ -213,6 +218,11 @@ exports[`The IamPolicies stack matches the snapshot 2`] = `
                   ],
                 },
               ],
+            },
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-CODE/*",
             },
           ],
           "Version": "2012-10-17",
