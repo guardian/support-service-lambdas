@@ -58,9 +58,14 @@ const mockList = jest
 	.fn<Promise<InvitationRecord[]>, [string]>()
 	.mockResolvedValue(mockInvitations);
 
+const mockListNonCancelled = jest
+	.fn<Promise<InvitationRecord[]>, [string]>()
+	.mockResolvedValue(mockInvitations);
+
 const mockRepo: InvitationRepository = {
 	save: mockSave,
 	list: mockList,
+	listNonCancelled: mockListNonCancelled,
 } as unknown as InvitationRepository;
 
 const mockIdentityClient = {} as IdentityClient;
@@ -70,6 +75,7 @@ describe('createInvitationHandler', () => {
 		jest.clearAllMocks();
 		mockSave.mockResolvedValue(undefined);
 		mockList.mockResolvedValue(mockInvitations);
+		mockListNonCancelled.mockResolvedValue(mockInvitations);
 	});
 
 	it('saves an invitation record and returns 201 with invitationCode', async () => {

@@ -51,21 +51,57 @@ afterEach(async () => {
 	);
 });
 
-test('deleteInvitationEndpoint deletes invitation and returns 204', async () => {
+test('deleteInvitationEndpoint soft deletes invitation and returns 204', async () => {
 	const invitationCode = `it-delete-${Date.now()}`;
 	const record = buildRecord('A-S00099999', invitationCode);
 	await saveRecord(record);
 
 	const endpoint = deleteInvitationEndpoint(repo);
-	const result = await endpoint({ invitationCode });
+	const result = await endpoint(invitationCode, record.primaryIdentityId);
 
 	expect(result.statusCode).toBe(204);
-	await expect(repo.get(record.invitationCode)).resolves.toBeUndefined();
+
+	// The record is soft deleted: it still exists but now has cancelledBy and
+	// cancelledDate set and an updated TTL (expiryDate) roughly 2 weeks in the future.
+	const softDeleted = await repo.get(invitationCode);
+	expect(softDeleted?.cancelledBy).toBe('primary');
+	expect(softDeleted?.cancelledDate).toBeDefined();
+	expect(dayjs(softDeleted?.cancelledDate).isValid()).toBe(true);
+	expect(softDeleted?.expiryDate).toBeGreaterThan(
+		dayjs().add(13, 'days').unix(),
+	);
+});
+
+test('deleteInvitationEndpoint records cancelledBy as secondary when the secondary user rejects', async () => {
+	const invitationCode = `it-delete-secondary-${Date.now()}`;
+	const record = buildRecord('A-S00099999', invitationCode);
+	await saveRecord(record);
+
+	const endpoint = deleteInvitationEndpoint(repo);
+	const result = await endpoint(invitationCode, record.secondaryIdentityId);
+
+	expect(result.statusCode).toBe(204);
+
+	const softDeleted = await repo.get(invitationCode);
+	expect(softDeleted?.cancelledBy).toBe('secondary');
+	expect(softDeleted?.cancelledDate).toBeDefined();
+	expect(dayjs(softDeleted?.cancelledDate).isValid()).toBe(true);
+});
+
+test('deleteInvitationEndpoint returns 400 when the identity id matches neither user', async () => {
+	const invitationCode = `it-delete-badrequest-${Date.now()}`;
+	const record = buildRecord('A-S00099999', invitationCode);
+	await saveRecord(record);
+
+	const endpoint = deleteInvitationEndpoint(repo);
+	const result = await endpoint(invitationCode, 'not-a-matching-id');
+
+	expect(result.statusCode).toBe(400);
 });
 
 test('deleteInvitationEndpoint returns 404 when invitation is not found', async () => {
 	const endpoint = deleteInvitationEndpoint(repo);
-	const result = await endpoint({ invitationCode: `it-missing-${Date.now()}` });
+	const result = await endpoint(`it-missing-${Date.now()}`, '12345678');
 
 	expect(result.statusCode).toBe(404);
 });

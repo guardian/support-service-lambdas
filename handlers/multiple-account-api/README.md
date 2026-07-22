@@ -123,3 +123,29 @@ Example path: /subscriptions/A-S00974337/secondary-users/30067890
 #### Response:
 
 `204 No Content`
+
+### Delete (reject/cancel) an invitation
+
+#### Request:
+
+DELETE /invitation/{invitationCode}
+
+Headers: 'x-identity-id' - the identity id of the user cancelling/rejecting the
+invitation. This is required and must match either the `primaryIdentityId` or
+the `secondaryIdentityId` of the invitation.
+
+Example path: /invitation/RpwR62kMnAxe
+
+The invitation is soft deleted: the record is retained for two weeks (via the
+DynamoDB TTL `expiryDate`) with a `cancelledBy` value derived from the identity
+id - `primary` when it matches the primary user, `secondary` when it matches the
+secondary user.
+
+#### Response:
+
+`204 No Content`
+
+If the `x-identity-id` header is missing, or does not match either user on the
+invitation, a `400 Bad Request` is returned.
+
+

@@ -157,7 +157,7 @@ paths:
               schema:
                 type: string
                 example: Internal server error
-    /subscriptions/{subscriptionName}/secondary-users/{secondaryIdentityId}:
+  /subscriptions/{subscriptionName}/secondary-users/{secondaryIdentityId}:
     delete:
       operationId: deleteSecondaryUser
       summary: Delete secondary user
@@ -309,7 +309,13 @@ paths:
     delete:
       operationId: deleteInvitation
       summary: Delete invitation
-      description: Deletes an invitation by invitation code.
+      description: >-
+        Deletes (soft deletes) an invitation by invitation code. The
+        'x-identity-id' header is required and must match either the primary or
+        secondary user of the invitation. Whether the invitation was cancelled
+        by the primary or rejected by the secondary is derived from which of the
+        two the identity id matches. An invitation that has already been
+        cancelled is treated as not found and cannot be cancelled again.
       security:
         - apiKey: []
       parameters:
@@ -319,19 +325,32 @@ paths:
           schema:
             type: string
           description: The invitation code to delete.
+        - name: x-identity-id
+          in: header
+          required: true
+          schema:
+            type: string
+          description: >-
+            The identity id of the primary or secondary user of the invitation.
+            When it matches the primary user the cancellation is recorded as
+            'primary'; when it matches the secondary user it is recorded as
+            'secondary'.
       responses:
         '204':
           description: Invitation deleted.
+        '400':
+          description: >-
+            Missing 'x-identity-id' header, or the identity id does not match
+            the primary or secondary user of the invitation.
           content:
-            application/json:
+            text/plain:
               schema:
-                $ref: '#/components/schemas/DeleteInvitationResponse'
-              examples:
-                default:
-                  value:
-                    message: Deleted
+                type: string
+                example: The x-identity-id header is required
         '404':
-          description: Invitation not found.
+          description: >-
+            Invitation not found. Also returned when the invitation has already
+            been cancelled.
           content:
             text/plain:
               schema:
@@ -348,7 +367,10 @@ paths:
     post:
       operationId: acceptInvitation
       summary: Accept invitation
-      description: Accepts an invitation for the signed-in secondary user, linking them to the subscription.
+      description: >-
+        Accepts an invitation for the signed-in secondary user, linking them to
+        the subscription. An invitation that has already been cancelled cannot
+        be accepted.
       security:
         - bearerAuth: []
       parameters:
@@ -368,10 +390,16 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: false
+                $ref: '#/components/schemas/AcceptInvitationResponse'
+              examples:
+                default:
+                  value:
+                    identityId: '30067890'
+                    secondarySubscriptionName: A-S00974338
         '400':
-          description: Invalid request or the signed-in user does not match the invited user.
+          description: >-
+            Invalid request, the signed-in user does not match the invited user,
+            or the invitation has already been cancelled.
           content:
             text/plain:
               schema:
@@ -379,6 +407,8 @@ paths:
               examples:
                 incorrectUser:
                   value: Incorrect user
+                cancelled:
+                  value: Invitation has been cancelled by the primary user
             application/json:
               schema:
                 $ref: '#/components/schemas/ParserError'
@@ -464,15 +494,21 @@ components:
           pattern: '^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{12}$'
           description: 12-character Base58 invitation code.
           example: RpwR62kMnAxe
-    DeleteInvitationResponse:
+    AcceptInvitationResponse:
       type: object
       additionalProperties: false
       required:
-        - message
+        - identityId
+        - secondarySubscriptionName
       properties:
-        message:
+        identityId:
           type: string
-          example: Deleted
+          description: Identity id of the secondary user who accepted the invitation.
+          example: '30067890'
+        secondarySubscriptionName:
+          type: string
+          description: Zuora subscription number created for the secondary user.
+          example: A-S00974338
     Invitation:
       type: object
       additionalProperties: false
@@ -507,6 +543,17 @@ components:
         expiryDate:
           type: number
           example: 1781222400000
+        cancelledBy:
+          type: string
+          enum:
+            - primary
+            - secondary
+          description: >-
+            Present in the list-invitations response when the invitation has
+            been cancelled by the primary user or rejected by the secondary
+            user. Absent for pending invitations, and never returned by the
+            mma-primary summary (which excludes cancelled invitations).
+          example: primary
     ListInvitationsResponse:
       type: object
       additionalProperties: false

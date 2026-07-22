@@ -10,6 +10,7 @@ import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import type { Dayjs } from 'dayjs';
 import { z } from 'zod';
 import { logger } from '@modules/logger/logger';
+import { cancelledBySchema } from '@modules/multiple-account/cancelledBySchema';
 import type { Stage } from '@modules/stage';
 
 export const secondaryUserRecordSchema = z.object({
@@ -18,6 +19,7 @@ export const secondaryUserRecordSchema = z.object({
 	primaryIdentityId: z.string(),
 	acceptedDate: z.string(),
 	expiryDate: z.number(),
+	cancelledBy: cancelledBySchema.optional(),
 });
 
 export function secondaryUserTTLFromPrimarySubscriptionTTL(primaryTTL: Dayjs) {

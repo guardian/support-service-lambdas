@@ -40,6 +40,12 @@ export const acceptInvitationEndpoint = async (
 			return badRequest('Incorrect user');
 		}
 
+		if (invitation.cancelledBy !== undefined) {
+			return badRequest(
+				`Invitation has been cancelled by the ${invitation.cancelledBy} user`,
+			);
+		}
+
 		const { subscriptionName, secondaryIdentityId, primaryIdentityId } =
 			invitation;
 
