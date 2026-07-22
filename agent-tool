@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# See agent-tools/README.md for full usage documentation.
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec bash "$ROOT_DIR/agent-tools/bin/agent-tool.sh" "$ROOT_DIR" "$@"

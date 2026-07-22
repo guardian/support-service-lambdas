@@ -8,7 +8,7 @@ When adding comments that explain generated code, prefix with "TODO:delete comme
 When generating documentation e.g. README.md, include a brief overview, how to test, and references to external documentation.
 Avoid adding new dependencies on external libraries.
 When accessing AWS, only use aws-sdk v3
-PR descriptions must include links to previous relevant PRs, and any chat discussions and google docs.  Information from other sources should not be duplicated.
+PR descriptions must include links to previous relevant PRs, and any chat discussions and google docs. Information from other sources should not be duplicated.
 
 ### Config
 Only load secret and private information from config e.g. usernames, passwords
@@ -23,14 +23,14 @@ Always use logger.log, instead of console.log.
 In each handler, as soon as you know either the subscription id (or similar correlating information), add it to the logger context.
 
 ### REST clients
-To create a REST client, follow the existing pattern in modules/zuora/src/zuoraClient.ts 
+To create a REST client, follow the existing pattern in modules/zuora/src/zuoraClient.ts
 have a static create method that takes a suitable config object and stage as a parameter
 ensure that the exposed methods are the http verbs
 - only implement the necessary verbs
-- the common code must be extracted to a shared "fetch" method 
+- the common code must be extracted to a shared "fetch" method
 - where a body is requested or returned it should be generic in REQ and/or RESP
 - zod schemas should be passed in as parameters
-All requests and responses should be logged
+  All requests and responses should be logged
 - include full request and response body
 
 the high level calls should be implemented in separate files as per modules/zuora/src/discount.ts together with their schemas
@@ -39,6 +39,79 @@ the high level calls should be implemented in separate files as per modules/zuor
 
 Use SrCDK constructs from ./cdk/lib/cdk/ where possible.
 
+In agent mode, to reduce approval fatigue, here is the order of preference for tools:
+First choice: built in MCP functions
+Second choice: agent-tool (all sub-commands can be approved in one go)
+Third choice: consistent pnpm scripts (exact command strings can be manually approved)
+Fourth choice: consistent shell commands
+Last choice: arbitrary/ad hoc shell commmands
 
-### Verification
-Always run build, fix-formatting and eslint with a fix flag as well as all relevant tests after making changes to Typescript code.
+### Verification and repair
+
+Always run type-check, fix-formatting and lint-fix as well as all relevant tests after making changes to Typescript code.
+
+### agent-tool
+
+Always use `agent-tool` in place of commands like `pnpm`, `git`, `rm`, `tsc`, `eslint`, `jest`, `grep`, `tail` if it supports what's necessary.
+Call it by absolute path rather than calling `cd` first, e.g.
+`/Users/john_duffell/code/support-service-lambdas/agent-tool <command>`.
+
+Exception: while actively authoring or debugging the scripts under `agent-tools/bin/` or the
+`agent-tool` wrapper itself, direct shell commands (bash, sed, awk, grep, chmod, git for scratch
+test fixtures, etc.) are expected and fine - you cannot use a tool to build or debug itself.
+The moment a change to `agent-tool`/`agent-tools/bin/` is validated, switch back immediately to
+using `./agent-tool` exclusively for all repo-wide verification (type-check, lint, formatting,
+tests, git inspection) - do not keep using raw `pnpm`/`git` for those out of habit.
+
+Usage:
+
+```
+./agent-tool <script> <package...>
+./agent-tool <script> --changed [pattern]
+./agent-tool list-packages
+./agent-tool snapshot:update
+./agent-tool install
+./agent-tool git-rm <file>
+./agent-tool git-mv <source> <destination>
+./agent-tool git-status
+./agent-tool git-status-target <package>
+./agent-tool git-diff / git-diff-staged / git-diff-stat / git-diff-staged-stat
+./agent-tool git-diff-target <package> / git-diff-target-stat <package>
+./agent-tool git-show <ref> <file>
+```
+
+Scripts: `type-check`, `lint`, `lint-fix`, `check-formatting`, `fix-formatting`, `test`
+
+Always scope to the minimum set of affected packages under `handlers/*`, `modules/*`, `cdk`, or `buildcheck`. Use `./agent-tool list-packages` if the package scope is unclear.
+
+Package arguments must always be given as workspace paths, e.g. `handlers/product-switch-api` or `modules/aws` rather than `product-switch-api`.
+
+Optional output filtering flags supported by all commands:
+
+- `--grep PATTERN` to show only lines matching a regex pattern (buffers output, runs to completion first)
+- `--invert` to show lines NOT matching `--grep` (requires `--grep`)
+- `--context N` to keep N lines of context around each `--grep` match (requires `--grep`)
+- `--tail N` to cap displayed output to the last N lines after filtering (buffers output, runs to completion first)
+- `--all` to show the full output uncapped, streamed live
+- `./agent-tool last [--tail N] [--all] [--grep PATTERN] [--invert] [--context N]` to retrieve the most recently recorded full output for this repository, re-filtered/re-capped by the same flags — every run's full combined output is always captured to `agent-tools/.last.log` (gitignored, in the workspace, always overwritten), regardless of what was displayed
+
+Default behaviour (no `--grep`/`--tail`/`--all`): output streams live, stopping after 100 lines with a truncation notice. If truncated, use `./agent-tool last --all` or `read_file agent-tools/.last.log` to see the full output — do not use shell commands to access the file directly.
+
+Recommended order (use the first applicable scoped command):
+
+1. `./agent-tool list-packages` if the package scope is unclear
+1. `./agent-tool git-diff-stat` or `./agent-tool git-diff-target-stat <package>`
+1. `./agent-tool fix-formatting --changed` / `./agent-tool lint-fix --changed` / `./agent-tool type-check --changed` (run all three after making changes)
+1. `./agent-tool test --changed` (or `./agent-tool test <packages...> [pattern]`) when tests are needed
+   - The optional pattern is a Jest path filter, e.g. `./agent-tool test handlers/product-switch-api test/changePlan/action/pendingAmendments.test.ts`
+1. `./agent-tool git-diff` or `./agent-tool git-diff-target <package>` when full diff detail is needed; `./agent-tool git-status-target <package>` for a status scoped to one package
+1. `./agent-tool git-show <ref> <file>` shows a file's content at a given ref; the special ref `main` resolves to `git merge-base HEAD origin/main` (the state of the file on main before any of your branch's changes)
+1. `./agent-tool git-rm <file>` to delete a tracked file (staged automatically); `./agent-tool git-mv <source> <destination>` to rename/move one
+1. `./agent-tool snapshot:update` when buildcheck-managed snapshots are expected
+1. `./agent-tool install` when dependencies or lockfiles need updating
+
+`--changed` resolves the changed packages from git and also runs checks on their downstream dependents via pnpm's dependency graph, catching breakage in consumers of a changed module. Prefer it over explicit package names for verification commands.
+
+`./agent-tool` exits with the underlying command's exit code, captured before any display filtering/capping - a non-zero result always means the command genuinely failed.
+
+When summarising changes made, if ad-hoc shell commands were needed, suggest adding suitable commands to `agent-tool` for future use.

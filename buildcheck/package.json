@@ -12,6 +12,7 @@
 		"test": "pnpm generate && jest",
 		"type-check": "pnpm generate && tsc --noEmit",
 		"lint": "pnpm generate && eslint 'src/**/*.ts' 'test/**/*.ts' 'data/**/*.ts'",
+		"lint-fix": "pnpm generate && eslint --fix 'src/**/*.ts' 'test/**/*.ts' 'data/**/*.ts'",
 		"check-formatting": "pnpm generate && prettier --check \"**/*.ts\"",
 		"fix-formatting": "pnpm generate && prettier --write \"**/*.ts\""
 	},

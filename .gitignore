@@ -12,3 +12,4 @@ project/project/
 node_modules/
 *.zip
 handlers/*/coverage
+agent-tools/.last.log
