@@ -10,8 +10,12 @@ export class IamPolicies extends SrStack {
 		super(scope, { app: 'iam-policies', stage });
 
 		new GuDeveloperPolicyExperimental(this, 'LocalDevelopmentPolicy', {
-			friendlyName: 'Local Development',
-			grantId: 'membership-local-dev',
+			friendlyName:
+				'Local Development' +
+				(stage === 'PROD'
+					? ''
+					: ` (${stage} policy - use PROD version for general use)`),
+			grantId: `membership-local-dev` + (stage === 'PROD' ? '' : `-${stage}`),
 			withoutPolicyChecks: true,
 			statements: [
 				new AllowCodeS3ConfigReadPolicy(),
