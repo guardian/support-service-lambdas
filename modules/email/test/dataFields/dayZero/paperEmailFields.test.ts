@@ -68,6 +68,7 @@ describe('Paper email fields', () => {
 				deliveryInstructions: '',
 				deliveryContact: deliveryContact,
 			},
+			taxMode: 'TaxInclusive',
 		});
 
 		expect(emailFields).toStrictEqual(expected);
@@ -90,6 +91,7 @@ describe('Paper email fields', () => {
 				deliveryAgent: 123,
 			},
 			deliveryAgentDetails: deliveryAgentDetails,
+			taxMode: 'TaxInclusive',
 		});
 
 		expect(emailFields.To.ContactAttributes.SubscriberAttributes).toMatchObject(

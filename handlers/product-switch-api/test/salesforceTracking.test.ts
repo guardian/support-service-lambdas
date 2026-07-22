@@ -15,6 +15,7 @@ test('salesforce tracking data is serialised to the queue correctly', () => {
 		productRatePlanId: '',
 		ratePlanName: 'Supporter Plus V2 - Monthly',
 		subscriptionChargeId: '',
+		taxMode: 'TaxInclusive',
 	};
 	const subscriptionInformation: SubscriptionInformation = {
 		accountNumber: '',

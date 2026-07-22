@@ -20,12 +20,23 @@ describe('contributionEmailFields', () => {
 			subscriptionNumber: 'SUBSCRIPTION123',
 			paymentSchedule: {
 				payments: [
-					{ date: new Date('2025-11-21'), amount: 5 },
-					{ date: new Date('2025-12-21'), amount: 5 },
+					{
+						date: new Date('2025-11-21'),
+						amount: 5,
+						amountWithoutTax: 5,
+						taxAmount: 0,
+					},
+					{
+						date: new Date('2025-12-21'),
+						amount: 5,
+						amountWithoutTax: 5,
+						taxAmount: 0,
+					},
 				],
 			},
 			paymentMethod: directDebitPaymentMethod,
 			mandateId: mandateId,
+			taxMode: 'TaxInclusive',
 		});
 		const expected = {
 			To: {

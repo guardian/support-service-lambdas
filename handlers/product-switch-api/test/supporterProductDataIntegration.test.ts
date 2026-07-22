@@ -40,6 +40,7 @@ test('supporter product data', async () => {
 			ratePlanName: 'Supporter Plus V2 - Monthly',
 			dataExtensionName:
 				DataExtensionNames.recurringContributionToSupporterPlusSwitch,
+			taxMode: 'TaxInclusive',
 		},
 	};
 

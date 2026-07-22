@@ -5,6 +5,7 @@ import type {
 	EmailMessageWithIdentityUserId,
 } from '@modules/email/email';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { TaxMode } from '@modules/product-catalog/productCatalog';
 import { describePayments, firstPayment } from './paymentDescription';
 import type { EmailPaymentFields } from './paymentEmailFields';
 import { getPaymentFields } from './paymentEmailFields';
@@ -34,6 +35,7 @@ export function buildNonDeliveryEmailFields({
 	paymentSchedule,
 	isFixedTerm,
 	mandateId,
+	taxMode,
 }: {
 	today: Dayjs;
 	user: EmailUser;
@@ -44,6 +46,7 @@ export function buildNonDeliveryEmailFields({
 	paymentSchedule: EmailPaymentSchedule;
 	isFixedTerm: boolean;
 	mandateId?: string;
+	taxMode: TaxMode;
 }): NonDeliveryEmailFields {
 	const paymentFields = getPaymentFields(
 		today,
@@ -56,6 +59,7 @@ export function buildNonDeliveryEmailFields({
 		billingPeriod,
 		currency,
 		isFixedTerm,
+		taxMode,
 	);
 	return {
 		first_name: user.firstName,

@@ -25,6 +25,7 @@ describe('Guardian weekly thank you email fields', () => {
 			paymentMethod: creditCardPaymentMethod,
 			isFixedTerm: false,
 			mandateId: undefined,
+			taxMode: 'TaxInclusive',
 		});
 
 		const expected = {
@@ -71,6 +72,7 @@ describe('Guardian weekly thank you email fields', () => {
 			isFixedTerm: true,
 			mandateId: undefined,
 			giftRecipient: giftRecipient,
+			taxMode: 'TaxInclusive',
 		});
 		const expected = {
 			To: {

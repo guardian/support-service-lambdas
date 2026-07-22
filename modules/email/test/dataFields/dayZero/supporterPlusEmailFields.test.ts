@@ -26,6 +26,7 @@ describe('Supporter plus thank you email fields', () => {
 			paymentMethod: directDebitPaymentMethod,
 			isFixedTerm: false,
 			mandateId: mandateId,
+			taxMode: 'TaxInclusive',
 		});
 
 		const expected = {
@@ -80,6 +81,7 @@ describe('Supporter plus thank you email fields', () => {
 			paymentSchedule: paymentSchedule,
 			paymentMethod: creditCardPaymentMethod,
 			isFixedTerm: false,
+			taxMode: 'TaxInclusive',
 		});
 		const expected = {
 			To: {
@@ -116,6 +118,7 @@ describe('Supporter plus thank you email fields', () => {
 			paymentMethod: directDebitPaymentMethod,
 			isFixedTerm: true,
 			mandateId: '65HK26E',
+			taxMode: 'TaxInclusive',
 		});
 
 		const expected = {
@@ -146,6 +149,45 @@ describe('Supporter plus thank you email fields', () => {
 			DataExtensionName: DataExtensionNames.day0Emails.supporterPlus,
 			IdentityUserId: '1234',
 		};
+		expect(emailFields).toStrictEqual(expected);
+	});
+
+	it('should build correct email fields for tax exclusive monthly supporter plus', () => {
+		const emailFields = buildSupporterPlusEmailFields({
+			today: dayjs(today),
+			user: emailUser,
+			currency: 'CAD',
+			billingPeriod: 'Monthly',
+			subscriptionNumber: subscriptionNumber,
+			paymentSchedule: paymentSchedule,
+			paymentMethod: creditCardPaymentMethod,
+			isFixedTerm: false,
+			mandateId: mandateId,
+			taxMode: 'TaxExclusive',
+		});
+
+		const expected = {
+			To: {
+				Address: emailAddress,
+				ContactAttributes: {
+					SubscriberAttributes: {
+						first_name: emailUser.firstName,
+						payment_method: 'Credit/Debit Card',
+						first_payment_date: 'Thursday, 11 December 2025',
+						last_name: emailUser.lastName,
+						currency: 'CAD',
+						billing_period: 'monthly',
+						is_fixed_term: 'false',
+						subscriber_id: subscriptionNumber,
+						subscription_rate:
+							'$8.00 for the first month, then $10.00 every month',
+					},
+				},
+			},
+			DataExtensionName: DataExtensionNames.day0Emails.supporterPlus,
+			IdentityUserId: '1234',
+		};
+
 		expect(emailFields).toStrictEqual(expected);
 	});
 });

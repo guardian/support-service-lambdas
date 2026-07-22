@@ -2,6 +2,7 @@ import type { Dayjs } from 'dayjs';
 import type { EmailMessageWithIdentityUserId } from '@modules/email/email';
 import { DataExtensionNames } from '@modules/email/email';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { TaxMode } from '@modules/product-catalog/productCatalog';
 import { buildEmailFields, buildNonDeliveryEmailFields } from './emailFields';
 import type {
 	EmailPaymentMethod,
@@ -17,6 +18,7 @@ export function buildGuardianAdLiteEmailFields({
 	paymentMethod,
 	paymentSchedule,
 	mandateId,
+	taxMode,
 }: {
 	today: Dayjs;
 	user: EmailUser;
@@ -25,6 +27,7 @@ export function buildGuardianAdLiteEmailFields({
 	paymentMethod: EmailPaymentMethod;
 	paymentSchedule: EmailPaymentSchedule;
 	mandateId?: string;
+	taxMode: TaxMode;
 }): EmailMessageWithIdentityUserId {
 	const nonDeliveryEmailFields = buildNonDeliveryEmailFields({
 		today: today,
@@ -36,6 +39,7 @@ export function buildGuardianAdLiteEmailFields({
 		paymentSchedule,
 		mandateId: mandateId,
 		isFixedTerm: false, // Guardian Ad-Lite has no fixed term rate plans
+		taxMode,
 	});
 
 	return buildEmailFields(

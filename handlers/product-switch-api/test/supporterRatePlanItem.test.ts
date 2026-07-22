@@ -32,6 +32,7 @@ const getSwitchInformation = (): SwitchInformation => ({
 		ratePlanName: 'Supporter Plus V2 - Monthly',
 		dataExtensionName:
 			DataExtensionNames.recurringContributionToSupporterPlusSwitch,
+		taxMode: 'TaxInclusive',
 	},
 });
 

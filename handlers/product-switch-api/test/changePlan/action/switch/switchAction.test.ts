@@ -94,6 +94,8 @@ describe('DoSwitchAction', () => {
 		const callOrder: string[] = [];
 		const nextPaymentDate = new Date(2026, 10, 16); // 16 November 2026
 		const nextPaymentTotal = 95.5;
+		const nextPaymentWithoutTax = 90.0;
+		const nextPaymentTaxAmount = 5.5;
 
 		mockZuoraClient.get.mockResolvedValueOnce(zeroAmountInvoice);
 
@@ -111,10 +113,14 @@ describe('DoSwitchAction', () => {
 					{
 						date: nextPaymentDate,
 						total: nextPaymentTotal,
+						amountWithoutTax: nextPaymentWithoutTax,
+						taxAmount: nextPaymentTaxAmount,
 					},
 					{
 						date: dayjs(nextPaymentDate).add(1, 'year').toDate(),
 						total: nextPaymentTotal,
+						amountWithoutTax: nextPaymentWithoutTax,
+						taxAmount: nextPaymentTaxAmount,
 					},
 				]);
 			}),

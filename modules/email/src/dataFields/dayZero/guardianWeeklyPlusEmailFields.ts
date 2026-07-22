@@ -2,6 +2,7 @@ import type { Dayjs } from 'dayjs';
 import { DataExtensionNames } from '@modules/email/email';
 import type { EmailMessageWithIdentityUserId } from '@modules/email/email';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { TaxMode } from '@modules/product-catalog/productCatalog';
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 import { buildDeliveryEmailFields } from './deliveryEmailFields';
 import { buildEmailFields } from './emailFields';
@@ -27,6 +28,7 @@ export function buildGuardianWeeklyPlusEmailFields({
 	paymentMethod,
 	isFixedTerm,
 	mandateId,
+	taxMode,
 }: {
 	today: Dayjs;
 	user: EmailUser;
@@ -37,6 +39,7 @@ export function buildGuardianWeeklyPlusEmailFields({
 	paymentMethod: EmailPaymentMethod;
 	isFixedTerm: boolean;
 	mandateId?: string;
+	taxMode: TaxMode;
 }): EmailMessageWithIdentityUserId {
 	const deliveryFields = buildDeliveryEmailFields({
 		today: today,
@@ -48,6 +51,7 @@ export function buildGuardianWeeklyPlusEmailFields({
 		paymentSchedule: paymentSchedule,
 		isFixedTerm: isFixedTerm,
 		mandateId: mandateId,
+		taxMode,
 	});
 
 	return buildEmailFields(

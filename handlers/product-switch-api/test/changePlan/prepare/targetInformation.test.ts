@@ -76,6 +76,7 @@ describe('getTargetInformation', () => {
 			discount: undefined,
 			dataExtensionName:
 				DataExtensionNames.recurringContributionToSupporterPlusSwitch,
+			taxMode: 'TaxInclusive',
 		} satisfies TargetInformation);
 	});
 

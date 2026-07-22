@@ -28,9 +28,19 @@ export const itemsForSubscription =
 			(item) => item.subscriptionNumber === subscriptionNumber,
 		);
 
-export type SimpleInvoiceItem = { date: Date; amount: number };
+export type SimpleInvoiceItem = {
+	date: Date;
+	amount: number;
+	amountWithoutTax: number;
+	taxAmount: number;
+};
 
-export type SimpleInvoiceTotal = { date: Date; total: number };
+export type SimpleInvoiceTotal = {
+	date: Date;
+	total: number;
+	amountWithoutTax: number;
+	taxAmount: number;
+};
 
 export function getNextInvoiceTotal(invoiceItems: SimpleInvoiceItem[]) {
 	return convertItemsToTotal(getNextInvoice(invoiceItems)).total;
@@ -95,6 +105,8 @@ const convertItemsToTotal = ({
 	({
 		date: new Date(date),
 		total: sumNumbers(items.map((item) => item.amount)),
+		amountWithoutTax: sumNumbers(items.map((item) => item.amountWithoutTax)),
+		taxAmount: sumNumbers(items.map((item) => item.taxAmount)),
 	}) satisfies SimpleInvoiceTotal;
 
 export const toSimpleInvoiceItems = (
@@ -103,4 +115,6 @@ export const toSimpleInvoiceItems = (
 	billingPreviewAfter.map((entry) => ({
 		date: entry.serviceStartDate,
 		amount: entry.chargeAmount + entry.taxAmount,
+		amountWithoutTax: entry.chargeAmount,
+		taxAmount: entry.taxAmount,
 	}));

@@ -2,6 +2,7 @@ import type { Dayjs } from 'dayjs';
 import type { EmailMessageWithIdentityUserId } from '@modules/email/email';
 import { DataExtensionNames } from '@modules/email/email';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { TaxMode } from '@modules/product-catalog/productCatalog';
 import { buildEmailFields, buildNonDeliveryEmailFields } from './emailFields';
 import type {
 	EmailBillingPeriod,
@@ -19,6 +20,7 @@ export function buildDigitalSubscriptionEmailFields({
 	paymentSchedule,
 	paymentMethod,
 	mandateId,
+	taxMode,
 }: {
 	today: Dayjs;
 	user: EmailUser;
@@ -28,6 +30,7 @@ export function buildDigitalSubscriptionEmailFields({
 	paymentSchedule: EmailPaymentSchedule;
 	paymentMethod: EmailPaymentMethod;
 	mandateId?: string;
+	taxMode: TaxMode;
 }): EmailMessageWithIdentityUserId {
 	const nonDeliveryEmailFields = buildNonDeliveryEmailFields({
 		today: today,
@@ -39,6 +42,7 @@ export function buildDigitalSubscriptionEmailFields({
 		paymentSchedule,
 		mandateId,
 		isFixedTerm: false, // There are no fixed term Digital subscription rate plans
+		taxMode,
 	});
 
 	const productFields = {

@@ -1,6 +1,7 @@
 import type { Dayjs } from 'dayjs';
 import { getCountryNameByCode } from '@modules/internationalisation/country';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { TaxMode } from '@modules/product-catalog/productCatalog';
 import type { NonDeliveryEmailFields } from './emailFields';
 import { buildNonDeliveryEmailFields } from './emailFields';
 import type {
@@ -30,6 +31,7 @@ export function buildDeliveryEmailFields({
 	paymentSchedule,
 	isFixedTerm,
 	mandateId,
+	taxMode,
 }: {
 	today: Dayjs;
 	user: EmailUser;
@@ -40,6 +42,7 @@ export function buildDeliveryEmailFields({
 	paymentSchedule: EmailPaymentSchedule;
 	isFixedTerm: boolean;
 	mandateId?: string;
+	taxMode: TaxMode;
 }): DeliveryEmailFields {
 	const nonDeliveryFields: NonDeliveryEmailFields = buildNonDeliveryEmailFields(
 		{
@@ -52,6 +55,7 @@ export function buildDeliveryEmailFields({
 			paymentSchedule: paymentSchedule,
 			isFixedTerm: isFixedTerm,
 			mandateId: mandateId,
+			taxMode,
 		},
 	);
 

@@ -1,6 +1,7 @@
 import type dayjs from 'dayjs';
 import { DataExtensionNames } from '@modules/email/email';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { TaxMode } from '@modules/product-catalog/productCatalog';
 import { buildEmailFields, buildNonDeliveryEmailFields } from './emailFields';
 import { getPaymentMethodFieldsSupporterPlus } from './paymentEmailFields';
 import type {
@@ -20,6 +21,7 @@ export function buildSupporterPlusEmailFields({
 	paymentMethod,
 	isFixedTerm,
 	mandateId,
+	taxMode,
 }: {
 	today: dayjs.Dayjs;
 	user: EmailUser;
@@ -30,6 +32,7 @@ export function buildSupporterPlusEmailFields({
 	paymentMethod: EmailPaymentMethod;
 	isFixedTerm: boolean;
 	mandateId?: string;
+	taxMode: TaxMode;
 }) {
 	const nonDeliveryEmailFields = buildNonDeliveryEmailFields({
 		today: today,
@@ -41,6 +44,7 @@ export function buildSupporterPlusEmailFields({
 		paymentSchedule,
 		mandateId,
 		isFixedTerm,
+		taxMode,
 	});
 	const oldNonStandardPaymentFields = getPaymentMethodFieldsSupporterPlus(
 		paymentMethod,

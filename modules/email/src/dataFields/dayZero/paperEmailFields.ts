@@ -5,6 +5,7 @@ import type {
 	EmailMessageWithIdentityUserId,
 } from '@modules/email/email';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { TaxMode } from '@modules/product-catalog/productCatalog';
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 import { buildDeliveryEmailFields } from './deliveryEmailFields';
 import { buildEmailFields } from './emailFields';
@@ -30,6 +31,7 @@ export function buildPaperEmailFields({
 	mandateId,
 	productInformation,
 	deliveryAgentDetails,
+	taxMode,
 }: {
 	today: Dayjs;
 	user: EmailUser;
@@ -40,6 +42,7 @@ export function buildPaperEmailFields({
 	mandateId?: string;
 	productInformation: PaperProductPurchase;
 	deliveryAgentDetails?: EmailDeliveryAgentDetails;
+	taxMode: TaxMode;
 }): EmailMessageWithIdentityUserId {
 	const deliveryAgentFields =
 		productInformation.product === 'NationalDelivery' && deliveryAgentDetails
@@ -65,6 +68,7 @@ export function buildPaperEmailFields({
 		paymentSchedule: paymentSchedule,
 		isFixedTerm: false, // There are no fixed term paper rate plans
 		mandateId: mandateId,
+		taxMode,
 	});
 	const productFields = {
 		package: productInformation.ratePlan,
