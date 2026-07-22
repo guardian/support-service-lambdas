@@ -9,10 +9,12 @@ export class IamPolicies extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
 		super(scope, { app: 'iam-policies', stage });
 
+		const friendlyName =
+			'Local Development' +
+			(stage === 'PROD' ? '' : ` ${stage} (for testing the policy itself)`);
+
 		new GuDeveloperPolicyExperimental(this, 'LocalDevelopmentPolicy', {
-			friendlyName:
-				'Local Development' +
-				(stage === 'PROD' ? '' : ` ${stage} (for testing the policy itself)`),
+			friendlyName,
 			grantId: `membership-local-dev`,
 			withoutPolicyChecks: true,
 			statements: [
@@ -23,12 +25,13 @@ export class IamPolicies extends SrStack {
 				new AllowCodeParameterStoreReadPolicy(this),
 				new AllowCodeSecretsManagerReadPolicy(this),
 				new AllowS3GetPolicy('gu-zuora-catalog', [`PROD/Zuora-CODE/*`]),
-				new AllowS3GetPolicy('support-admin-console', [
-					'google-auth-service-account-certificate.json', // needed to run locally
-					'DEV/*',
-					'CODE/*',
-				]),
+				getSupportAdminConsoleBucketPolicy(),
 				new AllowDynamoTableFullAccessPolicy(this),
+				...getManageFrontendPolicies(this.region, this.account),
+				new PolicyStatement({
+					actions: ['cloudwatch:PutMetricData'],
+					resources: ['*'],
+				}),
 			],
 		});
 	}
@@ -89,4 +92,50 @@ class AllowDynamoTableFullAccessPolicy extends PolicyStatement {
 			],
 		});
 	}
+}
+
+/*
+manage-frontend policies
+from https://github.com/guardian/manage-frontend/blob/820a3d691173a21b6fd40ad47e02930b1198b21f/cdk/lib/manage-frontend.ts#L119
+*/
+function getManageFrontendPolicies(region: string, account: string) {
+	const fulfilmentDatesBucketPolicy = new AllowS3GetPolicy(
+		'fulfilment-date-calculator-code',
+		['*'],
+	);
+
+	const allowListStackResources = new PolicyStatement({
+		actions: ['cloudformation:ListStackResources'],
+		resources: [
+			`arn:aws:cloudformation:${region}:${account}:stack/membership-CODE-*`,
+			`arn:aws:cloudformation:${region}:${account}:stack/support-CODE-*`,
+		],
+	});
+	const unsafeAllowGetAllApiKeys = new PolicyStatement({
+		actions: ['apigateway:GET'],
+		resources: [`arn:aws:apigateway:${region}::/apikeys/*`], // FIXME only CODE ones
+	});
+	const allowInvokeLambda = new PolicyStatement({
+		actions: ['execute-api:Invoke'],
+		resources: [`arn:aws:execute-api:${region}:${account}:*/CODE/*`],
+	});
+
+	return [
+		fulfilmentDatesBucketPolicy,
+		allowListStackResources,
+		unsafeAllowGetAllApiKeys,
+		allowInvokeLambda,
+	];
+}
+
+function getSupportAdminConsoleBucketPolicy() {
+	const supportAdminConsoleBucketPolicy = new AllowS3GetPolicy(
+		'support-admin-console',
+		[
+			'google-auth-service-account-certificate.json', // needed to run locally
+			'DEV/*',
+			'CODE/*',
+		],
+	);
+	return supportAdminConsoleBucketPolicy;
 }
