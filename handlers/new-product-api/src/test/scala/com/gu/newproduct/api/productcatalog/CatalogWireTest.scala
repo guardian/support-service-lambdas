@@ -25,6 +25,30 @@ class CatalogWireTest extends AnyFlatSpec with Matchers with ResourceLoader {
     Json.prettyPrint(Json.toJson(wireCatalog)) shouldBe Json.prettyPrint(Json.parse(expected.get))
   }
 
+  it should "append plus taxes to tax exclusive payment plan descriptions" in {
+    val wireCatalog = WireCatalog.fromCatalog(
+      NewProductApi.catalog(fakePricesFor, stubGetFirstAvailableStartDate, today),
+    )
+
+    val supporterPlus = wireCatalog.products.find(_.label == "All Access Digital (Supporter Plus)").get
+    val monthlyTaxExclusivePlan = supporterPlus.plans.find(_.id == "monthly_supporter_plus_tax_exclusive").get
+    val cadPaymentPlan = monthlyTaxExclusivePlan.paymentPlans.find(_.currencyCode == "CAD").get
+
+    cadPaymentPlan.description shouldBe "CAD 16.99 every month plus taxes"
+  }
+
+  it should "not append plus taxes when tax mode is missing" in {
+    val wireCatalog = WireCatalog.fromCatalog(
+      NewProductApi.catalog(fakePricesFor, stubGetFirstAvailableStartDate, today),
+    )
+
+    val digitalPlus = wireCatalog.products.find(_.label == "Digital Plus").get
+    val monthlyPlan = digitalPlus.plans.find(_.id == "digipack_monthly").get
+    val gbpPaymentPlan = monthlyPlan.paymentPlans.find(_.currencyCode == "GBP").get
+
+    gbpPaymentPlan.description shouldBe "GBP 55.55 every month"
+  }
+
   def gbpPrice(amount: Int): PlanPrices = PlanPrices(
     Map(Currency.GBP -> AmountMinorUnits(amount)),
     None,

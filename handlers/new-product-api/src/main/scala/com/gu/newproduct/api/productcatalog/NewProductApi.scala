@@ -19,13 +19,19 @@ object NewProductApi {
       case Annual => "every 12 months"
       case SixWeeks => "for the first six weeks"
     }
+
+    val taxesDescriptionSuffix = planPrices.taxMode match {
+      case Some(TaxMode.TaxExclusive) => " plus taxes"
+      case _ => ""
+    }
+
     planPrices.priceMinorUnits.map { case (currency, amount) =>
       currency ->
         PaymentPlan(
           currency = currency,
           amountMinorUnits = amount,
           billingPeriod = billingPeriod,
-          description = s"${currency.iso} ${amount.formatted} $billingPeriodDescription",
+          description = s"${currency.iso} ${amount.formatted} $billingPeriodDescription$taxesDescriptionSuffix",
           taxMode = planPrices.taxMode,
         )
     }
