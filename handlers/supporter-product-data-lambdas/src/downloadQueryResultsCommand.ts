@@ -1,4 +1,5 @@
 import { createWriteStream, existsSync, statSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
@@ -171,10 +172,19 @@ void (async function () {
 		return;
 	}
 
-	// Default to the current directory; a filename is generated inside
-	// downloadQueryResults when the path is a directory.
-	const outputPath = process.argv[4] ?? '.';
+	// The downloaded file contains PII, so default to the OS temp directory
+	// rather than the current working directory. This keeps it out of the git
+	// working tree (avoiding accidental commits) and lets the OS clean it up
+	// automatically. Pass an explicit outputPath to override.
+	let outputPath = process.argv[4];
+	if (outputPath === undefined) {
+		console.log(`Defaulting outputPath to the OS temp directory: ${tmpdir()}`);
+		outputPath = tmpdir();
+	}
 
 	const resolvedPath = await downloadQueryResults(stage, queryType, outputPath);
 	console.log(`Results written to ${resolvedPath}`);
+	console.log(
+		'This file contains PII - delete it when you are done and never commit it to source control.',
+	);
 })();

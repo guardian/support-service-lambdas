@@ -12,3 +12,5 @@ project/project/
 node_modules/
 *.zip
 handlers/*/coverage
+# PII query result downloads from supporter-product-data-lambdas download-query-results
+select-active-rate-plans-*.csv
