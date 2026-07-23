@@ -6,6 +6,8 @@ import {
 } from 'aws-cdk-lib/aws-cloudwatch';
 import { EventBus, Rule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
+import { EventInvokeConfig } from 'aws-cdk-lib/aws-lambda';
+import { SqsDestination } from 'aws-cdk-lib/aws-lambda-destinations';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { SrApiLambda } from './cdk/SrApiLambda';
 import { SrLambdaAlarm } from './cdk/SrLambdaAlarm';
@@ -47,6 +49,11 @@ export class BrazeAcquisitionEventsSync extends SrStack {
 			retentionPeriod: Duration.days(14),
 		});
 
+		const lambdaAsyncFailureDlq = new Queue(this, 'LambdaAsyncFailureDlq', {
+			queueName: `braze-acquisition-events-sync-lambda-async-failure-dlq-${this.stage}`,
+			retentionPeriod: Duration.days(14),
+		});
+
 		const acquisitionsToBrazeRule = new Rule(this, 'AcquisitionsToBrazeRule', {
 			ruleName: `braze-acquisition-events-sync-${this.stage}`,
 			eventBus: acquisitionsBus,
@@ -63,24 +70,14 @@ export class BrazeAcquisitionEventsSync extends SrStack {
 			}),
 		);
 
-		const alarmsEnabled = this.stage === 'PROD';
-
-		new SrLambdaAlarm(this, 'LambdaErrorAlarm', {
-			app: this.app,
-			alarmName: `${this.stage} braze-acquisition-events-sync lambda errors`,
-			alarmDescription:
-				'braze-acquisition-events-sync failed. Quick triage: inspect lambda logs for error stack and identityId context, check IDAPI lookup result for missing braze-uuid, and confirm Braze /users/track request and response payloads. Impact: an eligible user may not have suppression-related Braze updates applied to their profile, which may result in them receiving marketing communications they should not receive',
-			lambdaFunctionNames: lambda.functionName,
-			metric: lambda.metricErrors({
-				period: Duration.minutes(5),
-				statistic: 'Sum',
-			}),
-			threshold: 1,
-			evaluationPeriods: 1,
-			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-			treatMissingData: TreatMissingData.NOT_BREACHING,
-			actionsEnabled: alarmsEnabled,
+		new EventInvokeConfig(this, 'LambdaAsyncInvokeConfig', {
+			function: lambda,
+			maxEventAge: Duration.hours(2),
+			retryAttempts: 2,
+			onFailure: new SqsDestination(lambdaAsyncFailureDlq),
 		});
+
+		const alarmsEnabled = this.stage === 'PROD';
 
 		new SrLambdaAlarm(this, 'EventBridgeDlqAlarm', {
 			app: this.app,
@@ -89,6 +86,23 @@ export class BrazeAcquisitionEventsSync extends SrStack {
 				'EventBridge could not invoke braze-acquisition-events-sync lambda after retries. Quick triage: inspect DLQ message attributes for invoke failure reason, confirm rule event pattern matches AcquisitionsEvent payload shape, verify lambda permissions from EventBridge, and redrive once root cause is fixed.',
 			lambdaFunctionNames: lambda.functionName,
 			metric: eventBridgeToLambdaDlq.metricApproximateNumberOfMessagesVisible({
+				period: Duration.minutes(5),
+				statistic: 'Maximum',
+			}),
+			threshold: 1,
+			evaluationPeriods: 1,
+			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+			treatMissingData: TreatMissingData.NOT_BREACHING,
+			actionsEnabled: alarmsEnabled,
+		});
+
+		new SrLambdaAlarm(this, 'LambdaAsyncFailureDlqAlarm', {
+			app: this.app,
+			alarmName: `${this.stage} braze-acquisition-events-sync lambda retries exhausted`,
+			alarmDescription:
+				'braze-acquisition-events-sync failed after async Lambda retries and the event was sent to the lambda async failure DLQ. Quick triage: inspect the DLQ message payload and request context, check lambda logs for the matching request ID, then redrive once the root cause is fixed.',
+			lambdaFunctionNames: lambda.functionName,
+			metric: lambdaAsyncFailureDlq.metricApproximateNumberOfMessagesVisible({
 				period: Duration.minutes(5),
 				statistic: 'Maximum',
 			}),
