@@ -64,7 +64,7 @@
         "currencyCode" : "CAD",
         "amount" : 16.99,
         "billingPeriod" : "Monthly",
-        "description" : "CAD 16.99 every month",
+        "description" : "CAD 16.99 every month plus taxes",
         "taxMode" : "TaxExclusive"
       } ],
       "enabledForBillingCountries" : [ "Canada" ]
@@ -82,7 +82,7 @@
         "currencyCode" : "CAD",
         "amount" : 169.99,
         "billingPeriod" : "Annual",
-        "description" : "CAD 169.99 every 12 months",
+        "description" : "CAD 169.99 every 12 months plus taxes",
         "taxMode" : "TaxExclusive"
       } ],
       "enabledForBillingCountries" : [ "Canada" ]
@@ -149,7 +149,7 @@
         "currencyCode" : "CAD",
         "amount" : 119.99,
         "billingPeriod" : "Annual",
-        "description" : "CAD 119.99 every 12 months",
+        "description" : "CAD 119.99 every 12 months plus taxes",
         "taxMode" : "TaxExclusive"
       } ],
       "enabledForBillingCountries" : [ "Canada" ]
@@ -167,7 +167,7 @@
         "currencyCode" : "CAD",
         "amount" : 11.99,
         "billingPeriod" : "Monthly",
-        "description" : "CAD 11.99 every month",
+        "description" : "CAD 11.99 every month plus taxes",
         "taxMode" : "TaxExclusive"
       } ],
       "enabledForBillingCountries" : [ "Canada" ]
