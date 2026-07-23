@@ -18,7 +18,7 @@
 	"devDependencies": {
 		"@guardian/cdk": "64.1.0",
 		"@types/jest": "^29.5.14",
-		"@types/node": "^22.15.14",
+		"@types/node": "^26.1.1",
 		"aws-cdk": "2.1128.1",
 		"aws-cdk-lib": "2.246.0",
 		"constructs": "10.6.0",
