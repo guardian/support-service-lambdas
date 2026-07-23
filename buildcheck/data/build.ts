@@ -851,6 +851,10 @@ const supporterProductDataLambdas: HandlerDefinition = {
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
+		...devDeps['tsx'],
+	},
+	extraScripts: {
+		'download-query-results': 'tsx src/downloadQueryResultsCommand.ts',
 	},
 	moduleDependencies: [
 		moduleLogger,

@@ -7,6 +7,24 @@ This project contains the Supporter Product Data sync pipeline. It runs a Step F
 ## How to test
 - Unit tests: `pnpm --filter supporter-product-data-lambdas test`
 - Integration tests: `pnpm --filter supporter-product-data-lambdas it-test`
+
+## Downloading query results locally
+`download-query-results` is a helper script that runs the same `select-active-rate-plans`
+query used by the pipeline against Zuora, waits for the batch job to complete, and
+downloads the CSV export to a local file (instead of uploading it to S3).
+
+```bash
+pnpm --filter supporter-product-data-lambdas download-query-results <CODE|PROD> <full|incremental> [outputPath]
+```
+- `STAGE` (required): `CODE` or `PROD`. Controls which Zuora config and catalog are used.
+- `queryType` (optional, default `full`): `full` queries all subscriptions; `incremental`
+  queries from the last successful query time in SSM.
+- `outputPath` (optional): where to write the CSV. Defaults to
+  `select-active-rate-plans-<STAGE>-<timestamp>.csv` in the current directory.
+
+The script reads Zuora credentials and config from AWS (SSM/S3/Secrets Manager), so you
+must have credentials for the relevant account (e.g. via Janus) before running it.
+
 ## Infrastructure Diagram
 <img src="infrastructure_diagram.jpg" alt="infrastructure_diagram.jpg" width="600">
 
