@@ -4,7 +4,7 @@ import type {
 	DataExtensionName,
 	EmailMessageWithIdentityUserId,
 } from '@modules/email/email';
-import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { CurrencyCode } from '@modules/internationalisation/currency';
 import type { TaxMode } from '@modules/product-catalog/productCatalog';
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 import { buildDeliveryEmailFields } from './deliveryEmailFields';
@@ -35,7 +35,7 @@ export function buildPaperEmailFields({
 }: {
 	today: Dayjs;
 	user: EmailUser;
-	currency: IsoCurrency;
+	currency: CurrencyCode;
 	subscriptionNumber: string;
 	paymentSchedule: EmailPaymentSchedule;
 	paymentMethod: EmailPaymentMethod;

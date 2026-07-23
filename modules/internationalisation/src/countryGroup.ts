@@ -1,5 +1,5 @@
 import type { CountryCode } from '@modules/internationalisation/country';
-import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { CurrencyCode } from '@modules/internationalisation/currency';
 
 // ----- Types ----- //
 export const GBPCountries = 'GBPCountries';
@@ -40,7 +40,7 @@ export enum SupportRegionId {
 
 export type CountryGroup = {
 	name: CountryGroupName;
-	currency: IsoCurrency;
+	currency: CurrencyCode;
 	countries: CountryCode[];
 	supportRegionId: SupportRegionId;
 };

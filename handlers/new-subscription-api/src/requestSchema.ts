@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { isoCurrencySchema } from '@modules/internationalisation/schemas';
+import { currencyCodeSchema } from '@modules/internationalisation/schemas';
 import { productPurchaseSchema } from '@modules/product-catalog/productPurchaseSchema';
 import { existingPaymentMethodInputSchema } from '@modules/zuora/createSubscription/createSubscriptionWithExistingPaymentMethod';
 import { giftRecipientSchema } from '@modules/zuora/createSubscription/giftRecipient';
@@ -25,7 +25,7 @@ export const createSubscriptionRequestSchema = z.object({
 	salesforceAccountId: z.string(),
 	salesforceContactId: z.string(),
 	identityId: z.string(),
-	currency: isoCurrencySchema,
+	currency: currencyCodeSchema,
 	paymentGateway: paymentGatewaySchema,
 	existingPaymentMethod: existingPaymentMethodInputSchema,
 	billToContact: contactSchema,
