@@ -19,7 +19,7 @@
     "zuora-catalog": "workspace:*"
   },
   "devDependencies": {
-    "@aws-sdk/client-cloudwatch-logs": "^3.940.0",
+    "@aws-sdk/client-cloudwatch-logs": "^3.1088.0",
     "@aws-sdk/credential-providers": "^3.940.0"
   }
 }
