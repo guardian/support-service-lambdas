@@ -24,9 +24,10 @@ describe('listInvitationsEndpoint', () => {
 			list: mockList,
 		} as unknown as InvitationRepository;
 
-		const result = await listInvitationsEndpoint(invitationRepository)({
-			subscriptionName: 'A-S00974337',
-		});
+		const result = await listInvitationsEndpoint(
+			invitationRepository,
+			'A-S00974337',
+		);
 
 		expect(result.statusCode).toBe(200);
 		expect(JSON.parse(result.body)).toEqual({ invitations });
@@ -41,9 +42,10 @@ describe('listInvitationsEndpoint', () => {
 			list: mockList,
 		} as unknown as InvitationRepository;
 
-		const result = await listInvitationsEndpoint(invitationRepository)({
-			subscriptionName: 'A-S00974337',
-		});
+		const result = await listInvitationsEndpoint(
+			invitationRepository,
+			'A-S00974337',
+		);
 
 		expect(result.statusCode).toBe(500);
 		expect(JSON.parse(result.body)).toEqual({

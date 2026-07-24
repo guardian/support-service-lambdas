@@ -23,7 +23,7 @@ export function invitationCancellationTTL(): number {
 	return dayjs().add(2, 'weeks').unix();
 }
 
-export const invitationRecordSchema = z.object({
+export const nonCancelledInvitationRecordSchema = z.object({
 	subscriptionName: z.string(),
 	invitationCode: z.string(),
 	primaryIdentityId: z.string(),
@@ -31,9 +31,14 @@ export const invitationRecordSchema = z.object({
 	secondaryIdentityId: z.string(),
 	invitedDate: z.string(),
 	expiryDate: z.number(),
-	cancelledBy: cancelledBySchema.optional(),
-	cancelledDate: z.iso.datetime().optional(),
 });
+
+export const invitationRecordSchema = nonCancelledInvitationRecordSchema.extend(
+	{
+		cancelledBy: cancelledBySchema.optional(),
+		cancelledDate: z.iso.datetime().optional(),
+	},
+);
 
 export type InvitationRecord = z.infer<typeof invitationRecordSchema>;
 

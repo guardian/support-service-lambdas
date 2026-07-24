@@ -24,13 +24,12 @@ test('mmaPrimarySummaryEndpoint returns invitations and secondary users with nam
 		`/${stage}/support/multiple-account-api/identity-client-access-token`,
 	);
 
-	const endpoint = mmaPrimarySummaryEndpoint(
+	const result = await mmaPrimarySummaryEndpoint(
 		invitationRepository,
 		secondaryUserRepository,
 		identityClient,
+		subscriptionName,
 	);
-
-	const result = await endpoint({ subscriptionName });
 
 	expect(result.statusCode).toBe(200);
 

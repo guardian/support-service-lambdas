@@ -13,32 +13,22 @@ import { withBodyParser, withPathParser } from '@modules/routing/withParsers';
 import { stageFromEnvironment } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
-import {
-	acceptInvitationEndpoint,
-	acceptInvitationPathSchema,
-} from './acceptInvitationEndpoint';
+import { acceptInvitationEndpoint } from './acceptInvitationEndpoint';
 import {
 	createInvitationBodySchema,
 	createInvitationEndpoint,
 } from './createInvitationEndpoint';
-import {
-	deleteInvitationEndpoint,
-	deleteInvitationPathSchema,
-} from './deleteInvitationEndpoint';
+import { deleteInvitationEndpoint } from './deleteInvitationEndpoint';
 import {
 	deleteSecondaryUserEndpoint,
 	deleteSecondaryUserPathSchema,
 } from './deleteSecondaryUserEndpoint';
+import { getInvitationEndpoint } from './getInvitationEndpoint';
 import { InvitationRepository } from './invitationRepository';
-import {
-	listInvitationsEndpoint,
-	listInvitationsPathSchema,
-} from './listInvitationsEndpoint';
-import {
-	listSecondaryUsersEndpoint,
-	listSecondaryUsersPathSchema,
-} from './listSecondaryUsersEndpoint';
+import { listInvitationsEndpoint } from './listInvitationsEndpoint';
+import { listSecondaryUsersEndpoint } from './listSecondaryUsersEndpoint';
 import { mmaPrimarySummaryEndpoint } from './mmaPrimarySummaryEndpoint';
+import { invitationPathSchema, subscriptionPathSchema } from './schemas';
 import { secondaryUserMeEndpoint } from './secondaryUserMeEndpoint';
 
 const stage = stageFromEnvironment();
@@ -85,16 +75,24 @@ export const handler: Handler = Router([
 		),
 	},
 	{
+		httpMethod: 'GET',
+		path: '/invitation/{invitationCode}',
+		handler: withPathParser(invitationPathSchema, async (_event, path) =>
+			getInvitationEndpoint(invitationRepository, path.invitationCode),
+		),
+	},
+	{
 		httpMethod: 'DELETE',
 		path: '/invitation/{invitationCode}',
-		handler: withPathParser(deleteInvitationPathSchema, async (event, path) => {
+		handler: withPathParser(invitationPathSchema, async (event, path) => {
 			// Both the primary (cancelling) and secondary (rejecting) users send
 			// their identity id in the 'x-identity-id' header.
 			const identityId = event.headers['x-identity-id'];
 			if (!identityId) {
 				return badRequest('The x-identity-id header is required');
 			}
-			return deleteInvitationEndpoint(invitationRepository)(
+			return deleteInvitationEndpoint(
+				invitationRepository,
 				path.invitationCode,
 				identityId,
 			);
@@ -103,7 +101,7 @@ export const handler: Handler = Router([
 	{
 		httpMethod: 'POST',
 		path: '/invitation/{invitationCode}/accept',
-		handler: withPathParser(acceptInvitationPathSchema, async (event, path) => {
+		handler: withPathParser(invitationPathSchema, async (event, path) => {
 			const maybeAuthenticatedEvent = await authenticate(event);
 
 			if (maybeAuthenticatedEvent.type === 'failure') {
@@ -112,11 +110,11 @@ export const handler: Handler = Router([
 
 			return acceptInvitationEndpoint(
 				stage,
-				maybeAuthenticatedEvent.userDetails.identityId,
-				path.invitationCode,
 				invitationRepository,
 				secondaryUserRepository,
 				dynamoClient,
+				maybeAuthenticatedEvent.userDetails.identityId,
+				path.invitationCode,
 			);
 		}),
 	},
@@ -124,13 +122,14 @@ export const handler: Handler = Router([
 		httpMethod: 'GET',
 		path: '/subscriptions/{subscriptionName}/invitations',
 		handler: withPathParser(
-			listInvitationsPathSchema,
+			subscriptionPathSchema,
 			withMMAIdentityCheck(
 				stage,
 				async (_body, _zuoraClient, subscription) =>
-					listInvitationsEndpoint(invitationRepository)({
-						subscriptionName: subscription.subscriptionNumber,
-					}),
+					listInvitationsEndpoint(
+						invitationRepository,
+						subscription.subscriptionNumber,
+					),
 				({ path }) => path.subscriptionName,
 			),
 		),
@@ -139,13 +138,14 @@ export const handler: Handler = Router([
 		httpMethod: 'GET',
 		path: '/subscriptions/{subscriptionName}/secondary-users',
 		handler: withPathParser(
-			listSecondaryUsersPathSchema,
+			subscriptionPathSchema,
 			withMMAIdentityCheck(
 				stage,
 				async (_body, _zuoraClient, subscription) =>
-					listSecondaryUsersEndpoint(secondaryUserRepository)({
-						subscriptionName: subscription.subscriptionNumber,
-					}),
+					listSecondaryUsersEndpoint(
+						secondaryUserRepository,
+						subscription.subscriptionNumber,
+					),
 				({ path }) => path.subscriptionName,
 			),
 		),
@@ -162,10 +162,8 @@ export const handler: Handler = Router([
 						stage,
 						secondaryUserRepository,
 						dynamoClient,
-					)({
-						subscriptionName: subscription.subscriptionNumber,
-						secondaryIdentityId: path.secondaryIdentityId,
-					}),
+						path,
+					),
 				({ path }) => path.subscriptionName,
 			),
 		),
@@ -174,7 +172,7 @@ export const handler: Handler = Router([
 		httpMethod: 'GET',
 		path: '/subscriptions/{subscriptionName}/mma-primary',
 		handler: withPathParser(
-			listSecondaryUsersPathSchema,
+			subscriptionPathSchema,
 			withMMAIdentityCheck(
 				stage,
 				async (_body, _zuoraClient, subscription) =>
@@ -182,9 +180,8 @@ export const handler: Handler = Router([
 						invitationRepository,
 						secondaryUserRepository,
 						await identityClientPromise,
-					)({
-						subscriptionName: subscription.subscriptionNumber,
-					}),
+						subscription.subscriptionNumber,
+					),
 				({ path }) => path.subscriptionName,
 			),
 		),

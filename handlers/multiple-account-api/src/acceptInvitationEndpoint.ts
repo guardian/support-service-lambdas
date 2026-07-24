@@ -1,7 +1,6 @@
-import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import type { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import dayjs from 'dayjs';
-import { z } from 'zod';
 import { createSecondarySubscription } from '@modules/multiple-account/secondarySubscription';
 import type { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
 import { secondaryUserTTLFromPrimarySubscriptionTTL } from '@modules/multiple-account/secondaryUserRepository';
@@ -17,17 +16,13 @@ import { getSupporterRatePlan } from '@modules/supporter-product-data/supporterP
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { InvitationRepository } from './invitationRepository';
 
-export const acceptInvitationPathSchema = z.object({
-	invitationCode: z.string(),
-});
-
 export const acceptInvitationEndpoint = async (
 	stage: Stage,
-	signedInUserId: string,
-	invitationCode: string,
 	invitationRepository: InvitationRepository,
 	secondaryUserRepository: SecondaryUserRepository,
 	dynamoClient: DynamoDBClient,
+	signedInUserId: string,
+	invitationCode: string,
 ) => {
 	try {
 		const invitation = await invitationRepository.get(invitationCode);
