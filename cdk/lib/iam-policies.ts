@@ -28,6 +28,7 @@ export class IamPolicies extends SrStack {
 				getSupportAdminConsoleBucketPolicy(),
 				new AllowDynamoTableFullAccessPolicy(this),
 				...getManageFrontendPolicies(this.region, this.account),
+				...getSupportFrontendPolicies(this.region, this.account),
 				new PolicyStatement({
 					actions: ['cloudwatch:PutMetricData'],
 					resources: ['*'],
@@ -124,6 +125,16 @@ function getManageFrontendPolicies(region: string, account: string) {
 		actions: ['execute-api:Invoke'],
 		resources: [`arn:aws:execute-api:${region}:${account}:*/CODE/*`],
 	});
+
+	return [
+		fulfilmentDatesBucketPolicy,
+		allowListStackResources,
+		unsafeAllowGetAllApiKeys,
+		allowInvokeApi,
+	];
+}
+
+function getSupportFrontendPolicies(region: string, account: string) {
 	const allowInvokeLambda = new PolicyStatement({
 		actions: ['lambda:InvokeFunction'],
 		resources: [
@@ -131,13 +142,7 @@ function getManageFrontendPolicies(region: string, account: string) {
 		],
 	});
 
-	return [
-		fulfilmentDatesBucketPolicy,
-		allowListStackResources,
-		unsafeAllowGetAllApiKeys,
-		allowInvokeApi,
-		allowInvokeLambda,
-	];
+	return [allowInvokeLambda];
 }
 
 function getSupportAdminConsoleBucketPolicy() {
