@@ -27,6 +27,7 @@ exports[`The IamPolicies stack matches the snapshot 1`] = `
               "Action": [
                 "ssm:GetParameters",
                 "ssm:GetParameter",
+                "ssm:GetParametersByPath",
               ],
               "Effect": "Allow",
               "Resource": [
@@ -74,7 +75,7 @@ exports[`The IamPolicies stack matches the snapshot 1`] = `
                       {
                         "Ref": "AWS::AccountId",
                       },
-                      ":parameter/support/frontend/DEV/*",
+                      ":parameter/support/frontend/DEV",
                     ],
                   ],
                 },
@@ -333,6 +334,7 @@ exports[`The IamPolicies stack matches the snapshot 2`] = `
               "Action": [
                 "ssm:GetParameters",
                 "ssm:GetParameter",
+                "ssm:GetParametersByPath",
               ],
               "Effect": "Allow",
               "Resource": [
@@ -380,7 +382,7 @@ exports[`The IamPolicies stack matches the snapshot 2`] = `
                       {
                         "Ref": "AWS::AccountId",
                       },
-                      ":parameter/support/frontend/DEV/*",
+                      ":parameter/support/frontend/DEV",
                     ],
                   ],
                 },
