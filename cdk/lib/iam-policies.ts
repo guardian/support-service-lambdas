@@ -49,11 +49,15 @@ class AllowS3GetPolicy extends PolicyStatement {
 class AllowCodeParameterStoreReadPolicy extends PolicyStatement {
 	constructor(scope: GuStack) {
 		super({
-			actions: ['ssm:GetParameters', 'ssm:GetParameter'],
+			actions: [
+				'ssm:GetParameters',
+				'ssm:GetParameter',
+				'ssm:GetParametersByPath',
+			],
 			resources: [
 				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/DEV/*`,
 				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/CODE/*`,
-				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/support/frontend/DEV/*`,
+				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/support/frontend/DEV`,
 			],
 		});
 	}
