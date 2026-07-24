@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import { z } from 'zod';
-import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { CurrencyCode } from '@modules/internationalisation/currency';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type {
 	ProductCatalog,
@@ -53,7 +53,7 @@ export type CreateSubscriptionInputFields<T extends PaymentMethod> = {
 	salesforceAccountId: string;
 	salesforceContactId: string;
 	identityId: string;
-	currency: IsoCurrency;
+	currency: CurrencyCode;
 	paymentGateway: PaymentGateway<T>;
 	paymentMethod: T | ClonedPaymentMethod;
 	billToContact: Contact;
@@ -119,7 +119,7 @@ export function getReaderType(
 export function buildSubscriptionOrderAction(
 	productCatalog: ProductCatalog,
 	productPurchase: ProductPurchase,
-	currency: IsoCurrency,
+	currency: CurrencyCode,
 	appliedPromotion: AppliedPromotion | undefined,
 	promotion: Promo | undefined,
 ): {

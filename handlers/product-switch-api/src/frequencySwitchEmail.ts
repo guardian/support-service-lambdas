@@ -1,8 +1,8 @@
 import type dayjs from 'dayjs';
 import type { EmailMessageWithUserId } from '@modules/email/email';
 import { DataExtensionNames, sendEmail } from '@modules/email/email';
-import type { IsoCurrency } from '@modules/internationalisation/currency';
-import { getCurrencyInfo } from '@modules/internationalisation/currency';
+import type { CurrencyCode } from '@modules/internationalisation/currency';
+import { getCurrencyByCode } from '@modules/internationalisation/currency';
 import type { Stage } from '@modules/stage';
 import type { ZuoraAccount, ZuoraSubscription } from '@modules/zuora/types';
 
@@ -26,7 +26,7 @@ export const buildFrequencySwitchEmailMessage = (
 	lastName: string,
 	identityId: string,
 	subscriptionNumber: string,
-	currency: IsoCurrency,
+	currency: CurrencyCode,
 	newAnnualPrice: number,
 	nextPaymentDate: dayjs.Dayjs,
 ): EmailMessageWithUserId => {
@@ -38,7 +38,7 @@ export const buildFrequencySwitchEmailMessage = (
 					first_name: firstName,
 					last_name: lastName,
 					first_discounted_payment_date: nextPaymentDate.format('DD MMMM YYYY'),
-					currency: getCurrencyInfo(currency).extendedGlyph,
+					currency: getCurrencyByCode(currency).extendedGlyph,
 					new_price: newAnnualPrice.toFixed(2),
 					payment_frequency: 'Annually',
 					subscription_id: subscriptionNumber,
@@ -59,6 +59,7 @@ export const buildFrequencySwitchEmailMessage = (
  * @param stage The environment stage (CODE/PROD)
  * @param subscription The Zuora subscription
  * @param account The Zuora account
+ * @param currency The currency on the subscription
  * @param newAnnualPrice The new annual price
  * @param effectiveDate The date when the switch takes effect (next payment date)
  * @returns Promise that resolves when the email is sent
@@ -67,7 +68,7 @@ export const sendFrequencySwitchConfirmationEmail = async (
 	stage: Stage,
 	subscription: ZuoraSubscription,
 	account: ZuoraAccount,
-	currency: IsoCurrency,
+	currency: CurrencyCode,
 	newAnnualPrice: number,
 	effectiveDate: dayjs.Dayjs,
 ): Promise<void> => {

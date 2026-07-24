@@ -1,7 +1,7 @@
 import type { Dayjs } from 'dayjs';
 import type { EmailMessageWithIdentityUserId } from '@modules/email/email';
 import { DataExtensionNames } from '@modules/email/email';
-import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { CurrencyCode } from '@modules/internationalisation/currency';
 import type { TaxMode } from '@modules/product-catalog/productCatalog';
 import { buildEmailFields, buildNonDeliveryEmailFields } from './emailFields';
 import type {
@@ -24,7 +24,7 @@ export function buildDigitalSubscriptionEmailFields({
 }: {
 	today: Dayjs;
 	user: EmailUser;
-	currency: IsoCurrency;
+	currency: CurrencyCode;
 	billingPeriod: EmailBillingPeriod;
 	subscriptionNumber: string;
 	paymentSchedule: EmailPaymentSchedule;

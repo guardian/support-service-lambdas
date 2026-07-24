@@ -1,6 +1,4 @@
-import { isInList } from '@modules/arrayFunctions';
-
-export const CurrencyValues = [
+export const currencyCodes = [
 	'GBP',
 	'EUR',
 	'AUD',
@@ -9,15 +7,15 @@ export const CurrencyValues = [
 	'NZD',
 ] as const;
 
-export type IsoCurrency = (typeof CurrencyValues)[number];
+export type CurrencyCode = (typeof currencyCodes)[number];
 
-export type CurrencyInfo = {
+export type Currency = {
 	glyph: string;
 	extendedGlyph: string;
 	spokenCurrency: string;
 };
 
-const currencies: Record<IsoCurrency, CurrencyInfo> = {
+const currencies: Record<CurrencyCode, Currency> = {
 	GBP: {
 		glyph: '£',
 		extendedGlyph: '£',
@@ -50,7 +48,14 @@ const currencies: Record<IsoCurrency, CurrencyInfo> = {
 	},
 };
 
-export const isSupportedCurrency = isInList(CurrencyValues);
+const currencySet: Set<string> = new Set(currencyCodes);
 
-export const getCurrencyInfo = (currency: IsoCurrency): CurrencyInfo =>
-	currencies[currency];
+export function isSupportedCurrency(
+	maybeCurrency: string,
+): maybeCurrency is CurrencyCode {
+	return currencySet.has(maybeCurrency);
+}
+
+export function getCurrencyByCode(currencyCode: CurrencyCode): Currency {
+	return currencies[currencyCode];
+}

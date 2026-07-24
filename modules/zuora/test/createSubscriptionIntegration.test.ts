@@ -7,7 +7,7 @@
 import dayjs from 'dayjs';
 import { z } from 'zod';
 import { SupportRegionId } from '@modules/internationalisation/countryGroup';
-import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { CurrencyCode } from '@modules/internationalisation/currency';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
@@ -31,7 +31,7 @@ import code from '../../zuora-catalog/test/fixtures/catalog-code.json';
 
 describe('createSubscription integration', () => {
 	const productCatalog = generateProductCatalog(zuoraCatalogSchema.parse(code));
-	const currency: IsoCurrency = 'GBP';
+	const currency: CurrencyCode = 'GBP';
 	const contact = {
 		firstName: 'John',
 		lastName: 'Doe',

@@ -1,5 +1,5 @@
 import { ValidationError } from '@modules/errors';
-import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { CurrencyCode } from '@modules/internationalisation/currency';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { objectEntries } from '@modules/objectFunctions';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
@@ -9,7 +9,7 @@ import { getProductRatePlan } from '@modules/zuora/createSubscription/getProduct
 export const getChargeOverride = (
 	productCatalog: ProductCatalog,
 	productPurchase: ProductPurchase,
-	currency: IsoCurrency,
+	currency: CurrencyCode,
 ): { productRatePlanChargeId: string; overrideAmount: number } | undefined => {
 	if (productPurchase.product === 'Contribution') {
 		const chargeId =
@@ -50,7 +50,7 @@ export const getChargeOverride = (
 function getBaseProductPrice(
 	productCatalog: ProductCatalog,
 	productPurchase: ProductPurchase,
-	currency: IsoCurrency,
+	currency: CurrencyCode,
 ) {
 	return getIfDefined(
 		objectEntries(

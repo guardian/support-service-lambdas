@@ -3,7 +3,7 @@
  * Tests the candidate selection logic and edge cases without external API calls.
  */
 import dayjs from 'dayjs';
-import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { CurrencyCode } from '@modules/internationalisation/currency';
 import type {
 	RatePlanCharge,
 	ZuoraAccount,
@@ -45,7 +45,7 @@ function makeMockZuoraClient(): ZuoraClient {
 function makeAccount(overrides?: {
 	totalInvoiceBalance?: number;
 	creditBalance?: number;
-	currency?: IsoCurrency;
+	currency?: CurrencyCode;
 }): ZuoraAccount {
 	return {
 		basicInfo: {

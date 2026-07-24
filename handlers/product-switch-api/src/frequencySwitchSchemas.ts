@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { isoCurrencySchema } from '@modules/internationalisation/schemas';
+import { currencyCodeSchema } from '@modules/internationalisation/schemas';
 
 export const frequencySwitchRequestSchema = z.object({
 	preview: z.boolean(),
@@ -30,7 +30,7 @@ const priceObjectSchema = z.object({
 });
 
 export const frequencySwitchPreviewSuccessResponseSchema = z.object({
-	currency: isoCurrencySchema,
+	currency: currencyCodeSchema,
 	savings: priceObjectSchema,
 	newPrice: priceObjectSchema,
 	currentContribution: priceObjectSchema,

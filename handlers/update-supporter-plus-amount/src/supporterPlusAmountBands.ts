@@ -1,8 +1,8 @@
-import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { CurrencyCode } from '@modules/internationalisation/currency';
 import type { ProductBillingPeriod } from '@modules/product-catalog/productBillingPeriods';
 
 export const supporterPlusAmountBands: Record<
-	IsoCurrency,
+	CurrencyCode,
 	Record<ProductBillingPeriod<'SupporterPlus'>, { min: number; max: number }>
 > = {
 	GBP: {

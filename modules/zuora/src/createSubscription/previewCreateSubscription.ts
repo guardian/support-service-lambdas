@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import { z } from 'zod';
-import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { CurrencyCode } from '@modules/internationalisation/currency';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 import type { AppliedPromotion, Promo } from '@modules/promotions/v2/schema';
@@ -19,7 +19,7 @@ import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 export type PreviewCreateSubscriptionInputFields = {
 	stage: Stage;
 	accountNumber: string;
-	currency: IsoCurrency;
+	currency: CurrencyCode;
 	productPurchase: ProductPurchase;
 	appliedPromotion?: AppliedPromotion;
 };

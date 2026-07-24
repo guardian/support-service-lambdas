@@ -1,4 +1,4 @@
-import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { CurrencyCode } from '@modules/internationalisation/currency';
 import type { PaymentGateway } from '@modules/zuora/orders/paymentGateways';
 import type { AnyPaymentMethod } from '@modules/zuora/orders/paymentMethods';
 
@@ -19,7 +19,7 @@ export type Contact = {
 
 type NewAccountBase<T extends AnyPaymentMethod> = {
 	name: string;
-	currency: IsoCurrency;
+	currency: CurrencyCode;
 	crmId: string; // Salesforce accountId
 	customFields: {
 		sfContactId__c: string; // Salesforce contactId

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { CurrencyValues } from '@modules/internationalisation/currency';
+import { currencyCodeSchema } from '@modules/internationalisation/schemas';
 import { zuoraSubscriptionSchema } from './subscription';
 
 export const zuoraAccountBasicInfoSchema = z
@@ -14,7 +14,7 @@ export const zuoraAccountBasicInfoSchema = z
 
 export const metricsSchema = z.object({
 	totalInvoiceBalance: z.number(),
-	currency: z.enum(CurrencyValues),
+	currency: currencyCodeSchema,
 	creditBalance: z.number(),
 });
 export const billToContactSchema = z.object({

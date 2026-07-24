@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { partition } from '@modules/arrayFunctions';
-import type { IsoCurrency } from '@modules/internationalisation/currency';
-import { getCurrencyInfo } from '@modules/internationalisation/currency';
+import type { CurrencyCode } from '@modules/internationalisation/currency';
+import { getCurrencyByCode } from '@modules/internationalisation/currency';
 import { getNonEmptyOrThrow, isNonEmpty } from '@modules/nullAndUndefined';
 import type { TaxMode } from '@modules/product-catalog/productCatalog';
 import type { EmailBillingPeriod, EmailPaymentSchedule } from './types';
@@ -24,10 +24,10 @@ export function formatPrice(amount: number): string {
 }
 
 export function priceWithCurrency(
-	currency: IsoCurrency,
+	currency: CurrencyCode,
 	amount: number,
 ): string {
-	return `${getCurrencyInfo(currency).glyph}${formatPrice(amount)}`;
+	return `${getCurrencyByCode(currency).glyph}${formatPrice(amount)}`;
 }
 
 export function firstPayment(paymentSchedule: EmailPaymentSchedule): Payment {
@@ -85,7 +85,7 @@ function getRelevantAmountFromPayment(taxMode: TaxMode, payment: Payment) {
 export function describePayments(
 	paymentSchedule: EmailPaymentSchedule,
 	billingPeriod: EmailBillingPeriod,
-	currency: IsoCurrency,
+	currency: CurrencyCode,
 	isFixedTerm: boolean,
 	taxMode: TaxMode,
 ): string {
@@ -143,7 +143,7 @@ export function describePayments(
 
 function descriptionWithSingleIntroductoryPeriod(
 	paymentsWithDifferentPrice: [Payment, ...Payment[]],
-	currency: IsoCurrency,
+	currency: CurrencyCode,
 	initialPrice: number,
 	billingPeriod: EmailBillingPeriod,
 	taxMode: TaxMode,
@@ -163,7 +163,7 @@ function descriptionWithSingleIntroductoryPeriod(
 function descriptionWithMultipleIntroductoryPeriods(
 	paymentsWithInitialPrice: [Payment, ...Payment[]],
 	paymentsWithDifferentPrice: [Payment, ...Payment[]],
-	currency: IsoCurrency,
+	currency: CurrencyCode,
 	initialPrice: number,
 	billingPeriod: EmailBillingPeriod,
 	taxMode: TaxMode,

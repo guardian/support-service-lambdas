@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { describePayments } from '@modules/email/dataFields/dayZero/paymentDescription';
 import type { EmailMessageWithUserId } from '@modules/email/email';
-import { getCurrencyInfo } from '@modules/internationalisation/currency';
+import { getCurrencyByCode } from '@modules/internationalisation/currency';
 import type { SimpleInvoiceTotal } from '@modules/zuora/billingPreview';
 import type { PaymentMethodType } from '../prepare/accountInformation';
 import type { SwitchInformation } from '../prepare/switchInformation';
@@ -52,7 +52,7 @@ export const buildEmailMessage = (
 				SubscriberAttributes: {
 					first_name: firstName,
 					last_name: lastName,
-					currency: getCurrencyInfo(currency).extendedGlyph,
+					currency: getCurrencyByCode(currency).extendedGlyph,
 					first_payment_amount: firstPaymentAmount.toFixed(2),
 					date_of_first_payment: today.format('DD MMMM YYYY'),
 					date_of_next_payment:
