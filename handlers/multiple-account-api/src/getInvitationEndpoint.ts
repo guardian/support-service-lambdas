@@ -6,7 +6,10 @@ import {
 	notFound,
 	ok,
 } from '@modules/routing/apiGatewayResponses';
-import { type InvitationRepository } from './invitationRepository';
+import {
+	type InvitationRepository,
+	nonCancelledInvitationRecordSchema,
+} from './invitationRepository';
 
 export const getInvitationEndpoint = async (
 	invitationRepository: InvitationRepository,
@@ -27,7 +30,7 @@ export const getInvitationEndpoint = async (
 			);
 		}
 
-		return ok({ invitation });
+		return ok(invitation, nonCancelledInvitationRecordSchema);
 	} catch (error) {
 		logger.error('Error retrieving invitation', error);
 		return internalServerError();
