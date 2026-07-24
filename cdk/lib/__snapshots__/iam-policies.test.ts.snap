@@ -317,6 +317,11 @@ exports[`The IamPolicies stack matches the snapshot 1`] = `
               "Effect": "Allow",
               "Resource": "*",
             },
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3:::contributions-ticker/CODE/*",
+            },
           ],
           "Version": "2012-10-17",
         },
@@ -643,6 +648,11 @@ exports[`The IamPolicies stack matches the snapshot 2`] = `
               "Action": "cloudwatch:PutMetricData",
               "Effect": "Allow",
               "Resource": "*",
+            },
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3:::contributions-ticker/CODE/*",
             },
           ],
           "Version": "2012-10-17",

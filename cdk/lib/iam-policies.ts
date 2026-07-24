@@ -33,6 +33,7 @@ export class IamPolicies extends SrStack {
 					actions: ['cloudwatch:PutMetricData'],
 					resources: ['*'],
 				}),
+				new AllowS3GetPolicy('contributions-ticker', ['CODE/*']),
 			],
 		});
 	}
