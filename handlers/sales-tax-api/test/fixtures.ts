@@ -46,7 +46,7 @@ export const canadianCountryStates: TaxRatesResponse = {
 	NU: 0.05,
 	ON: 0.13,
 	PE: 0.15,
-	QC: 0.1475,
+	QC: 0.14975,
 	SK: 0.11,
 	YT: 0.05,
 };
