@@ -143,7 +143,19 @@ function getSupportFrontendPolicies(region: string, account: string) {
 		],
 	});
 
-	return [allowInvokeLambda];
+	const stateMachinePolicy = new PolicyStatement({
+		actions: [
+			'states:StartExecution',
+			'states:GetExecutionHistory',
+			'states:DescribeStateMachine',
+		],
+		resources: [
+			`arn:aws:states:${region}:${account}:stateMachine:support-workers-CODE`,
+			`arn:aws:states:${region}:${account}:execution:support-workers-CODE:*`,
+		],
+	});
+
+	return [allowInvokeLambda, stateMachinePolicy];
 }
 
 function getSupportAdminConsoleBucketPolicy() {

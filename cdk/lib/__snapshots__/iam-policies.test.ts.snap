@@ -313,6 +313,48 @@ exports[`The IamPolicies stack matches the snapshot 1`] = `
               },
             },
             {
+              "Action": [
+                "states:StartExecution",
+                "states:GetExecutionHistory",
+                "states:DescribeStateMachine",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:states:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":stateMachine:support-workers-CODE",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:states:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":execution:support-workers-CODE:*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
               "Action": "cloudwatch:PutMetricData",
               "Effect": "Allow",
               "Resource": "*",
@@ -643,6 +685,48 @@ exports[`The IamPolicies stack matches the snapshot 2`] = `
                   ],
                 ],
               },
+            },
+            {
+              "Action": [
+                "states:StartExecution",
+                "states:GetExecutionHistory",
+                "states:DescribeStateMachine",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:states:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":stateMachine:support-workers-CODE",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:states:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":execution:support-workers-CODE:*",
+                    ],
+                  ],
+                },
+              ],
             },
             {
               "Action": "cloudwatch:PutMetricData",
