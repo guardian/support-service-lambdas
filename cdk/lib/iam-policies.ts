@@ -120,15 +120,22 @@ function getManageFrontendPolicies(region: string, account: string) {
 		actions: ['apigateway:GET'],
 		resources: [`arn:aws:apigateway:${region}::/apikeys/*`], // FIXME only CODE ones
 	});
-	const allowInvokeLambda = new PolicyStatement({
+	const allowInvokeApi = new PolicyStatement({
 		actions: ['execute-api:Invoke'],
 		resources: [`arn:aws:execute-api:${region}:${account}:*/CODE/*`],
+	});
+	const allowInvokeLambda = new PolicyStatement({
+		actions: ['lambda:InvokeFunction'],
+		resources: [
+			`arn:aws:lambda:${region}:${account}:function:stripe-intent-CODE`,
+		],
 	});
 
 	return [
 		fulfilmentDatesBucketPolicy,
 		allowListStackResources,
 		unsafeAllowGetAllApiKeys,
+		allowInvokeApi,
 		allowInvokeLambda,
 	];
 }

@@ -293,6 +293,26 @@ exports[`The IamPolicies stack matches the snapshot 1`] = `
               },
             },
             {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:lambda:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":function:stripe-intent-CODE",
+                  ],
+                ],
+              },
+            },
+            {
               "Action": "cloudwatch:PutMetricData",
               "Effect": "Allow",
               "Resource": "*",
@@ -595,6 +615,26 @@ exports[`The IamPolicies stack matches the snapshot 2`] = `
                       "Ref": "AWS::AccountId",
                     },
                     ":*/CODE/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:lambda:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":function:stripe-intent-CODE",
                   ],
                 ],
               },
