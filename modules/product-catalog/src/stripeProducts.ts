@@ -22,8 +22,6 @@ export type StripeProduct = {
 			billingPeriod: 'Month' | 'OneTime';
 			termType: 'Recurring' | 'FixedTerm';
 			termLengthInMonths: number;
-			// Stripe products are always TaxInclusive
-			taxMode: 'TaxInclusive';
 		}
 	>;
 };
@@ -48,7 +46,6 @@ export const stripeProducts: Partial<
 				billingPeriod: 'Month',
 				termType: 'Recurring',
 				termLengthInMonths: 12,
-				taxMode: 'TaxInclusive',
 			},
 		},
 	},
@@ -69,7 +66,6 @@ export const stripeProducts: Partial<
 				billingPeriod: 'OneTime',
 				termType: 'FixedTerm',
 				termLengthInMonths: 0,
-				taxMode: 'TaxInclusive',
 			},
 		},
 	},
@@ -92,7 +88,6 @@ export const stripeProductsSchema = `GuardianPatron: z.object({
 				}),
 			}),
 			billingPeriod: z.literal('Month'),
-			taxMode: z.literal('TaxInclusive'),
 		}),
 	}),
 }),
@@ -113,7 +108,6 @@ OneTimeContribution: z.object({
 				}),
 			}),
 			billingPeriod: z.literal('OneTime'),
-			taxMode: z.literal('TaxInclusive'),
 		}),
 	}),
 })`;
