@@ -28,10 +28,12 @@ export class IamPolicies extends SrStack {
 				getSupportAdminConsoleBucketPolicy(),
 				new AllowDynamoTableFullAccessPolicy(this),
 				...getManageFrontendPolicies(this.region, this.account),
+				...getSupportFrontendPolicies(this.region, this.account),
 				new PolicyStatement({
 					actions: ['cloudwatch:PutMetricData'],
 					resources: ['*'],
 				}),
+				new AllowS3GetPolicy('contributions-ticker', ['CODE/*']),
 			],
 		});
 	}
@@ -120,7 +122,7 @@ function getManageFrontendPolicies(region: string, account: string) {
 		actions: ['apigateway:GET'],
 		resources: [`arn:aws:apigateway:${region}::/apikeys/*`], // FIXME only CODE ones
 	});
-	const allowInvokeLambda = new PolicyStatement({
+	const allowInvokeApi = new PolicyStatement({
 		actions: ['execute-api:Invoke'],
 		resources: [`arn:aws:execute-api:${region}:${account}:*/CODE/*`],
 	});
@@ -129,8 +131,31 @@ function getManageFrontendPolicies(region: string, account: string) {
 		fulfilmentDatesBucketPolicy,
 		allowListStackResources,
 		unsafeAllowGetAllApiKeys,
-		allowInvokeLambda,
+		allowInvokeApi,
 	];
+}
+
+function getSupportFrontendPolicies(region: string, account: string) {
+	const allowInvokeLambda = new PolicyStatement({
+		actions: ['lambda:InvokeFunction'],
+		resources: [
+			`arn:aws:lambda:${region}:${account}:function:stripe-intent-CODE`,
+		],
+	});
+
+	const stateMachinePolicy = new PolicyStatement({
+		actions: [
+			'states:StartExecution',
+			'states:GetExecutionHistory',
+			'states:DescribeStateMachine',
+		],
+		resources: [
+			`arn:aws:states:${region}:${account}:stateMachine:support-workers-CODE`,
+			`arn:aws:states:${region}:${account}:execution:support-workers-CODE:*`,
+		],
+	});
+
+	return [allowInvokeLambda, stateMachinePolicy];
 }
 
 function getSupportAdminConsoleBucketPolicy() {
