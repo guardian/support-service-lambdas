@@ -52,7 +52,7 @@ jobs:
         shell: bash
       - uses: actions/setup-node@v6
         with:
-          node-version-file: '.nvmrc'
+          node-version-file: '.tool-versions'
           cache: 'pnpm'
       - run: pnpm install
       - run: pnpm --filter cdk package
@@ -164,7 +164,7 @@ jobs:
         shell: bash
       - uses: actions/setup-node@v6
         with:
-          node-version-file: '.nvmrc'
+          node-version-file: '.tool-versions'
           cache: 'pnpm'
       - run: pnpm install
       - run: pnpm --filter cdk package
