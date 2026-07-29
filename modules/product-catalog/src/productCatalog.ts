@@ -246,4 +246,4 @@ export class ProductCatalogHelper {
 	}
 }
 
-export type TaxMode = 'TaxInclusive' | 'TaxExclusive' | null | undefined;
+export type TaxMode = 'TaxInclusive' | 'TaxExclusive' | null;
