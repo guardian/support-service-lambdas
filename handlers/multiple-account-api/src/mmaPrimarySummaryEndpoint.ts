@@ -63,7 +63,9 @@ const getNonCancelledSecondaryUserListWithNames = async (
 	identityClient: IdentityClient,
 ) => {
 	const secondaryUsers =
-		await secondaryUserRepository.listNonCancelled(subscriptionName);
+		await secondaryUserRepository.listNonCancelledBySubscription(
+			subscriptionName,
+		);
 
 	return Promise.all(
 		secondaryUsers.map(async (secondaryUser) =>

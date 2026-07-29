@@ -19,7 +19,7 @@ describe('listSecondaryUsersEndpoint', () => {
 			.fn<Promise<SecondaryUserRecord[]>, [string]>()
 			.mockResolvedValue(secondaryUsers);
 		const secondaryUserRepository = {
-			listNonCancelled: mockListNonCancelled,
+			listNonCancelledBySubscription: mockListNonCancelled,
 		} as unknown as SecondaryUserRepository;
 
 		const result = await listSecondaryUsersEndpoint(
@@ -37,7 +37,7 @@ describe('listSecondaryUsersEndpoint', () => {
 			.fn<Promise<SecondaryUserRecord[]>, [string]>()
 			.mockRejectedValue(new Error('dynamodb error'));
 		const secondaryUserRepository = {
-			listNonCancelled: mockListNonCancelled,
+			listNonCancelledBySubscription: mockListNonCancelled,
 		} as unknown as SecondaryUserRepository;
 
 		const result = await listSecondaryUsersEndpoint(

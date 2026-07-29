@@ -1,6 +1,7 @@
 import {
 	DeleteItemCommand,
 	DynamoDBClient,
+	GetItemCommand,
 	PutItemCommand,
 	QueryCommand,
 	type TransactWriteItem,
@@ -61,7 +62,9 @@ export class SecondaryUserRepository {
 		);
 	}
 
-	async get(secondaryIdentityId: string): Promise<SecondaryUserRecord[]> {
+	async listByIdentity(
+		secondaryIdentityId: string,
+	): Promise<SecondaryUserRecord[]> {
 		const result = await this.client.send(
 			new QueryCommand({
 				TableName: this.tableName,
@@ -77,30 +80,50 @@ export class SecondaryUserRepository {
 		);
 	}
 
-	async getFromSubscription(
+	async listNonCancelledByIdentity(
 		secondaryIdentityId: string,
-		subscriptionName: string,
-	): Promise<SecondaryUserRecord | undefined> {
-		const result = await this.client.send(
-			new QueryCommand({
-				TableName: this.tableName,
-				KeyConditionExpression:
-					'secondaryIdentityId = :secondaryIdentityId AND subscriptionName = :subscriptionName',
-				ExpressionAttributeValues: {
-					':secondaryIdentityId': { S: secondaryIdentityId },
-					':subscriptionName': { S: subscriptionName },
-				},
-			}),
-		);
-		const allSecondaryUsers = (result.Items ?? []).map((item) =>
-			secondaryUserRecordSchema.parse(unmarshall(item)),
-		);
-		return allSecondaryUsers.find(
-			(record) => record.subscriptionName === subscriptionName,
+	): Promise<SecondaryUserRecord[]> {
+		return (await this.listByIdentity(secondaryIdentityId)).filter(
+			(secondaryUser) => secondaryUser.cancelledBy === undefined,
 		);
 	}
 
-	async list(subscriptionName: string): Promise<SecondaryUserRecord[]> {
+	async getBySubscriptionAndIdentity(
+		subscriptionName: string,
+		secondaryIdentityId: string,
+	): Promise<SecondaryUserRecord | undefined> {
+		const result = await this.client.send(
+			new GetItemCommand({
+				TableName: this.tableName,
+				Key: {
+					subscriptionName: { S: subscriptionName },
+					secondaryIdentityId: { S: secondaryIdentityId },
+				},
+			}),
+		);
+		if (!result.Item) {
+			return undefined;
+		}
+		return secondaryUserRecordSchema.parse(unmarshall(result.Item));
+	}
+
+	async getNonCancelledBySubscriptionAndIdentity(
+		subscriptionName: string,
+		secondaryIdentityId: string,
+	): Promise<SecondaryUserRecord | undefined> {
+		const secondaryUser = await this.getBySubscriptionAndIdentity(
+			subscriptionName,
+			secondaryIdentityId,
+		);
+		if (!secondaryUser || secondaryUser.cancelledBy !== undefined) {
+			return undefined;
+		}
+		return secondaryUser;
+	}
+
+	async listBySubscription(
+		subscriptionName: string,
+	): Promise<SecondaryUserRecord[]> {
 		logger.log(
 			`Querying secondary users for primary subscription ${subscriptionName}`,
 		);
@@ -118,10 +141,10 @@ export class SecondaryUserRepository {
 		);
 	}
 
-	async listNonCancelled(
+	async listNonCancelledBySubscription(
 		subscriptionName: string,
 	): Promise<SecondaryUserRecord[]> {
-		return (await this.list(subscriptionName)).filter(
+		return (await this.listBySubscription(subscriptionName)).filter(
 			(secondaryUser) => secondaryUser.cancelledBy === undefined,
 		);
 	}

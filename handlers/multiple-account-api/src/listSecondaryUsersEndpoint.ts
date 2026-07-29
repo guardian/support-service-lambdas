@@ -9,7 +9,9 @@ export const listSecondaryUsersEndpoint = async (
 	try {
 		logger.mutableAddContext(subscriptionName);
 		const secondaryUsers =
-			await secondaryUserRepository.listNonCancelled(subscriptionName);
+			await secondaryUserRepository.listNonCancelledBySubscription(
+				subscriptionName,
+			);
 		return ok({ secondaryUsers });
 	} catch (error) {
 		return buildErrorResponse(error);

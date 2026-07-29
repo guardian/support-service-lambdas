@@ -108,7 +108,7 @@ afterEach(async () => {
 
 test('deleteSecondaryUserEndpoint soft deletes the secondary user and removes the supporter product data record', async () => {
 	const secondaryUsersBeforeDelete =
-		await secondaryUserRepository.get(secondaryIdentityId);
+		await secondaryUserRepository.listByIdentity(secondaryIdentityId);
 	const matchingSecondaryUserBeforeDelete = secondaryUsersBeforeDelete.find(
 		(record) => record.subscriptionName === subscriptionName,
 	);
@@ -138,7 +138,7 @@ test('deleteSecondaryUserEndpoint soft deletes the secondary user and removes th
 	// The secondary user record is retained (soft deleted) with cancellation
 	// metadata rather than hard deleted.
 	const secondaryUsersAfterDelete =
-		await secondaryUserRepository.get(secondaryIdentityId);
+		await secondaryUserRepository.listByIdentity(secondaryIdentityId);
 	const matchingSecondaryUserAfterDelete = secondaryUsersAfterDelete.find(
 		(record) => record.subscriptionName === subscriptionName,
 	);

@@ -25,9 +25,8 @@ export async function secondaryUserMeEndpoint(
 	secondaryUserRepository: SecondaryUserRepository,
 	zuoraClient: ZuoraClient,
 ): Promise<APIGatewayProxyResult> {
-	const secondaryUsers: SecondaryUserRecord[] = (
-		await secondaryUserRepository.get(identityId)
-	).filter((secondaryUser) => secondaryUser.cancelledBy === undefined);
+	const secondaryUsers: SecondaryUserRecord[] =
+		await secondaryUserRepository.listNonCancelledByIdentity(identityId);
 
 	const primaryUsers = await Promise.all(
 		secondaryUsers.map(async (secondaryUser) =>

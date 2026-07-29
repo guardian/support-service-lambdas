@@ -1126,6 +1126,10 @@ exports[`The Multiple account api stack matches the snapshot 1`] = `
             "Value": "CODE",
           },
         ],
+        "TimeToLiveSpecification": {
+          "AttributeName": "expiryDate",
+          "Enabled": true,
+        },
       },
       "Type": "AWS::DynamoDB::Table",
       "UpdateReplacePolicy": "Delete",
@@ -2421,6 +2425,10 @@ exports[`The Multiple account api stack matches the snapshot 2`] = `
             "Value": "PROD",
           },
         ],
+        "TimeToLiveSpecification": {
+          "AttributeName": "expiryDate",
+          "Enabled": true,
+        },
       },
       "Type": "AWS::DynamoDB::Table",
       "UpdateReplacePolicy": "Retain",

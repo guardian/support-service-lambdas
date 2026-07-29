@@ -107,7 +107,8 @@ test('acceptInvitationEndpoint accepts an invitation and creates a secondary use
 	expect(invitation).toBeUndefined();
 
 	// A secondary user record should have been created
-	const secondaryUsers = await secondaryUserRepository.get(secondaryIdentityId);
+	const secondaryUsers =
+		await secondaryUserRepository.listByIdentity(secondaryIdentityId);
 	expect(secondaryUsers).toHaveLength(1);
 	expect(secondaryUsers[0]?.subscriptionName).toBe(subscriptionName);
 	expect(secondaryUsers[0]?.secondaryIdentityId).toBe(secondaryIdentityId);
