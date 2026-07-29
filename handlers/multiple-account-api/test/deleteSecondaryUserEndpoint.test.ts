@@ -40,26 +40,27 @@ const makeRepository = (
 	secondaryUser: SecondaryUserRecord | undefined,
 ): {
 	repository: SecondaryUserRepository;
-	mockGetBySubscriptionAndIdentity: jest.Mock<
+	mockGetNonCancelledBySubscriptionAndIdentity: jest.Mock<
 		Promise<SecondaryUserRecord | undefined>,
 		[string, string]
 	>;
-	mockSoftDeleteTransactItem: jest.Mock;
+	mockGetSoftDeleteTransaction: jest.Mock;
 } => {
-	const mockGetBySubscriptionAndIdentity = jest
+	const mockGetNonCancelledBySubscriptionAndIdentity = jest
 		.fn<Promise<SecondaryUserRecord | undefined>, [string, string]>()
 		.mockResolvedValue(secondaryUser);
-	const mockSoftDeleteTransactItem = jest
+	const mockGetSoftDeleteTransaction = jest
 		.fn()
 		.mockReturnValue(softDeleteTransactItem);
 	const repository = {
-		getBySubscriptionAndIdentity: mockGetBySubscriptionAndIdentity,
-		softDeleteTransactItem: mockSoftDeleteTransactItem,
+		getNonCancelledBySubscriptionAndIdentity:
+			mockGetNonCancelledBySubscriptionAndIdentity,
+		getSoftDeleteTransaction: mockGetSoftDeleteTransaction,
 	} as unknown as SecondaryUserRepository;
 	return {
 		repository,
-		mockGetBySubscriptionAndIdentity,
-		mockSoftDeleteTransactItem,
+		mockGetNonCancelledBySubscriptionAndIdentity,
+		mockGetSoftDeleteTransaction,
 	};
 };
 
@@ -76,7 +77,7 @@ const makeDynamoClient = (): {
 
 describe('deleteSecondaryUserEndpoint', () => {
 	it('soft deletes with cancelledBy "primary" when the primary user deletes', async () => {
-		const { repository, mockSoftDeleteTransactItem } =
+		const { repository, mockGetSoftDeleteTransaction } =
 			makeRepository(makeSecondaryUser());
 		const { client, mockSend } = makeDynamoClient();
 
@@ -90,7 +91,7 @@ describe('deleteSecondaryUserEndpoint', () => {
 		);
 
 		expect(result.statusCode).toBe(204);
-		expect(mockSoftDeleteTransactItem).toHaveBeenCalledWith(
+		expect(mockGetSoftDeleteTransaction).toHaveBeenCalledWith(
 			subscriptionName,
 			secondaryIdentityId,
 			'primary',
@@ -115,7 +116,7 @@ describe('deleteSecondaryUserEndpoint', () => {
 	});
 
 	it('soft deletes with cancelledBy "secondary" when the secondary user deletes', async () => {
-		const { repository, mockSoftDeleteTransactItem } =
+		const { repository, mockGetSoftDeleteTransaction } =
 			makeRepository(makeSecondaryUser());
 		const { client } = makeDynamoClient();
 
@@ -129,7 +130,7 @@ describe('deleteSecondaryUserEndpoint', () => {
 		);
 
 		expect(result.statusCode).toBe(204);
-		expect(mockSoftDeleteTransactItem).toHaveBeenCalledWith(
+		expect(mockGetSoftDeleteTransaction).toHaveBeenCalledWith(
 			subscriptionName,
 			secondaryIdentityId,
 			'secondary',
@@ -137,7 +138,7 @@ describe('deleteSecondaryUserEndpoint', () => {
 	});
 
 	it('returns 404 when the secondary user record is not found', async () => {
-		const { repository, mockSoftDeleteTransactItem } =
+		const { repository, mockGetSoftDeleteTransaction } =
 			makeRepository(undefined);
 		const { client, mockSend } = makeDynamoClient();
 
@@ -151,17 +152,15 @@ describe('deleteSecondaryUserEndpoint', () => {
 		);
 
 		expect(result.statusCode).toBe(404);
-		expect(mockSoftDeleteTransactItem).not.toHaveBeenCalled();
+		expect(mockGetSoftDeleteTransaction).not.toHaveBeenCalled();
 		expect(mockSend).not.toHaveBeenCalled();
 	});
 
 	it('returns 404 when the secondary user record is already cancelled', async () => {
-		const { repository, mockSoftDeleteTransactItem } = makeRepository(
-			makeSecondaryUser({
-				cancelledBy: 'primary',
-				cancelledDate: '2026-07-29T00:00:00.000Z',
-			}),
-		);
+		// The repository's getNonCancelledBySubscriptionAndIdentity filters out
+		// cancelled records, so it resolves undefined for an already-cancelled user.
+		const { repository, mockGetSoftDeleteTransaction } =
+			makeRepository(undefined);
 		const { client, mockSend } = makeDynamoClient();
 
 		const result = await deleteSecondaryUserEndpoint(
@@ -174,12 +173,12 @@ describe('deleteSecondaryUserEndpoint', () => {
 		);
 
 		expect(result.statusCode).toBe(404);
-		expect(mockSoftDeleteTransactItem).not.toHaveBeenCalled();
+		expect(mockGetSoftDeleteTransaction).not.toHaveBeenCalled();
 		expect(mockSend).not.toHaveBeenCalled();
 	});
 
 	it('returns 400 when the identity id matches neither user', async () => {
-		const { repository, mockSoftDeleteTransactItem } =
+		const { repository, mockGetSoftDeleteTransaction } =
 			makeRepository(makeSecondaryUser());
 		const { client, mockSend } = makeDynamoClient();
 
@@ -193,7 +192,7 @@ describe('deleteSecondaryUserEndpoint', () => {
 		);
 
 		expect(result.statusCode).toBe(400);
-		expect(mockSoftDeleteTransactItem).not.toHaveBeenCalled();
+		expect(mockGetSoftDeleteTransaction).not.toHaveBeenCalled();
 		expect(mockSend).not.toHaveBeenCalled();
 	});
 });
