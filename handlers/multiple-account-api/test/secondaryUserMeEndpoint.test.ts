@@ -114,6 +114,41 @@ describe('secondaryUserMeEndpoint', () => {
 		expect(mockGetAccount).not.toHaveBeenCalled();
 	});
 
+	it('excludes cancelled secondary user records', async () => {
+		const activeUser = makeSecondaryUser('A-S00000001');
+		const cancelledUser: SecondaryUserRecord = {
+			...makeSecondaryUser('A-S00000002'),
+			cancelledBy: 'primary',
+			cancelledDate: '2026-07-29T00:00:00.000Z',
+		};
+		mockGetSubscription.mockResolvedValueOnce(makeSubscription('A00000001'));
+		mockGetAccount.mockResolvedValueOnce(
+			makeAccount('Ada', 'Lovelace', 'ada@example.com'),
+		);
+
+		const result = await secondaryUserMeEndpoint(
+			'secondary-id',
+			makeRepository([activeUser, cancelledUser]),
+			zuoraClient,
+		);
+
+		expect(result.statusCode).toBe(200);
+		expect(JSON.parse(result.body)).toEqual({
+			primaryUsers: [
+				{
+					firstName: 'Ada',
+					lastName: 'Lovelace',
+					workEmail: 'ada@example.com',
+				},
+			],
+		});
+		expect(mockGetSubscription).toHaveBeenCalledTimes(1);
+		expect(mockGetSubscription).toHaveBeenCalledWith(
+			zuoraClient,
+			'A-S00000001',
+		);
+	});
+
 	it('propagates errors thrown while fetching from Zuora', async () => {
 		mockGetSubscription.mockRejectedValue(new Error('Zuora unavailable'));
 

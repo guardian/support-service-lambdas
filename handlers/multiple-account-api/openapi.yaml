@@ -16,7 +16,7 @@ paths:
       description: Creates a new invitation for a subscription and returns an invitation code.
       security:
         - identityId: []
-        -  apiKey: []
+        - apiKey: []
       requestBody:
         required: true
         content:
@@ -161,7 +161,16 @@ paths:
     delete:
       operationId: deleteSecondaryUser
       summary: Delete secondary user
-      description: Removes a secondary user from a primary subscription.
+      description: >-
+        Removes (soft deletes) a secondary user from a primary subscription. The
+        'x-identity-id' header is required and must match either the primary
+        user (removing the secondary user) or the secondary user (removing
+        themselves). Whether the removal was carried out by the primary or the
+        secondary is derived from which of the two the identity id matches. The
+        secondary user record is retained for two weeks via a DynamoDB TTL with
+        a 'cancelledBy' value, while the associated supporter product data record
+        (the benefit) is deleted immediately. A secondary user record that has
+        already been cancelled is treated as not found.
       security:
         - identityId: []
         - apiKey: []
@@ -180,11 +189,32 @@ paths:
             type: string
           description: Identity ID of the secondary user to remove.
           example: '30067890'
+        - name: x-identity-id
+          in: header
+          required: true
+          schema:
+            type: string
+          description: >-
+            The identity id of the primary or secondary user of the secondary
+            user record. When it matches the primary user the removal is recorded
+            as 'primary'; when it matches the secondary user it is recorded as
+            'secondary'.
       responses:
         '204':
           description: Secondary user deleted.
+        '400':
+          description: >-
+            Missing 'x-identity-id' header, or the identity id does not match
+            the primary or secondary user of the secondary user record.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: The x-identity-id header is required
         '404':
-          description: Route not found.
+          description: >-
+            Secondary user not found. Also returned when the secondary user has
+            already been cancelled.
           content:
             text/plain:
               schema:
@@ -691,5 +721,3 @@ components:
             - Invalid request path
         details:
           description: Parser-specific error details.
-
-

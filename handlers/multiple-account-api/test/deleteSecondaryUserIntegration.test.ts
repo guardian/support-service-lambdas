@@ -106,7 +106,7 @@ afterEach(async () => {
 	}
 });
 
-test('deleteSecondaryUserEndpoint deletes secondary user and supporter product data records', async () => {
+test('deleteSecondaryUserEndpoint soft deletes the secondary user and removes the supporter product data record', async () => {
 	const secondaryUsersBeforeDelete =
 		await secondaryUserRepository.get(secondaryIdentityId);
 	const matchingSecondaryUserBeforeDelete = secondaryUsersBeforeDelete.find(
@@ -128,21 +128,25 @@ test('deleteSecondaryUserEndpoint deletes secondary user and supporter product d
 		stage,
 		secondaryUserRepository,
 		dynamoClient,
-		{
-			subscriptionName,
-			secondaryIdentityId,
-		},
+		subscriptionName,
+		secondaryIdentityId,
+		secondaryIdentityId,
 	);
 
 	expect(result.statusCode).toBe(204);
 
+	// The secondary user record is retained (soft deleted) with cancellation
+	// metadata rather than hard deleted.
 	const secondaryUsersAfterDelete =
 		await secondaryUserRepository.get(secondaryIdentityId);
 	const matchingSecondaryUserAfterDelete = secondaryUsersAfterDelete.find(
 		(record) => record.subscriptionName === subscriptionName,
 	);
-	expect(matchingSecondaryUserAfterDelete).toBeUndefined();
+	expect(matchingSecondaryUserAfterDelete).toBeDefined();
+	expect(matchingSecondaryUserAfterDelete?.cancelledBy).toBe('secondary');
+	expect(matchingSecondaryUserAfterDelete?.cancelledDate).toBeDefined();
 
+	// The supporter product data record (the benefit) is removed immediately.
 	const supporterProductDataRecordsAfterDelete =
 		(await getSupporterRatePlans(stage, secondaryIdentityId)) ?? [];
 	const subscriptionRecordAfterDelete =
