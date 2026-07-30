@@ -119,3 +119,38 @@ See [this doc](./handlers/HOWTO-create-lambda.md)
 ### Scala dependency tree
 
 run `sbt dependencyTree`
+
+### Finding unused code and dependencies (knip)
+
+[knip](https://knip.dev) analyses the TypeScript workspaces to report **unused files,
+exports, types and dependencies**, plus dependencies that are used but not declared. It
+is a useful way to keep the lambdas and shared modules lean.
+
+Run it from the root of the repo (using the Node version in `.nvmrc`):
+
+```shell
+pnpm knip
+```
+
+knip is configured in [`knip.ts`](./knip.ts). A few things are worth knowing about how it
+is set up for this monorepo:
+
+- Shared modules are imported through the `@modules/*` TypeScript path alias rather than by
+  package name, so knip cannot link those imports back to the `workspace:*` dependency. The
+  config therefore ignores internal workspace packages (they are also required by
+  `buildcheck` for `pnpm --filter <project>...`). External (third party) dependencies are
+  still checked.
+- Handler entry points are `src/index.ts` (api-gateway lambdas) and `src/handlers/*.ts`
+  (step function lambdas); `runManual/*` scripts are also treated as entry points.
+- knip exits with a non-zero status when it finds issues, so it can be wired into CI once
+  the existing findings have been triaged.
+
+Because every lambda/module `package.json` is a **managed file** (see
+[`buildcheck/README.md`](./buildcheck/README.md)), fix any unused-dependency findings by
+editing [`buildcheck/data/build.ts`](./buildcheck/data/build.ts) and running
+`pnpm snapshot:update` — do not edit the generated `package.json` files directly.
+
+External documentation:
+
+- knip docs: https://knip.dev
+- knip configuration reference: https://knip.dev/reference/configuration
