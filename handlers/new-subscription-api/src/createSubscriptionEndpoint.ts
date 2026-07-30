@@ -1,7 +1,6 @@
 import type { APIGatewayProxyResult } from 'aws-lambda';
-import { ValidationError } from '@modules/errors';
-import { supportRegionIdFromCountry } from '@modules/internationalisation/countryGroup';
 import { countryCodeSchema } from '@modules/internationalisation/schemas';
+import { supportRegionIdFromCountryCode } from '@modules/internationalisation/supportRegion';
 import { logger } from '@modules/logger/logger';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { getPromotion } from '@modules/promotions/v2/getPromotion';
@@ -30,12 +29,7 @@ async function fetchPromotionAndAppliedPromotionFromPromoCode(
 		deliveryDetails.deliveryContact?.country ??
 			requestBody.billToContact.country,
 	);
-	const supportRegionId = supportRegionIdFromCountry(supportRegionCountry);
-	if (!supportRegionId) {
-		throw new ValidationError(
-			`No support region found for country ${supportRegionCountry}`,
-		);
-	}
+	const supportRegionId = supportRegionIdFromCountryCode(supportRegionCountry);
 
 	return {
 		appliedPromotion: {

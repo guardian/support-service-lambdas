@@ -292,19 +292,22 @@ export const supportRegions: Record<SupportRegionId, SupportRegion> = {
 	},
 };
 
-export const supportRegionFromCountryCode = (country: CountryCode) => {
-	const regions = Object.values(supportRegions).filter((region) =>
-		region.countries.includes(country),
+export const supportRegionIdFromCountryCode = (
+	country: CountryCode,
+): SupportRegionId => {
+	const [regionId, ...extraRegionIds] = supportRegionIds.filter((id) =>
+		supportRegions[id].countries.includes(country),
 	);
-	if (regions.length === 0) {
+	if (!regionId) {
 		throw new Error(
 			`Country code ${country} does not belong to any support region`,
 		);
 	}
-	if (regions.length > 1) {
+	if (extraRegionIds.length > 0) {
 		throw new Error(
-			`Country code ${country} belongs to multiple support regions (${regions.map((r) => r.name).join(', ')})`,
+			`Country code ${country} belongs to multiple support regions (${[regionId, ...extraRegionIds].map((id) => supportRegions[id].name).join(', ')})`,
 		);
 	}
-	return regions[0];
+
+	return regionId;
 };

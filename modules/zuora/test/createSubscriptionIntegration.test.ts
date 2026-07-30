@@ -6,7 +6,6 @@
 
 import dayjs from 'dayjs';
 import { z } from 'zod';
-import { SupportRegionId } from '@modules/internationalisation/countryGroup';
 import type { CurrencyCode } from '@modules/internationalisation/currency';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
@@ -212,7 +211,7 @@ describe('createSubscription integration', () => {
 			productPurchase: productPurchase,
 			appliedPromotion: {
 				promoCode: 'E2E_TEST_SPLUS_MONTHLY',
-				supportRegionId: SupportRegionId.UK,
+				supportRegionId: 'uk',
 			},
 		};
 		const client = await ZuoraClient.create('CODE');
@@ -246,7 +245,7 @@ describe('createSubscription integration', () => {
 			productPurchase: productPurchase,
 			appliedPromotion: {
 				promoCode: 'TEST_CODE',
-				supportRegionId: SupportRegionId.UK,
+				supportRegionId: 'uk',
 			},
 		};
 		const client = await ZuoraClient.create('CODE');
