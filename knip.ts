@@ -55,6 +55,25 @@ const config: KnipConfig = {
 			entry: ['runManual/**/*.ts'],
 			project: ['src/**/*.ts'],
 		},
+		'modules/internationalisation': {
+			// These files are consumed externally by the support-frontend repo,
+			// which imports this repo as a git dependency, so they are entry
+			// points even though nothing in this repo imports them.
+			entry: [
+				'src/gwDeliverableCountries.ts',
+				'src/restrictedCountries.ts',
+			],
+			project: ['src/**/*.ts'],
+		},
+		'modules/email': {
+			// These files are consumed externally by the support-frontend repo,
+			// which imports this repo as a git dependency, so they are entry
+			// points even though nothing in this repo imports them.
+			entry: [
+				'src/dataFields/dayZero/guardianWeeklyPlusEmailFields.ts',
+			],
+			project: ['src/**/*.ts'],
+		},
 		cdk: {
 			entry: ['bin/cdk.ts', 'lib/**/*.test.ts'],
 			project: ['{bin,lib}/**/*.ts'],
