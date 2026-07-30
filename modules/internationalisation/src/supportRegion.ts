@@ -1,7 +1,15 @@
 import type { CountryCode } from './country';
 import { type Currency, getCurrencyByCode } from './currency';
 
-export const supportRegionIds = ['uk', 'us', 'au', 'eu', 'int', 'nz', 'ca'];
+export const supportRegionIds = [
+	'uk',
+	'us',
+	'eu',
+	'au',
+	'nz',
+	'ca',
+	'int',
+] as const;
 
 export type SupportRegionId = (typeof supportRegionIds)[number];
 
