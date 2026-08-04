@@ -1,0 +1,27 @@
+# MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/riff-raff.yaml.ts
+stacks:
+  - support
+regions:
+  - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  scrub-non-tokenised-payment-methods-cloudformation:
+    type: cloud-formation
+    app: scrub-non-tokenised-payment-methods
+    parameters:
+      templateStagePaths:
+        CODE: scrub-non-tokenised-payment-methods-CODE.template.json
+        PROD: scrub-non-tokenised-payment-methods-PROD.template.json
+  scrub-non-tokenised-payment-methods:
+    type: aws-lambda
+    parameters:
+      fileName: scrub-non-tokenised-payment-methods.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+        - get-payment-methods-to-scrub-
+        - scrub-payment-methods-
+    dependencies:
+      - scrub-non-tokenised-payment-methods-cloudformation

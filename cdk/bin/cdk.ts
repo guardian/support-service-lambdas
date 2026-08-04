@@ -35,6 +35,7 @@ import { SalesTaxApi } from '../lib/sales-tax-api';
 import { SalesforceDisasterRecovery } from '../lib/salesforce-disaster-recovery';
 import { SalesforceDisasterRecoveryHealthCheck } from '../lib/salesforce-disaster-recovery-health-check';
 import { SalesforceEventBus } from '../lib/salesforce-event-bus';
+import { ScrubNonTokenisedPaymentMethods } from '../lib/scrub-non-tokenised-payment-methods';
 import { SfEmailsToS3Exporter } from '../lib/sf-emails-to-s3-exporter';
 import { SfMoveSubscriptionsApi } from '../lib/sf-move-subscriptions-api';
 import {
@@ -298,6 +299,22 @@ new WriteOffUnpaidInvoices(app, 'write-off-unpaid-invoices-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 });
+new ScrubNonTokenisedPaymentMethods(
+	app,
+	'scrub-non-tokenised-payment-methods-CODE',
+	{
+		stack: 'support',
+		stage: 'CODE',
+	},
+);
+new ScrubNonTokenisedPaymentMethods(
+	app,
+	'scrub-non-tokenised-payment-methods-PROD',
+	{
+		stack: 'support',
+		stage: 'PROD',
+	},
+);
 new SalesforceEventBus(app, 'salesforce-event-bus-CODE', {
 	stack: 'support',
 	stage: 'CODE',

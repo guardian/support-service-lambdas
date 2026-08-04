@@ -673,6 +673,13 @@ const writeOffUnpaidInvoices: HandlerDefinition = {
 	moduleDependencies: [moduleAws, moduleBigquery, moduleZuora],
 };
 
+const scrubNonTokenisedPaymentMethods: HandlerDefinition = {
+	name: 'scrub-non-tokenised-payment-methods',
+	functionNames: ['get-payment-methods-to-scrub-', 'scrub-payment-methods-'],
+	entryPoints: ['src/handlers/*.ts'],
+	moduleDependencies: [moduleAws, moduleBigquery, moduleZuora],
+};
+
 const zuoraSalesforceLinkRemover: HandlerDefinition = {
 	name: 'zuora-salesforce-link-remover',
 	stack: 'membership',
@@ -915,6 +922,7 @@ export const build: BuildDefinition = {
 		salesTaxApi,
 		supporterProductDataLambdas,
 		brazeAcquisitionEventsSync,
+		scrubNonTokenisedPaymentMethods,
 		// MARKER new-lambda: buildcheck-reference
 	],
 
