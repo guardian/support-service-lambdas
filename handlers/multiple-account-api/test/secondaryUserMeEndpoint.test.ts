@@ -47,7 +47,7 @@ describe('secondaryUserMeEndpoint', () => {
 		users: SecondaryUserRecord[],
 	): SecondaryUserRepository =>
 		({
-			get: jest
+			listNonCancelledByIdentity: jest
 				.fn<Promise<SecondaryUserRecord[]>, [string]>()
 				.mockResolvedValue(users),
 		}) as unknown as SecondaryUserRepository;
@@ -112,6 +112,36 @@ describe('secondaryUserMeEndpoint', () => {
 		expect(JSON.parse(result.body)).toEqual({ primaryUsers: [] });
 		expect(mockGetSubscription).not.toHaveBeenCalled();
 		expect(mockGetAccount).not.toHaveBeenCalled();
+	});
+
+	it('only requests details for the non-cancelled records returned by the repository', async () => {
+		const activeUser = makeSecondaryUser('A-S00000001');
+		mockGetSubscription.mockResolvedValueOnce(makeSubscription('A00000001'));
+		mockGetAccount.mockResolvedValueOnce(
+			makeAccount('Ada', 'Lovelace', 'ada@example.com'),
+		);
+
+		const result = await secondaryUserMeEndpoint(
+			'secondary-id',
+			makeRepository([activeUser]),
+			zuoraClient,
+		);
+
+		expect(result.statusCode).toBe(200);
+		expect(JSON.parse(result.body)).toEqual({
+			primaryUsers: [
+				{
+					firstName: 'Ada',
+					lastName: 'Lovelace',
+					workEmail: 'ada@example.com',
+				},
+			],
+		});
+		expect(mockGetSubscription).toHaveBeenCalledTimes(1);
+		expect(mockGetSubscription).toHaveBeenCalledWith(
+			zuoraClient,
+			'A-S00000001',
+		);
 	});
 
 	it('propagates errors thrown while fetching from Zuora', async () => {

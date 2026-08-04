@@ -155,17 +155,24 @@ export const handler: Handler = Router([
 		path: '/subscriptions/{subscriptionName}/secondary-users/{secondaryIdentityId}',
 		handler: withPathParser(
 			deleteSecondaryUserPathSchema,
-			withMMAIdentityCheck(
-				stage,
-				async (_body, _zuoraClient, subscription, _account, path) =>
-					deleteSecondaryUserEndpoint(
-						stage,
-						secondaryUserRepository,
-						dynamoClient,
-						path,
-					),
-				({ path }) => path.subscriptionName,
-			),
+			async (event, path) => {
+				// Both the primary (removing a secondary user) and the secondary
+				// user (removing themselves) send their identity id in the
+				// 'x-identity-id' header.
+				const loggedInUserIdentityId = event.headers['x-identity-id'];
+				if (!loggedInUserIdentityId) {
+					return badRequest('The x-identity-id header is required');
+				}
+				const { subscriptionName, secondaryIdentityId } = path;
+				return deleteSecondaryUserEndpoint(
+					stage,
+					secondaryUserRepository,
+					dynamoClient,
+					subscriptionName,
+					secondaryIdentityId,
+					loggedInUserIdentityId,
+				);
+			},
 		),
 	},
 	{

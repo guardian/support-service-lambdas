@@ -1,16 +1,20 @@
 import {
 	DeleteItemCommand,
 	DynamoDBClient,
+	GetItemCommand,
 	PutItemCommand,
 	QueryCommand,
 	type TransactWriteItem,
 	UpdateItemCommand,
 } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
-import type { Dayjs } from 'dayjs';
+import dayjs, { type Dayjs } from 'dayjs';
 import { z } from 'zod';
 import { logger } from '@modules/logger/logger';
-import { cancelledBySchema } from '@modules/multiple-account/cancelledBySchema';
+import {
+	type CancelledBy,
+	cancelledBySchema,
+} from '@modules/multiple-account/cancelledBySchema';
 import type { Stage } from '@modules/stage';
 
 export const secondaryUserRecordSchema = z.object({
@@ -20,10 +24,18 @@ export const secondaryUserRecordSchema = z.object({
 	acceptedDate: z.string(),
 	expiryDate: z.number(),
 	cancelledBy: cancelledBySchema.optional(),
+	cancelledDate: z.iso.datetime().optional(),
 });
 
 export function secondaryUserTTLFromPrimarySubscriptionTTL(primaryTTL: Dayjs) {
 	return primaryTTL.add(2, 'weeks').unix();
+}
+
+// When a secondary user is removed we keep the record for a short period
+// (rather than hard deleting it) so we can tell who cancelled it, then let
+// DynamoDB's TTL (expiryDate) remove it automatically.
+export function secondaryUserCancellationTTL(): number {
+	return dayjs().add(2, 'weeks').unix();
 }
 
 export type SecondaryUserRecord = z.infer<typeof secondaryUserRecordSchema>;
@@ -50,7 +62,9 @@ export class SecondaryUserRepository {
 		);
 	}
 
-	async get(secondaryIdentityId: string): Promise<SecondaryUserRecord[]> {
+	async listByIdentity(
+		secondaryIdentityId: string,
+	): Promise<SecondaryUserRecord[]> {
 		const result = await this.client.send(
 			new QueryCommand({
 				TableName: this.tableName,
@@ -66,7 +80,50 @@ export class SecondaryUserRepository {
 		);
 	}
 
-	async list(subscriptionName: string): Promise<SecondaryUserRecord[]> {
+	async listNonCancelledByIdentity(
+		secondaryIdentityId: string,
+	): Promise<SecondaryUserRecord[]> {
+		return (await this.listByIdentity(secondaryIdentityId)).filter(
+			(secondaryUser) => secondaryUser.cancelledBy === undefined,
+		);
+	}
+
+	async getBySubscriptionAndIdentity(
+		subscriptionName: string,
+		secondaryIdentityId: string,
+	): Promise<SecondaryUserRecord | undefined> {
+		const result = await this.client.send(
+			new GetItemCommand({
+				TableName: this.tableName,
+				Key: {
+					subscriptionName: { S: subscriptionName },
+					secondaryIdentityId: { S: secondaryIdentityId },
+				},
+			}),
+		);
+		if (!result.Item) {
+			return undefined;
+		}
+		return secondaryUserRecordSchema.parse(unmarshall(result.Item));
+	}
+
+	async getNonCancelledBySubscriptionAndIdentity(
+		subscriptionName: string,
+		secondaryIdentityId: string,
+	): Promise<SecondaryUserRecord | undefined> {
+		const secondaryUser = await this.getBySubscriptionAndIdentity(
+			subscriptionName,
+			secondaryIdentityId,
+		);
+		if (!secondaryUser || secondaryUser.cancelledBy !== undefined) {
+			return undefined;
+		}
+		return secondaryUser;
+	}
+
+	async listBySubscription(
+		subscriptionName: string,
+	): Promise<SecondaryUserRecord[]> {
 		logger.log(
 			`Querying secondary users for primary subscription ${subscriptionName}`,
 		);
@@ -81,6 +138,14 @@ export class SecondaryUserRepository {
 		);
 		return (result.Items ?? []).map((item) =>
 			secondaryUserRecordSchema.parse(unmarshall(item)),
+		);
+	}
+
+	async listNonCancelledBySubscription(
+		subscriptionName: string,
+	): Promise<SecondaryUserRecord[]> {
+		return (await this.listBySubscription(subscriptionName)).filter(
+			(secondaryUser) => secondaryUser.cancelledBy === undefined,
 		);
 	}
 
@@ -109,6 +174,29 @@ export class SecondaryUserRepository {
 				Key: {
 					subscriptionName: { S: subscriptionName },
 					secondaryIdentityId: { S: secondaryIdentityId },
+				},
+			},
+		};
+	}
+
+	getSoftDeleteTransaction(
+		subscriptionName: string,
+		secondaryIdentityId: string,
+		cancelledBy: CancelledBy,
+	): TransactWriteItem {
+		return {
+			Update: {
+				TableName: this.tableName,
+				Key: {
+					subscriptionName: { S: subscriptionName },
+					secondaryIdentityId: { S: secondaryIdentityId },
+				},
+				UpdateExpression:
+					'SET expiryDate = :expiryDate, cancelledBy = :cancelledBy, cancelledDate = :cancelledDate',
+				ExpressionAttributeValues: {
+					':expiryDate': { N: secondaryUserCancellationTTL().toString() },
+					':cancelledBy': { S: cancelledBy },
+					':cancelledDate': { S: dayjs().toISOString() },
 				},
 			},
 		};
