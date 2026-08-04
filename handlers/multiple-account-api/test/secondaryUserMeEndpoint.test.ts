@@ -76,13 +76,15 @@ describe('secondaryUserMeEndpoint', () => {
 
 		expect(result.statusCode).toBe(200);
 		expect(JSON.parse(result.body)).toEqual({
-			primaryUsers: [
+			subscriptions: [
 				{
+					subscriptionName: 'A-S00000001',
 					firstName: 'Ada',
 					lastName: 'Lovelace',
 					workEmail: 'ada@example.com',
 				},
 				{
+					subscriptionName: 'A-S00000002',
 					firstName: 'Alan',
 					lastName: 'Turing',
 					workEmail: 'alan@example.com',
@@ -109,7 +111,7 @@ describe('secondaryUserMeEndpoint', () => {
 		);
 
 		expect(result.statusCode).toBe(200);
-		expect(JSON.parse(result.body)).toEqual({ primaryUsers: [] });
+		expect(JSON.parse(result.body)).toEqual({ subscriptions: [] });
 		expect(mockGetSubscription).not.toHaveBeenCalled();
 		expect(mockGetAccount).not.toHaveBeenCalled();
 	});
@@ -129,8 +131,9 @@ describe('secondaryUserMeEndpoint', () => {
 
 		expect(result.statusCode).toBe(200);
 		expect(JSON.parse(result.body)).toEqual({
-			primaryUsers: [
+			subscriptions: [
 				{
+					subscriptionName: 'A-S00000001',
 					firstName: 'Ada',
 					lastName: 'Lovelace',
 					workEmail: 'ada@example.com',
