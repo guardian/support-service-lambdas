@@ -56,9 +56,11 @@ async function getSubscriptionWithPrimaryUserInformation(
 		zuoraClient,
 		subscription.accountNumber,
 	);
-	const { zipCode, ...firstNameLastNameAndEmail } = account.billToContact;
+	const { firstName, lastName, workEmail } = account.billToContact;
 	return {
 		subscriptionName,
-		...firstNameLastNameAndEmail,
+		firstName,
+		lastName,
+		workEmail,
 	};
 }
