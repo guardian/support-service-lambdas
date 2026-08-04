@@ -16,7 +16,7 @@ Do a PR as normal and once in PROD, the policy will be updated for everyone gett
 
 ### Using CODE
 
-For testing, you can deploy iam-policies to CODE using either riff-raff or `pnpm-update-stack`
+For testing, you can deploy iam-policies to CODE using either riff-raff or `pnpm update-stack`
 
 This will add a "Local Development CODE (for testing the policy itself)" role in Janus which will be available to anyone
 who has the main policy.
@@ -24,7 +24,7 @@ who has the main policy.
 Afterwards use `pnpm delete-stack` (or the aws console) to remove the stack therefore cleaning up the permission from
 everyone's Janus home page.
 
-### pnpm update-stack
+### pnpm update-stack credential clash workaround
 
 Note: At the moment, the dev credential doesn't allow cloudformation updates.  If you want to use `pnpm update-stack`
 you will need to either refetch admin credentials, or fetch them as "membershipAdmin" or similar, and temporarily change
