@@ -16,13 +16,13 @@ Do a PR as normal and once in PROD, the policy will be updated for everyone gett
 
 ### Using CODE
 
-For testing, you can deploy iam-policies to CODE.
+For testing, you can deploy iam-policies to CODE using either riff-raff or `pnpm-update-stack`
 
 This will add a "Local Development CODE (for testing the policy itself)" role in Janus which will be available to anyone
 who has the main policy.
 
-Be sure to drop the `support-CODE-iam-policies` stack once you have finished, to remove it from everyone's Janus home
-page.
+Afterwards use `pnpm delete-stack` (or the aws console) to remove the stack therefore cleaning up the permission from
+everyone's Janus home page.
 
 ### pnpm update-stack
 
