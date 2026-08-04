@@ -10,14 +10,19 @@ import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraAccount } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
+const subscriptionWithPrimaryUserInformationSchema = z.object({
+	subscriptionName: z.string(),
+	firstName: z.string(),
+	lastName: z.string(),
+	workEmail: z.string(),
+});
+
+type SubscriptionWithPrimaryUserInformation = z.infer<
+	typeof subscriptionWithPrimaryUserInformationSchema
+>;
+
 const responseSchema = z.object({
-	primaryUsers: z
-		.object({
-			firstName: z.string(),
-			lastName: z.string(),
-			workEmail: z.string(),
-		})
-		.array(),
+	subscriptions: z.array(subscriptionWithPrimaryUserInformationSchema),
 });
 
 export async function secondaryUserMeEndpoint(
@@ -28,28 +33,32 @@ export async function secondaryUserMeEndpoint(
 	const secondaryUsers: SecondaryUserRecord[] =
 		await secondaryUserRepository.listNonCancelledByIdentity(identityId);
 
-	const primaryUsers = await Promise.all(
+	const subscriptionsWithPrimaryUserInformation = await Promise.all(
 		secondaryUsers.map(async (secondaryUser) =>
-			getPrimaryUserInformationForSubscription(
+			getSubscriptionWithPrimaryUserInformation(
 				zuoraClient,
 				secondaryUser.subscriptionName,
 			),
 		),
 	);
-	return ok({ primaryUsers }, responseSchema);
+	return ok(
+		{ subscriptions: subscriptionsWithPrimaryUserInformation },
+		responseSchema,
+	);
 }
 
-async function getPrimaryUserInformationForSubscription(
+async function getSubscriptionWithPrimaryUserInformation(
 	zuoraClient: ZuoraClient,
 	subscriptionName: string,
-) {
+): Promise<SubscriptionWithPrimaryUserInformation> {
 	const subscription = await getSubscription(zuoraClient, subscriptionName);
 	const account: ZuoraAccount = await getAccount(
 		zuoraClient,
 		subscription.accountNumber,
 	);
-	const { zipCode, ...billToContactWithoutZipCode } = account.billToContact;
+	const { zipCode, ...firstNameLastNameAndEmail } = account.billToContact;
 	return {
-		...billToContactWithoutZipCode,
+		subscriptionName,
+		...firstNameLastNameAndEmail,
 	};
 }
