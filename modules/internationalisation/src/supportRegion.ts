@@ -1,72 +1,43 @@
-import type { CountryCode } from '@modules/internationalisation/country';
-import type { CurrencyCode } from '@modules/internationalisation/currency';
+import type { CountryCode } from './country';
+import { type Currency, getCurrencyByCode } from './currency';
 
-// ----- Types ----- //
-export const GBPCountries = 'GBPCountries';
-export const UnitedStates = 'UnitedStates';
-export const AUDCountries = 'AUDCountries';
-export const EURCountries = 'EURCountries';
-export const NZDCountries = 'NZDCountries';
-export const Canada = 'Canada';
-export const International = 'International';
+export const supportRegionIds = [
+	'uk',
+	'us',
+	'eu',
+	'au',
+	'nz',
+	'ca',
+	'int',
+] as const;
 
-export type CountryGroupId =
-	| typeof GBPCountries
-	| typeof UnitedStates
-	| typeof AUDCountries
-	| typeof EURCountries
-	| typeof International
-	| typeof NZDCountries
-	| typeof Canada;
+export type SupportRegionId = (typeof supportRegionIds)[number];
 
-export type CountryGroupName =
-	| 'United Kingdom'
-	| 'United States'
-	| 'Australia'
-	| 'Europe'
-	| 'International'
-	| 'New Zealand'
-	| 'Canada';
-
-export enum SupportRegionId {
-	UK = 'uk',
-	US = 'us',
-	AU = 'au',
-	EU = 'eu',
-	INT = 'int',
-	NZ = 'nz',
-	CA = 'ca',
-}
-
-export type CountryGroup = {
-	name: CountryGroupName;
-	currency: CurrencyCode;
+export type SupportRegion = {
+	name: string;
 	countries: CountryCode[];
-	supportRegionId: SupportRegionId;
+	currency: Currency;
 };
-type CountryGroups = Record<CountryGroupId, CountryGroup>;
-export const countryGroups: CountryGroups = {
-	GBPCountries: {
+
+export const supportRegions: Record<SupportRegionId, SupportRegion> = {
+	uk: {
 		name: 'United Kingdom',
-		currency: 'GBP',
 		countries: ['GB', 'FK', 'GI', 'GG', 'IM', 'JE', 'SH'],
-		supportRegionId: SupportRegionId.UK,
+		currency: getCurrencyByCode('GBP'),
 	},
-	UnitedStates: {
+	us: {
 		name: 'United States',
-		currency: 'USD',
 		countries: ['US'],
-		supportRegionId: SupportRegionId.US,
+		currency: getCurrencyByCode('USD'),
 	},
-	AUDCountries: {
+	au: {
 		name: 'Australia',
-		currency: 'AUD',
 		countries: ['AU', 'KI', 'NR', 'NF', 'TV'],
-		supportRegionId: SupportRegionId.AU,
+		currency: getCurrencyByCode('AUD'),
 	},
-	EURCountries: {
+	eu: {
 		name: 'Europe',
-		currency: 'EUR',
+		currency: getCurrencyByCode('EUR'),
 		countries: [
 			'AD',
 			'AL',
@@ -130,11 +101,9 @@ export const countryGroups: CountryGroups = {
 			'UA',
 			'MK',
 		],
-		supportRegionId: SupportRegionId.EU,
 	},
-	International: {
+	int: {
 		name: 'International',
-		currency: 'USD',
 		countries: [
 			'AE',
 			'AF',
@@ -309,43 +278,36 @@ export const countryGroups: CountryGroups = {
 			'ZM',
 			'ZW',
 		],
-		supportRegionId: SupportRegionId.INT,
+		currency: getCurrencyByCode('USD'),
 	},
-	NZDCountries: {
+	nz: {
 		name: 'New Zealand',
-		currency: 'NZD',
 		countries: ['NZ', 'CK'],
-		supportRegionId: SupportRegionId.NZ,
+		currency: getCurrencyByCode('NZD'),
 	},
-	Canada: {
+	ca: {
 		name: 'Canada',
-		currency: 'CAD',
 		countries: ['CA'],
-		supportRegionId: SupportRegionId.CA,
+		currency: getCurrencyByCode('CAD'),
 	},
-} as const;
-export const countryGroupBySupportRegionId = (
-	supportRegionId: SupportRegionId,
-): CountryGroup => {
-	switch (supportRegionId) {
-		case SupportRegionId.UK:
-			return countryGroups.GBPCountries;
-		case SupportRegionId.EU:
-			return countryGroups.EURCountries;
-		case SupportRegionId.US:
-			return countryGroups.UnitedStates;
-		case SupportRegionId.CA:
-			return countryGroups.Canada;
-		case SupportRegionId.AU:
-			return countryGroups.AUDCountries;
-		case SupportRegionId.NZ:
-			return countryGroups.NZDCountries;
-		case SupportRegionId.INT:
-			return countryGroups.International;
-	}
 };
-export const supportRegionIdFromCountry = (country: CountryCode) => {
-	return Object.values(countryGroups).find((countryGroup) =>
-		countryGroup.countries.includes(country),
-	)?.supportRegionId;
+
+export const supportRegionIdFromCountryCode = (
+	country: CountryCode,
+): SupportRegionId => {
+	const [regionId, ...extraRegionIds] = supportRegionIds.filter((id) =>
+		supportRegions[id].countries.includes(country),
+	);
+	if (!regionId) {
+		throw new Error(
+			`Country code ${country} does not belong to any support region`,
+		);
+	}
+	if (extraRegionIds.length > 0) {
+		throw new Error(
+			`Country code ${country} belongs to multiple support regions (${[regionId, ...extraRegionIds].map((id) => supportRegions[id].name).join(', ')})`,
+		);
+	}
+
+	return regionId;
 };

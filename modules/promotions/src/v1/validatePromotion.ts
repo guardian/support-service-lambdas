@@ -1,7 +1,7 @@
 import { intersection } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
-import type { SupportRegionId } from '@modules/internationalisation/countryGroup';
-import { countryGroupBySupportRegionId } from '@modules/internationalisation/countryGroup';
+import type { SupportRegionId } from '@modules/internationalisation/supportRegion';
+import { supportRegions } from '@modules/internationalisation/supportRegion';
 import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { getPromotionByCode } from './getPromotions';
@@ -42,7 +42,7 @@ export const validatePromotion = (
 	console.log(
 		`${appliedPromotion.promoCode} has a duration of ${promotion.promotionType.durationMonths}`,
 	);
-	validateForCountryGroup(promotion, appliedPromotion.supportRegionId);
+	validateForSupportRegion(promotion, appliedPromotion.supportRegionId);
 	console.log(
 		`Promotion ${appliedPromotion.promoCode} is valid for country group ${appliedPromotion.supportRegionId}`,
 	);
@@ -82,18 +82,18 @@ const isDiscountPromotion = (
 ): promotionType is DiscountPromotionType => {
 	return promotionType.name === 'percent_discount';
 };
-const validateForCountryGroup = (
+const validateForSupportRegion = (
 	promotion: Promotion,
 	supportRegionId: SupportRegionId,
 ) => {
-	const countryGroup = countryGroupBySupportRegionId(supportRegionId);
+	const supportRegion = supportRegions[supportRegionId];
 
 	if (
-		intersection([...promotion.appliesTo.countries], countryGroup.countries)
+		intersection([...promotion.appliesTo.countries], supportRegion.countries)
 			.length === 0
 	) {
 		throw new ValidationError(
-			`Promotion ${promotion.name} is not valid for country group ${countryGroup.name}`,
+			`Promotion ${promotion.name} is not valid for support region ${supportRegion.name}`,
 		);
 	}
 };
