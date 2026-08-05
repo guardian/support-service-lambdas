@@ -2,6 +2,18 @@ import { uploadFileToS3 } from '@modules/aws/s3';
 import { DAILY_SCRUB_LIMIT } from '../constants';
 import { findPaymentMethodsToScrub } from '../services';
 
+/**
+ * First state of the scrub-non-tokenised-payment-methods state machine.
+ *
+ * Invoked by the state machine, which an EventBridge rule starts at 6am daily.
+ * That rule is only enabled in PROD, so in CODE this runs when someone starts
+ * an execution by hand.
+ *
+ * Builds the work list for the run: non-tokenised cards on accounts where every
+ * subscription is cancelled. Writes it to S3 rather than returning it, because
+ * the distributed map reads its items from a file and a list this size will not
+ * fit in the payload passed between states.
+ */
 export const handler = async ({ filePath }: { filePath: string }) => {
 	const paymentMethods = await findPaymentMethodsToScrub();
 	const count = Array.isArray(paymentMethods) ? paymentMethods.length : 0;
