@@ -18,8 +18,8 @@ import { getPaymentMethods } from '@modules/zuora/paymentMethod';
 import { doQuery } from '@modules/zuora/query';
 import { getSubscriptionsByAccountNumber } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { PaymentMethodToScrub } from '../src/handlers/scrubPaymentMethods';
-import { processPaymentMethod } from '../src/handlers/scrubPaymentMethods';
+import { processPaymentMethod } from '../../src/services';
+import type { PaymentMethodToScrub } from '../../src/types';
 
 const stage: Stage = 'CODE';
 
