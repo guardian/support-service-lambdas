@@ -89,6 +89,9 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 1`] = `
         "LambdaRole3A44B857",
       ],
       "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
         "Code": {
           "S3Bucket": {
             "Ref": "DistributionBucketName",
@@ -210,8 +213,6 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 1`] = `
               "Action": [
                 "s3:GetObject",
                 "s3:PutObject",
-                "s3:ListBucket",
-                "s3:ListMultipartUploadParts",
               ],
               "Effect": "Allow",
               "Resource": {
@@ -236,7 +237,40 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 1`] = `
                 "logs:PutLogEvents",
               ],
               "Effect": "Allow",
-              "Resource": "*",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:logs:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":log-group:/aws/lambda/get-payment-methods-to-scrub-CODE",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:logs:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":log-group:/aws/lambda/get-payment-methods-to-scrub-CODE:*",
+                    ],
+                  ],
+                },
+              ],
             },
             {
               "Action": [
@@ -387,7 +421,7 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', $.ResultFiles.FAILED[0].Key)","MessageAttributes":{"app":{"DataType":"String","StringValue":"scrub-non-tokenised-payment-methods"},"stage":{"DataType":"String","StringValue":"CODE"}}},"ResultPath":"$.TaskResult"},"AllPaymentMethodsScrubbedSuccessfully":{"Type":"Succeed"}}}",
+              "', $.ResultFiles.FAILED[0].Key)","MessageAttributes":{"app":{"DataType":"String","StringValue":"scrub-non-tokenised-payment-methods"},"stage":{"DataType":"String","StringValue":"CODE"}}},"ResultPath":"$.TaskResult"},"AllPaymentMethodsScrubbedSuccessfully":{"Type":"Succeed"}},"TimeoutSeconds":3600}",
             ],
           ],
         },
@@ -741,6 +775,9 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 1`] = `
         "ScrubPaymentMethodsLambdaServiceRole97A7FFCD",
       ],
       "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
         "Code": {
           "S3Bucket": {
             "Ref": "DistributionBucketName",
@@ -1060,6 +1097,9 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 2`] = `
         "LambdaRole3A44B857",
       ],
       "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
         "Code": {
           "S3Bucket": {
             "Ref": "DistributionBucketName",
@@ -1181,8 +1221,6 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 2`] = `
               "Action": [
                 "s3:GetObject",
                 "s3:PutObject",
-                "s3:ListBucket",
-                "s3:ListMultipartUploadParts",
               ],
               "Effect": "Allow",
               "Resource": {
@@ -1207,7 +1245,40 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 2`] = `
                 "logs:PutLogEvents",
               ],
               "Effect": "Allow",
-              "Resource": "*",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:logs:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":log-group:/aws/lambda/get-payment-methods-to-scrub-PROD",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:logs:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":log-group:/aws/lambda/get-payment-methods-to-scrub-PROD:*",
+                    ],
+                  ],
+                },
+              ],
             },
             {
               "Action": [
@@ -1358,7 +1429,7 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 2`] = `
               {
                 "Ref": "AWS::Region",
               },
-              "', $.ResultFiles.FAILED[0].Key)","MessageAttributes":{"app":{"DataType":"String","StringValue":"scrub-non-tokenised-payment-methods"},"stage":{"DataType":"String","StringValue":"PROD"}}},"ResultPath":"$.TaskResult"},"AllPaymentMethodsScrubbedSuccessfully":{"Type":"Succeed"}}}",
+              "', $.ResultFiles.FAILED[0].Key)","MessageAttributes":{"app":{"DataType":"String","StringValue":"scrub-non-tokenised-payment-methods"},"stage":{"DataType":"String","StringValue":"PROD"}}},"ResultPath":"$.TaskResult"},"AllPaymentMethodsScrubbedSuccessfully":{"Type":"Succeed"}},"TimeoutSeconds":3600}",
             ],
           ],
         },
@@ -1712,6 +1783,9 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 2`] = `
         "ScrubPaymentMethodsLambdaServiceRole97A7FFCD",
       ],
       "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
         "Code": {
           "S3Bucket": {
             "Ref": "DistributionBucketName",

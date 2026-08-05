@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { stageFromEnvironment } from '@modules/stage';
 import {
 	getPaymentMethods,
@@ -5,6 +6,21 @@ import {
 } from '@modules/zuora/paymentMethod';
 import { getSubscriptionsByAccountNumber } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
+
+/*
+ * Deliberately narrow schemas. We only need the subscription status and the
+ * card's id and status, so parsing only those keeps the job working on accounts
+ * the full schemas would reject: subscriptions in states outside Active and
+ * Cancelled, and accounts with no default payment method, which is exactly what
+ * an account looks like once we have scrubbed its default.
+ */
+const subscriptionStatusSchema = z.object({ status: z.string() });
+
+const nonTokenisedCardsSchema = z.object({
+	creditcard: z
+		.array(z.object({ id: z.string(), status: z.string() }))
+		.optional(),
+});
 
 export type PaymentMethodToScrub = {
 	payment_method_id: string;
@@ -16,7 +32,7 @@ export type LambdaEvent = {
 	Items: PaymentMethodToScrub[];
 };
 
-export type Outcome = 'scrubbed' | 'skipped';
+export type Outcome = 'scrubbed' | 'skipped' | 'wouldScrub';
 
 export const handler = async (event: LambdaEvent) => {
 	console.log(JSON.stringify(event, null, 2));
@@ -26,6 +42,7 @@ export const handler = async (event: LambdaEvent) => {
 
 	const failures: string[] = [];
 	let scrubbed = 0;
+	let wouldScrub = 0;
 	let skipped = 0;
 
 	for (const item of event.Items) {
@@ -38,6 +55,8 @@ export const handler = async (event: LambdaEvent) => {
 			});
 			if (outcome === 'scrubbed') {
 				scrubbed++;
+			} else if (outcome === 'wouldScrub') {
+				wouldScrub++;
 			} else {
 				skipped++;
 			}
@@ -51,7 +70,7 @@ export const handler = async (event: LambdaEvent) => {
 	}
 
 	console.log(
-		`Batch finished: ${scrubbed} scrubbed, ${skipped} skipped, ${failures.length} failed`,
+		`Batch finished: ${scrubbed} scrubbed, ${wouldScrub} would have been scrubbed, ${skipped} skipped, ${failures.length} failed`,
 	);
 
 	// Surface failures to the distributed map so the state machine can report
@@ -63,7 +82,7 @@ export const handler = async (event: LambdaEvent) => {
 		);
 	}
 
-	return { scrubbed, skipped };
+	return { scrubbed, wouldScrub, skipped };
 };
 
 export const processPaymentMethod = async ({
@@ -90,6 +109,7 @@ export const processPaymentMethod = async ({
 	const subscriptions = await getSubscriptionsByAccountNumber(
 		zuoraClient,
 		accountNumber,
+		subscriptionStatusSchema,
 	);
 
 	if (subscriptions.length === 0) {
@@ -112,7 +132,11 @@ export const processPaymentMethod = async ({
 	 * this check also makes the job naturally idempotent: anything scrubbed by
 	 * an earlier run is simply not found and gets skipped.
 	 */
-	const paymentMethods = await getPaymentMethods(zuoraClient, accountId);
+	const paymentMethods = await getPaymentMethods(
+		zuoraClient,
+		accountId,
+		nonTokenisedCardsSchema,
+	);
 	const creditCard = paymentMethods.creditcard?.find(
 		(card) => card.id === paymentMethodId,
 	);
@@ -135,7 +159,7 @@ export const processPaymentMethod = async ({
 		console.log(
 			`DRY RUN: would scrub ${paymentMethodId} on account ${accountNumber}`,
 		);
-		return 'scrubbed';
+		return 'wouldScrub';
 	}
 
 	/*

@@ -14,7 +14,7 @@ import {
 	Role,
 	ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
-import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
+import { Architecture, LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
 	Choice,
@@ -60,16 +60,17 @@ export class ScrubNonTokenisedPaymentMethods extends GuStack {
 
 		lambdaRole.addToPolicy(
 			new PolicyStatement({
-				actions: [
-					's3:GetObject',
-					's3:PutObject',
-					's3:ListBucket',
-					's3:ListMultipartUploadParts',
-				],
+				actions: ['s3:GetObject', 's3:PutObject'],
 				resources: [bucket.arnForObjects('*')],
 			}),
 		);
 
+		/*
+		 * The other lambda gets its logging from the role GuCDK builds for it.
+		 * This one is given an explicit role so its name stays short enough for
+		 * the GCP auth request, which means the managed basic execution policy is
+		 * not attached and logging has to be granted here.
+		 */
 		lambdaRole.addToPolicy(
 			new PolicyStatement({
 				actions: [
@@ -77,15 +78,19 @@ export class ScrubNonTokenisedPaymentMethods extends GuStack {
 					'logs:CreateLogStream',
 					'logs:PutLogEvents',
 				],
-				resources: ['*'],
+				resources: [
+					`arn:aws:logs:${this.region}:${this.account}:log-group:/aws/lambda/get-payment-methods-to-scrub-${this.stage}`,
+					`arn:aws:logs:${this.region}:${this.account}:log-group:/aws/lambda/get-payment-methods-to-scrub-${this.stage}:*`,
+				],
 			}),
 		);
 
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,
-			'app' | 'memorySize' | 'fileName' | 'runtime' | 'timeout'
+			'app' | 'architecture' | 'memorySize' | 'fileName' | 'runtime' | 'timeout'
 		> = {
 			app,
+			architecture: Architecture.ARM_64,
 			memorySize: 1024,
 			fileName: `${app}.zip`,
 			runtime: nodeVersion,
@@ -263,6 +268,10 @@ export class ScrubNonTokenisedPaymentMethods extends GuStack {
 			'ScrubNonTokenisedPaymentMethodsStateMachine',
 			{
 				stateMachineName: `${app}-${this.stage}`,
+				// 500 items processed one at a time, a few Zuora calls each. An hour
+				// is generous; past that something is stuck and we want to know
+				// rather than have the execution sit there until tomorrow's run.
+				timeout: Duration.hours(1),
 				definitionBody: DefinitionBody.fromChainable(
 					getPaymentMethodsToScrub
 						.next(processPaymentMethods)
