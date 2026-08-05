@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { stageFromEnvironment } from '@modules/stage';
+import { ZuoraError } from '@modules/zuora/errors';
 import {
 	getPaymentMethods,
 	scrubPaymentMethod,
@@ -33,6 +34,29 @@ export type LambdaEvent = {
 };
 
 export type Outcome = 'scrubbed' | 'skipped' | 'wouldScrub';
+
+/**
+ * Zuora answers 50000040 when the thing you asked for is not there.
+ *
+ * That is not a failure for this job, it is the work list having gone stale:
+ * the account was removed between the BigQuery snapshot and the run, so the
+ * item no longer qualifies and belongs on the skip path. Treating it as a
+ * failure would raise an alarm every time. It is also what every item looks
+ * like in CODE, where the work list is full of PROD ids the sandbox has never
+ * heard of.
+ *
+ * Narrow on purpose. Any other Zuora error still fails loudly.
+ */
+const isNotFoundInZuora = (error: unknown): boolean =>
+	error instanceof ZuoraError &&
+	error.zuoraErrorDetails.some((detail) => detail.code === '50000040');
+
+const undefinedIfNotFound = (error: unknown): undefined => {
+	if (isNotFoundInZuora(error)) {
+		return undefined;
+	}
+	throw error;
+};
 
 export const handler = async (event: LambdaEvent) => {
 	console.log(JSON.stringify(event, null, 2));
@@ -110,7 +134,14 @@ export const processPaymentMethod = async ({
 		zuoraClient,
 		accountNumber,
 		subscriptionStatusSchema,
-	);
+	).catch(undefinedIfNotFound);
+
+	if (subscriptions === undefined) {
+		console.log(
+			`Skipping ${paymentMethodId}: account ${accountNumber} no longer exists in Zuora`,
+		);
+		return 'skipped';
+	}
 
 	if (subscriptions.length === 0) {
 		console.log(
@@ -136,7 +167,15 @@ export const processPaymentMethod = async ({
 		zuoraClient,
 		accountId,
 		nonTokenisedCardsSchema,
-	);
+	).catch(undefinedIfNotFound);
+
+	if (paymentMethods === undefined) {
+		console.log(
+			`Skipping ${paymentMethodId}: account ${accountNumber} has no payment methods in Zuora`,
+		);
+		return 'skipped';
+	}
+
 	const creditCard = paymentMethods.creditcard?.find(
 		(card) => card.id === paymentMethodId,
 	);

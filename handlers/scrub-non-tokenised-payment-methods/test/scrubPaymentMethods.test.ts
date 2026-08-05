@@ -1,6 +1,7 @@
 /**
  * @group unit
  */
+import { ZuoraError } from '@modules/zuora/errors';
 import {
 	getPaymentMethods,
 	scrubPaymentMethod,
@@ -124,6 +125,46 @@ describe('processPaymentMethod', () => {
 
 		expect(outcome).toBe('skipped');
 		expect(mockScrubPaymentMethod).not.toHaveBeenCalled();
+	});
+
+	it('skips, rather than fails, when Zuora no longer has the account', async () => {
+		// 50000040 means the work list has gone stale, not that something broke.
+		// Failing here would alarm on every run.
+		mockGetSubscriptions.mockRejectedValue(
+			new ZuoraError(
+				"Cannot find entity by key: 'acc-id-1'.",
+				{ status: 200, responseBody: '', responseHeaders: {} },
+				[
+					{
+						code: '50000040',
+						message: "Cannot find entity by key: 'acc-id-1'.",
+					},
+				],
+			),
+		);
+
+		const outcome = await processPaymentMethod({
+			zuoraClient,
+			item,
+			dryRun: false,
+		});
+
+		expect(outcome).toBe('skipped');
+		expect(mockScrubPaymentMethod).not.toHaveBeenCalled();
+	});
+
+	it('still fails loudly on any other Zuora error', async () => {
+		mockGetSubscriptions.mockRejectedValue(
+			new ZuoraError(
+				'Something else went wrong',
+				{ status: 500, responseBody: '', responseHeaders: {} },
+				[{ code: '99999999', message: 'Something else went wrong' }],
+			),
+		);
+
+		await expect(
+			processPaymentMethod({ zuoraClient, item, dryRun: false }),
+		).rejects.toThrow('Something else went wrong');
 	});
 
 	it('skips a card that is no longer Active', async () => {
