@@ -2,6 +2,7 @@ import type { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuDeveloperPolicyExperimental } from '@guardian/cdk/lib/experimental/constructs/iam/policies';
 import { type App } from 'aws-cdk-lib';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import type { SrQueueName } from './cdk/policies';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
 
@@ -34,6 +35,18 @@ export class IamPolicies extends SrStack {
 					resources: ['*'],
 				}),
 				new AllowS3GetPolicy('contributions-ticker', ['CODE/*']),
+				new AllowSqsSendPolicy(this, 'braze-emails'),
+			],
+		});
+	}
+}
+
+class AllowSqsSendPolicy extends PolicyStatement {
+	constructor(scope: GuStack, queueName: SrQueueName) {
+		super({
+			actions: ['sqs:GetQueueUrl', 'sqs:SendMessage'],
+			resources: [
+				`arn:aws:sqs:${scope.region}:${scope.account}:${queueName}-CODE`,
 			],
 		});
 	}
