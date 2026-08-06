@@ -120,11 +120,12 @@ limit.
 
 ### Revalidation
 
-The work list comes from BigQuery, which lags Zuora by up to a sync interval. In
-that window an account can take out a new subscription or someone can remove the
-card by hand. Every item is therefore re-read from Zuora before anything is
-scrubbed: the subscriptions are checked again, and so is the card's existence and
-status. Anything that no longer qualifies is skipped.
+The work list comes from BigQuery, which only contains Zuora data up to midnight:
+Fivetran syncs the Zuora tables once a day, shortly after 00:00. In the hours
+since, an account can take out a new subscription or someone can remove the card
+by hand. Every item is therefore re-read from Zuora before anything is scrubbed:
+the subscriptions are checked again, and so is the card's existence and status.
+Anything that no longer qualifies is skipped.
 
 That last check also makes the job idempotent for free. A scrubbed payment
 method is no longer returned by Zuora, so a re-run simply doesn't find it and
