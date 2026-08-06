@@ -32,9 +32,6 @@
       "@modules/promotions/*": [
         "../../modules/promotions/src/*"
       ],
-      "@modules/email/*": [
-        "../../modules/email/src/*"
-      ],
       "@modules/routing/*": [
         "../../modules/routing/src/*"
       ],
@@ -46,6 +43,9 @@
       ],
       "@modules/guardian-subscription/*": [
         "../../modules/guardian-subscription/src/*"
+      ],
+      "@modules/email/*": [
+        "../../modules/email/src/*"
       ],
       "@modules/multiple-account-api/*": [
         "../../modules/multiple-account-api/src/*"

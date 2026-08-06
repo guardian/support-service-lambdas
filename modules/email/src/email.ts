@@ -69,7 +69,7 @@ export const DataExtensionNames = {
 		paper: 'paper-failed',
 		tierThree: 'tier-three-failed',
 	},
-	multipleAccountsEmails: {
+	multipleAccountEmails: {
 		secondaryUser: {
 			invitation: 'SV_DP_SecondaryUserInvitation', // Invite secondary user to join subscription
 			invitationCancelled: 'SV_DP_SecondaryUserCancellation', // The invitation has been cancelled

@@ -30,7 +30,8 @@
     "logger": "workspace:*",
     "identity": "workspace:*",
     "product-benefits": "workspace:*",
-    "guardian-subscription": "workspace:*"
+    "guardian-subscription": "workspace:*",
+    "email": "workspace:*"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147",

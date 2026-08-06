@@ -402,6 +402,9 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.21
+      email:
+        specifier: workspace:*
+        version: link:../../modules/email
       guardian-subscription:
         specifier: workspace:*
         version: link:../../modules/guardian-subscription
@@ -1084,9 +1087,6 @@ importers:
       aws:
         specifier: workspace:*
         version: link:../aws
-      email:
-        specifier: workspace:*
-        version: link:../email
       logger:
         specifier: workspace:*
         version: link:../logger

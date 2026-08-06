@@ -16,7 +16,7 @@ describe('Email Integration Tests', () => {
 				},
 			},
 			DataExtensionName:
-				DataExtensionNames.multipleAccountsEmails.secondaryUser.invitation,
+				DataExtensionNames.multipleAccountEmails.secondaryUser.invitation,
 			IdentityUserId: '12345',
 		};
 
