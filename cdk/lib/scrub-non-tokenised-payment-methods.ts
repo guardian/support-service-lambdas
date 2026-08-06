@@ -3,7 +3,12 @@ import { type App, Duration } from 'aws-cdk-lib';
 import { ComparisonOperator, MathExpression } from 'aws-cdk-lib/aws-cloudwatch';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
-import { PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+import {
+	ManagedPolicy,
+	PolicyStatement,
+	Role,
+	ServicePrincipal,
+} from 'aws-cdk-lib/aws-iam';
 import { Architecture } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Topic } from 'aws-cdk-lib/aws-sns';
@@ -28,7 +33,7 @@ import {
 	APP,
 	bucketName,
 } from '../../handlers/scrub-non-tokenised-payment-methods/src/constants';
-import { getNameWithStage, SrLambda } from './cdk/SrLambda';
+import { SrLambda } from './cdk/SrLambda';
 import { SrLambdaAlarm } from './cdk/SrLambdaAlarm';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
@@ -45,35 +50,26 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 
 		const paymentMethodsFileName = 'payment-methods-to-scrub.json';
 
+		/*
+		 * This lambda is given an explicit role only so its name stays short
+		 * enough for the GCP auth request, which sends the role name. Passing a
+		 * role means CDK does not build one, so the basic execution policy it
+		 * would have attached is added here instead.
+		 */
 		const lambdaRole = new Role(this, 'LambdaRole', {
-			roleName: `scrub-non-tok-pm-${this.stage}`, // Role name must be short to not break the authentication request to GCP
+			roleName: `scrub-non-tok-pm-${this.stage}`,
 			assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
+			managedPolicies: [
+				ManagedPolicy.fromAwsManagedPolicyName(
+					'service-role/AWSLambdaBasicExecutionRole',
+				),
+			],
 		});
 
 		lambdaRole.addToPolicy(
 			new PolicyStatement({
 				actions: ['s3:GetObject', 's3:PutObject'],
 				resources: [bucket.arnForObjects('*')],
-			}),
-		);
-
-		/*
-		 * The other lambda gets its logging from the role GuCDK builds for it.
-		 * This one is given an explicit role so its name stays short enough for
-		 * the GCP auth request, which means the managed basic execution policy is
-		 * not attached and logging has to be granted here.
-		 */
-		lambdaRole.addToPolicy(
-			new PolicyStatement({
-				actions: [
-					'logs:CreateLogGroup',
-					'logs:CreateLogStream',
-					'logs:PutLogEvents',
-				],
-				resources: [
-					`arn:aws:logs:${this.region}:${this.account}:log-group:/aws/lambda/${getNameWithStage(this, 'get')}`,
-					`arn:aws:logs:${this.region}:${this.account}:log-group:/aws/lambda/${getNameWithStage(this, 'get')}:*`,
-				],
 			}),
 		);
 

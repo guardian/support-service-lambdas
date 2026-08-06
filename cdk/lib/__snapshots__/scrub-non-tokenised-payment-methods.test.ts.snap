@@ -165,6 +165,20 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
         "RoleName": "scrub-non-tok-pm-CODE",
         "Tags": [
           {
@@ -215,48 +229,6 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 1`] = `
                   ],
                 ],
               },
-            },
-            {
-              "Action": [
-                "logs:CreateLogGroup",
-                "logs:CreateLogStream",
-                "logs:PutLogEvents",
-              ],
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:aws:logs:",
-                      {
-                        "Ref": "AWS::Region",
-                      },
-                      ":",
-                      {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":log-group:/aws/lambda/scrub-non-tokenised-payment-methods-get-CODE",
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:aws:logs:",
-                      {
-                        "Ref": "AWS::Region",
-                      },
-                      ":",
-                      {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":log-group:/aws/lambda/scrub-non-tokenised-payment-methods-get-CODE:*",
-                    ],
-                  ],
-                },
-              ],
             },
             {
               "Action": [
@@ -1317,6 +1289,20 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
         "RoleName": "scrub-non-tok-pm-PROD",
         "Tags": [
           {
@@ -1367,48 +1353,6 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 2`] = `
                   ],
                 ],
               },
-            },
-            {
-              "Action": [
-                "logs:CreateLogGroup",
-                "logs:CreateLogStream",
-                "logs:PutLogEvents",
-              ],
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:aws:logs:",
-                      {
-                        "Ref": "AWS::Region",
-                      },
-                      ":",
-                      {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":log-group:/aws/lambda/scrub-non-tokenised-payment-methods-get-PROD",
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:aws:logs:",
-                      {
-                        "Ref": "AWS::Region",
-                      },
-                      ":",
-                      {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":log-group:/aws/lambda/scrub-non-tokenised-payment-methods-get-PROD:*",
-                    ],
-                  ],
-                },
-              ],
             },
             {
               "Action": [
