@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import * as email from 'email/src/email';
 import * as identity from '@modules/identity/idapi';
 import type { IdentityClient } from '@modules/identity/identityClient';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
@@ -19,13 +20,25 @@ import weekendSub from './fixtures/weekend-subscription.json';
 
 jest.mock('@modules/identity/idapi');
 
+jest.mock('email/src/email', () => ({
+	...jest.requireActual<typeof email>('email/src/email'),
+	sendEmail: jest.fn(),
+}));
+
 const mockGetOrCreateUserFromEmail = jest.mocked(
 	identity.getOrCreateUserFromEmail,
 );
 
+const mockSendEmail = jest.mocked(email.sendEmail);
+
 const mockAccount: ZuoraAccount = {
 	basicInfo: {
 		identityId: 'primary-identity-123',
+	},
+	billToContact: {
+		firstName: 'Primary',
+		lastName: 'User',
+		workEmail: 'primary.user@thegulocal.com',
 	},
 } as ZuoraAccount;
 
@@ -42,9 +55,11 @@ const mockInvitations: InvitationRecord[] = [
 		secondaryUserEmail: 'integration-test@thegulocal.com',
 		secondaryIdentityId: '8888888',
 		invitedDate: zuoraDateFormat(testDay),
-		expiryDate: dayjs(testDay).add(1, 'm').toDate().getTime(),
+		expiryDate: dayjs(testDay).add(1, 'month').toDate().getTime(),
 	},
 ];
+
+const stage = 'CODE';
 
 const zuoraCatalog = zuoraCatalogSchema.parse(code);
 
@@ -73,6 +88,9 @@ const mockIdentityClient = {} as IdentityClient;
 describe('createInvitationHandler', () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
+		mockSendEmail.mockResolvedValue(
+			{} as Awaited<ReturnType<typeof email.sendEmail>>,
+		);
 		mockSave.mockResolvedValue(undefined);
 		mockList.mockResolvedValue(mockInvitations);
 		mockListNonCancelled.mockResolvedValue(mockInvitations);
@@ -83,6 +101,7 @@ describe('createInvitationHandler', () => {
 		mockGetOrCreateUserFromEmail.mockResolvedValue('secondary-identity-456');
 
 		const handler = createInvitationEndpoint(
+			stage,
 			mockRepo,
 			mockIdentityClient,
 			zuoraCatalog,
@@ -126,6 +145,7 @@ describe('createInvitationHandler', () => {
 
 		const now = dayjs().add(1, 'month').toDate().getTime();
 		const handler = createInvitationEndpoint(
+			stage,
 			mockRepo,
 			mockIdentityClient,
 			zuoraCatalog,
@@ -152,6 +172,7 @@ describe('createInvitationHandler', () => {
 		);
 
 		const handler = createInvitationEndpoint(
+			stage,
 			mockRepo,
 			mockIdentityClient,
 			zuoraCatalog,
