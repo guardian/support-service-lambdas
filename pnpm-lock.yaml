@@ -1099,9 +1099,6 @@ importers:
       aws:
         specifier: workspace:*
         version: link:../aws
-      email:
-        specifier: workspace:*
-        version: link:../email
       logger:
         specifier: workspace:*
         version: link:../logger

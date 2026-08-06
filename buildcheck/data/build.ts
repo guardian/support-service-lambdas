@@ -235,12 +235,7 @@ const moduleMultipleAccount: ModuleDefinition = {
 		...dep['dayjs'],
 		...dep['zod'],
 	},
-	moduleDependencies: [
-		moduleAws,
-		moduleLogger,
-		moduleSupporterProductData,
-		moduleEmail,
-	],
+	moduleDependencies: [moduleAws, moduleLogger, moduleSupporterProductData],
 };
 
 const moduleProductBenefits: ModuleDefinition = {

@@ -32,9 +32,6 @@
       "@modules/promotions/*": [
         "../../modules/promotions/src/*"
       ],
-      "@modules/email/*": [
-        "../../modules/email/src/*"
-      ],
       "@modules/routing/*": [
         "../../modules/routing/src/*"
       ],
