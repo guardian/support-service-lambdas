@@ -4,13 +4,13 @@ import { ComparisonOperator } from 'aws-cdk-lib/aws-cloudwatch';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import {
-	Policy,
 	PolicyStatement,
 	Role,
 	ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
 import { Architecture } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
+import { Topic } from 'aws-cdk-lib/aws-sns';
 import {
 	Choice,
 	Condition,
@@ -27,7 +27,7 @@ import {
 	Succeed,
 	TaskInput,
 } from 'aws-cdk-lib/aws-stepfunctions';
-import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
+import { LambdaInvoke, SnsPublish } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import {
 	APP,
 	bucketName,
@@ -189,35 +189,25 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 			},
 		});
 
-		const notifyTeam = new CustomState(
+		const notifyTeam = new SnsPublish(
 			this,
 			'NotifyTeamSomePaymentMethodsFailed',
 			{
-				stateJson: {
-					Type: 'Task',
-					Resource: 'arn:aws:states:::sns:publish',
-					Parameters: {
-						TopicArn: snsTopicArn,
-						'Message.$': JsonPath.format(
-							`{} - Some non-tokenised payment methods on fully cancelled accounts failed to be scrubbed.\nYou can review the failures here:\nhttps://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}`,
-							this.stage,
-							bucket.bucketName,
-							this.region,
-							JsonPath.stringAt('$.ResultFiles.FAILED[0].Key'),
-						),
-						MessageAttributes: {
-							app: {
-								DataType: 'String',
-								StringValue: APP,
-							},
-							stage: {
-								DataType: 'String',
-								StringValue: this.stage,
-							},
-						},
-					},
-					ResultPath: JsonPath.stringAt('$.TaskResult'),
+				topic: Topic.fromTopicArn(this, 'AlarmsHandlerTopic', snsTopicArn),
+				message: TaskInput.fromText(
+					JsonPath.format(
+						`{} - Some non-tokenised payment methods on fully cancelled accounts failed to be scrubbed.\nYou can review the failures here:\nhttps://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}`,
+						this.stage,
+						bucket.bucketName,
+						this.region,
+						JsonPath.stringAt('$.ResultFiles.FAILED[0].Key'),
+					),
+				),
+				messageAttributes: {
+					app: { value: APP },
+					stage: { value: this.stage },
 				},
+				resultPath: '$.TaskResult',
 			},
 		);
 
@@ -244,26 +234,6 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 						.next(checkForFailures),
 				),
 			},
-		);
-
-		/*
-		 * The distributed map grants itself the bucket, lambda and execution
-		 * permissions it needs. Publishing the failure notification is the one
-		 * thing it does not know about.
-		 */
-		stateMachine.role.attachInlinePolicy(
-			new Policy(
-				this,
-				'ScrubNonTokenisedPaymentMethodsStateMachineRoleAdditionalPolicy',
-				{
-					statements: [
-						new PolicyStatement({
-							actions: ['sns:Publish'],
-							resources: [snsTopicArn],
-						}),
-					],
-				},
-			),
 		);
 
 		const rule = new Rule(this, 'Daily6AMRule', {
