@@ -1,16 +1,9 @@
 import type { GuFunctionProps } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
-import {
-	ComparisonOperator,
-	MathExpression,
-} from 'aws-cdk-lib/aws-cloudwatch';
+import { ComparisonOperator, MathExpression } from 'aws-cdk-lib/aws-cloudwatch';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
-import {
-	PolicyStatement,
-	Role,
-	ServicePrincipal,
-} from 'aws-cdk-lib/aws-iam';
+import { PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Architecture } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Topic } from 'aws-cdk-lib/aws-sns';
@@ -180,7 +173,10 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 				lambdaFunction: scrubPaymentMethodsLambda,
 				outputPath: '$.Payload',
 			}),
-			{ mode: ProcessorMode.DISTRIBUTED, executionType: ProcessorType.STANDARD },
+			{
+				mode: ProcessorMode.DISTRIBUTED,
+				executionType: ProcessorType.STANDARD,
+			},
 		);
 
 		const getMapResult = new CustomState(this, 'GetDistributedMapResult', {
