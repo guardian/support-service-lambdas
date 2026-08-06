@@ -44,6 +44,9 @@
       "@modules/guardian-subscription/*": [
         "../../modules/guardian-subscription/src/*"
       ],
+      "@modules/email/*": [
+        "../../modules/email/src/*"
+      ],
       "@modules/multiple-account-api/*": [
         "../../modules/multiple-account-api/src/*"
       ]

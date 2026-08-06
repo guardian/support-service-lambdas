@@ -747,6 +747,7 @@ const multipleAccountApi: HandlerDefinition = {
 		moduleIdentity,
 		moduleProductBenefits,
 		moduleGuardianSubscription,
+		moduleEmail,
 	],
 };
 

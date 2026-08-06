@@ -69,6 +69,24 @@ export const DataExtensionNames = {
 		paper: 'paper-failed',
 		tierThree: 'tier-three-failed',
 	},
+	multipleAccountEmails: {
+		secondaryUser: {
+			invitation: 'SV_DP_SecondaryUserInvitation', // Invite secondary user to join subscription
+			invitationCancelled: 'SV_DP_SecondaryUserCancellation', // The invitation has been cancelled
+			invitationRedeemed: 'SV_DP_InvitationRedeemedConfirmation', // Confirm successful invite redemption
+			day0Email: 'SV_DP_SecondaryUserOnboardingDay0', // Secondary user day 0 email
+			leaveSubscription: 'SV_DP_LeaveSharedSubscriptionConfirmation', // Confirm leaving the subscription
+			accessRemoved: 'SV_DP_SecondaryUserAccessRemoved', // Secondary user access has been removed
+			subscriptionCancelled: 'SV_DP_SharedSubscriptionEnding', // The subscription has been cancelled
+		},
+		primaryUser: {
+			invitationRedeemed: 'SV_DP_InvitationRedeemed',
+			invitationDeclined: 'SV_DP_InvitationDeclined',
+			invitationLapsed: 'SV_DP_InvitationLapsed',
+			secondaryUserLeftSubscription:
+				'SV_DP_SecondaryUserLeftSubscriptionNotification',
+		},
+	},
 } as const;
 
 // This type extracts all possible string values from nested objects, to support eg.
