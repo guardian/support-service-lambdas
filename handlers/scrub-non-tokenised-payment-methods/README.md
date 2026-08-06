@@ -93,9 +93,10 @@ of the term, which leaves the subscription `Cancelled` while payments are still
 due until that date. Status alone would currently pick up 147 accounts in that
 state, so the term has to be over as well.
 
-Subscriptions are versioned in Zuora and each amendment creates a new version, so
-the query only looks at the latest version of each. An account with an active
-subscription and several old cancelled versions is not a target.
+Subscriptions are versioned in Zuora and each amendment creates a new version,
+so the query only looks at the latest version of each. Earlier versions are all
+`Expired`, never `Cancelled`, so without that filter every account would fail the
+"every subscription is cancelled" test and nothing would ever be a target.
 
 ## How it runs
 
