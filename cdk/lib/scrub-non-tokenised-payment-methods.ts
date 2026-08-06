@@ -1,5 +1,3 @@
-import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
-import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import {
 	type GuFunctionProps,
 	GuLambdaFunction,
@@ -28,13 +26,15 @@ import {
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { SrLambdaAlarm } from './cdk/SrLambdaAlarm';
+import type { SrStageNames } from './cdk/SrStack';
+import { SrStack } from './cdk/SrStack';
 import { nodeVersion } from './node-version';
 
-export class ScrubNonTokenisedPaymentMethods extends GuStack {
-	constructor(scope: App, id: string, props: GuStackProps) {
-		super(scope, id, props);
+export class ScrubNonTokenisedPaymentMethods extends SrStack {
+	constructor(scope: App, stage: SrStageNames) {
+		super(scope, { stage, app: 'scrub-non-tokenised-payment-methods' });
 
-		const app = 'scrub-non-tokenised-payment-methods';
+		const app = this.app;
 
 		const bucket = new Bucket(this, 'Bucket', {
 			bucketName: `${app}-${this.stage.toLowerCase()}`,

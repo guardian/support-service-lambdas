@@ -24,6 +24,10 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 1`] = `
         "BucketName": "scrub-non-tokenised-payment-methods-code",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "scrub-non-tokenised-payment-methods",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -49,6 +53,10 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 1`] = `
         "ScheduleExpression": "cron(0 6 ? * * *)",
         "State": "DISABLED",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "scrub-non-tokenised-payment-methods",
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -165,6 +173,10 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 1`] = `
         },
         "RoleName": "scrub-non-tok-pm-CODE",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "scrub-non-tokenised-payment-methods",
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -434,6 +446,10 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 1`] = `
         "StateMachineName": "scrub-non-tokenised-payment-methods-CODE",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "scrub-non-tokenised-payment-methods",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -469,6 +485,10 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 1`] = `
           "Version": "2012-10-17",
         },
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "scrub-non-tokenised-payment-methods",
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -527,6 +547,10 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 1`] = `
           "Version": "2012-10-17",
         },
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "scrub-non-tokenised-payment-methods",
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -734,6 +758,10 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 1`] = `
         "Period": 300,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "scrub-non-tokenised-payment-methods",
+          },
           {
             "Key": "DiagnosticLinks",
             "Value": {
@@ -1032,6 +1060,10 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 2`] = `
         "BucketName": "scrub-non-tokenised-payment-methods-prod",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "scrub-non-tokenised-payment-methods",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1057,6 +1089,10 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 2`] = `
         "ScheduleExpression": "cron(0 6 ? * * *)",
         "State": "ENABLED",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "scrub-non-tokenised-payment-methods",
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -1173,6 +1209,10 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 2`] = `
         },
         "RoleName": "scrub-non-tok-pm-PROD",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "scrub-non-tokenised-payment-methods",
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -1442,6 +1482,10 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 2`] = `
         "StateMachineName": "scrub-non-tokenised-payment-methods-PROD",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "scrub-non-tokenised-payment-methods",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1477,6 +1521,10 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 2`] = `
           "Version": "2012-10-17",
         },
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "scrub-non-tokenised-payment-methods",
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -1535,6 +1583,10 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 2`] = `
           "Version": "2012-10-17",
         },
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "scrub-non-tokenised-payment-methods",
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -1742,6 +1794,10 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 2`] = `
         "Period": 300,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "scrub-non-tokenised-payment-methods",
+          },
           {
             "Key": "DiagnosticLinks",
             "Value": {

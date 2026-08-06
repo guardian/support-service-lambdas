@@ -172,6 +172,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	SfMoveSubscriptionsApi,
 	SfEmailsToS3Exporter,
 	IamPolicies,
+	ScrubNonTokenisedPaymentMethods,
 	// MARKER new-lambda: cdk-bin
 ];
 
@@ -299,22 +300,6 @@ new WriteOffUnpaidInvoices(app, 'write-off-unpaid-invoices-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 });
-new ScrubNonTokenisedPaymentMethods(
-	app,
-	'scrub-non-tokenised-payment-methods-CODE',
-	{
-		stack: 'support',
-		stage: 'CODE',
-	},
-);
-new ScrubNonTokenisedPaymentMethods(
-	app,
-	'scrub-non-tokenised-payment-methods-PROD',
-	{
-		stack: 'support',
-		stage: 'PROD',
-	},
-);
 new SalesforceEventBus(app, 'salesforce-event-bus-CODE', {
 	stack: 'support',
 	stage: 'CODE',
