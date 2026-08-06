@@ -22,6 +22,11 @@ import {
 	TaskInput,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
+import {
+	APP,
+	bucketName,
+	gcpCredentialsConfigParameterName,
+} from '../../handlers/scrub-non-tokenised-payment-methods/src/constants';
 import { getNameWithStage, SrLambda } from './cdk/SrLambda';
 import { SrLambdaAlarm } from './cdk/SrLambdaAlarm';
 import type { SrStageNames } from './cdk/SrStack';
@@ -29,12 +34,10 @@ import { SrStack } from './cdk/SrStack';
 
 export class ScrubNonTokenisedPaymentMethods extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
-		super(scope, { stage, app: 'scrub-non-tokenised-payment-methods' });
-
-		const app = this.app;
+		super(scope, { stage, app: APP });
 
 		const bucket = new Bucket(this, 'Bucket', {
-			bucketName: `${app}-${this.stage.toLowerCase()}`,
+			bucketName: bucketName(stage),
 		});
 
 		const snsTopicArn = `arn:aws:sns:${this.region}:${this.account}:alarms-handler-topic-${this.stage}`;
@@ -50,7 +53,7 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 			new PolicyStatement({
 				actions: ['ssm:GetParameter'],
 				resources: [
-					`arn:aws:ssm:${this.region}:${this.account}:parameter/${app}/${this.stage}/gcp-credentials-config`,
+					`arn:aws:ssm:${this.region}:${this.account}:parameter${gcpCredentialsConfigParameterName(stage)}`,
 				],
 			}),
 		);
@@ -95,11 +98,6 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 					nameSuffix: 'get',
 					lambdaOverrides: {
 						...lambdaDefaults,
-						environment: {
-							GCP_CREDENTIALS_CONFIG_PARAMETER_NAME: `/${app}/${this.stage}/gcp-credentials-config`,
-							GCP_PROJECT_ID: `datatech-platform-${this.stage.toLowerCase()}`,
-							BUCKET_NAME: bucket.bucketName,
-						},
 						handler: 'getPaymentMethodsToScrub.handler',
 						role: lambdaRole,
 					},
@@ -231,7 +229,7 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 						MessageAttributes: {
 							app: {
 								DataType: 'String',
-								StringValue: app,
+								StringValue: APP,
 							},
 							stage: {
 								DataType: 'String',
@@ -255,7 +253,7 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 			this,
 			'ScrubNonTokenisedPaymentMethodsStateMachine',
 			{
-				stateMachineName: `${app}-${this.stage}`,
+				stateMachineName: `${APP}-${this.stage}`,
 				// 500 items processed one at a time, a few Zuora calls each. An hour
 				// is generous; past that something is stuck and we want to know
 				// rather than have the execution sit there until tomorrow's run.
@@ -328,7 +326,7 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 			this,
 			'ScrubNonTokenisedPaymentMethodsStepFunctionFailureAlarm',
 			{
-				app,
+				app: APP,
 				metric: stateMachine.metricFailed({
 					period: Duration.minutes(5),
 					statistic: 'Sum',

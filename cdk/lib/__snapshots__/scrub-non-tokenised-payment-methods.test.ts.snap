@@ -107,11 +107,6 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "scrub-non-tokenised-payment-methods",
-            "BUCKET_NAME": {
-              "Ref": "Bucket83908E77",
-            },
-            "GCP_CREDENTIALS_CONFIG_PARAMETER_NAME": "/scrub-non-tokenised-payment-methods/CODE/gcp-credentials-config",
-            "GCP_PROJECT_ID": "datatech-platform-code",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
@@ -1143,11 +1138,6 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "scrub-non-tokenised-payment-methods",
-            "BUCKET_NAME": {
-              "Ref": "Bucket83908E77",
-            },
-            "GCP_CREDENTIALS_CONFIG_PARAMETER_NAME": "/scrub-non-tokenised-payment-methods/PROD/gcp-credentials-config",
-            "GCP_PROJECT_ID": "datatech-platform-prod",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",

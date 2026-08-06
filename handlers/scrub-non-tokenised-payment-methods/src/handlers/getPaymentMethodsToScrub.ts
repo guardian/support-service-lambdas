@@ -1,5 +1,6 @@
 import { uploadFileToS3 } from '@modules/aws/s3';
-import { DAILY_SCRUB_LIMIT } from '../constants';
+import { stageFromEnvironment } from '@modules/stage';
+import { bucketName, DAILY_SCRUB_LIMIT } from '../constants';
 import { findPaymentMethodsToScrub } from '../services';
 
 /**
@@ -15,7 +16,8 @@ import { findPaymentMethodsToScrub } from '../services';
  * fit in the payload passed between states.
  */
 export const handler = async ({ filePath }: { filePath: string }) => {
-	const paymentMethods = await findPaymentMethodsToScrub();
+	const stage = stageFromEnvironment();
+	const paymentMethods = await findPaymentMethodsToScrub(stage);
 	const count = Array.isArray(paymentMethods) ? paymentMethods.length : 0;
 
 	// Hitting the cap means there is still a backlog to get through. Once runs
@@ -25,7 +27,7 @@ export const handler = async ({ filePath }: { filePath: string }) => {
 	);
 
 	await uploadFileToS3({
-		bucketName: process.env.BUCKET_NAME!,
+		bucketName: bucketName(stage),
 		filePath,
 		content: JSON.stringify(paymentMethods),
 	});

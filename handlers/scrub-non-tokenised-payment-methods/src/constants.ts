@@ -1,3 +1,25 @@
+/*
+ * The CDK imports this file so the resource names are written once and both
+ * sides get the same ones. It cannot resolve the @modules aliases, so the stage
+ * is spelled out here rather than imported from @modules/stage. It is the same
+ * union, so a Stage from the lambda and an SrStageNames from the CDK both fit.
+ */
+type Stage = 'CODE' | 'PROD';
+
+/** The app name, which every resource this lambda owns is named after. */
+export const APP = 'scrub-non-tokenised-payment-methods';
+
+/** Where the first handler writes the work list for the distributed map. */
+export const bucketName = (stage: Stage) => `${APP}-${stage.toLowerCase()}`;
+
+/** Holds the workload identity federation config used to reach BigQuery. */
+export const gcpCredentialsConfigParameterName = (stage: Stage) =>
+	`/${APP}/${stage}/gcp-credentials-config`;
+
+/** The GCP project the Fivetran mirror of Zuora lives in. */
+export const gcpProjectId = (stage: Stage) =>
+	`datatech-platform-${stage.toLowerCase()}`;
+
 /**
  * Zuora answers with this code when the thing you asked for is not there.
  * Used to tell a stale work list apart from a real failure.
