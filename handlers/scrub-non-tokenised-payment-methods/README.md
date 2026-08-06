@@ -115,8 +115,14 @@ The query is capped at 500 rows, oldest first. There are 19,744 payment methods
 in scope, going back to 2015, and a dozen to thirty a month keep arriving as
 accounts become fully cancelled. Capping each run means the same code drains the
 backlog over about six weeks and then quietly handles the trickle, with no
-separate backfill job. It also keeps the run comfortably inside Zuora's rate
-limit.
+separate backfill job.
+
+The cap is not there for Zuora's sake. Zuora limits how many requests you have in
+flight at once, not how many you make in a day, and the map runs one item at a
+time, so we are inside that by construction whatever the cap is. What the cap
+buys is a bounded run: 500 items at a few calls each finishes well inside the
+state machine's one hour timeout, where the whole backlog in one go would not,
+and it keeps the first PROD runs small enough to actually read.
 
 ### Revalidation
 

@@ -6,8 +6,8 @@ import type { BatchResult, LambdaEvent } from '../types';
  * Second state of the scrub-non-tokenised-payment-methods state machine.
  *
  * Invoked by the distributed map, once per batch, over the work list the first
- * lambda wrote to S3. Batches are one item and run one at a time, to stay well
- * inside Zuora's rate limit.
+ * lambda wrote to S3. Batches are one item and run one at a time, which keeps us
+ * inside Zuora's limit on requests in flight.
  *
  * Strips the card data from each payment method, after re-reading it from Zuora
  * to confirm it still qualifies. Throws if any item failed, so the map records

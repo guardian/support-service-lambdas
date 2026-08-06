@@ -139,7 +139,7 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 			this,
 			'ProcessPaymentMethodsInDistributedMap',
 			{
-				comment: `MaxConcurrency is 1 to stay well inside Zuora's rate limit. ToleratedFailurePercentage is 100 so one bad account does not stop the rest of the run`,
+				comment: `MaxConcurrency is 1 to stay inside Zuora's limit on requests in flight. ToleratedFailurePercentage is 100 so one bad account does not stop the rest of the run`,
 				maxConcurrency: 1,
 				toleratedFailurePercentage: 100,
 				itemReader: new S3JsonItemReader({

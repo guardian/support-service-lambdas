@@ -38,7 +38,11 @@ export const CANCELLED_SUBSCRIPTION_STATUS = 'Cancelled';
  * ongoing trickle of a couple of dozen a month, because cards are still being
  * entered in Zuora directly. Capping each run means the same code drains the
  * backlog over about six weeks and then handles the trickle, with no separate
- * backfill job, and keeps the run well inside Zuora's rate limit.
+ * backfill job.
+ *
+ * Not a Zuora limit: Zuora caps requests in flight, not requests per day, and
+ * the map runs one at a time. The cap is what keeps a run short enough to finish
+ * inside the state machine's timeout.
  */
 export const DAILY_SCRUB_LIMIT = 500;
 
