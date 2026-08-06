@@ -1,7 +1,7 @@
 # scrub-non-tokenised-payment-methods
 
-Strips the card data from non-tokenised card payment methods on Zuora accounts
-where every subscription is cancelled.
+This handler is a state machine that runs daily to clear non-tokenised card data
+from Zuora accounts with no active subscriptions.
 
 ## Why
 
