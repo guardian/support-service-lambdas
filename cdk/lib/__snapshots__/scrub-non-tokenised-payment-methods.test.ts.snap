@@ -837,22 +837,57 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 1`] = `
             ],
           },
         ],
-        "AlarmDescription": "The scheduled job that scrubs non-tokenised payment methods on fully cancelled accounts has failed. Login to the AWS console and debug the last execution.",
+        "AlarmDescription": "The scheduled job that scrubs non-tokenised payment methods on fully cancelled accounts has failed or timed out. Login to the AWS console and debug the last execution.",
         "AlarmName": "CODE: ScrubNonTokenisedPaymentMethodsStepFunctionExecutionFailure",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
-        "Dimensions": [
+        "EvaluationPeriods": 1,
+        "Metrics": [
           {
-            "Name": "StateMachineArn",
-            "Value": {
-              "Ref": "ScrubNonTokenisedPaymentMethodsStateMachineA2C3CBC6",
+            "Expression": "failed + timedOut",
+            "Id": "expr_1",
+            "ReturnData": true,
+          },
+          {
+            "Id": "failed",
+            "MetricStat": {
+              "Metric": {
+                "Dimensions": [
+                  {
+                    "Name": "StateMachineArn",
+                    "Value": {
+                      "Ref": "ScrubNonTokenisedPaymentMethodsStateMachineA2C3CBC6",
+                    },
+                  },
+                ],
+                "MetricName": "ExecutionsFailed",
+                "Namespace": "AWS/States",
+              },
+              "Period": 60,
+              "Stat": "Sum",
             },
+            "ReturnData": false,
+          },
+          {
+            "Id": "timedOut",
+            "MetricStat": {
+              "Metric": {
+                "Dimensions": [
+                  {
+                    "Name": "StateMachineArn",
+                    "Value": {
+                      "Ref": "ScrubNonTokenisedPaymentMethodsStateMachineA2C3CBC6",
+                    },
+                  },
+                ],
+                "MetricName": "ExecutionsTimedOut",
+                "Namespace": "AWS/States",
+              },
+              "Period": 60,
+              "Stat": "Sum",
+            },
+            "ReturnData": false,
           },
         ],
-        "EvaluationPeriods": 1,
-        "MetricName": "ExecutionsFailed",
-        "Namespace": "AWS/States",
-        "Period": 60,
-        "Statistic": "Sum",
         "Tags": [
           {
             "Key": "App",
@@ -1974,22 +2009,57 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "The scheduled job that scrubs non-tokenised payment methods on fully cancelled accounts has failed. Login to the AWS console and debug the last execution.",
+        "AlarmDescription": "The scheduled job that scrubs non-tokenised payment methods on fully cancelled accounts has failed or timed out. Login to the AWS console and debug the last execution.",
         "AlarmName": "PROD: ScrubNonTokenisedPaymentMethodsStepFunctionExecutionFailure",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
-        "Dimensions": [
+        "EvaluationPeriods": 1,
+        "Metrics": [
           {
-            "Name": "StateMachineArn",
-            "Value": {
-              "Ref": "ScrubNonTokenisedPaymentMethodsStateMachineA2C3CBC6",
+            "Expression": "failed + timedOut",
+            "Id": "expr_1",
+            "ReturnData": true,
+          },
+          {
+            "Id": "failed",
+            "MetricStat": {
+              "Metric": {
+                "Dimensions": [
+                  {
+                    "Name": "StateMachineArn",
+                    "Value": {
+                      "Ref": "ScrubNonTokenisedPaymentMethodsStateMachineA2C3CBC6",
+                    },
+                  },
+                ],
+                "MetricName": "ExecutionsFailed",
+                "Namespace": "AWS/States",
+              },
+              "Period": 60,
+              "Stat": "Sum",
             },
+            "ReturnData": false,
+          },
+          {
+            "Id": "timedOut",
+            "MetricStat": {
+              "Metric": {
+                "Dimensions": [
+                  {
+                    "Name": "StateMachineArn",
+                    "Value": {
+                      "Ref": "ScrubNonTokenisedPaymentMethodsStateMachineA2C3CBC6",
+                    },
+                  },
+                ],
+                "MetricName": "ExecutionsTimedOut",
+                "Namespace": "AWS/States",
+              },
+              "Period": 60,
+              "Stat": "Sum",
+            },
+            "ReturnData": false,
           },
         ],
-        "EvaluationPeriods": 1,
-        "MetricName": "ExecutionsFailed",
-        "Namespace": "AWS/States",
-        "Period": 60,
-        "Statistic": "Sum",
         "Tags": [
           {
             "Key": "App",

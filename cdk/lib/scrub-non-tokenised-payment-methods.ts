@@ -1,6 +1,9 @@
 import type { GuFunctionProps } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
-import { ComparisonOperator } from 'aws-cdk-lib/aws-cloudwatch';
+import {
+	ComparisonOperator,
+	MathExpression,
+} from 'aws-cdk-lib/aws-cloudwatch';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import {
@@ -266,14 +269,23 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 			'ScrubNonTokenisedPaymentMethodsStepFunctionFailureAlarm',
 			{
 				app: APP,
-				metric: stateMachine.metricFailed({
+				/*
+				 * A run that hits the state machine timeout ends as TimedOut, not
+				 * Failed, so alarming on failures alone would miss the case the
+				 * timeout is there to catch.
+				 */
+				metric: new MathExpression({
+					expression: 'failed + timedOut',
+					usingMetrics: {
+						failed: stateMachine.metricFailed({ statistic: 'Sum' }),
+						timedOut: stateMachine.metricTimedOut({ statistic: 'Sum' }),
+					},
 					period: alarmPeriod,
-					statistic: 'Sum',
 				}),
 				threshold: 1,
 				evaluationPeriods: 1,
 				alarmDescription:
-					'The scheduled job that scrubs non-tokenised payment methods on fully cancelled accounts has failed. Login to the AWS console and debug the last execution.',
+					'The scheduled job that scrubs non-tokenised payment methods on fully cancelled accounts has failed or timed out. Login to the AWS console and debug the last execution.',
 				alarmName: `${this.stage}: ScrubNonTokenisedPaymentMethodsStepFunctionExecutionFailure`,
 				comparisonOperator:
 					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
