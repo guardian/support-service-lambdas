@@ -36,9 +36,10 @@ export const CANCELLED_SUBSCRIPTION_STATUS = 'Cancelled';
  * How many payment methods a single run will look at.
  *
  * There is a backlog of around twenty thousand going back to 2015 and an
- * ongoing trickle of a handful a month. Capping each run means the same code
- * drains the backlog over about six weeks and then handles the trickle, with no
- * separate backfill job, and keeps the run well inside Zuora's rate limit.
+ * ongoing trickle of a couple of dozen a month, because cards are still being
+ * entered in Zuora directly. Capping each run means the same code drains the
+ * backlog over about six weeks and then handles the trickle, with no separate
+ * backfill job, and keeps the run well inside Zuora's rate limit.
  */
 export const DAILY_SCRUB_LIMIT = 500;
 
