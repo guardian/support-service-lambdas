@@ -14,8 +14,7 @@
   "dependencies": {
     "aws": "workspace:*",
     "logger": "workspace:*",
-    "supporter-product-data": "workspace:*",
-    "email": "workspace:*"
+    "supporter-product-data": "workspace:*"
   },
   "devDependencies": {
     "@aws-sdk/client-dynamodb": "^3.940.0",
