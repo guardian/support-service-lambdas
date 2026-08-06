@@ -32,6 +32,9 @@
       "@modules/promotions/*": [
         "../../modules/promotions/src/*"
       ],
+      "@modules/email/*": [
+        "../../modules/email/src/*"
+      ],
       "@modules/supporter-product-data-lambdas/*": [
         "../../modules/supporter-product-data-lambdas/src/*"
       ]
