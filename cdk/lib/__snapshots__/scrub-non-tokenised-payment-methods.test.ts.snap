@@ -851,7 +851,7 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 1`] = `
         "EvaluationPeriods": 1,
         "MetricName": "ExecutionsFailed",
         "Namespace": "AWS/States",
-        "Period": 300,
+        "Period": 60,
         "Statistic": "Sum",
         "Tags": [
           {
@@ -1988,7 +1988,7 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 2`] = `
         "EvaluationPeriods": 1,
         "MetricName": "ExecutionsFailed",
         "Namespace": "AWS/States",
-        "Period": 300,
+        "Period": 60,
         "Statistic": "Sum",
         "Tags": [
           {

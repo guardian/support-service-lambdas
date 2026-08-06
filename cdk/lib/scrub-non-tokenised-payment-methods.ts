@@ -255,13 +255,19 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 
 		rule.addTarget(new SfnStateMachine(stateMachine));
 
+		/*
+		 * Kept short so the log link the alarms handler builds covers a narrow
+		 * window, which makes the offending execution easy to find.
+		 */
+		const alarmPeriod = Duration.minutes(1);
+
 		new SrLambdaAlarm(
 			this,
 			'ScrubNonTokenisedPaymentMethodsStepFunctionFailureAlarm',
 			{
 				app: APP,
 				metric: stateMachine.metricFailed({
-					period: Duration.minutes(5),
+					period: alarmPeriod,
 					statistic: 'Sum',
 				}),
 				threshold: 1,
