@@ -44,13 +44,19 @@ export const CANCELLED_SUBSCRIPTION_STATUS = 'Cancelled';
 export const DAILY_SCRUB_LIMIT = 500;
 
 /**
- * Finds non-tokenised cards on accounts where every subscription is cancelled.
+ * Finds non-tokenised cards on accounts that are done being billed.
  *
  * Oldest first, so the run order is stable and progress is easy to follow.
  *
- * Subscriptions are versioned in Zuora, so an account is only fully cancelled
- * when every one of its latest-version subscriptions is cancelled. An account
- * with no subscriptions at all is excluded, since it never had one to cancel.
+ * Cancelled is not the same as finished. A cancellation can be dated to the end
+ * of the term, which leaves the subscription cancelled while payments are still
+ * due, so the term has to be over as well. There are currently 147 such accounts
+ * that status alone would have picked up.
+ *
+ * Subscriptions are versioned in Zuora and only the latest version carries a
+ * live status, every earlier one is Expired, so without that filter no account
+ * would ever qualify. An account with no subscriptions at all is excluded, since
+ * it never had one to cancel.
  */
 export const PAYMENT_METHODS_TO_SCRUB_QUERY = `
     WITH fully_cancelled_accounts AS (
@@ -61,6 +67,7 @@ export const PAYMENT_METHODS_TO_SCRUB_QUERY = `
         GROUP BY sub.account_id
         HAVING COUNT(*) > 0
         AND COUNTIF(sub.status != '${CANCELLED_SUBSCRIPTION_STATUS}') = 0
+        AND COUNTIF(sub.term_end_date > CURRENT_DATE()) = 0
     )
 
     SELECT

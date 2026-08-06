@@ -10,6 +10,7 @@ import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { processPaymentMethod } from '../../src/services';
 import {
 	activeSubscription,
+	cancelledAtEndOfTermSubscription,
 	cancelledSubscription,
 	creditCardFixture,
 	paymentMethodToScrubFixture as item,
@@ -64,6 +65,51 @@ it('skips when the account has taken out a new subscription since the query ran'
 	mockGetSubscriptions.mockResolvedValue([
 		cancelledSubscription,
 		activeSubscription,
+	]);
+
+	const outcome = await processPaymentMethod({
+		zuoraClient,
+		item,
+		dryRun: false,
+	});
+
+	expect(outcome).toBe('skipped');
+	expect(mockScrubPaymentMethod).not.toHaveBeenCalled();
+});
+
+it('skips a cancellation dated to the end of the term, since payments are still due', async () => {
+	mockGetSubscriptions.mockResolvedValue([cancelledAtEndOfTermSubscription]);
+
+	const outcome = await processPaymentMethod({
+		zuoraClient,
+		item,
+		dryRun: false,
+	});
+
+	expect(outcome).toBe('skipped');
+	expect(mockScrubPaymentMethod).not.toHaveBeenCalled();
+});
+
+it('scrubs once every cancelled subscription has run out its term', async () => {
+	mockGetSubscriptions.mockResolvedValue([
+		cancelledSubscription,
+		cancelledSubscription,
+	]);
+
+	const outcome = await processPaymentMethod({
+		zuoraClient,
+		item,
+		dryRun: false,
+	});
+
+	expect(outcome).toBe('scrubbed');
+	expect(mockScrubPaymentMethod).toHaveBeenCalledWith(zuoraClient, 'pm-1');
+});
+
+it('skips when only one of several cancelled subscriptions is still in term', async () => {
+	mockGetSubscriptions.mockResolvedValue([
+		cancelledSubscription,
+		cancelledAtEndOfTermSubscription,
 	]);
 
 	const outcome = await processPaymentMethod({

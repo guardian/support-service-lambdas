@@ -72,8 +72,14 @@ payment method id. Scrubbing twice fails with `50000020`.
 - The payment method type is `CreditCard`, so not tokenised.
 - Its status is `Active`.
 - Every latest-version subscription on the account is `Cancelled`.
+- Every one of those has a `termEndDate` in the past.
 - The account has at least one subscription, so accounts that never had one are
   left alone.
+
+Cancelled is not the same as finished. A CSR can cancel forward dated to the end
+of the term, which leaves the subscription `Cancelled` while payments are still
+due until that date. Status alone would currently pick up 147 accounts in that
+state, so the term has to be over as well.
 
 Subscriptions are versioned in Zuora and each amendment creates a new version, so
 the query only looks at the latest version of each. An account with an active

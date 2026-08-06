@@ -8,7 +8,7 @@ import {
 	ACTIVE_PAYMENT_METHOD_STATUS,
 	CANCELLED_SUBSCRIPTION_STATUS,
 } from '../constants';
-import { undefinedIfNotFound } from '../helpers';
+import { isInTheFuture, undefinedIfNotFound } from '../helpers';
 import { nonTokenisedCardsSchema, subscriptionStatusSchema } from '../schemas';
 import type { Outcome, PaymentMethodToScrub } from '../types';
 
@@ -61,6 +61,21 @@ export const processPaymentMethod = async ({
 	if (stillActive.length > 0) {
 		console.log(
 			`Skipping ${paymentMethodId}: account ${accountNumber} has ${stillActive.length} subscription(s) that are not cancelled`,
+		);
+		return 'skipped';
+	}
+
+	/*
+	 * Cancelled is not the same as finished. A cancellation can be dated to the
+	 * end of the term, which leaves the subscription cancelled while payments are
+	 * still due, so the card has to stay until the term is actually over.
+	 */
+	const stillBillable = subscriptions.filter((sub) =>
+		isInTheFuture(sub.termEndDate),
+	);
+	if (stillBillable.length > 0) {
+		console.log(
+			`Skipping ${paymentMethodId}: account ${accountNumber} has ${stillBillable.length} cancelled subscription(s) whose term has not ended yet`,
 		);
 		return 'skipped';
 	}
