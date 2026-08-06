@@ -29,6 +29,9 @@
       "@modules/promotions/*": [
         "../../modules/promotions/src/*"
       ],
+      "@modules/email/*": [
+        "../../modules/email/src/*"
+      ],
       "@modules/multiple-account/*": [
         "../../modules/multiple-account/src/*"
       ]
