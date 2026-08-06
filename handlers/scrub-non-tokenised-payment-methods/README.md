@@ -8,11 +8,26 @@ where every subscription is cancelled.
 A `CreditCard` payment method in Zuora holds the card details themselves. A
 `CreditCardReferenceTransaction` holds only a gateway token, and the card lives
 at Stripe or PayPal instead. We have roughly 39,000 of the former against 2.78
-million of the latter, so the non-tokenised ones are the tail end of an older
-way of taking payments.
+million of the latter.
 
 Once every subscription on an account is cancelled, those card details can never
 be used again. Keeping them is pure risk with no upside.
+
+### This is an ongoing mechanism, not a one off
+
+`CreditCard` is not a dead type we are clearing out. It is what you get when card
+details are entered in Zuora directly, and around 200 to 250 are still created a
+month, steady, with no sign of declining. About 88 percent of the recent ones
+land on an account that already existed, so they look like card updates rather
+than new signups.
+
+What is old is the backlog currently in scope, because a card only becomes a
+target once every subscription on its account is cancelled, which happens long
+after the card was added. Hence 6,000 in scope from 2018 alone against 121
+created this year. A card added today simply becomes eligible later.
+
+That is why this is a scheduled job rather than a cleanup script: the stock is
+historical, but the source is live and will keep feeding it.
 
 ## Scrub, not delete
 
@@ -77,12 +92,12 @@ A Step Function on a daily 6am cron, only enabled in PROD.
 
 ### The daily cap
 
-The query is capped at 500 rows, oldest first. There is a historical backlog of
-around 20,000 payment methods going back to 2015, and an ongoing trickle of
-somewhere between four and fourteen a month. Capping each run means the same
-code drains the backlog over about six weeks and then quietly handles the
-trickle, with no separate backfill job. It also keeps the run comfortably inside
-Zuora's rate limit.
+The query is capped at 500 rows, oldest first. There are 19,744 payment methods
+in scope, going back to 2015, and a dozen to thirty a month keep arriving as
+accounts become fully cancelled. Capping each run means the same code drains the
+backlog over about six weeks and then quietly handles the trickle, with no
+separate backfill job. It also keeps the run comfortably inside Zuora's rate
+limit.
 
 ### Revalidation
 
