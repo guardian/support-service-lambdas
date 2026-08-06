@@ -866,6 +866,10 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 1`] = `
                 [
                   "lambda:",
                   {
+                    "Ref": "GetPaymentMethodsToScrubLambdaB572E4A7",
+                  },
+                  " lambda:",
+                  {
                     "Ref": "ScrubPaymentMethodsLambda776F3FD0",
                   },
                 ],
@@ -1998,6 +2002,10 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 2`] = `
                 "",
                 [
                   "lambda:",
+                  {
+                    "Ref": "GetPaymentMethodsToScrubLambdaB572E4A7",
+                  },
+                  " lambda:",
                   {
                     "Ref": "ScrubPaymentMethodsLambda776F3FD0",
                   },

@@ -96,18 +96,24 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 			timeout: Duration.minutes(3),
 		};
 
+		const getPaymentMethodsToScrubLambda = new SrLambda(
+			this,
+			'GetPaymentMethodsToScrubLambda',
+			{
+				nameSuffix: 'get',
+				lambdaOverrides: {
+					...lambdaDefaults,
+					handler: 'getPaymentMethodsToScrub.handler',
+					role: lambdaRole,
+				},
+			},
+		);
+
 		const getPaymentMethodsToScrub = new LambdaInvoke(
 			this,
 			'GetNonTokenisedPaymentMethodsOnCancelledAccounts',
 			{
-				lambdaFunction: new SrLambda(this, 'GetPaymentMethodsToScrubLambda', {
-					nameSuffix: 'get',
-					lambdaOverrides: {
-						...lambdaDefaults,
-						handler: 'getPaymentMethodsToScrub.handler',
-						role: lambdaRole,
-					},
-				}),
+				lambdaFunction: getPaymentMethodsToScrubLambda,
 				payload: TaskInput.fromObject({
 					filePath: JsonPath.format(
 						`executions/{}/${paymentMethodsFileName}`,
@@ -265,7 +271,10 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 				alarmName: `${this.stage}: ScrubNonTokenisedPaymentMethodsStepFunctionExecutionFailure`,
 				comparisonOperator:
 					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-				lambdaFunctionNames: scrubPaymentMethodsLambda.functionName,
+				lambdaFunctionNames: [
+					getPaymentMethodsToScrubLambda.functionName,
+					scrubPaymentMethodsLambda.functionName,
+				],
 			},
 		);
 	}
