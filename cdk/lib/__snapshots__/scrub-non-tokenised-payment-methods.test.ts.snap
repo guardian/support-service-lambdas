@@ -5,8 +5,6 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 1`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuLambdaFunction",
-      "GuLambdaFunction",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -114,11 +112,12 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 1`] = `
             },
             "GCP_CREDENTIALS_CONFIG_PARAMETER_NAME": "/scrub-non-tokenised-payment-methods/CODE/gcp-credentials-config",
             "GCP_PROJECT_ID": "datatech-platform-code",
+            "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
           },
         },
-        "FunctionName": "get-payment-methods-to-scrub-CODE",
+        "FunctionName": "scrub-non-tokenised-payment-methods-get-CODE",
         "Handler": "getPaymentMethodsToScrub.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
@@ -262,7 +261,7 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 1`] = `
                       {
                         "Ref": "AWS::AccountId",
                       },
-                      ":log-group:/aws/lambda/get-payment-methods-to-scrub-CODE",
+                      ":log-group:/aws/lambda/scrub-non-tokenised-payment-methods-get-CODE",
                     ],
                   ],
                 },
@@ -278,7 +277,7 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 1`] = `
                       {
                         "Ref": "AWS::AccountId",
                       },
-                      ":log-group:/aws/lambda/get-payment-methods-to-scrub-CODE:*",
+                      ":log-group:/aws/lambda/scrub-non-tokenised-payment-methods-get-CODE:*",
                     ],
                   ],
                 },
@@ -816,11 +815,12 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 1`] = `
           "Variables": {
             "APP": "scrub-non-tokenised-payment-methods",
             "DRY_RUN": "true",
+            "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
           },
         },
-        "FunctionName": "scrub-payment-methods-CODE",
+        "FunctionName": "scrub-non-tokenised-payment-methods-scrub-CODE",
         "Handler": "scrubPaymentMethods.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
@@ -1041,8 +1041,6 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 2`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuLambdaFunction",
-      "GuLambdaFunction",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -1150,11 +1148,12 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 2`] = `
             },
             "GCP_CREDENTIALS_CONFIG_PARAMETER_NAME": "/scrub-non-tokenised-payment-methods/PROD/gcp-credentials-config",
             "GCP_PROJECT_ID": "datatech-platform-prod",
+            "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",
           },
         },
-        "FunctionName": "get-payment-methods-to-scrub-PROD",
+        "FunctionName": "scrub-non-tokenised-payment-methods-get-PROD",
         "Handler": "getPaymentMethodsToScrub.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
@@ -1298,7 +1297,7 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 2`] = `
                       {
                         "Ref": "AWS::AccountId",
                       },
-                      ":log-group:/aws/lambda/get-payment-methods-to-scrub-PROD",
+                      ":log-group:/aws/lambda/scrub-non-tokenised-payment-methods-get-PROD",
                     ],
                   ],
                 },
@@ -1314,7 +1313,7 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 2`] = `
                       {
                         "Ref": "AWS::AccountId",
                       },
-                      ":log-group:/aws/lambda/get-payment-methods-to-scrub-PROD:*",
+                      ":log-group:/aws/lambda/scrub-non-tokenised-payment-methods-get-PROD:*",
                     ],
                   ],
                 },
@@ -1852,11 +1851,12 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 2`] = `
           "Variables": {
             "APP": "scrub-non-tokenised-payment-methods",
             "DRY_RUN": "true",
+            "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",
           },
         },
-        "FunctionName": "scrub-payment-methods-PROD",
+        "FunctionName": "scrub-non-tokenised-payment-methods-scrub-PROD",
         "Handler": "scrubPaymentMethods.handler",
         "LoggingConfig": {
           "LogFormat": "Text",

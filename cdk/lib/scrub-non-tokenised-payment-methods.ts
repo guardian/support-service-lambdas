@@ -1,7 +1,4 @@
-import {
-	type GuFunctionProps,
-	GuLambdaFunction,
-} from '@guardian/cdk/lib/constructs/lambda';
+import type { GuFunctionProps } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
 import { ComparisonOperator } from 'aws-cdk-lib/aws-cloudwatch';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
@@ -12,7 +9,7 @@ import {
 	Role,
 	ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
-import { Architecture, LoggingFormat } from 'aws-cdk-lib/aws-lambda';
+import { Architecture } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
 	Choice,
@@ -25,10 +22,10 @@ import {
 	TaskInput,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
+import { getNameWithStage, SrLambda } from './cdk/SrLambda';
 import { SrLambdaAlarm } from './cdk/SrLambdaAlarm';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
-import { nodeVersion } from './node-version';
 
 export class ScrubNonTokenisedPaymentMethods extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
@@ -79,21 +76,14 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 					'logs:PutLogEvents',
 				],
 				resources: [
-					`arn:aws:logs:${this.region}:${this.account}:log-group:/aws/lambda/get-payment-methods-to-scrub-${this.stage}`,
-					`arn:aws:logs:${this.region}:${this.account}:log-group:/aws/lambda/get-payment-methods-to-scrub-${this.stage}:*`,
+					`arn:aws:logs:${this.region}:${this.account}:log-group:/aws/lambda/${getNameWithStage(this, 'get')}`,
+					`arn:aws:logs:${this.region}:${this.account}:log-group:/aws/lambda/${getNameWithStage(this, 'get')}:*`,
 				],
 			}),
 		);
 
-		const lambdaDefaultConfig: Pick<
-			GuFunctionProps,
-			'app' | 'architecture' | 'memorySize' | 'fileName' | 'runtime' | 'timeout'
-		> = {
-			app,
+		const lambdaDefaults: Partial<GuFunctionProps> = {
 			architecture: Architecture.ARM_64,
-			memorySize: 1024,
-			fileName: `${app}.zip`,
-			runtime: nodeVersion,
 			timeout: Duration.minutes(3),
 		};
 
@@ -101,22 +91,19 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 			this,
 			'GetNonTokenisedPaymentMethodsOnCancelledAccounts',
 			{
-				lambdaFunction: new GuLambdaFunction(
-					this,
-					'GetPaymentMethodsToScrubLambda',
-					{
-						...lambdaDefaultConfig,
+				lambdaFunction: new SrLambda(this, 'GetPaymentMethodsToScrubLambda', {
+					nameSuffix: 'get',
+					lambdaOverrides: {
+						...lambdaDefaults,
 						environment: {
 							GCP_CREDENTIALS_CONFIG_PARAMETER_NAME: `/${app}/${this.stage}/gcp-credentials-config`,
 							GCP_PROJECT_ID: `datatech-platform-${this.stage.toLowerCase()}`,
 							BUCKET_NAME: bucket.bucketName,
 						},
 						handler: 'getPaymentMethodsToScrub.handler',
-						functionName: `get-payment-methods-to-scrub-${this.stage}`,
-						loggingFormat: LoggingFormat.TEXT,
 						role: lambdaRole,
 					},
-				),
+				}),
 				payload: TaskInput.fromObject({
 					filePath: JsonPath.format(
 						`executions/{}/${paymentMethodsFileName}`,
@@ -126,28 +113,29 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 			},
 		);
 
-		const scrubPaymentMethodsLambda = new GuLambdaFunction(
+		const scrubPaymentMethodsLambda = new SrLambda(
 			this,
 			'ScrubPaymentMethodsLambda',
 			{
-				...lambdaDefaultConfig,
-				memorySize: 512,
-				handler: 'scrubPaymentMethods.handler',
-				functionName: `scrub-payment-methods-${this.stage}`,
-				loggingFormat: LoggingFormat.TEXT,
-				environment: {
-					// Log what would happen without touching Zuora. Flip to false in a
-					// follow-up once a PROD run has been eyeballed.
-					DRY_RUN: 'true',
+				nameSuffix: 'scrub',
+				lambdaOverrides: {
+					...lambdaDefaults,
+					memorySize: 512,
+					handler: 'scrubPaymentMethods.handler',
+					environment: {
+						// Log what would happen without touching Zuora. Flip to false in a
+						// follow-up once a PROD run has been eyeballed.
+						DRY_RUN: 'true',
+					},
+					initialPolicy: [
+						new PolicyStatement({
+							actions: ['secretsmanager:GetSecretValue'],
+							resources: [
+								`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+							],
+						}),
+					],
 				},
-				initialPolicy: [
-					new PolicyStatement({
-						actions: ['secretsmanager:GetSecretValue'],
-						resources: [
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
-						],
-					}),
-				],
 			},
 		);
 
