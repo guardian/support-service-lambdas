@@ -27,7 +27,6 @@ import { LambdaInvoke, SnsPublish } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import {
 	APP,
 	bucketName,
-	gcpCredentialsConfigParameterName,
 } from '../../handlers/scrub-non-tokenised-payment-methods/src/constants';
 import { getNameWithStage, SrLambda } from './cdk/SrLambda';
 import { SrLambdaAlarm } from './cdk/SrLambdaAlarm';
@@ -50,15 +49,6 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 			roleName: `scrub-non-tok-pm-${this.stage}`, // Role name must be short to not break the authentication request to GCP
 			assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
 		});
-
-		lambdaRole.addToPolicy(
-			new PolicyStatement({
-				actions: ['ssm:GetParameter'],
-				resources: [
-					`arn:aws:ssm:${this.region}:${this.account}:parameter${gcpCredentialsConfigParameterName(stage)}`,
-				],
-			}),
-		);
 
 		lambdaRole.addToPolicy(
 			new PolicyStatement({

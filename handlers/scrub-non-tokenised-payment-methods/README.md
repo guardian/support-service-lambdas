@@ -130,6 +130,19 @@ That last check also makes the job idempotent for free. A scrubbed payment
 method is no longer returned by Zuora, so a re-run simply doesn't find it and
 skips it.
 
+## Config
+
+One parameter, at the standard config path:
+
+```
+/<STAGE>/support/scrub-non-tokenised-payment-methods/gcpCredentialsConfig
+```
+
+It holds the workload identity federation config used to reach BigQuery. GuCDK
+grants the lambda read access to that path for free, and `loadConfig` parses it
+through a zod schema, so a missing value fails the run rather than reaching the
+GCP client as `undefined`.
+
 ## Dry run
 
 `DRY_RUN` is set to `true` on the lambda. In that mode every check runs and the

@@ -1,11 +1,7 @@
-import { getSSMParam } from '@modules/aws/ssm';
 import { buildAuthClient, runQuery } from '@modules/bigquery/bigquery';
 import type { Stage } from '@modules/stage';
-import {
-	gcpCredentialsConfigParameterName,
-	gcpProjectId,
-	PAYMENT_METHODS_TO_SCRUB_QUERY,
-} from '../constants';
+import { getAppConfig } from '../config';
+import { gcpProjectId, PAYMENT_METHODS_TO_SCRUB_QUERY } from '../constants';
 
 /**
  * Asks BigQuery for the payment methods this run should look at.
@@ -16,8 +12,8 @@ import {
 export const findPaymentMethodsToScrub = async (
 	stage: Stage,
 ): Promise<unknown> => {
-	const gcpConfig = await getSSMParam(gcpCredentialsConfigParameterName(stage));
-	const authClient = await buildAuthClient(gcpConfig);
+	const { gcpCredentialsConfig } = await getAppConfig(stage);
+	const authClient = await buildAuthClient(gcpCredentialsConfig);
 
 	const [rows] = await runQuery(
 		authClient,

@@ -9,12 +9,11 @@ type Stage = 'CODE' | 'PROD';
 /** The app name, which every resource this lambda owns is named after. */
 export const APP = 'scrub-non-tokenised-payment-methods';
 
+/** The Riff-Raff stack, which also forms part of the config path in SSM. */
+export const STACK = 'support';
+
 /** Where the first handler writes the work list for the distributed map. */
 export const bucketName = (stage: Stage) => `${APP}-${stage.toLowerCase()}`;
-
-/** Holds the workload identity federation config used to reach BigQuery. */
-export const gcpCredentialsConfigParameterName = (stage: Stage) =>
-	`/${APP}/${stage}/gcp-credentials-config`;
 
 /** The GCP project the Fivetran mirror of Zuora lives in. */
 export const gcpProjectId = (stage: Stage) =>
