@@ -16,7 +16,13 @@ import {
 	Condition,
 	CustomState,
 	DefinitionBody,
+	DistributedMap,
+	ItemBatcher,
 	JsonPath,
+	ProcessorMode,
+	ProcessorType,
+	ResultWriter,
+	S3JsonItemReader,
 	StateMachine,
 	Succeed,
 	TaskInput,
@@ -137,62 +143,35 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 			},
 		);
 
-		const processPaymentMethods = new CustomState(
+		const processPaymentMethods = new DistributedMap(
 			this,
 			'ProcessPaymentMethodsInDistributedMap',
 			{
-				stateJson: {
-					Type: 'Map',
-					MaxConcurrency: 1,
-					ToleratedFailurePercentage: 100,
-					Comment: `MaxConcurrency is 1 to stay well inside Zuora's rate limit. ToleratedFailurePercentage is 100 so one bad account does not stop the rest of the run`,
-					ItemReader: {
-						Resource: 'arn:aws:states:::s3:getObject',
-						ReaderConfig: {
-							InputType: 'JSON',
-						},
-						Parameters: {
-							Bucket: bucket.bucketName,
-							'Key.$': JsonPath.format(
-								`executions/{}/${paymentMethodsFileName}`,
-								JsonPath.stringAt('$$.Execution.StartTime'),
-							),
-						},
-					},
-					ItemBatcher: {
-						MaxItemsPerBatch: 1,
-					},
-					ItemProcessor: {
-						ProcessorConfig: {
-							Mode: 'DISTRIBUTED',
-							ExecutionType: 'STANDARD',
-						},
-						StartAt: 'ScrubPaymentMethods',
-						States: {
-							ScrubPaymentMethods: {
-								Type: 'Task',
-								Resource: 'arn:aws:states:::lambda:invoke',
-								OutputPath: '$.Payload',
-								Parameters: {
-									'Payload.$': '$',
-									FunctionName: scrubPaymentMethodsLambda.functionArn,
-								},
-								End: true,
-							},
-						},
-					},
-					ResultWriter: {
-						Resource: 'arn:aws:states:::s3:putObject',
-						Parameters: {
-							Bucket: bucket.bucketName,
-							'Prefix.$': JsonPath.format(
-								`executions/{}`,
-								JsonPath.stringAt('$$.Execution.StartTime'),
-							),
-						},
-					},
-				},
+				comment: `MaxConcurrency is 1 to stay well inside Zuora's rate limit. ToleratedFailurePercentage is 100 so one bad account does not stop the rest of the run`,
+				maxConcurrency: 1,
+				toleratedFailurePercentage: 100,
+				itemReader: new S3JsonItemReader({
+					bucket,
+					key: JsonPath.format(
+						`executions/{}/${paymentMethodsFileName}`,
+						JsonPath.stringAt('$$.Execution.StartTime'),
+					),
+				}),
+				itemBatcher: new ItemBatcher({ maxItemsPerBatch: 1 }),
+				resultWriter: new ResultWriter({
+					bucket,
+					prefix: JsonPath.format(
+						`executions/{}`,
+						JsonPath.stringAt('$$.Execution.StartTime'),
+					),
+				}),
 			},
+		).itemProcessor(
+			new LambdaInvoke(this, 'ScrubPaymentMethods', {
+				lambdaFunction: scrubPaymentMethodsLambda,
+				outputPath: '$.Payload',
+			}),
+			{ mode: ProcessorMode.DISTRIBUTED, executionType: ProcessorType.STANDARD },
 		);
 
 		const getMapResult = new CustomState(this, 'GetDistributedMapResult', {
@@ -267,39 +246,17 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 			},
 		);
 
+		/*
+		 * The distributed map grants itself the bucket, lambda and execution
+		 * permissions it needs. Publishing the failure notification is the one
+		 * thing it does not know about.
+		 */
 		stateMachine.role.attachInlinePolicy(
 			new Policy(
 				this,
 				'ScrubNonTokenisedPaymentMethodsStateMachineRoleAdditionalPolicy',
 				{
 					statements: [
-						new PolicyStatement({
-							actions: [
-								's3:GetObject',
-								's3:PutObject',
-								's3:ListBucket',
-								's3:ListMultipartUploadParts',
-							],
-							resources: [bucket.arnForObjects('*')],
-						}),
-						new PolicyStatement({
-							actions: ['states:StartExecution'],
-							resources: [stateMachine.stateMachineArn],
-						}),
-						new PolicyStatement({
-							actions: [
-								'states:RedriveExecution',
-								'states:DescribeExecution',
-								'states:StopExecution',
-							],
-							resources: [
-								`arn:aws:states:${this.region}:${this.account}:execution:${stateMachine.stateMachineName}/*`,
-							],
-						}),
-						new PolicyStatement({
-							actions: ['lambda:InvokeFunction'],
-							resources: [scrubPaymentMethodsLambda.functionArn],
-						}),
 						new PolicyStatement({
 							actions: ['sns:Publish'],
 							resources: [snsTopicArn],
