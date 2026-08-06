@@ -7,8 +7,8 @@ from Zuora accounts with no active subscriptions.
 
 A `CreditCard` payment method in Zuora holds the card details themselves. A
 `CreditCardReferenceTransaction` holds only a gateway token, and the card lives
-at Stripe or PayPal instead. We have roughly 39,000 of the former against 2.78
-million of the latter.
+at Stripe or PayPal instead. We have roughly 39,000 `CreditCard` payment methods
+against 2.78 million `CreditCardReferenceTransaction` ones.
 
 Once every subscription on an account is cancelled, those card details can never
 be used again. Keeping them is pure risk with no upside.
