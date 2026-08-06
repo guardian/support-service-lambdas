@@ -43,9 +43,9 @@ historical, but the source is live and will keep feeding it.
 
 ## Scrub, not delete
 
-The card asked for deletion. We use Zuora's scrub endpoint instead, which strips
-the card data but leaves the payment records that reference it intact, so we
-keep the audit trail of which payment was taken with which method.
+We use Zuora's scrub endpoint rather than deleting the payment method. Scrubbing
+strips the card data but leaves the payment records that reference it intact, so
+the audit trail of which payment was taken with which method survives.
 
 That was the reason for choosing it, and testing in CODE turned up two more:
 
