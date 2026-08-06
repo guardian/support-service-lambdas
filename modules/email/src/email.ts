@@ -26,6 +26,7 @@ export type EmailPayload = {
 		SubscriberAttributes: Record<string, string>;
 	};
 };
+
 export const DataExtensionNames = {
 	recurringContributionToSupporterPlusSwitch: 'SV_RCtoSP_Switch',
 	supporterPlusToDigitalPlusSwitch: 'SV_SPtoDP_SwitchConfirmation',
@@ -96,6 +97,28 @@ type RecursiveValues<T> = T extends object
 	: T;
 
 export type DataExtensionName = RecursiveValues<typeof DataExtensionNames>;
+
+export type UserIdentifier =
+	| { IdentityUserId: string }
+	| { SfContactId: string };
+
+export function buildEmailMessage(
+	emailAddress: string,
+	dataExtensionName: DataExtensionName,
+	subscriberAttributes: Record<string, string>,
+	user: UserIdentifier,
+): EmailMessageWithUserId {
+	return {
+		To: {
+			Address: emailAddress,
+			ContactAttributes: {
+				SubscriberAttributes: subscriberAttributes,
+			},
+		},
+		DataExtensionName: dataExtensionName,
+		...user,
+	};
+}
 
 export const sendEmail = async (
 	stage: Stage,

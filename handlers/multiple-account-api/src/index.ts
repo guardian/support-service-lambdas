@@ -64,6 +64,7 @@ export const handler: Handler = Router([
 				async (body, zuoraClient, subscription, account) => {
 					const identityClient = await identityClientPromise;
 					return createInvitationEndpoint(
+						stage,
 						invitationRepository,
 						identityClient,
 						await lazyZuoraCatalog.get(),
