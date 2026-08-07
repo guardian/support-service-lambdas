@@ -32,6 +32,9 @@ it('holds off while a cancellation is dated to the end of the term', () => {
 
 it('one subscription still in term is enough to hold the whole account', () => {
 	expect(
-		stillBillingReason([cancelledSubscription, cancelledAtEndOfTermSubscription]),
+		stillBillingReason([
+			cancelledSubscription,
+			cancelledAtEndOfTermSubscription,
+		]),
 	).toBe('1 cancelled subscription(s) whose term has not ended yet');
 });
