@@ -60,9 +60,7 @@ const mockInvitations: InvitationRecord[] = [
 ];
 
 const stage = 'CODE';
-
 const zuoraCatalog = zuoraCatalogSchema.parse(code);
-
 const productCatalog = generateProductCatalog(zuoraCatalog);
 
 const mockSave = jest
