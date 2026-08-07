@@ -4,13 +4,11 @@ import {
 } from '@modules/zuora/paymentMethod';
 import { getSubscriptionsByAccountNumber } from '@modules/zuora/subscription';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import {
-	ACTIVE_PAYMENT_METHOD_STATUS,
-	CANCELLED_SUBSCRIPTION_STATUS,
-} from '../constants';
-import { isInTheFuture, undefinedIfNotFound } from '../helpers';
+import { ACTIVE_PAYMENT_METHOD_STATUS } from '../constants';
+import { undefinedIfNotFound } from '../helpers';
 import { nonTokenisedCardsSchema, subscriptionStatusSchema } from '../schemas';
 import type { Outcome, PaymentMethodToScrub } from '../types';
+import { stillBillingReason } from './stillBillingReason';
 
 /**
  * Decides what to do with one payment method, and does it.
@@ -48,34 +46,10 @@ export const processPaymentMethod = async ({
 		return 'skipped';
 	}
 
-	if (subscriptions.length === 0) {
+	const stillBilling = stillBillingReason(subscriptions);
+	if (stillBilling !== undefined) {
 		console.log(
-			`Skipping ${paymentMethodId}: account ${accountNumber} has no subscriptions`,
-		);
-		return 'skipped';
-	}
-
-	const stillActive = subscriptions.filter(
-		(sub) => sub.status !== CANCELLED_SUBSCRIPTION_STATUS,
-	);
-	if (stillActive.length > 0) {
-		console.log(
-			`Skipping ${paymentMethodId}: account ${accountNumber} has ${stillActive.length} subscription(s) that are not cancelled`,
-		);
-		return 'skipped';
-	}
-
-	/*
-	 * Cancelled is not the same as finished. A cancellation can be dated to the
-	 * end of the term, which leaves the subscription cancelled while payments are
-	 * still due, so the card has to stay until the term is actually over.
-	 */
-	const stillBillable = subscriptions.filter((sub) =>
-		isInTheFuture(sub.termEndDate),
-	);
-	if (stillBillable.length > 0) {
-		console.log(
-			`Skipping ${paymentMethodId}: account ${accountNumber} has ${stillBillable.length} cancelled subscription(s) whose term has not ended yet`,
+			`Skipping ${paymentMethodId}: account ${accountNumber} has ${stillBilling}`,
 		);
 		return 'skipped';
 	}

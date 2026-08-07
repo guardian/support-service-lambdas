@@ -60,6 +60,10 @@ export const DAILY_SCRUB_LIMIT = 500;
  * live status, every earlier one is Expired, so without that filter no account
  * would ever qualify. An account with no subscriptions at all is excluded, since
  * it never had one to cancel.
+ *
+ * The three HAVING clauses are the same rule stillBillingReason applies when
+ * each item is re-read from Zuora. SQL cannot call it, so the rule genuinely
+ * lives in two places: change one and you have to change the other.
  */
 export const PAYMENT_METHODS_TO_SCRUB_QUERY = `
     WITH fully_cancelled_accounts AS (
