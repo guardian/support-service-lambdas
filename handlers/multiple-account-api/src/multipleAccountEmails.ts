@@ -10,10 +10,9 @@ function getUrls(stage: Stage, invitationCode: string) {
 		stage === 'PROD'
 			? 'https://support.theguardian.com'
 			: 'https://support.code.dev-theguardian.com';
-	// TODO: get the actual urls for these
 	return {
-		acceptInvitationUrl: `${baseUrl}/multiple-accounts/accept-invitation?code=${invitationCode}`,
-		rejectInvitationUrl: `${baseUrl}/multiple-accounts/reject-invitation?code=${invitationCode}`,
+		acceptInvitationUrl: `${baseUrl}/invitation/accept/${invitationCode}`,
+		rejectInvitationUrl: `${baseUrl}/invitation/reject/${invitationCode}`,
 	};
 }
 
