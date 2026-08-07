@@ -33,6 +33,7 @@ import {
 	APP,
 	bucketName,
 } from '../../handlers/scrub-non-tokenised-payment-methods/src/constants';
+import { AllowZuoraOAuthSecretsPolicy } from './cdk/policies';
 import { SrLambda } from './cdk/SrLambda';
 import { SrLambdaAlarm } from './cdk/SrLambdaAlarm';
 import type { SrStageNames } from './cdk/SrStack';
@@ -124,16 +125,12 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 						// follow-up once a PROD run has been eyeballed.
 						DRY_RUN: 'true',
 					},
-					initialPolicy: [
-						new PolicyStatement({
-							actions: ['secretsmanager:GetSecretValue'],
-							resources: [
-								`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
-							],
-						}),
-					],
 				},
 			},
+		);
+
+		scrubPaymentMethodsLambda.addPolicies(
+			new AllowZuoraOAuthSecretsPolicy(this),
 		);
 
 		const processPaymentMethods = new DistributedMap(

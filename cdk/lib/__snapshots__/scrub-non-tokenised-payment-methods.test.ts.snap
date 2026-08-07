@@ -1005,26 +1005,6 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 1`] = `
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "secretsmanager:GetSecretValue",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:secretsmanager:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":secret:CODE/Zuora-OAuth/SupportServiceLambdas-*",
-                  ],
-                ],
-              },
-            },
-            {
               "Action": [
                 "s3:GetObject*",
                 "s3:GetBucket*",
@@ -1112,6 +1092,42 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 1`] = `
           "Version": "2012-10-17",
         },
         "PolicyName": "ScrubPaymentMethodsLambdaServiceRoleDefaultPolicyFE7ECBDE",
+        "Roles": [
+          {
+            "Ref": "ScrubPaymentMethodsLambdaServiceRole97A7FFCD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "ZuoraOAuthSecretsManagerpolicy5448D99B": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:CODE/Zuora-OAuth/SupportServiceLambdas-*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "ZuoraOAuthSecretsManagerpolicy5448D99B",
         "Roles": [
           {
             "Ref": "ScrubPaymentMethodsLambdaServiceRole97A7FFCD",
@@ -2129,26 +2145,6 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 2`] = `
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "secretsmanager:GetSecretValue",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:secretsmanager:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":secret:PROD/Zuora-OAuth/SupportServiceLambdas-*",
-                  ],
-                ],
-              },
-            },
-            {
               "Action": [
                 "s3:GetObject*",
                 "s3:GetBucket*",
@@ -2236,6 +2232,42 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 2`] = `
           "Version": "2012-10-17",
         },
         "PolicyName": "ScrubPaymentMethodsLambdaServiceRoleDefaultPolicyFE7ECBDE",
+        "Roles": [
+          {
+            "Ref": "ScrubPaymentMethodsLambdaServiceRole97A7FFCD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "ZuoraOAuthSecretsManagerpolicy5448D99B": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:PROD/Zuora-OAuth/SupportServiceLambdas-*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "ZuoraOAuthSecretsManagerpolicy5448D99B",
         "Roles": [
           {
             "Ref": "ScrubPaymentMethodsLambdaServiceRole97A7FFCD",
