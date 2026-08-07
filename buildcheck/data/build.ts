@@ -675,7 +675,10 @@ const writeOffUnpaidInvoices: HandlerDefinition = {
 
 const scrubNonTokenisedPaymentMethods: HandlerDefinition = {
 	name: 'scrub-non-tokenised-payment-methods',
-	functionNames: ['get-payment-methods-to-scrub-', 'scrub-payment-methods-'],
+	functionNames: [
+		'scrub-non-tokenised-payment-methods-get-',
+		'scrub-non-tokenised-payment-methods-scrub-',
+	],
 	entryPoints: ['src/handlers/*.ts'],
 	moduleDependencies: [moduleAws, moduleBigquery, moduleZuora],
 };
