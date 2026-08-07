@@ -15,11 +15,6 @@ someone we shouldn't, which has happened more than once before; starting a new
 subscription against old or defunct card details; and, worst case, those details
 being part of a breach.
 
-There is no equivalent job for tokenised methods because there is nothing in
-Zuora to strip: the card sits at Stripe or PayPal and Zuora only holds a token.
-Whether those tokens should be revoked at the gateway is a separate question
-that this job does not answer.
-
 ### This is an ongoing mechanism, not a one off
 
 `CreditCard` is not a dead type we are clearing out. It is what you get when card
