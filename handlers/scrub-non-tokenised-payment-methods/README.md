@@ -86,12 +86,18 @@ A Step Function on a daily 6am cron, only enabled in PROD.
 
 1. `get-payment-methods-to-scrub` queries BigQuery and writes the work list to
    S3.
-2. A [distributed map][map] feeds that list one item at a time to
-   `scrub-payment-methods`.
+2. A [distributed map][map] reads that file with an [S3JsonItemReader][reader]
+   and feeds it to `scrub-payment-methods` one item at a time, via an
+   [ItemBatcher][batcher] of one. A [ResultWriterV2][writer] drops the outcome
+   back in S3.
 3. The map result is read back, and if anything failed the team gets an SNS
-   message.
+   message through [SnsPublish][sns].
 
 [map]: https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_stepfunctions.DistributedMap.html
+[reader]: https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_stepfunctions.S3JsonItemReader.html
+[batcher]: https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_stepfunctions.ItemBatcher.html
+[writer]: https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_stepfunctions.ResultWriterV2.html
+[sns]: https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_stepfunctions_tasks.SnsPublish.html
 
 ### What a run leaves behind
 
