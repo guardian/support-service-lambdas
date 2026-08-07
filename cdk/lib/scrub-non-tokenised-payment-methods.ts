@@ -55,6 +55,11 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 		 * enough for the GCP auth request, which sends the role name. Passing a
 		 * role means CDK does not build one, so the basic execution policy it
 		 * would have attached is added here instead.
+		 *
+		 * The name below is half of a contract with GCP: it is referenced from
+		 * the workload identity setup in the gcp-iac-terraform repo, owned by
+		 * Data Technology. Renaming it breaks BigQuery access until that side is
+		 * updated to match. See docs/bigquery-access.md.
 		 */
 		const lambdaRole = new Role(this, 'LambdaRole', {
 			roleName: `scrub-non-tok-pm-${this.stage}`,
