@@ -17,19 +17,11 @@ being part of a breach.
 
 ### This is an ongoing mechanism, not a one off
 
-`CreditCard` is not a dead type we are clearing out. It is what you get when card
-details are entered in Zuora directly, and around 200 to 250 are still created a
-month, steady, with no sign of declining. About 88 percent of the recent ones
-land on an account that already existed, so they look like card updates rather
-than new signups.
-
-What is old is the backlog currently in scope, because a card only becomes a
-target once every subscription on its account is cancelled, which happens long
-after the card was added. Hence 6,000 in scope from 2018 alone against 121
-created this year. A card added today simply becomes eligible later.
-
-That is why this is a scheduled job rather than a cleanup script: the stock is
-historical, but the source is live and will keep feeding it.
+`CreditCard` are added when details are entered directly into Zuora, which
+supports CSR assisted card updates.
+Once established, this job will clean up the details as they become redundant,
+but before that there will be a backlog which will be cleared gradually over
+several months.
 
 ## Scrub, not delete
 
