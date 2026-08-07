@@ -18,7 +18,7 @@ function getUrls(stage: Stage, invitationCode: string) {
 
 export async function sendInvitationEmail(
 	stage: Stage,
-	identityId: string,
+	secondaryUserIdentityId: string,
 	secondaryUserEmail: string,
 	primaryUserFirstName: string,
 	primaryUserEmail: string,
@@ -36,7 +36,7 @@ export async function sendInvitationEmail(
 		secondaryUserEmail,
 		DataExtensionNames.multipleAccountEmails.secondaryUser.invitation,
 		dataAttributes,
-		{ IdentityUserId: identityId },
+		{ IdentityUserId: secondaryUserIdentityId },
 	);
 	await sendEmail(stage, emailMessage);
 }

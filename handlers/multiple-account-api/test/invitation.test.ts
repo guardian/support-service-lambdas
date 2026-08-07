@@ -135,6 +135,26 @@ describe('createInvitationHandler', () => {
 			mockIdentityClient,
 			'secondary@example.com',
 		);
+
+		expect(mockSendEmail).toHaveBeenCalledWith(stage, {
+			DataExtensionName: 'SV_DP_SecondaryUserInvitation',
+			IdentityUserId: 'secondary-identity-456',
+			To: {
+				Address: 'secondary@example.com',
+				ContactAttributes: {
+					SubscriberAttributes: {
+						accept_invitation_url: expect.stringMatching(
+							/^https:\/\/support\.code\.dev-theguardian\.com\/invitation\/accept\/[A-Za-z0-9]{12}$/,
+						) as string,
+						primary_user_email: 'primary.user@thegulocal.com',
+						primary_user_first_name: 'Primary',
+						reject_invitation_url: expect.stringMatching(
+							/^https:\/\/support\.code\.dev-theguardian\.com\/invitation\/reject\/[A-Za-z0-9]{12}$/,
+						) as string,
+					},
+				},
+			},
+		});
 	});
 
 	it('sets expiryDate one month from now', async () => {
@@ -189,5 +209,6 @@ describe('createInvitationHandler', () => {
 		).rejects.toThrow('Identity service unavailable');
 
 		expect(mockSave).not.toHaveBeenCalled();
+		expect(mockSendEmail).not.toHaveBeenCalled();
 	});
 });
