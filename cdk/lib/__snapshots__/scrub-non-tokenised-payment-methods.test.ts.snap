@@ -107,6 +107,7 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "scrub-non-tokenised-payment-methods",
+            "DRY_RUN": "true",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
@@ -1247,6 +1248,7 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "scrub-non-tokenised-payment-methods",
+            "DRY_RUN": "true",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",

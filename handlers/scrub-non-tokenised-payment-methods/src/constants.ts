@@ -6,6 +6,12 @@ export const APP = 'scrub-non-tokenised-payment-methods';
 /** The Riff-Raff stack, which also forms part of the config path in SSM. */
 export const STACK = 'support';
 
+/**
+ * Where the last real run's work list is kept, so the next run can tell whether
+ * that run changed anything. Fixed key, deliberately outside executions/.
+ */
+export const PREVIOUS_WORK_LIST_KEY = 'previous-work-list.json';
+
 /** Where the first handler writes the work list for the distributed map. */
 export const bucketName = (stage: Stage) => `${APP}-${stage.toLowerCase()}`;
 

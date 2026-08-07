@@ -92,6 +92,13 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 		const lambdaDefaults: Partial<GuFunctionProps> = {
 			architecture: Architecture.ARM_64,
 			timeout: Duration.minutes(3),
+			environment: {
+				// Log what would happen without touching Zuora. Both lambdas read it:
+				// the first one skips its no-progress check, which would otherwise
+				// fire every day since a dry run never changes the work list.
+				// Flip to false in a follow-up once a PROD run has been eyeballed.
+				DRY_RUN: 'true',
+			},
 		};
 
 		const getPaymentMethodsToScrubLambda = new SrLambda(
@@ -130,11 +137,6 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 					...lambdaDefaults,
 					memorySize: 512,
 					handler: 'scrubPaymentMethods.handler',
-					environment: {
-						// Log what would happen without touching Zuora. Flip to false in a
-						// follow-up once a PROD run has been eyeballed.
-						DRY_RUN: 'true',
-					},
 				},
 			},
 		);

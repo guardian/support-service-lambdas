@@ -169,6 +169,26 @@ That last check also makes the job idempotent for free. A scrubbed payment
 method is no longer returned by Zuora, so a re-run simply doesn't find it and
 skips it.
 
+### Detecting a run that achieves nothing
+
+That idempotence has a nasty edge. A scrubbed payment method stops being returned
+by Zuora, so it is skipped next time, and a run where every item skips looks
+exactly like a healthy one: the map succeeds, nothing fails, no alarm. If those
+rows also never leave the BigQuery mirror, the same work list comes back every
+day and the backlog never moves, quietly.
+
+So each real run keeps its work list at `previous-work-list.json`, and the next
+one compares. Identical means the last run changed nothing, and the job fails
+rather than carrying on. The message points at the mirror, which is the likeliest
+cause, but the check does not depend on knowing why.
+
+It is skipped in dry run, where the list is expected to repeat because nothing is
+ever scrubbed.
+
+**Before turning dry run off**, this is the thing to watch: the day after the
+first real run, check that the payment methods it scrubbed have dropped out of
+the query.
+
 ## Config
 
 One parameter, at the standard config path:
