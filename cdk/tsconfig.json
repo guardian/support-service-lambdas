@@ -22,7 +22,9 @@
 		"inlineSources": true,
 		"experimentalDecorators": true,
 		"strictPropertyInitialization": false,
-		"outDir": "dist"
+		"outDir": "dist",
+		// so this package can import handler code that uses the @modules aliases
+		"paths": { "@modules/*": ["../modules/*"] }
 	},
 	"include": ["lib/**/*", "bin/**/*"],
 	"exclude": ["node_modules", "cdk.out", "lib/**/__snapshots__/**"]
