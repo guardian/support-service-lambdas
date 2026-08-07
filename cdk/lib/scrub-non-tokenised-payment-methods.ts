@@ -22,7 +22,7 @@ import {
 	JsonPath,
 	ProcessorMode,
 	ProcessorType,
-	ResultWriter,
+	ResultWriterV2,
 	S3JsonItemReader,
 	StateMachine,
 	Succeed,
@@ -42,6 +42,16 @@ import { SrStack } from './cdk/SrStack';
 export class ScrubNonTokenisedPaymentMethods extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
 		super(scope, { stage, app: APP });
+
+		/*
+		 * ResultWriter is deprecated in favour of ResultWriterV2, which is gated
+		 * behind a feature flag. Setting it on this stack rather than in cdk.json
+		 * keeps the change to this stack instead of every synth in the repo.
+		 */
+		this.node.setContext(
+			'@aws-cdk/aws-stepfunctions:useDistributedMapResultWriterV2',
+			true,
+		);
 
 		const bucket = new Bucket(this, 'Bucket', {
 			bucketName: bucketName(stage),
@@ -148,7 +158,7 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 					),
 				}),
 				itemBatcher: new ItemBatcher({ maxItemsPerBatch: 1 }),
-				resultWriter: new ResultWriter({
+				resultWriterV2: new ResultWriterV2({
 					bucket,
 					prefix: JsonPath.format(
 						`executions/{}`,
