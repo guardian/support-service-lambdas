@@ -2,25 +2,18 @@
  * @group integration
  */
 
-import type { EmailMessageWithUserId } from '@modules/email/email';
-import { DataExtensionNames, sendEmail } from '@modules/email/email';
+import { sendInvitationEmail } from '../src/multipleAccountEmails';
 
 describe('Email Integration Tests', () => {
 	test('Send invitation email', async () => {
-		const emailFields: EmailMessageWithUserId = {
-			To: {
-				// Change this to your email address to test sending a real email
-				Address: 'test@thegulocal.com',
-				ContactAttributes: {
-					SubscriberAttributes: {},
-				},
-			},
-			DataExtensionName:
-				DataExtensionNames.multipleAccountEmails.secondaryUser.invitation,
-			IdentityUserId: '12345',
-		};
-
-		const response = await sendEmail('CODE', emailFields);
-		expect(response.MessageId?.length).toBeGreaterThan(0);
+		await sendInvitationEmail(
+			'CODE',
+			'12345',
+			// To send a real email, change this to your email address
+			'test@thegulocal.com',
+			'John',
+			'john@thegulocal.com',
+			'INVITE123',
+		);
 	});
 });
