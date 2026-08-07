@@ -15,7 +15,7 @@ deployments:
     type: aws-lambda
     parameters:
       fileName: delivery-problem-credit-processor.jar
-      bucket: support-service-lambdas-dist
+      bucketSsmLookup: true
       prefixStack: false
       functionNames:
         - delivery-problem-credit-processor-
