@@ -2,6 +2,8 @@ import { buildAuthClient, runQuery } from '@modules/bigquery/bigquery';
 import type { Stage } from '@modules/stage';
 import { getAppConfig } from '../config';
 import { gcpProjectId, PAYMENT_METHODS_TO_SCRUB_QUERY } from '../constants';
+import { paymentMethodsToScrubSchema } from '../schemas';
+import type { PaymentMethodToScrub } from '../types';
 
 /**
  * Asks BigQuery for the payment methods this run should look at.
@@ -11,7 +13,7 @@ import { gcpProjectId, PAYMENT_METHODS_TO_SCRUB_QUERY } from '../constants';
  */
 export const findPaymentMethodsToScrub = async (
 	stage: Stage,
-): Promise<unknown> => {
+): Promise<PaymentMethodToScrub[]> => {
 	const { gcpCredentialsConfig } = await getAppConfig(stage);
 	const authClient = await buildAuthClient(gcpCredentialsConfig);
 
@@ -21,5 +23,5 @@ export const findPaymentMethodsToScrub = async (
 		PAYMENT_METHODS_TO_SCRUB_QUERY,
 	);
 
-	return rows;
+	return paymentMethodsToScrubSchema.parse(rows);
 };
