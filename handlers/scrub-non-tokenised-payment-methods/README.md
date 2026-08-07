@@ -86,10 +86,54 @@ A Step Function on a daily 6am cron, only enabled in PROD.
 
 1. `get-payment-methods-to-scrub` queries BigQuery and writes the work list to
    S3.
-2. A distributed map feeds that list one item at a time to
+2. A [distributed map][map] feeds that list one item at a time to
    `scrub-payment-methods`.
 3. The map result is read back, and if anything failed the team gets an SNS
    message.
+
+[map]: https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_stepfunctions.DistributedMap.html
+
+### What a run leaves behind
+
+Everything is keyed on the execution start time, so one run's files sit together
+and you can find them from the execution in the console. From a real CODE run
+(ids below are made up, this repo is public):
+
+```
+executions/2026-08-07T08:50:15.556Z/
+├── payment-methods-to-scrub.json          written by step 1
+└── 0a1b2c3d-4e5f-6071-8293-a4b5c6d7e8f9/  the map run id
+    ├── manifest.json
+    └── SUCCEEDED_0.json                   plus FAILED_0/PENDING_0 if any
+```
+
+The work list is a flat array, one entry per payment method, straight out of the
+BigQuery query:
+
+```json
+[{ "payment_method_id": "2c92...", "account_id": "2c92...", "account_number": "A00123456" }]
+```
+
+`manifest.json` is what the state machine reads next. It points at the result
+files, and it is the `FAILED` array being non-empty that triggers the SNS
+notification:
+
+```json
+{
+  "DestinationBucket": "scrub-non-tokenised-payment-methods-code",
+  "MapRunArn": "arn:aws:states:eu-west-1:123456789012:mapRun:...",
+  "ResultFiles": { "FAILED": [], "PENDING": [], "SUCCEEDED": [{ "Key": "...", "Size": 445461 }] }
+}
+```
+
+Each entry in `SUCCEEDED_0.json` is one child execution, so you can see exactly
+what a single item was given and what it returned:
+
+```json
+{ "Input": "{\"Items\":[{\"payment_method_id\":\"2c92...\"}]}",
+  "Output": "{\"scrubbed\":0,\"wouldScrub\":0,\"skipped\":1}",
+  "Status": "SUCCEEDED" }
+```
 
 ### The daily cap
 
