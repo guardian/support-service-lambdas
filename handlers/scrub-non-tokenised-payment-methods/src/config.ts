@@ -9,7 +9,7 @@ import { APP, STACK } from './constants';
  * there is no policy to write, and zod fails the run loudly if anything is
  * missing rather than letting an undefined through to the GCP client.
  */
-export const configSchema = z.object({
+const configSchema = z.object({
 	gcpCredentialsConfig: z.string().min(1),
 });
 
