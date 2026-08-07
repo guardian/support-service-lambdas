@@ -10,15 +10,10 @@ A `CreditCard` payment method in Zuora holds the card details themselves. A
 at Stripe or PayPal instead. We have roughly 39,000 `CreditCard` payment methods
 against 2.78 million `CreditCardReferenceTransaction` ones.
 
-The risk is holding cardholder data we have no use for. A `CreditCard` method
-keeps the card number and expiry inside Zuora, so they live in our systems, and
-in anything derived from them, for as long as the record does. Once the account
-is finished being billed that card can never be charged again, so there is
-nothing to weigh against keeping it.
-
-It is not about charging someone by mistake. The account has no live
-subscription left, and where the scrubbed method was the default Zuora switches
-auto pay off as well.
+Keeping card details we can no longer use is what creates the risk: charging
+someone we shouldn't, which has happened more than once before; starting a new
+subscription against old or defunct card details; and, worst case, those details
+being part of a breach.
 
 There is no equivalent job for tokenised methods because there is nothing in
 Zuora to strip: the card sits at Stripe or PayPal and Zuora only holds a token.
