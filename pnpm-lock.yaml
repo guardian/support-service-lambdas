@@ -728,6 +728,18 @@ importers:
 
   handlers/salesforce-event-bus: {}
 
+  handlers/scrub-non-tokenised-payment-methods:
+    dependencies:
+      aws:
+        specifier: workspace:*
+        version: link:../../modules/aws
+      bigquery:
+        specifier: workspace:*
+        version: link:../../modules/bigquery
+      zuora:
+        specifier: workspace:*
+        version: link:../../modules/zuora
+
   handlers/stripe-disputes:
     dependencies:
       aws-sdk:

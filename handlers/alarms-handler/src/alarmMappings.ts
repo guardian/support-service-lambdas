@@ -121,6 +121,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'identity-retention',
 		'zuora-retention', //https://github.com/guardian/zuora-retention
 		'zuora-salesforce-link-remover',
+		'scrub-non-tokenised-payment-methods',
 
 		// members-data-api
 		'membership-attribute-service',
