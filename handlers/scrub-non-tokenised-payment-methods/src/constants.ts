@@ -59,6 +59,14 @@ export const DAILY_SCRUB_LIMIT = 500;
  * The two HAVING clauses are the same rule stillBillingReason applies when each
  * item is re-read from Zuora. SQL cannot call it, so the rule genuinely lives in
  * two places: change one and you have to change the other.
+ *
+ * The balance condition is the exception, and is deliberately only here.
+ * zuora-rer refuses to erase an account with a balance either way, and the same
+ * caution applies: nine of these accounts are in credit, and scrubbing the card
+ * we would refund to is not something to do without looking. Mirroring it in
+ * stillBillingReason would mean reading the account back for all five hundred
+ * items to catch a balance that appeared since the overnight sync, which is not
+ * worth an extra call per item.
  */
 export const PAYMENT_METHODS_TO_SCRUB_QUERY = `
     WITH fully_cancelled_accounts AS (
@@ -84,6 +92,7 @@ export const PAYMENT_METHODS_TO_SCRUB_QUERY = `
     WHERE pm.type = 'CreditCard'
     AND pm.payment_method_status = '${ACTIVE_PAYMENT_METHOD_STATUS}'
     AND NOT pm._fivetran_deleted
+    AND acc.balance = 0
     ORDER BY pm.created_date ASC
     LIMIT ${DAILY_SCRUB_LIMIT}
 `;

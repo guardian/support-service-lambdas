@@ -43,7 +43,7 @@ Better still, Zuora tidies the account up on its own. Scrubbing a default
 payment method clears `defaultPaymentMethodId` and, where `autoPay` was on,
 turns it off. So the account is never left with auto pay enabled and nothing to
 charge, and we never write to it. That matters for the largest group of targets:
-9,014 of them are the default on an account with `autoPay` still true.
+9,008 of them are the default on an account with `autoPay` still true.
 
 **Scrub works on a cancelled account. Delete does not.** Where the Zuora account
 itself has status `Canceled`, both of these are rejected:
@@ -54,7 +54,7 @@ PUT    /v1/accounts/{number}      -> 51500030 Cannot update a cancelled account
 ```
 
 There is no way through: you cannot delete it and you cannot detach it either.
-Only 5 of the current targets are in that state, the other 19,603 sit on
+Only 5 of the current targets are in that state, the other 19,594 sit on
 accounts that are still `Active` with all their subscriptions cancelled, but
 scrub covers both without a special case.
 
@@ -71,6 +71,7 @@ payment method id. Scrubbing twice fails with `50000020`.
 - Every one of those has a `termEndDate` in the past.
 - The account has at least one subscription, so accounts that never had one are
   left alone.
+- The account balance is zero, in either direction.
 
 Cancelled is not the same as finished. A CSR can cancel forward dated to the end
 of the term, which leaves the subscription `Cancelled` while payments are still
@@ -81,6 +82,18 @@ Subscriptions are versioned in Zuora and each amendment creates a new version,
 so the query only looks at the latest version of each. Earlier versions are all
 `Expired`, never `Cancelled`, so without that filter every account would fail the
 "every subscription is cancelled" test and nothing would ever be a target.
+
+The account balance has to be zero. [zuora-rer][rer] refuses to erase an account
+carrying a balance either way, and the same caution applies here. Nobody in this
+set owes us anything, but 9 of them are in credit, down to -27.99, and scrubbing
+the card we would refund to is not a decision to take in a batch job.
+
+That one condition lives only in the query, not in `stillBillingReason`.
+Mirroring it would mean reading the account back for all 500 items to catch a
+balance that appeared since the overnight sync, and one extra Zuora call per
+item is a poor trade for that.
+
+[rer]: https://github.com/guardian/support-service-lambdas/tree/main/handlers/zuora-rer
 
 ## How it runs
 
@@ -145,7 +158,7 @@ what a single item was given and what it returned:
 
 ### The daily cap
 
-The query is capped at 500 rows, oldest first. There are 19,608 payment methods
+The query is capped at 500 rows, oldest first. There are 19,599 payment methods
 in scope, going back to 2015, and roughly 200 a month keep arriving as accounts
 become fully cancelled. Capping each run means the same code drains the backlog
 over about six weeks and then quietly handles the trickle, which is only a few a
