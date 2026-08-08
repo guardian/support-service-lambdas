@@ -1,3 +1,4 @@
+import { GuGetS3ObjectsPolicy } from '@guardian/cdk/lib/constructs/iam';
 import type { GuFunctionProps } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
 import { ComparisonOperator, MathExpression } from 'aws-cdk-lib/aws-cloudwatch';
@@ -156,6 +157,26 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 					handler: 'checkRunMadeProgress.handler',
 				},
 			},
+		);
+
+		/*
+		 * It reads the map's result files back out of the bucket. CDK builds this
+		 * lambda a role of its own, which covers the artifact and the config path
+		 * but knows nothing about our data.
+		 */
+		bucket.grantRead(checkRunMadeProgressLambda);
+
+		/*
+		 * It reads the map's result files back out of the bucket. SrLambda gives
+		 * each lambda a role of its own, which covers the artifact and the config
+		 * path but knows nothing about our data, so the read is granted here and
+		 * scoped to the prefix the map writes under.
+		 */
+		checkRunMadeProgressLambda.addPolicies(
+			new GuGetS3ObjectsPolicy(this, 'ReadMapRunResults', {
+				bucketName: bucketName(stage),
+				paths: ['executions/*'],
+			}),
 		);
 
 		const processPaymentMethods = new DistributedMap(
