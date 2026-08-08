@@ -678,6 +678,7 @@ const scrubNonTokenisedPaymentMethods: HandlerDefinition = {
 	functionNames: [
 		'scrub-non-tokenised-payment-methods-get-',
 		'scrub-non-tokenised-payment-methods-scrub-',
+		'scrub-non-tokenised-payment-methods-check-',
 	],
 	entryPoints: ['src/handlers/*.ts'],
 	moduleDependencies: [moduleAws, moduleBigquery, moduleZuora],

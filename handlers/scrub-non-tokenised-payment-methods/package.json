@@ -12,7 +12,7 @@
     "packageQuick": "pnpm build && cd target && zip -qr scrub-non-tokenised-payment-methods.zip ./*.js.map ./*.js",
     "cdk:test": "pnpm --filter cdk test scrub-non-tokenised-payment-methods",
     "cdk:test-update": "pnpm --filter cdk test-update scrub-non-tokenised-payment-methods",
-    "update-lambda": "../../update-lambda.sh \"scrub-non-tokenised-payment-methods\" scrub-non-tokenised-payment-methods-get- scrub-non-tokenised-payment-methods-scrub-",
+    "update-lambda": "../../update-lambda.sh \"scrub-non-tokenised-payment-methods\" scrub-non-tokenised-payment-methods-get- scrub-non-tokenised-payment-methods-scrub- scrub-non-tokenised-payment-methods-check-",
     "update-stack": "../../update-stack.sh \"scrub-non-tokenised-payment-methods\""
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",

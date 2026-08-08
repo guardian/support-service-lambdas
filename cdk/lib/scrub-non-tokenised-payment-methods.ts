@@ -145,6 +145,19 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 			new AllowZuoraOAuthSecretsPolicy(this),
 		);
 
+		const checkRunMadeProgressLambda = new SrLambda(
+			this,
+			'CheckRunMadeProgressLambda',
+			{
+				nameSuffix: 'check',
+				lambdaOverrides: {
+					...lambdaDefaults,
+					memorySize: 512,
+					handler: 'checkRunMadeProgress.handler',
+				},
+			},
+		);
+
 		const processPaymentMethods = new DistributedMap(
 			this,
 			'ProcessPaymentMethodsInDistributedMap',
@@ -194,6 +207,16 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 			},
 		});
 
+		const checkRunMadeProgress = new LambdaInvoke(
+			this,
+			'CheckRunMadeProgress',
+			{
+				lambdaFunction: checkRunMadeProgressLambda,
+				payload: TaskInput.fromJsonPathAt('$'),
+				resultPath: JsonPath.DISCARD,
+			},
+		);
+
 		const notifyTeam = new SnsPublish(
 			this,
 			'NotifyTeamSomePaymentMethodsFailed',
@@ -236,6 +259,7 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 					getPaymentMethodsToScrub
 						.next(processPaymentMethods)
 						.next(getMapResult)
+						.next(checkRunMadeProgress)
 						.next(checkForFailures),
 				),
 			},
@@ -288,6 +312,7 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 				lambdaFunctionNames: [
 					getPaymentMethodsToScrubLambda.functionName,
 					scrubPaymentMethodsLambda.functionName,
+					checkRunMadeProgressLambda.functionName,
 				],
 			},
 		);

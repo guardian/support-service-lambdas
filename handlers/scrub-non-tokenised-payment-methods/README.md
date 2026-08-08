@@ -177,17 +177,20 @@ exactly like a healthy one: the map succeeds, nothing fails, no alarm. If those
 rows also never leave the BigQuery mirror, the same work list comes back every
 day and the backlog never moves, quietly.
 
-So each real run keeps its work list at `previous-work-list.json`, and the next
-one compares. Identical means the last run changed nothing, and the job fails
-rather than carrying on. The message points at the mirror, which is the likeliest
-cause, but the check does not depend on knowing why.
+So a third state runs after the map, reads back what the map actually did, and
+fails the run if it had payment methods to get through and scrubbed none of them.
+It measures the outcome rather than the input, so it says nothing about a stale
+mirror or a late Fivetran sync as long as work is still getting done, and it
+holds no state of its own: each run is judged on its own merits and a bad day
+cannot wedge the job.
 
-It is skipped in dry run, where the list is expected to repeat because nothing is
-ever scrubbed.
+It deliberately says nothing about an empty work list, which is the steady state
+once the backlog is drained, and it is skipped in dry run, where nothing is ever
+scrubbed.
 
-**Before turning dry run off**, this is the thing to watch: the day after the
-first real run, check that the payment methods it scrubbed have dropped out of
-the query.
+**Before turning dry run off**, this is still the thing to watch: the day after
+the first real run, check that the payment methods it scrubbed have dropped out
+of the query.
 
 ## Config
 

@@ -1,3 +1,9 @@
+export {
+	batchResultSchema,
+	mapRunManifestSchema,
+	mapRunResultSchema,
+	type MapRunManifest,
+} from './mapRunSchemas';
 export { nonTokenisedCardsSchema } from './nonTokenisedCardsSchema';
 export {
 	paymentMethodsToScrubSchema,

@@ -23,5 +23,6 @@ deployments:
       functionNames:
         - scrub-non-tokenised-payment-methods-get-
         - scrub-non-tokenised-payment-methods-scrub-
+        - scrub-non-tokenised-payment-methods-check-
     dependencies:
       - scrub-non-tokenised-payment-methods-cloudformation
