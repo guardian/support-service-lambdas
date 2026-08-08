@@ -98,10 +98,14 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 			],
 		});
 
+		/*
+		 * All it does with the bucket is write the work list, under the same
+		 * per-execution prefix everything else in the run lives under.
+		 */
 		lambdaRole.addToPolicy(
 			new PolicyStatement({
-				actions: ['s3:GetObject', 's3:PutObject'],
-				resources: [bucket.arnForObjects('*')],
+				actions: ['s3:PutObject'],
+				resources: [bucket.arnForObjects('executions/*')],
 			}),
 		);
 
@@ -173,13 +177,6 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 				},
 			},
 		);
-
-		/*
-		 * It reads the map's result files back out of the bucket. CDK builds this
-		 * lambda a role of its own, which covers the artifact and the config path
-		 * but knows nothing about our data.
-		 */
-		bucket.grantRead(checkRunMadeProgressLambda);
 
 		/*
 		 * It reads the map's result files back out of the bucket. SrLambda gives
