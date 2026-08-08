@@ -21,6 +21,16 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 1`] = `
       "DeletionPolicy": "Retain",
       "Properties": {
         "BucketName": "scrub-non-tokenised-payment-methods-code",
+        "LifecycleConfiguration": {
+          "Rules": [
+            {
+              "ExpirationInDays": 90,
+              "Id": "expire-execution-files",
+              "Prefix": "executions/",
+              "Status": "Enabled",
+            },
+          ],
+        },
         "Tags": [
           {
             "Key": "App",
@@ -1471,6 +1481,16 @@ exports[`The ScrubNonTokenisedPaymentMethods stack matches the snapshot 2`] = `
       "DeletionPolicy": "Retain",
       "Properties": {
         "BucketName": "scrub-non-tokenised-payment-methods-prod",
+        "LifecycleConfiguration": {
+          "Rules": [
+            {
+              "ExpirationInDays": 90,
+              "Id": "expire-execution-files",
+              "Prefix": "executions/",
+              "Status": "Enabled",
+            },
+          ],
+        },
         "Tags": [
           {
             "Key": "App",

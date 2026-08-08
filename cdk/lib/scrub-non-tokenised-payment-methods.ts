@@ -54,8 +54,23 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 			true,
 		);
 
+		/*
+		 * The other buckets in this repo rewrite the same file every run, so they
+		 * never grow. This one keys everything on the execution start time, which
+		 * is what makes a past run findable from the console, and that means a new
+		 * folder of account numbers and payment method ids every day, kept for
+		 * ever. Ninety days is long enough to look into anything anyone is going to
+		 * ask about, and stops us holding the rest indefinitely for no reason.
+		 */
 		const bucket = new Bucket(this, 'Bucket', {
 			bucketName: bucketName(stage),
+			lifecycleRules: [
+				{
+					id: 'expire-execution-files',
+					prefix: 'executions/',
+					expiration: Duration.days(90),
+				},
+			],
 		});
 
 		const snsTopicArn = `arn:aws:sns:${this.region}:${this.account}:alarms-handler-topic-${this.stage}`;
