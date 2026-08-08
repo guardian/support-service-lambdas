@@ -52,12 +52,13 @@ export const DAILY_SCRUB_LIMIT = 500;
  *
  * Subscriptions are versioned in Zuora and only the latest version carries a
  * live status, every earlier one is Expired, so without that filter no account
- * would ever qualify. An account with no subscriptions at all is excluded, since
- * it never had one to cancel.
+ * would ever qualify. An account with no subscriptions at all never forms a
+ * group here, so it is excluded without needing to say so: it never had a
+ * subscription to cancel.
  *
- * The three HAVING clauses are the same rule stillBillingReason applies when
- * each item is re-read from Zuora. SQL cannot call it, so the rule genuinely
- * lives in two places: change one and you have to change the other.
+ * The two HAVING clauses are the same rule stillBillingReason applies when each
+ * item is re-read from Zuora. SQL cannot call it, so the rule genuinely lives in
+ * two places: change one and you have to change the other.
  */
 export const PAYMENT_METHODS_TO_SCRUB_QUERY = `
     WITH fully_cancelled_accounts AS (
@@ -66,8 +67,7 @@ export const PAYMENT_METHODS_TO_SCRUB_QUERY = `
         WHERE sub.is_latest_version
         AND NOT sub._fivetran_deleted
         GROUP BY sub.account_id
-        HAVING COUNT(*) > 0
-        AND COUNTIF(sub.status != '${CANCELLED_SUBSCRIPTION_STATUS}') = 0
+        HAVING COUNTIF(sub.status != '${CANCELLED_SUBSCRIPTION_STATUS}') = 0
         AND COUNTIF(sub.term_end_date > CURRENT_DATE()) = 0
     )
 
