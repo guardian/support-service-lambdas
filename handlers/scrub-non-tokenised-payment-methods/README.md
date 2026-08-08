@@ -1,7 +1,8 @@
 # scrub-non-tokenised-payment-methods
 
 This handler is a state machine that runs daily to clear non-tokenised card data
-from Zuora accounts with no active subscriptions.
+from Zuora accounts that are done being billed: every subscription cancelled and
+out of term.
 
 ## Why
 
@@ -20,8 +21,9 @@ being part of a breach.
 `CreditCard` are added when details are entered directly into Zuora, which
 supports CSR assisted card updates.
 Once established, this job will clean up the details as they become redundant,
-but before that there will be a backlog which will be cleared gradually over
-several months.
+but before that there is a backlog, which the daily cap clears over about six
+weeks. All the counts below were measured against the BigQuery mirror in early
+August 2026 and will have moved since.
 
 ## Scrub, not delete
 
@@ -41,7 +43,7 @@ Better still, Zuora tidies the account up on its own. Scrubbing a default
 payment method clears `defaultPaymentMethodId` and, where `autoPay` was on,
 turns it off. So the account is never left with auto pay enabled and nothing to
 charge, and we never write to it. That matters for the largest group of targets:
-9,050 of them are the default on an account with `autoPay` still true.
+9,014 of them are the default on an account with `autoPay` still true.
 
 **Scrub works on a cancelled account. Delete does not.** Where the Zuora account
 itself has status `Canceled`, both of these are rejected:
@@ -52,7 +54,7 @@ PUT    /v1/accounts/{number}      -> 51500030 Cannot update a cancelled account
 ```
 
 There is no way through: you cannot delete it and you cannot detach it either.
-Only 5 of the current targets are in that state, the other 19,728 sit on
+Only 5 of the current targets are in that state, the other 19,603 sit on
 accounts that are still `Active` with all their subscriptions cancelled, but
 scrub covers both without a special case.
 
@@ -143,11 +145,11 @@ what a single item was given and what it returned:
 
 ### The daily cap
 
-The query is capped at 500 rows, oldest first. There are 19,744 payment methods
-in scope, going back to 2015, and a dozen to thirty a month keep arriving as
-accounts become fully cancelled. Capping each run means the same code drains the
-backlog over about six weeks and then quietly handles the trickle, with no
-separate backfill job.
+The query is capped at 500 rows, oldest first. There are 19,608 payment methods
+in scope, going back to 2015, and roughly 200 a month keep arriving as accounts
+become fully cancelled. Capping each run means the same code drains the backlog
+over about six weeks and then quietly handles the trickle, which is only a few a
+day, with no separate backfill job.
 
 The cap is not there for Zuora's sake. Zuora limits how many requests you have in
 flight at once, not how many you make in a day, and the map runs one item at a
@@ -207,6 +209,7 @@ GCP client as `undefined`.
 
 ## Dry run
 
-`DRY_RUN` is set to `true` on the lambda. In that mode every check runs and the
-intended action is logged, but nothing is written to Zuora. Flip it to `false`
+`DRY_RUN` is set to `true` on the lambdas. The scrub step still runs every check
+and logs what it would have done, but writes nothing to Zuora, and the progress
+check stays quiet because in dry run nothing is ever scrubbed. Flip it to `false`
 once a PROD run has been eyeballed.

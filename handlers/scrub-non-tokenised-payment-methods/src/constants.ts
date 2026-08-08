@@ -29,10 +29,10 @@ export const CANCELLED_SUBSCRIPTION_STATUS = 'Cancelled';
  * How many payment methods a single run will look at.
  *
  * There is a backlog of around twenty thousand going back to 2015 and an
- * ongoing trickle of a couple of dozen a month, because cards are still being
+ * ongoing trickle of roughly two hundred a month, because cards are still being
  * entered in Zuora directly. Capping each run means the same code drains the
- * backlog over about six weeks and then handles the trickle, with no separate
- * backfill job.
+ * backlog over about six weeks and then handles the trickle, which is a few a
+ * day, with no separate backfill job.
  *
  * Not a Zuora limit: Zuora caps requests in flight, not requests per day, and
  * the map runs one at a time. The cap is what keeps a run short enough to finish
