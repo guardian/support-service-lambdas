@@ -54,24 +54,36 @@ export class DeliveryProblemCreditProcessor extends SrStack {
 			},
 		});
 
-		lambda.addToRolePolicy(
-			new PolicyStatement({
-				effect: Effect.ALLOW,
-				actions: ['s3:GetObject'],
-				resources: [
-					`arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${stage}/zuoraRest-${stage}*.json`,
-				],
-			}),
-		);
-		lambda.addToRolePolicy(
-			new PolicyStatement({
-				effect: Effect.ALLOW,
-				actions: ['s3:GetObject'],
-				resources: [
-					`arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${stage}/sfAuth-${stage}*.json`,
-				],
-			}),
-		);
+		const zuoraRestS3Statement = new PolicyStatement({
+			effect: Effect.ALLOW,
+			actions: ['s3:GetObject'],
+			resources: [
+				`arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${stage}/zuoraRest-${stage}*.json`,
+			],
+		});
+		const sfAuthS3Statement = new PolicyStatement({
+			effect: Effect.ALLOW,
+			actions: ['s3:GetObject'],
+			resources: [
+				`arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${stage}/sfAuth-${stage}*.json`,
+			],
+		});
+		const deliveryProblemProcessorPolicy = new PolicyStatement({
+			effect: Effect.ALLOW,
+			actions: [
+				'lambda:InvokeFunction',
+				'logs:CreateLogGroup',
+				'logs:CreateLogStream',
+				'logs:PutLogEvents',
+			],
+			resources: [
+				`arn:aws:logs:${this.region}:${this.account}:log-group:/aws/lambda/delivery-problem-credit-processor-${stage}:log-stream:*`,
+			],
+		});
+
+		lambda.addToRolePolicy(deliveryProblemProcessorPolicy);
+		lambda.addToRolePolicy(zuoraRestS3Statement);
+		lambda.addToRolePolicy(sfAuthS3Statement);
 
 		let failureAlarm: SrLambdaErrorAlarm | undefined;
 		if (isProd) {
@@ -106,6 +118,20 @@ export class DeliveryProblemCreditProcessor extends SrStack {
 				forcedLogicalId: 'DeliveryProblemCreditProcessorLambdaInvokeConfig',
 				reason:
 					'Keep the original cfn logical id so CloudFormation updates the existing fn|$LATEST async-invoke config in place instead of creating a duplicate.',
+			},
+			{
+				construct: lambda.node.findChild('ServiceRole'),
+				forcedLogicalId: 'DeliveryProblemCreditProcessorRole',
+				reason:
+					'Keep the original cfn logical id so CloudFormation updates the existing policy in place instead of creating a duplicate.',
+			},
+			{
+				construct: lambda.node
+					.findChild('ServiceRole')
+					.node.findChild('DefaultPolicy'),
+				forcedLogicalId: 'DeliveryProblemCreditProcessorPolicy',
+				reason:
+					'Keep the original cfn logical id so CloudFormation updates the existing policy in place instead of creating a duplicate.',
 			},
 			...(failureAlarm
 				? [
