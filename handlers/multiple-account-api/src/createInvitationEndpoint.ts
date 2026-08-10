@@ -78,6 +78,8 @@ export const createInvitationEndpoint =
 			subscriptionName: zuoraSubscription.subscriptionNumber,
 			invitationCode,
 			primaryIdentityId: account.basicInfo.identityId,
+			primaryUserFirstName: account.billToContact.firstName,
+			primiaryUserEmail: account.billToContact.workEmail,
 			secondaryUserEmail: body.secondaryUserEmail,
 			secondaryIdentityId,
 			invitedDate: zuoraDateFormat(now),
