@@ -12,7 +12,6 @@ import type {
 import {
 	cancelSubscriptionResponseSchema,
 	zuoraSubscriptionSchema,
-	zuoraSubscriptionsFromAccountSchema,
 } from '@modules/zuora/types';
 import type {
 	ProductId,
@@ -239,9 +238,57 @@ describe('subscription', () => {
 
 			expect(mockZuoraClient.get).toHaveBeenCalledWith(
 				'v1/subscriptions/accounts/ACC-67890',
-				zuoraSubscriptionsFromAccountSchema,
+				expect.anything(),
 			);
 			expect(result).toEqual(mockSubscriptions);
+		});
+
+		it('follows nextPage so an absence is never inferred from a partial list', async () => {
+			const page = (
+				subscriptionNumber: string,
+				nextPage?: string,
+			): Record<string, unknown> => ({
+				subscriptions: [
+					{
+						id: subscriptionNumber,
+						accountNumber: 'ACC-67890',
+						status: 'Active',
+						termStartDate: new Date('2025-01-01'),
+						termEndDate: new Date('2026-01-01'),
+						ratePlans: [],
+						subscriptionNumber,
+						contractEffectiveDate: new Date('2025-01-01'),
+						serviceActivationDate: new Date('2025-01-01'),
+						customerAcceptanceDate: new Date('2025-01-01'),
+						subscriptionStartDate: new Date('2025-01-01'),
+						subscriptionEndDate: new Date('2026-01-01'),
+						lastBookingDate: new Date('2026-01-01'),
+					},
+				],
+				...(nextPage === undefined ? {} : { nextPage }),
+			});
+
+			mockZuoraClient.get = jest
+				.fn()
+				.mockResolvedValueOnce(
+					page('SUB-1', '/v1/subscriptions/accounts/ACC-67890?page=2'),
+				)
+				.mockResolvedValueOnce(page('SUB-2'));
+
+			const result = await getSubscriptionsByAccountNumber(
+				mockZuoraClient,
+				'ACC-67890',
+			);
+
+			expect(mockZuoraClient.get).toHaveBeenCalledTimes(2);
+			expect(mockZuoraClient.get).toHaveBeenLastCalledWith(
+				'v1/subscriptions/accounts/ACC-67890?page=2',
+				expect.anything(),
+			);
+			expect(result.map((sub) => sub.subscriptionNumber)).toEqual([
+				'SUB-1',
+				'SUB-2',
+			]);
 		});
 
 		it('should throw if the account number does not exist', async () => {
@@ -319,7 +366,7 @@ describe('subscription', () => {
 				'ACC-67890',
 			);
 
-			expect(result).toBe(mockResponse.subscriptions);
+			expect(result).toStrictEqual(mockResponse.subscriptions);
 		});
 
 		it('should throw if zuoraClient.get rejects', async () => {
