@@ -2,7 +2,7 @@ import {
 	buildEmailMessage,
 	DataExtensionNames,
 	sendEmail,
-} from 'email/src/email';
+} from '@modules/email/email';
 import type { Stage } from '@modules/stage';
 
 function getUrls(stage: Stage, invitationCode: string) {

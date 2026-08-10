@@ -8,8 +8,9 @@ describe('Email Integration Tests', () => {
 	test('Send invitation email', async () => {
 		await sendInvitationEmail(
 			'CODE',
+			// To send a real email, change this to your identity id
 			'12345',
-			// To send a real email, change this to your email address
+			// and this to your email address
 			'test@thegulocal.com',
 			'John',
 			'john@thegulocal.com',
