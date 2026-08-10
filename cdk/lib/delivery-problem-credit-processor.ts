@@ -1,6 +1,9 @@
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
-import { ComparisonOperator, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
+import {
+	ComparisonOperator,
+	TreatMissingData,
+} from 'aws-cdk-lib/aws-cloudwatch';
 import { Schedule } from 'aws-cdk-lib/aws-events';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
@@ -17,24 +20,25 @@ export class DeliveryProblemCreditProcessor extends SrStack {
 			stage,
 			app: 'delivery-problem-credit-processor',
 		});
-        const isProd = stage === 'PROD';
-		const scheduleRules =
-			isProd
-				? [
-						{
-							schedule: Schedule.cron({ minute: '0/20' }),
-							description:
-								'Trigger processing of delivery-problem credits every 20 mins',
-						},
-					]
-				: [];
+		const isProd = stage === 'PROD';
+		const scheduleRules = isProd
+			? [
+					{
+						schedule: Schedule.cron({ minute: '0/20' }),
+						description:
+							'Trigger processing of delivery-problem credits every 20 mins',
+					},
+				]
+			: [];
 
-		const lambda = new SrScheduledLambda(this, 'Lambda', { // DeliveryProblemCreditProcessorRole IAM Role for lambda.amazonaws.com? 
+		const lambda = new SrScheduledLambda(this, 'Lambda', {
+			// DeliveryProblemCreditProcessorRole IAM Role for lambda.amazonaws.com?
 			rules: scheduleRules,
 			monitoring: {
-                noMonitoring: true, // Custom alarm
-            },
-			lambdaOverrides: { // DeliveryProblemCreditProcessor AWS::Lambda::Function 
+				noMonitoring: true, // Custom alarm
+			},
+			lambdaOverrides: {
+				// DeliveryProblemCreditProcessor AWS::Lambda::Function
 				runtime: Runtime.JAVA_21,
 				architecture: Architecture.ARM_64,
 				fileName: 'delivery-problem-credit-processor.jar',
@@ -80,7 +84,8 @@ export class DeliveryProblemCreditProcessor extends SrStack {
 				evaluationPeriods: 65,
 				datapointsToAlarm: 3,
 				threshold: 1,
-				comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+				comparisonOperator:
+					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 				treatMissingData: TreatMissingData.NOT_BREACHING,
 			});
 		}
@@ -113,7 +118,7 @@ export class DeliveryProblemCreditProcessor extends SrStack {
 					]
 				: []),
 		];
-		
+
 		resourcesKeepingExistingLogicalIds.forEach(
 			({ construct, forcedLogicalId, reason }) => {
 				this.overrideLogicalId(construct, {
