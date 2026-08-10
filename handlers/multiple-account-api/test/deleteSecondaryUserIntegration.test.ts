@@ -44,6 +44,7 @@ beforeEach(async () => {
 	);
 
 	const createEndpoint = createInvitationEndpoint(
+		stage,
 		invitationRepository,
 		identityClient,
 		zuoraCatalog,

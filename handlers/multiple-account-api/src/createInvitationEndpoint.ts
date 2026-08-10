@@ -7,6 +7,7 @@ import type { IdentityClient } from '@modules/identity/identityClient';
 import { logger } from '@modules/logger/logger';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { created } from '@modules/routing/apiGatewayResponses';
+import type { Stage } from '@modules/stage';
 import type {
 	ZuoraAccount,
 	ZuoraSubscription,
@@ -15,6 +16,7 @@ import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ZuoraCatalog } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import type { InvitationRepository } from './invitationRepository';
+import { sendInvitationEmail } from './multipleAccountEmails';
 import {
 	checkSubscriptionHasMultipleAccountsBenefit,
 	validateInvitationInformation,
@@ -37,6 +39,7 @@ const generateInvitationCode = customAlphabet(
 
 export const createInvitationEndpoint =
 	(
+		stage: Stage,
 		invitationRepository: InvitationRepository,
 		identityClient: IdentityClient,
 		zuoraCatalog: ZuoraCatalog,
@@ -81,7 +84,14 @@ export const createInvitationEndpoint =
 			expiryDate: now.add(1, 'month').toDate().getTime(),
 		});
 
-		// TODO: trigger the invite email
+		await sendInvitationEmail(
+			stage,
+			secondaryIdentityId,
+			body.secondaryUserEmail,
+			account.billToContact.firstName,
+			account.billToContact.workEmail,
+			invitationCode,
+		);
 
 		return created(
 			{ invitationCode },
