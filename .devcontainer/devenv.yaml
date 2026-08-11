@@ -27,6 +27,13 @@ modules:
 # Optional: Mount directories from host to container
 # mounts:
 #   - "source=${localEnv:HOME}/.gu/example,target=/home/vscode/.gu/example,readonly,type=bind,consistency=cached"
+mounts:
+  # Give the container its own node_modules (a named volume) rather than reusing
+  # the host's. The host is macOS but the container is Linux, so packages with
+  # native/platform-specific binaries (e.g. esbuild, and pnpm's .pnpm store) must
+  # be installed for Linux. This also speeds up file I/O vs a bind-mounted
+  # node_modules on macOS. It is populated by `pnpm install` in postCreateCommand.
+  - "source=support-service-lambdas-node-modules-volume,target=${containerWorkspaceFolder}/node_modules,type=volume"
 
 # Optional: IDE plugins - shared project plugins like language support
 # plugins:
@@ -36,11 +43,17 @@ modules:
 # Optional: Commands to run after container creation
 # Each command has a 'cmd' field and a 'workingDirectory' field
 # e.g.
-# postCreateCommand:
-#   - cmd: "npm install"
-#     workingDirectory: "."
-#   - cmd: "make setup"
-#     workingDirectory: "/workspaces/project"
+postCreateCommand:
+  - cmd: 'mise install'
+    workingDirectory: '.'
+  - cmd: 'mise exec -- node --version'
+    workingDirectory: '.'
+  - cmd: 'mise exec -- corepack enable'
+    workingDirectory: '.'
+  - cmd: 'sudo chown -R "$(whoami):$(whoami)" node_modules'
+    workingDirectory: '.'
+  - cmd: 'mise exec -- pnpm install'
+    workingDirectory: '.'
 # postStartCommand:
 #   - cmd: "echo 'Container started successfully'"
 #     workingDirectory: "."
