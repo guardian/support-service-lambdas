@@ -130,11 +130,15 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 			architecture: Architecture.ARM_64,
 			timeout: Duration.minutes(3),
 			environment: {
-				// Log what would happen without touching Zuora. Both lambdas read it:
-				// the first one skips its no-progress check, which would otherwise
-				// fire every day since a dry run never changes the work list.
-				// Flip to false in a follow-up once a PROD run has been eyeballed.
-				DRY_RUN: 'true',
+				// Logs what would happen without touching Zuora. It also turns off
+				// the no-progress check, which would otherwise fire every day, since
+				// a dry run never changes the work list.
+				//
+				// CODE can only ever dry run: the work list is read from the mirror
+				// of PROD, so none of it exists in the CODE Zuora tenant and every
+				// item is skipped. Left live there, the no-progress check would fail
+				// every run for a reason that says nothing about the code.
+				DRY_RUN: String(this.stage !== 'PROD'),
 			},
 		};
 
