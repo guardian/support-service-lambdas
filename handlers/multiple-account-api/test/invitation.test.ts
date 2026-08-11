@@ -52,6 +52,8 @@ const mockInvitations: InvitationRecord[] = [
 		subscriptionName: 'A-S12345',
 		invitationCode: 'invitation-code',
 		primaryIdentityId: '99999999',
+		primaryUserFirstName: 'Joe',
+		primaryUserEmail: 'integration-test-joe@thegulocal.com',
 		secondaryUserEmail: 'integration-test@thegulocal.com',
 		secondaryIdentityId: '8888888',
 		invitedDate: zuoraDateFormat(testDay),

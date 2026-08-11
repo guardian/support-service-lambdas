@@ -19,7 +19,7 @@ const testRecord: InvitationRecord = {
 	invitationCode: 'it-test-code',
 	primaryIdentityId: '12345678',
 	primaryUserFirstName: 'Joe',
-	primiaryUserEmail: 'integration-test-joe@thegulocal.com',
+	primaryUserEmail: 'integration-test-joe@thegulocal.com',
 	secondaryUserEmail: 'integration-test@thegulocal.com',
 	secondaryIdentityId: '87654321',
 	invitedDate: new Date().toISOString(),
