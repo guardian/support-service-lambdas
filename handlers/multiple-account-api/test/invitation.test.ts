@@ -8,7 +8,6 @@ import type {
 	ZuoraSubscription,
 } from '@modules/zuora/types/objects';
 import { zuoraSubscriptionSchema } from '@modules/zuora/types/objects';
-import { zuoraDateFormat } from '@modules/zuora/utils';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import code from '../../../modules/zuora-catalog/test/fixtures/catalog-code.json';
 import { createInvitationEndpoint } from '../src/createInvitationEndpoint';
@@ -56,7 +55,7 @@ const mockInvitations: InvitationRecord[] = [
 		primaryUserEmail: 'integration-test-joe@thegulocal.com',
 		secondaryUserEmail: 'integration-test@thegulocal.com',
 		secondaryIdentityId: '8888888',
-		invitedDate: zuoraDateFormat(testDay),
+		invitedDate: testDay.toISOString(),
 		expiryDate: dayjs(testDay).add(1, 'month').toDate().getTime(),
 	},
 ];
@@ -126,7 +125,7 @@ describe('createInvitationHandler', () => {
 			expect.objectContaining({
 				expiryDate: testDay.add(1, 'month').toDate().getTime(),
 				invitationCode: expect.any(String) as string,
-				invitedDate: zuoraDateFormat(testDay),
+				invitedDate: testDay.toISOString(),
 				primaryIdentityId: 'primary-identity-123',
 				secondaryIdentityId: 'secondary-identity-456',
 				subscriptionName: 'A-S00974337',

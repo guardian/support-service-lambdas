@@ -55,7 +55,7 @@ export const acceptInvitationEndpoint = async (
 			subscriptionName,
 			secondaryIdentityId,
 			primaryIdentityId,
-			acceptedDate: zuoraDateFormat(today),
+			acceptedDate: today.toISOString(),
 			expiryDate: secondaryUserTTLFromPrimarySubscriptionTTL(
 				parentSupporterProductDataRecord.termEndDate,
 			),
