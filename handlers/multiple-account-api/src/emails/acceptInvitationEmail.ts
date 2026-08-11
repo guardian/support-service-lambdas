@@ -9,14 +9,12 @@ export async function sendAcceptInvitationEmail(
 	stage: Stage,
 	primaryUserFirstName: string,
 	primaryUserEmail: string,
-	secondaryUserFirstName: string,
 	secondaryUserEmail: string,
 	secondaryUserIdentityId: string,
 ) {
 	const dataAttributes = {
 		primary_user_first_name: primaryUserFirstName,
 		primary_user_email: primaryUserEmail,
-		secondary_user_first_name: secondaryUserFirstName,
 	};
 
 	const emailMessage = buildEmailMessage(

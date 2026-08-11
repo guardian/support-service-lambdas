@@ -114,7 +114,6 @@ export const handler: Handler = Router([
 				invitationRepository,
 				secondaryUserRepository,
 				dynamoClient,
-				await lazyZuoraClient.get(),
 				maybeAuthenticatedEvent.userDetails.identityId,
 				path.invitationCode,
 			);

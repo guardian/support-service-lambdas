@@ -13,10 +13,7 @@ import {
 } from '@modules/routing/apiGatewayResponses';
 import type { Stage } from '@modules/stage';
 import { getSupporterRatePlan } from '@modules/supporter-product-data/supporterProductData';
-import { getAccount } from '@modules/zuora/account';
-import { getSubscription } from '@modules/zuora/subscription';
 import { zuoraDateFormat } from '@modules/zuora/utils';
-import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { sendAcceptInvitationEmail } from './emails/acceptInvitationEmail';
 import type { InvitationRepository } from './invitationRepository';
 
@@ -25,7 +22,6 @@ export const acceptInvitationEndpoint = async (
 	invitationRepository: InvitationRepository,
 	secondaryUserRepository: SecondaryUserRepository,
 	dynamoClient: DynamoDBClient,
-	zuoraClient: ZuoraClient,
 	signedInUserId: string,
 	invitationCode: string,
 ) => {
@@ -93,20 +89,10 @@ export const acceptInvitationEndpoint = async (
 			today,
 		);
 
-		const zuoraSubscription = await getSubscription(
-			zuoraClient,
-			invitation.subscriptionName,
-		);
-		const account = await getAccount(
-			zuoraClient,
-			zuoraSubscription.accountNumber,
-		);
-
 		await sendAcceptInvitationEmail(
 			stage,
-			account.billToContact.firstName,
-			account.billToContact.workEmail,
-			invitation.secondaryUserFirstName,
+			invitation.primaryUserFirstName,
+			invitation.primaryUserEmail,
 			invitation.secondaryUserEmail,
 			invitation.secondaryIdentityId,
 		);
