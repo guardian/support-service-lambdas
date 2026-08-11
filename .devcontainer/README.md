@@ -62,6 +62,21 @@ must already be started from your IDE):
 If the container fails to build or set up correctly, the setup output is logged inside the container at
 `/var/log/post-create.log`, which is a good starting point for debugging.
 
+#### Running the project in a host IDE and the dev container at the same time
+
+The repo is bind-mounted into the container, so the project directory (including `.idea`) is shared with the host.
+IntelliJ writes machine-specific settings such as the Project JDK into `.idea`, and those references are not valid
+across the host and the container (for example the JDK the [mise](https://plugins.jetbrains.com/plugin/24904-mise)
+plugin configures inside the container points at a Linux path that doesn't exist on macOS). If both IDEs share one
+`.idea`, they clobber each other's config and you see errors like `JDK "corretto-21.0.7.6.1 (mise)" is missing` or
+"No project JDK configured".
+
+To allow running both at once (e.g. editing the dev container files in a host IDE while launching the container from
+it), the container gets its **own** `.idea` via a named volume (`support-service-lambdas-idea-volume`, see `mounts` in
+`devenv.yaml`). This masks the host's `.idea` inside the container so each IDE keeps independent settings. The volume
+starts empty, so the in-container IntelliJ will re-import/index the project on first open, and the mise plugin will
+configure the JDK/Node into the container's own `.idea`.
+
 ## .devcontainer directory contents
 
 ### `README.md`
