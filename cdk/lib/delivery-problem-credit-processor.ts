@@ -39,6 +39,7 @@ export class DeliveryProblemCreditProcessor extends SrStack {
 			},
 			lambdaOverrides: {
 				// DeliveryProblemCreditProcessor AWS::Lambda::Function
+				functionName: `delivery-problem-credit-processor-${stage}`,
 				runtime: Runtime.JAVA_21,
 				architecture: Architecture.ARM_64,
 				fileName: 'delivery-problem-credit-processor.jar',
@@ -70,12 +71,7 @@ export class DeliveryProblemCreditProcessor extends SrStack {
 		});
 		const deliveryProblemProcessorPolicy = new PolicyStatement({
 			effect: Effect.ALLOW,
-			actions: [
-				'lambda:InvokeFunction',
-				'logs:CreateLogGroup',
-				'logs:CreateLogStream',
-				'logs:PutLogEvents',
-			],
+			actions: ['lambda:InvokeFunction'],
 			resources: [
 				`arn:aws:logs:${this.region}:${this.account}:log-group:/aws/lambda/delivery-problem-credit-processor-${stage}:log-stream:*`,
 			],
