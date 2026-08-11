@@ -14,6 +14,7 @@ import {
 import type { Stage } from '@modules/stage';
 import { getSupporterRatePlan } from '@modules/supporter-product-data/supporterProductData';
 import { zuoraDateFormat } from '@modules/zuora/utils';
+import { sendAcceptInvitationEmail } from './emails/acceptInvitationEmail';
 import type { InvitationRepository } from './invitationRepository';
 
 export const acceptInvitationEndpoint = async (
@@ -89,7 +90,13 @@ export const acceptInvitationEndpoint = async (
 			today,
 		);
 
-		// TODO: email?
+		await sendAcceptInvitationEmail(
+			stage,
+			invitation.primaryUserFirstName,
+			invitation.primaryUserEmail,
+			invitation.secondaryUserEmail,
+			invitation.secondaryIdentityId,
+		);
 		return ok({
 			identityId: secondaryIdentityId,
 			secondarySubscriptionName,
