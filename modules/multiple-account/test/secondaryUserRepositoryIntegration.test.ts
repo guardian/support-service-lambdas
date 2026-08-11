@@ -19,6 +19,7 @@ const testRecord = {
 	primaryIdentityId: '12345678',
 	acceptedDate: new Date().toISOString(),
 	expiryDate: dayjs().add(10, 'seconds').toDate().getTime(),
+	invitationCode: 'it-test-invitation-code',
 };
 
 const repo = new SecondaryUserRepository(

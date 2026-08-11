@@ -22,6 +22,7 @@ const makeSecondaryUser = (
 	primaryIdentityId,
 	acceptedDate: '2026-06-12',
 	expiryDate: 1781218800,
+	invitationCode: 'RpwR62kMnAxe',
 	...overrides,
 });
 

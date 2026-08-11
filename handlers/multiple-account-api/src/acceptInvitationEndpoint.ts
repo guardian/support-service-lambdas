@@ -58,6 +58,7 @@ export const acceptInvitationEndpoint = async (
 			expiryDate: secondaryUserTTLFromPrimarySubscriptionTTL(
 				parentSupporterProductDataRecord.termEndDate,
 			),
+			invitationCode,
 		};
 
 		const createSecondaryUserTransaction =
