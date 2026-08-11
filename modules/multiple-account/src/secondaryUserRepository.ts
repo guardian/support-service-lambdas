@@ -25,6 +25,7 @@ export const secondaryUserRecordSchema = z.object({
 	expiryDate: z.number(),
 	cancelledBy: cancelledBySchema.optional(),
 	cancelledDate: z.iso.datetime().optional(),
+	invitationCode: z.string(),
 });
 
 export function secondaryUserTTLFromPrimarySubscriptionTTL(primaryTTL: Dayjs) {
