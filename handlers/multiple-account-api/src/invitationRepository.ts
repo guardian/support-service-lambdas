@@ -27,6 +27,8 @@ export const nonCancelledInvitationRecordSchema = z.object({
 	subscriptionName: z.string(),
 	invitationCode: z.string(),
 	primaryIdentityId: z.string(),
+	primaryUserFirstName: z.string(),
+	primaryUserEmail: z.string(),
 	secondaryUserEmail: z.string(),
 	secondaryIdentityId: z.string(),
 	invitedDate: z.string(),
