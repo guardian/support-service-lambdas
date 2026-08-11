@@ -26,22 +26,17 @@ class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffShouldMa
 
     update.value shouldMatchTo (
       SubscriptionUpdate(
-        currentTerm = Some(418),
-        currentTermPeriodType = Some("Day"),
-        add = List(
-          Add(
-            productRatePlanId = "prp1",
-            contractEffectiveDate = invoiceDate.value,
-            customerAcceptanceDate = invoiceDate.value,
-            serviceActivationDate = invoiceDate.value,
-            chargeOverrides = List(
-              ChargeOverride(
-                productRatePlanChargeId = "prpc3",
-                HolidayStart__c = publicationDate.value,
-                HolidayEnd__c = publicationDate.value,
-                price = -4.72,
-              ),
-            ),
+        extendedTermEndDate = Some(invoiceDate.value),
+        productAddition = CreditProductAddition(
+          productRatePlanId = "prp1",
+          contractEffectiveDate = invoiceDate.value,
+          customerAcceptanceDate = invoiceDate.value,
+          serviceActivationDate = invoiceDate.value,
+          chargeOverride = CreditChargeOverride(
+            productRatePlanChargeId = "prpc3",
+            HolidayStart__c = publicationDate.value,
+            HolidayEnd__c = publicationDate.value,
+            price = -4.72,
           ),
         ),
       )

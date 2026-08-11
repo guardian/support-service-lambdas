@@ -9,5 +9,6 @@ trait CreditRequest {
     */
   def chargeCode: Option[RatePlanChargeCode]
 
+  /** Used to inspect a subscription for a credit that has already been added. */
   def productRatePlanChargeName: String
 }

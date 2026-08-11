@@ -1,6 +1,6 @@
 package com.gu.zuora.orders
 
-import com.gu.zuora.subscription.{Add, Subscription, SubscriptionUpdate, ZuoraApiFailure, ZuoraApiResponse}
+import com.gu.zuora.subscription.{CreditProductAddition, Subscription, SubscriptionUpdate}
 import io.circe.{Encoder, Json}
 import io.circe.generic.auto._
 import io.circe.syntax._
@@ -19,79 +19,58 @@ object CreateOrderRequest {
       subscription: Subscription,
       update: SubscriptionUpdate,
       orderDate: LocalDate,
-  ): ZuoraApiResponse[CreateOrderRequest] =
-    update.add match {
-      case add :: Nil =>
-        for {
-          _ <- validateChargeOverrides(add)
-          maybeTermsAndConditions <- termsAndConditionsAction(subscription, update, orderDate)
-        } yield {
-          CreateOrderRequest(
-            orderDate = orderDate,
-            existingAccountNumber = subscription.accountNumber,
-            subscriptions = List(
-              OrderSubscription(
-                subscriptionNumber = subscription.subscriptionNumber,
-                orderActions = maybeTermsAndConditions.toList :+ addProductAction(add),
-              ),
-            ),
-            processingOptions = ProcessingOptions(runBilling = false, collectPayment = false),
-          )
-        }
-      case _ => Left(ZuoraApiFailure("A credit order must add exactly one product rate plan"))
-    }
-
-  private def validateChargeOverrides(add: Add): ZuoraApiResponse[Unit] =
-    add.chargeOverrides match {
-      case _ :: Nil => Right(())
-      case _ => Left(ZuoraApiFailure("A credit order must contain exactly one price override"))
-    }
+  ): CreateOrderRequest =
+    CreateOrderRequest(
+      orderDate = orderDate,
+      existingAccountNumber = subscription.accountNumber,
+      subscriptions = List(
+        OrderSubscription(
+          subscriptionNumber = subscription.subscriptionNumber,
+          orderActions = termsAndConditionsAction(update, orderDate).toList :+ addProductAction(
+            update.productAddition,
+          ),
+        ),
+      ),
+      processingOptions = ProcessingOptions(runBilling = false, collectPayment = false),
+    )
 
   private def termsAndConditionsAction(
-      subscription: Subscription,
       update: SubscriptionUpdate,
       orderDate: LocalDate,
-  ): ZuoraApiResponse[Option[TermsAndConditionsOrderAction]] =
-    (update.currentTerm, update.currentTermPeriodType) match {
-      case (None, None) => Right(None)
-      case (Some(currentTerm), Some("Day")) if currentTerm >= 0 =>
-        Right(
-          Some(
-            TermsAndConditionsOrderAction(
-              triggerDates = TriggerDate.allOn(orderDate),
-              termsAndConditions = TermsAndConditions(
-                lastTerm = LastTerm(
-                  termType = TermType.Termed,
-                  endDate = subscription.termStartDate.plusDays(currentTerm.toLong),
-                ),
-              ),
-            ),
+  ): Option[TermsAndConditionsOrderAction] =
+    update.extendedTermEndDate.map { extendedTermEndDate =>
+      TermsAndConditionsOrderAction(
+        triggerDates = TriggerDate.allOn(orderDate),
+        termsAndConditions = TermsAndConditions(
+          lastTerm = LastTerm(
+            termType = TermType.Termed,
+            endDate = extendedTermEndDate,
           ),
-        )
-      case _ => Left(ZuoraApiFailure("A credit order can only extend a subscription term by days"))
+        ),
+      )
     }
 
-  private def addProductAction(add: Add): AddProductOrderAction =
+  private def addProductAction(productAddition: CreditProductAddition): AddProductOrderAction =
     AddProductOrderAction(
       triggerDates = List(
-        TriggerDate(TriggerDateName.ContractEffective, add.contractEffectiveDate),
-        TriggerDate(TriggerDateName.ServiceActivation, add.serviceActivationDate),
-        TriggerDate(TriggerDateName.CustomerAcceptance, add.customerAcceptanceDate),
+        TriggerDate(TriggerDateName.ContractEffective, productAddition.contractEffectiveDate),
+        TriggerDate(TriggerDateName.ServiceActivation, productAddition.serviceActivationDate),
+        TriggerDate(TriggerDateName.CustomerAcceptance, productAddition.customerAcceptanceDate),
       ),
       addProduct = ProductToAdd(
-        productRatePlanId = add.productRatePlanId,
-        chargeOverrides = add.chargeOverrides.map { chargeOverride =>
+        productRatePlanId = productAddition.productRatePlanId,
+        chargeOverrides = List(
           ChargeOverride(
-            productRatePlanChargeId = chargeOverride.productRatePlanChargeId,
-            customFields = RatePlanChargeCustomFields(
-              HolidayStart__c = chargeOverride.HolidayStart__c,
-              HolidayEnd__c = chargeOverride.HolidayEnd__c,
+            productRatePlanChargeId = productAddition.chargeOverride.productRatePlanChargeId,
+            customFields = CreditCustomFields(
+              HolidayStart__c = productAddition.chargeOverride.HolidayStart__c,
+              HolidayEnd__c = productAddition.chargeOverride.HolidayEnd__c,
             ),
             pricing = Pricing(
-              oneTimeFlatFee = OneTimeFlatFee(listPrice = chargeOverride.price),
+              oneTimeFlatFee = OneTimeFlatFee(listPrice = productAddition.chargeOverride.price),
             ),
-          )
-        },
+          ),
+        ),
       ),
     )
 }
@@ -137,11 +116,11 @@ case class ProductToAdd(
 
 case class ChargeOverride(
     productRatePlanChargeId: String,
-    customFields: RatePlanChargeCustomFields,
+    customFields: CreditCustomFields,
     pricing: Pricing,
 )
 
-case class RatePlanChargeCustomFields(
+case class CreditCustomFields(
     HolidayStart__c: LocalDate,
     HolidayEnd__c: LocalDate,
 )

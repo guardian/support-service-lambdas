@@ -64,7 +64,7 @@ object DeliveryCreditProcessor extends Logging {
       }
 
   def processAllProducts(
-      getRemainingTimeInMillis: () => Int = () => Int.MaxValue,
+      getRemainingTimeInMillis: () => Int,
   ): RIO[Clock, List[DeliveryCreditResult]] = {
     val productTypes = List(NewspaperHomeDelivery, GuardianWeekly, NewspaperNationalDelivery, TierThree)
     for {

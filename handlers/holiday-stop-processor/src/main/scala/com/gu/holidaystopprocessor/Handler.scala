@@ -96,6 +96,7 @@ object Handler extends Lambda[Option[ProductTypeAndStopDate], List[ZuoraHolidayC
             productTypeAndStopDate,
             HttpURLConnectionBackend(),
             GetFromS3.fetchString,
+            () => Int.MaxValue,
           ),
         )
         _ <- showResults(processResults)

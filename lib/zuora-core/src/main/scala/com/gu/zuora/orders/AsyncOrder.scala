@@ -1,8 +1,26 @@
 package com.gu.zuora.orders
 
-import io.circe.Decoder
+import io.circe.{Decoder, DecodingFailure}
 
-case class AsyncJobSubmission(jobId: Option[String], success: Boolean)
+sealed trait AsyncJobSubmission
+
+object AsyncJobSubmission {
+  case class Accepted(jobId: String) extends AsyncJobSubmission
+  case object Rejected extends AsyncJobSubmission
+
+  implicit val decoder: Decoder[AsyncJobSubmission] = Decoder.instance { cursor =>
+    cursor.downField("success").as[Boolean].flatMap {
+      case true =>
+        cursor
+          .downField("jobId")
+          .as[String]
+          .map(Accepted.apply)
+          .left
+          .map(_ => DecodingFailure("Zuora accepted the order without returning a job ID", cursor.history))
+      case false => Right(Rejected)
+    }
+  }
+}
 
 case class AsyncJobReport(
     status: AsyncJobStatus,

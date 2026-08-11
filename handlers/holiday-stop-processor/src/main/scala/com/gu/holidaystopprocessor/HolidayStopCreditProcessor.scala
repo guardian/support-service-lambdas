@@ -35,7 +35,7 @@ object HolidayStopCreditProcessor {
       productTypeAndStopDateOverride: Option[ProductTypeAndStopDate],
       backend: SttpBackend[Identity, Any],
       fetchFromS3: S3Location => Try[String],
-      getRemainingTimeInMillis: () => Int = () => Int.MaxValue,
+      getRemainingTimeInMillis: () => Int,
   ): List[ProcessResult[ZuoraHolidayCreditAddResult]] = {
 
     val allProcessableProductTypes = List(

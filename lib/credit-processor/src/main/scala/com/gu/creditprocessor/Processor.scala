@@ -43,7 +43,7 @@ object Processor {
       writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_],
       getAccount: String => ZuoraApiResponse[ZuoraAccount],
       getNextInvoiceDate: String => ZuoraApiResponse[LocalDate] = null, // FIXME
-      getRemainingTimeInMillis: () => Int = () => Int.MaxValue,
+      getRemainingTimeInMillis: () => Int,
   ): List[ProcessResult[Result]] = {
 
     def getSubscription(
@@ -57,7 +57,7 @@ object Processor {
     ): ZuoraApiResponse[Unit] =
       for {
         _ <- checkTimeRemaining(subscription.subscriptionNumber, getRemainingTimeInMillis())
-        order <- CreateOrderRequest.forCredit(subscription, update, MutableCalendar.today)
+        order = CreateOrderRequest.forCredit(subscription, update, MutableCalendar.today)
         _ <- ZuoraOrders.createOrderAsynchronously(config, zuoraAccessToken, sttpBackend)(order)
       } yield ()
 
@@ -213,10 +213,10 @@ object Processor {
   ): Future[_] = Future {
     (getNextInvoiceDate(subscription.subscriptionNumber)
       .map { actual =>
-        if (expected.add.forall(_.contractEffectiveDate == actual)) {
+        if (expected.productAddition.contractEffectiveDate == actual) {
           // logger.info("testInProdNextInvoiceDate OK")
         } else {
-          logger.error(s"testInProdNextInvoiceDate failed because ${expected.add.head} =/= $actual")
+          logger.error(s"testInProdNextInvoiceDate failed because ${expected.productAddition} =/= $actual")
         }
       })
       .left
