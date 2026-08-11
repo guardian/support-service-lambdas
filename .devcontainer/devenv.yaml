@@ -53,6 +53,17 @@ mounts:
 postCreateCommand:
   - cmd: 'mise install'
     workingDirectory: '.'
+  # The IntelliJ backend (and IDE-launched processes like test runners) use a
+  # non-login, non-interactive shell whose PATH is only the system default
+  # (/usr/local/sbin:/usr/local/bin:...). That does NOT include mise (~/.local/bin)
+  # or the mise shims (~/.local/share/mise/shims), which are only added to
+  # interactive/login shells via ~/.bashrc / ~/.profile. Without this, IntelliJ
+  # reports "Node.js is required" and tests fail with "no node executable found in
+  # path". Symlink mise and its tool shims into /usr/local/bin (which IS on the
+  # default PATH) so node, java, npm etc. are always discoverable. The shims
+  # resolve tool versions from the project's mise config at runtime.
+  - cmd: 'sudo ln -sf "$HOME/.local/bin/mise" /usr/local/bin/mise && sudo ln -sf "$HOME"/.local/share/mise/shims/* /usr/local/bin/'
+    workingDirectory: '.'
   - cmd: 'mise exec -- node --version'
     workingDirectory: '.'
   - cmd: 'mise exec -- corepack enable'
