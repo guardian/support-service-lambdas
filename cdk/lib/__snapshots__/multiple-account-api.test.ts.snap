@@ -1030,22 +1030,40 @@ exports[`The Multiple account api stack matches the snapshot 1`] = `
                 "sqs:SendMessage",
               ],
               "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:sqs:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":supporter-product-data-CODE",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:sqs:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":supporter-product-data-CODE",
+                    ],
                   ],
-                ],
-              },
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:sqs:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":braze-emails-CODE",
+                    ],
+                  ],
+                },
+              ],
             },
           ],
           "Version": "2012-10-17",
@@ -2329,22 +2347,40 @@ exports[`The Multiple account api stack matches the snapshot 2`] = `
                 "sqs:SendMessage",
               ],
               "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:sqs:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":supporter-product-data-PROD",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:sqs:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":supporter-product-data-PROD",
+                    ],
                   ],
-                ],
-              },
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:sqs:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":braze-emails-PROD",
+                    ],
+                  ],
+                },
+              ],
             },
           ],
           "Version": "2012-10-17",
