@@ -50,6 +50,7 @@ export class MultipleAccountApi extends SrStack {
 		lambda.addPolicies(new AllowSupporterProductDataDeletePolicy(this));
 		lambda.addPolicies(
 			AllowSqsSendPolicy.create(this, 'supporter-product-data'),
+			AllowSqsSendPolicy.create(this, `braze-emails`),
 		);
 
 		const invitationTable = new Table(this, 'InvitationTable', {
