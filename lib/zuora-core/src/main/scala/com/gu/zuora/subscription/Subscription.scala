@@ -46,7 +46,7 @@ case class Subscription(
   lazy val fulfilmentStartDate: LocalDate =
     (customerAcceptanceDate :: allEffectiveStartDates).min[LocalDate](_ compareTo _)
 
-  def hasCreditAmendment(request: CreditRequest): Boolean = ratePlanCharge(request).isDefined
+  def hasCredit(request: CreditRequest): Boolean = ratePlanCharge(request).isDefined
 }
 
 case class RatePlan(

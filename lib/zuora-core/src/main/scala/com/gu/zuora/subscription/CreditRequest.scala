@@ -1,7 +1,5 @@
 package com.gu.zuora.subscription
 
-/** Request to add a credit amendment to a Zuora subscription.
-  */
 trait CreditRequest {
 
   def subscriptionName: SubscriptionName
@@ -11,7 +9,5 @@ trait CreditRequest {
     */
   def chargeCode: Option[RatePlanChargeCode]
 
-  /** This is used to inspect a subscription to see if a credit amendment has already been added.
-    */
   def productRatePlanChargeName: String
 }

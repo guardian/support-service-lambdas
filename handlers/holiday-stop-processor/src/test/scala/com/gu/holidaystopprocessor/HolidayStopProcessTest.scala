@@ -53,10 +53,10 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
     getAccountResult
   }
 
-  private def exportAmendments(
-      amendmentExport: Either[SalesforceApiFailure, Unit],
+  private def exportCredits(
+      creditExport: Either[SalesforceApiFailure, Unit],
   ): List[ZuoraHolidayCreditAddResult] => Either[SalesforceApiFailure, Unit] =
-    _ => amendmentExport
+    _ => creditExport
 
   val today = LocalDate.now()
 
@@ -221,7 +221,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       updateToApply,
       updateSubscription(Right(())),
       ZuoraHolidayCreditAddResult.apply,
-      exportAmendments(Right(())),
+      exportCredits(Right(())),
     )
     responses.head.creditResults.headOption.value.right.value shouldBe ZuoraHolidayCreditAddResult(
       requestId = HolidayStopRequestsDetailId("R1"),
@@ -258,7 +258,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       updateToApply,
       updateSubscription(Right(())),
       ZuoraHolidayCreditAddResult.apply,
-      exportAmendments(Right(())),
+      exportCredits(Right(())),
     )
   }
   it should "get target date from overridedate" in {
@@ -278,7 +278,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       updateToApply,
       updateSubscription(Right(())),
       ZuoraHolidayCreditAddResult.apply,
-      exportAmendments(Right(())),
+      exportCredits(Right(())),
     )
   }
 
@@ -310,7 +310,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       updateToApply,
       updateSubscription(Right(())),
       ZuoraHolidayCreditAddResult.apply,
-      exportAmendments(Right(())),
+      exportCredits(Right(())),
     )
     responses.flatMap(_.resultsToExport) shouldBe List(
       ZuoraHolidayCreditAddResult(
@@ -353,7 +353,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       updateToApply,
       updateSubscription(Right(())),
       ZuoraHolidayCreditAddResult.apply,
-      exportAmendments(Left(SalesforceApiFailure("Export failed"))),
+      exportCredits(Left(SalesforceApiFailure("Export failed"))),
     )
 
     responses.map(_.overallFailure) should contain(Some(OverallFailure("Export failed")))

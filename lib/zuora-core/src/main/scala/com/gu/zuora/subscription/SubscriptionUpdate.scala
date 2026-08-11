@@ -8,8 +8,8 @@ case class SubscriptionUpdate(
     add: List[Add],
 )
 
-/** This builds the request body to add a Credit RatePlanCharge in Zuora. It should not contain business logic. Any
-  * business logic should be moved out to the main for-comprehension.
+/** This describes the product and term changes needed to add a credit in Zuora. It should not contain business logic.
+  * Any business logic should be moved out to the main for-comprehension.
   */
 object SubscriptionUpdate {
 

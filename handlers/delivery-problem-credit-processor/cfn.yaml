@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Applies a credit amendment to a subscription for a delivery problem.
+Description: Applies a credit to a subscription for a delivery problem.
 
 Parameters:
 
@@ -64,7 +64,7 @@ Resources:
     Properties:
       FunctionName:
         !Sub delivery-problem-credit-processor-${Stage}
-      Description: Applies credit amendments for delivery problems. Source - https://github.com/guardian/support-service-lambdas/tree/main/handlers/delivery-problem-credit-processor
+      Description: Applies credits for delivery problems. Source - https://github.com/guardian/support-service-lambdas/tree/main/handlers/delivery-problem-credit-processor
       Code:
         S3Bucket: support-service-lambdas-dist
         S3Key: !Sub membership/${Stage}/delivery-problem-credit-processor/delivery-problem-credit-processor.jar

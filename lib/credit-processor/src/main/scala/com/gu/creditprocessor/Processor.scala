@@ -2,10 +2,10 @@ package com.gu.creditprocessor
 
 import cats.syntax.all._
 import com.gu.fulfilmentdates.FulfilmentDatesFetcher
-import com.gu.zuora.ZuoraLockingContention.retryLockingContention
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
+import com.gu.zuora.orders.CreateOrderRequest
 import com.gu.zuora.subscription._
-import com.gu.zuora.{AccessToken, HolidayStopProcessorZuoraConfig, Zuora}
+import com.gu.zuora.{AccessToken, HolidayStopProcessorZuoraConfig, Zuora, ZuoraOrders}
 import org.slf4j.LoggerFactory
 import sttp.client3.{Identity, SttpBackend}
 
@@ -47,13 +47,14 @@ object Processor {
     ): ZuoraApiResponse[Subscription] =
       Zuora.subscriptionGetResponse(config, zuoraAccessToken, sttpBackend)(subscriptionName)
 
-    def updateSubscription(
+    def applyOrder(
         subscription: Subscription,
         update: SubscriptionUpdate,
     ): ZuoraApiResponse[Unit] =
-      retryLockingContention(2, subscription.subscriptionNumber) {
-        Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, sttpBackend)(subscription, update)
-      }
+      for {
+        order <- CreateOrderRequest.forCredit(subscription, update, MutableCalendar.today)
+        _ <- ZuoraOrders.createOrderAsynchronously(config, zuoraAccessToken, sttpBackend)(order)
+      } yield ()
 
     processProduct(
       creditProduct: CreditProductForSubscription,
@@ -69,7 +70,7 @@ object Processor {
           ZuoraAccount,
           Request,
       ) => ZuoraApiResponse[SubscriptionUpdate],
-      updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
+      applyOrder: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
       resultOfZuoraCreditAdd: (Request, RatePlanCharge) => Result,
       writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_],
       getNextInvoiceDate: String => ZuoraApiResponse[LocalDate],
@@ -90,7 +91,7 @@ object Processor {
           ZuoraAccount,
           Request,
       ) => ZuoraApiResponse[SubscriptionUpdate],
-      updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
+      applyOrder: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
       resultOfZuoraCreditAdd: (Request, RatePlanCharge) => Result,
       writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_],
       getNextInvoiceDate: String => ZuoraApiResponse[LocalDate] = null, // FIXME,
@@ -137,7 +138,7 @@ object Processor {
               getSubscription,
               getAccount,
               updateToApply,
-              updateSubscription,
+              applyOrder,
               resultOfZuoraCreditAdd,
               getNextInvoiceDate,
             )(creditRequest)
@@ -170,9 +171,6 @@ object Processor {
             .par
 
         val requestConcurrency = 20
-        /*https://developer.zuora.com/docs/guides/rate-limits/#concurrent-request-limits
-        Zuora supports up to 40 concurrent requests until migration to orders API which supports 200
-         */
         val forkJoinPool = new java.util.concurrent.ForkJoinPool(requestConcurrency)
         creditRequestBatches.tasksupport = new ForkJoinTaskSupport(forkJoinPool)
 
@@ -212,8 +210,6 @@ object Processor {
       }
   }(ecForTestInProd)
 
-  /** This is the main business logic for adding a credit amendment to a subscription in Zuora
-    */
   def addCreditToSubscription[Request <: CreditRequest, Result <: ZuoraCreditAddResult](
       creditProduct: CreditProductForSubscription,
       getSubscription: SubscriptionName => ZuoraApiResponse[Subscription],
@@ -224,7 +220,7 @@ object Processor {
           ZuoraAccount,
           Request,
       ) => ZuoraApiResponse[SubscriptionUpdate],
-      updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
+      applyOrder: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
       result: (Request, RatePlanCharge) => Result,
       getNextInvoiceDate: String => ZuoraApiResponse[LocalDate] = null, // FIXME
   )(request: Request): ZuoraApiResponse[Result] =
@@ -235,21 +231,21 @@ object Processor {
         if (subscription.status == "Cancelled")
           Left(
             ZuoraApiFailure(
-              s"Cannot process cancelled subscription because Zuora does not allow amending cancelled subs (Code: 58730020). Apply manual refund ASAP! $request; ${subscription.subscriptionNumber};",
+              s"Cannot process cancelled subscription because Zuora does not allow changing cancelled subscriptions (Code: 58730020). Apply manual refund ASAP! $request; ${subscription.subscriptionNumber};",
             ),
           )
         else Right(())
-      subscriptionUpdate <- updateToApply(creditProduct, subscription, account, request) // FIXME: Deprecated
+      subscriptionUpdate <- updateToApply(creditProduct, subscription, account, request)
       _ = testInProdNextInvoiceDate(subscription, getNextInvoiceDate, subscriptionUpdate)
       // FIXME: nextInvoiceDate <- getNextInvoiceDate(subscription.subscriptionNumber)
       // FIXME: subscriptionUpdate <- SubscriptionUpdate(creditProduct(subscription), subscription, account, request.publicationDate, Some(InvoiceDate(nextInvoiceDate)))
       _ <-
-        if (subscription.hasCreditAmendment(request)) Right(())
-        else updateSubscription(subscription, subscriptionUpdate)
+        if (subscription.hasCredit(request)) Right(())
+        else applyOrder(subscription, subscriptionUpdate)
       updatedSubscription <- getSubscription(request.subscriptionName)
       addedCharge <- updatedSubscription
         .ratePlanCharge(request)
-        .toRight(ZuoraApiFailure(s"Failed to write credit amendment to Zuora: $request"))
+        .toRight(ZuoraApiFailure(s"Failed to write credit to Zuora: $request"))
     } yield {
       logger.info(s"Added credit ${addedCharge.number} to ${subscription.subscriptionNumber}")
       result(request, addedCharge)
