@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import { SupportRegionId } from '@modules/internationalisation/countryGroup';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { Promo } from '@modules/promotions/v2/schema';
 import { createSubscriptionWithExistingPaymentMethod } from '@modules/zuora/createSubscription/createSubscriptionWithExistingPaymentMethod';
@@ -274,7 +273,7 @@ describe('createSubscriptionWithExistingPaymentMethod', () => {
 					existingPaymentMethod: { id: 'pm-ccrt-id', requiresCloning: true },
 					appliedPromotion: {
 						promoCode: 'PROMO25',
-						supportRegionId: SupportRegionId.UK,
+						supportRegionId: 'uk',
 					},
 					productPurchase: {
 						product: 'NationalDelivery',

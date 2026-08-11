@@ -5,7 +5,6 @@
 
 import dayjs from 'dayjs';
 import { z } from 'zod';
-import { SupportRegionId } from '@modules/internationalisation/countryGroup';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import { getPromotion } from '@modules/promotions/v2/getPromotion';
 import { deleteAccount } from '@modules/zuora/account';
@@ -231,7 +230,7 @@ describe('createSubscriptionWithExistingPaymentMethod integration', () => {
 				},
 				appliedPromotion: {
 					promoCode,
-					supportRegionId: SupportRegionId.UK,
+					supportRegionId: 'uk',
 				},
 			};
 
