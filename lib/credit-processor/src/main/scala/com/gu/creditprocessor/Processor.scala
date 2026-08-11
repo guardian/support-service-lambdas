@@ -12,6 +12,7 @@ import sttp.client3.{Identity, SttpBackend}
 import java.time.LocalDate
 import scala.collection.parallel.CollectionConverters.ImmutableSeqIsParallelizable
 import scala.collection.parallel.ForkJoinTaskSupport
+import scala.concurrent.duration.DurationInt
 
 object Processor {
 
@@ -20,6 +21,8 @@ object Processor {
   }
 
   private val logger = LoggerFactory.getLogger(getClass)
+  private val OrderCompletionBuffer = 1.minute
+  private val MinimumTimeForOrder = ZuoraOrders.MaximumOrderDuration + OrderCompletionBuffer
 
   def processLiveProduct[Request <: CreditRequest, Result <: ZuoraCreditAddResult](
       config: HolidayStopProcessorZuoraConfig,
@@ -40,6 +43,7 @@ object Processor {
       writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_],
       getAccount: String => ZuoraApiResponse[ZuoraAccount],
       getNextInvoiceDate: String => ZuoraApiResponse[LocalDate] = null, // FIXME
+      getRemainingTimeInMillis: () => Int = () => Int.MaxValue,
   ): List[ProcessResult[Result]] = {
 
     def getSubscription(
@@ -52,6 +56,7 @@ object Processor {
         update: SubscriptionUpdate,
     ): ZuoraApiResponse[Unit] =
       for {
+        _ <- checkTimeRemaining(subscription.subscriptionNumber, getRemainingTimeInMillis())
         order <- CreateOrderRequest.forCredit(subscription, update, MutableCalendar.today)
         _ <- ZuoraOrders.createOrderAsynchronously(config, zuoraAccessToken, sttpBackend)(order)
       } yield ()
@@ -170,6 +175,9 @@ object Processor {
             .toList
             .par
 
+        /** Status polling uses Zuora's default tenant-wide limit of 40, so 20 leaves room for other clients.
+          * https://developer.zuora.com/docs/guides/rate-limits/#concurrent-request-limits
+          */
         val requestConcurrency = 20
         val forkJoinPool = new java.util.concurrent.ForkJoinPool(requestConcurrency)
         creditRequestBatches.tasksupport = new ForkJoinTaskSupport(forkJoinPool)
@@ -185,6 +193,13 @@ object Processor {
         processResults
     }
   }
+
+  private[gu] def checkTimeRemaining(
+      subscriptionNumber: String,
+      remainingTimeInMillis: Int,
+  ): ZuoraApiResponse[Unit] =
+    if (remainingTimeInMillis >= MinimumTimeForOrder.toMillis) Right(())
+    else Left(ZuoraApiFailure(s"Not enough time remaining to submit a Zuora order for $subscriptionNumber"))
 
   // FIXME: Temporary test in production to validate migration to https://github.com/guardian/invoicing-api/pull/20
   import java.util.concurrent.Executors

@@ -1,7 +1,6 @@
 package com.gu.zuora
 
 import com.gu.zuora.orders._
-import com.gu.zuora.subscription.ZuoraApiResponse
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import org.scalatest.EitherValues
@@ -68,6 +67,76 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
     result.left.value.reason shouldBe "Zuora accepted the order without returning a job ID"
   }
 
+  it should "retry when the job report confirms locking contention" in {
+    val submissions = new AtomicInteger(0)
+    val backend = SttpBackendStub.synchronous.whenRequestMatchesPartial {
+      case submittedRequest: Request[_, _] if submittedRequest.method == Method.POST =>
+        val attempt = submissions.incrementAndGet()
+        Response.ok(s"""{"jobId":"job-$attempt","success":true}""")
+      case statusRequest: Request[_, _] if statusRequest.method == Method.GET && submissions.get() == 1 =>
+        Response.ok(
+          """{"status":"Failed","errors":"[40000050]: Operation failed due to a lock competition, please retry later.","result":null}""",
+        )
+      case statusRequest: Request[_, _] if statusRequest.method == Method.GET =>
+        Response.ok("""{"status":"Completed","errors":null,"result":{"status":"Completed"}}""")
+    }
+
+    val result = ZuoraOrders.createOrderAsynchronously(
+      config,
+      accessToken,
+      backend,
+      pause = () => (),
+      maxPollAttempts = 1,
+    )(request)
+
+    result shouldBe Right(())
+    submissions.get() shouldBe 2
+  }
+
+  it should "not retry other job failures" in {
+    val submissions = new AtomicInteger(0)
+    val backend = SttpBackendStub.synchronous.whenRequestMatchesPartial {
+      case submittedRequest: Request[_, _] if submittedRequest.method == Method.POST =>
+        submissions.incrementAndGet()
+        Response.ok("""{"jobId":"job-1","success":true}""")
+      case statusRequest: Request[_, _] if statusRequest.method == Method.GET =>
+        Response.ok("""{"status":"Failed","errors":"The order could not be applied","result":null}""")
+    }
+
+    val result = ZuoraOrders.createOrderAsynchronously(
+      config,
+      accessToken,
+      backend,
+      pause = () => (),
+      maxPollAttempts = 1,
+    )(request)
+
+    result.left.value.reason shouldBe "Zuora order job job-1 failed: The order could not be applied"
+    submissions.get() shouldBe 1
+  }
+
+  it should "not resubmit after an ambiguous job status response" in {
+    val submissions = new AtomicInteger(0)
+    val backend = SttpBackendStub.synchronous.whenRequestMatchesPartial {
+      case submittedRequest: Request[_, _] if submittedRequest.method == Method.POST =>
+        submissions.incrementAndGet()
+        Response.ok("""{"jobId":"job-1","success":true}""")
+      case statusRequest: Request[_, _] if statusRequest.method == Method.GET =>
+        Response.ok("not-json")
+    }
+
+    val result = ZuoraOrders.createOrderAsynchronously(
+      config,
+      accessToken,
+      backend,
+      pause = () => (),
+      maxPollAttempts = 1,
+    )(request)
+
+    result.left.value.reason should startWith("Failed to read Zuora order job job-1")
+    submissions.get() shouldBe 1
+  }
+
   "waitForCompletion" should "fail when the job completes without a completed order" in {
     val result = waitFor(
       AsyncJobReport(
@@ -108,13 +177,22 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
     reads.get() shouldBe 2
   }
 
+  it should "require at least one poll" in {
+    an[IllegalArgumentException] should be thrownBy ZuoraOrders.waitForCompletion(
+      jobId = "job-1",
+      getReport = _ => Right(AsyncJobReport(AsyncJobStatus.Processing, None, None)),
+      pause = () => (),
+      maxPollAttempts = 0,
+    )
+  }
+
   it should "reject an unknown job status" in {
     val result = decode[AsyncJobReport]("""{"status":"Unknown","errors":null,"result":null}""")
 
     result.left.value.getMessage should include("Unknown Zuora async job status: Unknown")
   }
 
-  private def waitFor(report: AsyncJobReport): ZuoraApiResponse[Unit] =
+  private def waitFor(report: AsyncJobReport): Either[ZuoraOrders.OrderFailure, Unit] =
     ZuoraOrders.waitForCompletion(
       jobId = "job-1",
       getReport = _ => Right(report),

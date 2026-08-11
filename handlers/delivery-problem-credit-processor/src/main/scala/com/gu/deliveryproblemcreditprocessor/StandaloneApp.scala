@@ -7,7 +7,7 @@ import zio._
 object StandaloneApp extends App {
 
   def run(args: List[String]): URIO[ZEnv, ExitCode] =
-    processAllProducts
+    processAllProducts()
       .tapError(e => console.putStrLn(e.toString))
       .exitCode
 }
