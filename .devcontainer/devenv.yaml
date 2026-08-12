@@ -1,0 +1,92 @@
+# Devenv project configuration
+# Edit this file to configure your project's devcontainer
+# and then run `devenv generate` to create the devcontainer.json files
+
+# REQUIRED: Change this to your project name
+name: "support-service-lambdas"
+
+# Modules: Built-in functionality
+# - mise: Install and configure mise for dev tools management (https://mise.jdx.dev/)
+# - docker-in-docker: Enable running Docker containers within the devcontainer
+# - scala: Add IDE plugins and jar caching for Scala development
+# - node: Add IDE plugins for Node.js development
+# - github-copilot: Sets up GitHub Copilot for IDE and CLI use (requires the mise module)
+# To disable, comment out or remove items from this list
+modules:
+  - mise
+  # - docker-in-docker  # (disabled by default) - enable if your tests need Docker (e.g. localstack/testcontainers)
+  - scala
+  - node
+  - github-copilot
+
+# Optional: Ports to forward
+# forwardPorts:
+#   - 8080  # same port on host and container
+#   - "8000:9000"  # hostPort:containerPort
+
+# Optional: Mount directories from host to container
+# mounts:
+#   - "source=${localEnv:HOME}/.gu/example,target=/home/vscode/.gu/example,readonly,type=bind,consistency=cached"
+mounts:
+  # Give the container its own node_modules (a named volume) rather than reusing
+  # the host's. The host is macOS but the container is Linux, so packages with
+  # native/platform-specific binaries (e.g. esbuild, and pnpm's .pnpm store) must
+  # be installed for Linux. This also speeds up file I/O vs a bind-mounted
+  # node_modules on macOS. It is populated by `pnpm install` in postCreateCommand.
+  - "source=support-service-lambdas-node-modules-volume,target=${containerWorkspaceFolder}/node_modules,type=volume"
+  # Give the container its own .idea (a named volume) so the in-container IntelliJ
+  # doesn't share IDE config with a host IntelliJ opened on the same repo. The repo
+  # is bind-mounted, so without this both IDEs write to the same .idea and clobber
+  # each other's Project JDK (e.g. "JDK ... (mise) is missing"). This lets you run
+  # both IDEs at once (e.g. editing devcontainer files on the host while launching
+  # the container from it).
+  - "source=support-service-lambdas-idea-volume,target=${containerWorkspaceFolder}/.idea,type=volume"
+
+# Optional: IDE plugins - shared project plugins like language support
+# plugins:
+#   vscode: []
+#   intellij: []
+
+# Optional: Commands to run after container creation
+# Each command has a 'cmd' field and a 'workingDirectory' field
+# e.g.
+postCreateCommand:
+  - cmd: 'mise install'
+    workingDirectory: '.'
+  # pnpm is pinned via package.json's "packageManager" field, but it's provided by
+  # corepack, which mise's shim mode has no version for (interactive shells and the
+  # IntelliJ test runner then fail with "No version is set for shim: pnpm" /
+  # "pnpm: command not found"). Register pnpm as a mise-managed tool at the pinned
+  # version so a proper shim exists. This runs BEFORE the /usr/local/bin symlink
+  # step below so the pnpm shim is also exposed on IntelliJ's non-login PATH. The
+  # version is read from package.json (single source of truth), stripping any
+  # "+sha" suffix.
+  - cmd: "mise use -g pnpm@$(mise exec -- node -p 'require(\"./package.json\").packageManager.split(\"@\")[1].split(\"+\")[0]')"
+    workingDirectory: '.'
+  # The IntelliJ backend (and IDE-launched processes like test runners) use a
+  # non-login, non-interactive shell whose PATH is only the system default
+  # (/usr/local/sbin:/usr/local/bin:...). That does NOT include mise (~/.local/bin)
+  # or the mise shims (~/.local/share/mise/shims), which are only added to
+  # interactive/login shells via ~/.bashrc / ~/.profile. Without this, IntelliJ
+  # reports "Node.js is required" and tests fail with "no node executable found in
+  # path". Symlink mise and its tool shims into /usr/local/bin (which IS on the
+  # default PATH) so node, java, npm etc. are always discoverable. The shims
+  # resolve tool versions from the project's mise config at runtime.
+  - cmd: 'sudo ln -sf "$HOME/.local/bin/mise" /usr/local/bin/mise && sudo ln -sf "$HOME"/.local/share/mise/shims/* /usr/local/bin/'
+    workingDirectory: '.'
+  - cmd: 'mise exec -- node --version'
+    workingDirectory: '.'
+  - cmd: 'mise exec -- corepack enable'
+    workingDirectory: '.'
+  - cmd: 'sudo chown -R "$(whoami):$(whoami)" node_modules'
+    workingDirectory: '.'
+  # The .idea directory is a named volume (see mounts above) so the container gets its
+  # own IntelliJ config. A fresh volume is owned by root, so take ownership as the
+  # container user before the IDE tries to write to it.
+  - cmd: 'sudo chown -R "$(whoami):$(whoami)" .idea'
+    workingDirectory: '.'
+  - cmd: 'mise exec -- pnpm install'
+    workingDirectory: '.'
+# postStartCommand:
+#   - cmd: "echo 'Container started successfully'"
+#     workingDirectory: "."
