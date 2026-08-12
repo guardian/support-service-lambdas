@@ -53,6 +53,16 @@ mounts:
 postCreateCommand:
   - cmd: 'mise install'
     workingDirectory: '.'
+  # pnpm is pinned via package.json's "packageManager" field, but it's provided by
+  # corepack, which mise's shim mode has no version for (interactive shells and the
+  # IntelliJ test runner then fail with "No version is set for shim: pnpm" /
+  # "pnpm: command not found"). Register pnpm as a mise-managed tool at the pinned
+  # version so a proper shim exists. This runs BEFORE the /usr/local/bin symlink
+  # step below so the pnpm shim is also exposed on IntelliJ's non-login PATH. The
+  # version is read from package.json (single source of truth), stripping any
+  # "+sha" suffix.
+  - cmd: "mise use -g pnpm@$(mise exec -- node -p 'require(\"./package.json\").packageManager.split(\"@\")[1].split(\"+\")[0]')"
+    workingDirectory: '.'
   # The IntelliJ backend (and IDE-launched processes like test runners) use a
   # non-login, non-interactive shell whose PATH is only the system default
   # (/usr/local/sbin:/usr/local/bin:...). That does NOT include mise (~/.local/bin)
