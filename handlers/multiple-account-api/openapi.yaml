@@ -569,7 +569,8 @@ components:
           example: '30067890'
         invitedDate:
           type: string
-          example: '2026-06-12'
+          format: date-time
+          example: '2026-06-12T00:00:00.000Z'
         expiryDate:
           type: number
           example: 1781222400000
@@ -614,7 +615,8 @@ components:
           example: '20012345'
         acceptedDate:
           type: string
-          example: '2026-06-12'
+          format: date-time
+          example: '2026-06-12T00:00:00.000Z'
     SecondaryUserWithName:
       type: object
       additionalProperties: false
@@ -639,7 +641,8 @@ components:
           example: '20012345'
         acceptedDate:
           type: string
-          example: '2026-06-12'
+          format: date-time
+          example: '2026-06-12T00:00:00.000Z'
         displayName:
           type: string
           example: jsmith92

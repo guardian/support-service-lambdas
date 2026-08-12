@@ -12,7 +12,6 @@ import type {
 	ZuoraAccount,
 	ZuoraSubscription,
 } from '@modules/zuora/types/objects';
-import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ZuoraCatalog } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import type { InvitationRepository } from './invitationRepository';
@@ -82,7 +81,7 @@ export const createInvitationEndpoint =
 			primaryUserEmail: account.billToContact.workEmail,
 			secondaryUserEmail: body.secondaryUserEmail,
 			secondaryIdentityId,
-			invitedDate: zuoraDateFormat(now),
+			invitedDate: now.toISOString(),
 			expiryDate: now.add(1, 'month').toDate().getTime(),
 		});
 
