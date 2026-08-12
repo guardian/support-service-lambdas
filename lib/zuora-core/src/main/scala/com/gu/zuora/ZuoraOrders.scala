@@ -17,9 +17,10 @@ object ZuoraOrders extends LazyLogging {
   private val RequestReadTimeout = 2.minutes
   private val MaxOrderAttempts = 2
   private val LockingContentionCode = "[40000050]"
+  private val LockingContentionRetryDelay = 1.minute
 
   private[gu] val MaximumOrderDuration: FiniteDuration =
-    MaxOrderDuration * MaxOrderAttempts.toLong
+    MaxOrderDuration * MaxOrderAttempts.toLong + LockingContentionRetryDelay * (MaxOrderAttempts - 1).toLong
 
   private[zuora] sealed trait OrderFailure {
     def reason: String
@@ -77,7 +78,10 @@ object ZuoraOrders extends LazyLogging {
 
       result match {
         case Left(failure: LockingContention) if attemptsRemaining > 1 =>
-          logger.warn(s"Retrying the Zuora order after locking contention: ${failure.reason}")
+          logger.warn(
+            s"Retrying the Zuora order in $LockingContentionRetryDelay after locking contention: ${failure.reason}",
+          )
+          pause(LockingContentionRetryDelay)
           attempt(attemptsRemaining - 1)
         case other => other
       }

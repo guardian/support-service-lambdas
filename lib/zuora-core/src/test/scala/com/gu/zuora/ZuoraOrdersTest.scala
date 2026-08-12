@@ -98,6 +98,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
   }
 
   it should "retry when the job report confirms locking contention" in {
+    val clock = new AtomicLong(0)
     val submissions = new AtomicInteger(0)
     val backend = SttpBackendStub.synchronous.whenRequestMatchesPartial {
       case submittedRequest: Request[_, _] if submittedRequest.method == Method.POST =>
@@ -111,13 +112,15 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
         Response.ok("""{"status":"Completed","errors":null,"result":{"status":"Completed"}}""")
     }
 
-    val result = createOrder(backend, new AtomicLong(0))(request)
+    val result = createOrder(backend, clock)(request)
 
     result shouldBe Right(())
     submissions.get() shouldBe 2
+    clock.get() shouldBe 1.minute.toNanos
   }
 
   it should "stop after two locking contention failures" in {
+    val clock = new AtomicLong(0)
     val submissions = new AtomicInteger(0)
     val backend = SttpBackendStub.synchronous.whenRequestMatchesPartial {
       case submittedRequest: Request[_, _] if submittedRequest.method == Method.POST =>
@@ -129,11 +132,12 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
         )
     }
 
-    val result = createOrder(backend, new AtomicLong(0))(request)
+    val result = createOrder(backend, clock)(request)
 
     result.left.value.reason shouldBe
       "Zuora order job job-2 failed: [40000050]: Operation failed due to a lock competition, please retry later."
     submissions.get() shouldBe 2
+    clock.get() shouldBe 1.minute.toNanos
   }
 
   it should "not retry other job failures" in {

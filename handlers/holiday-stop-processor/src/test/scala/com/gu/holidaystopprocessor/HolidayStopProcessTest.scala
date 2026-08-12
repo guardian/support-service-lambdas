@@ -195,12 +195,12 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
     response.left.value shouldBe ZuoraApiFailure("shouldn't need to apply an update")
   }
 
-  "checkTimeRemaining" should "allow enough time for an order and one retry" in {
-    Processor.checkTimeRemaining("A-S000001", 11.minutes.toMillis.toInt) shouldBe Right(())
+  "checkTimeRemaining" should "allow enough time for an order, a locking retry delay and one retry" in {
+    Processor.checkTimeRemaining("A-S000001", 12.minutes.toMillis.toInt) shouldBe Right(())
   }
 
   it should "stop before submitting an order that cannot be monitored" in {
-    Processor.checkTimeRemaining("A-S000001", 11.minutes.toMillis.toInt - 1) shouldBe Left(
+    Processor.checkTimeRemaining("A-S000001", 12.minutes.toMillis.toInt - 1) shouldBe Left(
       ZuoraApiFailure("Not enough time remaining to submit a Zuora order for A-S000001"),
     )
   }
