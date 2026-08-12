@@ -34,6 +34,7 @@
 		},
 		"setupFilesAfterEnv": [
 			"./jest.setup.js"
-		]
+		],
+		"workerIdleMemoryLimit": "1G"
 	}
 }
