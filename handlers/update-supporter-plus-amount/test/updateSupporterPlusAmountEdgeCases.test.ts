@@ -36,12 +36,14 @@ describe('Supporter Plus Amount Update - term renewal variations', () => {
 				],
 			};
 
+			const today = dayjs('2024-05-01');
 			const applyFromDate = dayjs('2024-07-15'); // Mid-term change
 			const shouldExtendTerm = applyFromDate.isAfter(
 				dayjs(subscriptionData.termEndDate),
 			);
 
 			const orderRequest = buildUpdateAmountRequestBody({
+				today,
 				applyFromDate,
 				subscriptionNumber: subscriptionData.subscriptionNumber,
 				accountNumber: subscriptionData.accountNumber,
@@ -55,6 +57,19 @@ describe('Supporter Plus Amount Update - term renewal variations', () => {
 			expect(orderRequest.subscriptions[0]?.orderActions[0]?.type).toBe(
 				'UpdateProduct',
 			);
+			expect(orderRequest.orderDate).toBe('2024-05-01');
+			expect(
+				orderRequest.subscriptions[0]?.orderActions[0]?.triggerDates,
+			).toEqual([
+				{
+					name: 'ContractEffective',
+					triggerDate: '2024-07-15',
+				},
+				{
+					name: 'CustomerAcceptance',
+					triggerDate: '2024-07-15',
+				},
+			]);
 
 			// Should NOT extend term for mid-term changes
 			expect(shouldExtendTerm).toBe(false);
