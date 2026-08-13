@@ -179,12 +179,7 @@ exports[`The delivery problem credit processor stack matches the snapshot 1`] = 
               },
             },
             {
-              "Action": [
-                "lambda:InvokeFunction",
-                "logs:CreateLogGroup",
-                "logs:CreateLogStream",
-                "logs:PutLogEvents",
-              ],
+              "Action": "lambda:InvokeFunction",
               "Effect": "Allow",
               "Resource": {
                 "Fn::Join": [
@@ -550,12 +545,7 @@ exports[`The delivery problem credit processor stack matches the snapshot 2`] = 
               },
             },
             {
-              "Action": [
-                "lambda:InvokeFunction",
-                "logs:CreateLogGroup",
-                "logs:CreateLogStream",
-                "logs:PutLogEvents",
-              ],
+              "Action": "lambda:InvokeFunction",
               "Effect": "Allow",
               "Resource": {
                 "Fn::Join": [
