@@ -36,13 +36,23 @@ object ZuoraOrders extends LazyLogging {
   )(
       request: CreateOrderRequest,
   ): ZuoraApiResponse[Unit] =
+    createOrderAsynchronously(config, accessToken, backend, MaximumOrderDuration)(request)
+
+  def createOrderAsynchronously(
+      config: ZuoraConfig,
+      accessToken: AccessToken,
+      backend: SttpBackend[Identity, Any],
+      maximumOrderDuration: FiniteDuration,
+  )(
+      request: CreateOrderRequest,
+  ): ZuoraApiResponse[Unit] =
     createOrderAsynchronously(
       config,
       accessToken,
       backend,
       pause = duration => LockSupport.parkNanos(duration.toNanos),
       monotonicNanos = () => System.nanoTime(),
-      maxOrderDuration = MaxOrderDuration,
+      maximumOrderDuration = maximumOrderDuration,
     )(request)
 
   private[zuora] def createOrderAsynchronously(
@@ -51,17 +61,19 @@ object ZuoraOrders extends LazyLogging {
       backend: SttpBackend[Identity, Any],
       pause: FiniteDuration => Unit,
       monotonicNanos: () => Long,
-      maxOrderDuration: FiniteDuration,
+      maximumOrderDuration: FiniteDuration,
   )(
       request: CreateOrderRequest,
   ): ZuoraApiResponse[Unit] = {
-    require(maxOrderDuration.length > 0, "maxOrderDuration must be positive")
+    require(maximumOrderDuration.length > 0, "maximumOrderDuration must be positive")
+
+    val orderDeadlineNanos = monotonicNanos() + maximumOrderDuration.toNanos
 
     @tailrec
     def attempt(attemptsRemaining: Int): Either[OrderFailure, Unit] = {
-      val deadlineNanos = monotonicNanos() + maxOrderDuration.toNanos
+      val attemptDeadlineNanos = math.min(orderDeadlineNanos, monotonicNanos() + MaxOrderDuration.toNanos)
       val result = for {
-        readTimeout <- remainingReadTimeout(deadlineNanos, monotonicNanos)
+        readTimeout <- remainingReadTimeout(attemptDeadlineNanos, monotonicNanos)
           .toRight(PermanentOrderFailure("Timed out before submitting the Zuora order"))
         jobId <- submitOrder(config, accessToken, backend, readTimeout)(request).left
           .map(failure => PermanentOrderFailure(failure.reason))
@@ -70,14 +82,17 @@ object ZuoraOrders extends LazyLogging {
           jobId = jobId,
           getReport = getJobReport(config, accessToken, backend),
           pause = pause,
-          deadlineNanos = deadlineNanos,
+          deadlineNanos = attemptDeadlineNanos,
           monotonicNanos = monotonicNanos,
         )
         _ = logger.info(s"Zuora order job $jobId completed")
       } yield ()
 
       result match {
-        case Left(failure: LockingContention) if attemptsRemaining > 1 =>
+        case Left(failure: LockingContention)
+            if attemptsRemaining > 1 && remainingDuration(orderDeadlineNanos, monotonicNanos).exists(
+              _ > LockingContentionRetryDelay,
+            ) =>
           logger.warn(
             s"Retrying the Zuora order in $LockingContentionRetryDelay after locking contention: ${failure.reason}",
           )
@@ -140,34 +155,36 @@ object ZuoraOrders extends LazyLogging {
   ): Either[OrderFailure, Unit] = {
     val timedOut = Left(PermanentOrderFailure(s"Timed out waiting for Zuora order job $jobId"))
 
+    def pauseForNextPoll(): Boolean =
+      remainingDuration(deadlineNanos, monotonicNanos) match {
+        case None => false
+        case Some(timeRemaining) =>
+          pause(if (timeRemaining < PollInterval) timeRemaining else PollInterval)
+          true
+      }
+
     @tailrec
     def poll(): Either[OrderFailure, Unit] =
       remainingReadTimeout(deadlineNanos, monotonicNanos) match {
         case None => timedOut
         case Some(readTimeout) =>
-          val report = getReport(jobId, readTimeout)
-          if (remainingDuration(deadlineNanos, monotonicNanos).isEmpty) timedOut
-          else
-            report match {
-              case Left(failure) => Left(PermanentOrderFailure(failure.reason))
-              case Right(AsyncJobReport(AsyncJobStatus.Failed, errors, _)) =>
-                val reason = s"Zuora order job $jobId failed: ${errors.getOrElse("no reason returned")}"
-                if (errors.exists(_.contains(LockingContentionCode))) Left(LockingContention(reason))
-                else Left(PermanentOrderFailure(reason))
-              case Right(AsyncJobReport(AsyncJobStatus.Completed, _, Some(result)))
-                  if result.status == OrderStatus.Completed =>
-                Right(())
-              case Right(AsyncJobReport(AsyncJobStatus.Completed, _, result)) =>
-                val orderStatus = result.map(_.status.value).getOrElse("missing")
-                Left(PermanentOrderFailure(s"Zuora order job $jobId completed with order status $orderStatus"))
-              case Right(AsyncJobReport(AsyncJobStatus.Processing, _, _)) =>
-                remainingDuration(deadlineNanos, monotonicNanos) match {
-                  case None => timedOut
-                  case Some(timeRemaining) =>
-                    pause(if (timeRemaining < PollInterval) timeRemaining else PollInterval)
-                    poll()
-                }
-            }
+          getReport(jobId, readTimeout) match {
+            case Left(failure) =>
+              logger.warn(s"Could not read Zuora order job $jobId: ${failure.reason}. Retrying.")
+              if (pauseForNextPoll()) poll() else timedOut
+            case Right(AsyncJobReport(AsyncJobStatus.Failed, errors, _)) =>
+              val reason = s"Zuora order job $jobId failed: ${errors.getOrElse("no reason returned")}"
+              if (errors.exists(_.contains(LockingContentionCode))) Left(LockingContention(reason))
+              else Left(PermanentOrderFailure(reason))
+            case Right(AsyncJobReport(AsyncJobStatus.Completed, _, Some(result)))
+                if result.status == OrderStatus.Completed =>
+              Right(())
+            case Right(AsyncJobReport(AsyncJobStatus.Completed, _, result)) =>
+              val orderStatus = result.map(_.status.value).getOrElse("missing")
+              Left(PermanentOrderFailure(s"Zuora order job $jobId completed with order status $orderStatus"))
+            case Right(AsyncJobReport(AsyncJobStatus.Processing, _, _)) =>
+              if (pauseForNextPoll()) poll() else timedOut
+          }
       }
 
     poll()

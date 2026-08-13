@@ -1,6 +1,7 @@
 package com.gu.zuora
 
 import com.gu.zuora.orders._
+import com.gu.zuora.subscription.ZuoraApiFailure
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import org.scalatest.EitherValues
@@ -156,20 +157,23 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
     submissions.get() shouldBe 1
   }
 
-  it should "not resubmit after an ambiguous job status response" in {
+  it should "retry an ambiguous job status response without resubmitting" in {
     val submissions = new AtomicInteger(0)
+    val jobReads = new AtomicInteger(0)
     val backend = SttpBackendStub.synchronous.whenRequestMatchesPartial {
       case submittedRequest: Request[_, _] if submittedRequest.method == Method.POST =>
         submissions.incrementAndGet()
         Response.ok("""{"jobId":"job-1","success":true}""")
       case statusRequest: Request[_, _] if statusRequest.method == Method.GET =>
-        Response.ok("not-json")
+        if (jobReads.getAndIncrement() == 0) Response.ok("not-json")
+        else Response.ok("""{"status":"Completed","errors":null,"result":{"status":"Completed"}}""")
     }
 
     val result = createOrder(backend, new AtomicLong(0))(request)
 
-    result.left.value.reason should startWith("Failed to read Zuora order job job-1")
+    result shouldBe Right(())
     submissions.get() shouldBe 1
+    jobReads.get() shouldBe 2
   }
 
   it should "include submission time in the order deadline" in {
@@ -186,7 +190,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
         Response.ok("""{"status":"Completed","errors":null,"result":{"status":"Completed"}}""")
     }
 
-    val result = createOrder(backend, clock)(request)
+    val result = createOrder(backend, clock, 5.minutes)(request)
 
     result.left.value.reason shouldBe "Timed out waiting for Zuora order job job-1"
     submissions.get() shouldBe 1
@@ -229,7 +233,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
     result.left.value.reason shouldBe "Zuora order job job-1 failed: no reason returned"
   }
 
-  it should "include time spent reading job status in the deadline" in {
+  it should "accept a completed job status read at the deadline" in {
     val clock = new AtomicLong(0)
     val reads = new AtomicInteger(0)
     val result = ZuoraOrders.waitForCompletion(
@@ -244,8 +248,28 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
       monotonicNanos = () => clock.get(),
     )
 
-    result.left.value.reason shouldBe "Timed out waiting for Zuora order job job-1"
+    result shouldBe Right(())
     reads.get() shouldBe 1
+  }
+
+  it should "retry a failed job status read until the job completes" in {
+    val clock = new AtomicLong(0)
+    val reads = new AtomicInteger(0)
+    val result = ZuoraOrders.waitForCompletion(
+      jobId = "job-1",
+      getReport = (_, _) =>
+        if (reads.getAndIncrement() == 0) Left(ZuoraApiFailure("temporary network error"))
+        else Right(AsyncJobReport(AsyncJobStatus.Completed, None, Some(AsyncOrderResult(OrderStatus.Completed)))),
+      pause = duration => {
+        clock.addAndGet(duration.toNanos)
+        ()
+      },
+      deadlineNanos = 5.seconds.toNanos,
+      monotonicNanos = () => clock.get(),
+    )
+
+    result shouldBe Right(())
+    reads.get() shouldBe 2
   }
 
   it should "stop polling at the deadline and shorten the final pause" in {
@@ -306,7 +330,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
   private def createOrder(
       backend: SttpBackend[Identity, Any],
       clock: AtomicLong,
-      maxOrderDuration: FiniteDuration = 5.minutes,
+      maxOrderDuration: FiniteDuration = ZuoraOrders.MaximumOrderDuration,
   )(request: CreateOrderRequest) =
     ZuoraOrders.createOrderAsynchronously(
       config,
@@ -317,7 +341,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
         ()
       },
       monotonicNanos = () => clock.get(),
-      maxOrderDuration = maxOrderDuration,
+      maximumOrderDuration = maxOrderDuration,
     )(request)
 
   private def waitFor(report: AsyncJobReport): Either[ZuoraOrders.OrderFailure, Unit] =

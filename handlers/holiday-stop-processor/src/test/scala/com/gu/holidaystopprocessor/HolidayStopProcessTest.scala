@@ -17,7 +17,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{EitherValues, OptionValues}
 
-import scala.concurrent.duration.DurationInt
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
 
 class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues with OptionValues {
   MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-07-12")))
@@ -46,6 +46,12 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
   private def updateSubscription(
       subscriptionUpdate: Either[ZuoraApiFailure, Unit],
   ): (Subscription, SubscriptionUpdate) => Either[ZuoraApiFailure, Unit] = { case (_, _) =>
+    subscriptionUpdate
+  }
+
+  private def applyOrder(
+      subscriptionUpdate: Either[ZuoraApiFailure, Unit],
+  ): (Subscription, SubscriptionUpdate, FiniteDuration) => Either[ZuoraApiFailure, Unit] = { case (_, _, _) =>
     subscriptionUpdate
   }
 
@@ -195,14 +201,50 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
     response.left.value shouldBe ZuoraApiFailure("shouldn't need to apply an update")
   }
 
-  "checkTimeRemaining" should "allow enough time for an order, a locking retry delay and one retry" in {
-    Processor.checkTimeRemaining("A-S000001", 12.minutes.toMillis.toInt) shouldBe Right(())
+  "orderDuration" should "cap an order at the full retry budget" in {
+    Processor.orderDuration(15.minutes.toMillis.toInt) shouldBe Some(11.minutes)
   }
 
-  it should "stop before submitting an order that cannot be monitored" in {
-    Processor.checkTimeRemaining("A-S000001", 12.minutes.toMillis.toInt - 1) shouldBe Left(
-      ZuoraApiFailure("Not enough time remaining to submit a Zuora order for A-S000001"),
+  it should "leave time to prepare the order and finish the credit" in {
+    Processor.orderDuration(3.minutes.toMillis.toInt) shouldBe Some(1.minute + 50.seconds)
+  }
+
+  it should "defer an order that cannot be monitored" in {
+    Processor.orderDuration(79.seconds.toMillis.toInt) shouldBe None
+  }
+
+  it should "leave deferred credits for the next run without writing to either system" in {
+    var subscriptionRead = false
+    var salesforceWritten = false
+
+    val responses = Processor.processProduct(
+      creditProduct,
+      (_, _) => Right(List(request)),
+      fulfilmentDatesFetcher,
+      None,
+      ZuoraProductTypes.GuardianWeekly,
+      _ => {
+        subscriptionRead = true
+        Right(subscription)
+      },
+      getAccount(Fixtures.mkAccount().asRight),
+      updateToApply,
+      (_: Subscription, _: SubscriptionUpdate, _: FiniteDuration) => fail("should not submit a deferred order"),
+      ZuoraHolidayCreditAddResult.apply,
+      (_: List[ZuoraHolidayCreditAddResult]) => {
+        salesforceWritten = true
+        Right(())
+      },
+      availableOrderDuration = () => None,
     )
+
+    responses should have size 1
+    responses.head.creditsToApply shouldBe List(request)
+    responses.head.creditResults shouldBe Nil
+    responses.head.resultsToExport shouldBe Nil
+    responses.head.overallFailure shouldBe None
+    subscriptionRead shouldBe false
+    salesforceWritten shouldBe false
   }
 
   "processHolidayStops" should "give correct charges added" in {
@@ -231,7 +273,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
       getAccount(Fixtures.mkAccount().asRight),
       updateToApply,
-      updateSubscription(Right(())),
+      applyOrder(Right(())),
       ZuoraHolidayCreditAddResult.apply,
       exportCredits(Right(())),
     )
@@ -268,7 +310,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
       getAccount(Fixtures.mkAccount().asRight),
       updateToApply,
-      updateSubscription(Right(())),
+      applyOrder(Right(())),
       ZuoraHolidayCreditAddResult.apply,
       exportCredits(Right(())),
     )
@@ -288,7 +330,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
       getAccount(Fixtures.mkAccount().asRight),
       updateToApply,
-      updateSubscription(Right(())),
+      applyOrder(Right(())),
       ZuoraHolidayCreditAddResult.apply,
       exportCredits(Right(())),
     )
@@ -320,7 +362,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
       getAccount(Fixtures.mkAccount().asRight),
       updateToApply,
-      updateSubscription(Right(())),
+      applyOrder(Right(())),
       ZuoraHolidayCreditAddResult.apply,
       exportCredits(Right(())),
     )
@@ -363,7 +405,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
       getAccount(Fixtures.mkAccount().asRight),
       updateToApply,
-      updateSubscription(Right(())),
+      applyOrder(Right(())),
       ZuoraHolidayCreditAddResult.apply,
       exportCredits(Left(SalesforceApiFailure("Export failed"))),
     )

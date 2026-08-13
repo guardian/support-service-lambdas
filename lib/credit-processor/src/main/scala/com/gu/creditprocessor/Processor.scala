@@ -12,7 +12,7 @@ import sttp.client3.{Identity, SttpBackend}
 import java.time.LocalDate
 import scala.collection.parallel.CollectionConverters.ImmutableSeqIsParallelizable
 import scala.collection.parallel.ForkJoinTaskSupport
-import scala.concurrent.duration.DurationInt
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
 
 object Processor {
 
@@ -22,7 +22,8 @@ object Processor {
 
   private val logger = LoggerFactory.getLogger(getClass)
   private val OrderCompletionBuffer = 1.minute
-  private val MinimumTimeForOrder = ZuoraOrders.MaximumOrderDuration + OrderCompletionBuffer
+  private val OrderSetupBuffer = 10.seconds
+  private val MinimumOrderDuration = 10.seconds
 
   def processLiveProduct[Request <: CreditRequest, Result <: ZuoraCreditAddResult](
       config: HolidayStopProcessorZuoraConfig,
@@ -54,12 +55,11 @@ object Processor {
     def applyOrder(
         subscription: Subscription,
         update: SubscriptionUpdate,
-    ): ZuoraApiResponse[Unit] =
-      for {
-        _ <- checkTimeRemaining(subscription.subscriptionNumber, getRemainingTimeInMillis())
-        order = CreateOrderRequest.forCredit(subscription, update, MutableCalendar.today)
-        _ <- ZuoraOrders.createOrderAsynchronously(config, zuoraAccessToken, sttpBackend)(order)
-      } yield ()
+        maximumOrderDuration: FiniteDuration,
+    ): ZuoraApiResponse[Unit] = {
+      val order = CreateOrderRequest.forCredit(subscription, update, MutableCalendar.today)
+      ZuoraOrders.createOrderAsynchronously(config, zuoraAccessToken, sttpBackend, maximumOrderDuration)(order)
+    }
 
     processProduct(
       creditProduct: CreditProductForSubscription,
@@ -75,10 +75,11 @@ object Processor {
           ZuoraAccount,
           Request,
       ) => ZuoraApiResponse[SubscriptionUpdate],
-      applyOrder: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
+      applyOrder: (Subscription, SubscriptionUpdate, FiniteDuration) => ZuoraApiResponse[Unit],
       resultOfZuoraCreditAdd: (Request, RatePlanCharge) => Result,
       writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_],
       getNextInvoiceDate: String => ZuoraApiResponse[LocalDate],
+      availableOrderDuration = () => orderDuration(getRemainingTimeInMillis()),
     )
   }
 
@@ -96,10 +97,11 @@ object Processor {
           ZuoraAccount,
           Request,
       ) => ZuoraApiResponse[SubscriptionUpdate],
-      applyOrder: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
+      applyOrder: (Subscription, SubscriptionUpdate, FiniteDuration) => ZuoraApiResponse[Unit],
       resultOfZuoraCreditAdd: (Request, RatePlanCharge) => Result,
       writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_],
       getNextInvoiceDate: String => ZuoraApiResponse[LocalDate] = null, // FIXME,
+      availableOrderDuration: () => Option[FiniteDuration] = () => Some(ZuoraOrders.MaximumOrderDuration),
   ): List[ProcessResult[Result]] = {
 
     val creditRequestsFromSalesforce = for {
@@ -136,32 +138,52 @@ object Processor {
           )
         }
 
-        def updateInZuoraAndSf(creditRequests: List[Request]) = {
-          creditRequests.map { creditRequest =>
-            val zuoraApiResponse = addCreditToSubscription(
-              creditProduct,
-              getSubscription,
-              getAccount,
-              updateToApply,
-              applyOrder,
-              resultOfZuoraCreditAdd,
-              getNextInvoiceDate,
-            )(creditRequest)
+        def updateInZuoraAndSf(creditRequests: List[Request]): List[ProcessResult[Result]] = {
+          @scala.annotation.tailrec
+          def applyCredits(
+              remainingCreditRequests: List[Request],
+              processResults: List[ProcessResult[Result]],
+          ): List[ProcessResult[Result]] =
+            remainingCreditRequests match {
+              case Nil => processResults.reverse
+              case creditRequest :: remainingRequests =>
+                availableOrderDuration() match {
+                  case None =>
+                    logger.info(
+                      s"Deferring ${remainingCreditRequests.size} credit(s) for ${creditRequest.subscriptionName} until the next run because there is not enough Lambda time remaining",
+                    )
+                    (ProcessResult[Result](remainingCreditRequests, Nil, Nil, None) :: processResults).reverse
+                  case Some(maximumOrderDuration) =>
+                    val applyOrderWithinTimeRemaining = (subscription: Subscription, update: SubscriptionUpdate) =>
+                      applyOrder(subscription, update, maximumOrderDuration)
+                    val zuoraApiResponse = addCreditToSubscription(
+                      creditProduct,
+                      getSubscription,
+                      getAccount,
+                      updateToApply,
+                      applyOrderWithinTimeRemaining,
+                      resultOfZuoraCreditAdd,
+                      getNextInvoiceDate,
+                    )(creditRequest)
 
-            val sfResult =
-              zuoraApiResponse
-                .map(ar => updateSaleforce(creditRequests, zuoraApiResponse, ar))
-                .leftMap(failure =>
-                  ProcessResult(
-                    creditRequests,
-                    List(zuoraApiResponse),
-                    List.empty,
-                    Some(OverallFailure(failure.reason)),
-                  ),
-                )
+                    val processResult =
+                      zuoraApiResponse
+                        .map(ar => updateSaleforce(creditRequests, zuoraApiResponse, ar))
+                        .leftMap(failure =>
+                          ProcessResult(
+                            creditRequests,
+                            List(zuoraApiResponse),
+                            List.empty,
+                            Some(OverallFailure(failure.reason)),
+                          ),
+                        )
+                        .merge
 
-            sfResult
-          }
+                    applyCredits(remainingRequests, processResult :: processResults)
+                }
+            }
+
+          applyCredits(creditRequests, Nil)
         }
 
         logger.info(s"Processing ${creditRequests.length} credits in Zuora ...")
@@ -187,19 +209,21 @@ object Processor {
             .map(requests => updateInZuoraAndSf(requests))
             .toList
             .flatten
-            .map(_.merge)
 
         forkJoinPool.shutdown()
         processResults
     }
   }
 
-  private[gu] def checkTimeRemaining(
-      subscriptionNumber: String,
+  private[gu] def orderDuration(
       remainingTimeInMillis: Int,
-  ): ZuoraApiResponse[Unit] =
-    if (remainingTimeInMillis >= MinimumTimeForOrder.toMillis) Right(())
-    else Left(ZuoraApiFailure(s"Not enough time remaining to submit a Zuora order for $subscriptionNumber"))
+  ): Option[FiniteDuration] = {
+    val timeAvailableForOrder = remainingTimeInMillis.millis - OrderCompletionBuffer - OrderSetupBuffer
+    Option.when(timeAvailableForOrder >= MinimumOrderDuration) {
+      if (timeAvailableForOrder < ZuoraOrders.MaximumOrderDuration) timeAvailableForOrder
+      else ZuoraOrders.MaximumOrderDuration
+    }
+  }
 
   // FIXME: Temporary test in production to validate migration to https://github.com/guardian/invoicing-api/pull/20
   import java.util.concurrent.Executors
