@@ -24,7 +24,7 @@ jobs:
           cache: 'sbt'
 
       - name: Setup SBT
-        uses: sbt/setup-sbt@v1.4.0
+        uses: sbt/setup-sbt@v1.5.4
 
       - name: Run tests
         run: sbt test

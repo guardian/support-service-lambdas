@@ -11,8 +11,9 @@ describe('listSecondaryUsersEndpoint', () => {
 				subscriptionName: 'A-S00974337',
 				secondaryIdentityId: 'secondary-id',
 				primaryIdentityId: 'primary-id',
-				acceptedDate: '2026-06-12',
+				acceptedDate: '2026-06-12T00:00:00.000Z',
 				expiryDate: 1781218800,
+				invitationCode: 'RpwR62kMnAxe',
 			},
 		];
 		const mockListNonCancelled = jest
