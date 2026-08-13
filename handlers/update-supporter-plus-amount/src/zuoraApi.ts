@@ -15,7 +15,6 @@ export const doUpdate = async ({
 	zuoraClient: ZuoraClient;
 	subscriptionNumber: string;
 	accountNumber: string;
-	today: Dayjs;
 	applyFromDate: Dayjs;
 	ratePlanId: string;
 	chargeNumber: string;
@@ -57,7 +56,6 @@ const updateAmount = (
 });
 
 export const buildUpdateAmountRequestBody = ({
-	today,
 	applyFromDate,
 	subscriptionNumber,
 	accountNumber,
@@ -65,7 +63,6 @@ export const buildUpdateAmountRequestBody = ({
 	chargeNumber,
 	contributionAmount,
 }: {
-	today: Dayjs;
 	applyFromDate: Dayjs;
 	subscriptionNumber: string;
 	accountNumber: string;
@@ -73,7 +70,7 @@ export const buildUpdateAmountRequestBody = ({
 	chargeNumber: string;
 	contributionAmount: number;
 }): OrderRequest => ({
-	orderDate: zuoraDateFormat(today),
+	orderDate: zuoraDateFormat(applyFromDate),
 	existingAccountNumber: accountNumber,
 	description: 'Update supporter plus contribution amount',
 	subscriptions: [

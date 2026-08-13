@@ -215,7 +215,6 @@ export const updateSupporterPlusAmount = async (
 
 	await doUpdate({
 		zuoraClient,
-		today: now,
 		applyFromDate,
 		subscriptionNumber,
 		accountNumber: subscription.accountNumber,
