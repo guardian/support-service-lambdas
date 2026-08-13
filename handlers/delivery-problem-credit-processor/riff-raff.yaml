@@ -6,11 +6,13 @@ allowedStages:
   - CODE
   - PROD
 deployments:
-  cfn:
+  delivery-problem-credit-processor-cloudformation:
     type: cloud-formation
     app: delivery-problem-credit-processor
     parameters:
-      templatePath: cfn.yaml
+      templateStagePaths:
+        CODE: delivery-problem-credit-processor-CODE.template.json
+        PROD: delivery-problem-credit-processor-PROD.template.json
   delivery-problem-credit-processor:
     type: aws-lambda
     parameters:
@@ -19,4 +21,4 @@ deployments:
       prefixStack: false
       functionNames:
         - delivery-problem-credit-processor-
-    dependencies: [cfn]
+    dependencies: [delivery-problem-credit-processor-cloudformation]
