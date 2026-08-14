@@ -14,6 +14,10 @@ import {
 } from '@modules/routing/apiGatewayResponses';
 import type { Stage } from '@modules/stage';
 import { getDeleteSupporterRatePlanTransaction } from '@modules/supporter-product-data/supporterProductData';
+import { getAccount } from '@modules/zuora/account';
+import { getSubscription } from '@modules/zuora/subscription';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { sendLeaveSubscriptionEmail } from './emails/leaveSubcriptionEmail';
 
 export const deleteSecondaryUserPathSchema = z.object({
 	subscriptionName: z.string(),
@@ -28,6 +32,7 @@ export const deleteSecondaryUserEndpoint = async (
 	stage: Stage,
 	secondaryUserRepository: SecondaryUserRepository,
 	dynamoClient: DynamoDBClient,
+	zuoraClient: ZuoraClient,
 	subscriptionName: string,
 	secondaryIdentityId: string,
 	loggedInUserIdentityId: string,
@@ -83,6 +88,24 @@ export const deleteSecondaryUserEndpoint = async (
 				],
 			}),
 		);
+		const zuoraSubscription = await getSubscription(
+			zuoraClient,
+			subscriptionName,
+		);
+		const account = await getAccount(
+			zuoraClient,
+			zuoraSubscription.accountNumber,
+		);
+
+		if (cancelledBy === 'secondary') {
+			await sendLeaveSubscriptionEmail(
+				stage,
+				account.billToContact.firstName,
+				account.billToContact.workEmail,
+				secondaryUser.secondaryEmail,
+				secondaryIdentityId,
+			);
+		}
 
 		return {
 			statusCode: 204,
