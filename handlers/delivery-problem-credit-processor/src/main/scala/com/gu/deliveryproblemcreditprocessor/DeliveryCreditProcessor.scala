@@ -63,13 +63,17 @@ object DeliveryCreditProcessor extends Logging {
         case e: Throwable => e
       }
 
-  val processAllProducts: RIO[Clock, List[DeliveryCreditResult]] = {
+  def processAllProducts(
+      getRemainingTimeInMillis: () => Int,
+  ): RIO[Clock, List[DeliveryCreditResult]] = {
     val productTypes = List(NewspaperHomeDelivery, GuardianWeekly, NewspaperNationalDelivery, TierThree)
     for {
       sfAuthConfig <- sfConfig
       zConfig <- zuoraConfig
       zAccessToken <- zuoraAccessToken(zConfig)
-      processResults <- Task.foreach(productTypes)(processProduct(sfAuthConfig, zConfig, zAccessToken))
+      processResults <- Task.foreach(productTypes)(
+        processProduct(sfAuthConfig, zConfig, zAccessToken, getRemainingTimeInMillis),
+      )
       creditResults <- Task.foreach(processResults)(gatherCreditResults)
     } yield creditResults.flatten
   }
@@ -93,6 +97,7 @@ object DeliveryCreditProcessor extends Logging {
       sfAuthConfig: SFAuthConfig,
       zuoraConfig: HolidayStopProcessorZuoraConfig,
       zuoraAccessToken: AccessToken,
+      getRemainingTimeInMillis: () => Int,
   )(productType: ZuoraProductType): Task[List[ProcessResult[DeliveryCreditResult]]] =
     for {
       processResult <- Task.effect(
@@ -110,6 +115,7 @@ object DeliveryCreditProcessor extends Logging {
             resultOfZuoraCreditAdd,
             writeCreditResultsToSalesforce(sfAuthConfig),
             Zuora.accountGetResponse(zuoraConfig, zuoraAccessToken, zuoraSttpBackend),
+            getRemainingTimeInMillis = getRemainingTimeInMillis,
           ),
       )
     } yield processResult

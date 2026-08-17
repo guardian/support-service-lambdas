@@ -16,6 +16,8 @@ import org.scalatest.OptionValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
+import scala.concurrent.duration.FiniteDuration
+
 /** Make sure short-circuiting does not happen.
   */
 class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionValues {
@@ -44,7 +46,8 @@ class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionVa
 
   val subscription: Subscription = Fixtures.mkSubscriptionWithHolidayStops()
 
-  val updateSubscription: (Subscription, SubscriptionUpdate) => Either[ZuoraApiFailure, Unit] = (_, _) => Right(())
+  val updateSubscription: (Subscription, SubscriptionUpdate, FiniteDuration) => Either[ZuoraApiFailure, Unit] =
+    (_, _, _) => Right(())
 
   private def getAccount(
       getAccountResult: Either[ZuoraApiFailure, ZuoraAccount],
