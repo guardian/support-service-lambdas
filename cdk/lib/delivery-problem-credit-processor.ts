@@ -4,10 +4,10 @@ import {
 	ComparisonOperator,
 	TreatMissingData,
 } from 'aws-cdk-lib/aws-cloudwatch';
-import { Schedule } from 'aws-cdk-lib/aws-events';
+import { RuleTargetInput, Schedule } from 'aws-cdk-lib/aws-events';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
-import type { IConstruct } from 'constructs/lib/construct';
+import type { IConstruct } from 'constructs';
 import { SrLambdaErrorAlarm } from './cdk/SrLambdaErrorAlarm';
 import { SrScheduledLambda } from './cdk/SrScheduledLambda';
 import type { SrStageNames } from './cdk/SrStack';
@@ -25,6 +25,7 @@ export class DeliveryProblemCreditProcessor extends SrStack {
 			? [
 					{
 						schedule: Schedule.cron({ minute: '0/20' }),
+						input: RuleTargetInput.fromText('null'),
 						description:
 							'Trigger processing of delivery-problem credits every 20 mins',
 					},
