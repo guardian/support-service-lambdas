@@ -30,7 +30,7 @@ object Handler extends Lambda[None.type, List[DeliveryCreditResult]] {
     runtime.unsafeRun {
       JavaSystem.setOut(printStream)
       JavaSystem.setErr(printStream)
-      val program = DeliveryCreditProcessor.processAllProducts
+      val program = DeliveryCreditProcessor.processAllProducts(context.getRemainingTimeInMillis _)
       program.either
     }
 }

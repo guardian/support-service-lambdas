@@ -1,4 +1,4 @@
 # Credit processor
 
-This library reads subscriptions from Salesforce, adds credit amendments to them in Zuora, 
-and then writes the results back to Salesforce.
+This library reads subscriptions from Salesforce, adds credits to them with asynchronous Zuora Orders, and then
+writes the results back to Salesforce.
