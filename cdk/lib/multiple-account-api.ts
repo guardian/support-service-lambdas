@@ -49,7 +49,7 @@ export class MultipleAccountApi extends SrStack {
 		lambda.addPolicies(new AllowSupporterProductDataQueryPolicy(this));
 		lambda.addPolicies(new AllowSupporterProductDataDeletePolicy(this));
 		lambda.addPolicies(
-			AllowSqsSendPolicy.create(this, 'supporter-product-data'),
+			AllowSqsSendPolicy.create(this, 'supporter-product-data', 'braze-emails'),
 		);
 
 		const invitationTable = new Table(this, 'InvitationTable', {
@@ -76,6 +76,7 @@ export class MultipleAccountApi extends SrStack {
 			billingMode: BillingMode.PAY_PER_REQUEST,
 			partitionKey: { name: 'subscriptionName', type: AttributeType.STRING },
 			sortKey: { name: 'secondaryIdentityId', type: AttributeType.STRING },
+			timeToLiveAttribute: 'expiryDate',
 			encryption: TableEncryption.AWS_MANAGED,
 			stream: StreamViewType.NEW_AND_OLD_IMAGES,
 			removalPolicy:

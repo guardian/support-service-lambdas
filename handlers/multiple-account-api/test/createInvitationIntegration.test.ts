@@ -32,6 +32,7 @@ test('createInvitationEndpoint saves invitation data and returns invitation code
 	const subscriptionName = 'A-S00974337';
 
 	const endpoint = createInvitationEndpoint(
+		stage,
 		invitationRepository,
 		identityClient,
 		zuoraCatalog,

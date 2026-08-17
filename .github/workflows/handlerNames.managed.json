@@ -25,6 +25,7 @@
     "salesforce-disaster-recovery",
     "salesforce-disaster-recovery-health-check",
     "salesforce-event-bus",
+    "scrub-non-tokenised-payment-methods",
     "stripe-disputes",
     "supporter-product-data-lambdas",
     "ticket-tailor-webhook",

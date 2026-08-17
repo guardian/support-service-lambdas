@@ -402,6 +402,9 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.21
+      email:
+        specifier: workspace:*
+        version: link:../../modules/email
       guardian-subscription:
         specifier: workspace:*
         version: link:../../modules/guardian-subscription
@@ -724,6 +727,18 @@ importers:
         version: 8.10.161
 
   handlers/salesforce-event-bus: {}
+
+  handlers/scrub-non-tokenised-payment-methods:
+    dependencies:
+      aws:
+        specifier: workspace:*
+        version: link:../../modules/aws
+      bigquery:
+        specifier: workspace:*
+        version: link:../../modules/bigquery
+      zuora:
+        specifier: workspace:*
+        version: link:../../modules/zuora
 
   handlers/stripe-disputes:
     dependencies:

@@ -38,14 +38,18 @@ export const mmaPrimarySummaryEndpoint = async (
 		const nonCancelledInvitations =
 			await invitationRepository.listNonCancelled(subscriptionName);
 
-		const secondaryUsers = await getSecondaryUserListWithNames(
-			subscriptionName,
-			secondaryUserRepository,
-			identityClient,
-		);
+		const nonCancelledSecondaryUsers =
+			await getNonCancelledSecondaryUserListWithNames(
+				subscriptionName,
+				secondaryUserRepository,
+				identityClient,
+			);
 
 		return ok(
-			{ invitations: nonCancelledInvitations, secondaryUsers },
+			{
+				invitations: nonCancelledInvitations,
+				secondaryUsers: nonCancelledSecondaryUsers,
+			},
 			mmaPrimarySummaryResponseSchema,
 		);
 	} catch (error) {
@@ -53,12 +57,15 @@ export const mmaPrimarySummaryEndpoint = async (
 	}
 };
 
-const getSecondaryUserListWithNames = async (
+const getNonCancelledSecondaryUserListWithNames = async (
 	subscriptionName: string,
 	secondaryUserRepository: SecondaryUserRepository,
 	identityClient: IdentityClient,
 ) => {
-	const secondaryUsers = await secondaryUserRepository.list(subscriptionName);
+	const secondaryUsers =
+		await secondaryUserRepository.listNonCancelledBySubscription(
+			subscriptionName,
+		);
 
 	return Promise.all(
 		secondaryUsers.map(async (secondaryUser) =>

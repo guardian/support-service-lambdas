@@ -43,14 +43,14 @@ jobs:
           cache: 'sbt'
 
       - name: Setup SBT
-        uses: sbt/setup-sbt@v1.4.0
+        uses: sbt/setup-sbt@v1.5.4
 
       - name: Run tests and build subproject JAR
         run: sbt "project ${{ matrix.subproject }}" test assembly
       - run: npm install --global corepack@0.31.0
       - run: corepack enable
         shell: bash
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
@@ -115,7 +115,7 @@ jobs:
           cache: 'sbt'
 
       - name: Setup SBT
-        uses: sbt/setup-sbt@v1.4.0
+        uses: sbt/setup-sbt@v1.5.4
 
       - name: run tests and Build jar
         run: sbt "project ${{ matrix.subproject }}" test assembly
@@ -154,7 +154,7 @@ jobs:
           cache: 'sbt'
 
       - name: Setup SBT
-        uses: sbt/setup-sbt@v1.4.0
+        uses: sbt/setup-sbt@v1.5.4
 
       - name: Run tests and build subproject JAR
         run: sbt "project zuora-callout-apis" test assembly
@@ -162,7 +162,7 @@ jobs:
       - run: npm install --global corepack@0.31.0
       - run: corepack enable
         shell: bash
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'

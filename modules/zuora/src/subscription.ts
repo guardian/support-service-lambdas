@@ -1,15 +1,10 @@
 import type { Dayjs } from 'dayjs';
-import type { z } from 'zod';
-import type {
-	CancelSubscriptionResponse,
-	ZuoraSubscription,
-	ZuoraSubscriptionsFromAccountResponse,
-} from './types';
+import { z } from 'zod';
+import type { CancelSubscriptionResponse, ZuoraSubscription } from './types';
 import {
 	cancelSubscriptionResponseSchema,
 	voidSchema,
 	zuoraSubscriptionSchema,
-	zuoraSubscriptionsFromAccountSchema,
 } from './types';
 import { zuoraDateFormat } from './utils';
 import type { ZuoraClient } from './zuoraClient';
@@ -71,17 +66,60 @@ export async function getSubscription<T extends z.ZodType>(
 	return zuoraClient.get(path, schema);
 }
 
-export const getSubscriptionsByAccountNumber = async (
+export async function getSubscriptionsByAccountNumber(
 	zuoraClient: ZuoraClient,
 	accountNumber: string,
-): Promise<ZuoraSubscription[]> => {
-	const path = `v1/subscriptions/accounts/${accountNumber}`;
-	const response: ZuoraSubscriptionsFromAccountResponse = await zuoraClient.get(
-		path,
-		zuoraSubscriptionsFromAccountSchema,
-	);
-	return response.subscriptions ?? [];
-};
+): Promise<ZuoraSubscription[]>;
+export async function getSubscriptionsByAccountNumber<T extends z.ZodType>(
+	zuoraClient: ZuoraClient,
+	accountNumber: string,
+	schema: T,
+): Promise<Array<z.infer<T>>>;
+export async function getSubscriptionsByAccountNumber<T extends z.ZodType>(
+	zuoraClient: ZuoraClient,
+	accountNumber: string,
+	schema?: T,
+): Promise<ZuoraSubscription[] | Array<z.infer<T>>> {
+	return schema === undefined
+		? await allPagesOfSubscriptions(
+				zuoraClient,
+				accountNumber,
+				zuoraSubscriptionSchema,
+			)
+		: await allPagesOfSubscriptions(zuoraClient, accountNumber, schema);
+}
+
+/**
+ * Reads every page of an account's subscriptions.
+ *
+ * Zuora pages this endpoint at 20 and hands back a nextPage when there are more,
+ * so a single call can quietly return a partial list. A caller reasoning about
+ * what an account does NOT have needs all of it, otherwise a truncated response
+ * reads as an absence.
+ */
+async function allPagesOfSubscriptions<T extends z.ZodType>(
+	zuoraClient: ZuoraClient,
+	accountNumber: string,
+	schema: T,
+): Promise<Array<z.infer<T>>> {
+	const pageSchema = z.object({
+		subscriptions: z.array(schema).optional(),
+		nextPage: z.string().optional(),
+	});
+
+	type Page = { subscriptions?: Array<z.infer<T>>; nextPage?: string };
+
+	const subscriptions: Array<z.infer<T>> = [];
+	let path: string | undefined = `v1/subscriptions/accounts/${accountNumber}`;
+
+	while (path !== undefined) {
+		const page: Page = await zuoraClient.get(path, pageSchema);
+		subscriptions.push(...(page.subscriptions ?? []));
+		path = page.nextPage?.replace(/^\//, '');
+	}
+
+	return subscriptions;
+}
 
 export const updateSubscription = async (
 	zuoraClient: ZuoraClient,

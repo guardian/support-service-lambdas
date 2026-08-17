@@ -80,12 +80,15 @@ export class ZuoraBearerTokenProvider implements BearerTokenProvider {
 		const json = await response.json();
 
 		const parseResult = zuoraBearerTokenSchema.safeParse(json);
-		logger.log('Zuora bearer token response:', json);
 		if (!parseResult.success) {
 			throw new Error(
 				`Failed to fetch Zuora bearer token: ${JSON.stringify(parseResult.error.issues)}`,
 			);
 		}
+		// Deliberately says nothing about the response body: it holds the token.
+		logger.log(
+			`fetched zuora bearer token, valid for ${parseResult.data.expires_in} seconds`,
+		);
 		return {
 			bearerToken: parseResult.data.access_token,
 			tokenExpiryTime: Date.now() + parseResult.data.expires_in * 1000,

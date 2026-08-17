@@ -1,7 +1,7 @@
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import type { z } from 'zod';
 import { ValidationError } from '@modules/errors';
-import { prettyPrint } from '@modules/prettyPrint';
+import { logger } from '@modules/logger/logger';
 import { stringify } from '@modules/stringify';
 
 function jsonResponse(message: string, statusCode: number) {
@@ -64,13 +64,9 @@ export function created<T extends Record<string, unknown>>(
 
 export function buildErrorResponse(error: unknown): APIGatewayProxyResult {
 	if (error instanceof ValidationError) {
-		console.log(
-			`Handler returned 400 response due to validation error: ${prettyPrint(error)}`,
-		);
+		logger.log(`Handler returned 400 response due to validation error`, error);
 		return badRequest(error.message);
 	}
-	console.log(
-		`Handler returned 500 response due to unexpected error: ${prettyPrint(error)}`,
-	);
+	logger.log(`Handler returned 500 response due to unexpected error`, error);
 	return internalServerError();
 }

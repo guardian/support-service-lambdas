@@ -108,6 +108,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 				primaryIdentityId: 'primary-id-1',
 				acceptedDate: '2026-01-01',
 				expiryDate: dayjs('2026-01-01').add(2, 'weeks').unix(),
+				invitationCode: 'invitation-code-1',
 			},
 			{
 				subscriptionName: 'sub-1',
@@ -115,6 +116,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 				primaryIdentityId: 'primary-id-1',
 				acceptedDate: '2026-01-02',
 				expiryDate: dayjs('2026-01-02').add(2, 'weeks').unix(),
+				invitationCode: 'invitation-code-2',
 			},
 		];
 		const getSecondaryUsers = jest.fn(() => Promise.resolve(secondaryUsers));

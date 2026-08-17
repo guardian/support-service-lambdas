@@ -39,15 +39,16 @@ describe('secondaryUserMeEndpoint', () => {
 		subscriptionName,
 		secondaryIdentityId: 'secondary-id',
 		primaryIdentityId: 'primary-id',
-		acceptedDate: '2026-06-12',
+		acceptedDate: '2026-06-12T00:00:00.000Z',
 		expiryDate: 1781218800,
+		invitationCode: 'RpwR62kMnAxe',
 	});
 
 	const makeRepository = (
 		users: SecondaryUserRecord[],
 	): SecondaryUserRepository =>
 		({
-			get: jest
+			listNonCancelledByIdentity: jest
 				.fn<Promise<SecondaryUserRecord[]>, [string]>()
 				.mockResolvedValue(users),
 		}) as unknown as SecondaryUserRepository;
@@ -76,13 +77,15 @@ describe('secondaryUserMeEndpoint', () => {
 
 		expect(result.statusCode).toBe(200);
 		expect(JSON.parse(result.body)).toEqual({
-			primaryUsers: [
+			subscriptions: [
 				{
+					subscriptionName: 'A-S00000001',
 					firstName: 'Ada',
 					lastName: 'Lovelace',
 					workEmail: 'ada@example.com',
 				},
 				{
+					subscriptionName: 'A-S00000002',
 					firstName: 'Alan',
 					lastName: 'Turing',
 					workEmail: 'alan@example.com',
@@ -109,9 +112,40 @@ describe('secondaryUserMeEndpoint', () => {
 		);
 
 		expect(result.statusCode).toBe(200);
-		expect(JSON.parse(result.body)).toEqual({ primaryUsers: [] });
+		expect(JSON.parse(result.body)).toEqual({ subscriptions: [] });
 		expect(mockGetSubscription).not.toHaveBeenCalled();
 		expect(mockGetAccount).not.toHaveBeenCalled();
+	});
+
+	it('only requests details for the non-cancelled records returned by the repository', async () => {
+		const activeUser = makeSecondaryUser('A-S00000001');
+		mockGetSubscription.mockResolvedValueOnce(makeSubscription('A00000001'));
+		mockGetAccount.mockResolvedValueOnce(
+			makeAccount('Ada', 'Lovelace', 'ada@example.com'),
+		);
+
+		const result = await secondaryUserMeEndpoint(
+			'secondary-id',
+			makeRepository([activeUser]),
+			zuoraClient,
+		);
+
+		expect(result.statusCode).toBe(200);
+		expect(JSON.parse(result.body)).toEqual({
+			subscriptions: [
+				{
+					subscriptionName: 'A-S00000001',
+					firstName: 'Ada',
+					lastName: 'Lovelace',
+					workEmail: 'ada@example.com',
+				},
+			],
+		});
+		expect(mockGetSubscription).toHaveBeenCalledTimes(1);
+		expect(mockGetSubscription).toHaveBeenCalledWith(
+			zuoraClient,
+			'A-S00000001',
+		);
 	});
 
 	it('propagates errors thrown while fetching from Zuora', async () => {

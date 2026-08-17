@@ -19,6 +19,7 @@ const testRecord = {
 	primaryIdentityId: '12345678',
 	acceptedDate: new Date().toISOString(),
 	expiryDate: dayjs().add(10, 'seconds').toDate().getTime(),
+	invitationCode: 'it-test-invitation-code',
 };
 
 const repo = new SecondaryUserRepository(
@@ -36,7 +37,7 @@ afterEach(async () => {
 test('SecondaryUserRepository saves and retrieves a record from DynamoDB', async () => {
 	await repo.save(testRecord);
 
-	const saved = await repo.get(testRecord.secondaryIdentityId);
+	const saved = await repo.listByIdentity(testRecord.secondaryIdentityId);
 
 	expect(saved).toEqual([testRecord]);
 });
@@ -51,7 +52,7 @@ test('SecondaryUserRepository updateTTL updates the expiryDate without overwriti
 		newExpiryDate,
 	);
 
-	const saved = await repo.get(testRecord.secondaryIdentityId);
+	const saved = await repo.listByIdentity(testRecord.secondaryIdentityId);
 
 	expect(saved).toEqual([{ ...testRecord, expiryDate: newExpiryDate }]);
 });

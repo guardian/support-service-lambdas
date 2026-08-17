@@ -104,7 +104,7 @@ Example path: /subscriptions/A-S00974337/secondary-users
       "subscriptionName": "A-S00974337",
       "secondaryIdentityId": "30067890",
       "primaryIdentityId": "20012345",
-      "acceptedDate": "2026-06-12"
+      "acceptedDate": "2026-06-12T00:00:00.000Z"
     }
   ]
 }
@@ -116,13 +116,25 @@ Example path: /subscriptions/A-S00974337/secondary-users
 
 DELETE /subscriptions/{subscriptionName}/secondary-users/{secondaryIdentityId}
 
-Headers: 'x-identity-id' - the identity id of the primary user
+Headers: 'x-identity-id' - the identity id of the user removing the secondary
+user. This is required and must match either the `primaryIdentityId` (the
+primary removing the secondary user) or the `secondaryIdentityId` (the secondary
+user removing themselves) of the secondary user record.
 
 Example path: /subscriptions/A-S00974337/secondary-users/30067890
+
+The secondary user record is soft deleted: the record is retained for two weeks
+(via the DynamoDB TTL `expiryDate`) with a `cancelledBy` value derived from the
+identity id - `primary` when it matches the primary user, `secondary` when it
+matches the secondary user. The associated supporter product data record (the
+benefit) is deleted immediately.
 
 #### Response:
 
 `204 No Content`
+
+If the `x-identity-id` header is missing, or does not match either user on the
+secondary user record, a `400 Bad Request` is returned.
 
 ### Delete (reject/cancel) an invitation
 
@@ -147,5 +159,3 @@ secondary user.
 
 If the `x-identity-id` header is missing, or does not match either user on the
 invitation, a `400 Bad Request` is returned.
-
-
