@@ -694,6 +694,7 @@ exports[`The delivery problem credit processor stack matches the snapshot 2`] = 
               ],
             },
             "Id": "Target0",
+            "Input": ""null"",
           },
         ],
       },
