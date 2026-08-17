@@ -33,7 +33,6 @@ export class DeliveryProblemCreditProcessor extends SrStack {
 			: [];
 
 		const lambda = new SrScheduledLambda(this, 'Lambda', {
-			// DeliveryProblemCreditProcessorRole IAM Role for lambda.amazonaws.com?
 			rules: scheduleRules,
 			monitoring: {
 				noMonitoring: true, // Custom alarm
