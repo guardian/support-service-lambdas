@@ -1,7 +1,6 @@
 package com.gu.autoCancel
 
-import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
-import com.gu.util.resthttp.Types.GenericError
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 import com.gu.util.zuora.SubscriptionNumber
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.{InvoiceItem, ItemisedInvoice}
 import org.scalamock.scalatest.MockFactory
@@ -32,6 +31,20 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
   "orderDuration" should "leave time for the balance transfers after the order completes" in {
     AutoCancel.orderDuration(5.minutes.toMillis.toInt) shouldBe Some(3.minutes)
     AutoCancel.orderDuration(2.minutes.toMillis.toInt) shouldBe None
+  }
+
+  "executeAll" should "attempt every cancellation before returning the first failure" in {
+    val first = AutoCancel.AutoCancelRequest("account", SubscriptionNumber("first"), LocalDate.of(2026, 8, 18))
+    val second = AutoCancel.AutoCancelRequest("account", SubscriptionNumber("second"), LocalDate.of(2026, 8, 18))
+    val execute = mockFunction[AutoCancel.AutoCancelRequest, ClientFailableOp[Unit]]
+    val failure = GenericError("first cancellation failed")
+
+    inSequence {
+      execute.expects(first).returning(failure).once()
+      execute.expects(second).returning(ClientSuccess(())).once()
+    }
+
+    AutoCancel.executeAll(List(first, second))(execute) shouldBe failure
   }
 
   "applyCreditBalances" should "apply credit to multiple invoices" in {

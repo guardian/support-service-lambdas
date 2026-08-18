@@ -56,12 +56,18 @@ object AutoCancel extends Logging {
 
     cancellation
       .flatMap { cancelSubscription =>
-        acRequests.foldLeft(ClientSuccess(()): ClientFailableOp[Unit]) { (completed, request) =>
-          completed.flatMap(_ => executeCancel(requests, urlParams.dryRun, cancelSubscription)(request))
-        }
+        executeAll(acRequests)(executeCancel(requests, urlParams.dryRun, cancelSubscription))
       }
       .toApiGatewayOp("AutoCancel failed")
   }
+
+  private[autoCancel] def executeAll[A](
+      requests: List[AutoCancelRequest],
+  )(execute: AutoCancelRequest => ClientFailableOp[A]): ClientFailableOp[Unit] =
+    requests
+      .map(execute)
+      .collectFirst { case failure: ClientFailure => failure }
+      .getOrElse(ClientSuccess(()))
 
   /*
    * This process applies at the subscription level.  It will potentially run multiple times per invoice.
