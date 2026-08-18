@@ -6,7 +6,7 @@ import {
 } from 'aws-cdk-lib/aws-cloudwatch';
 import { RuleTargetInput, Schedule } from 'aws-cdk-lib/aws-events';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { Architecture, CfnPermission, Runtime } from 'aws-cdk-lib/aws-lambda';
 import type { IConstruct } from 'constructs';
 import { SrLambdaErrorAlarm } from './cdk/SrLambdaErrorAlarm';
 import { SrScheduledLambda } from './cdk/SrScheduledLambda';
@@ -21,23 +21,18 @@ export class DeliveryProblemCreditProcessor extends SrStack {
 			app: 'delivery-problem-credit-processor',
 		});
 		const isProd = stage === 'PROD';
+		const scheduleName = `delivery-problem-credit-processor-schedule-${stage.toLowerCase()}`;
 		const scheduleRules = isProd
 			? [
 					{
 						schedule: Schedule.cron({ minute: '0/20' }),
 						input: RuleTargetInput.fromObject(null),
+						name: scheduleName,
 						description:
 							'Trigger processing of delivery-problem credits every 20 mins',
 					},
 				]
-			: [
-					{
-						schedule: Schedule.cron({ year: '1' }),
-						input: RuleTargetInput.fromObject(null),
-						description:
-							'Trigger processing of delivery-problem credits every 20 mins',
-					},
-				];
+			: [];
 
 		const lambda = new SrScheduledLambda(this, 'Lambda', {
 			rules: scheduleRules,
@@ -79,18 +74,22 @@ export class DeliveryProblemCreditProcessor extends SrStack {
 		lambda.addToRolePolicy(zuoraRestS3Statement);
 		lambda.addToRolePolicy(sfAuthS3Statement);
 
-		const failureAlarm = new SrLambdaErrorAlarm(this, 'FailureAlarm', {
-			lambdaFunctionName: lambda.functionName,
-			alarmName:
-				'temp URGENT 9-5 - PROD: Failed to process delivery-problem credits',
-			errorImpact:
-				'IMPACT: If this goes unaddressed at least one subscription that was supposed to be suspended will be fulfilled. Until we document how to deal with likely problems please alert the SX team. For general advice, see https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk',
-			evaluationPeriods: 65,
-			datapointsToAlarm: 3,
-			threshold: 1,
-			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-			treatMissingData: TreatMissingData.NOT_BREACHING,
-		});
+		let failureAlarm: SrLambdaErrorAlarm | undefined;
+		if (isProd) {
+			failureAlarm = new SrLambdaErrorAlarm(this, 'FailureAlarm', {
+				lambdaFunctionName: lambda.functionName,
+				alarmName:
+					'URGENT 9-5 - PROD: Failed to process delivery-problem credits',
+				errorImpact:
+					'IMPACT: If this goes unaddressed at least one subscription that was supposed to be suspended will be fulfilled. Until we document how to deal with likely problems please alert the SX team. For general advice, see https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk',
+				evaluationPeriods: 65,
+				datapointsToAlarm: 3,
+				threshold: 1,
+				comparisonOperator:
+					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+				treatMissingData: TreatMissingData.NOT_BREACHING,
+			});
+		}
 
 		const resourcesKeepingExistingLogicalIds: Array<{
 			construct: IConstruct;
@@ -123,27 +122,22 @@ export class DeliveryProblemCreditProcessor extends SrStack {
 				reason:
 					'Keep resource names consistent with the original cfn template.',
 			},
-			{
-				construct: failureAlarm,
-				forcedLogicalId: 'DeliveryProblemCreditProcessorFailureAlarm',
-				reason:
-					'Keep resource names consistent with the original cfn template.',
-			},
-			{
-				construct: lambda.node.findChild('Rule0'),
-				forcedLogicalId: 'DeliveryProblemCreditProcessorScheduleRule',
-				reason:
-					'Keep resource names consistent with the original cfn template.',
-			},
-			// {
-			// 	construct: lambda.node
-			// 		.findChild('Rule0')
-			// 		.node.findChild('AllowEventRuledeliveryproblemcreditprocessorPRODLambdaACD6EB8A'),
-			// 	forcedLogicalId:
-			// 		'DeliveryProblemCreditProcessorLambdaInvokePermission',
-			// 	reason:
-			// 		'Keep resource names consistent with the original cfn template.',
-			// }
+			...(failureAlarm
+				? [
+						{
+							construct: failureAlarm,
+							forcedLogicalId: 'DeliveryProblemCreditProcessorFailureAlarm',
+							reason:
+								'Keep resource names consistent with the original cfn template.',
+						},
+						{
+							construct: lambda.node.findChild('Rule0'),
+							forcedLogicalId: 'DeliveryProblemCreditProcessorScheduleRule',
+							reason:
+								'Keep resource names consistent with the original cfn template.',
+						},
+					]
+				: []),
 		];
 
 		resourcesKeepingExistingLogicalIds.forEach(
@@ -154,5 +148,13 @@ export class DeliveryProblemCreditProcessor extends SrStack {
 				});
 			},
 		);
+
+		lambda.node.findAll().forEach((child) => {
+			if (child instanceof CfnPermission) {
+				child.overrideLogicalId(
+					'DeliveryProblemCreditProcessorLambdaInvokePermission',
+				);
+			}
+		});
 	}
 }

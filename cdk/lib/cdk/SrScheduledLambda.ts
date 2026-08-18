@@ -11,9 +11,18 @@ import type { SrStack } from './SrStack';
 
 type SrScheduledLambdaProps = SrLambdaProps & {
 	/**
-	 * rules as per the GuCDK definition
+	 * rules as per the GuCDK definition, plus an optional `name` per rule
 	 */
-	rules: GuScheduledLambdaProps['rules'];
+	rules: Array<
+		GuScheduledLambdaProps['rules'][number] & {
+			/**
+			 * override the physical name (CloudFormation `Name`) of the schedule Rule,
+			 * e.g. to preserve an existing name during a migration so it is updated in
+			 * place rather than replaced. If omitted, CloudFormation auto-generates it
+			 */
+			name?: string;
+		}
+	>;
 	/**
 	 * do we want to disable standard SrCDK alarm or override any properties?
 	 */
@@ -43,6 +52,7 @@ export class SrScheduledLambda extends SrLambda implements Construct {
 				schedule: rule.schedule,
 				targets: [new LambdaFunction(this, { event: rule.input })],
 				...(rule.description && { description: rule.description }),
+				...(rule.name && { ruleName: rule.name }),
 				enabled: true,
 			});
 		});
