@@ -112,7 +112,7 @@ exports[`The delivery problem credit processor stack matches the snapshot 1`] = 
             ],
           ],
         },
-        "AlarmName": "URGENT 9-5 - PROD: Failed to process delivery-problem credits",
+        "AlarmName": "temp URGENT 9-5 - PROD: Failed to process delivery-problem credits",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "DatapointsToAlarm": 3,
         "Dimensions": [
@@ -519,7 +519,7 @@ exports[`The delivery problem credit processor stack matches the snapshot 2`] = 
             ],
           ],
         },
-        "AlarmName": "URGENT 9-5 - PROD: Failed to process delivery-problem credits",
+        "AlarmName": "temp URGENT 9-5 - PROD: Failed to process delivery-problem credits",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "DatapointsToAlarm": 3,
         "Dimensions": [

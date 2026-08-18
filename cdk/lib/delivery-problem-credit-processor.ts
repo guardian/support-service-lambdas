@@ -82,7 +82,7 @@ export class DeliveryProblemCreditProcessor extends SrStack {
 		const failureAlarm = new SrLambdaErrorAlarm(this, 'FailureAlarm', {
 			lambdaFunctionName: lambda.functionName,
 			alarmName:
-				'URGENT 9-5 - PROD: Failed to process delivery-problem credits',
+				'temp URGENT 9-5 - PROD: Failed to process delivery-problem credits',
 			errorImpact:
 				'IMPACT: If this goes unaddressed at least one subscription that was supposed to be suspended will be fulfilled. Until we document how to deal with likely problems please alert the SX team. For general advice, see https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk',
 			evaluationPeriods: 65,
