@@ -4,7 +4,7 @@ import {
 	ComparisonOperator,
 	TreatMissingData,
 } from 'aws-cdk-lib/aws-cloudwatch';
-import { Schedule } from 'aws-cdk-lib/aws-events';
+import { RuleTargetInput, Schedule } from 'aws-cdk-lib/aws-events';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import type { IConstruct } from 'constructs/lib/construct';
@@ -13,12 +13,12 @@ import { SrScheduledLambda } from './cdk/SrScheduledLambda';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
 
-export class HolidayApiProcessor extends SrStack {
+export class HolidayStopProcessor extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
 		super(scope, {
 			stack: 'membership',
 			stage,
-			app: 'holiday-api-processor',
+			app: 'holiday-stop-processor',
 		});
 		const isProd = stage === 'PROD';
 		const scheduleRules = isProd
@@ -27,12 +27,12 @@ export class HolidayApiProcessor extends SrStack {
 						schedule: Schedule.cron({ minute: '0/20' }),
 						description:
 							'IMPACT: If this goes unaddressed at least one subscription that was supposed to be suspended will be fulfilled. Until we document how to deal with likely problems please alert the Value team. For general advice, see https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk',
+						input: RuleTargetInput.fromText('null'),
 					},
 				]
 			: [];
 
 		const lambda = new SrScheduledLambda(this, 'Lambda', {
-			// HolidayApiProcessorRole IAM Role for lambda.amazonaws.com?
 			rules: scheduleRules,
 			monitoring: {
 				noMonitoring: true, // Custom alarm
@@ -59,14 +59,6 @@ export class HolidayApiProcessor extends SrStack {
 			resources: ['arn:aws:s3:::fulfilment-date-calculator-code/*'],
 			effect: Effect.ALLOW,
 		});
-
-		const lambdaInvoke = new PolicyStatement({
-			effect: Effect.ALLOW,
-			resources: [
-				`arn:aws:logs:${this.region}:${this.account}:log-group:/aws/lambda/holiday-stop-processor-${stage}:log-stream:*`,
-			],
-			actions: ['lambda:InvokeFunction'],
-		});
 		const zuoraRestS3Statement = new PolicyStatement({
 			effect: Effect.ALLOW,
 			actions: ['s3:GetObject'],
@@ -83,7 +75,6 @@ export class HolidayApiProcessor extends SrStack {
 		});
 
 		lambda.addToRolePolicy(fulfilmentDatesCalculatorBucket);
-		lambda.addToRolePolicy(lambdaInvoke);
 		lambda.addToRolePolicy(zuoraRestS3Statement);
 		lambda.addToRolePolicy(sfAuthS3Statement);
 
@@ -110,37 +101,37 @@ export class HolidayApiProcessor extends SrStack {
 		}> = [
 			{
 				construct: lambda,
-				forcedLogicalId: 'DeliveryProblemCreditProcessor',
-				reason:
-					'The original cfn stack used this logical id for the lambda function, so we need to keep it to avoid dropping and recreating the function.',
+				forcedLogicalId: 'HolidayStopProcessor',
+				reason: 'Keeping resource names consistent.',
 			},
 			{
 				construct: lambda.node.findChild('EventInvokeConfig'),
-				forcedLogicalId: 'DeliveryProblemCreditProcessorLambdaInvokeConfig',
-				reason:
-					'Keep the original cfn logical id so CloudFormation updates the existing fn|$LATEST async-invoke config in place instead of creating a duplicate.',
+				forcedLogicalId: 'HolidayStopProcessorLambdaInvokeConfig',
+				reason: 'Keeping resource names consistent.',
 			},
 			{
 				construct: lambda.node.findChild('ServiceRole'),
-				forcedLogicalId: 'DeliveryProblemCreditProcessorRole',
-				reason:
-					'Keep the original cfn logical id so CloudFormation updates the existing policy in place instead of creating a duplicate.',
+				forcedLogicalId: 'HolidayStopProcessorRole',
+				reason: 'Keeping resource names consistent.',
 			},
 			{
 				construct: lambda.node
 					.findChild('ServiceRole')
 					.node.findChild('DefaultPolicy'),
-				forcedLogicalId: 'DeliveryProblemCreditProcessorPolicy',
-				reason:
-					'Keep the original cfn logical id so CloudFormation updates the existing policy in place instead of creating a duplicate.',
+				forcedLogicalId: 'HolidayStopProcessorPolicy',
+				reason: 'Keeping resource names consistent.',
 			},
 			...(failureAlarm
 				? [
 						{
 							construct: failureAlarm,
-							forcedLogicalId: 'DeliveryProblemCreditProcessorFailureAlarm',
-							reason:
-								'Keep the original cfn logical id; the AlarmName is unchanged so an in-place update avoids an alarm-name collision (PROD).',
+							forcedLogicalId: 'HolidayStopProcessorFailureAlarm',
+							reason: 'Keeping resource names consistent.',
+						},
+						{
+							construct: lambda.node.findChild('Rule0'),
+							forcedLogicalId: 'HolidayStopProcessorScheduleRule',
+							reason: 'Keeping resource names consistent.',
 						},
 					]
 				: []),

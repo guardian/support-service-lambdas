@@ -15,6 +15,7 @@ import { ContributionsOnlyCountriesApi } from '../lib/contributions-only-countri
 import { DiscountApi } from '../lib/discount-api';
 import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
+import { HolidayStopProcessor } from '../lib/holiday-stop-processor';
 import { IamPolicies } from '../lib/iam-policies';
 import { ImovoVoucherApi } from '../lib/imovo-voucher-api';
 import { MetricPushApi } from '../lib/metric-push-api';
@@ -171,6 +172,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	BrazeAcquisitionEventsSync,
 	SfMoveSubscriptionsApi,
 	SfEmailsToS3Exporter,
+	HolidayStopProcessor,
 	IamPolicies,
 	ScrubNonTokenisedPaymentMethods,
 	// MARKER new-lambda: cdk-bin
