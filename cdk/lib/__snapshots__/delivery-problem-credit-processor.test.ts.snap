@@ -80,6 +80,95 @@ exports[`The delivery problem credit processor stack matches the snapshot 1`] = 
       },
       "Type": "AWS::Lambda::Function",
     },
+    "DeliveryProblemCreditProcessorFailureAlarm": {
+      "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-CODE",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "DeliveryProblemCreditProcessor",
+              },
+              " failed. Search the logs below for "error" for more information. Impact: IMPACT: If this goes unaddressed at least one subscription that was supposed to be suspended will be fulfilled. Until we document how to deal with likely problems please alert the SX team. For general advice, see https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk",
+            ],
+          ],
+        },
+        "AlarmName": "URGENT 9-5 - PROD: Failed to process delivery-problem credits",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "DatapointsToAlarm": 3,
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": {
+              "Ref": "DeliveryProblemCreditProcessor",
+            },
+          },
+        ],
+        "EvaluationPeriods": 65,
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "delivery-problem-credit-processor",
+          },
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "DeliveryProblemCreditProcessor",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
     "DeliveryProblemCreditProcessorLambdaInvokeConfig": {
       "Properties": {
         "FunctionName": {
@@ -179,26 +268,6 @@ exports[`The delivery problem credit processor stack matches the snapshot 1`] = 
               },
             },
             {
-              "Action": "lambda:InvokeFunction",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:logs:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":log-group:/aws/lambda/delivery-problem-credit-processor-CODE:log-stream:*",
-                  ],
-                ],
-              },
-            },
-            {
               "Action": "s3:GetObject",
               "Effect": "Allow",
               "Resource": "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/zuoraRest-CODE*.json",
@@ -272,6 +341,67 @@ exports[`The delivery problem credit processor stack matches the snapshot 1`] = 
         ],
       },
       "Type": "AWS::IAM::Role",
+    },
+    "DeliveryProblemCreditProcessorScheduleRule": {
+      "Properties": {
+        "Description": "Trigger processing of delivery-problem credits every 20 mins",
+        "ScheduleExpression": "cron(* * * * ? 1)",
+        "State": "ENABLED",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "delivery-problem-credit-processor",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "DeliveryProblemCreditProcessor",
+                "Arn",
+              ],
+            },
+            "Id": "Target0",
+            "Input": "null",
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "LambdaRule0AllowEventRuledeliveryproblemcreditprocessorCODELambda0AD5B5D60E3AC364": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "DeliveryProblemCreditProcessor",
+            "Arn",
+          ],
+        },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "DeliveryProblemCreditProcessorScheduleRule",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
     },
   },
 }
@@ -545,26 +675,6 @@ exports[`The delivery problem credit processor stack matches the snapshot 2`] = 
               },
             },
             {
-              "Action": "lambda:InvokeFunction",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:logs:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":log-group:/aws/lambda/delivery-problem-credit-processor-PROD:log-stream:*",
-                  ],
-                ],
-              },
-            },
-            {
               "Action": "s3:GetObject",
               "Effect": "Allow",
               "Resource": "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/PROD/zuoraRest-PROD*.json",
@@ -639,26 +749,7 @@ exports[`The delivery problem credit processor stack matches the snapshot 2`] = 
       },
       "Type": "AWS::IAM::Role",
     },
-    "LambdaRule0AllowEventRuledeliveryproblemcreditprocessorPRODLambdaACD6EB8A0609CDB7": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "DeliveryProblemCreditProcessor",
-            "Arn",
-          ],
-        },
-        "Principal": "events.amazonaws.com",
-        "SourceArn": {
-          "Fn::GetAtt": [
-            "LambdaRule0F219D97C",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "LambdaRule0F219D97C": {
+    "DeliveryProblemCreditProcessorScheduleRule": {
       "Properties": {
         "Description": "Trigger processing of delivery-problem credits every 20 mins",
         "ScheduleExpression": "cron(0/20 * * * ? *)",
@@ -694,11 +785,30 @@ exports[`The delivery problem credit processor stack matches the snapshot 2`] = 
               ],
             },
             "Id": "Target0",
-            "Input": ""null"",
+            "Input": "null",
           },
         ],
       },
       "Type": "AWS::Events::Rule",
+    },
+    "LambdaRule0AllowEventRuledeliveryproblemcreditprocessorPRODLambdaACD6EB8A0609CDB7": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "DeliveryProblemCreditProcessor",
+            "Arn",
+          ],
+        },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "DeliveryProblemCreditProcessorScheduleRule",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
     },
   },
 }
