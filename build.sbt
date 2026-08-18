@@ -382,7 +382,7 @@ lazy val `zuora-callout-apis` = lambdaProject(
     stripe,
     scalaMock,
   ),
-  Seq(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep),
+  Seq(zuora, `zuora-core`, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep),
 )
 
 lazy val `identity-backfill` = lambdaProject(

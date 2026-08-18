@@ -112,4 +112,35 @@ class OrderRequestTest extends AnyFlatSpec with Matchers with EitherValues {
     actions(1) shouldBe a[AddProductOrderAction]
   }
 
+  "forCancellation" should "build a specific-date cancellation order" in {
+    val cancellationDate = LocalDate.parse("2026-08-31")
+    val request = CreateOrderRequest.forCancellation(
+      accountId = "account-id",
+      subscriptionNumber = "A-S000001",
+      cancellationDate = cancellationDate,
+      orderDate = orderDate,
+    )
+
+    request.asJson shouldBe parse(
+      s"""
+         |{
+         |  "orderDate": "$orderDate",
+         |  "existingAccountId": "account-id",
+         |  "subscriptions": [{
+         |    "subscriptionNumber": "A-S000001",
+         |    "orderActions": [{
+         |      "type": "CancelSubscription",
+         |      "triggerDates": [{"name": "ContractEffective", "triggerDate": "$cancellationDate"}],
+         |      "cancelSubscription": {
+         |        "cancellationPolicy": "SpecificDate",
+         |        "cancellationEffectiveDate": "$cancellationDate"
+         |      }
+         |    }]
+         |  }],
+         |  "processingOptions": {"runBilling": true, "collectPayment": false}
+         |}
+         |""".stripMargin,
+    ).value
+  }
+
 }

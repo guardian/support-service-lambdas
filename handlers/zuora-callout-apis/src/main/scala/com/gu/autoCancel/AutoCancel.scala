@@ -8,10 +8,17 @@ import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, ClientSuccess, GenericError, NotFound}
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.{InvoiceTransactionSummary, ItemisedInvoice}
 import com.gu.util.zuora._
+import com.gu.zuora.orders.CreateOrderRequest
+import com.gu.zuora.{AccessToken, HolidayStopProcessorZuoraConfig, Zuora, ZuoraOrders}
+import sttp.client3.{Identity, SttpBackend}
 
 import java.time.LocalDate
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
 
 object AutoCancel extends Logging {
+
+  private val PostOrderWorkBuffer = 2.minutes
+  private val MinimumOrderDuration = 10.seconds
 
   case class AutoCancelRequest(
       accountId: String,
@@ -21,13 +28,39 @@ object AutoCancel extends Logging {
 
   def apply(
       requests: Requests,
+      ordersConfig: HolidayStopProcessorZuoraConfig,
+      ordersBackend: SttpBackend[Identity, Any],
+      getRemainingTimeInMillis: () => Int,
+      orderDate: LocalDate,
   )(acRequests: List[AutoCancelRequest], urlParams: AutoCancelUrlParams): ApiGatewayOp[Unit] = {
     logger.info(s"dryRun: ${urlParams.dryRun}")
-    val ac = executeCancel(requests, urlParams.dryRun) _
-    val responses = acRequests.map(cancelReq => ac(cancelReq))
-    logger.info(s"AutoCancel responses: $responses")
-    // TODO to refactor it should not call head
-    responses.head
+    val cancellation: ClientFailableOp[
+      AutoCancelRequest => ClientFailableOp[ZuoraCancelSubscription.CancellationResponse],
+    ] =
+      if (urlParams.dryRun) ClientSuccess(legacyCancellation(requests, dryRun = true) _)
+      else
+        for {
+          accessToken <- Zuora
+            .accessTokenGetResponse(ordersConfig, ordersBackend)
+            .left
+            .map(failure => GenericError(failure.reason))
+            .toClientFailableOp
+        } yield orderCancellation(
+          requests,
+          ordersConfig,
+          accessToken,
+          ordersBackend,
+          getRemainingTimeInMillis,
+          orderDate,
+        ) _
+
+    cancellation
+      .flatMap { cancelSubscription =>
+        acRequests.foldLeft(ClientSuccess(()): ClientFailableOp[Unit]) { (completed, request) =>
+          completed.flatMap(_ => executeCancel(requests, urlParams.dryRun, cancelSubscription)(request))
+        }
+      }
+      .toApiGatewayOp("AutoCancel failed")
   }
 
   /*
@@ -38,15 +71,17 @@ object AutoCancel extends Logging {
    * This means that after all subscriptions on an invoice have been cancelled, the balance of all
    * invoices should be 0.
    */
-  private def executeCancel(requests: Requests, dryRun: Boolean)(acRequest: AutoCancelRequest): ApiGatewayOp[Unit] = {
+  private def executeCancel(
+      requests: Requests,
+      dryRun: Boolean,
+      cancelSubscription: AutoCancelRequest => ClientFailableOp[ZuoraCancelSubscription.CancellationResponse],
+  )(acRequest: AutoCancelRequest): ClientFailableOp[Unit] = {
     val AutoCancelRequest(accountId, subToCancel, cancellationDate) = acRequest
     logger.info(
       s"Attempting to perform auto-cancellation on account: $accountId for subscription: ${subToCancel.value}",
     )
     val zuoraUpdateCancellationReasonF =
       if (dryRun) ZuoraUpdateCancellationReason.dryRun(requests) _ else ZuoraUpdateCancellationReason(requests) _
-    val zuoraCancelSubscriptionF =
-      if (dryRun) ZuoraCancelSubscription.dryRun(requests) _ else ZuoraCancelSubscription(requests) _
     val zuoraGetInvoiceTransactionsF =
       if (dryRun) ZuoraGetInvoiceTransactions.dryRun(requests) _ else ZuoraGetInvoiceTransactions(requests) _
     val zuoraTransferToCreditBalanceF =
@@ -54,7 +89,7 @@ object AutoCancel extends Logging {
     val zuoraApplyCreditBalanceF = if (dryRun) ApplyCreditBalance.dryRun(requests) _ else ApplyCreditBalance(requests) _
     val zuoraOp = for {
       _ <- zuoraUpdateCancellationReasonF(subToCancel).withLogging("updateCancellationReason")
-      cancellationResponse <- zuoraCancelSubscriptionF(subToCancel, cancellationDate).withLogging("cancelSubscription")
+      cancellationResponse <- cancelSubscription(acRequest).withLogging("cancelSubscription")
       invoiceTransactionSummary <- zuoraGetInvoiceTransactionsF(accountId)
       unbalancedInvoices <- UnbalancedInvoices.fromSummary(
         accountId,
@@ -70,7 +105,60 @@ object AutoCancel extends Logging {
         "Auto-cancellation",
       ).withLogging("applyCreditBalance")
     } yield ()
-    zuoraOp.toApiGatewayOp("AutoCancel failed")
+    zuoraOp
+  }
+
+  private def legacyCancellation(
+      requests: Requests,
+      dryRun: Boolean,
+  )(request: AutoCancelRequest): ClientFailableOp[ZuoraCancelSubscription.CancellationResponse] =
+    if (dryRun) ZuoraCancelSubscription.dryRun(requests)(request.subToCancel, request.cancellationDate)
+    else ZuoraCancelSubscription(requests)(request.subToCancel, request.cancellationDate)
+
+  private def orderCancellation(
+      requests: Requests,
+      ordersConfig: HolidayStopProcessorZuoraConfig,
+      accessToken: AccessToken,
+      ordersBackend: SttpBackend[Identity, Any],
+      getRemainingTimeInMillis: () => Int,
+      orderDate: LocalDate,
+  )(request: AutoCancelRequest): ClientFailableOp[ZuoraCancelSubscription.CancellationResponse] =
+    for {
+      maximumOrderDuration <- orderDuration(getRemainingTimeInMillis())
+        .toRight(
+          GenericError("Not enough Lambda time remains to safely submit the Zuora cancellation order"),
+        )
+        .toClientFailableOp
+      orderResult <- ZuoraOrders
+        .createOrderAsynchronously(ordersConfig, accessToken, ordersBackend, maximumOrderDuration)(
+          CreateOrderRequest.forCancellation(
+            accountId = request.accountId,
+            subscriptionNumber = request.subToCancel.value,
+            cancellationDate = request.cancellationDate,
+            orderDate = orderDate,
+          ),
+        )
+        .left
+        .map(failure => GenericError(failure.reason))
+        .toClientFailableOp
+      invoiceNumber <- singleInvoiceNumber(orderResult.invoiceNumbers).toClientFailableOp
+      invoiceId <- ZuoraGetInvoice(requests)(invoiceNumber)
+    } yield ZuoraCancelSubscription.CancellationResponse(invoiceId)
+
+  private[autoCancel] def singleInvoiceNumber(invoiceNumbers: Option[List[String]]): Either[GenericError, String] =
+    invoiceNumbers match {
+      case Some(invoiceNumber :: Nil) => Right(invoiceNumber)
+      case Some(Nil) => Left(GenericError("Zuora completed the cancellation order without generating an invoice"))
+      case Some(_) => Left(GenericError("Zuora generated more than one invoice for a single subscription cancellation"))
+      case None => Left(GenericError("Zuora completed the cancellation order without returning invoice numbers"))
+    }
+
+  private[autoCancel] def orderDuration(remainingTimeInMillis: Int): Option[FiniteDuration] = {
+    val availableDuration = remainingTimeInMillis.millis - PostOrderWorkBuffer
+    Option.when(availableDuration >= MinimumOrderDuration) {
+      if (availableDuration < ZuoraOrders.MaximumOrderDuration) availableDuration
+      else ZuoraOrders.MaximumOrderDuration
+    }
   }
 
   private[autoCancel] def applyCreditBalances(applyCreditBalance: (String, Double, String) => ClientFailableOp[Unit])(
