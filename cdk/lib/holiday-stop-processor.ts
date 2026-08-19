@@ -7,7 +7,7 @@ import {
 import { RuleTargetInput, Schedule } from 'aws-cdk-lib/aws-events';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
-import type { IConstruct } from 'constructs/lib/construct';
+import type { IConstruct } from 'constructs';
 import { SrLambdaErrorAlarm } from './cdk/SrLambdaErrorAlarm';
 import { SrScheduledLambda } from './cdk/SrScheduledLambda';
 import type { SrStageNames } from './cdk/SrStack';
@@ -57,7 +57,9 @@ export class HolidayStopProcessor extends SrStack {
 
 		const fulfilmentDatesCalculatorBucket = new PolicyStatement({
 			actions: ['s3:GetObject'],
-			resources: ['arn:aws:s3:::fulfilment-date-calculator-code/*'],
+			resources: [
+				`arn:aws:s3:::fulfilment-date-calculator-${stage.toLowerCase()}/*`,
+			],
 			effect: Effect.ALLOW,
 		});
 		const zuoraRestS3Statement = new PolicyStatement({
