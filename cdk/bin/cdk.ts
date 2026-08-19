@@ -173,6 +173,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	BrazeAcquisitionEventsSync,
 	SfMoveSubscriptionsApi,
 	SfEmailsToS3Exporter,
+	DeliveryProblemCreditProcessor,
 	HolidayStopProcessor,
 	IamPolicies,
 	ScrubNonTokenisedPaymentMethods,
