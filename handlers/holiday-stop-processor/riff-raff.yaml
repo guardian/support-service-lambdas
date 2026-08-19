@@ -11,8 +11,8 @@ deployments:
     app: holiday-stop-processor
     parameters:
       templateStagePaths:
-        CODE: ./cdk/cdk.out/holiday-stop-processor-CODE.template.json
-        PROD: ./cdk/cdk.out/holiday-stop-processor-PROD.template.json
+        CODE: holiday-stop-processor-CODE.template.json
+        PROD: holiday-stop-processor-PROD.template.json
   holiday-stop-processor:
     type: aws-lambda
     parameters:
