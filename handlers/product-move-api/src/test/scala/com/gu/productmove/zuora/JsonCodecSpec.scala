@@ -3,6 +3,7 @@ package com.gu.productmove.zuora
 import com.gu.productmove.*
 import com.gu.productmove.endpoint.available.Currency
 import com.gu.productmove.endpoint.zuora.GetSubscriptionToCancel.GetSubscriptionToCancelResponse
+import com.gu.productmove.zuora.model.{AccountNumber, SubscriptionName}
 import com.gu.productmove.zuora.GetAccount.BasicInfo
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import org.scalatest.*
@@ -99,10 +100,32 @@ class JsonCodecSpec extends AnyFlatSpec {
     assert(json.fromJson[GetSubscriptionResponse].getOrElse("") == getSubscriptionResponse2)
   }
 
-  it should "Correctly decode PUT (/v1/subscriptions/$subscriptionNumber/cancel) response without a negative invoice attached" in {
-    val json = Source.fromResource("zuoraResponses/CancellationResponse2.json").mkString
+  it should "encode a cancellation Order with today as its order date" in {
+    val request = CancellationOrderRequest.forSubscription(
+      AccountNumber("A0123456"),
+      SubscriptionName("A-S0123456"),
+      LocalDate.of(2026, 9, 1),
+      LocalDate.of(2026, 8, 19),
+    )
 
-    assert(json.fromJson[CancellationResponse].getOrElse("") == cancellationResponse2)
+    assert(
+      request.toJson ==
+        """{"orderDate":"2026-08-19","existingAccountNumber":"A0123456","subscriptions":[{"subscriptionNumber":"A-S0123456","orderActions":[{"type":"CancelSubscription","triggerDates":[{"name":"ContractEffective","triggerDate":"2026-09-01"}],"cancelSubscription":{"cancellationPolicy":"SpecificDate","cancellationEffectiveDate":"2026-09-01"}}]}],"processingOptions":{"runBilling":false,"collectPayment":false}}""",
+    )
+  }
+
+  it should "keep a backdated cancellation effective date separate from the order date" in {
+    val request = CancellationOrderRequest.forSubscription(
+      AccountNumber("A0123456"),
+      SubscriptionName("A-S0123456"),
+      LocalDate.of(2026, 8, 1),
+      LocalDate.of(2026, 8, 19),
+    )
+
+    assert(
+      request.toJson ==
+        """{"orderDate":"2026-08-19","existingAccountNumber":"A0123456","subscriptions":[{"subscriptionNumber":"A-S0123456","orderActions":[{"type":"CancelSubscription","triggerDates":[{"name":"ContractEffective","triggerDate":"2026-08-01"}],"cancelSubscription":{"cancellationPolicy":"SpecificDate","cancellationEffectiveDate":"2026-08-01"}}]}],"processingOptions":{"runBilling":false,"collectPayment":false}}""",
+    )
   }
 
   it should "Correctly decode PUT (/v1/subscriptions/$subscriptionNumber) response where user made payment on switch" in {

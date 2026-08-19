@@ -57,7 +57,9 @@ abstract class ZIOApiGatewayRequestHandler(val server: List[ServerEndpoint[Any, 
             str = new String(allBytes, StandardCharsets.UTF_8)
             _ <- ZIO.log("input: " + str)
             loggedOutputStream = new ByteArrayOutputStream()
-            _ <- handler.process[AwsRequestV1](new ByteArrayInputStream(allBytes), loggedOutputStream)
+            _ <- LambdaRemainingTime.withContext(context) {
+              handler.process[AwsRequestV1](new ByteArrayInputStream(allBytes), loggedOutputStream)
+            }
             _ <- ZIO.log("output: " + new String(loggedOutputStream.toByteArray, StandardCharsets.UTF_8))
             _ = output.write(loggedOutputStream.toByteArray)
             _ = output.close()

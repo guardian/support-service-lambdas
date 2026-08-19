@@ -567,10 +567,7 @@ object HandlerSpec extends ZIOSpecDefault {
         val mockGetSubscriptionToCancel =
           new MockGetSubscriptionToCancel(Map(subscriptionName -> getSubscriptionForCancelResponse))
         val mockZuoraCancel = new MockZuoraCancel(
-          Map(
-            (subscriptionName, LocalDate.of(2022, 9, 29)) ->
-              CancellationResponse(subscriptionName.value, LocalDate.of(2022, 9, 29)),
-          ),
+          Set((subscriptionName, LocalDate.of(2022, 9, 29))),
         )
         val mockSQS = new MockSQS(Map(emailMessage -> ()))
         (for {
@@ -593,7 +590,18 @@ object HandlerSpec extends ZIOSpecDefault {
             equalTo(ProductMoveEndpointTypes.Success("Subscription A-S00339056 was successfully cancelled")),
           ) &&
           assert(mockGetSubscriptionToCancel.requests)(equalTo(List(subscriptionName))) &&
-          assert(mockZuoraCancel.requests)(equalTo(List((subscriptionName, LocalDate.of(2022, 9, 29))))) &&
+          assert(mockZuoraCancel.requests)(
+            equalTo(
+              List(
+                (
+                  AccountNumber("anAccountNumber"),
+                  subscriptionName,
+                  LocalDate.of(2022, 9, 29),
+                  LocalDate.ofInstant(time, zoneOffset),
+                ),
+              ),
+            ),
+          ) &&
           assert(mockSQS.requests)(hasSameElements(List(emailMessage)))
         })
       },

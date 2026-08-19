@@ -276,15 +276,6 @@ val directDebitGetAccountResponse = GetAccountResponse(
 )
 
 //-----------------------------------------------------
-// Stubs for ZuoraCancel service
-//-----------------------------------------------------
-
-val cancellationResponse2 = CancellationResponse(
-  "8a129cc3861a835d01862248d8ee5c9d",
-  cancelledDate = LocalDate.of(2023, 2, 19),
-)
-
-//-----------------------------------------------------
 // Stubs for Dynamo service
 //-----------------------------------------------------
 
