@@ -12,6 +12,7 @@ import {
 	membershipHostedZoneId,
 } from '../lib/constants';
 import { ContributionsOnlyCountriesApi } from '../lib/contributions-only-countries-api';
+import { DeliveryProblemCreditProcessor } from '../lib/delivery-problem-credit-processor';
 import { DiscountApi } from '../lib/discount-api';
 import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
@@ -171,6 +172,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	BrazeAcquisitionEventsSync,
 	SfMoveSubscriptionsApi,
 	SfEmailsToS3Exporter,
+	DeliveryProblemCreditProcessor,
 	IamPolicies,
 	ScrubNonTokenisedPaymentMethods,
 	// MARKER new-lambda: cdk-bin
