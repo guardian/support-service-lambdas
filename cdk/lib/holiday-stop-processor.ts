@@ -27,7 +27,8 @@ export class HolidayStopProcessor extends SrStack {
 						schedule: Schedule.cron({ minute: '0/20' }),
 						description:
 							'IMPACT: If this goes unaddressed at least one subscription that was supposed to be suspended will be fulfilled. Until we document how to deal with likely problems please alert the Value team. For general advice, see https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk',
-						input: RuleTargetInput.fromText('null'),
+						name: 'holiday-stop-processor-schedule',
+						input: RuleTargetInput.fromObject(null),
 					},
 				]
 			: [];
@@ -44,7 +45,7 @@ export class HolidayStopProcessor extends SrStack {
 				fileName: 'holiday-stop-processor.jar',
 				handler: 'com.gu.holidaystopprocessor.Handler::handle',
 				memorySize: 1232,
-				timeout: Duration.seconds(900),
+				timeout: Duration.minutes(15),
 				retryAttempts: 0,
 				description:
 					'Updates subscriptions with outstanding holiday stops. Source - https://github.com/guardian/support-service-lambdas/tree/main/handlers/holiday-stop-processor',
