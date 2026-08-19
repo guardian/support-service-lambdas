@@ -58,7 +58,9 @@ object Processor {
         maximumOrderDuration: FiniteDuration,
     ): ZuoraApiResponse[Unit] = {
       val order = CreateOrderRequest.forCredit(subscription, update, MutableCalendar.today)
-      ZuoraOrders.createOrderAsynchronously(config, zuoraAccessToken, sttpBackend, maximumOrderDuration)(order)
+      ZuoraOrders
+        .createOrderAsynchronously(config, zuoraAccessToken, sttpBackend, maximumOrderDuration)(order)
+        .map(_ => ())
     }
 
     processProduct(

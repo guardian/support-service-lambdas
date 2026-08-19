@@ -15,7 +15,9 @@ import com.gu.util.config._
 import com.gu.util.email.EmailSendSteps
 import com.gu.util.reader.Types._
 import com.gu.util.zuora._
+import com.gu.zuora.HolidayStopProcessorZuoraConfig
 import okhttp3.{Request, Response}
+import sttp.client3.HttpURLConnectionBackend
 
 import scala.util.Try
 
@@ -27,22 +29,33 @@ object AutoCancelHandler extends App with Logging {
       response: Request => Response,
       now: () => LocalDateTime,
       awsSQSSend: QueueName => Payload => Try[Unit],
+      getRemainingTimeInMillis: () => Int,
   ): ApiGatewayOp[ApiGatewayHandler.Operation] = {
     val loadConfigModule = LoadConfigModule(stage, fetchString)
     for {
       zuoraRestConfig <- loadConfigModule.load[ZuoraRestConfig].toApiGatewayOp("load zuora config")
+      zuoraOrdersConfig <- loadConfigModule
+        .load[HolidayStopProcessorZuoraConfig](ConfigLocation("zuoraRest", 1), HolidayStopProcessorZuoraConfig.reads)
+        .toApiGatewayOp("load zuora orders config")
     } yield {
       val zuoraRequest = ZuoraRestRequestMaker(response, zuoraRestConfig)
+      val processingDate = now().toLocalDate
 
       val cancelRequestsProducer = AutoCancelDataCollectionFilter(
-        now().toLocalDate,
+        processingDate,
         ZuoraGetAccountSummary(zuoraRequest),
         ZuoraGetAccountSubscriptions(zuoraRequest),
         ZuoraGetSubsNamesOnInvoice(zuoraRequest),
       ) _
 
       AutoCancelSteps(
-        AutoCancel.apply(zuoraRequest),
+        AutoCancel.apply(
+          zuoraRequest,
+          zuoraOrdersConfig,
+          HttpURLConnectionBackend(),
+          getRemainingTimeInMillis,
+          processingDate,
+        ),
         cancelRequestsProducer,
         new ZuoraEmailSteps(
           EmailSendSteps(awsSQSSend(EmailQueueName)),
@@ -63,6 +76,7 @@ object AutoCancelHandler extends App with Logging {
         RawEffects.response,
         RawEffects.now,
         SqsSync.send(SqsSync.buildClient),
+        context.getRemainingTimeInMillis _,
       )
     }
 }

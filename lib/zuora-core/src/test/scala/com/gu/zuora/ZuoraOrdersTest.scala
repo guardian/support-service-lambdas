@@ -23,7 +23,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
   private val accessToken = AccessToken("access-token")
   private val request = CreateOrderRequest(
     orderDate = LocalDate.parse("2026-08-11"),
-    existingAccountNumber = "A000001",
+    existingAccount = ExistingAccount.Number("A000001"),
     subscriptions = Nil,
     processingOptions = ProcessingOptions(runBilling = false, collectPayment = false),
   )
@@ -44,13 +44,13 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
           if (jobReads.getAndIncrement() == 0)
             """{"status":"Processing","errors":null,"result":null}"""
           else
-            """{"status":"Completed","errors":null,"result":{"status":"Completed"}}"""
+            """{"status":"Completed","errors":null,"result":{"status":"Completed","invoiceNumbers":["INV-000001"]}}"""
         Response.ok(response)
     }
 
     val result = createOrder(backend, clock)(request)
 
-    result shouldBe Right(())
+    result shouldBe Right(AsyncOrderResult(OrderStatus.Completed, Some(List("INV-000001"))))
     requests.toList shouldBe List(
       (Method.POST, "https://rest.test.eu.zuora.com/v1/async/orders", Some("Bearer access-token")),
       (Method.GET, "https://rest.test.eu.zuora.com/v1/async-jobs/job-1", Some("Bearer access-token")),
@@ -115,7 +115,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
 
     val result = createOrder(backend, clock)(request)
 
-    result shouldBe Right(())
+    result shouldBe Right(AsyncOrderResult(OrderStatus.Completed))
     submissions.get() shouldBe 2
     clock.get() shouldBe 1.minute.toNanos
   }
@@ -171,7 +171,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
 
     val result = createOrder(backend, new AtomicLong(0))(request)
 
-    result shouldBe Right(())
+    result shouldBe Right(AsyncOrderResult(OrderStatus.Completed))
     submissions.get() shouldBe 1
     jobReads.get() shouldBe 2
   }
@@ -248,7 +248,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
       monotonicNanos = () => clock.get(),
     )
 
-    result shouldBe Right(())
+    result shouldBe Right(AsyncOrderResult(OrderStatus.Completed))
     reads.get() shouldBe 1
   }
 
@@ -268,7 +268,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
       monotonicNanos = () => clock.get(),
     )
 
-    result shouldBe Right(())
+    result shouldBe Right(AsyncOrderResult(OrderStatus.Completed))
     reads.get() shouldBe 2
   }
 
@@ -309,7 +309,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
       monotonicNanos = () => 0,
     )
 
-    result shouldBe Right(())
+    result shouldBe Right(AsyncOrderResult(OrderStatus.Completed))
     readTimeouts.toList shouldBe List(2.minutes)
   }
 
@@ -344,7 +344,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
       maximumOrderDuration = maxOrderDuration,
     )(request)
 
-  private def waitFor(report: AsyncJobReport): Either[ZuoraOrders.OrderFailure, Unit] =
+  private def waitFor(report: AsyncJobReport): Either[ZuoraOrders.OrderFailure, AsyncOrderResult] =
     ZuoraOrders.waitForCompletion(
       jobId = "job-1",
       getReport = (_, _) => Right(report),

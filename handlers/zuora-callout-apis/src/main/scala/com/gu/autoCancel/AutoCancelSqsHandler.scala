@@ -10,12 +10,14 @@ import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse.unauthorized
 import com.gu.util.apigateway.Auth
 import com.gu.util.apigateway.Auth.TrustedApiConfig
-import com.gu.util.config.{ConfigReads, LoadConfigModule}
+import com.gu.util.config.{ConfigLocation, ConfigReads, LoadConfigModule}
 import com.gu.util.email.{EmailId, EmailSendSteps}
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.RestRequestMaker
 import com.gu.util.zuora._
+import com.gu.zuora.HolidayStopProcessorZuoraConfig
 import play.api.libs.json.{Json, Reads}
+import sttp.client3.{HttpURLConnectionBackend, Identity, SttpBackend}
 
 import java.time.LocalDateTime
 import scala.jdk.CollectionConverters._
@@ -51,7 +53,7 @@ class AutoCancelSqsHandler extends RequestHandler[SQSEvent, Unit] with Logging {
         parsedCallout <- parseRecord(record)
         (zuoraCalloutRecord, apiToken) = parsedCallout
         processor <- ProcessCalloutSteps.build().toTry
-        _ <- processor.execute(zuoraCalloutRecord, apiToken).toTry(())
+        _ <- processor.execute(zuoraCalloutRecord, apiToken, context.getRemainingTimeInMillis _).toTry(())
       } yield ()
     }
 
@@ -100,6 +102,10 @@ object ProcessCalloutSteps extends Logging {
     for {
       zuoraRestConfig <- loadConfigModule.load[ZuoraRestConfig]
       _ = logger.info(s"Loaded Zuora config for stage: $stage")
+      zuoraOrdersConfig <- loadConfigModule.load[HolidayStopProcessorZuoraConfig](
+        ConfigLocation("zuoraRest", 1),
+        HolidayStopProcessorZuoraConfig.reads,
+      )
 
       zuoraRequest = ZuoraRestRequestMaker(response, zuoraRestConfig)
 
@@ -109,18 +115,33 @@ object ProcessCalloutSteps extends Logging {
       )
       trustedApiConfig <- loadConfigModule.load[TrustedApiConfig]
 
-    } yield new ProcessCalloutSteps(zuoraRequest, now, trustedApiConfig, zuoraEmailSteps)
+    } yield new ProcessCalloutSteps(
+      zuoraRequest,
+      zuoraOrdersConfig,
+      HttpURLConnectionBackend(),
+      now,
+      trustedApiConfig,
+      zuoraEmailSteps,
+    )
   }
 
 }
 
 class ProcessCalloutSteps(
     zuoraRequest: RestRequestMaker.Requests,
+    zuoraOrdersConfig: HolidayStopProcessorZuoraConfig,
+    zuoraOrdersBackend: SttpBackend[Identity, Any],
     now: () => LocalDateTime,
     trustedApiConfig: TrustedApiConfig,
     zuoraEmailSteps: ZuoraEmailSteps,
 ) {
-  def execute(autoCancelCallout: AutoCancelCallout, apiToken: String): ApiGatewayOp[Unit] = {
+  def execute(
+      autoCancelCallout: AutoCancelCallout,
+      apiToken: String,
+      getRemainingTimeInMillis: () => Int,
+  ): ApiGatewayOp[Unit] = {
+
+    val processingDate = now().toLocalDate
 
     for {
       _ <- Auth
@@ -129,7 +150,7 @@ class ProcessCalloutSteps(
         .withLogging("authentication")
 
       cancelRequestsProducer = AutoCancelDataCollectionFilter(
-        now().toLocalDate,
+        processingDate,
         ZuoraGetAccountSummary(zuoraRequest),
         ZuoraGetAccountSubscriptions(zuoraRequest),
         ZuoraGetSubsNamesOnInvoice(zuoraRequest),
@@ -144,7 +165,13 @@ class ProcessCalloutSteps(
       )
 
       // Execute the cancellation
-      _ <- AutoCancel(zuoraRequest)(
+      _ <- AutoCancel(
+        zuoraRequest,
+        zuoraOrdersConfig,
+        zuoraOrdersBackend,
+        getRemainingTimeInMillis,
+        processingDate,
+      )(
         autoCancelRequests,
         AutoCancelSteps.AutoCancelUrlParams(onlyCancelDirectDebit = false, dryRun = false),
       )
