@@ -382,7 +382,7 @@ lazy val `zuora-callout-apis` = lambdaProject(
     stripe,
     scalaMock,
   ),
-  Seq(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep),
+  Seq(zuora, `zuora-core`, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep),
 )
 
 lazy val `identity-backfill` = lambdaProject(
@@ -596,7 +596,7 @@ lazy val `batch-email-sender` = lambdaProject(
 
 lazy val `holiday-stop-processor` = lambdaProject(
   "holiday-stop-processor",
-  "Add a holiday credit amendment to a subscription.",
+  "Add a holiday credit to a subscription with the Zuora Orders API.",
   Seq(scalaLambda, awsS3),
   Seq(
     `credit-processor`,
@@ -609,7 +609,7 @@ lazy val `holiday-stop-processor` = lambdaProject(
 
 lazy val `delivery-problem-credit-processor` = lambdaProject(
   "delivery-problem-credit-processor",
-  "Applies a credit amendment to a subscription for a delivery problem.",
+  "Add a delivery-problem credit to a subscription with the Zuora Orders API.",
   Seq(
     scalaLambda,
     circe,

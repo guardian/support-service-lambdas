@@ -55,6 +55,13 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 		);
 
 		/*
+		 * The work list, the map's result files, the lifecycle rule and the two
+		 * policies that grant access to them only work together while they all
+		 * name the same prefix, so it is named once.
+		 */
+		const executionsPrefix = 'executions';
+
+		/*
 		 * The other buckets in this repo rewrite the same file every run, so they
 		 * never grow. This one keys everything on the execution start time, which
 		 * is what makes a past run findable from the console, and that means a new
@@ -67,7 +74,7 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 			lifecycleRules: [
 				{
 					id: 'expire-execution-files',
-					prefix: 'executions/',
+					prefix: `${executionsPrefix}/`,
 					expiration: Duration.days(90),
 				},
 			],
@@ -76,6 +83,16 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 		const snsTopicArn = `arn:aws:sns:${this.region}:${this.account}:alarms-handler-topic-${this.stage}`;
 
 		const paymentMethodsFileName = 'payment-methods-to-scrub.json';
+
+		/*
+		 * The map reads back the file the first lambda writes, so the two have to
+		 * agree on the key down to the character. Building it once is what stops
+		 * them drifting apart.
+		 */
+		const paymentMethodsFileKey = JsonPath.format(
+			`${executionsPrefix}/{}/${paymentMethodsFileName}`,
+			JsonPath.stringAt('$$.Execution.StartTime'),
+		);
 
 		/*
 		 * This lambda is given an explicit role only so its name stays short
@@ -105,7 +122,7 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 		lambdaRole.addToPolicy(
 			new PolicyStatement({
 				actions: ['s3:PutObject'],
-				resources: [bucket.arnForObjects('executions/*')],
+				resources: [bucket.arnForObjects(`${executionsPrefix}/*`)],
 			}),
 		);
 
@@ -113,11 +130,15 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 			architecture: Architecture.ARM_64,
 			timeout: Duration.minutes(3),
 			environment: {
-				// Log what would happen without touching Zuora. Both lambdas read it:
-				// the first one skips its no-progress check, which would otherwise
-				// fire every day since a dry run never changes the work list.
-				// Flip to false in a follow-up once a PROD run has been eyeballed.
-				DRY_RUN: 'true',
+				// Logs what would happen without touching Zuora. It also turns off
+				// the no-progress check, which would otherwise fire every day, since
+				// a dry run never changes the work list.
+				//
+				// CODE can only ever dry run: the work list is read from the mirror
+				// of PROD, so none of it exists in the CODE Zuora tenant and every
+				// item is skipped. Left live there, the no-progress check would fail
+				// every run for a reason that says nothing about the code.
+				DRY_RUN: String(this.stage !== 'PROD'),
 			},
 		};
 
@@ -140,10 +161,7 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 			{
 				lambdaFunction: getPaymentMethodsToScrubLambda,
 				payload: TaskInput.fromObject({
-					filePath: JsonPath.format(
-						`executions/{}/${paymentMethodsFileName}`,
-						JsonPath.stringAt('$$.Execution.StartTime'),
-					),
+					filePath: paymentMethodsFileKey,
 				}),
 			},
 		);
@@ -187,7 +205,7 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 		checkRunMadeProgressLambda.addPolicies(
 			new GuGetS3ObjectsPolicy(this, 'ReadMapRunResults', {
 				bucketName: bucketName(stage),
-				paths: ['executions/*'],
+				paths: [`${executionsPrefix}/*`],
 			}),
 		);
 
@@ -200,16 +218,13 @@ export class ScrubNonTokenisedPaymentMethods extends SrStack {
 				toleratedFailurePercentage: 100,
 				itemReader: new S3JsonItemReader({
 					bucket,
-					key: JsonPath.format(
-						`executions/{}/${paymentMethodsFileName}`,
-						JsonPath.stringAt('$$.Execution.StartTime'),
-					),
+					key: paymentMethodsFileKey,
 				}),
 				itemBatcher: new ItemBatcher({ maxItemsPerBatch: 1 }),
 				resultWriterV2: new ResultWriterV2({
 					bucket,
 					prefix: JsonPath.format(
-						`executions/{}`,
+						`${executionsPrefix}/{}`,
 						JsonPath.stringAt('$$.Execution.StartTime'),
 					),
 				}),

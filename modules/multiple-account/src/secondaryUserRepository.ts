@@ -21,7 +21,7 @@ export const secondaryUserRecordSchema = z.object({
 	subscriptionName: z.string(),
 	secondaryIdentityId: z.string(),
 	primaryIdentityId: z.string(),
-	acceptedDate: z.string(),
+	acceptedDate: z.iso.datetime(),
 	expiryDate: z.number(),
 	cancelledBy: cancelledBySchema.optional(),
 	cancelledDate: z.iso.datetime().optional(),

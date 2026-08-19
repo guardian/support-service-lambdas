@@ -104,7 +104,7 @@ Example path: /subscriptions/A-S00974337/secondary-users
       "subscriptionName": "A-S00974337",
       "secondaryIdentityId": "30067890",
       "primaryIdentityId": "20012345",
-      "acceptedDate": "2026-06-12"
+      "acceptedDate": "2026-06-12T00:00:00.000Z"
     }
   ]
 }

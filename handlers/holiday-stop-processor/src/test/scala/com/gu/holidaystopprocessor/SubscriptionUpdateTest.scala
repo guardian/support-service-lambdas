@@ -2,9 +2,9 @@ package com.gu.holidaystopprocessor
 
 import com.gu.holiday_stops.Fixtures
 import com.gu.zuora.subscription.{
-  Add,
   AffectedPublicationDate,
-  ChargeOverride,
+  CreditChargeOverride,
+  CreditProductAddition,
   InvoiceDate,
   MutableCalendar,
   SubscriptionUpdate,
@@ -46,22 +46,17 @@ class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffShouldMa
     )
     update shouldBe Right(
       SubscriptionUpdate(
-        currentTerm = None,
-        currentTermPeriodType = None,
-        List(
-          Add(
-            productRatePlanId = creditProduct.productRatePlanId,
-            contractEffectiveDate = dateCreditIsApplied,
-            customerAcceptanceDate = dateCreditIsApplied,
-            serviceActivationDate = dateCreditIsApplied,
-            chargeOverrides = List(
-              ChargeOverride(
-                productRatePlanChargeId = creditProduct.productRatePlanChargeId,
-                HolidayStart__c = stoppedPublicationDate.value,
-                HolidayEnd__c = stoppedPublicationDate.value,
-                price = -3.24,
-              ),
-            ),
+        extendedTermEndDate = None,
+        productAddition = CreditProductAddition(
+          productRatePlanId = creditProduct.productRatePlanId,
+          contractEffectiveDate = dateCreditIsApplied,
+          customerAcceptanceDate = dateCreditIsApplied,
+          serviceActivationDate = dateCreditIsApplied,
+          chargeOverride = CreditChargeOverride(
+            productRatePlanChargeId = creditProduct.productRatePlanChargeId,
+            HolidayStart__c = stoppedPublicationDate.value,
+            HolidayEnd__c = stoppedPublicationDate.value,
+            price = -3.24,
           ),
         ),
       ),
@@ -85,22 +80,17 @@ class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffShouldMa
     )
     update shouldBe Right(
       SubscriptionUpdate(
-        currentTerm = Some(366),
-        currentTermPeriodType = Some("Day"),
-        List(
-          Add(
-            creditProduct.productRatePlanId,
-            contractEffectiveDate = dateCreditIsApplied,
-            customerAcceptanceDate = dateCreditIsApplied,
-            serviceActivationDate = dateCreditIsApplied,
-            chargeOverrides = List(
-              ChargeOverride(
-                creditProduct.productRatePlanChargeId,
-                HolidayStart__c = stoppedPublicationDate.value,
-                HolidayEnd__c = stoppedPublicationDate.value,
-                price = -3.24,
-              ),
-            ),
+        extendedTermEndDate = Some(dateCreditIsApplied),
+        productAddition = CreditProductAddition(
+          creditProduct.productRatePlanId,
+          contractEffectiveDate = dateCreditIsApplied,
+          customerAcceptanceDate = dateCreditIsApplied,
+          serviceActivationDate = dateCreditIsApplied,
+          chargeOverride = CreditChargeOverride(
+            creditProduct.productRatePlanChargeId,
+            HolidayStart__c = stoppedPublicationDate.value,
+            HolidayEnd__c = stoppedPublicationDate.value,
+            price = -3.24,
           ),
         ),
       ),
@@ -125,22 +115,17 @@ class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffShouldMa
     )
     update shouldBe Right(
       SubscriptionUpdate(
-        currentTerm = None,
-        currentTermPeriodType = None,
-        List(
-          Add(
-            creditProduct.productRatePlanId,
-            contractEffectiveDate = dateCreditIsApplied,
-            customerAcceptanceDate = dateCreditIsApplied,
-            serviceActivationDate = dateCreditIsApplied,
-            chargeOverrides = List(
-              ChargeOverride(
-                creditProduct.productRatePlanChargeId,
-                HolidayStart__c = stoppedPublicationDate.value,
-                HolidayEnd__c = stoppedPublicationDate.value,
-                price = -3.24,
-              ),
-            ),
+        extendedTermEndDate = None,
+        productAddition = CreditProductAddition(
+          creditProduct.productRatePlanId,
+          contractEffectiveDate = dateCreditIsApplied,
+          customerAcceptanceDate = dateCreditIsApplied,
+          serviceActivationDate = dateCreditIsApplied,
+          chargeOverride = CreditChargeOverride(
+            creditProduct.productRatePlanChargeId,
+            HolidayStart__c = stoppedPublicationDate.value,
+            HolidayEnd__c = stoppedPublicationDate.value,
+            price = -3.24,
           ),
         ),
       ),
@@ -166,22 +151,17 @@ class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffShouldMa
     )
     update.value shouldMatchTo (
       SubscriptionUpdate(
-        currentTerm = Some(536),
-        currentTermPeriodType = Some("Day"),
-        List(
-          Add(
-            creditProduct.productRatePlanId,
-            contractEffectiveDate = givenInvoiceDate.value,
-            customerAcceptanceDate = givenInvoiceDate.value,
-            serviceActivationDate = givenInvoiceDate.value,
-            chargeOverrides = List(
-              ChargeOverride(
-                creditProduct.productRatePlanChargeId,
-                HolidayStart__c = stoppedPublicationDate.value,
-                HolidayEnd__c = stoppedPublicationDate.value,
-                price = -3.24,
-              ),
-            ),
+        extendedTermEndDate = Some(givenInvoiceDate.value),
+        productAddition = CreditProductAddition(
+          creditProduct.productRatePlanId,
+          contractEffectiveDate = givenInvoiceDate.value,
+          customerAcceptanceDate = givenInvoiceDate.value,
+          serviceActivationDate = givenInvoiceDate.value,
+          chargeOverride = CreditChargeOverride(
+            creditProduct.productRatePlanChargeId,
+            HolidayStart__c = stoppedPublicationDate.value,
+            HolidayEnd__c = stoppedPublicationDate.value,
+            price = -3.24,
           ),
         ),
       )

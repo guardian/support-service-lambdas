@@ -37,21 +37,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
       - name: Setup Java
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v5.6.0
         with:
           distribution: 'corretto'
           java-version: '21'
           cache: 'sbt'
 
       - name: Setup SBT
-        uses: sbt/setup-sbt@v1.4.0
+        uses: sbt/setup-sbt@v1.5.4
 
       - name: Run tests and build subproject JAR
         run: sbt "project ${{ matrix.subproject }}" test assembly
       - run: npm install --global corepack@0.31.0
       - run: corepack enable
         shell: bash
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
@@ -80,7 +80,6 @@ jobs:
         subproject:
           - catalog-service
           - contact-us-api
-          - delivery-problem-credit-processor
           - delivery-records-api
           - dev-env-cleaner
           - digital-subscription-expiry
@@ -108,14 +107,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
       - name: Setup Java
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v5.6.0
         with:
           distribution: 'corretto'
           java-version: '21'
           cache: 'sbt'
 
       - name: Setup SBT
-        uses: sbt/setup-sbt@v1.4.0
+        uses: sbt/setup-sbt@v1.5.4
 
       - name: run tests and Build jar
         run: sbt "project ${{ matrix.subproject }}" test assembly
@@ -135,7 +134,6 @@ jobs:
             cfn:
               - handlers/${{ matrix.subproject }}/cfn.yaml
 
-
   zuora-callout-apis:
     name: build (zuora-callout-apis)
     runs-on: ubuntu-latest
@@ -147,14 +145,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
       - name: Setup Java
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v5.6.0
         with:
           distribution: 'corretto'
           java-version: '21'
           cache: 'sbt'
 
       - name: Setup SBT
-        uses: sbt/setup-sbt@v1.4.0
+        uses: sbt/setup-sbt@v1.5.4
 
       - name: Run tests and build subproject JAR
         run: sbt "project zuora-callout-apis" test assembly
@@ -162,7 +160,7 @@ jobs:
       - run: npm install --global corepack@0.31.0
       - run: corepack enable
         shell: bash
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
@@ -203,4 +201,3 @@ jobs:
           [ "${{ needs.gu-cdk-build.result }}" = "success" ]
           [ "${{ needs.build.result }}" = "success" ]
           [ "${{ needs.zuora-callout-apis.result }}" = "success" ]
-
