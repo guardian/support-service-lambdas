@@ -2,7 +2,10 @@ import type { Dayjs } from 'dayjs';
 import { z } from 'zod';
 import { createOrderAsynchronously } from './orders/asyncOrderRequests';
 import { type OrderAction, singleTriggerDate } from './orders/orderActions';
-import type { OrderRequest, PreviewOrderRequest } from './orders/orderRequests';
+import type {
+	CreateOrderRequest,
+	PreviewOrderRequest,
+} from './orders/orderRequests';
 import { previewOrderRequest } from './orders/orderRequests';
 import { zuoraDateFormat } from './utils';
 import type { ZuoraClient } from './zuoraClient';
@@ -46,7 +49,7 @@ const termExtensionIfRequired = ({
 
 export const buildDiscountOrderRequest = (
 	input: DiscountOrderInput,
-): OrderRequest => ({
+): CreateOrderRequest => ({
 	orderDate: zuoraDateFormat(input.today),
 	existingAccountNumber: input.accountNumber,
 	subscriptions: [
@@ -58,6 +61,10 @@ export const buildDiscountOrderRequest = (
 			],
 		},
 	],
+	processingOptions: {
+		runBilling: false,
+		collectPayment: false,
+	},
 });
 
 export const buildPreviewDiscountOrderRequest = (

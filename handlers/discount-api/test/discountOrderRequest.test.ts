@@ -43,6 +43,10 @@ test('builds an AddProduct order with today as the order date', () => {
 				],
 			},
 		],
+		processingOptions: {
+			runBilling: false,
+			collectPayment: false,
+		},
 	});
 });
 
