@@ -12,7 +12,11 @@ import {
 	itemsForSubscription,
 	toSimpleInvoiceItems,
 } from '@modules/zuora/billingPreview';
-import { addDiscount, previewDiscount } from '@modules/zuora/discount';
+import {
+	addDiscount,
+	type DiscountOrderInput,
+	previewDiscount,
+} from '@modules/zuora/discount';
 import { isNotRemovedOrDiscount } from '@modules/zuora/rateplan';
 import type { ZuoraAccount, ZuoraSubscription } from '@modules/zuora/types';
 import { zuoraDateFormat } from '@modules/zuora/utils';
@@ -21,6 +25,35 @@ import { getZuoraCatalog } from '@modules/zuora-catalog/S3';
 import { EligibilityChecker } from './eligibilityChecker';
 import { generateCancellationDiscountConfirmationEmail } from './generateCancellationDiscountConfirmationEmail';
 import { getDiscountFromSubscription } from './productToDiscountMapping';
+
+const postOrderWorkBufferInMilliseconds = 10_000;
+const minimumOrderDurationInMilliseconds = 10_000;
+/**
+ * API Gateway gives a REST API integration at most 29 seconds. The eighteen
+ * second order budget leaves ten seconds for the billing preview and confirmation
+ * email, plus one second of timing margin before the caller receives a timeout.
+ */
+const maximumInteractiveOrderDurationInMilliseconds = 18_000;
+
+export const orderDuration = (
+	getRemainingTimeInMillis: (() => number) | undefined,
+): number => {
+	const remainingTimeInMilliseconds =
+		getRemainingTimeInMillis?.() ??
+		maximumInteractiveOrderDurationInMilliseconds +
+			postOrderWorkBufferInMilliseconds;
+	const availableDuration =
+		remainingTimeInMilliseconds - postOrderWorkBufferInMilliseconds;
+	if (availableDuration < minimumOrderDurationInMilliseconds) {
+		throw new Error(
+			'Not enough Lambda time remains to safely submit the Zuora discount order',
+		);
+	}
+	return Math.min(
+		availableDuration,
+		maximumInteractiveOrderDurationInMilliseconds,
+	);
+};
 
 export const previewDiscountEndpoint = async (
 	stage: Stage,
@@ -36,12 +69,23 @@ export const previewDiscountEndpoint = async (
 	// note that this only returns the next payment - payments are not guaranteed to be identical
 	const previewResponse = await previewDiscount(
 		zuoraClient,
-		subscription.subscriptionNumber,
-		dayjs(dateToApply),
-		discount.productRatePlanId,
+		toDiscountOrderInput(
+			subscription,
+			subscription.subscriptionNumber,
+			today,
+			dayjs(dateToApply),
+			discount.productRatePlanId,
+		),
+	);
+	const previewInvoice = previewResponse.previewResult.invoices.find(
+		(invoice) => dayjs(invoice.targetDate).isSame(dateToApply, 'day'),
 	);
 
-	if (!previewResponse.success || previewResponse.invoiceItems.length < 2) {
+	if (
+		!previewResponse.success ||
+		previewInvoice === undefined ||
+		previewInvoice.invoiceItems.length < 2
+	) {
 		throw new Error(
 			'Unexpected data in preview response from Zuora. ' +
 				'We expected at least 2 invoice items, one for the discount and at least one for the main plan',
@@ -49,8 +93,8 @@ export const previewDiscountEndpoint = async (
 	}
 
 	const discountedPrice = sum(
-		previewResponse.invoiceItems,
-		(item) => item.chargeAmount + item.taxAmount,
+		previewInvoice.invoiceItems,
+		(item) => item.amountWithoutTax + item.taxAmount,
 	);
 
 	const firstDiscountedPaymentDate = zuoraDateFormat(dayjs(dateToApply));
@@ -88,6 +132,7 @@ export const applyDiscountEndpoint = async (
 	account: ZuoraAccount,
 	subscriptionNumber: string,
 	today: dayjs.Dayjs,
+	getRemainingTimeInMillis?: () => number,
 ) => {
 	logger.mutableAddContext(
 		subscription.ratePlans
@@ -106,11 +151,14 @@ export const applyDiscountEndpoint = async (
 	logger.log('Apply a discount to the subscription');
 	await addDiscount(
 		zuoraClient,
-		subscriptionNumber,
-		dayjs(subscription.termStartDate),
-		dayjs(subscription.termEndDate),
-		dayjs(dateToApply),
-		discount.productRatePlanId,
+		toDiscountOrderInput(
+			subscription,
+			subscriptionNumber,
+			today,
+			dayjs(dateToApply),
+			discount.productRatePlanId,
+		),
+		orderDuration(getRemainingTimeInMillis),
 	);
 	logger.log('Discount applied successfully');
 
@@ -147,6 +195,22 @@ export const applyDiscountEndpoint = async (
 		},
 	};
 };
+
+const toDiscountOrderInput = (
+	subscription: ZuoraSubscription,
+	subscriptionNumber: string,
+	today: dayjs.Dayjs,
+	applyFromDate: dayjs.Dayjs,
+	discountProductRatePlanId: string,
+): DiscountOrderInput => ({
+	subscriptionNumber,
+	accountNumber: subscription.accountNumber,
+	termStartDate: dayjs(subscription.termStartDate),
+	termEndDate: dayjs(subscription.termEndDate),
+	today,
+	applyFromDate,
+	discountProductRatePlanId,
+});
 
 async function getDiscountToApply(
 	stage: Stage,

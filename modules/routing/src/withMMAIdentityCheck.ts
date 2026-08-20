@@ -5,7 +5,7 @@ import type {
 } from 'aws-lambda';
 import { ValidationError } from '@modules/errors';
 import { logger } from '@modules/logger/logger';
-import type { Handler } from '@modules/routing/router';
+import type { Handler, RequestContext } from '@modules/routing/router';
 import type { Stage } from '@modules/stage';
 import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
@@ -41,6 +41,7 @@ export const withMMAIdentityCheck =
 			subscription: ZuoraSubscription,
 			account: ZuoraAccount,
 			path: TPath,
+			context?: RequestContext,
 		) => Promise<APIGatewayProxyResult>,
 		extractSubscriptionNumber: (parsed: { path: TPath; body: TBody }) => string,
 	): Handler<Pick<APIGatewayProxyEvent, 'headers'>, TPath, TBody> =>
@@ -48,6 +49,7 @@ export const withMMAIdentityCheck =
 		event: Pick<APIGatewayProxyEvent, 'headers'>,
 		path: TPath,
 		body: TBody,
+		context?: RequestContext,
 	): Promise<APIGatewayProxyResult> => {
 		const zuoraClient = await ZuoraClient.create(stage);
 		logger.log('Getting the subscription and account details from Zuora');
@@ -59,5 +61,12 @@ export const withMMAIdentityCheck =
 
 		logger.mutableAddContext(subscriptionNumber);
 		assertIdentityIdMatches(account, event.headers);
-		return await handler(body, zuoraClient, subscription, account, path);
+		return await handler(
+			body,
+			zuoraClient,
+			subscription,
+			account,
+			path,
+			context,
+		);
 	};

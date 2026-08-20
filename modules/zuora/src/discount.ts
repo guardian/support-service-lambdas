@@ -1,76 +1,129 @@
 import type { Dayjs } from 'dayjs';
-import type { AddDiscountPreview } from './types';
-import { addDiscountPreviewSchema, voidSchema } from './types';
+import { z } from 'zod';
+import { createOrderAsynchronously } from './orders/asyncOrderRequests';
+import { type OrderAction, singleTriggerDate } from './orders/orderActions';
+import type { OrderRequest, PreviewOrderRequest } from './orders/orderRequests';
+import { previewOrderRequest } from './orders/orderRequests';
 import { zuoraDateFormat } from './utils';
 import type { ZuoraClient } from './zuoraClient';
 
-export const addDiscount = async (
-	zuoraClient: ZuoraClient,
-	subscriptionNumber: string,
-	termStartDate: Dayjs,
-	termEndDate: Dayjs,
-	contractEffectiveDate: Dayjs,
-	discountProductRatePlanId: string,
-): Promise<void> => {
-	// If the next billing date is outside the current term, we will need to extend it as you can't add a rate plan
-	// after the end of the current term. As digital subscriptions have their customer acceptance date (when first
-	// payment is taken therefore billing date) 14 days after the contract effective date (acquisition date/when the
-	// term begins) to provide a free trial period, for annual subs the next billing date is going to be outside the
-	// current term.
-	const newTermLengthIfRequired = getNewTermLengthIfRequired(
-		termStartDate,
-		termEndDate,
-		contractEffectiveDate,
-	);
-	const path = `/v1/subscriptions/${subscriptionNumber}`;
-	const body = JSON.stringify({
-		add: [
-			{
-				contractEffectiveDate: zuoraDateFormat(contractEffectiveDate),
-				productRatePlanId: discountProductRatePlanId,
-			},
-		],
-		...newTermLengthIfRequired,
-	});
-	await zuoraClient.put(path, body, voidSchema);
+export type DiscountOrderInput = {
+	subscriptionNumber: string;
+	accountNumber: string;
+	termStartDate: Dayjs;
+	termEndDate: Dayjs;
+	today: Dayjs;
+	applyFromDate: Dayjs;
+	discountProductRatePlanId: string;
 };
 
-export const getNewTermLengthIfRequired = (
-	termStartDate: Dayjs,
-	termEndDate: Dayjs,
-	nextBillingDate: Dayjs,
-) => {
-	if (nextBillingDate.isAfter(termEndDate)) {
-		return {
-			currentTerm: nextBillingDate.diff(termStartDate, 'day'),
-			currentTermPeriodType: 'Day',
-		};
-	}
-	return {};
+const addDiscountAction = (input: DiscountOrderInput): OrderAction => ({
+	type: 'AddProduct',
+	triggerDates: singleTriggerDate(input.applyFromDate),
+	addProduct: {
+		productRatePlanId: input.discountProductRatePlanId,
+	},
+});
+
+const changeTermEnd = (endDate: Dayjs, applyFromDate: Dayjs): OrderAction => ({
+	type: 'TermsAndConditions',
+	triggerDates: singleTriggerDate(applyFromDate),
+	termsAndConditions: {
+		lastTerm: {
+			termType: 'TERMED',
+			endDate: zuoraDateFormat(endDate),
+		},
+	},
+});
+
+const termExtensionIfRequired = ({
+	termEndDate,
+	applyFromDate,
+}: Pick<DiscountOrderInput, 'termEndDate' | 'applyFromDate'>): OrderAction[] =>
+	applyFromDate.isAfter(termEndDate)
+		? [changeTermEnd(applyFromDate, applyFromDate)]
+		: [];
+
+export const buildDiscountOrderRequest = (
+	input: DiscountOrderInput,
+): OrderRequest => ({
+	orderDate: zuoraDateFormat(input.today),
+	existingAccountNumber: input.accountNumber,
+	subscriptions: [
+		{
+			subscriptionNumber: input.subscriptionNumber,
+			orderActions: [
+				...termExtensionIfRequired(input),
+				addDiscountAction(input),
+			],
+		},
+	],
+});
+
+export const buildPreviewDiscountOrderRequest = (
+	input: DiscountOrderInput,
+): PreviewOrderRequest => ({
+	orderDate: zuoraDateFormat(input.today),
+	existingAccountNumber: input.accountNumber,
+	subscriptions: [
+		{
+			subscriptionNumber: input.subscriptionNumber,
+			orderActions: [
+				changeTermEnd(
+					input.termStartDate.add(24, 'month'),
+					input.applyFromDate,
+				),
+				addDiscountAction(input),
+			],
+		},
+	],
+	previewOptions: {
+		previewThruType: 'SpecificDate',
+		previewTypes: ['BillingDocs'],
+		specificPreviewThruDate: zuoraDateFormat(input.applyFromDate),
+	},
+});
+
+/**
+ * https://developer.zuora.com/v1-api-reference/api/orders/post_createorderasynchronously
+ */
+export const addDiscount = async (
+	zuoraClient: ZuoraClient,
+	input: DiscountOrderInput,
+	maximumDurationInMilliseconds = 18_000,
+): Promise<void> => {
+	await createOrderAsynchronously(
+		zuoraClient,
+		buildDiscountOrderRequest(input),
+		maximumDurationInMilliseconds,
+	);
 };
+
+const discountPreviewInvoiceItemSchema = z.object({
+	amountWithoutTax: z.number(),
+	taxAmount: z.number(),
+});
+
+const discountPreviewInvoiceSchema = z.object({
+	targetDate: z.coerce.date(),
+	invoiceItems: z.array(discountPreviewInvoiceItemSchema),
+});
+
+export const discountPreviewResponseSchema = z.object({
+	success: z.boolean(),
+	previewResult: z.object({
+		invoices: z.array(discountPreviewInvoiceSchema),
+	}),
+});
+
+export type DiscountPreview = z.infer<typeof discountPreviewResponseSchema>;
 
 export const previewDiscount = async (
 	zuoraClient: ZuoraClient,
-	subscriptionNumber: string,
-	contractEffectiveDate: Dayjs,
-	discountProductRatePlanId: string,
-): Promise<AddDiscountPreview> => {
-	const path = `/v1/subscriptions/${subscriptionNumber}`;
-	const body = JSON.stringify({
-		add: [
-			{
-				contractEffectiveDate: zuoraDateFormat(contractEffectiveDate),
-				productRatePlanId: discountProductRatePlanId,
-			},
-		],
-		// Set to 24 months because you can't preview adding product rate plan after the end of the current term
-		// and as digital subscriptions have their customer acceptance date (when payment is taken therefore billing date)
-		// 14 days after the contract effective date (acquisition date/when the term begins) to provide a free
-		// trial period, for annual subs in particular the next billing date is going to be outside the current term.
-		currentTerm: 24,
-		currentTermPeriodType: 'Month',
-		preview: 'true',
-		invoiceTargetDate: zuoraDateFormat(contractEffectiveDate),
-	});
-	return zuoraClient.put(path, body, addDiscountPreviewSchema);
-};
+	input: DiscountOrderInput,
+): Promise<DiscountPreview> =>
+	previewOrderRequest(
+		zuoraClient,
+		buildPreviewDiscountOrderRequest(input),
+		discountPreviewResponseSchema,
+	);

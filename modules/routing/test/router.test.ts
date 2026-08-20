@@ -1,4 +1,4 @@
-import type { APIGatewayProxyEvent } from 'aws-lambda';
+import type { APIGatewayProxyEvent, Context } from 'aws-lambda';
 import { z } from 'zod';
 import type { Handler, HttpMethod } from '@modules/routing/router';
 import { NotFoundResponse, Router } from '@modules/routing/router';
@@ -80,6 +80,32 @@ describe('Router', () => {
 		expect(await router(buildApiGatewayEvent('/benefits/me', 'GET'))).toEqual(
 			successResponse,
 		);
+	});
+	test('it should pass the Lambda context to a route handler', async () => {
+		const context = {
+			getRemainingTimeInMillis: () => 12_345,
+		} as Context;
+		const routerWithContext = Router([
+			{
+				httpMethod: 'POST',
+				path: '/context',
+				handler: withBodyParser(
+					z.object({}),
+					(_event, _path, _body, lambdaContext) =>
+						Promise.resolve({
+							body: String(lambdaContext?.getRemainingTimeInMillis()),
+							statusCode: 200,
+						}),
+				),
+			},
+		]);
+
+		expect(
+			await routerWithContext(
+				buildApiGatewayEvent('/context', 'POST', '{}'),
+				context,
+			),
+		).toEqual({ body: '12345', statusCode: 200 });
 	});
 	test('it should return a 404 if no route is found', async () => {
 		expect(await router(buildApiGatewayEvent('/not-found', 'GET'))).toEqual(
