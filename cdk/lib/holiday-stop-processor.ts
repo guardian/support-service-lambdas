@@ -151,9 +151,7 @@ export class HolidayStopProcessor extends SrStack {
 
 		lambda.node.findAll().forEach((child) => {
 			if (child instanceof CfnPermission) {
-				child.overrideLogicalId(
-					'HolidayStopProcessorLambdaInvokePermission',
-				);
+				child.overrideLogicalId('HolidayStopProcessorLambdaInvokePermission');
 			}
 		});
 	}
