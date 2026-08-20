@@ -80,16 +80,6 @@ exports[`The holiday stop processor stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "HolidayStopProcessorLambdaInvokeConfig": {
-      "Properties": {
-        "FunctionName": {
-          "Ref": "HolidayStopProcessor",
-        },
-        "MaximumRetryAttempts": 0,
-        "Qualifier": "$LATEST",
-      },
-      "Type": "AWS::Lambda::EventInvokeConfig",
-    },
     "HolidayStopProcessorPolicy": {
       "Properties": {
         "PolicyDocument": {
@@ -204,6 +194,16 @@ exports[`The holiday stop processor stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "HolidayStopProcessorRetryConfig": {
+      "Properties": {
+        "FunctionName": {
+          "Ref": "HolidayStopProcessor",
+        },
+        "MaximumRetryAttempts": 0,
+        "Qualifier": "$LATEST",
+      },
+      "Type": "AWS::Lambda::EventInvokeConfig",
     },
     "HolidayStopProcessorRole": {
       "Properties": {
@@ -431,15 +431,24 @@ exports[`The holiday stop processor stack matches the snapshot 2`] = `
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
-    "HolidayStopProcessorLambdaInvokeConfig": {
+    "HolidayStopProcessorLambdaInvokePermission": {
       "Properties": {
+        "Action": "lambda:InvokeFunction",
         "FunctionName": {
-          "Ref": "HolidayStopProcessor",
+          "Fn::GetAtt": [
+            "HolidayStopProcessor",
+            "Arn",
+          ],
         },
-        "MaximumRetryAttempts": 0,
-        "Qualifier": "$LATEST",
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "HolidayStopProcessorScheduleRule",
+            "Arn",
+          ],
+        },
       },
-      "Type": "AWS::Lambda::EventInvokeConfig",
+      "Type": "AWS::Lambda::Permission",
     },
     "HolidayStopProcessorPolicy": {
       "Properties": {
@@ -556,6 +565,16 @@ exports[`The holiday stop processor stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "HolidayStopProcessorRetryConfig": {
+      "Properties": {
+        "FunctionName": {
+          "Ref": "HolidayStopProcessor",
+        },
+        "MaximumRetryAttempts": 0,
+        "Qualifier": "$LATEST",
+      },
+      "Type": "AWS::Lambda::EventInvokeConfig",
+    },
     "HolidayStopProcessorRole": {
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -651,25 +670,6 @@ exports[`The holiday stop processor stack matches the snapshot 2`] = `
         ],
       },
       "Type": "AWS::Events::Rule",
-    },
-    "LambdaRule0AllowEventRuleholidaystopprocessorPRODLambda41B287B8750220FB": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "HolidayStopProcessor",
-            "Arn",
-          ],
-        },
-        "Principal": "events.amazonaws.com",
-        "SourceArn": {
-          "Fn::GetAtt": [
-            "HolidayStopProcessorScheduleRule",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
     },
   },
 }

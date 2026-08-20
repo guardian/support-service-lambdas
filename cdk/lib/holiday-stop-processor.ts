@@ -6,7 +6,7 @@ import {
 } from 'aws-cdk-lib/aws-cloudwatch';
 import { RuleTargetInput, Schedule } from 'aws-cdk-lib/aws-events';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { Architecture, CfnPermission, Runtime } from 'aws-cdk-lib/aws-lambda';
 import type { IConstruct } from 'constructs';
 import { SrLambdaErrorAlarm } from './cdk/SrLambdaErrorAlarm';
 import { SrScheduledLambda } from './cdk/SrScheduledLambda';
@@ -109,7 +109,7 @@ export class HolidayStopProcessor extends SrStack {
 			},
 			{
 				construct: lambda.node.findChild('EventInvokeConfig'),
-				forcedLogicalId: 'HolidayStopProcessorLambdaInvokeConfig',
+				forcedLogicalId: 'HolidayStopProcessorRetryConfig',
 				reason: 'Keeping resource names consistent.',
 			},
 			{
@@ -148,5 +148,13 @@ export class HolidayStopProcessor extends SrStack {
 				});
 			},
 		);
+
+		lambda.node.findAll().forEach((child) => {
+			if (child instanceof CfnPermission) {
+				child.overrideLogicalId(
+					'HolidayStopProcessorLambdaInvokePermission',
+				);
+			}
+		});
 	}
 }
