@@ -3,38 +3,31 @@ import { z } from 'zod';
 import { RestClientError } from '@modules/zuora/restClient';
 import type { IdentityClient } from './identityClient';
 
-const identityUserSchema = z.object({
+const identityUserByEmailSchema = z.object({
 	id: z.string(),
 	primaryEmailAddress: z.string(),
 	publicFields: z.object({ displayName: z.string() }),
 });
 
-const identityUserWithPrivateFieldsSchema = z.object({
+type IdentityUserByEmail = z.infer<typeof identityUserByEmailSchema>;
+
+const identityUserByIdSchema = z.object({
 	id: z.string(),
 	primaryEmailAddress: z.string().optional(),
 	publicFields: z.object({ displayName: z.string() }),
-	privateFields: z.object({
-		brazeUuid: z.string().optional(),
-		firstName: z.string().optional(),
-		secondName: z.string().optional(),
-	}),
 });
 
-type IdentityUser = z.infer<typeof identityUserSchema>;
+type IdentityUserById = z.infer<typeof identityUserByIdSchema>;
 
 const userByEmailResponseSchema = z.object({
 	status: z.literal('ok'),
-	user: identityUserSchema,
+	user: identityUserByEmailSchema,
 });
 
 const userByIdentityIdResponseSchema = z.object({
 	status: z.literal('ok'),
-	user: identityUserWithPrivateFieldsSchema,
+	user: identityUserByIdSchema,
 });
-
-type IdentityUserWithPrivateFields = z.infer<
-	typeof identityUserWithPrivateFieldsSchema
->;
 
 const guestAccountResponseSchema = z.object({
 	status: z.literal('ok'),
@@ -46,7 +39,7 @@ const guestAccountResponseSchema = z.object({
 export const getUserByEmail = async (
 	client: IdentityClient,
 	email: string,
-): Promise<IdentityUser | undefined> => {
+): Promise<IdentityUserByEmail | undefined> => {
 	try {
 		const response = await client.get(
 			`/user?emailAddress=${encodeURIComponent(email)}`,
@@ -67,7 +60,7 @@ export const getUserByEmail = async (
 export const getUserByIdentityId = async (
 	client: IdentityClient,
 	identityId: string,
-): Promise<IdentityUserWithPrivateFields | undefined> => {
+): Promise<IdentityUserById | undefined> => {
 	try {
 		const response = await client.get(
 			`/user/${encodeURIComponent(identityId)}`,

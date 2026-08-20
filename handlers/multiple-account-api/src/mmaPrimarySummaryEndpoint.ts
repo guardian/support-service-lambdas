@@ -19,9 +19,6 @@ export const mmaPrimarySummaryResponseSchema = z.object({
 	secondaryUsers: z.array(
 		secondaryUserRecordSchema.extend({
 			email: z.string().optional(),
-			displayName: z.string().optional(),
-			firstName: z.string().optional(),
-			lastName: z.string().optional(),
 		}),
 	),
 });
@@ -69,12 +66,12 @@ const getNonCancelledSecondaryUserListWithNames = async (
 
 	return Promise.all(
 		secondaryUsers.map(async (secondaryUser) =>
-			getSecondaryUserWithName(identityClient, secondaryUser),
+			getSecondaryUserWithEmail(identityClient, secondaryUser),
 		),
 	);
 };
 
-const getSecondaryUserWithName = async (
+const getSecondaryUserWithEmail = async (
 	identityClient: IdentityClient,
 	secondaryUser: SecondaryUserRecord,
 ) => {
@@ -91,9 +88,6 @@ const getSecondaryUserWithName = async (
 
 	return {
 		...secondaryUser,
-		displayName: userDetails.publicFields.displayName,
-		firstName: userDetails.privateFields.firstName,
-		lastName: userDetails.privateFields.secondName,
 		email: userDetails.primaryEmailAddress,
 	};
 };
