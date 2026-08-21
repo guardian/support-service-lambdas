@@ -6,17 +6,19 @@ allowedStages:
   - CODE
   - PROD
 deployments:
-  cfn:
+  holiday-stop-processor-cloudformation:
     type: cloud-formation
     app: holiday-stop-processor
     parameters:
-      templatePath: cfn.yaml
+      templateStagePaths:
+        CODE: holiday-stop-processor-CODE.template.json
+        PROD: holiday-stop-processor-PROD.template.json
   holiday-stop-processor:
     type: aws-lambda
     parameters:
       fileName: holiday-stop-processor.jar
-      bucket: support-service-lambdas-dist
+      bucketSsmLookup: true
       prefixStack: false
       functionNames:
         - holiday-stop-processor-
-    dependencies: [cfn]
+    dependencies: [holiday-stop-processor-cloudformation]
