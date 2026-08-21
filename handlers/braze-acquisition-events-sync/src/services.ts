@@ -49,6 +49,12 @@ export const defaultDeps: RuntimeDeps = {
 			);
 			return undefined;
 		}
+		if (!user.privateFields) {
+			logger.log(
+				`User found in IDAPI for identityId ${identityId} missing privateFields`,
+			);
+			return undefined;
+		}
 		const parsedPrivateFields = privateFieldsSchema.safeParse(
 			user.privateFields,
 		);
