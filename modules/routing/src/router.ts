@@ -1,4 +1,8 @@
-import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import type {
+	APIGatewayProxyEvent,
+	APIGatewayProxyResult,
+	Context,
+} from 'aws-lambda';
 import { mapPartition, mapValues, zipAll } from '@modules/arrayFunctions';
 import { getCallerInfo } from '@modules/logger/getCallerInfo';
 import { logger } from '@modules/logger/logger';
@@ -14,10 +18,25 @@ export type HttpMethod =
 	| 'OPTIONS'
 	| 'HEAD';
 
+/**
+ * The remaining time for the request, bounded by both API Gateway and Lambda.
+ */
+export type RequestContext = {
+	getRemainingTimeInMillis: () => number;
+};
+
+/**
+ * API Gateway REST integrations have a 29 second limit.
+ * https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-execution-service-limits-table.html
+ */
+const maximumApiGatewayRequestDurationInMilliseconds = 29_000;
+const apiGatewayResponseMarginInMilliseconds = 1_000;
+
 export type Handler<E, TPath, TBody> = (
 	event: E,
 	path: TPath,
 	body: TBody,
+	context?: RequestContext,
 ) => Promise<APIGatewayProxyResult>;
 
 export type Route<TPath, TBody> = {
@@ -96,7 +115,19 @@ export function Router(
 	const callerInfo = getCallerInfo();
 	const httpRouter = async (
 		event: APIGatewayProxyEvent,
+		context?: Context,
 	): Promise<APIGatewayProxyResult> => {
+		const requestDeadline =
+			Date.now() +
+			maximumApiGatewayRequestDurationInMilliseconds -
+			apiGatewayResponseMarginInMilliseconds;
+		const requestContext: RequestContext = {
+			getRemainingTimeInMillis: () =>
+				Math.min(
+					requestDeadline - Date.now(),
+					context?.getRemainingTimeInMillis() ?? Number.POSITIVE_INFINITY,
+				),
+		};
 		try {
 			for (const route of routes) {
 				const matchResult = matchPath(route.path, event.path);
@@ -116,6 +147,7 @@ export function Router(
 						eventWithParams,
 						eventWithParams.pathParameters,
 						eventWithParams.body,
+						requestContext,
 					);
 				}
 			}

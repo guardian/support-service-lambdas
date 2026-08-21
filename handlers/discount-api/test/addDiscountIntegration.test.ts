@@ -44,12 +44,13 @@ test('createPriceRiseSubscription', async () => {
 	await doPriceRise(zuoraClient, subscription, nextBillingDate);
 
 	console.log('Apply a discount to the subscription');
-	await addDiscount(
-		zuoraClient,
+	await addDiscount(zuoraClient, {
 		subscriptionNumber,
-		dayjs(subscription.termStartDate),
-		dayjs(subscription.termEndDate),
-		nextBillingDate,
-		'8ad09be48b23d33f018b23e53afd522d',
-	);
+		accountNumber: subscription.accountNumber,
+		termStartDate: dayjs(subscription.termStartDate),
+		termEndDate: dayjs(subscription.termEndDate),
+		today: dayjs(),
+		applyFromDate: nextBillingDate,
+		discountProductRatePlanId: '8ad09be48b23d33f018b23e53afd522d',
+	});
 }, 30000);

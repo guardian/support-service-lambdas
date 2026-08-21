@@ -38,7 +38,7 @@ test('Supporter Plus subscriptions can have a discount and get an email', async 
 		subscription,
 		account,
 		subscriptionNumber,
-		paymentDate.add(2, 'months').add(1, 'day'),
+		today,
 	);
 
 	const expected: ApplyDiscountResponseBody = {
