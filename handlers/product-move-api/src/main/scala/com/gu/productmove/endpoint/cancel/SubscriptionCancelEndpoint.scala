@@ -24,7 +24,6 @@ import com.gu.productmove.invoicingapi.InvoicingApiRefund.RefundResponse
 import com.gu.productmove.invoicingapi.{InvoicingApiRefund, InvoicingApiRefundLive}
 import com.gu.productmove.zuora.rest.*
 import com.gu.productmove.zuora.{
-  CancellationResponse,
   CreditBalanceAdjustment,
   CreditBalanceAdjustmentLive,
   GetAccount,
