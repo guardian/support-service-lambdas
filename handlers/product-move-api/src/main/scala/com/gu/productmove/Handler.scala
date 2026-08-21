@@ -137,7 +137,7 @@ class TestContext() extends Context {
 
   override def getClientContext: ClientContext = ???
 
-  override def getRemainingTimeInMillis: Int = ???
+  override def getRemainingTimeInMillis: Int = 300000
 
   override def getMemoryLimitInMB: Int = ???
 
