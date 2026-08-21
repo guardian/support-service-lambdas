@@ -74,10 +74,10 @@ class SubscriptionCancelEndpointSteps(
       )
       supporterPlusCharge <- getSupporterPlusCharge(charges, zuoraIds.supporterPlusZuoraIds)
 
-      today <- Clock.currentDateTime.map(_.toLocalDate)
+      currentDate <- Clock.currentDateTime.map(_.toLocalDate)
 
       // check whether the sub is within the first 14 days of purchase - if it is then the subscriber is entitled to a refund
-      shouldBeRefundedDate = getRefundDateIfEligibile(today, subscription.LastPlanAddedDate__c)
+      shouldBeRefundedDate = getRefundDateIfEligibile(currentDate, subscription.LastPlanAddedDate__c)
       _ <- ZIO.log(s"Backdated refund effective date is $shouldBeRefundedDate")
 
       cancellationDate <- ZIO
@@ -91,7 +91,7 @@ class SubscriptionCancelEndpointSteps(
       _ <- ZIO.log(s"Cancellation date is $cancellationDate")
 
       _ <- ZIO.log(s"Attempting to cancel sub")
-      cancellationResponse <- zuoraCancel.cancel(subscriptionName, cancellationDate)
+      _ <- zuoraCancel.cancel(subscription.accountNumber, subscriptionName, cancellationDate, today)
       _ <- ZIO.log("Sub cancelled as of: " + cancellationDate)
 
       _ <- ZIO.log(
@@ -100,7 +100,7 @@ class SubscriptionCancelEndpointSteps(
       )
       _ <-
         if (shouldBeRefundedDate.isDefined)
-          sqs.queueRefund(RefundInput(subscriptionName, account.basicInfo.id, today))
+          sqs.queueRefund(RefundInput(subscriptionName, account.basicInfo.id, currentDate))
         else
           ZIO.succeed(())
 

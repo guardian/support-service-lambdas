@@ -1,26 +1,29 @@
 package com.gu.productmove.zuora
 
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
-import com.gu.productmove.zuora.model.SubscriptionName
+import com.gu.productmove.zuora.model.{AccountNumber, SubscriptionName}
 import zio.*
 
 import java.time.LocalDate
 
-class MockZuoraCancel(responses: Map[(SubscriptionName, LocalDate), CancellationResponse]) extends ZuoraCancel {
+class MockZuoraCancel(responses: Set[(SubscriptionName, LocalDate)]) extends ZuoraCancel {
 
-  private var mutableStore: List[(SubscriptionName, LocalDate)] = Nil // we need to remember the side effects
+  private var mutableStore: List[(AccountNumber, SubscriptionName, LocalDate, LocalDate)] =
+    Nil // we need to remember the side effects
 
   def requests = mutableStore.reverse
 
   override def cancel(
+      accountNumber: AccountNumber,
       subscriptionName: SubscriptionName,
       chargedThroughDate: LocalDate,
-  ): Task[CancellationResponse] = {
-    mutableStore = (subscriptionName, chargedThroughDate) :: mutableStore
+      orderDate: LocalDate,
+  ): Task[Unit] = {
+    mutableStore = (accountNumber, subscriptionName, chargedThroughDate, orderDate) :: mutableStore
 
-    responses.get((subscriptionName, chargedThroughDate)) match {
-      case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
-      case None =>
+    responses.contains((subscriptionName, chargedThroughDate)) match {
+      case true => ZIO.unit
+      case false =>
         ZIO.fail(
           new Throwable(
             s"MockZuoraCancel: no response stubbed for parameters: (${subscriptionName.value}, $chargedThroughDate)",
@@ -31,6 +34,6 @@ class MockZuoraCancel(responses: Map[(SubscriptionName, LocalDate), Cancellation
 }
 
 object MockZuoraCancel {
-  def requests: ZIO[MockZuoraCancel, Nothing, List[(SubscriptionName, LocalDate)]] =
+  def requests: ZIO[MockZuoraCancel, Nothing, List[(AccountNumber, SubscriptionName, LocalDate, LocalDate)]] =
     ZIO.serviceWith[MockZuoraCancel](_.requests)
 }
