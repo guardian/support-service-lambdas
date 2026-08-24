@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import { sendEmail } from '@modules/email/email';
 import { logger } from '@modules/logger/logger';
 import { ok } from '@modules/routing/apiGatewayResponses';
-import { Router } from '@modules/routing/router';
+import { type RequestContext, Router } from '@modules/routing/router';
 import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
 import { withBodyParser } from '@modules/routing/withParsers';
 import type { Stage } from '@modules/stage';
@@ -60,6 +60,8 @@ export function applyDiscountHandler(stage: Stage) {
 		zuoraClient: ZuoraClient,
 		subscription: ZuoraSubscription,
 		account: ZuoraAccount,
+		_path: Record<string, string>,
+		context?: RequestContext,
 	): Promise<APIGatewayProxyResult> => {
 		const { response, emailPayload } = await applyDiscountEndpoint(
 			stage,
@@ -68,6 +70,9 @@ export function applyDiscountHandler(stage: Stage) {
 			account,
 			subscription.subscriptionNumber,
 			dayjs(),
+			context === undefined
+				? undefined
+				: () => context.getRemainingTimeInMillis(),
 		);
 		await sendEmail(stage, emailPayload);
 		return ok(response, applyDiscountResponseSchema);

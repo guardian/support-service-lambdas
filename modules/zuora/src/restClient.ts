@@ -33,6 +33,7 @@ export abstract class RestClient {
 		path: string,
 		schema: S,
 		urlSearchParams?: URLSearchParams,
+		timeoutInMilliseconds?: number,
 	): Promise<z.infer<S>> {
 		return await this.fetchWithLogging(getCallerInfo(1))(
 			path,
@@ -41,6 +42,7 @@ export abstract class RestClient {
 			undefined,
 			undefined,
 			urlSearchParams,
+			timeoutInMilliseconds,
 		);
 	}
 
@@ -49,6 +51,7 @@ export abstract class RestClient {
 		body: string,
 		schema: S,
 		headers?: Record<string, string>,
+		timeoutInMilliseconds?: number,
 	): Promise<z.infer<S>> {
 		return await this.fetchWithLogging(getCallerInfo(1))(
 			path,
@@ -56,6 +59,8 @@ export abstract class RestClient {
 			schema,
 			body,
 			headers,
+			undefined,
+			timeoutInMilliseconds,
 		);
 	}
 
@@ -64,6 +69,7 @@ export abstract class RestClient {
 		body: string,
 		schema: S,
 		headers?: Record<string, string>,
+		timeoutInMilliseconds?: number,
 	): Promise<z.infer<S>> {
 		return await this.fetchWithLogging(getCallerInfo(1))(
 			path,
@@ -71,6 +77,8 @@ export abstract class RestClient {
 			schema,
 			body,
 			headers,
+			undefined,
+			timeoutInMilliseconds,
 		);
 	}
 
@@ -79,6 +87,7 @@ export abstract class RestClient {
 		body: string,
 		schema: S,
 		headers?: Record<string, string>,
+		timeoutInMilliseconds?: number,
 	): Promise<z.infer<S>> {
 		return await this.fetchWithLogging(getCallerInfo(1))(
 			path,
@@ -86,17 +95,24 @@ export abstract class RestClient {
 			schema,
 			body,
 			headers,
+			undefined,
+			timeoutInMilliseconds,
 		);
 	}
 
 	public async delete<S extends ZodType>(
 		path: string,
 		schema: S,
+		timeoutInMilliseconds?: number,
 	): Promise<z.infer<S>> {
 		return await this.fetchWithLogging(getCallerInfo(1))(
 			path,
 			'DELETE',
 			schema,
+			undefined,
+			undefined,
+			undefined,
+			timeoutInMilliseconds,
 		);
 	}
 
@@ -135,6 +151,7 @@ export abstract class RestClient {
 		body?: string,
 		headers?: Record<string, string>,
 		params?: URLSearchParams,
+		timeoutInMilliseconds?: number,
 	): Promise<z.infer<S>> {
 		const authorisation = await this.tokenProvider.getAuthorisation();
 		const pathWithoutLeadingSlash = path.replace(/^\//, '');
@@ -147,6 +164,10 @@ export abstract class RestClient {
 				...headers,
 			},
 			body,
+			signal:
+				timeoutInMilliseconds === undefined
+					? undefined
+					: AbortSignal.timeout(timeoutInMilliseconds),
 		});
 		const responseBody = await response.text();
 

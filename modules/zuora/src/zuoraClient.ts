@@ -28,6 +28,7 @@ export class ZuoraClient extends RestClient {
 		body?: string,
 		headers?: Record<string, string>,
 		params?: URLSearchParams,
+		timeoutInMilliseconds?: number,
 	): Promise<z.infer<S>> {
 		try {
 			/*
@@ -45,6 +46,7 @@ export class ZuoraClient extends RestClient {
 				body,
 				headers,
 				params,
+				timeoutInMilliseconds,
 			);
 		} catch (e) {
 			if (e instanceof RestClientError) {
