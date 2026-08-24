@@ -1,12 +1,14 @@
 import type { Dayjs } from 'dayjs';
 import { z } from 'zod';
-import { createOrderAsynchronously } from './orders/asyncOrderRequests';
 import { type OrderAction, singleTriggerDate } from './orders/orderActions';
 import type {
 	CreateOrderRequest,
 	PreviewOrderRequest,
 } from './orders/orderRequests';
-import { previewOrderRequest } from './orders/orderRequests';
+import {
+	executeOrderRequest,
+	previewOrderRequest,
+} from './orders/orderRequests';
 import { zuoraDateFormat } from './utils';
 import type { ZuoraClient } from './zuoraClient';
 
@@ -91,17 +93,21 @@ export const buildPreviewDiscountOrderRequest = (
 	},
 });
 
-/**
- * https://developer.zuora.com/v1-api-reference/api/orders/post_createorderasynchronously
- */
+const completedOrderResponseSchema = z.object({
+	status: z.literal('Completed'),
+});
+
+/** https://developer.zuora.com/v1-api-reference/api/orders/post_order */
 export const addDiscount = async (
 	zuoraClient: ZuoraClient,
 	input: DiscountOrderInput,
 	maximumDurationInMilliseconds = 18_000,
 ): Promise<void> => {
-	await createOrderAsynchronously(
+	await executeOrderRequest(
 		zuoraClient,
 		buildDiscountOrderRequest(input),
+		completedOrderResponseSchema,
+		undefined,
 		maximumDurationInMilliseconds,
 	);
 };

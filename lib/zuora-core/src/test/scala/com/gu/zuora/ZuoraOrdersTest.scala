@@ -197,6 +197,30 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
     jobReads.get() shouldBe 0
   }
 
+  it should "allow a background worker to wait beyond the default attempt duration" in {
+    val clock = new AtomicLong(0)
+    val jobReads = new AtomicInteger(0)
+    val backend = SttpBackendStub.synchronous.whenRequestMatchesPartial {
+      case submittedRequest: Request[_, _] if submittedRequest.method == Method.POST =>
+        Response.ok("""{"jobId":"job-1","success":true}""")
+      case statusRequest: Request[_, _] if statusRequest.method == Method.GET =>
+        if (jobReads.getAndIncrement() == 0) {
+          clock.addAndGet(6.minutes.toNanos)
+          Response.ok("""{"status":"Processing","errors":null,"result":null}""")
+        } else Response.ok("""{"status":"Completed","errors":null,"result":{"status":"Completed"}}""")
+    }
+
+    val result = createOrder(
+      backend,
+      clock,
+      maxOrderDuration = 13.minutes + 50.seconds,
+      maxOrderAttemptDuration = 13.minutes + 50.seconds,
+    )(request)
+
+    result shouldBe Right(AsyncOrderResult(OrderStatus.Completed))
+    jobReads.get() shouldBe 2
+  }
+
   "waitForCompletion" should "fail when the job completes without a completed order" in {
     val result = waitFor(
       AsyncJobReport(
@@ -331,6 +355,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
       backend: SttpBackend[Identity, Any],
       clock: AtomicLong,
       maxOrderDuration: FiniteDuration = ZuoraOrders.MaximumOrderDuration,
+      maxOrderAttemptDuration: FiniteDuration = ZuoraOrders.MaximumOrderAttemptDuration,
   )(request: CreateOrderRequest) =
     ZuoraOrders.createOrderAsynchronously(
       config,
@@ -342,6 +367,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
       },
       monotonicNanos = () => clock.get(),
       maximumOrderDuration = maxOrderDuration,
+      maximumOrderAttemptDuration = maxOrderAttemptDuration,
     )(request)
 
   private def waitFor(report: AsyncJobReport): Either[ZuoraOrders.OrderFailure, AsyncOrderResult] =

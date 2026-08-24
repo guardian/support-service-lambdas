@@ -45,6 +45,8 @@ object Processor {
       getAccount: String => ZuoraApiResponse[ZuoraAccount],
       getNextInvoiceDate: String => ZuoraApiResponse[LocalDate] = null, // FIXME
       getRemainingTimeInMillis: () => Int,
+      maximumOrderDuration: FiniteDuration = ZuoraOrders.MaximumOrderDuration,
+      maximumOrderAttemptDuration: FiniteDuration = ZuoraOrders.MaximumOrderAttemptDuration,
   ): List[ProcessResult[Result]] = {
 
     def getSubscription(
@@ -59,7 +61,13 @@ object Processor {
     ): ZuoraApiResponse[Unit] = {
       val order = CreateOrderRequest.forCredit(subscription, update, MutableCalendar.today)
       ZuoraOrders
-        .createOrderAsynchronously(config, zuoraAccessToken, sttpBackend, maximumOrderDuration)(order)
+        .createOrderAsynchronously(
+          config,
+          zuoraAccessToken,
+          sttpBackend,
+          maximumOrderDuration,
+          maximumOrderAttemptDuration,
+        )(order)
         .map(_ => ())
     }
 
@@ -81,7 +89,7 @@ object Processor {
       resultOfZuoraCreditAdd: (Request, RatePlanCharge) => Result,
       writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_],
       getNextInvoiceDate: String => ZuoraApiResponse[LocalDate],
-      availableOrderDuration = () => orderDuration(getRemainingTimeInMillis()),
+      availableOrderDuration = () => orderDuration(getRemainingTimeInMillis(), maximumOrderDuration),
     )
   }
 
@@ -219,11 +227,12 @@ object Processor {
 
   private[gu] def orderDuration(
       remainingTimeInMillis: Int,
+      maximumOrderDuration: FiniteDuration = ZuoraOrders.MaximumOrderDuration,
   ): Option[FiniteDuration] = {
     val timeAvailableForOrder = remainingTimeInMillis.millis - OrderCompletionBuffer - OrderSetupBuffer
     Option.when(timeAvailableForOrder >= MinimumOrderDuration) {
-      if (timeAvailableForOrder < ZuoraOrders.MaximumOrderDuration) timeAvailableForOrder
-      else ZuoraOrders.MaximumOrderDuration
+      if (timeAvailableForOrder < maximumOrderDuration) timeAvailableForOrder
+      else maximumOrderDuration
     }
   }
 
