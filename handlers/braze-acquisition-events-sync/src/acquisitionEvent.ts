@@ -33,6 +33,7 @@ export const acquisitionDataRowSchema = z.object({
 	product: z.enum(acquisitionProductValues),
 	printOptions: z
 		.object({ product: z.string().nullable().optional() })
+		.nullable()
 		.optional(),
 	amount: z.number().nullable().optional(),
 	currency: z.string(),
@@ -50,7 +51,7 @@ export const acquisitionsEventSchema = z
 export interface AcquisitionDataRow {
 	eventTimeStamp: string;
 	product: AcquisitionProduct;
-	printOptions?: { product?: string | null };
+	printOptions?: { product?: string | null } | null;
 	currency: Currency;
 	paymentFrequency: PaymentFrequency;
 	identityId?: string | null;

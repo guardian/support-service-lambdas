@@ -143,6 +143,21 @@ describe('processAcquisitionEvent', () => {
 		},
 	);
 
+	it('handles printOptions being null (real EventBridge payload)', () => {
+		const event = buildEvent({
+			product: 'PRINT_SUBSCRIPTION',
+			printOptions: null,
+		});
+
+		const payload = transformEventForBrazePayload(
+			event.detail,
+			'external-user-123',
+		);
+		expect(payload.events?.[0]?.properties?.product_name).toEqual(
+			'Newspaper - Subscription',
+		);
+	});
+
 	it.each([
 		['ONE_OFF', 'One-off payment'],
 		['MONTHLY', 'Month'],
