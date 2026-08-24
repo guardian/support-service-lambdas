@@ -88,16 +88,17 @@ export const deleteSecondaryUserEndpoint = async (
 				],
 			}),
 		);
-		const zuoraSubscription = await getSubscription(
-			zuoraClient,
-			subscriptionName,
-		);
-		const account = await getAccount(
-			zuoraClient,
-			zuoraSubscription.accountNumber,
-		);
 
 		if (cancelledBy === 'secondary') {
+			const zuoraSubscription = await getSubscription(
+				zuoraClient,
+				subscriptionName,
+			);
+			const account = await getAccount(
+				zuoraClient,
+				zuoraSubscription.accountNumber,
+			);
+
 			await sendLeaveSubscriptionEmail(
 				stage,
 				account.billToContact.firstName,
