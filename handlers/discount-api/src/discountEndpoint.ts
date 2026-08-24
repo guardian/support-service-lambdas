@@ -30,7 +30,7 @@ const postOrderWorkBufferInMilliseconds = 10_000;
 const minimumOrderDurationInMilliseconds = 10_000;
 /**
  * API Gateway gives a REST API integration at most 29 seconds. The eighteen
- * second synchronous order budget leaves ten seconds for the billing preview and confirmation
+ * second order budget leaves ten seconds for the billing preview and confirmation
  * email, plus one second of timing margin before the caller receives a timeout.
  */
 const maximumInteractiveOrderDurationInMilliseconds = 18_000;
