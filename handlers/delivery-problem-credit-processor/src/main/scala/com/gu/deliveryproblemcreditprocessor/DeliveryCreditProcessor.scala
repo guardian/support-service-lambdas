@@ -26,8 +26,13 @@ import zio.{RIO, Task, ZIO}
 
 import java.time.{DayOfWeek, LocalDate, LocalDateTime}
 import scala.concurrent.ExecutionContext
+import scala.concurrent.duration.{FiniteDuration, MINUTES, SECONDS}
 
 object DeliveryCreditProcessor extends Logging {
+
+  /** The 15-minute Lambda leaves the shared processor's 70-second completion and setup buffer.
+    */
+  private val MaximumOrderDuration: FiniteDuration = FiniteDuration(13, MINUTES) + FiniteDuration(50, SECONDS)
 
   private implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
   private val zuoraSttpBackend = HttpURLConnectionBackend()
@@ -116,6 +121,8 @@ object DeliveryCreditProcessor extends Logging {
             writeCreditResultsToSalesforce(sfAuthConfig),
             Zuora.accountGetResponse(zuoraConfig, zuoraAccessToken, zuoraSttpBackend),
             getRemainingTimeInMillis = getRemainingTimeInMillis,
+            maximumOrderDuration = MaximumOrderDuration,
+            maximumOrderAttemptDuration = MaximumOrderDuration,
           ),
       )
     } yield processResult

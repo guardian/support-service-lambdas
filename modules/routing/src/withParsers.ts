@@ -20,7 +20,7 @@ export const withBodyParser =
 		bodyParser: z.Schema<TBody>,
 		handler: Handler<E, TPath, TBody>,
 	): Handler<E, TPath, string | null> =>
-	async (event: E, path: TPath, unparsedBody: string | null) => {
+	async (event: E, path: TPath, unparsedBody: string | null, context) => {
 		if (unparsedBody === null) {
 			return {
 				statusCode: 400,
@@ -49,7 +49,7 @@ export const withBodyParser =
 				}),
 			};
 		}
-		return await handler(event, path, parsedBody.data);
+		return await handler(event, path, parsedBody.data, context);
 	};
 
 export const withPathParser =
@@ -57,7 +57,7 @@ export const withPathParser =
 		pathParser: z.Schema<TPath>,
 		handler: Handler<E, TPath, TBody>,
 	): Handler<E, unknown, TBody> =>
-	async (event: E, path: unknown, body: TBody) => {
+	async (event: E, path: unknown, body: TBody, context) => {
 		const parsedPath = pathParser.safeParse(path);
 		if (!parsedPath.success) {
 			return {
@@ -68,7 +68,7 @@ export const withPathParser =
 				}),
 			};
 		}
-		return await handler(event, parsedPath.data, body);
+		return await handler(event, parsedPath.data, body, context);
 	};
 export const withParsers = <E, TPath, TBody>(
 	path: z.Schema<TPath>,
