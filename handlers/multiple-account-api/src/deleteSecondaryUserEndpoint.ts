@@ -4,9 +4,11 @@ import {
 } from '@aws-sdk/client-dynamodb';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
+import { getUserByIdentityId } from '@modules/identity/idapi';
+import type { IdentityClient } from '@modules/identity/identityClient';
 import { logger } from '@modules/logger/logger';
 import { secondarySubscriptionName } from '@modules/multiple-account/secondarySubscription';
-import type { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
+import { type SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
 import {
 	badRequest,
 	buildErrorResponse,
@@ -16,6 +18,7 @@ import type { Stage } from '@modules/stage';
 import { getDeleteSupporterRatePlanTransaction } from '@modules/supporter-product-data/supporterProductData';
 import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
+import type { ZuoraAccount } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { sendLeaveSubscriptionEmail } from './emails/leaveSubcriptionEmail';
 
@@ -28,11 +31,24 @@ export type DeleteSecondaryUserPath = z.infer<
 	typeof deleteSecondaryUserPathSchema
 >;
 
+const getZuoraAccount = async (
+	zuoraClient: ZuoraClient,
+	subscriptionName: string,
+): Promise<ZuoraAccount> => {
+	const zuoraSubscription = await getSubscription(
+		zuoraClient,
+		subscriptionName,
+	);
+
+	return getAccount(zuoraClient, zuoraSubscription.accountNumber);
+};
+
 export const deleteSecondaryUserEndpoint = async (
 	stage: Stage,
 	secondaryUserRepository: SecondaryUserRepository,
 	dynamoClient: DynamoDBClient,
 	zuoraClient: ZuoraClient,
+	identityClient: IdentityClient,
 	subscriptionName: string,
 	secondaryIdentityId: string,
 	loggedInUserIdentityId: string,
@@ -90,20 +106,20 @@ export const deleteSecondaryUserEndpoint = async (
 		);
 
 		if (cancelledBy === 'secondary') {
-			const zuoraSubscription = await getSubscription(
-				zuoraClient,
-				subscriptionName,
-			);
-			const account = await getAccount(
-				zuoraClient,
-				zuoraSubscription.accountNumber,
-			);
+			const [account, secondaryUserDetails] = await Promise.all([
+				getZuoraAccount(zuoraClient, subscriptionName),
+				getUserByIdentityId(identityClient, secondaryIdentityId),
+			]);
+
+			if (!secondaryUserDetails?.primaryEmailAddress) {
+				throw new Error('Secondary user does not have email address');
+			}
 
 			await sendLeaveSubscriptionEmail(
 				stage,
 				account.billToContact.firstName,
 				account.billToContact.workEmail,
-				secondaryUser.secondaryEmail,
+				secondaryUserDetails.primaryEmailAddress,
 				secondaryIdentityId,
 			);
 		}

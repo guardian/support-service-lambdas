@@ -174,6 +174,7 @@ export const handler: Handler = Router([
 					secondaryUserRepository,
 					dynamoClient,
 					await lazyZuoraClient.get(),
+					await identityClientPromise,
 					subscriptionName,
 					secondaryIdentityId,
 					loggedInUserIdentityId,
