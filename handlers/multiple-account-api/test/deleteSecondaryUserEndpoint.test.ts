@@ -3,10 +3,12 @@ import type {
 	DynamoDBClient,
 	TransactWriteItem,
 } from '@aws-sdk/client-dynamodb';
+import type { IdentityClient } from '@modules/identity/identityClient';
 import type {
 	SecondaryUserRecord,
 	SecondaryUserRepository,
 } from '@modules/multiple-account/secondaryUserRepository';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { deleteSecondaryUserEndpoint } from '../src/deleteSecondaryUserEndpoint';
 
 const stage = 'CODE';
@@ -81,11 +83,15 @@ describe('deleteSecondaryUserEndpoint', () => {
 		const { repository, mockGetSoftDeleteTransaction } =
 			makeRepository(makeSecondaryUser());
 		const { client, mockSend } = makeDynamoClient();
+		const zuoraClient = {} as unknown as ZuoraClient;
+		const identityClient = {} as unknown as IdentityClient;
 
 		const result = await deleteSecondaryUserEndpoint(
 			stage,
 			repository,
 			client,
+			zuoraClient,
+			identityClient,
 			subscriptionName,
 			secondaryIdentityId,
 			primaryIdentityId,
@@ -120,11 +126,15 @@ describe('deleteSecondaryUserEndpoint', () => {
 		const { repository, mockGetSoftDeleteTransaction } =
 			makeRepository(makeSecondaryUser());
 		const { client } = makeDynamoClient();
+		const zuoraClient = {} as unknown as ZuoraClient;
+		const identityClient = {} as unknown as IdentityClient;
 
 		const result = await deleteSecondaryUserEndpoint(
 			stage,
 			repository,
 			client,
+			zuoraClient,
+			identityClient,
 			subscriptionName,
 			secondaryIdentityId,
 			secondaryIdentityId,
@@ -142,11 +152,15 @@ describe('deleteSecondaryUserEndpoint', () => {
 		const { repository, mockGetSoftDeleteTransaction } =
 			makeRepository(undefined);
 		const { client, mockSend } = makeDynamoClient();
+		const zuoraClient = {} as unknown as ZuoraClient;
+		const identityClient = {} as unknown as IdentityClient;
 
 		const result = await deleteSecondaryUserEndpoint(
 			stage,
 			repository,
 			client,
+			zuoraClient,
+			identityClient,
 			subscriptionName,
 			secondaryIdentityId,
 			primaryIdentityId,
@@ -163,11 +177,15 @@ describe('deleteSecondaryUserEndpoint', () => {
 		const { repository, mockGetSoftDeleteTransaction } =
 			makeRepository(undefined);
 		const { client, mockSend } = makeDynamoClient();
+		const zuoraClient = {} as unknown as ZuoraClient;
+		const identityClient = {} as unknown as IdentityClient;
 
 		const result = await deleteSecondaryUserEndpoint(
 			stage,
 			repository,
 			client,
+			zuoraClient,
+			identityClient,
 			subscriptionName,
 			secondaryIdentityId,
 			primaryIdentityId,
@@ -182,11 +200,15 @@ describe('deleteSecondaryUserEndpoint', () => {
 		const { repository, mockGetSoftDeleteTransaction } =
 			makeRepository(makeSecondaryUser());
 		const { client, mockSend } = makeDynamoClient();
+		const zuoraClient = {} as unknown as ZuoraClient;
+		const identityClient = {} as unknown as IdentityClient;
 
 		const result = await deleteSecondaryUserEndpoint(
 			stage,
 			repository,
 			client,
+			zuoraClient,
+			identityClient,
 			subscriptionName,
 			secondaryIdentityId,
 			'someone-else',
