@@ -20,14 +20,14 @@ import scala.concurrent.duration.{DurationInt, FiniteDuration, NANOSECONDS}
 
 object ZuoraOrders extends LazyLogging {
   private val PollInterval = 2.seconds
-  private val MaxOrderDuration = 5.minutes
+  private[gu] val MaximumOrderAttemptDuration = 5.minutes
   private val RequestReadTimeout = 2.minutes
   private val MaxOrderAttempts = 2
   private val LockingContentionCode = "[40000050]"
   private val LockingContentionRetryDelay = 1.minute
 
   private[gu] val MaximumOrderDuration: FiniteDuration =
-    MaxOrderDuration * MaxOrderAttempts.toLong + LockingContentionRetryDelay * (MaxOrderAttempts - 1).toLong
+    MaximumOrderAttemptDuration * MaxOrderAttempts.toLong + LockingContentionRetryDelay * (MaxOrderAttempts - 1).toLong
 
   private[zuora] sealed trait OrderFailure {
     def reason: String
@@ -57,9 +57,27 @@ object ZuoraOrders extends LazyLogging {
       config,
       accessToken,
       backend,
+      maximumOrderDuration,
+      MaximumOrderAttemptDuration,
+    )(request)
+
+  def createOrderAsynchronously(
+      config: ZuoraConfig,
+      accessToken: AccessToken,
+      backend: SttpBackend[Identity, Any],
+      maximumOrderDuration: FiniteDuration,
+      maximumOrderAttemptDuration: FiniteDuration,
+  )(
+      request: CreateOrderRequest,
+  ): ZuoraApiResponse[AsyncOrderResult] =
+    createOrderAsynchronously(
+      config,
+      accessToken,
+      backend,
       pause = duration => LockSupport.parkNanos(duration.toNanos),
       monotonicNanos = () => System.nanoTime(),
       maximumOrderDuration = maximumOrderDuration,
+      maximumOrderAttemptDuration = maximumOrderAttemptDuration,
     )(request)
 
   private[zuora] def createOrderAsynchronously(
@@ -69,16 +87,18 @@ object ZuoraOrders extends LazyLogging {
       pause: FiniteDuration => Unit,
       monotonicNanos: () => Long,
       maximumOrderDuration: FiniteDuration,
+      maximumOrderAttemptDuration: FiniteDuration,
   )(
       request: CreateOrderRequest,
   ): ZuoraApiResponse[AsyncOrderResult] = {
     require(maximumOrderDuration.length > 0, "maximumOrderDuration must be positive")
+    require(maximumOrderAttemptDuration.length > 0, "maximumOrderAttemptDuration must be positive")
 
     val orderDeadlineNanos = monotonicNanos() + maximumOrderDuration.toNanos
 
     @tailrec
     def attempt(attemptsRemaining: Int): Either[OrderFailure, AsyncOrderResult] = {
-      val attemptDeadlineNanos = math.min(orderDeadlineNanos, monotonicNanos() + MaxOrderDuration.toNanos)
+      val attemptDeadlineNanos = math.min(orderDeadlineNanos, monotonicNanos() + maximumOrderAttemptDuration.toNanos)
       val result = for {
         readTimeout <- remainingReadTimeout(attemptDeadlineNanos, monotonicNanos)
           .toRight(PermanentOrderFailure("Timed out before submitting the Zuora order"))

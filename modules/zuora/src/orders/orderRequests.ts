@@ -46,13 +46,20 @@ export function executeOrderRequest<T extends z.ZodType>(
 	orderRequest: CreateOrderRequest,
 	responseSchema: T,
 	idempotencyKey?: string,
+	timeoutInMilliseconds?: number,
 ): Promise<z.infer<T>> {
 	const path = `/v1/orders`;
 	const body = JSON.stringify(orderRequest);
 	const headers = idempotencyKey
 		? { 'idempotency-key': idempotencyKey }
 		: undefined;
-	return zuoraClient.post(path, body, responseSchema, headers);
+	return zuoraClient.post(
+		path,
+		body,
+		responseSchema,
+		headers,
+		timeoutInMilliseconds,
+	);
 }
 
 export function previewOrderRequest<T extends z.ZodType>(

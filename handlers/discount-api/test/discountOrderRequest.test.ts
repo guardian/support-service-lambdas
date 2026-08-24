@@ -1,9 +1,11 @@
 import dayjs from 'dayjs';
 import {
+	addDiscount,
 	buildDiscountOrderRequest,
 	buildPreviewDiscountOrderRequest,
 	type DiscountOrderInput,
 } from '@modules/zuora/discount';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { orderDuration } from '../src/discountEndpoint';
 
 const input: DiscountOrderInput = {
@@ -103,5 +105,20 @@ test('keeps time for the billing preview and email after an order', () => {
 	expect(orderDuration(() => 60_000)).toBe(18_000);
 	expect(() => orderDuration(() => 19_999)).toThrow(
 		'Not enough Lambda time remains',
+	);
+});
+
+test('sends the discount as one synchronous order request', async () => {
+	const post = jest.fn().mockResolvedValue({ status: 'Completed' });
+	const zuoraClient = { post } as unknown as ZuoraClient;
+
+	await addDiscount(zuoraClient, input, 18_000);
+
+	expect(post).toHaveBeenCalledWith(
+		'/v1/orders',
+		JSON.stringify(buildDiscountOrderRequest(input)),
+		expect.anything(),
+		undefined,
+		18_000,
 	);
 });
