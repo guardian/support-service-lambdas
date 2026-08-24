@@ -51,7 +51,7 @@ private class ZuoraCancelLive(zuoraClient: ZuoraClient) extends ZuoraCancel {
     } yield ()
 
   /** https://developer.zuora.com/v1-api-reference/api/orders/post_order */
-  private def submit(request: CancellationOrderRequest): Task[SyncOrderResult] =
+  private def submit(request: CancellationOrderRequest): Task[OrderResult] =
     for {
       body <- zuoraClient.send(
         basicRequest
@@ -61,7 +61,7 @@ private class ZuoraCancelLive(zuoraClient: ZuoraClient) extends ZuoraCancel {
           .post(uri"orders"),
       )
       result <- ZIO.fromEither(
-        ZuoraRestBody.parseIfSuccessful[SyncOrderResult](body, ZuoraRestBody.ZuoraSuccessCheck.SuccessCheckLowercase),
+        ZuoraRestBody.parseIfSuccessful[OrderResult](body, ZuoraRestBody.ZuoraSuccessCheck.SuccessCheckLowercase),
       )
     } yield result
 }
@@ -134,7 +134,7 @@ object CancellationPolicy {
 
 case class ProcessingOptions(runBilling: Boolean, collectPayment: Boolean) derives JsonEncoder
 
-case class SyncOrderResult(status: OrderStatus) derives JsonDecoder
+case class OrderResult(status: OrderStatus) derives JsonDecoder
 
 enum OrderStatus(val value: String) {
   case Draft extends OrderStatus("Draft")
