@@ -122,13 +122,15 @@ describe('processAcquisitionEvent', () => {
 			'Newspaper - Subscription',
 		],
 		['PRINT_SUBSCRIPTION', 'VOUCHER_SIXDAY', 'Newspaper - Subscription'],
+		['PRINT_SUBSCRIPTION', null, 'Newspaper - Subscription'],
 		['APP_PREMIUM_TIER', undefined, 'Premium App'],
 	] as const)(
-		'maps product %s with printProduct %s to %s',
+		'maps product %s with printOptions.product %s to %s',
 		(product, printProduct, expectedProductName) => {
 			const event = buildEvent({
 				product,
-				printProduct,
+				printOptions:
+					printProduct === undefined ? undefined : { product: printProduct },
 			});
 
 			const payload = transformEventForBrazePayload(
