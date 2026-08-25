@@ -70,6 +70,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'workers',
 		'payment-api',
 		'supporter-product-data',
+		'support-backend',
 
 		// support-service-lambdas
 		'catalog-service',
