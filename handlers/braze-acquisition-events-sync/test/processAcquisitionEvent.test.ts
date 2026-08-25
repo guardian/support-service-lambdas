@@ -122,13 +122,15 @@ describe('processAcquisitionEvent', () => {
 			'Newspaper - Subscription',
 		],
 		['PRINT_SUBSCRIPTION', 'VOUCHER_SIXDAY', 'Newspaper - Subscription'],
+		['PRINT_SUBSCRIPTION', null, 'Newspaper - Subscription'],
 		['APP_PREMIUM_TIER', undefined, 'Premium App'],
 	] as const)(
-		'maps product %s with printProduct %s to %s',
+		'maps product %s with printOptions.product %s to %s',
 		(product, printProduct, expectedProductName) => {
 			const event = buildEvent({
 				product,
-				printProduct,
+				printOptions:
+					printProduct === undefined ? undefined : { product: printProduct },
 			});
 
 			const payload = transformEventForBrazePayload(
@@ -140,6 +142,21 @@ describe('processAcquisitionEvent', () => {
 			);
 		},
 	);
+
+	it('handles printOptions being null (real EventBridge payload)', () => {
+		const event = buildEvent({
+			product: 'PRINT_SUBSCRIPTION',
+			printOptions: null,
+		});
+
+		const payload = transformEventForBrazePayload(
+			event.detail,
+			'external-user-123',
+		);
+		expect(payload.events?.[0]?.properties?.product_name).toEqual(
+			'Newspaper - Subscription',
+		);
+	});
 
 	it.each([
 		['ONE_OFF', 'One-off payment'],

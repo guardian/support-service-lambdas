@@ -31,7 +31,10 @@ export type PaymentFrequency = (typeof paymentFrequencyValues)[number];
 export const acquisitionDataRowSchema = z.object({
 	eventTimeStamp: z.string(),
 	product: z.enum(acquisitionProductValues),
-	printProduct: z.string().nullable().optional(),
+	printOptions: z
+		.object({ product: z.string().nullable().optional() })
+		.nullable()
+		.optional(),
 	amount: z.number().nullable().optional(),
 	currency: z.string(),
 	paymentFrequency: z.enum(paymentFrequencyValues),
@@ -48,7 +51,7 @@ export const acquisitionsEventSchema = z
 export interface AcquisitionDataRow {
 	eventTimeStamp: string;
 	product: AcquisitionProduct;
-	printProduct?: string | null;
+	printOptions?: { product?: string | null } | null;
 	currency: Currency;
 	paymentFrequency: PaymentFrequency;
 	identityId?: string | null;

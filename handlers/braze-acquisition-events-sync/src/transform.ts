@@ -25,14 +25,15 @@ const paymentFrequencyMap: Partial<
 
 function mapProductName(event: AcquisitionDataRow): string {
 	if (event.product === 'PRINT_SUBSCRIPTION') {
+		const printProduct = event.printOptions?.product;
 		if (
-			event.printProduct === 'HOME_DELIVERY_SUNDAY' ||
-			event.printProduct === 'VOUCHER_SUNDAY'
+			printProduct === 'HOME_DELIVERY_SUNDAY' ||
+			printProduct === 'VOUCHER_SUNDAY'
 		) {
 			return 'Newspaper - Subscription';
 		}
 
-		if (event.printProduct !== 'GUARDIAN_WEEKLY') {
+		if (printProduct !== 'GUARDIAN_WEEKLY') {
 			return 'Newspaper - Subscription';
 		}
 

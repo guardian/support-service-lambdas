@@ -35,19 +35,23 @@ export class IamPolicies extends SrStack {
 					resources: ['*'],
 				}),
 				new AllowS3GetPolicy('contributions-ticker', ['CODE/*']),
-				new AllowSqsSendPolicy(this, 'braze-emails'),
+				new AllowSqsSendPolicy(this, [
+					'braze-emails',
+					'supporter-product-data',
+				]),
 			],
 		});
 	}
 }
 
 class AllowSqsSendPolicy extends PolicyStatement {
-	constructor(scope: GuStack, queueName: SrQueueName) {
+	constructor(scope: GuStack, queueNames: SrQueueName[]) {
 		super({
 			actions: ['sqs:GetQueueUrl', 'sqs:SendMessage'],
-			resources: [
-				`arn:aws:sqs:${scope.region}:${scope.account}:${queueName}-CODE`,
-			],
+			resources: queueNames.map(
+				(queueName) =>
+					`arn:aws:sqs:${scope.region}:${scope.account}:${queueName}-CODE`,
+			),
 		});
 	}
 }
