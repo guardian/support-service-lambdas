@@ -38,6 +38,7 @@ export function doPreviewInvoices(
 	zuoraClient: ZuoraClient,
 	orderRequest: PreviewOrderRequest,
 ): Promise<ZuoraPreviewResponse> {
+	console.log('doPreviewInvoices orderRequest:', JSON.stringify(orderRequest));
 	return previewOrderRequest(
 		zuoraClient,
 		orderRequest,
