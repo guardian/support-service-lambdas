@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/order -- the other import must come after the mocks
-import type { SQSEvent } from 'aws-lambda';
+import type { Context, SQSEvent } from 'aws-lambda';
 
 const mockLogger = {
 	log: jest.fn(),
@@ -114,7 +114,24 @@ describe('Consumer Handler', () => {
 				mockLogger,
 				expect.objectContaining({ data: { object: { id: 'du_2' } } }),
 				'du_2',
+				undefined,
 			);
+		});
+
+		it('passes the Lambda time budget to dispute closures', async () => {
+			const event = createMockSqsEvent('dispute.closed', 'du_test123');
+			const getRemainingTimeInMillis = jest.fn(() => 300_000);
+
+			await handler(event, { getRemainingTimeInMillis } as unknown as Context);
+
+			expect(mockHandleListenDisputeClosed).toHaveBeenCalledWith(
+				mockLogger,
+				expect.objectContaining({ data: { object: { id: 'du_test123' } } }),
+				'du_test123',
+				expect.any(Function),
+			);
+			const timeBudget = mockHandleListenDisputeClosed.mock.calls[0]?.[3];
+			expect(timeBudget()).toBe(300_000);
 		});
 	});
 });

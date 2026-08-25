@@ -1,4 +1,4 @@
-import type { SQSEvent } from 'aws-lambda';
+import type { Context, SQSEvent } from 'aws-lambda';
 import { Logger } from '@modules/logger/logger';
 import type {
 	ListenDisputeClosedRequestBody,
@@ -18,7 +18,10 @@ interface DisputeEventMessage {
 	disputeId: string;
 }
 
-export const handler = async (event: SQSEvent): Promise<void> => {
+export const handler = async (
+	event: SQSEvent,
+	context?: Context,
+): Promise<void> => {
 	logger.log(`Input: ${JSON.stringify(event)}`);
 	logger.log(`Processing ${event.Records.length} SQS dispute events`);
 
@@ -47,6 +50,9 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 						logger,
 						message.webhookData as ListenDisputeClosedRequestBody,
 						message.disputeId,
+						context === undefined
+							? undefined
+							: () => context.getRemainingTimeInMillis(),
 					);
 					break;
 				}
