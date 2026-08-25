@@ -27,25 +27,15 @@ modules:
 # Optional: Mount directories from host to container
 # mounts:
 #   - "source=${localEnv:HOME}/.gu/example,target=/home/vscode/.gu/example,readonly,type=bind,consistency=cached"
-mounts:
-  # Give the container its own node_modules (a named volume) rather than reusing
-  # the host's. The host is macOS but the container is Linux, so packages with
-  # native/platform-specific binaries (e.g. esbuild, and pnpm's .pnpm store) must
-  # be installed for Linux. This also speeds up file I/O vs a bind-mounted
-  # node_modules on macOS. It is populated by `pnpm install` in postCreateCommand.
-  - "source=support-service-lambdas-node-modules-volume,target=${containerWorkspaceFolder}/node_modules,type=volume"
-  # Give the container its own .idea (a named volume) so the in-container IntelliJ
-  # doesn't share IDE config with a host IntelliJ opened on the same repo. The repo
-  # is bind-mounted, so without this both IDEs write to the same .idea and clobber
-  # each other's Project JDK (e.g. "JDK ... (mise) is missing"). This lets you run
-  # both IDEs at once (e.g. editing devcontainer files on the host while launching
-  # the container from it).
-  - "source=support-service-lambdas-idea-volume,target=${containerWorkspaceFolder}/.idea,type=volume"
 
 # Optional: IDE plugins - shared project plugins like language support
 # plugins:
 #   vscode: []
 #   intellij: []
+
+# Optional: Extra switches for container generation (passed to `docker create`)
+runArgs:
+  - '--name=support-service-lambdas-devcontainer'
 
 # Optional: Commands to run after container creation
 # Each command has a 'cmd' field and a 'workingDirectory' field
@@ -77,13 +67,6 @@ postCreateCommand:
   - cmd: 'mise exec -- node --version'
     workingDirectory: '.'
   - cmd: 'mise exec -- corepack enable'
-    workingDirectory: '.'
-  - cmd: 'sudo chown -R "$(whoami):$(whoami)" node_modules'
-    workingDirectory: '.'
-  # The .idea directory is a named volume (see mounts above) so the container gets its
-  # own IntelliJ config. A fresh volume is owned by root, so take ownership as the
-  # container user before the IDE tries to write to it.
-  - cmd: 'sudo chown -R "$(whoami):$(whoami)" .idea'
     workingDirectory: '.'
   - cmd: 'mise exec -- pnpm install'
     workingDirectory: '.'
