@@ -51,6 +51,9 @@ describe('secondaryUserMeEndpoint', () => {
 			get: jest
 				.fn<Promise<SecondaryUserRecord[]>, [string]>()
 				.mockResolvedValue(users),
+			listNonCancelledByIdentity: jest
+				.fn<Promise<SecondaryUserRecord[]>, [string]>()
+				.mockResolvedValue(users),
 		}) as unknown as SecondaryUserRepository;
 
 	beforeEach(() => {
@@ -77,16 +80,18 @@ describe('secondaryUserMeEndpoint', () => {
 
 		expect(result.statusCode).toBe(200);
 		expect(JSON.parse(result.body)).toEqual({
-			primaryUsers: [
+			subscriptions: [
 				{
 					firstName: 'Ada',
 					lastName: 'Lovelace',
 					workEmail: 'ada@example.com',
+					subscriptionName: 'A-S00000001',
 				},
 				{
 					firstName: 'Alan',
 					lastName: 'Turing',
 					workEmail: 'alan@example.com',
+					subscriptionName: 'A-S00000002',
 				},
 			],
 		});
@@ -102,7 +107,7 @@ describe('secondaryUserMeEndpoint', () => {
 		expect(mockGetAccount).toHaveBeenCalledWith(zuoraClient, 'A00000002');
 	});
 
-	it('returns an empty primaryUsers list when there are no secondary users', async () => {
+	it('returns an empty subscriptions list when there are no secondary users', async () => {
 		const result = await secondaryUserDetailsEndpoint(
 			'secondary-id',
 			makeRepository([]),
@@ -110,7 +115,7 @@ describe('secondaryUserMeEndpoint', () => {
 		);
 
 		expect(result.statusCode).toBe(200);
-		expect(JSON.parse(result.body)).toEqual({ primaryUsers: [] });
+		expect(JSON.parse(result.body)).toEqual({ subscriptions: [] });
 		expect(mockGetSubscription).not.toHaveBeenCalled();
 		expect(mockGetAccount).not.toHaveBeenCalled();
 	});
