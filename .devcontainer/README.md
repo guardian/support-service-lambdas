@@ -17,32 +17,49 @@ These steps take you from a fresh checkout to a running dev container.
   Gateway / the built-in dev containers support) or **[VS Code](https://code.visualstudio.com/)** with the
   **[Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)**.
   These are assumed to be already installed.
+- **[mise](https://mise.jdx.dev/)** — needed on the host to generate the devcontainer config (`devenv generate`,
+  see below). Everything else the project needs runs inside the container.
 
-All other tooling (Java, Node, `mise`, the GitHub Copilot CLI, etc.) is installed automatically inside the container,
-so nothing else needs to be installed on your host.
+Apart from `mise` (used only to generate the config), all other tooling (Java, Node, the GitHub Copilot CLI, etc.)
+is installed automatically inside the container, so nothing else needs to be installed on your host.
 
 ### Open the dev container
 
-1. (Optional) Clone the repo locally. With the clone-in-volume flow below your
-   IDE clones the sources into the container for you, so a local checkout isn't
-   required to run the container — but it's handy for pointing the IDE at the
-   config file:
+The standard flow uses a **local checkout only to hold the config**, then has the IDE **clone the sources
+into a container volume** — so there is no bind mount of your working tree.
+
+1. Clone the repo locally:
    ```bash
    git clone git@github.com:guardian/support-service-lambdas.git
    cd support-service-lambdas
    ```
-2. Start the dev container from your IDE, cloning the repo into a container
-   volume (no host bind mount):
-   - **VS Code**: run **Dev Containers: Clone Repository in Container Volume**
-     from the command palette and point it at this repo. (If you already have a
-     local checkout open, **Reopen in Container** also works, but the
-     clone-in-volume flow keeps the whole filesystem inside the container.)
-   - **IntelliJ IDEA**: open `.devcontainer/shared/devcontainer.json`, then use
-     the gutter action / dev container prompt to **Create Dev Container and
-     Clone Sources**.
-3. Wait for the first build to finish. The first run is slower because it provisions the shared Scala caches
+2. Install the pinned host tooling (`devenv`, plus `java`/`node` from
+   [`.tool-versions`](../.tool-versions)) with `mise`:
+   ```bash
+   mise install
+   ```
+3. Generate the devcontainer config, including your personal `user/devcontainer.json` (see
+   [`devenv.yaml`](#devenvyaml) below):
+   ```bash
+   devenv generate
+   ```
+4. Create the container from the generated **`user/devcontainer.json`**, using your IDE's
+   clone-into-volume action (this clones the sources into a container volume; your local checkout is
+   not bind-mounted):
+   - **IntelliJ IDEA**: open `.devcontainer/user/devcontainer.json` and use the gutter action
+     **Create Dev Container and Clone Sources**.
+   - **VS Code**: run **Dev Containers: Clone Repository in Container Volume** from the command palette
+     (pointed at this repo), using the `user/devcontainer.json` configuration when prompted.
+5. Wait for the first build to finish. The first run is slower because it provisions the shared Scala caches
    (Ivy and coursier volumes), sets up the in-container tooling, and installs the GitHub Copilot CLI. Subsequent
    starts reuse these and are much faster.
+
+> [!NOTE]
+> Using `user/devcontainer.json` (rather than the committed `shared/devcontainer.json`) is what lets your
+> personal overrides — extra extensions/plugins etc. — apply to the container, so keep the local checkout
+> around and re-run `devenv generate` after editing `devenv.yaml`. Bear in mind that with clone-in-volume
+> your **uncommitted work lives only in the container volume** — if that volume is removed (e.g. a
+> from-scratch re-clone or `docker rm -f`), the work is lost, so commit and push often.
 
 ### Working inside the container
 
@@ -83,23 +100,26 @@ or any other config settings. Then run:
 ```bash
 devenv generate
 ``` 
-to regenerate the `shared/` and `user/` `devcontainer.json` files. (`devenv` is provided by `mise` — see
-[`.tool-versions`](../.tool-versions) — so run it from the repo root, e.g. `mise exec -- devenv generate`, if it
-isn't already on your `PATH`.)
+to regenerate the `shared/` and `user/` `devcontainer.json` files. (`devenv` is installed on the host by
+`mise` — see [`.tool-versions`](../.tool-versions) — so `devenv generate` works directly once `mise install`
+has run and `mise` is activated in your shell.)
 
 ### `shared/devcontainer.json`
 
-The main devcontainer configuration, committed to the repository and shared by all developers.
-It is generated from `devenv.yaml`.
+A devcontainer configuration generated from `devenv.yaml`, committed to the repository and shared by all
+developers. It contains only the project-wide settings (no personal overrides). It exists so the config can
+be inspected in the repo and used by tooling, but it is **not** the file you normally launch the container
+from — use `user/devcontainer.json` for that (see [Open the dev container](#open-the-dev-container)).
 
 > [!IMPORTANT]
 > Do not edit this file directly! Instead, edit `devenv.yaml` and then run `devenv generate`.
 
 ### `user/devcontainer.json`
 
-A personal copy of the devcontainer config, **git-ignored** (see `.gitignore`).
-This file is intended for your own overrides:
-extra VS Code extensions or Intellij plugins, personal settings or tweaks that shouldn't affect other contributors.
-Modify this file freely without worrying about polluting shared config.
-> [!IMPORTANT]
-> But be aware that `devenv generate` will overwrite it!
+**This is the file you launch the dev container from** (see [Open the dev container](#open-the-dev-container)).
+It is generated by `devenv generate` from `devenv.yaml` **merged with your personal preferences** (extra VS Code
+extensions or IntelliJ plugins, personal settings/tweaks), and is **git-ignored** (see `.gitignore`) so those
+overrides don't affect other contributors.
+
+To add personal overrides, put them in your user devenv config (`~/.config/devenv/devenv.yaml`) and re-run
+`devenv generate` — do not hand-edit `user/devcontainer.json`, as `devenv generate` will overwrite it.
