@@ -68,6 +68,16 @@ postCreateCommand:
     workingDirectory: '.'
   - cmd: 'mise exec -- corepack enable'
     workingDirectory: '.'
+  # Different IDEs clone the sources to different locations in the clone-into-volume
+  # flow (JetBrains -> /IdeaProjects/<repo>, VS Code -> /workspaces/<repo>). If you
+  # create the container in one IDE and then "Attach" to it from another (e.g. VS
+  # Code's Remote Explorer), that IDE opens the container's default directory rather
+  # than the project, and you have to hunt around the filesystem for the sources.
+  # postCreateCommand runs *in* the workspace folder, so $PWD here is wherever this
+  # IDE cloned the repo. Symlink a fixed, predictable path ($HOME/project) to it so
+  # there is always a standard place to open the project from, regardless of IDE.
+  - cmd: 'ln -sfn "$PWD" "$HOME/project"'
+    workingDirectory: '.'
   - cmd: 'mise exec -- pnpm install'
     workingDirectory: '.'
 # postStartCommand:
