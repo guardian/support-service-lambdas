@@ -2,13 +2,16 @@ import { sendEmail } from '@modules/email/email';
 import type { Logger } from '@modules/logger/logger';
 import { stageFromEnvironment } from '@modules/stage';
 import { getAccount } from '@modules/zuora/account';
-import { cancelSubscription } from '@modules/zuora/subscription';
+import { cancelSubscriptionWithOrder } from '@modules/zuora/orders/cancelSubscription';
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { cancelSubscriptionService } from '../../src/services/cancelSubscriptionService';
+import {
+	cancelSubscriptionService,
+	orderDuration,
+} from '../../src/services/cancelSubscriptionService';
 
 jest.mock('@modules/zuora/account');
-jest.mock('@modules/zuora/subscription');
+jest.mock('@modules/zuora/orders/cancelSubscription');
 jest.mock('@modules/email/email');
 jest.mock('@modules/stage');
 jest.mock('dayjs', () =>
@@ -27,6 +30,7 @@ describe('cancelSubscriptionService', () => {
 	} as unknown as jest.Mocked<Logger>;
 
 	const mockZuoraClient = {} as ZuoraClient;
+	const disputeId = 'dp_123';
 
 	const createMockSubscription = (
 		status: 'Active' | 'Cancelled',
@@ -63,29 +67,35 @@ describe('cancelSubscriptionService', () => {
 		jest.clearAllMocks();
 		(stageFromEnvironment as jest.Mock).mockReturnValue('TEST');
 		(getAccount as jest.Mock).mockResolvedValue(mockAccount);
-		(cancelSubscription as jest.Mock).mockResolvedValue({
-			invoiceId: 'INV-NEG-001',
-		});
+		(cancelSubscriptionWithOrder as jest.Mock).mockResolvedValue('INV-NEG-001');
 	});
 
-	it('should cancel active subscription with SpecificDate policy and runBilling=true', async () => {
+	it('cancels active subscriptions with a billing order', async () => {
 		const mockSubscription = createMockSubscription('Active');
 
 		const result = await cancelSubscriptionService(
 			mockLogger,
 			mockZuoraClient,
 			mockSubscription,
+			disputeId,
 		);
 
 		expect(result).toEqual({
 			cancelled: true,
 			negativeInvoiceId: 'INV-NEG-001',
 		});
-		expect(cancelSubscription).toHaveBeenCalledWith(
+		expect(cancelSubscriptionWithOrder).toHaveBeenCalledWith(
 			mockZuoraClient,
-			'SUB-12345',
-			expect.objectContaining({ format: expect.any(Function) }),
-			true,
+			expect.objectContaining({
+				accountNumber: 'ACC-12345',
+				subscriptionNumber: 'SUB-12345',
+				orderDate: expect.objectContaining({ format: expect.any(Function) }),
+				cancellationEffectiveDate: expect.objectContaining({
+					format: expect.any(Function),
+				}),
+			}),
+			180_000,
+			'stripe-dispute-cancellation-dp_123',
 		);
 	});
 
@@ -96,25 +106,25 @@ describe('cancelSubscriptionService', () => {
 			mockLogger,
 			mockZuoraClient,
 			mockSubscription,
+			disputeId,
 		);
 
 		expect(result).toEqual({ cancelled: false });
 		expect(mockLogger.log).toHaveBeenCalledWith(
 			'Subscription already inactive (Cancelled), skipping cancellation',
 		);
-		expect(cancelSubscription).not.toHaveBeenCalled();
+		expect(cancelSubscriptionWithOrder).not.toHaveBeenCalled();
 	});
 
 	it('should return negativeInvoiceId from cancel response', async () => {
 		const mockSubscription = createMockSubscription('Active');
-		(cancelSubscription as jest.Mock).mockResolvedValue({
-			invoiceId: 'INV-NEG-789',
-		});
+		(cancelSubscriptionWithOrder as jest.Mock).mockResolvedValue('INV-NEG-789');
 
 		const result = await cancelSubscriptionService(
 			mockLogger,
 			mockZuoraClient,
 			mockSubscription,
+			disputeId,
 		);
 
 		expect(result.negativeInvoiceId).toBe('INV-NEG-789');
@@ -123,27 +133,49 @@ describe('cancelSubscriptionService', () => {
 		);
 	});
 
-	it('should handle cancel response without invoiceId', async () => {
+	it('continues when the cancellation order does not generate an invoice', async () => {
 		const mockSubscription = createMockSubscription('Active');
-		(cancelSubscription as jest.Mock).mockResolvedValue({});
+		(cancelSubscriptionWithOrder as jest.Mock).mockResolvedValue(undefined);
 
-		const result = await cancelSubscriptionService(
-			mockLogger,
-			mockZuoraClient,
-			mockSubscription,
+		await expect(
+			cancelSubscriptionService(
+				mockLogger,
+				mockZuoraClient,
+				mockSubscription,
+				disputeId,
+			),
+		).resolves.toEqual({ cancelled: true, negativeInvoiceId: undefined });
+		expect(mockLogger.log).not.toHaveBeenCalledWith(
+			'Cancellation generated negative invoice: undefined',
 		);
-
-		expect(result).toEqual({ cancelled: true, negativeInvoiceId: undefined });
 	});
 
 	it('should propagate errors when ZuoraClient throws', async () => {
 		const mockSubscription = createMockSubscription('Active');
 		const error = new Error('Zuora API error: Subscription not found');
-		(cancelSubscription as jest.Mock).mockRejectedValue(error);
+		(cancelSubscriptionWithOrder as jest.Mock).mockRejectedValue(error);
 
 		await expect(
-			cancelSubscriptionService(mockLogger, mockZuoraClient, mockSubscription),
+			cancelSubscriptionService(
+				mockLogger,
+				mockZuoraClient,
+				mockSubscription,
+				disputeId,
+			),
 		).rejects.toThrow('Zuora API error: Subscription not found');
+	});
+
+	describe('orderDuration', () => {
+		it('leaves two minutes for the remaining dispute processing', () => {
+			expect(orderDuration(() => 300_000)).toBe(180_000);
+			expect(orderDuration(() => 210_000)).toBe(90_000);
+		});
+
+		it('does not submit an order without enough time left', () => {
+			expect(() => orderDuration(() => 129_999)).toThrow(
+				'Not enough Lambda time remains',
+			);
+		});
 	});
 
 	describe('email sending', () => {
@@ -155,6 +187,7 @@ describe('cancelSubscriptionService', () => {
 				mockLogger,
 				mockZuoraClient,
 				mockSubscription,
+				disputeId,
 			);
 
 			expect(result.cancelled).toBe(true);
@@ -190,6 +223,7 @@ describe('cancelSubscriptionService', () => {
 				mockLogger,
 				mockZuoraClient,
 				mockSubscription,
+				disputeId,
 			);
 
 			expect(result.cancelled).toBe(true);
@@ -207,6 +241,7 @@ describe('cancelSubscriptionService', () => {
 				mockLogger,
 				mockZuoraClient,
 				mockSubscription,
+				disputeId,
 			);
 
 			expect(result.cancelled).toBe(true);
@@ -226,6 +261,7 @@ describe('cancelSubscriptionService', () => {
 				mockLogger,
 				mockZuoraClient,
 				mockSubscription,
+				disputeId,
 			);
 
 			expect(result.cancelled).toBe(true);
@@ -243,6 +279,7 @@ describe('cancelSubscriptionService', () => {
 				mockLogger,
 				mockZuoraClient,
 				mockSubscription,
+				disputeId,
 			);
 
 			expect(sendEmail).not.toHaveBeenCalled();

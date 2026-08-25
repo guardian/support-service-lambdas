@@ -170,6 +170,8 @@ describe('handleListenDisputeClosed', () => {
 				status: 'Active',
 				subscriptionNumber: 'SUB-12345',
 			}),
+			'du_test456',
+			undefined,
 		);
 
 		expect(mockRejectPayment).toHaveBeenCalledWith(

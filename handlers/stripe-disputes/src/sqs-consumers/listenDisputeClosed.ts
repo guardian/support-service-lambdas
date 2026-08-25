@@ -18,6 +18,7 @@ export async function handleListenDisputeClosed(
 	logger: Logger,
 	webhookData: ListenDisputeClosedRequestBody,
 	disputeId: string,
+	getRemainingTimeInMillis?: () => number,
 ): Promise<SalesforceUpsertResponse | null> {
 	logger.log(`Processing dispute closure for dispute ${disputeId}`);
 
@@ -61,6 +62,8 @@ export async function handleListenDisputeClosed(
 			logger,
 			zuoraClient,
 			subscription,
+			disputeId,
+			getRemainingTimeInMillis,
 		);
 
 		// Step 3: Reject payment - may fail if already refunded

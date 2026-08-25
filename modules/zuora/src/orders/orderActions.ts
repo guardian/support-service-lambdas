@@ -25,7 +25,8 @@ export type OrderActionType =
 	| 'UpdateProduct'
 	| 'CreateSubscription'
 	| 'AddProduct'
-	| 'RemoveProduct';
+	| 'RemoveProduct'
+	| 'CancelSubscription';
 
 type BaseOrderAction = {
 	type: OrderActionType;
@@ -90,6 +91,19 @@ export type TermsAndConditionsOrderAction = BaseOrderAction & {
 		};
 	};
 };
+export type CancelSubscriptionOrderAction = {
+	type: 'CancelSubscription';
+	triggerDates: [
+		{
+			name: 'ContractEffective';
+			triggerDate: string;
+		},
+	];
+	cancelSubscription: {
+		cancellationPolicy: 'SpecificDate';
+		cancellationEffectiveDate: string;
+	};
+};
 type SubscribeToProductRatePlan = {
 	productRatePlanId: string;
 	chargeOverrides?: Array<{
@@ -150,7 +164,8 @@ export type OrderAction =
 	| UpdateProductOrderAction
 	| DiscountOrderAction
 	| RemoveProductOrderAction
-	| CreateSubscriptionOrderAction;
+	| CreateSubscriptionOrderAction
+	| CancelSubscriptionOrderAction;
 
 export function singleTriggerDate(applyFromDate: Dayjs): TriggerDates {
 	return [
