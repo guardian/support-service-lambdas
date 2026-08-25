@@ -7,3 +7,7 @@ export const invitationPathSchema = z.object({
 export const subscriptionPathSchema = z.object({
 	subscriptionName: z.string(),
 });
+
+export const identityIdPathSchema = z.object({
+	identityId: z.string(),
+});
