@@ -13,6 +13,7 @@ import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { deleteSecondaryUserEndpoint } from '../src/deleteSecondaryUserEndpoint';
+import { sendLeaveSubscriptionEmail } from '../src/emails/leaveSubcriptionEmail';
 import { makeAccount, makeSubscription } from './helpers';
 
 jest.mock('@modules/zuora/subscription', () => ({
@@ -25,6 +26,10 @@ jest.mock('@modules/zuora/account', () => ({
 
 jest.mock('@modules/identity/idapi', () => ({
 	getUserByIdentityId: jest.fn(),
+}));
+
+jest.mock('../src/emails/leaveSubcriptionEmail', () => ({
+	sendLeaveSubscriptionEmail: jest.fn(),
 }));
 
 const stage = 'CODE';
@@ -155,12 +160,15 @@ describe('deleteSecondaryUserEndpoint', () => {
 		const zuoraClient = {} as unknown as ZuoraClient;
 		const identityClient = {} as unknown as IdentityClient;
 		const secondaryEmail = 'secondary@thegulocal.com';
+		const primaryEmail = 'primary@thegulocal.com';
 		jest
 			.mocked(getSubscription)
 			.mockResolvedValue(makeSubscription(subscriptionName));
 		jest
 			.mocked(getAccount)
-			.mockResolvedValue(makeAccount('Firstname', 'Lastname', secondaryEmail));
+			.mockResolvedValue(
+				makeAccount('PrimaryFirstName', 'PrimaryLastName', primaryEmail),
+			);
 		jest.mocked(getUserByIdentityId).mockResolvedValue({
 			id: '123456',
 			primaryEmailAddress: secondaryEmail,
@@ -185,6 +193,13 @@ describe('deleteSecondaryUserEndpoint', () => {
 			subscriptionName,
 			secondaryIdentityId,
 			'secondary',
+		);
+		expect(sendLeaveSubscriptionEmail).toHaveBeenCalledWith(
+			stage,
+			'PrimaryFirstName',
+			primaryEmail,
+			secondaryEmail,
+			secondaryIdentityId,
 		);
 	});
 
