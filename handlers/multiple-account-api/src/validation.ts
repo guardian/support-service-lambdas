@@ -4,6 +4,7 @@ import { getSinglePlanFlattenedSubscriptionOrThrow } from '@modules/guardian-sub
 import { GuardianSubscriptionParser } from '@modules/guardian-subscription/guardianSubscriptionParser';
 import { SubscriptionFilter } from '@modules/guardian-subscription/subscriptionFilter';
 import { logger } from '@modules/logger/logger';
+import type { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
 import { productBenefitMapping } from '@modules/product-benefits/productBenefit';
 import type {
 	ProductCatalog,
@@ -42,13 +43,31 @@ export function checkSubscriptionHasMultipleAccountsBenefit(
 }
 
 export async function validateInvitationInformation(
-	repo: InvitationRepository,
+	invitationRepository: InvitationRepository,
+	secondaryUserRepository: SecondaryUserRepository,
 	subscriptionName: string,
 	secondaryIdentityId: string,
 ) {
 	logger.log('Validating invitation information');
 
-	const nonCancelledInvites = await repo.listNonCancelled(subscriptionName);
+	const existingSecondaryUsers =
+		await secondaryUserRepository.listNonCancelledBySubscription(
+			subscriptionName,
+		);
+
+	// Check the secondary user is not already a secondary user for this subscription
+	const secondaryUserAlreadyExists = existingSecondaryUsers.find(
+		(user) => user.secondaryIdentityId === secondaryIdentityId,
+	);
+
+	if (secondaryUserAlreadyExists) {
+		throw new ValidationError(
+			'This user is already a secondary user for this subscription',
+		);
+	}
+
+	const nonCancelledInvites =
+		await invitationRepository.listNonCancelled(subscriptionName);
 
 	// Check the secondary user has not been invited already
 	const inviteAlreadyExistsForUser = nonCancelledInvites.find(
@@ -63,7 +82,8 @@ export async function validateInvitationInformation(
 
 	// Check the subscription still has free invites
 	const subscriptionHasAvailableInvites =
-		nonCancelledInvites.length < MAXIMUM_NUMBER_OF_INVITES_PER_SUBSCRIPTION;
+		nonCancelledInvites.length + existingSecondaryUsers.length <
+		MAXIMUM_NUMBER_OF_INVITES_PER_SUBSCRIPTION;
 
 	if (!subscriptionHasAvailableInvites) {
 		throw new ValidationError(

@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { getOrCreateUserFromEmail } from '@modules/identity/idapi';
 import type { IdentityClient } from '@modules/identity/identityClient';
 import { logger } from '@modules/logger/logger';
+import type { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { created } from '@modules/routing/apiGatewayResponses';
 import type { Stage } from '@modules/stage';
@@ -40,6 +41,7 @@ export const createInvitationEndpoint =
 	(
 		stage: Stage,
 		invitationRepository: InvitationRepository,
+		secondaryUserRepository: SecondaryUserRepository,
 		identityClient: IdentityClient,
 		zuoraCatalog: ZuoraCatalog,
 		productCatalog: ProductCatalog,
@@ -66,6 +68,7 @@ export const createInvitationEndpoint =
 
 		await validateInvitationInformation(
 			invitationRepository,
+			secondaryUserRepository,
 			subscriptionName,
 			secondaryIdentityId,
 		);
