@@ -14,7 +14,7 @@ import type { ZuoraSubscription } from '@modules/zuora/types';
 import type { ZuoraCatalog } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import type { InvitationRepository } from './invitationRepository';
 
-const MAXIMUM_NUMBER_OF_INVITES_PER_SUBSCRIPTION = 3;
+const MAXIMUM_NUMBER_OF_INVITATIONS_AND_SECONDARY_USERS_PER_SUBSCRIPTION = 3;
 
 function productHasMultipleAccountsBenefit(productKey: ProductKey) {
 	return productBenefitMapping[productKey].includes('multipleAccounts');
@@ -80,14 +80,16 @@ export async function validateInvitationInformation(
 		);
 	}
 
-	// Check the subscription still has free invites
-	const subscriptionHasAvailableInvites =
+	// Check the subscription still has room for another invitation or secondary
+	// user, counting both pending invitations and already-accepted secondary
+	// users towards the limit.
+	const subscriptionHasAvailableSlots =
 		nonCancelledInvites.length + existingSecondaryUsers.length <
-		MAXIMUM_NUMBER_OF_INVITES_PER_SUBSCRIPTION;
+		MAXIMUM_NUMBER_OF_INVITATIONS_AND_SECONDARY_USERS_PER_SUBSCRIPTION;
 
-	if (!subscriptionHasAvailableInvites) {
+	if (!subscriptionHasAvailableSlots) {
 		throw new ValidationError(
-			'This subscription already has the maximum number of invites',
+			'This subscription already has the maximum number of invitations and secondary users',
 		);
 	}
 }
