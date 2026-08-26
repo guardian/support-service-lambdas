@@ -276,25 +276,27 @@ paths:
   /secondary-user/me:
     get:
       operationId: getSecondaryUserMe
-      summary: Get primary users for the signed-in secondary user
+      summary: Get primary user subscriptions for the signed-in secondary user
       description: >-
-        Returns the contact details of the primary user for each subscription
-        the signed-in secondary user is linked to. The secondary user is
-        identified by their Okta bearer token.
+        Returns, for each subscription the signed-in secondary user is linked
+        to, the subscription name and the contact details of that
+        subscription's primary user. The secondary user is identified by
+        their Okta bearer token.
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Primary users returned.
+          description: Subscriptions returned.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SecondaryUserMeResponse'
+                $ref: '#/components/schemas/SecondaryUserDetailsResponse'
               examples:
                 default:
                   value:
-                    primaryUsers:
-                      - firstName: Jane
+                    subscriptions:
+                      - subscriptionName: A-S00974337
+                        firstName: Jane
                         lastName: Smith
                         workEmail: jane.smith@example.com
         '401':
@@ -335,7 +337,101 @@ paths:
               schema:
                 type: string
                 example: Internal server error
+  /secondary-user/{identityId}:
+    get:
+      operationId: getSecondaryUserByIdentityId
+      summary: Get primary user subscriptions for a secondary user by identity id
+      description: >-
+        Returns, for each subscription the given secondary user is linked to,
+        the subscription name and the contact details of that subscription's
+        primary user. Intended for server-to-server use where the caller
+        already knows the secondary user's identity id.
+      security:
+        - apiKey: []
+      parameters:
+        - name: identityId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Identity id of the secondary user.
+          example: '30067890'
+      responses:
+        '200':
+          description: Subscriptions returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecondaryUserDetailsResponse'
+              examples:
+                default:
+                  value:
+                    subscriptions:
+                      - subscriptionName: A-S00974337
+                        firstName: Jane
+                        lastName: Smith
+                        workEmail: jane.smith@example.com
+        '404':
+          description: Route not found.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Not Found
+        '500':
+          description: Internal server error.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Internal server error
   /invitation/{invitationCode}:
+    get:
+      operationId: getInvitation
+      summary: Get invitation
+      description: >-
+        Returns an invitation by invitation code. Returns a 400 if the
+        invitation has already been cancelled by the primary or secondary
+        user.
+      security:
+        - apiKey: []
+      parameters:
+        - name: invitationCode
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The invitation code to look up.
+      responses:
+        '200':
+          description: Invitation returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invitation'
+        '400':
+          description: The invitation has already been cancelled.
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                cancelled:
+                  value: The invitation has been cancelled by the primary user
+        '404':
+          description: Invitation not found.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Not Found
+        '500':
+          description: Internal server error.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Internal server error
     delete:
       operationId: deleteInvitation
       summary: Delete invitation
@@ -546,6 +642,8 @@ components:
         - subscriptionName
         - invitationCode
         - primaryIdentityId
+        - primaryUserFirstName
+        - primaryUserEmail
         - secondaryUserEmail
         - secondaryIdentityId
         - invitedDate
@@ -560,6 +658,13 @@ components:
         primaryIdentityId:
           type: string
           example: '20012345'
+        primaryUserFirstName:
+          type: string
+          example: Jane
+        primaryUserEmail:
+          type: string
+          format: email
+          example: jane.smith@example.com
         secondaryUserEmail:
           type: string
           format: email
@@ -585,6 +690,13 @@ components:
             user. Absent for pending invitations, and never returned by the
             mma-primary summary (which excludes cancelled invitations).
           example: primary
+        cancelledDate:
+          type: string
+          format: date-time
+          description: >-
+            Present alongside 'cancelledBy' once the invitation has been
+            cancelled or rejected.
+          example: '2026-06-13T00:00:00.000Z'
     ListInvitationsResponse:
       type: object
       additionalProperties: false
@@ -603,6 +715,8 @@ components:
         - secondaryIdentityId
         - primaryIdentityId
         - acceptedDate
+        - expiryDate
+        - invitationCode
       properties:
         subscriptionName:
           type: string
@@ -617,45 +731,43 @@ components:
           type: string
           format: date-time
           example: '2026-06-12T00:00:00.000Z'
-    SecondaryUserWithName:
-      type: object
-      additionalProperties: false
-      required:
-        - subscriptionName
-        - secondaryIdentityId
-        - primaryIdentityId
-        - acceptedDate
-        - displayName
-        - firstName
-        - lastName
-        - email
-      properties:
-        subscriptionName:
+        expiryDate:
+          type: number
+          example: 1781222400000
+        invitationCode:
           type: string
-          example: A-S00974337
-        secondaryIdentityId:
+          description: The invitation code that was accepted to create this secondary user.
+          example: RpwR62kMnAxe
+        cancelledBy:
           type: string
-          example: '30067890'
-        primaryIdentityId:
-          type: string
-          example: '20012345'
-        acceptedDate:
+          enum:
+            - primary
+            - secondary
+          description: >-
+            Present once the secondary user has been removed by the primary
+            user or has removed themselves. Absent while the secondary user
+            is active, and never returned by list-secondary-users or the
+            mma-primary summary (which both exclude removed secondary users).
+          example: primary
+        cancelledDate:
           type: string
           format: date-time
-          example: '2026-06-12T00:00:00.000Z'
-        displayName:
-          type: string
-          example: jsmith92
-        firstName:
-          type: string
-          example: Jane
-        lastName:
-          type: string
-          example: Smith
-        email:
-          type: string
-          format: email
-          example: jane.smith@example.com
+          description: >-
+            Present alongside 'cancelledBy' once the secondary user has been
+            removed.
+          example: '2026-06-13T00:00:00.000Z'
+    SecondaryUserWithEmail:
+      description: >-
+        A secondary user together with their email address, as returned by
+        the mma-primary summary endpoint.
+      allOf:
+        - $ref: '#/components/schemas/SecondaryUser'
+        - type: object
+          properties:
+            email:
+              type: string
+              format: email
+              example: jane.smith@example.com
     MmaPrimarySummaryResponse:
       type: object
       additionalProperties: false
@@ -670,7 +782,7 @@ components:
         secondaryUsers:
           type: array
           items:
-            $ref: '#/components/schemas/SecondaryUserWithName'
+            $ref: '#/components/schemas/SecondaryUserWithEmail'
     ListSecondaryUsersResponse:
       type: object
       additionalProperties: false
@@ -681,14 +793,18 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SecondaryUser'
-    PrimaryUser:
+    SubscriptionWithPrimaryUser:
       type: object
       additionalProperties: false
       required:
+        - subscriptionName
         - firstName
         - lastName
         - workEmail
       properties:
+        subscriptionName:
+          type: string
+          example: A-S00974337
         firstName:
           type: string
           example: Jane
@@ -699,16 +815,16 @@ components:
           type: string
           format: email
           example: jane.smith@example.com
-    SecondaryUserMeResponse:
+    SecondaryUserDetailsResponse:
       type: object
       additionalProperties: false
       required:
-        - primaryUsers
+        - subscriptions
       properties:
-        primaryUsers:
+        subscriptions:
           type: array
           items:
-            $ref: '#/components/schemas/PrimaryUser'
+            $ref: '#/components/schemas/SubscriptionWithPrimaryUser'
     ParserError:
       type: object
       additionalProperties: true

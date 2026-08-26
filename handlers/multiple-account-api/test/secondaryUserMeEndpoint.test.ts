@@ -6,7 +6,7 @@ import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraAccount, ZuoraSubscription } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { secondaryUserMeEndpoint } from '../src/secondaryUserMeEndpoint';
+import { secondaryUserDetailsEndpoint } from '../src/secondaryUserDetailsEndpoint';
 
 jest.mock('@modules/zuora/subscription', () => ({
 	getSubscription: jest.fn(),
@@ -39,15 +39,18 @@ describe('secondaryUserMeEndpoint', () => {
 		subscriptionName,
 		secondaryIdentityId: 'secondary-id',
 		primaryIdentityId: 'primary-id',
-		acceptedDate: '2026-06-12T00:00:00.000Z',
+		acceptedDate: '2026-06-12',
 		expiryDate: 1781218800,
-		invitationCode: 'RpwR62kMnAxe',
+		invitationCode: 'INVITATION-CODE',
 	});
 
 	const makeRepository = (
 		users: SecondaryUserRecord[],
 	): SecondaryUserRepository =>
 		({
+			get: jest
+				.fn<Promise<SecondaryUserRecord[]>, [string]>()
+				.mockResolvedValue(users),
 			listNonCancelledByIdentity: jest
 				.fn<Promise<SecondaryUserRecord[]>, [string]>()
 				.mockResolvedValue(users),
@@ -69,7 +72,7 @@ describe('secondaryUserMeEndpoint', () => {
 			.mockResolvedValueOnce(makeAccount('Ada', 'Lovelace', 'ada@example.com'))
 			.mockResolvedValueOnce(makeAccount('Alan', 'Turing', 'alan@example.com'));
 
-		const result = await secondaryUserMeEndpoint(
+		const result = await secondaryUserDetailsEndpoint(
 			'secondary-id',
 			makeRepository(secondaryUsers),
 			zuoraClient,
@@ -79,16 +82,16 @@ describe('secondaryUserMeEndpoint', () => {
 		expect(JSON.parse(result.body)).toEqual({
 			subscriptions: [
 				{
-					subscriptionName: 'A-S00000001',
 					firstName: 'Ada',
 					lastName: 'Lovelace',
 					workEmail: 'ada@example.com',
+					subscriptionName: 'A-S00000001',
 				},
 				{
-					subscriptionName: 'A-S00000002',
 					firstName: 'Alan',
 					lastName: 'Turing',
 					workEmail: 'alan@example.com',
+					subscriptionName: 'A-S00000002',
 				},
 			],
 		});
@@ -104,8 +107,8 @@ describe('secondaryUserMeEndpoint', () => {
 		expect(mockGetAccount).toHaveBeenCalledWith(zuoraClient, 'A00000002');
 	});
 
-	it('returns an empty primaryUsers list when there are no secondary users', async () => {
-		const result = await secondaryUserMeEndpoint(
+	it('returns an empty subscriptions list when there are no secondary users', async () => {
+		const result = await secondaryUserDetailsEndpoint(
 			'secondary-id',
 			makeRepository([]),
 			zuoraClient,
@@ -117,42 +120,11 @@ describe('secondaryUserMeEndpoint', () => {
 		expect(mockGetAccount).not.toHaveBeenCalled();
 	});
 
-	it('only requests details for the non-cancelled records returned by the repository', async () => {
-		const activeUser = makeSecondaryUser('A-S00000001');
-		mockGetSubscription.mockResolvedValueOnce(makeSubscription('A00000001'));
-		mockGetAccount.mockResolvedValueOnce(
-			makeAccount('Ada', 'Lovelace', 'ada@example.com'),
-		);
-
-		const result = await secondaryUserMeEndpoint(
-			'secondary-id',
-			makeRepository([activeUser]),
-			zuoraClient,
-		);
-
-		expect(result.statusCode).toBe(200);
-		expect(JSON.parse(result.body)).toEqual({
-			subscriptions: [
-				{
-					subscriptionName: 'A-S00000001',
-					firstName: 'Ada',
-					lastName: 'Lovelace',
-					workEmail: 'ada@example.com',
-				},
-			],
-		});
-		expect(mockGetSubscription).toHaveBeenCalledTimes(1);
-		expect(mockGetSubscription).toHaveBeenCalledWith(
-			zuoraClient,
-			'A-S00000001',
-		);
-	});
-
 	it('propagates errors thrown while fetching from Zuora', async () => {
 		mockGetSubscription.mockRejectedValue(new Error('Zuora unavailable'));
 
 		await expect(
-			secondaryUserMeEndpoint(
+			secondaryUserDetailsEndpoint(
 				'secondary-id',
 				makeRepository([makeSecondaryUser('A-S00000001')]),
 				zuoraClient,

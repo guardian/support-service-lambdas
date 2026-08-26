@@ -28,8 +28,12 @@ import { InvitationRepository } from './invitationRepository';
 import { listInvitationsEndpoint } from './listInvitationsEndpoint';
 import { listSecondaryUsersEndpoint } from './listSecondaryUsersEndpoint';
 import { mmaPrimarySummaryEndpoint } from './mmaPrimarySummaryEndpoint';
-import { invitationPathSchema, subscriptionPathSchema } from './schemas';
-import { secondaryUserMeEndpoint } from './secondaryUserMeEndpoint';
+import {
+	identityIdPathSchema,
+	invitationPathSchema,
+	subscriptionPathSchema,
+} from './schemas';
+import { secondaryUserDetailsEndpoint } from './secondaryUserDetailsEndpoint';
 
 const stage = stageFromEnvironment();
 const authenticate = buildAuthenticate(stage, []);
@@ -204,11 +208,22 @@ export const handler: Handler = Router([
 				return maybeAuthenticatedEvent.response;
 			}
 
-			return secondaryUserMeEndpoint(
+			return secondaryUserDetailsEndpoint(
 				maybeAuthenticatedEvent.userDetails.identityId,
 				secondaryUserRepository,
 				await lazyZuoraClient.get(),
 			);
 		},
+	},
+	{
+		httpMethod: 'GET',
+		path: '/secondary-user/{identityId}',
+		handler: withPathParser(identityIdPathSchema, async (event, path) => {
+			return secondaryUserDetailsEndpoint(
+				path.identityId,
+				secondaryUserRepository,
+				await lazyZuoraClient.get(),
+			);
+		}),
 	},
 ]);

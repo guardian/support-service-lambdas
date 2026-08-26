@@ -25,7 +25,7 @@ const responseSchema = z.object({
 	subscriptions: z.array(subscriptionWithPrimaryUserInformationSchema),
 });
 
-export async function secondaryUserMeEndpoint(
+export async function secondaryUserDetailsEndpoint(
 	identityId: string,
 	secondaryUserRepository: SecondaryUserRepository,
 	zuoraClient: ZuoraClient,
