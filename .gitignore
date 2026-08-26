@@ -14,3 +14,4 @@ node_modules/
 handlers/*/coverage
 # PII query result downloads from supporter-product-data-lambdas download-query-results
 select-active-rate-plans-*.csv
+.pnpm-store

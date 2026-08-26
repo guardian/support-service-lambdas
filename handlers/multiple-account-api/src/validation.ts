@@ -13,7 +13,7 @@ import type { ZuoraSubscription } from '@modules/zuora/types';
 import type { ZuoraCatalog } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import type { InvitationRepository } from './invitationRepository';
 
-const MAXIMUM_NUMBER_OF_INVITES_PER_SUBSCRIPTION = 5;
+const MAXIMUM_NUMBER_OF_INVITES_PER_SUBSCRIPTION = 3;
 
 function productHasMultipleAccountsBenefit(productKey: ProductKey) {
 	return productBenefitMapping[productKey].includes('multipleAccounts');
