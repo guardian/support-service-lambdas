@@ -104,9 +104,7 @@ describe('deleteSecondaryUserEndpoint', () => {
 		const { repository, mockGetSoftDeleteTransaction } =
 			makeRepository(makeSecondaryUser());
 		const { client, mockSend } = makeDynamoClient();
-		// TODO: mock responses from these clients
 		const zuoraClient = {} as unknown as ZuoraClient;
-		// TODO: this should return a thegulocal.com email address so that membership-workflow knows to ignore it
 		const identityClient = {} as unknown as IdentityClient;
 		jest
 			.mocked(getSubscription)
