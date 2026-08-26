@@ -23,7 +23,7 @@ import { InvitationRepository } from '../src/invitationRepository';
 
 const stage = 'CODE';
 const subscriptionName = 'A-S00974337';
-const secondaryUserEmail = 'integration-test2+multiple-account@theguardian.com';
+const secondaryUserEmail = 'integration-test2+multiple-account@thegulocal.com';
 
 let invitationCode: string;
 let secondaryIdentityId: string;
