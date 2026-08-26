@@ -23,7 +23,7 @@ These steps take you from a fresh checkout to a running dev container.
 Apart from `mise` (used only to generate the config), all other tooling (Java, Node, the GitHub Copilot CLI, etc.)
 is installed automatically inside the container, so nothing else needs to be installed on your host.
 
-### Create the dev container
+### Create the dev container (one time only)
 
 The standard flow uses a **local checkout only to hold the config**, then has the IDE **clone the sources
 into a container volume** — so there is no bind mount of your working tree.
@@ -64,16 +64,18 @@ into a container volume** — so there is no bind mount of your working tree.
 ### Open an existing dev container
 
 Once the container has been created (see above), you don't need to recreate it — reconnect to the existing
-container instead (this reuses the same cloned-sources volume, so your work is preserved):
+container instead (this reuses the same cloned-sources volume, so your work is preserved). 
 
-**IntelliJ IDEA**: 
-- If you have opened the project in the container recently you can just use **File > Recent Projects** 
-- Otherwise use **File > Remote Development**, click on the Dev containers tab and pick the **support-service-lambdas-devcontainer** from the
+If you have opened
+the project in the container recently you can just use your IDE's **recent projects** menu. Otherwise attach to
+the existing container using the IDE's dev container attach action:
+
+**IntelliJ IDEA**:  
+Use **File > Remote Development**, click on the Dev containers tab and pick the **support-service-lambdas-devcontainer** from the
   list of existing dev containers. 
 
-**VS Code**: 
-- If you have opened the project in the container recently you can just use **File > Open Recent** 
-- Otherwise run the `Remote Explorer: Focus on dev containers` command, find the **support-service-lambdas-devcontainer** container
+**VS Code**:  
+Run the `Remote Explorer: Focus on dev containers` command, find the **support-service-lambdas-devcontainer** container
   under **Dev Containers**, and choose **Attach in [current | new] window**.
 
 > [!NOTE]
