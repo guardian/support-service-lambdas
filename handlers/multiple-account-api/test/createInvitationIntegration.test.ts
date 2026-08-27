@@ -5,6 +5,7 @@
  * @group integration
  */
 import { IdentityClient } from '@modules/identity/identityClient';
+import { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
@@ -25,6 +26,7 @@ test('createInvitationEndpoint saves invitation data and returns invitation code
 	const zuoraCatalog = await getZuoraCatalogFromS3(stage);
 	const productCatalog = await getProductCatalogFromApi(stage);
 	const invitationRepository = InvitationRepository.create(stage);
+	const secondaryUserRepository = SecondaryUserRepository.create(stage);
 	const identityClient = await IdentityClient.create(
 		stage,
 		`/${stage}/support/multiple-account-api/identity-client-access-token`,
@@ -34,6 +36,7 @@ test('createInvitationEndpoint saves invitation data and returns invitation code
 	const endpoint = createInvitationEndpoint(
 		stage,
 		invitationRepository,
+		secondaryUserRepository,
 		identityClient,
 		zuoraCatalog,
 		productCatalog,

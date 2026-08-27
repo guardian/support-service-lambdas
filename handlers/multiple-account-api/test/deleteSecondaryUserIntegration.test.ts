@@ -46,6 +46,7 @@ beforeEach(async () => {
 	const createEndpoint = createInvitationEndpoint(
 		stage,
 		invitationRepository,
+		secondaryUserRepository,
 		identityClient,
 		zuoraCatalog,
 		productCatalog,

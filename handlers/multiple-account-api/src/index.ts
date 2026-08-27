@@ -70,6 +70,7 @@ export const handler: Handler = Router([
 					return createInvitationEndpoint(
 						stage,
 						invitationRepository,
+						secondaryUserRepository,
 						identityClient,
 						await lazyZuoraCatalog.get(),
 						await lazyProductCatalog.get(),

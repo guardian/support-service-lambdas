@@ -2,6 +2,10 @@ import dayjs from 'dayjs';
 import * as email from 'email/src/email';
 import * as identity from '@modules/identity/idapi';
 import type { IdentityClient } from '@modules/identity/identityClient';
+import type {
+	SecondaryUserRecord,
+	SecondaryUserRepository,
+} from '@modules/multiple-account/secondaryUserRepository';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type {
 	ZuoraAccount,
@@ -60,6 +64,8 @@ const mockInvitations: InvitationRecord[] = [
 	},
 ];
 
+const mockSecondaryUsers: SecondaryUserRecord[] = [];
+
 const stage = 'CODE';
 const zuoraCatalog = zuoraCatalogSchema.parse(code);
 const productCatalog = generateProductCatalog(zuoraCatalog);
@@ -76,11 +82,17 @@ const mockListNonCancelled = jest
 	.fn<Promise<InvitationRecord[]>, [string]>()
 	.mockResolvedValue(mockInvitations);
 
-const mockRepo: InvitationRepository = {
+const mockInvitationRepo: InvitationRepository = {
 	save: mockSave,
 	list: mockList,
 	listNonCancelled: mockListNonCancelled,
 } as unknown as InvitationRepository;
+
+const mockSecondaryUserRepo = {
+	listNonCancelledBySubscription: jest
+		.fn<Promise<SecondaryUserRecord[]>, [string]>()
+		.mockResolvedValue(mockSecondaryUsers),
+} as unknown as SecondaryUserRepository;
 
 const mockIdentityClient = {} as IdentityClient;
 
@@ -101,7 +113,8 @@ describe('createInvitationHandler', () => {
 
 		const handler = createInvitationEndpoint(
 			stage,
-			mockRepo,
+			mockInvitationRepo,
+			mockSecondaryUserRepo,
 			mockIdentityClient,
 			zuoraCatalog,
 			productCatalog,
@@ -165,7 +178,8 @@ describe('createInvitationHandler', () => {
 		const now = dayjs().add(1, 'month').toDate().getTime();
 		const handler = createInvitationEndpoint(
 			stage,
-			mockRepo,
+			mockInvitationRepo,
+			mockSecondaryUserRepo,
 			mockIdentityClient,
 			zuoraCatalog,
 			productCatalog,
@@ -192,7 +206,8 @@ describe('createInvitationHandler', () => {
 
 		const handler = createInvitationEndpoint(
 			stage,
-			mockRepo,
+			mockInvitationRepo,
+			mockSecondaryUserRepo,
 			mockIdentityClient,
 			zuoraCatalog,
 			productCatalog,
