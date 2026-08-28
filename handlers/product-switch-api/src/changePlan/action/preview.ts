@@ -57,7 +57,7 @@ export const getRefundAmountMinorUnits = (
 		sourceSubscriptionReversalItems.length !== sourceChargeIds.length &&
 		(sourceSubscriptionReversalItems.length !== 0 || refundExpected)
 	) {
-		throw Error(
+		throw new ValidationError(
 			`getRefundAmountMinorUnits Did not find a refund for every charge in the old subscription in the preview response: expected: ${JSON.stringify(sourceChargeIds)} : received: ${JSON.stringify(itemsById)} : refundExpected: ${refundExpected}`,
 		);
 	}
