@@ -5,7 +5,7 @@ import {
 } from '@modules/email/email';
 import type { Stage } from '@modules/stage';
 
-export async function sendLeaveSubscriptionEmail(
+export async function sendLeaveSubscriptionEmailToSecondary(
 	stage: Stage,
 	primaryUserFirstName: string,
 	primaryUserEmail: string,

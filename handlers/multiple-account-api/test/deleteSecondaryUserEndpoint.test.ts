@@ -13,7 +13,7 @@ import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { deleteSecondaryUserEndpoint } from '../src/deleteSecondaryUserEndpoint';
-import { sendLeaveSubscriptionEmail } from '../src/emails/leaveSubcriptionEmail';
+import { sendLeaveSubscriptionEmailToSecondary } from '../src/emails/leaveSubcriptionEmail';
 import { makeAccount, makeSubscription } from './helpers';
 
 jest.mock('@modules/zuora/subscription', () => ({
@@ -29,7 +29,7 @@ jest.mock('@modules/identity/idapi', () => ({
 }));
 
 jest.mock('../src/emails/leaveSubcriptionEmail', () => ({
-	sendLeaveSubscriptionEmail: jest.fn(),
+	sendLeaveSubscriptionEmailToSecondary: jest.fn(),
 }));
 
 const stage = 'CODE';
@@ -192,7 +192,7 @@ describe('deleteSecondaryUserEndpoint', () => {
 			secondaryIdentityId,
 			'secondary',
 		);
-		expect(sendLeaveSubscriptionEmail).toHaveBeenCalledWith(
+		expect(sendLeaveSubscriptionEmailToSecondary).toHaveBeenCalledWith(
 			stage,
 			'PrimaryFirstName',
 			primaryEmail,
