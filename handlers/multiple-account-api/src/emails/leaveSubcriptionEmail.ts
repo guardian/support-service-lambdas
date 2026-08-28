@@ -26,3 +26,23 @@ export async function sendLeaveSubscriptionEmailToSecondary(
 	);
 	await sendEmail(stage, emailMessage);
 }
+
+export async function sendLeaveSubscriptionEmailToPrimary(
+	stage: Stage,
+	primaryUserEmail: string,
+	primaryUserIdentityId: string,
+	secondaryUserEmail: string,
+) {
+	const dataAttributes = {
+		secondary_user_email: secondaryUserEmail,
+	};
+
+	const emailMessage = buildEmailMessage(
+		primaryUserEmail,
+		DataExtensionNames.multipleAccountEmails.primaryUser
+			.secondaryUserLeftSubscription,
+		dataAttributes,
+		{ IdentityUserId: primaryUserIdentityId },
+	);
+	await sendEmail(stage, emailMessage);
+}
