@@ -58,7 +58,7 @@ export const getRefundAmountMinorUnits = (
 		(sourceSubscriptionReversalItems.length !== 0 || refundExpected)
 	) {
 		throw new ValidationError(
-			`getRefundAmountMinorUnits Did not find a refund for every charge in the old subscription in the preview response: expected: ${JSON.stringify(sourceChargeIds)} : received: ${JSON.stringify(itemsById)} : refundExpected: ${refundExpected}`,
+			`Did not find a refund for every charge in the old subscription in the preview response: expected: ${JSON.stringify(sourceChargeIds)}`,
 		);
 	}
 
@@ -93,19 +93,6 @@ export const previewResponseFromZuoraResponse = (
 			(item) => item.productRatePlanChargeId,
 			'duplicate productRatePlanChargeId in the same invoice',
 		);
-
-	console.log(
-		'previewResponseFromZuoraResponse itemsById:',
-		JSON.stringify(itemsById),
-	);
-	console.log(
-		'previewResponseFromZuoraResponse sourceProductChargeIds:',
-		sourceProductChargeIds,
-	);
-	console.log(
-		'previewResponseFromZuoraResponse chargedThroughDate:',
-		chargedThroughDate,
-	);
 
 	const proratedRefundAmount = getRefundAmountMinorUnits(
 		itemsById,

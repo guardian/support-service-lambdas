@@ -101,12 +101,6 @@ export class ChangePlanEndpoint {
 				switchInformation.subscription,
 			);
 
-		console.log(
-			'doPreview switchInformation:',
-			JSON.stringify(switchInformation),
-		);
-		console.log('doPreview orderRequest:', JSON.stringify(orderRequest));
-
 		return await this.doPreviewAction.preview(
 			switchInformation.subscription,
 			switchInformation.target,
