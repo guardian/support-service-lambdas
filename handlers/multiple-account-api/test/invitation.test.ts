@@ -148,6 +148,7 @@ describe('createInvitationHandler', () => {
 		expect(mockGetOrCreateUserFromEmail).toHaveBeenCalledWith(
 			mockIdentityClient,
 			'secondary@example.com',
+			false,
 		);
 
 		expect(mockSendEmail).toHaveBeenCalledWith(stage, {
