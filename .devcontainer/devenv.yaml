@@ -1,0 +1,91 @@
+# Devenv project configuration
+# Edit this file to configure your project's devcontainer
+# and then run `devenv generate` to create the devcontainer.json files
+
+name: "support-service-lambdas"
+
+# Modules: Built-in functionality
+# - mise: Install and configure mise for dev tools management (https://mise.jdx.dev/)
+# - docker-in-docker: Enable running Docker containers within the devcontainer
+# - scala: Add IDE plugins and jar caching for Scala development
+# - node: Add IDE plugins for Node.js development
+# - github-copilot: Sets up GitHub Copilot for IDE and CLI use (requires the mise module)
+# To disable, comment out or remove items from this list
+modules:
+  - mise
+  # - docker-in-docker  # (disabled by default) - enable if your tests need Docker (e.g. localstack/testcontainers)
+  - scala
+  - node
+  - github-copilot
+
+# Optional: Ports to forward
+# forwardPorts:
+#   - 8080  # same port on host and container
+#   - "8000:9000"  # hostPort:containerPort
+
+# Optional: Mount directories from host to container
+# mounts:
+#   - "source=${localEnv:HOME}/.gu/example,target=/home/vscode/.gu/example,readonly,type=bind,consistency=cached"
+
+# Optional: IDE plugins - shared project plugins like language support
+# plugins:
+#   vscode: []
+#   intellij: []
+
+# Optional: Extra switches for container generation (passed to `docker create`)
+runArgs:
+  - '--name=support-service-lambdas-devcontainer'
+
+# Optional: Commands to run after container creation
+# Each command has a 'cmd' field and a 'workingDirectory' field
+# e.g.
+postCreateCommand:
+  - cmd: 'mise install'
+    logLine: 'mise_install'
+    workingDirectory: '.'
+  # pnpm is pinned via package.json's "packageManager" field, but it's provided by
+  # corepack, which mise's shim mode has no version for (interactive shells and the
+  # IntelliJ test runner then fail with "No version is set for shim: pnpm" /
+  # "pnpm: command not found"). Register pnpm as a mise-managed tool at the pinned
+  # version so a proper shim exists. This runs BEFORE the /usr/local/bin symlink
+  # step below so the pnpm shim is also exposed on IntelliJ's non-login PATH. The
+  # version is read from package.json (single source of truth), stripping any
+  # "+sha" suffix.
+  - cmd: "mise use -g pnpm@$(mise exec -- node -p 'require(\"./package.json\").packageManager.split(\"@\")[1].split(\"+\")[0]')"
+    logLine: 'mise_use_pnpm'
+    workingDirectory: '.'
+  # The IntelliJ backend (and IDE-launched processes like test runners) use a
+  # non-login, non-interactive shell whose PATH is only the system default
+  # (/usr/local/sbin:/usr/local/bin:...). That does NOT include mise (~/.local/bin)
+  # or the mise shims (~/.local/share/mise/shims), which are only added to
+  # interactive/login shells via ~/.bashrc / ~/.profile. Without this, IntelliJ
+  # reports "Node.js is required" and tests fail with "no node executable found in
+  # path". Symlink mise and its tool shims into /usr/local/bin (which IS on the
+  # default PATH) so node, java, npm etc. are always discoverable. The shims
+  # resolve tool versions from the project's mise config at runtime.
+  - cmd: 'sudo ln -sf "$HOME/.local/bin/mise" /usr/local/bin/mise && sudo ln -sf "$HOME"/.local/share/mise/shims/* /usr/local/bin/'
+    logLine: 'symlink_mise_and_shims_to_usr_local_bin'
+    workingDirectory: '.'
+  - cmd: 'mise exec -- node --version'
+    logLine: 'node_version'
+    workingDirectory: '.'
+  - cmd: 'mise exec -- corepack enable'
+    logLine: 'corepack_enable'
+    workingDirectory: '.'
+  # Different IDEs clone the sources to different locations in the clone-into-volume
+  # flow (JetBrains -> /IdeaProjects/<repo>, VS Code -> /workspaces/<repo>). If you
+  # create the container in one IDE and then "Attach" to it from another (e.g. VS
+  # Code's Remote Explorer), that IDE opens the container's default directory rather
+  # than the project, and you have to hunt around the filesystem for the sources.
+  # postCreateCommand runs *in* the workspace folder, so $PWD here is wherever this
+  # IDE cloned the repo. Symlink a fixed, predictable path ($HOME/project) to it so
+  # there is always a standard place to open the project from, regardless of IDE.
+  - cmd: 'ln -sfn "$PWD" "$HOME/project"'
+    logLine: 'symlink_project_dir_to_PWD'
+    workingDirectory: '.'
+  - cmd: 'mise exec -- pnpm install'
+    logLine: 'pnpm_install'
+    workingDirectory: '.'
+# postStartCommand:
+#   - cmd: "echo 'Container started successfully'"
+#     workingDirectory: "."
