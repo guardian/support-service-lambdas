@@ -44,7 +44,7 @@ jobs:
           cache: 'sbt'
 
       - name: Setup SBT
-        uses: sbt/setup-sbt@v1.5.4
+        uses: sbt/setup-sbt@v1.5.8
 
       - name: Run tests and build subproject JAR
         run: sbt "project ${{ matrix.subproject }}" test assembly
@@ -115,7 +115,7 @@ jobs:
           cache: 'sbt'
 
       - name: Setup SBT
-        uses: sbt/setup-sbt@v1.5.4
+        uses: sbt/setup-sbt@v1.5.8
 
       - name: run tests and Build jar
         run: sbt "project ${{ matrix.subproject }}" test assembly
@@ -153,7 +153,7 @@ jobs:
           cache: 'sbt'
 
       - name: Setup SBT
-        uses: sbt/setup-sbt@v1.5.4
+        uses: sbt/setup-sbt@v1.5.8
 
       - name: Run tests and build subproject JAR
         run: sbt "project zuora-callout-apis" test assembly
