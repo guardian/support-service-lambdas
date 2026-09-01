@@ -86,9 +86,9 @@ Run the `Remote Explorer: Focus on dev containers` command, find the **support-s
 > [!TIP]
 > You don't need to create a new container per task or branch — reuse the same container for your ongoing work and
 > switch branches inside it as normal, rather than treating it as disposable. Re-running the "create / clone
-> sources" action does reuse the existing sources volume (so your work isn't lost), but it also reruns
-> `postCreateCommand`, which can have side effects (e.g. recreating the `~/project` symlink) and is unnecessary in
-> normal use — prefer the reconnect/attach actions above for getting back into an existing container.
+> sources" action does reuse the existing sources volume (so your work isn't lost), and `postCreateCommand` is
+> idempotent (safe to rerun), but it does redo work like `mise install` and `pnpm install`, so it's slower and
+> unnecessary in normal use — prefer the reconnect/attach actions above for getting back into an existing container.
 
 ## Working inside the container
 
