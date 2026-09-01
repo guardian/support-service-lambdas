@@ -2,7 +2,6 @@
 # Edit this file to configure your project's devcontainer
 # and then run `devenv generate` to create the devcontainer.json files
 
-# REQUIRED: Change this to your project name
 name: "support-service-lambdas"
 
 # Modules: Built-in functionality

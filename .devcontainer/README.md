@@ -50,16 +50,13 @@ into a container volume** — so there is no bind mount of your working tree.
      **Create Dev Container and Clone Sources**.
    - **VS Code**: run **Dev Containers: Clone Repository in Container Volume** from the command palette
      (pointed at this repo), using the `user/devcontainer.json` configuration when prompted.
-5. Wait for the first build to finish. The first run is slower because it provisions the shared Scala caches
-   (Ivy and coursier volumes), sets up the in-container tooling, and installs the GitHub Copilot CLI. Subsequent
-   starts reuse these and are much faster.
+5. Wait for the build to finish.  In case of errors, see Troubleshooting below, otherwise dependencies are 
+    now installed so use your IDE and copilot CLI as normal.
 
 > [!NOTE]
 > Using `user/devcontainer.json` (rather than the committed `shared/devcontainer.json`) is what lets your
 > personal overrides — extra extensions/plugins etc. — apply to the container, so keep the local checkout
-> around and re-run `devenv generate` after editing `devenv.yaml`. Bear in mind that with clone-in-volume
-> your **uncommitted work lives only in the container volume** — if that volume is removed (e.g. a
-> from-scratch re-clone or `docker rm -f`), the work is lost, so commit and push often.
+> around and re-run `devenv generate` after editing `devenv.yaml`.
 
 ### Open an existing dev container
 
