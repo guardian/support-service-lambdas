@@ -42,6 +42,7 @@ runArgs:
 # e.g.
 postCreateCommand:
   - cmd: 'mise install'
+    logLine: 'mise_install'
     workingDirectory: '.'
   # pnpm is pinned via package.json's "packageManager" field, but it's provided by
   # corepack, which mise's shim mode has no version for (interactive shells and the
@@ -52,6 +53,7 @@ postCreateCommand:
   # version is read from package.json (single source of truth), stripping any
   # "+sha" suffix.
   - cmd: "mise use -g pnpm@$(mise exec -- node -p 'require(\"./package.json\").packageManager.split(\"@\")[1].split(\"+\")[0]')"
+    logLine: 'mise_use_pnpm'
     workingDirectory: '.'
   # The IntelliJ backend (and IDE-launched processes like test runners) use a
   # non-login, non-interactive shell whose PATH is only the system default
@@ -63,10 +65,13 @@ postCreateCommand:
   # default PATH) so node, java, npm etc. are always discoverable. The shims
   # resolve tool versions from the project's mise config at runtime.
   - cmd: 'sudo ln -sf "$HOME/.local/bin/mise" /usr/local/bin/mise && sudo ln -sf "$HOME"/.local/share/mise/shims/* /usr/local/bin/'
+    logLine: 'symlink_mise_and_shims_to_usr_local_bin'
     workingDirectory: '.'
   - cmd: 'mise exec -- node --version'
+    logLine: 'node_version'
     workingDirectory: '.'
   - cmd: 'mise exec -- corepack enable'
+    logLine: 'corepack_enable'
     workingDirectory: '.'
   # Different IDEs clone the sources to different locations in the clone-into-volume
   # flow (JetBrains -> /IdeaProjects/<repo>, VS Code -> /workspaces/<repo>). If you
@@ -77,8 +82,10 @@ postCreateCommand:
   # IDE cloned the repo. Symlink a fixed, predictable path ($HOME/project) to it so
   # there is always a standard place to open the project from, regardless of IDE.
   - cmd: 'ln -sfn "$PWD" "$HOME/project"'
+    logLine: 'symlink_project_dir_to_PWD'
     workingDirectory: '.'
   - cmd: 'mise exec -- pnpm install'
+    logLine: 'pnpm_install'
     workingDirectory: '.'
 # postStartCommand:
 #   - cmd: "echo 'Container started successfully'"
