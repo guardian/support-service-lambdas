@@ -196,19 +196,16 @@ describe('deleteSecondaryUserEndpoint', () => {
 			secondaryIdentityId,
 			'secondary',
 		);
-		expect(sendLeaveSubscriptionEmailToSecondary).toHaveBeenCalledWith(
-			stage,
-			'PrimaryFirstName',
-			primaryEmail,
-			secondaryEmail,
-			secondaryIdentityId,
-		);
-		expect(sendLeaveSubscriptionEmailToPrimary).toHaveBeenCalledWith(
-			stage,
-			primaryEmail,
-			primaryIdentityId,
-			secondaryEmail,
-		);
+		expect(sendLeaveSubscriptionEmailToSecondary).toHaveBeenCalledWith(stage, {
+			primaryUserFirstName: 'PrimaryFirstName',
+			primaryUserEmail: primaryEmail,
+			secondaryUserEmail: secondaryEmail,
+			secondaryUserIdentityId: secondaryIdentityId,
+		});
+		expect(sendLeaveSubscriptionEmailToPrimary).toHaveBeenCalledWith(stage, {
+			primaryUserEmail: primaryEmail,
+			primaryUserIdentityId: primaryIdentityId,
+		});
 	});
 
 	it('returns 404 when the secondary user record is not found', async () => {

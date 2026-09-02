@@ -121,18 +121,16 @@ export const deleteSecondaryUserEndpoint = async (
 			const primaryFirstName = account.billToContact.firstName;
 			const primaryEmail = account.billToContact.workEmail;
 			await Promise.all([
-				sendLeaveSubscriptionEmailToSecondary(
-					stage,
-					primaryFirstName,
-					primaryEmail,
-					secondaryUserDetails.primaryEmailAddress,
-					secondaryIdentityId,
-				),
-				sendLeaveSubscriptionEmailToPrimary(
-					stage,
-					primaryEmail,
-					secondaryUser.primaryIdentityId,
-				),
+				sendLeaveSubscriptionEmailToSecondary(stage, {
+					primaryUserFirstName: primaryFirstName,
+					primaryUserEmail: primaryEmail,
+					secondaryUserEmail: secondaryUserDetails.primaryEmailAddress,
+					secondaryUserIdentityId: secondaryIdentityId,
+				}),
+				sendLeaveSubscriptionEmailToPrimary(stage, {
+					primaryUserEmail: primaryEmail,
+					primaryUserIdentityId: secondaryUser.primaryIdentityId,
+				}),
 			]);
 		}
 
