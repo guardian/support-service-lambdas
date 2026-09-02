@@ -13,6 +13,7 @@ import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { deleteSecondaryUserEndpoint } from '../src/deleteSecondaryUserEndpoint';
+import { sendAccessRemovedEmail } from '../src/emails/accessRemovedEmail';
 import { sendLeaveSubscriptionEmail } from '../src/emails/leaveSubcriptionEmail';
 import { makeAccount, makeSubscription } from './helpers';
 
@@ -193,6 +194,56 @@ describe('deleteSecondaryUserEndpoint', () => {
 			'secondary',
 		);
 		expect(sendLeaveSubscriptionEmail).toHaveBeenCalledWith(
+			stage,
+			'PrimaryFirstName',
+			primaryEmail,
+			secondaryEmail,
+			secondaryIdentityId,
+		);
+	});
+
+	it('soft deletes with cancelledBy "primary" and sends an email when the secondary user deletes', async () => {
+		const { repository, mockGetSoftDeleteTransaction } =
+			makeRepository(makeSecondaryUser());
+		const { client } = makeDynamoClient();
+		const zuoraClient = {} as unknown as ZuoraClient;
+		const identityClient = {} as unknown as IdentityClient;
+		const secondaryEmail = 'secondary@thegulocal.com';
+		const primaryEmail = 'primary@thegulocal.com';
+		jest
+			.mocked(getSubscription)
+			.mockResolvedValue(makeSubscription(subscriptionName));
+		jest
+			.mocked(getAccount)
+			.mockResolvedValue(
+				makeAccount('PrimaryFirstName', 'PrimaryLastName', primaryEmail),
+			);
+		jest.mocked(getUserByIdentityId).mockResolvedValue({
+			id: '123456',
+			primaryEmailAddress: secondaryEmail,
+			publicFields: {
+				displayName: 'Example',
+			},
+		});
+
+		const result = await deleteSecondaryUserEndpoint(
+			stage,
+			repository,
+			client,
+			zuoraClient,
+			identityClient,
+			subscriptionName,
+			secondaryIdentityId,
+			secondaryIdentityId,
+		);
+
+		expect(result.statusCode).toBe(204);
+		expect(mockGetSoftDeleteTransaction).toHaveBeenCalledWith(
+			subscriptionName,
+			secondaryIdentityId,
+			'primary',
+		);
+		expect(sendAccessRemovedEmail).toHaveBeenCalledWith(
 			stage,
 			'PrimaryFirstName',
 			primaryEmail,

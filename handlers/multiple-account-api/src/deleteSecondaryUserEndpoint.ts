@@ -20,6 +20,7 @@ import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraAccount } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { sendAccessRemovedEmail } from './emails/accessRemovedEmail';
 import { sendLeaveSubscriptionEmail } from './emails/leaveSubcriptionEmail';
 
 export const deleteSecondaryUserPathSchema = z.object({
@@ -105,16 +106,26 @@ export const deleteSecondaryUserEndpoint = async (
 			}),
 		);
 
+		const [account, secondaryUserDetails] = await Promise.all([
+			getZuoraAccount(zuoraClient, subscriptionName),
+			getUserByIdentityId(identityClient, secondaryIdentityId),
+		]);
+
+		if (!secondaryUserDetails?.primaryEmailAddress) {
+			throw new Error('Secondary user does not have email address');
+		}
+
+		if (cancelledBy === 'primary') {
+			await sendAccessRemovedEmail(
+				stage,
+				account.billToContact.firstName,
+				account.billToContact.workEmail,
+				secondaryUserDetails.primaryEmailAddress,
+				secondaryIdentityId,
+			);
+		}
+
 		if (cancelledBy === 'secondary') {
-			const [account, secondaryUserDetails] = await Promise.all([
-				getZuoraAccount(zuoraClient, subscriptionName),
-				getUserByIdentityId(identityClient, secondaryIdentityId),
-			]);
-
-			if (!secondaryUserDetails?.primaryEmailAddress) {
-				throw new Error('Secondary user does not have email address');
-			}
-
 			await sendLeaveSubscriptionEmail(
 				stage,
 				account.billToContact.firstName,
