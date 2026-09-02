@@ -132,7 +132,6 @@ export const deleteSecondaryUserEndpoint = async (
 					stage,
 					primaryEmail,
 					secondaryUser.primaryIdentityId,
-					secondaryUserDetails.primaryEmailAddress,
 				),
 			]);
 		}

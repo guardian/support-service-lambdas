@@ -31,11 +31,8 @@ export async function sendLeaveSubscriptionEmailToPrimary(
 	stage: Stage,
 	primaryUserEmail: string,
 	primaryUserIdentityId: string,
-	secondaryUserEmail: string,
 ) {
-	const dataAttributes = {
-		secondary_user_email: secondaryUserEmail,
-	};
+	const dataAttributes = {};
 
 	const emailMessage = buildEmailMessage(
 		primaryUserEmail,
