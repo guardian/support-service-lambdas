@@ -5,6 +5,7 @@ import com.gu.newproduct.api.addsubscription.validation.Validation._
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount._
 
 case class ValidatedAccount(
+    accountNumber: AccountNumber,
     identityId: Option[IdentityId],
     sfContactId: Option[SfContactId],
     paymentMethodId: PaymentMethodId,
@@ -19,6 +20,7 @@ object ValidateAccount {
       _ <- account.autoPay.value orFailWith "Zuora account has autopay disabled"
       paymentMethodId <- account.paymentMethodId getOrFailWith "Zuora account has no default payment method"
     } yield ValidatedAccount(
+      account.accountNumber,
       account.identityId,
       account.sfContactId,
       paymentMethodId,

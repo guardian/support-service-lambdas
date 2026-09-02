@@ -13,7 +13,10 @@ import com.gu.newproduct.api.addsubscription.validation.guardianweekly.{
 }
 import com.gu.newproduct.api.addsubscription.validation.paper.PaperAddressValidator
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{WireCreateRequest, WireSubscription}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{
+  WireCreateOrderRequest,
+  WireOrderResponse,
+}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora._
 import com.gu.newproduct.api.productcatalog.PlanId.{
@@ -116,7 +119,10 @@ object Steps {
           StartDateValidator.fromRule(validatorFor, plan.startDateRules)
         },
       )
-      createSubscription = CreateSubscription(zuoraClient.post[WireCreateRequest, WireSubscription], currentDate) _
+      createSubscription = CreateSubscription(
+        zuoraClient.post[WireCreateOrderRequest, WireOrderResponse],
+        currentDate,
+      ) _
 
       supporterPlusSteps = AddSupporterPlus.wireSteps(
         catalog,
