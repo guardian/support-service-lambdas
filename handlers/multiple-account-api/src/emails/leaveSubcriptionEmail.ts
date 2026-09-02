@@ -7,10 +7,17 @@ import type { Stage } from '@modules/stage';
 
 export async function sendLeaveSubscriptionEmailToSecondary(
 	stage: Stage,
-	primaryUserFirstName: string,
-	primaryUserEmail: string,
-	secondaryUserEmail: string,
-	secondaryUserIdentityId: string,
+	{
+		primaryUserFirstName,
+		primaryUserEmail,
+		secondaryUserEmail,
+		secondaryUserIdentityId,
+	}: {
+		primaryUserFirstName: string;
+		primaryUserEmail: string;
+		secondaryUserEmail: string;
+		secondaryUserIdentityId: string;
+	},
 ) {
 	const dataAttributes = {
 		primary_user_first_name: primaryUserFirstName,
@@ -29,8 +36,13 @@ export async function sendLeaveSubscriptionEmailToSecondary(
 
 export async function sendLeaveSubscriptionEmailToPrimary(
 	stage: Stage,
-	primaryUserEmail: string,
-	primaryUserIdentityId: string,
+	{
+		primaryUserEmail,
+		primaryUserIdentityId,
+	}: {
+		primaryUserEmail: string;
+		primaryUserIdentityId: string;
+	},
 ) {
 	const dataAttributes = {};
 
