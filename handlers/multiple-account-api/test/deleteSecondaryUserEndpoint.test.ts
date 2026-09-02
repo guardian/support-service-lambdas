@@ -33,6 +33,10 @@ jest.mock('../src/emails/leaveSubcriptionEmail', () => ({
 	sendLeaveSubscriptionEmail: jest.fn(),
 }));
 
+jest.mock('../src/emails/accessRemovedEmail', () => ({
+	sendAccessRemovedEmail: jest.fn(),
+}));
+
 const stage = 'CODE';
 const subscriptionName = 'A-S00974337';
 const secondaryIdentityId = 'secondary-id';
@@ -202,7 +206,7 @@ describe('deleteSecondaryUserEndpoint', () => {
 		);
 	});
 
-	it('soft deletes with cancelledBy "primary" and sends an email when the secondary user deletes', async () => {
+	it('soft deletes with cancelledBy "primary" and sends an email when the primary user removes access', async () => {
 		const { repository, mockGetSoftDeleteTransaction } =
 			makeRepository(makeSecondaryUser());
 		const { client } = makeDynamoClient();
@@ -234,13 +238,13 @@ describe('deleteSecondaryUserEndpoint', () => {
 			identityClient,
 			subscriptionName,
 			secondaryIdentityId,
-			secondaryIdentityId,
+			primaryIdentityId,
 		);
 
 		expect(result.statusCode).toBe(204);
 		expect(mockGetSoftDeleteTransaction).toHaveBeenCalledWith(
 			subscriptionName,
-			secondaryIdentityId,
+			primaryIdentityId,
 			'primary',
 		);
 		expect(sendAccessRemovedEmail).toHaveBeenCalledWith(
