@@ -56,6 +56,7 @@ class AddTierThree(
     ).toApiGatewayOp.toAsync
     createSubRequest <- createCreateSubRequest(
       request,
+      customerData.account.accountNumber,
       getZuoraRateplanId,
     ).toAsync
     subscriptionName <- createSubscription(createSubRequest).toAsyncApiGatewayOp("create tier three subscription")
@@ -124,6 +125,7 @@ object AddTierThree {
 
   def createCreateSubRequest(
       request: AddSubscriptionRequest,
+      accountNumber: GetAccount.AccountNumber,
       getZuoraRateplanId: PlanId => Option[ProductRatePlanId],
   ): ApiGatewayOp[ZuoraCreateSubRequest] = {
     for {
@@ -153,6 +155,7 @@ object AddTierThree {
         )
       createSubRequest = ZuoraCreateSubRequest(
         request = request,
+        accountNumber = accountNumber,
         acceptanceDate = request.startDate,
         ratePlans = ratePlans,
       )

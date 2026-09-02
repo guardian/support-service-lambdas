@@ -81,6 +81,7 @@ class AddDigipackSub(
 
     createSubRequest = ZuoraCreateSubRequest(
       request = request,
+      accountNumber = customerData.account.accountNumber,
       acceptanceDate = request.startDate,
       ratePlans = ratePlans,
     )
