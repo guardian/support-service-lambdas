@@ -21,6 +21,7 @@ jobs:
         subproject:
           - batch-email-sender
           - cancellation-sf-cases-api
+          - holiday-stop-processor
           - delivery-problem-credit-processor
           - new-product-api
           - sf-emails-to-s3-exporter
@@ -88,7 +89,6 @@ jobs:
           - digital-voucher-suspension-processor
           - fulfilment-date-calculator
           - holiday-stop-api
-          - holiday-stop-processor
           - identity-backfill
           - identity-retention
           - product-move-api
