@@ -7,11 +7,19 @@ import type { Stage } from '@modules/stage';
 
 export async function sendInvitationRedeemedEmail(
 	stage: Stage,
-	primaryUserIdentityId: string,
-	primaryUserFirstName: string,
-	primaryUserEmail: string,
-	secondaryUserEmail: string,
-	secondaryUserIdentityId: string,
+	{
+		primaryUserIdentityId,
+		primaryUserFirstName,
+		primaryUserEmail,
+		secondaryUserEmail,
+		secondaryUserIdentityId,
+	}: {
+		primaryUserIdentityId: string;
+		primaryUserFirstName: string;
+		primaryUserEmail: string;
+		secondaryUserEmail: string;
+		secondaryUserIdentityId: string;
+	},
 ) {
 	const dataAttributes = {
 		primary_user_first_name: primaryUserFirstName,

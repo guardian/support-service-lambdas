@@ -89,14 +89,13 @@ export const acceptInvitationEndpoint = async (
 			today,
 		);
 
-		await sendInvitationRedeemedEmail(
-			stage,
-			primaryIdentityId,
-			invitation.primaryUserFirstName,
-			invitation.primaryUserEmail,
-			invitation.secondaryUserEmail,
-			invitation.secondaryIdentityId,
-		);
+		await sendInvitationRedeemedEmail(stage, {
+			primaryUserIdentityId: primaryIdentityId,
+			primaryUserFirstName: invitation.primaryUserFirstName,
+			primaryUserEmail: invitation.primaryUserEmail,
+			secondaryUserEmail: invitation.secondaryUserEmail,
+			secondaryUserIdentityId: invitation.secondaryIdentityId,
+		});
 
 		return ok({
 			identityId: secondaryIdentityId,
