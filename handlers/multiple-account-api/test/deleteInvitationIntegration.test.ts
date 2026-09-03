@@ -101,11 +101,10 @@ test('deleteInvitationEndpoint records cancelledBy as secondary when the seconda
 	);
 
 	expect(result.statusCode).toBe(204);
-	expect(sendDeclineInvitationEmail).toHaveBeenCalledWith(
-		stage,
-		record.primaryIdentityId,
-		record.primaryUserEmail,
-	);
+	expect(sendDeclineInvitationEmail).toHaveBeenCalledWith(stage, {
+		primaryUserIdentityId: record.primaryIdentityId,
+		primaryUserEmail: record.primaryUserEmail,
+	});
 
 	const softDeleted = await repo.get(invitationCode);
 	expect(softDeleted?.cancelledBy).toBe('secondary');

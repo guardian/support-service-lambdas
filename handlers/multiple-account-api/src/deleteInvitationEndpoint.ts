@@ -43,11 +43,10 @@ export const deleteInvitationEndpoint = async (
 		);
 
 		if (cancelledBy === 'secondary') {
-			await sendDeclineInvitationEmail(
-				stage,
-				invitation.primaryIdentityId,
-				invitation.primaryUserEmail,
-			);
+			await sendDeclineInvitationEmail(stage, {
+				primaryUserIdentityId: invitation.primaryIdentityId,
+				primaryUserEmail: invitation.primaryUserEmail,
+			});
 		}
 
 		return {

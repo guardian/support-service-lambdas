@@ -7,8 +7,13 @@ import type { Stage } from '@modules/stage';
 
 export async function sendDeclineInvitationEmail(
 	stage: Stage,
-	primaryUserIdentityId: string,
-	primaryUserEmail: string,
+	{
+		primaryUserIdentityId,
+		primaryUserEmail,
+	}: {
+		primaryUserIdentityId: string;
+		primaryUserEmail: string;
+	},
 ) {
 	const emailMessage = buildEmailMessage(
 		primaryUserEmail,
