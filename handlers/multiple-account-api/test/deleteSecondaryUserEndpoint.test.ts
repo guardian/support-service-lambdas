@@ -13,6 +13,7 @@ import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { deleteSecondaryUserEndpoint } from '../src/deleteSecondaryUserEndpoint';
+import { sendAccessRemovedEmail } from '../src/emails/accessRemovedEmail';
 import { sendLeaveSubscriptionEmail } from '../src/emails/leaveSubcriptionEmail';
 import { makeAccount, makeSubscription } from './helpers';
 
@@ -135,7 +136,7 @@ describe('deleteSecondaryUserEndpoint', () => {
 			jest.clearAllMocks();
 		});
 
-		it('soft deletes with cancelledBy "primary" when the primary user deletes', async () => {
+		it('soft deletes with cancelledBy "primary" and sends an email when the primary user deletes', async () => {
 			const result = await deleteSecondaryUserEndpoint(
 				stage,
 				repository,
@@ -169,6 +170,12 @@ describe('deleteSecondaryUserEndpoint', () => {
 						identityId: { S: secondaryIdentityId },
 					},
 				},
+			});
+			expect(sendAccessRemovedEmail).toHaveBeenCalledWith(stage, {
+				primaryUserFirstName: 'PrimaryFirstName',
+				primaryUserEmail: primaryEmail,
+				secondaryUserEmail: secondaryEmail,
+				secondaryUserIdentityId: secondaryIdentityId,
 			});
 		});
 

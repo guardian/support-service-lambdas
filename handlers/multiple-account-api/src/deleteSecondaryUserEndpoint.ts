@@ -116,13 +116,12 @@ export const deleteSecondaryUserEndpoint = async (
 		}
 
 		if (cancelledBy === 'primary') {
-			await sendAccessRemovedEmail(
-				stage,
-				account.billToContact.firstName,
-				account.billToContact.workEmail,
-				secondaryUserDetails.primaryEmailAddress,
-				secondaryIdentityId,
-			);
+			await sendAccessRemovedEmail(stage, {
+				primaryUserFirstName: account.billToContact.firstName,
+				primaryUserEmail: account.billToContact.workEmail,
+				secondaryUserEmail: secondaryUserDetails.primaryEmailAddress,
+				secondaryUserIdentityId: secondaryIdentityId,
+			});
 		}
 
 		if (cancelledBy === 'secondary') {

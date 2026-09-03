@@ -7,10 +7,17 @@ import type { Stage } from '@modules/stage';
 
 export async function sendAccessRemovedEmail(
 	stage: Stage,
-	primaryUserFirstName: string,
-	primaryUserEmail: string,
-	secondaryUserEmail: string,
-	secondaryUserIdentityId: string,
+	{
+		primaryUserFirstName,
+		primaryUserEmail,
+		secondaryUserEmail,
+		secondaryUserIdentityId,
+	}: {
+		primaryUserFirstName: string;
+		primaryUserEmail: string;
+		secondaryUserEmail: string;
+		secondaryUserIdentityId: string;
+	},
 ) {
 	const dataAttributes = {
 		primary_user_first_name: primaryUserFirstName,
