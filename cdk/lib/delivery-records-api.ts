@@ -15,7 +15,7 @@ import { SrStack } from './cdk/SrStack';
 
 export class DeliveryRecordsApi extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
-		super(scope, { stack: 'membership', stage, app: 'delivery-records-api' });
+		super(scope, { stack: 'support', stage, app: 'delivery-records-api' });
 
 		const isProd = stage === 'PROD';
 
@@ -46,7 +46,7 @@ export class DeliveryRecordsApi extends SrStack {
 			effect: Effect.ALLOW,
 			actions: ['s3:GetObject'],
 			resources: [
-				`arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${stage}/*`,
+				`arn:aws:s3:::gu-reader-revenue-private/support/support-service-lambdas/${stage}/*`,
 			],
 		});
 
@@ -93,21 +93,15 @@ export class DeliveryRecordsApi extends SrStack {
 			),
 			DeliveryRecordsApiCloudWatchRole:
 				restApi.node.findChild('CloudWatchRole'),
+			DeliveryRecordsApiAnyMethod: restApi.node
+				.findChild('Default')
+				.node.findChild('ANY'),
 			DeliveryRecordsApiProxyResource: restApi.node
 				.findChild('Default')
 				.node.findChild('{proxy+}'),
-			// https://github.com/guardian/support-service-lambdas/blob/066bbfc2677d45ae97997c278e3117bfc1198b88/handlers/delivery-records-api/cfn.yaml#L137
-			DeliveryRecordsApiAnyMethod: restApi.node
-				.findChild('Default')
-				.node.findChild('{proxy+}')
-				.node.findChild('ANY'),
 			DeliveryRecordsApiUsagePlan: restApi.node.findChild('UsagePlan'),
 			DeliveryRecordsApiLambda: lambda,
 			DeliveryRecordsApiRole: lambda.node.findChild('ServiceRole'),
-			DeliveryRecordsApiDefaultPolicy: lambda.node
-				.findChild('ServiceRole')
-				.node.findChild('DefaultPolicy'),
-			DeliveryRecordsApiKey: restApi.node.findChild('ApiKey'),
 			...(failureAlarm
 				? {
 						// 'DeliveryRecordsApiFailureAlarm': failureAlarm,
