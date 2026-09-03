@@ -13,6 +13,7 @@ import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { deleteSecondaryUserEndpoint } from '../src/deleteSecondaryUserEndpoint';
+import { sendAccessRemovedEmail } from '../src/emails/accessRemovedEmail';
 import { sendLeaveSubscriptionEmail } from '../src/emails/leaveSubcriptionEmail';
 import { makeAccount, makeSubscription } from './helpers';
 
@@ -30,6 +31,10 @@ jest.mock('@modules/identity/idapi', () => ({
 
 jest.mock('../src/emails/leaveSubcriptionEmail', () => ({
 	sendLeaveSubscriptionEmail: jest.fn(),
+}));
+
+jest.mock('../src/emails/accessRemovedEmail', () => ({
+	sendAccessRemovedEmail: jest.fn(),
 }));
 
 const stage = 'CODE';
@@ -100,105 +105,106 @@ const makeDynamoClient = (): {
 };
 
 describe('deleteSecondaryUserEndpoint', () => {
-	it('soft deletes with cancelledBy "primary" when the primary user deletes', async () => {
+	describe('when the secondary user record exists', () => {
 		const { repository, mockGetSoftDeleteTransaction } =
 			makeRepository(makeSecondaryUser());
 		const { client, mockSend } = makeDynamoClient();
 		const zuoraClient = {} as unknown as ZuoraClient;
 		const identityClient = {} as unknown as IdentityClient;
-		jest
-			.mocked(getSubscription)
-			.mockResolvedValue(makeSubscription(subscriptionName));
-		jest
-			.mocked(getAccount)
-			.mockResolvedValue(
-				makeAccount('Firstname', 'Lastname', 'test@thegulocal.com'),
-			);
-
-		const result = await deleteSecondaryUserEndpoint(
-			stage,
-			repository,
-			client,
-			zuoraClient,
-			identityClient,
-			subscriptionName,
-			secondaryIdentityId,
-			primaryIdentityId,
-		);
-
-		expect(result.statusCode).toBe(204);
-		expect(mockGetSoftDeleteTransaction).toHaveBeenCalledWith(
-			subscriptionName,
-			secondaryIdentityId,
-			'primary',
-		);
-		expect(mockSend).toHaveBeenCalledWith(
-			expect.any(TransactWriteItemsCommand),
-		);
-		const command = mockSend.mock.calls[0]?.[0];
-		expect(command?.input.TransactItems).toHaveLength(2);
-		expect(command?.input.TransactItems?.[0]).toBe(softDeleteTransactItem);
-		expect(command?.input.TransactItems?.[1]).toEqual({
-			Delete: {
-				TableName: 'SupporterProductData-CODE',
-				Key: {
-					subscriptionName: {
-						S: `${subscriptionName}-${secondaryIdentityId}`,
-					},
-					identityId: { S: secondaryIdentityId },
-				},
-			},
-		});
-	});
-
-	it('soft deletes with cancelledBy "secondary" and sends an email when the secondary user deletes', async () => {
-		const { repository, mockGetSoftDeleteTransaction } =
-			makeRepository(makeSecondaryUser());
-		const { client } = makeDynamoClient();
-		const zuoraClient = {} as unknown as ZuoraClient;
-		const identityClient = {} as unknown as IdentityClient;
 		const secondaryEmail = 'secondary@thegulocal.com';
 		const primaryEmail = 'primary@thegulocal.com';
-		jest
-			.mocked(getSubscription)
-			.mockResolvedValue(makeSubscription(subscriptionName));
-		jest
-			.mocked(getAccount)
-			.mockResolvedValue(
-				makeAccount('PrimaryFirstName', 'PrimaryLastName', primaryEmail),
-			);
-		jest.mocked(getUserByIdentityId).mockResolvedValue({
-			id: '123456',
-			primaryEmailAddress: secondaryEmail,
-			publicFields: {
-				displayName: 'Example',
-			},
+
+		beforeEach(() => {
+			jest
+				.mocked(getSubscription)
+				.mockResolvedValue(makeSubscription(subscriptionName));
+			jest
+				.mocked(getAccount)
+				.mockResolvedValue(
+					makeAccount('PrimaryFirstName', 'PrimaryLastName', primaryEmail),
+				);
+			jest.mocked(getUserByIdentityId).mockResolvedValue({
+				id: '123456',
+				primaryEmailAddress: secondaryEmail,
+				publicFields: {
+					displayName: 'Example',
+				},
+			});
 		});
 
-		const result = await deleteSecondaryUserEndpoint(
-			stage,
-			repository,
-			client,
-			zuoraClient,
-			identityClient,
-			subscriptionName,
-			secondaryIdentityId,
-			secondaryIdentityId,
-		);
+		afterEach(() => {
+			jest.clearAllMocks();
+		});
 
-		expect(result.statusCode).toBe(204);
-		expect(mockGetSoftDeleteTransaction).toHaveBeenCalledWith(
-			subscriptionName,
-			secondaryIdentityId,
-			'secondary',
-		);
-		expect(sendLeaveSubscriptionEmail).toHaveBeenCalledWith(
-			stage,
-			'PrimaryFirstName',
-			primaryEmail,
-			secondaryEmail,
-			secondaryIdentityId,
-		);
+		it('soft deletes with cancelledBy "primary" and sends an email when the primary user deletes', async () => {
+			const result = await deleteSecondaryUserEndpoint(
+				stage,
+				repository,
+				client,
+				zuoraClient,
+				identityClient,
+				subscriptionName,
+				secondaryIdentityId,
+				primaryIdentityId,
+			);
+
+			expect(result.statusCode).toBe(204);
+			expect(mockGetSoftDeleteTransaction).toHaveBeenCalledWith(
+				subscriptionName,
+				secondaryIdentityId,
+				'primary',
+			);
+			expect(mockSend).toHaveBeenCalledWith(
+				expect.any(TransactWriteItemsCommand),
+			);
+			const command = mockSend.mock.calls[0]?.[0];
+			expect(command?.input.TransactItems).toHaveLength(2);
+			expect(command?.input.TransactItems?.[0]).toBe(softDeleteTransactItem);
+			expect(command?.input.TransactItems?.[1]).toEqual({
+				Delete: {
+					TableName: 'SupporterProductData-CODE',
+					Key: {
+						subscriptionName: {
+							S: `${subscriptionName}-${secondaryIdentityId}`,
+						},
+						identityId: { S: secondaryIdentityId },
+					},
+				},
+			});
+			expect(sendAccessRemovedEmail).toHaveBeenCalledWith(stage, {
+				primaryUserFirstName: 'PrimaryFirstName',
+				primaryUserEmail: primaryEmail,
+				secondaryUserEmail: secondaryEmail,
+				secondaryUserIdentityId: secondaryIdentityId,
+			});
+		});
+
+		it('soft deletes with cancelledBy "secondary" and sends an email when the secondary user deletes', async () => {
+			const result = await deleteSecondaryUserEndpoint(
+				stage,
+				repository,
+				client,
+				zuoraClient,
+				identityClient,
+				subscriptionName,
+				secondaryIdentityId,
+				secondaryIdentityId,
+			);
+
+			expect(result.statusCode).toBe(204);
+			expect(mockGetSoftDeleteTransaction).toHaveBeenCalledWith(
+				subscriptionName,
+				secondaryIdentityId,
+				'secondary',
+			);
+			expect(sendLeaveSubscriptionEmail).toHaveBeenCalledWith(
+				stage,
+				'PrimaryFirstName',
+				primaryEmail,
+				secondaryEmail,
+				secondaryIdentityId,
+			);
+		});
 	});
 
 	it('returns 404 when the secondary user record is not found', async () => {
