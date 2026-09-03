@@ -40,6 +40,8 @@ export async function sendInvitationRedeemedEmail(
 		{ IdentityUserId: primaryUserIdentityId },
 	);
 
-	await sendEmail(stage, secondaryUserEmailMessage);
-	await sendEmail(stage, primaryUserEmailMessage);
+	await Promise.all([
+		sendEmail(stage, secondaryUserEmailMessage),
+		sendEmail(stage, primaryUserEmailMessage),
+	]);
 }
