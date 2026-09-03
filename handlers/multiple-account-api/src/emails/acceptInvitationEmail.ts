@@ -5,8 +5,9 @@ import {
 } from '@modules/email/email';
 import type { Stage } from '@modules/stage';
 
-export async function sendAcceptInvitationEmail(
+export async function sendInvitationRedeemedEmail(
 	stage: Stage,
+	primaryUserIdentityId: string,
 	primaryUserFirstName: string,
 	primaryUserEmail: string,
 	secondaryUserEmail: string,
@@ -17,11 +18,20 @@ export async function sendAcceptInvitationEmail(
 		primary_user_email: primaryUserEmail,
 	};
 
-	const emailMessage = buildEmailMessage(
+	const secondaryUserEmailMessage = buildEmailMessage(
 		secondaryUserEmail,
 		DataExtensionNames.multipleAccountEmails.secondaryUser.invitationRedeemed,
 		dataAttributes,
 		{ IdentityUserId: secondaryUserIdentityId },
 	);
-	await sendEmail(stage, emailMessage);
+
+	const primaryUserEmailMessage = buildEmailMessage(
+		primaryUserEmail,
+		DataExtensionNames.multipleAccountEmails.primaryUser.invitationRedeemed,
+		{},
+		{ IdentityUserId: primaryUserIdentityId },
+	);
+
+	await sendEmail(stage, secondaryUserEmailMessage);
+	await sendEmail(stage, primaryUserEmailMessage);
 }
