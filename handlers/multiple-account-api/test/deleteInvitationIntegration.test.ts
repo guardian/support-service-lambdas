@@ -10,10 +10,15 @@ import dayjs from 'dayjs';
 import { getAwsConfig } from '@modules/aws/config';
 import type { Stage } from '@modules/stage';
 import { deleteInvitationEndpoint } from '../src/deleteInvitationEndpoint';
+import { sendDeclineInvitationEmail } from '../src/emails/declineInvitationEmail';
 import {
 	type InvitationRecord,
 	InvitationRepository,
 } from '../src/invitationRepository';
+
+jest.mock('../src/emails/declineInvitationEmail', () => ({
+	sendDeclineInvitationEmail: jest.fn(),
+}));
 
 const stage: Stage = 'CODE';
 const repo = new InvitationRepository(
@@ -22,6 +27,10 @@ const repo = new InvitationRepository(
 );
 
 const recordsToCleanup: InvitationRecord[] = [];
+
+beforeEach(() => {
+	jest.clearAllMocks();
+});
 
 const buildRecord = (
 	subscriptionName: string,
@@ -62,9 +71,11 @@ test('deleteInvitationEndpoint soft deletes invitation and returns 204', async (
 		repo,
 		invitationCode,
 		record.primaryIdentityId,
+		stage,
 	);
 
 	expect(result.statusCode).toBe(204);
+	expect(sendDeclineInvitationEmail).not.toHaveBeenCalled();
 
 	// The record is soft deleted: it still exists but now has cancelledBy and
 	// cancelledDate set and an updated TTL (expiryDate) roughly 2 weeks in the future.
@@ -86,9 +97,15 @@ test('deleteInvitationEndpoint records cancelledBy as secondary when the seconda
 		repo,
 		invitationCode,
 		record.secondaryIdentityId,
+		stage,
 	);
 
 	expect(result.statusCode).toBe(204);
+	expect(sendDeclineInvitationEmail).toHaveBeenCalledWith(
+		stage,
+		record.primaryIdentityId,
+		record.primaryUserEmail,
+	);
 
 	const softDeleted = await repo.get(invitationCode);
 	expect(softDeleted?.cancelledBy).toBe('secondary');
@@ -105,9 +122,11 @@ test('deleteInvitationEndpoint returns 400 when the identity id matches neither 
 		repo,
 		invitationCode,
 		'not-a-matching-id',
+		stage,
 	);
 
 	expect(result.statusCode).toBe(400);
+	expect(sendDeclineInvitationEmail).not.toHaveBeenCalled();
 });
 
 test('deleteInvitationEndpoint returns 404 when invitation is not found', async () => {
@@ -115,6 +134,7 @@ test('deleteInvitationEndpoint returns 404 when invitation is not found', async 
 		repo,
 		`it-missing-${Date.now()}`,
 		'12345678',
+		stage,
 	);
 
 	expect(result.statusCode).toBe(404);

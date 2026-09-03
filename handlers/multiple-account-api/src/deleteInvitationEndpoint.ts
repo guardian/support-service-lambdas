@@ -5,12 +5,15 @@ import {
 	internalServerError,
 	notFound,
 } from '@modules/routing/apiGatewayResponses';
+import type { Stage } from '@modules/stage';
+import { sendDeclineInvitationEmail } from './emails/declineInvitationEmail';
 import { type InvitationRepository } from './invitationRepository';
 
 export const deleteInvitationEndpoint = async (
 	invitationRepository: InvitationRepository,
 	invitationCode: string,
 	identityId: string,
+	stage: Stage,
 ): Promise<APIGatewayProxyResult> => {
 	logger.mutableAddContext(invitationCode);
 
@@ -38,6 +41,14 @@ export const deleteInvitationEndpoint = async (
 			invitationCode,
 			cancelledBy,
 		);
+
+		if (cancelledBy === 'secondary') {
+			await sendDeclineInvitationEmail(
+				stage,
+				invitation.primaryIdentityId,
+				invitation.primaryUserEmail,
+			);
+		}
 
 		return {
 			body: '',
