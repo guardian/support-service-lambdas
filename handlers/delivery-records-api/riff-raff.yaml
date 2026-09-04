@@ -1,23 +1,26 @@
 stacks:
-- membership
+  - membership
 regions:
-- eu-west-1
+  - eu-west-1
 allowedStages:
   - CODE
   - PROD
 deployments:
-  cfn:
+  delivery-records-api-cloudformation:
     type: cloud-formation
     app: delivery-records-api
     parameters:
-      templatePath: cfn.yaml
+      templateStagePaths:
+        CODE: delivery-records-api-CODE.template.json
+        PROD: delivery-records-api-PROD.template.json
 
   delivery-records-api:
     type: aws-lambda
     parameters:
       fileName: delivery-records-api.jar
-      bucket: support-service-lambdas-dist
+      bucketSsmLookup: true
       prefixStack: false
       functionNames:
-      - delivery-records-api-
-    dependencies: [cfn]
+        - delivery-records-api-CODE
+        - delivery-records-api-PROD
+    dependencies: [delivery-records-api-cloudformation]
