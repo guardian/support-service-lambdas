@@ -1,7 +1,7 @@
 stacks:
-- membership
+  - membership
 regions:
-- eu-west-1
+  - eu-west-1
 allowedStages:
   - CODE
   - PROD
@@ -16,8 +16,8 @@ deployments:
     type: aws-lambda
     parameters:
       fileName: delivery-records-api.jar
-      bucket: support-service-lambdas-dist
+      bucketSsmLookup: true
       prefixStack: false
       functionNames:
-      - delivery-records-api-
+        - delivery-records-api-
     dependencies: [cfn]
