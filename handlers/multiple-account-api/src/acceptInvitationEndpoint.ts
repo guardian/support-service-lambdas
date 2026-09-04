@@ -13,7 +13,7 @@ import {
 } from '@modules/routing/apiGatewayResponses';
 import type { Stage } from '@modules/stage';
 import { getSupporterRatePlan } from '@modules/supporter-product-data/supporterProductData';
-import { sendAcceptInvitationEmail } from './emails/acceptInvitationEmail';
+import { sendInvitationRedeemedEmail } from './emails/acceptInvitationEmail';
 import type { InvitationRepository } from './invitationRepository';
 
 export const acceptInvitationEndpoint = async (
@@ -89,13 +89,14 @@ export const acceptInvitationEndpoint = async (
 			today,
 		);
 
-		await sendAcceptInvitationEmail(
-			stage,
-			invitation.primaryUserFirstName,
-			invitation.primaryUserEmail,
-			invitation.secondaryUserEmail,
-			invitation.secondaryIdentityId,
-		);
+		await sendInvitationRedeemedEmail(stage, {
+			primaryUserIdentityId: primaryIdentityId,
+			primaryUserFirstName: invitation.primaryUserFirstName,
+			primaryUserEmail: invitation.primaryUserEmail,
+			secondaryUserEmail: invitation.secondaryUserEmail,
+			secondaryUserIdentityId: invitation.secondaryIdentityId,
+		});
+
 		return ok({
 			identityId: secondaryIdentityId,
 			secondarySubscriptionName,
