@@ -109,9 +109,17 @@ export class DeliveryRecordsApi extends SrStack {
 			DeliveryRecordsApiProxyResource: restApi.node
 				.findChild('Default')
 				.node.findChild('{proxy+}'),
+			DeliveryRecordsApiProxyAnyMethod: restApi.node
+				.findChild('Default')
+				.node.findChild('{proxy+}')
+				.node.findChild('ANY'),
 			DeliveryRecordsApiUsagePlan: restApi.node.findChild('UsagePlan'),
 			DeliveryRecordsApiLambda: lambda,
 			DeliveryRecordsApiRole: lambda.node.findChild('ServiceRole'),
+			DeliveryRecordsApiDefaultPolicy: lambda.node
+				.findChild('ServiceRole')
+				.node.findChild('DefaultPolicy'),
+			DeliveryRecordsApiKey: restApi.node.findChild('ApiKey'),
 			...(failureAlarm
 				? {
 						// 'DeliveryRecordsApiFailureAlarm': failureAlarm,

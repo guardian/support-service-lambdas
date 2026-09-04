@@ -204,9 +204,114 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Route53::RecordSet",
     },
+    "DeliveryRecordsApiDefaultPolicy": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/CODE/delivery-records-api/delivery-records-api.jar",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/delivery-records-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/delivery-records-api/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "DeliveryRecordsApiDefaultPolicy",
+        "Roles": [
+          {
+            "Ref": "DeliveryRecordsApiRole",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "DeliveryRecordsApiDeployment": {
       "DependsOn": [
-        "LambdaRestApiproxyANY486C4D1F",
+        "DeliveryRecordsApiProxyAnyMethod",
         "DeliveryRecordsApiProxyResource",
         "DeliveryRecordsApiAnyMethod",
       ],
@@ -266,9 +371,48 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
+    "DeliveryRecordsApiKey": {
+      "Properties": {
+        "Enabled": true,
+        "Name": "delivery-records-api-key-CODE",
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "DeliveryRecordsApi",
+            },
+            "StageName": {
+              "Ref": "DeliveryRecordsApiStage",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "delivery-records-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
+    },
     "DeliveryRecordsApiLambda": {
       "DependsOn": [
-        "LambdaServiceRoleDefaultPolicyDAE46E21",
+        "DeliveryRecordsApiDefaultPolicy",
         "DeliveryRecordsApiRole",
       ],
       "Properties": {
@@ -329,6 +473,47 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
         "Timeout": 300,
       },
       "Type": "AWS::Lambda::Function",
+    },
+    "DeliveryRecordsApiProxyAnyMethod": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "DeliveryRecordsApiLambda",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "DeliveryRecordsApiProxyResource",
+        },
+        "RestApiId": {
+          "Ref": "DeliveryRecordsApi",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
     },
     "DeliveryRecordsApiProxyResource": {
       "Properties": {
@@ -569,49 +754,10 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
       "Type": "AWS::ApiGateway::Account",
       "UpdateReplacePolicy": "Retain",
     },
-    "LambdaRestApiApiKeyB5CCCA11": {
-      "Properties": {
-        "Enabled": true,
-        "Name": "delivery-records-api-key-CODE",
-        "StageKeys": [
-          {
-            "RestApiId": {
-              "Ref": "DeliveryRecordsApi",
-            },
-            "StageName": {
-              "Ref": "DeliveryRecordsApiStage",
-            },
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "delivery-records-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::ApiKey",
-    },
     "LambdaRestApiUsagePlanUsagePlanKeyResourcedeliveryrecordsapiCODELambdaRestApiApiKey7834462D595229F7": {
       "Properties": {
         "KeyId": {
-          "Ref": "LambdaRestApiApiKeyB5CCCA11",
+          "Ref": "DeliveryRecordsApiKey",
         },
         "KeyType": "API_KEY",
         "UsagePlanId": {
@@ -619,47 +765,6 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
         },
       },
       "Type": "AWS::ApiGateway::UsagePlanKey",
-    },
-    "LambdaRestApiproxyANY486C4D1F": {
-      "Properties": {
-        "ApiKeyRequired": true,
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "DeliveryRecordsApiLambda",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Ref": "DeliveryRecordsApiProxyResource",
-        },
-        "RestApiId": {
-          "Ref": "DeliveryRecordsApi",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
     },
     "LambdaRestApiproxyANYApiPermissionTestdeliveryrecordsapiCODELambdaRestApiAF1B487AANYproxy3276478A": {
       "Properties": {
@@ -738,111 +843,6 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
         },
       },
       "Type": "AWS::Lambda::Permission",
-    },
-    "LambdaServiceRoleDefaultPolicyDAE46E21": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "s3:GetObject*",
-                "s3:GetBucket*",
-                "s3:List*",
-              ],
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                      "/support/CODE/delivery-records-api/delivery-records-api.jar",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": "ssm:GetParametersByPath",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/CODE/support/delivery-records-api",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "ssm:GetParameters",
-                "ssm:GetParameter",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/CODE/support/delivery-records-api/*",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/*",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "LambdaServiceRoleDefaultPolicyDAE46E21",
-        "Roles": [
-          {
-            "Ref": "DeliveryRecordsApiRole",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
     },
   },
 }
@@ -1128,9 +1128,114 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Route53::RecordSet",
     },
+    "DeliveryRecordsApiDefaultPolicy": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/PROD/delivery-records-api/delivery-records-api.jar",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/delivery-records-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/delivery-records-api/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/PROD/*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "DeliveryRecordsApiDefaultPolicy",
+        "Roles": [
+          {
+            "Ref": "DeliveryRecordsApiRole",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "DeliveryRecordsApiDeployment": {
       "DependsOn": [
-        "LambdaRestApiproxyANY486C4D1F",
+        "DeliveryRecordsApiProxyAnyMethod",
         "DeliveryRecordsApiProxyResource",
         "DeliveryRecordsApiAnyMethod",
       ],
@@ -1190,9 +1295,48 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
+    "DeliveryRecordsApiKey": {
+      "Properties": {
+        "Enabled": true,
+        "Name": "delivery-records-api-key-PROD",
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "DeliveryRecordsApi",
+            },
+            "StageName": {
+              "Ref": "DeliveryRecordsApiStage",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "delivery-records-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
+    },
     "DeliveryRecordsApiLambda": {
       "DependsOn": [
-        "LambdaServiceRoleDefaultPolicyDAE46E21",
+        "DeliveryRecordsApiDefaultPolicy",
         "DeliveryRecordsApiRole",
       ],
       "Properties": {
@@ -1253,6 +1397,47 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
         "Timeout": 300,
       },
       "Type": "AWS::Lambda::Function",
+    },
+    "DeliveryRecordsApiProxyAnyMethod": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "DeliveryRecordsApiLambda",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "DeliveryRecordsApiProxyResource",
+        },
+        "RestApiId": {
+          "Ref": "DeliveryRecordsApi",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
     },
     "DeliveryRecordsApiProxyResource": {
       "Properties": {
@@ -1573,49 +1758,10 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
       "Type": "AWS::ApiGateway::Account",
       "UpdateReplacePolicy": "Retain",
     },
-    "LambdaRestApiApiKeyB5CCCA11": {
-      "Properties": {
-        "Enabled": true,
-        "Name": "delivery-records-api-key-PROD",
-        "StageKeys": [
-          {
-            "RestApiId": {
-              "Ref": "DeliveryRecordsApi",
-            },
-            "StageName": {
-              "Ref": "DeliveryRecordsApiStage",
-            },
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "delivery-records-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::ApiKey",
-    },
     "LambdaRestApiUsagePlanUsagePlanKeyResourcedeliveryrecordsapiPRODLambdaRestApiApiKey7FAC9DFE035E022C": {
       "Properties": {
         "KeyId": {
-          "Ref": "LambdaRestApiApiKeyB5CCCA11",
+          "Ref": "DeliveryRecordsApiKey",
         },
         "KeyType": "API_KEY",
         "UsagePlanId": {
@@ -1623,47 +1769,6 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
         },
       },
       "Type": "AWS::ApiGateway::UsagePlanKey",
-    },
-    "LambdaRestApiproxyANY486C4D1F": {
-      "Properties": {
-        "ApiKeyRequired": true,
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "DeliveryRecordsApiLambda",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Ref": "DeliveryRecordsApiProxyResource",
-        },
-        "RestApiId": {
-          "Ref": "DeliveryRecordsApi",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
     },
     "LambdaRestApiproxyANYApiPermissionTestdeliveryrecordsapiPRODLambdaRestApi5F186F97ANYproxy2675B264": {
       "Properties": {
@@ -1742,111 +1847,6 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
         },
       },
       "Type": "AWS::Lambda::Permission",
-    },
-    "LambdaServiceRoleDefaultPolicyDAE46E21": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "s3:GetObject*",
-                "s3:GetBucket*",
-                "s3:List*",
-              ],
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                      "/support/PROD/delivery-records-api/delivery-records-api.jar",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": "ssm:GetParametersByPath",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/PROD/support/delivery-records-api",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "ssm:GetParameters",
-                "ssm:GetParameter",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/PROD/support/delivery-records-api/*",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/PROD/*",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "LambdaServiceRoleDefaultPolicyDAE46E21",
-        "Roles": [
-          {
-            "Ref": "DeliveryRecordsApiRole",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
     },
   },
 }
