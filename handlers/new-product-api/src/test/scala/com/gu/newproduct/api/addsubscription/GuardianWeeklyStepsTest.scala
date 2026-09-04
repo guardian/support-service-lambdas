@@ -12,7 +12,7 @@ import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{
   ZuoraCreateSubRequest,
   ZuoraCreateSubRequestRatePlan,
 }
-import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
+import com.gu.newproduct.api.addsubscription.zuora.GetAccount.{AccountNumber, SfContactId}
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BillToAddress, SoldToAddress}
 import com.gu.newproduct.api.productcatalog.PlanId.{
   GuardianWeeklyPlusDomesticMonthly,
@@ -117,7 +117,7 @@ class GuardianWeeklyStepsTest extends AnyFlatSpec with Matchers {
         request: CreateSubscription.ZuoraCreateSubRequest,
     ): Types.ClientFailableOp[CreateSubscription.SubscriptionName] = {
       request shouldBe ZuoraCreateSubRequest(
-        accountId = testZuoraAccountId,
+        accountNumber = AccountNumber("A00000001"),
         acceptanceDate = testFirstPaymentDate,
         acquisitionCase = testCaseId,
         acquisitionSource = testAcquistionSource,

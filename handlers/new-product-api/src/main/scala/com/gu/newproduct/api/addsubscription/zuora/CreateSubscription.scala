@@ -3,92 +3,188 @@ package com.gu.newproduct.api.addsubscription.zuora
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import com.gu.newproduct.api.addsubscription._
+import com.gu.newproduct.api.addsubscription.zuora.GetAccount.AccountNumber
 import com.gu.newproduct.api.productcatalog.AmountMinorUnits
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.util.resthttp.ClientFailableOpLogging.LogImplicit2
 import com.gu.util.resthttp.RestRequestMaker.{RequestsPost, WithCheck}
-import com.gu.util.resthttp.Types.ClientFailableOp
-import play.api.libs.json.{Json, OWrites, Reads}
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
+import play.api.libs.json.{JsObject, Json, OWrites, Reads}
 
 object CreateSubscription {
-  val SpecificDateTriggerEventId = "USD"
-
   object WireModel {
 
-    case class WireSubscription(subscriptionNumber: String)
+    case class WireOrderResponse(subscriptionNumbers: List[String])
 
-    implicit val readsResponse: Reads[WireSubscription] = Json.reads[WireSubscription]
+    implicit val readsResponse: Reads[WireOrderResponse] = Json.reads[WireOrderResponse]
 
-    case class ChargeOverrides(
-        price: Option[Double],
+    case class ChargeStartDate(triggerEvent: String, specificTriggerDate: String)
+
+    implicit val writesChargeStartDate: OWrites[ChargeStartDate] = Json.writes[ChargeStartDate]
+
+    case class RecurringFlatFee(listPrice: Double)
+
+    implicit val writesRecurringFlatFee: OWrites[RecurringFlatFee] = Json.writes[RecurringFlatFee]
+
+    case class Pricing(recurringFlatFee: RecurringFlatFee)
+
+    implicit val writesPricing: OWrites[Pricing] = Json.writes[Pricing]
+
+    case class ChargeOverride(
         productRatePlanChargeId: String,
-        triggerDate: Option[LocalDate],
-        triggerEvent: Option[String],
+        pricing: Option[Pricing],
+        startDate: Option[ChargeStartDate],
     )
 
-    implicit val writesCharge: OWrites[ChargeOverrides] = Json.writes[ChargeOverrides]
+    implicit val writesChargeOverride: OWrites[ChargeOverride] = OWrites { chargeOverride =>
+      Json.obj("productRatePlanChargeId" -> chargeOverride.productRatePlanChargeId) ++
+        chargeOverride.pricing.fold(JsObject.empty)(pricing => Json.obj("pricing" -> pricing)) ++
+        chargeOverride.startDate.fold(JsObject.empty)(startDate => Json.obj("startDate" -> startDate))
+    }
 
-    case class SubscribeToRatePlans(
-        productRatePlanId: String,
-        chargeOverrides: List[ChargeOverrides],
+    case class SubscribeToRatePlan(productRatePlanId: String, chargeOverrides: List[ChargeOverride])
+
+    implicit val writesSubscribeToRatePlan: OWrites[SubscribeToRatePlan] = Json.writes[SubscribeToRatePlan]
+
+    case class InitialTerm(termType: String, period: Int, periodType: String)
+
+    implicit val writesInitialTerm: OWrites[InitialTerm] = Json.writes[InitialTerm]
+
+    case class RenewalTerm(period: Int, periodType: String)
+
+    implicit val writesRenewalTerm: OWrites[RenewalTerm] = Json.writes[RenewalTerm]
+
+    case class Terms(
+        autoRenew: Boolean,
+        initialTerm: InitialTerm,
+        renewalSetting: String,
+        renewalTerms: List[RenewalTerm],
     )
 
-    implicit val writesSubscribe: OWrites[SubscribeToRatePlans] = Json.writes[SubscribeToRatePlans]
+    implicit val writesTerms: OWrites[Terms] = Json.writes[Terms]
 
-    case class WireCreateRequest(
-        accountKey: String,
-        autoRenew: Boolean = true,
-        contractEffectiveDate: String,
-        customerAcceptanceDate: String,
-        termType: String = "TERMED",
-        renewalTerm: Int = 12,
-        initialTerm: Int = 12,
-        subscribeToRatePlans: List[SubscribeToRatePlans],
-        AcquisitionCase__c: String,
-        AcquisitionSource__c: String,
-        CreatedByCSR__c: String,
-        DeliveryAgent__c: Option[String],
-        LastPlanAddedDate__c: String,
+    case class CreateSubscriptionAction(terms: Terms, subscribeToRatePlans: List[SubscribeToRatePlan])
+
+    implicit val writesCreateSubscriptionAction: OWrites[CreateSubscriptionAction] =
+      Json.writes[CreateSubscriptionAction]
+
+    case class TriggerDate(name: String, triggerDate: String)
+
+    implicit val writesTriggerDate: OWrites[TriggerDate] = Json.writes[TriggerDate]
+
+    case class OrderAction(
+        `type`: String,
+        triggerDates: List[TriggerDate],
+        createSubscription: CreateSubscriptionAction,
     )
 
-    implicit val writesRequest: OWrites[WireCreateRequest] = Json.writes[WireCreateRequest]
+    implicit val writesOrderAction: OWrites[OrderAction] = Json.writes[OrderAction]
+
+    case class SubscriptionCustomFields(
+        acquisitionCase: String,
+        acquisitionSource: String,
+        createdByCSR: String,
+        deliveryAgent: Option[String],
+        lastPlanAddedDate: String,
+    )
+
+    implicit val writesSubscriptionCustomFields: OWrites[SubscriptionCustomFields] = OWrites { customFields =>
+      Json.obj(
+        "AcquisitionCase__c" -> customFields.acquisitionCase,
+        "AcquisitionSource__c" -> customFields.acquisitionSource,
+        "CreatedByCSR__c" -> customFields.createdByCSR,
+        "LastPlanAddedDate__c" -> customFields.lastPlanAddedDate,
+      ) ++ customFields.deliveryAgent.fold(JsObject.empty)(deliveryAgent =>
+        Json.obj("DeliveryAgent__c" -> deliveryAgent),
+      )
+    }
+
+    case class OrderSubscription(orderActions: List[OrderAction], customFields: SubscriptionCustomFields)
+
+    implicit val writesOrderSubscription: OWrites[OrderSubscription] = Json.writes[OrderSubscription]
+
+    case class ProcessingOptions(runBilling: Boolean, collectPayment: Boolean)
+
+    implicit val writesProcessingOptions: OWrites[ProcessingOptions] = Json.writes[ProcessingOptions]
+
+    case class WireCreateOrderRequest(
+        orderDate: String,
+        existingAccountNumber: String,
+        subscriptions: List[OrderSubscription],
+        processingOptions: ProcessingOptions,
+    )
+
+    implicit val writesRequest: OWrites[WireCreateOrderRequest] = Json.writes[WireCreateOrderRequest]
   }
 
   import WireModel._
 
-  def createRequest(currentDate: LocalDate, createSubscription: ZuoraCreateSubRequest): WireCreateRequest = {
+  private val DateFormat = DateTimeFormatter.ISO_LOCAL_DATE
+
+  private def zuoraDate(date: LocalDate): String = date.format(DateFormat)
+
+  def createRequest(currentDate: LocalDate, createSubscription: ZuoraCreateSubRequest): WireCreateOrderRequest = {
     import createSubscription._
-    WireCreateRequest(
-      accountKey = accountId.value,
-      contractEffectiveDate = currentDate.format(DateTimeFormatter.ISO_LOCAL_DATE),
-      customerAcceptanceDate = acceptanceDate.format(DateTimeFormatter.ISO_LOCAL_DATE),
-      AcquisitionCase__c = acquisitionCase.value,
-      AcquisitionSource__c = acquisitionSource.value,
-      CreatedByCSR__c = createdByCSR.value,
-      DeliveryAgent__c = deliveryAgent.map(_.value),
-      LastPlanAddedDate__c = currentDate.format(DateTimeFormatter.ISO_LOCAL_DATE),
-      subscribeToRatePlans = ratePlans.map { ratePlan =>
-        SubscribeToRatePlans(
-          productRatePlanId = ratePlan.productRatePlanId.value,
-          chargeOverrides = ratePlan.maybeChargeOverride.map { chargeOverride =>
-            ChargeOverrides(
-              price = chargeOverride.amountMinorUnits.map(_.value.toDouble / 100),
-              productRatePlanChargeId = chargeOverride.productRatePlanChargeId.value,
-              triggerDate = chargeOverride.triggerDate,
-              triggerEvent = chargeOverride.triggerDate.map(_ => SpecificDateTriggerEventId),
-            )
-          }.toList,
-        )
-      },
+    val contractEffectiveDate = zuoraDate(currentDate)
+
+    WireCreateOrderRequest(
+      orderDate = contractEffectiveDate,
+      existingAccountNumber = accountNumber.value,
+      subscriptions = List(
+        OrderSubscription(
+          orderActions = List(
+            OrderAction(
+              `type` = "CreateSubscription",
+              triggerDates = List(
+                TriggerDate("ContractEffective", contractEffectiveDate),
+                TriggerDate("CustomerAcceptance", zuoraDate(acceptanceDate)),
+              ),
+              createSubscription = CreateSubscriptionAction(
+                terms = Terms(
+                  autoRenew = true,
+                  initialTerm = InitialTerm("TERMED", 12, "Month"),
+                  renewalSetting = "RENEW_WITH_SPECIFIC_TERM",
+                  renewalTerms = List(RenewalTerm(12, "Month")),
+                ),
+                subscribeToRatePlans = ratePlans.map { ratePlan =>
+                  SubscribeToRatePlan(
+                    productRatePlanId = ratePlan.productRatePlanId.value,
+                    chargeOverrides = ratePlan.maybeChargeOverride.map { chargeOverride =>
+                      WireModel.ChargeOverride(
+                        productRatePlanChargeId = chargeOverride.productRatePlanChargeId.value,
+                        pricing = chargeOverride.amountMinorUnits.map(amount =>
+                          Pricing(RecurringFlatFee(amount.value.toDouble / 100)),
+                        ),
+                        startDate =
+                          chargeOverride.triggerDate.map(date => ChargeStartDate("SpecificDate", zuoraDate(date))),
+                      )
+                    }.toList,
+                  )
+                },
+              ),
+            ),
+          ),
+          customFields = SubscriptionCustomFields(
+            acquisitionCase = acquisitionCase.value,
+            acquisitionSource = acquisitionSource.value,
+            createdByCSR = createdByCSR.value,
+            deliveryAgent = deliveryAgent.map(_.value),
+            lastPlanAddedDate = contractEffectiveDate,
+          ),
+        ),
+      ),
+      processingOptions = ProcessingOptions(runBilling = true, collectPayment = true),
     )
   }
+
   case class ChargeOverride(
       amountMinorUnits: Option[AmountMinorUnits],
       productRatePlanChargeId: ProductRatePlanChargeId,
       triggerDate: Option[LocalDate],
   )
+
   case class ZuoraCreateSubRequest(
-      accountId: ZuoraAccountId,
+      accountNumber: AccountNumber,
       acceptanceDate: LocalDate,
       acquisitionCase: CaseId,
       acquisitionSource: AcquisitionSource,
@@ -105,10 +201,11 @@ object CreateSubscription {
   object ZuoraCreateSubRequest {
     def apply(
         request: AddSubscriptionRequest,
+        accountNumber: AccountNumber,
         acceptanceDate: LocalDate,
         ratePlans: List[ZuoraCreateSubRequestRatePlan],
     ): ZuoraCreateSubRequest = ZuoraCreateSubRequest(
-      accountId = request.zuoraAccountId,
+      accountNumber = accountNumber,
       acceptanceDate = acceptanceDate,
       acquisitionCase = request.acquisitionCase,
       acquisitionSource = request.acquisitionSource,
@@ -117,18 +214,19 @@ object CreateSubscription {
       ratePlans = ratePlans,
     )
   }
+
   case class SubscriptionName(value: String) extends AnyVal
 
   def apply(
-      post: RequestsPost[WireCreateRequest, WireSubscription],
+      post: RequestsPost[WireCreateOrderRequest, WireOrderResponse],
       currentDate: () => LocalDate,
-  )(createSubscription: ZuoraCreateSubRequest): ClientFailableOp[SubscriptionName] = {
-    val maybeWireSubscription = post(createRequest(currentDate(), createSubscription), s"subscriptions", WithCheck)
-    maybeWireSubscription
-      .map { wireSubscription =>
-        SubscriptionName(wireSubscription.subscriptionNumber)
+  )(createSubscription: ZuoraCreateSubRequest): ClientFailableOp[SubscriptionName] =
+    // https://developer.zuora.com/v1-api-reference/api/operation/POST_Order/
+    post(createRequest(currentDate(), createSubscription), "orders", WithCheck)
+      .flatMap {
+        case WireOrderResponse(subscriptionNumber :: Nil) => ClientSuccess(SubscriptionName(subscriptionNumber))
+        case WireOrderResponse(subscriptionNumbers) =>
+          GenericError(s"expected one subscription number from Zuora Orders, received ${subscriptionNumbers.size}")
       }
       .withLogging("created subscription")
-  }
-
 }

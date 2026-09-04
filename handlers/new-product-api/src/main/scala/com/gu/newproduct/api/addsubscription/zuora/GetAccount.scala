@@ -11,6 +11,7 @@ object GetAccount {
   object WireModel {
 
     case class ZuoraAccount(
+        AccountNumber: String,
         IdentityId__c: Option[String],
         sfContactId__c: Option[String],
         DefaultPaymentMethodId: Option[String],
@@ -26,6 +27,7 @@ object GetAccount {
         case Some(currency) =>
           ClientSuccess(
             Account(
+              AccountNumber(zuoraAccount.AccountNumber),
               zuoraAccount.IdentityId__c.map(IdentityId),
               zuoraAccount.sfContactId__c.map(SfContactId.apply),
               zuoraAccount.DefaultPaymentMethodId.map(PaymentMethodId),
@@ -46,6 +48,8 @@ object GetAccount {
 
   case class IdentityId(value: String) extends AnyVal
 
+  case class AccountNumber(value: String) extends AnyVal
+
   case class SfContactId(value: String) extends AnyVal
 
   case class PaymentMethodId(value: String) extends AnyVal
@@ -55,6 +59,7 @@ object GetAccount {
   case class AccountBalanceMinorUnits(value: Int) extends AnyVal
 
   case class Account(
+      accountNumber: AccountNumber,
       identityId: Option[IdentityId],
       sfContactId: Option[SfContactId],
       paymentMethodId: Option[PaymentMethodId],

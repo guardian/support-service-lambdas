@@ -10,6 +10,7 @@ import com.gu.newproduct.api.addsubscription.validation.supporterplus.SupporterP
 import com.gu.newproduct.api.addsubscription.validation.tierthree.TierThreeCustomerData
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.{
   AccountBalanceMinorUnits,
+  AccountNumber,
   AutoPay,
   IdentityId,
   PaymentMethodId,
@@ -29,6 +30,7 @@ import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 
 object TestData {
   val validatedAccount = ValidatedAccount(
+    accountNumber = AccountNumber("A00000001"),
     identityId = Some(IdentityId("identityId")),
     paymentMethodId = PaymentMethodId("paymentMethodId"),
     autoPay = AutoPay(true),

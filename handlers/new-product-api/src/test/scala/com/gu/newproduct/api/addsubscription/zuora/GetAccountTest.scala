@@ -12,6 +12,7 @@ import org.scalatest.matchers.should.Matchers
 class GetAccountTest extends AnyFlatSpec with Matchers {
 
   val acc: ZuoraAccount = ZuoraAccount(
+    AccountNumber = "A00000001",
     IdentityId__c = Some("6002"),
     DefaultPaymentMethodId = Some("2c92c0f8649cc8a60164a2bfd475000c"),
     AutoPay = false,
@@ -28,6 +29,7 @@ class GetAccountTest extends AnyFlatSpec with Matchers {
     val actual = GetAccount(accF)(ZuoraAccountId("2c92c0f9624bbc5f016253e573970b16"))
     actual shouldBe ClientSuccess(
       Account(
+        AccountNumber("A00000001"),
         Some(IdentityId("6002")),
         Some(SfContactId("sfContactId")),
         Some(PaymentMethodId("2c92c0f8649cc8a60164a2bfd475000c")),
@@ -47,6 +49,7 @@ class GetAccountTest extends AnyFlatSpec with Matchers {
     val actual = GetAccount(accF)(ZuoraAccountId("missingFieldsAccount"))
     actual shouldBe ClientSuccess(
       Account(
+        AccountNumber("A00000001"),
         None,
         None,
         None,

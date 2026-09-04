@@ -61,6 +61,7 @@ class AddGuardianWeeklySub(
     ).toApiGatewayOp.toAsync
     createSubRequest <- createCreateSubRequest(
       request,
+      customerData.account.accountNumber,
       getZuoraRateplanId,
     ).toAsync
     subscriptionName <- createSubscription(createSubRequest).toAsyncApiGatewayOp("create guardian weekly subscription")
@@ -130,6 +131,7 @@ object AddGuardianWeeklySub {
 
   def createCreateSubRequest(
       request: AddSubscriptionRequest,
+      accountNumber: GetAccount.AccountNumber,
       getZuoraRateplanId: PlanId => Option[ProductRatePlanId],
   ): ApiGatewayOp[ZuoraCreateSubRequest] = {
     for {
@@ -159,6 +161,7 @@ object AddGuardianWeeklySub {
         )
       createSubRequest = ZuoraCreateSubRequest(
         request = request,
+        accountNumber = accountNumber,
         acceptanceDate = request.startDate,
         ratePlans = ratePlans,
       )
