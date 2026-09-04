@@ -8,6 +8,7 @@ import { getIfDefined } from '@modules/nullAndUndefined';
 import {
 	badRequest,
 	buildErrorResponse,
+	conflict,
 	notFound,
 	ok,
 } from '@modules/routing/apiGatewayResponses';
@@ -28,6 +29,19 @@ export const acceptInvitationEndpoint = async (
 		const invitation = await invitationRepository.get(invitationCode);
 
 		if (!invitation) {
+			// The invitation is hard-deleted once accepted, so if it's missing but a
+			// secondary user record already exists for this invitation code, the
+			// user has already accepted it previously.
+			const alreadyAccepted = (
+				await secondaryUserRepository.listByIdentity(signedInUserId)
+			).some(
+				(secondaryUser) => secondaryUser.invitationCode === invitationCode,
+			);
+
+			if (alreadyAccepted) {
+				return conflict('Invitation has already been accepted');
+			}
+
 			return notFound();
 		}
 

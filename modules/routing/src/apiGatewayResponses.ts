@@ -23,6 +23,10 @@ export function notFound(): APIGatewayProxyResult {
 	return jsonResponse('Not Found', 404);
 }
 
+export function conflict(message: string): APIGatewayProxyResult {
+	return jsonResponse(message, 409);
+}
+
 /**
  * Return a 200 OK response with the provided body.
  * @param body
