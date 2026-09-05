@@ -77,6 +77,13 @@ class AllowCodeParameterStoreReadPolicy extends PolicyStatement {
 				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/DEV/*`,
 				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/CODE/*`,
 				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/support/frontend/DEV`,
+				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/payment-api/app-config/dev/`,
+				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/payment-api/stripe-config/test/`,
+				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/payment-api/contributions-store-queue/test/`,
+				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/payment-api/email-config/test/`,
+				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/payment-api/identity-config/test/`,
+				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/payment-api/recaptcha-config/test/`,
+				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/payment-api/stripe-config/test/`,
 			],
 		});
 	}
