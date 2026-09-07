@@ -14,7 +14,6 @@ export const supporterPlusTaxEngineId = '8ad095dd81de1cf00181de66e7404253';
 
 export const zuoraTaxCodeSupporterPlus: ZuoraTaxCode = {
 	id: supporterPlusTaxCodeId,
-	taxEngineId: '2c92c0f94568f996014570f746f75c52',
 	active: true,
 	name: 'Supporter Plus',
 	description: '',

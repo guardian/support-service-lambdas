@@ -2,7 +2,6 @@ import { z } from 'zod';
 
 export const zuoraTaxCodeSchema = z.object({
 	id: z.string(),
-	taxEngineId: z.string(),
 	active: z.boolean(),
 	name: z.string(),
 	description: z.string(),
