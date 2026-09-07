@@ -8,7 +8,7 @@ import { getIfDefined } from '@modules/nullAndUndefined';
 import {
 	badRequest,
 	buildErrorResponse,
-	conflict,
+	gone,
 	notFound,
 	ok,
 } from '@modules/routing/apiGatewayResponses';
@@ -39,7 +39,7 @@ export const acceptInvitationEndpoint = async (
 			);
 
 			if (alreadyAccepted) {
-				return conflict('Invitation has already been accepted');
+				return gone('Invitation has already been accepted');
 			}
 
 			return notFound();

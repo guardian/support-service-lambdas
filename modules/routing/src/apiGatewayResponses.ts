@@ -23,8 +23,8 @@ export function notFound(): APIGatewayProxyResult {
 	return jsonResponse('Not Found', 404);
 }
 
-export function conflict(message: string): APIGatewayProxyResult {
-	return jsonResponse(message, 409);
+export function gone(message: string): APIGatewayProxyResult {
+	return jsonResponse(message, 410);
 }
 
 /**
