@@ -23,7 +23,7 @@ import { InvitationRepository } from '../src/invitationRepository';
 
 const stage = 'CODE';
 const subscriptionName = 'A-S00974337';
-const secondaryUserEmail = 'integration-test2+multiple-account@theguardian.com';
+const secondaryUserEmail = 'integration-test2+multiple-account@thegulocal.com';
 
 let invitationCode: string;
 let secondaryIdentityId: string;
@@ -34,14 +34,17 @@ const dynamoClient = new DynamoDBClient({});
 
 jest.setTimeout(30000);
 
+const buildIdentityClient = () =>
+	IdentityClient.create(
+		stage,
+		`/${stage}/support/multiple-account-api/identity-client-access-token`,
+	);
+
 beforeEach(async () => {
 	const zuoraClient = await ZuoraClient.create(stage);
 	const zuoraCatalog = await getZuoraCatalogFromS3(stage);
 	const productCatalog = await getProductCatalogFromApi(stage);
-	const identityClient = await IdentityClient.create(
-		stage,
-		`/${stage}/support/multiple-account-api/identity-client-access-token`,
-	);
+	const identityClient = await buildIdentityClient();
 
 	const createEndpoint = createInvitationEndpoint(
 		stage,
@@ -126,10 +129,15 @@ test('deleteSecondaryUserEndpoint soft deletes the secondary user and removes th
 		);
 	expect(subscriptionRecordBeforeDelete).toBeDefined();
 
+	const identityClient = await buildIdentityClient();
+	const zuoraClient = await ZuoraClient.create(stage);
+
 	const result = await deleteSecondaryUserEndpoint(
 		stage,
 		secondaryUserRepository,
 		dynamoClient,
+		zuoraClient,
+		identityClient,
 		subscriptionName,
 		secondaryIdentityId,
 		secondaryIdentityId,

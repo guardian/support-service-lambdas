@@ -4,9 +4,9 @@ import type {
 } from '@modules/multiple-account/secondaryUserRepository';
 import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
-import type { ZuoraAccount, ZuoraSubscription } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { secondaryUserDetailsEndpoint } from '../src/secondaryUserDetailsEndpoint';
+import { makeAccount, makeSubscription } from './helpers';
 
 jest.mock('@modules/zuora/subscription', () => ({
 	getSubscription: jest.fn(),
@@ -20,18 +20,6 @@ describe('secondaryUserMeEndpoint', () => {
 	const mockGetSubscription = jest.mocked(getSubscription);
 	const mockGetAccount = jest.mocked(getAccount);
 	const zuoraClient = {} as unknown as ZuoraClient;
-
-	const makeSubscription = (accountNumber: string): ZuoraSubscription =>
-		({ accountNumber }) as unknown as ZuoraSubscription;
-
-	const makeAccount = (
-		firstName: string,
-		lastName: string,
-		workEmail: string,
-	): ZuoraAccount =>
-		({
-			billToContact: { firstName, lastName, workEmail, zipCode: 'N1 9GU' },
-		}) as unknown as ZuoraAccount;
 
 	const makeSecondaryUser = (
 		subscriptionName: string,
