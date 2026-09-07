@@ -49,7 +49,7 @@ const makeSecondaryUserRepository = (
 const dynamoClient = {} as DynamoDBClient;
 
 describe('acceptInvitationEndpoint', () => {
-	it('returns 409 when the invitation has already been accepted by this user', async () => {
+	it('returns 410 when the invitation has already been accepted by this user', async () => {
 		const { repository: invitationRepository, mockGet } =
 			makeInvitationRepository();
 		const { repository: secondaryUserRepository, mockListByIdentity } =
@@ -64,7 +64,7 @@ describe('acceptInvitationEndpoint', () => {
 			invitationCode,
 		);
 
-		expect(result.statusCode).toBe(409);
+		expect(result.statusCode).toBe(410);
 		expect(mockGet).toHaveBeenCalledWith(invitationCode);
 		expect(mockListByIdentity).toHaveBeenCalledWith(secondaryIdentityId);
 	});
