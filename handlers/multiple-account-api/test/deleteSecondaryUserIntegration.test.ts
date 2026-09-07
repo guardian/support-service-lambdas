@@ -233,4 +233,4 @@ test('deleteSecondaryUserEndpoint soft deletes the secondary user and removes th
 		await deleteAccount(zuoraClient, accountNumber);
 		await deleteSupporterRatePlan(stage, primaryIdentityId, subscriptionName);
 	}
-}, 120000);
+});
