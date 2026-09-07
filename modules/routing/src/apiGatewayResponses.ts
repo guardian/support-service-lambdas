@@ -23,6 +23,10 @@ export function notFound(): APIGatewayProxyResult {
 	return jsonResponse('Not Found', 404);
 }
 
+export function gone(message: string): APIGatewayProxyResult {
+	return jsonResponse(message, 410);
+}
+
 /**
  * Return a 200 OK response with the provided body.
  * @param body
