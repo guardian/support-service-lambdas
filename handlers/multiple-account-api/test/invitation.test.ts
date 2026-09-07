@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import * as email from 'email/src/email';
+import * as email from '@modules/email/email';
 import * as identity from '@modules/identity/idapi';
 import type { IdentityClient } from '@modules/identity/identityClient';
 import type {
