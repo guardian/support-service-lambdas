@@ -64,6 +64,7 @@ export const createInvitationEndpoint =
 		const secondaryIdentityId = await getOrCreateUserFromEmail(
 			identityClient,
 			body.secondaryUserEmail,
+			false,
 		);
 
 		await validateInvitationInformation(

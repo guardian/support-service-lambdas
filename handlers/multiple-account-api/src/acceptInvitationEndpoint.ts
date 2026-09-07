@@ -8,12 +8,13 @@ import { getIfDefined } from '@modules/nullAndUndefined';
 import {
 	badRequest,
 	buildErrorResponse,
+	gone,
 	notFound,
 	ok,
 } from '@modules/routing/apiGatewayResponses';
 import type { Stage } from '@modules/stage';
 import { getSupporterRatePlan } from '@modules/supporter-product-data/supporterProductData';
-import { sendAcceptInvitationEmail } from './emails/acceptInvitationEmail';
+import { sendInvitationRedeemedEmail } from './emails/acceptInvitationEmail';
 import type { InvitationRepository } from './invitationRepository';
 
 export const acceptInvitationEndpoint = async (
@@ -28,6 +29,19 @@ export const acceptInvitationEndpoint = async (
 		const invitation = await invitationRepository.get(invitationCode);
 
 		if (!invitation) {
+			// The invitation is hard-deleted once accepted, so if it's missing but a
+			// secondary user record already exists for this invitation code, the
+			// user has already accepted it previously.
+			const alreadyAccepted = (
+				await secondaryUserRepository.listByIdentity(signedInUserId)
+			).some(
+				(secondaryUser) => secondaryUser.invitationCode === invitationCode,
+			);
+
+			if (alreadyAccepted) {
+				return gone('Invitation has already been accepted');
+			}
+
 			return notFound();
 		}
 
@@ -89,13 +103,14 @@ export const acceptInvitationEndpoint = async (
 			today,
 		);
 
-		await sendAcceptInvitationEmail(
-			stage,
-			invitation.primaryUserFirstName,
-			invitation.primaryUserEmail,
-			invitation.secondaryUserEmail,
-			invitation.secondaryIdentityId,
-		);
+		await sendInvitationRedeemedEmail(stage, {
+			primaryUserIdentityId: primaryIdentityId,
+			primaryUserFirstName: invitation.primaryUserFirstName,
+			primaryUserEmail: invitation.primaryUserEmail,
+			secondaryUserEmail: invitation.secondaryUserEmail,
+			secondaryUserIdentityId: invitation.secondaryIdentityId,
+		});
+
 		return ok({
 			identityId: secondaryIdentityId,
 			secondarySubscriptionName,

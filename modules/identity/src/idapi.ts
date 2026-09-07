@@ -87,9 +87,10 @@ export const getUserByIdentityId = async (
 export const createGuestAccount = async (
 	client: IdentityClient,
 	email: string,
+	sendAccountVerificationEmail: boolean = true,
 ): Promise<string> => {
 	const response = await client.post(
-		`/guest?accountVerificationEmail=true`,
+		`/guest?accountVerificationEmail=${sendAccountVerificationEmail}`,
 		JSON.stringify({ primaryEmailAddress: email }),
 		guestAccountResponseSchema,
 	);
@@ -99,10 +100,11 @@ export const createGuestAccount = async (
 export const getOrCreateUserFromEmail = async (
 	client: IdentityClient,
 	email: string,
+	sendAccountVerificationEmail: boolean = true,
 ): Promise<string> => {
 	const user = await getUserByEmail(client, email);
 	if (user) {
 		return user.id;
 	}
-	return await createGuestAccount(client, email);
+	return await createGuestAccount(client, email, sendAccountVerificationEmail);
 };
