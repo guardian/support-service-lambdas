@@ -122,6 +122,24 @@ export class SecondaryUserRepository {
 		return secondaryUser;
 	}
 
+	async listByInvitationCode(
+		invitationCode: string,
+	): Promise<SecondaryUserRecord[]> {
+		const result = await this.client.send(
+			new QueryCommand({
+				TableName: this.tableName,
+				IndexName: 'invitationCode-index',
+				KeyConditionExpression: 'invitationCode = :invitationCode',
+				ExpressionAttributeValues: {
+					':invitationCode': { S: invitationCode },
+				},
+			}),
+		);
+		return (result.Items ?? []).map((item) =>
+			secondaryUserRecordSchema.parse(unmarshall(item)),
+		);
+	}
+
 	async listBySubscription(
 		subscriptionName: string,
 	): Promise<SecondaryUserRecord[]> {
