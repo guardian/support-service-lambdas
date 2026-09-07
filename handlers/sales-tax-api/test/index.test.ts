@@ -39,7 +39,6 @@ describe('SalesTax API', () => {
 		taxCodes: [
 			{
 				id: supporterPlusTaxCodeId,
-				taxEngineId: '2c92c0f94568f996014570f746f75c52',
 				active: true,
 				name: 'Supporter Plus Global Tax',
 				description: '',

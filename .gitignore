@@ -10,7 +10,10 @@ project/project/
 .bloop/
 .DS_Store
 node_modules/
+# pnpm's content-addressable store, auto-created by `pnpm install` in the dev container
+.pnpm-store/
 *.zip
 handlers/*/coverage
 # PII query result downloads from supporter-product-data-lambdas download-query-results
 select-active-rate-plans-*.csv
+.pnpm-store

@@ -14,7 +14,10 @@ import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { deleteSecondaryUserEndpoint } from '../src/deleteSecondaryUserEndpoint';
 import { sendAccessRemovedEmail } from '../src/emails/accessRemovedEmail';
-import { sendLeaveSubscriptionEmail } from '../src/emails/leaveSubcriptionEmail';
+import {
+	sendLeaveSubscriptionEmailToPrimary,
+	sendLeaveSubscriptionEmailToSecondary,
+} from '../src/emails/leaveSubcriptionEmail';
 import { makeAccount, makeSubscription } from './helpers';
 
 jest.mock('@modules/zuora/subscription', () => ({
@@ -29,12 +32,13 @@ jest.mock('@modules/identity/idapi', () => ({
 	getUserByIdentityId: jest.fn(),
 }));
 
-jest.mock('../src/emails/leaveSubcriptionEmail', () => ({
-	sendLeaveSubscriptionEmail: jest.fn(),
-}));
-
 jest.mock('../src/emails/accessRemovedEmail', () => ({
 	sendAccessRemovedEmail: jest.fn(),
+}));
+
+jest.mock('../src/emails/leaveSubcriptionEmail', () => ({
+	sendLeaveSubscriptionEmailToSecondary: jest.fn(),
+	sendLeaveSubscriptionEmailToPrimary: jest.fn(),
 }));
 
 const stage = 'CODE';
@@ -197,13 +201,19 @@ describe('deleteSecondaryUserEndpoint', () => {
 				secondaryIdentityId,
 				'secondary',
 			);
-			expect(sendLeaveSubscriptionEmail).toHaveBeenCalledWith(
+			expect(sendLeaveSubscriptionEmailToSecondary).toHaveBeenCalledWith(
 				stage,
-				'PrimaryFirstName',
-				primaryEmail,
-				secondaryEmail,
-				secondaryIdentityId,
+				{
+					primaryUserFirstName: 'PrimaryFirstName',
+					primaryUserEmail: primaryEmail,
+					secondaryUserEmail: secondaryEmail,
+					secondaryUserIdentityId: secondaryIdentityId,
+				},
 			);
+			expect(sendLeaveSubscriptionEmailToPrimary).toHaveBeenCalledWith(stage, {
+				primaryUserEmail: primaryEmail,
+				primaryUserIdentityId: primaryIdentityId,
+			});
 		});
 	});
 
