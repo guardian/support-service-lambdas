@@ -902,7 +902,7 @@ const promotionsApi: HandlerDefinition = {
 
 		...devDeps['@redocly/cli'],
 	},
-	moduleDependencies: [moduleLogger, moduleRouting],
+	moduleDependencies: [moduleLogger, modulePromotions, moduleRouting],
 	extraScripts: {
 		...openApiScripts,
 		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr promotions-api.zip ./*.js.map ./*.js`,

@@ -646,6 +646,9 @@ importers:
       logger:
         specifier: workspace:*
         version: link:../../modules/logger
+      promotions:
+        specifier: workspace:*
+        version: link:../../modules/promotions
       routing:
         specifier: workspace:*
         version: link:../../modules/routing

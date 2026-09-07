@@ -1,14 +1,14 @@
-import { Router } from '@modules/routing/router';
-import { withBodyParser } from '@modules/routing/withParsers';
 import type { Handler } from 'aws-lambda';
-import { helloRequestEndpoint, helloRequestSchema } from './helloEndpoint';
+import { Router } from '@modules/routing/router';
+import { stageFromEnvironment } from '@modules/stage';
+import { listPromotionsEndpoint } from './listPromotionsEndpoint';
+
+const stage = stageFromEnvironment();
 
 export const handler: Handler = Router([
 	{
-		httpMethod: 'POST',
-		path: '/hello',
-		handler: withBodyParser(helloRequestSchema, async (event, path, body) =>
-			helloRequestEndpoint(body),
-		),
+		httpMethod: 'GET',
+		path: '/promotions',
+		handler: async () => listPromotionsEndpoint(stage),
 	},
 ]);

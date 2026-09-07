@@ -132,7 +132,7 @@ exports[`The Promotions api stack matches the snapshot 1`] = `
           },
           "S3Key": "support/CODE/promotions-api/promotions-api.zip",
         },
-        "Description": "A lambda that enables the addition of discounts to existing subscriptions",
+        "Description": "A lambda that returns a list of v2 promotions",
         "Environment": {
           "Variables": {
             "APP": "promotions-api",
@@ -839,6 +839,32 @@ exports[`The Promotions api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "PromocodetablequeryaccessB0CB896A": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:Query",
+                "dynamodb:DescribeTable",
+              ],
+              "Effect": "Allow",
+              "Resource": "arn:aws:dynamodb:*:*:table/support-admin-console-promos-CODE",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "PromocodetablequeryaccessB0CB896A",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
   },
 }
 `;
@@ -908,7 +934,7 @@ exports[`The Promotions api stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "promotions-api returned a 5XX response. Search the logs below for "error" for more information. Impact: an eligible user may not have been offered a discount during the cancellation flow",
+        "AlarmDescription": "promotions-api returned a 5XX response. Search the logs below for "error" for more information. Impact: callers may not be able to retrieve promotions data",
         "AlarmName": "promotions-api-PROD 5XX errors",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
@@ -1051,7 +1077,7 @@ exports[`The Promotions api stack matches the snapshot 2`] = `
           },
           "S3Key": "support/PROD/promotions-api/promotions-api.zip",
         },
-        "Description": "A lambda that enables the addition of discounts to existing subscriptions",
+        "Description": "A lambda that returns a list of v2 promotions",
         "Environment": {
           "Variables": {
             "APP": "promotions-api",
@@ -1750,6 +1776,32 @@ exports[`The Promotions api stack matches the snapshot 2`] = `
           "Version": "2012-10-17",
         },
         "PolicyName": "LambdaServiceRoleDefaultPolicyDAE46E21",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "PromocodetablequeryaccessB0CB896A": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:Query",
+                "dynamodb:DescribeTable",
+              ],
+              "Effect": "Allow",
+              "Resource": "arn:aws:dynamodb:*:*:table/support-admin-console-promos-PROD",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "PromocodetablequeryaccessB0CB896A",
         "Roles": [
           {
             "Ref": "LambdaServiceRoleA8ED4D3B",

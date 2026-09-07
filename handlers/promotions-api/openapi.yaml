@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: promotions-api API
-  description: A test API.
+  description: An API that exposes v2 promotions data from the promotions module.
   version: 1.0.0
 
 servers:
@@ -14,36 +14,26 @@ security:
   - apiKey: []
 
 paths:
-  /hello:
-    post:
-      operationId: hello
-      summary: Hello endpoint
-      description: A simple endpoint that returns a greeting.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/HelloRequest'
-            example:
-              name: World
+  /promotions:
+    get:
+      operationId: listPromotions
+      summary: List promotions
+      description: Returns all v2 promotions currently stored in the promotions module.
       responses:
         '200':
-          description: Successful greeting response
+          description: A list of promotions
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HelloResponse'
-              example:
-                message: Hello World!
-        '400':
-          description: Invalid request body
+                $ref: '#/components/schemas/ListPromotionsResponse'
+        '403':
+          description: Missing or invalid API key
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
-                message: Invalid request body
+                message: Forbidden
         '500':
           description: Unexpected server error
           content:
@@ -62,25 +52,92 @@ components:
       description: API key for authenticating requests.
 
   schemas:
-    HelloRequest:
+    ListPromotionsResponse:
       type: object
       required:
-        - name
+        - promotions
       properties:
+        promotions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Promotion'
+
+    Promotion:
+      type: object
+      required:
+        - promoCode
+        - name
+        - campaignCode
+        - appliesTo
+        - startTimestamp
+      properties:
+        promoCode:
+          type: string
+          description: The unique code identifying the promotion.
+          example: TEST123
         name:
           type: string
-          description: The name to greet
-          example: World
+          description: The display name of the promotion.
+        campaignCode:
+          type: string
+          description: The code of the campaign this promotion belongs to.
+        appliesTo:
+          $ref: '#/components/schemas/AppliesTo'
+        startTimestamp:
+          type: string
+          format: date-time
+          description: When the promotion becomes active.
+        endTimestamp:
+          type: string
+          format: date-time
+          description: When the promotion expires, if it has an end date.
+        discount:
+          $ref: '#/components/schemas/DiscountDetails'
+        description:
+          type: string
+          description: A human-readable description of the promotion.
+        landingPage:
+          $ref: '#/components/schemas/LandingPage'
 
-    HelloResponse:
+    AppliesTo:
       type: object
       required:
-        - message
+        - productRatePlanIds
+        - countries
       properties:
-        message:
+        productRatePlanIds:
+          type: array
+          items:
+            type: string
+          description: The Zuora product rate plan ids this promotion applies to.
+        countries:
+          type: array
+          items:
+            type: string
+          description: The ISO country codes this promotion applies to.
+
+    DiscountDetails:
+      type: object
+      required:
+        - amount
+        - durationMonths
+      properties:
+        amount:
+          type: number
+          description: The discount amount, as a percentage.
+        durationMonths:
+          type: number
+          description: How many months the discount lasts for.
+
+    LandingPage:
+      type: object
+      properties:
+        title:
           type: string
-          description: The greeting message
-          example: Hello World!
+        description:
+          type: string
+        roundelHtml:
+          type: string
 
     ErrorResponse:
       type: object
@@ -90,4 +147,3 @@ components:
         message:
           type: string
           description: Human-readable error message
-
