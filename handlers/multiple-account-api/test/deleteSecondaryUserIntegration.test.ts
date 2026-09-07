@@ -22,7 +22,7 @@ import { deleteSecondaryUserEndpoint } from '../src/deleteSecondaryUserEndpoint'
 import { InvitationRepository } from '../src/invitationRepository';
 
 const stage = 'CODE';
-const subscriptionName = 'A-S00974337';
+const subscriptionName = 'A-S01117027';
 const secondaryUserEmail = 'integration-test2+multiple-account@thegulocal.com';
 
 let invitationCode: string;
