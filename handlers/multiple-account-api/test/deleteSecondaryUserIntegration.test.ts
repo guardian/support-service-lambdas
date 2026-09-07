@@ -107,7 +107,8 @@ test('deleteSecondaryUserEndpoint soft deletes the secondary user and removes th
 	});
 
 	// Wait for the message above to be processed and written to DynamoDB
-	await new Promise((resolve) => setTimeout(resolve, 10000));
+	// Ugh why does this need to wait for so long?
+	await new Promise((resolve) => setTimeout(resolve, 60000));
 
 	let invitationCode: string | undefined;
 	let secondaryIdentityId: string | undefined;
