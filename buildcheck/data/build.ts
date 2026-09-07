@@ -892,6 +892,23 @@ const brazeAcquisitionEventsSync: HandlerDefinition = {
 	},
 	moduleDependencies: [moduleLogger, moduleIdentity],
 };
+const promotionsApi: HandlerDefinition = {
+	name: 'promotions-api',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+
+		...devDeps['@redocly/cli'],
+	},
+	moduleDependencies: [moduleLogger, moduleRouting],
+	extraScripts: {
+		...openApiScripts,
+		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr promotions-api.zip ./*.js.map ./*.js`,
+	},
+};
+
 // MARKER new-lambda: buildcheck-const
 
 export const build: BuildDefinition = {
@@ -927,6 +944,7 @@ export const build: BuildDefinition = {
 		supporterProductDataLambdas,
 		brazeAcquisitionEventsSync,
 		scrubNonTokenisedPaymentMethods,
+		promotionsApi,
 		// MARKER new-lambda: buildcheck-reference
 	],
 
