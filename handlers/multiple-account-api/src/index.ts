@@ -101,6 +101,7 @@ export const handler: Handler = Router([
 				invitationRepository,
 				path.invitationCode,
 				identityId,
+				stage,
 			);
 		}),
 	},
