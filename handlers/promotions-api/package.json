@@ -22,6 +22,7 @@
   "dependencies": {
     "zod": "catalog:",
     "logger": "workspace:*",
+    "product-catalog": "workspace:*",
     "promotions": "workspace:*",
     "routing": "workspace:*"
   },

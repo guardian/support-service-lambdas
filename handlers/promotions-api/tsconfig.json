@@ -8,20 +8,20 @@
       "@modules/logger/*": [
         "../../modules/logger/src/*"
       ],
-      "@modules/promotions/*": [
-        "../../modules/promotions/src/*"
-      ],
-      "@modules/aws/*": [
-        "../../modules/aws/src/*"
-      ],
-      "@modules/internationalisation/*": [
-        "../../modules/internationalisation/src/*"
-      ],
       "@modules/product-catalog/*": [
         "../../modules/product-catalog/src/*"
       ],
       "@modules/zuora-catalog/*": [
         "../../modules/zuora-catalog/src/*"
+      ],
+      "@modules/aws/*": [
+        "../../modules/aws/src/*"
+      ],
+      "@modules/promotions/*": [
+        "../../modules/promotions/src/*"
+      ],
+      "@modules/internationalisation/*": [
+        "../../modules/internationalisation/src/*"
       ],
       "@modules/routing/*": [
         "../../modules/routing/src/*"

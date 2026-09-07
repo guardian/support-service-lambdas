@@ -646,6 +646,9 @@ importers:
       logger:
         specifier: workspace:*
         version: link:../../modules/logger
+      product-catalog:
+        specifier: workspace:*
+        version: link:../../modules/product-catalog
       promotions:
         specifier: workspace:*
         version: link:../../modules/promotions

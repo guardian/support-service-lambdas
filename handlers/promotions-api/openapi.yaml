@@ -18,7 +18,10 @@ paths:
     get:
       operationId: listPromotions
       summary: List promotions
-      description: Returns all v2 promotions currently stored in the promotions module.
+      description: Returns all v2 promotions currently stored in the promotions
+        module, augmented with product catalog information (the catalog rate
+        plans each promotion applies to). Promotions whose rate plan ids
+        cannot be resolved against the current product catalog are omitted.
       responses:
         '200':
           description: A list of promotions
@@ -104,6 +107,7 @@ components:
       required:
         - productRatePlanIds
         - countries
+        - catalogRatePlans
       properties:
         productRatePlanIds:
           type: array
@@ -115,6 +119,25 @@ components:
           items:
             type: string
           description: The ISO country codes this promotion applies to.
+        catalogRatePlans:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogRatePlan'
+          description: The product catalog rate plans this promotion applies to,
+            resolved from productRatePlanIds.
+
+    CatalogRatePlan:
+      type: object
+      required:
+        - productKey
+        - productRatePlanKey
+      properties:
+        productKey:
+          type: string
+          description: The product catalog key, e.g. SupporterPlus.
+        productRatePlanKey:
+          type: string
+          description: The rate plan key within the product, e.g. Monthly.
 
     DiscountDetails:
       type: object
