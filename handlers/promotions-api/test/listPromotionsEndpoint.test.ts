@@ -49,6 +49,17 @@ const promoWithCatalogInformation: PromoWithCatalogInformation = {
 	},
 };
 
+const promoWithOtherCatalogInformation: PromoWithCatalogInformation = {
+	...promo,
+	promoCode: 'PROMO2',
+	appliesTo: {
+		...promo.appliesTo,
+		catalogRatePlans: [
+			{ productKey: 'SupporterPlus', productRatePlanKey: 'Annual' },
+		],
+	},
+};
+
 describe('listPromotionsEndpoint', () => {
 	afterEach(() => {
 		jest.resetAllMocks();
@@ -153,5 +164,65 @@ describe('listPromotionsEndpoint', () => {
 			expect.anything(),
 		);
 		expect(result.statusCode).toBe(200);
+	});
+
+	it('filters promotions by productKey', async () => {
+		mockGetPromotions.mockResolvedValue([promo, promo]);
+		mockAddCatalogInformationToPromos.mockReturnValue({
+			succeeded: [
+				promoWithCatalogInformation,
+				promoWithOtherCatalogInformation,
+			],
+			failed: [],
+		});
+
+		const result = await listPromotionsEndpoint('CODE', catalogHelper, {
+			productKey: 'SupporterPlus',
+			productRatePlanKey: 'Monthly',
+		});
+
+		expect(result.statusCode).toBe(200);
+		expect(JSON.parse(result.body)).toEqual({
+			promotions: [promoWithCatalogInformation],
+		});
+	});
+
+	it('filters promotions by productKey only, ignoring productRatePlanKey when not provided', async () => {
+		mockGetPromotions.mockResolvedValue([promo, promo]);
+		mockAddCatalogInformationToPromos.mockReturnValue({
+			succeeded: [
+				promoWithCatalogInformation,
+				promoWithOtherCatalogInformation,
+			],
+			failed: [],
+		});
+
+		const result = await listPromotionsEndpoint('CODE', catalogHelper, {
+			productKey: 'SupporterPlus',
+		});
+
+		expect(result.statusCode).toBe(200);
+		expect(JSON.parse(result.body)).toEqual({
+			promotions: [
+				promoWithCatalogInformation,
+				promoWithOtherCatalogInformation,
+			],
+		});
+	});
+
+	it('returns no promotions when no catalog rate plan matches the requested productRatePlanKey', async () => {
+		mockGetPromotions.mockResolvedValue([promo]);
+		mockAddCatalogInformationToPromos.mockReturnValue({
+			succeeded: [promoWithCatalogInformation],
+			failed: [],
+		});
+
+		const result = await listPromotionsEndpoint('CODE', catalogHelper, {
+			productKey: 'SupporterPlus',
+			productRatePlanKey: 'Annual',
+		});
+
+		expect(result.statusCode).toBe(200);
+		expect(JSON.parse(result.body)).toEqual({ promotions: [] });
 	});
 });
