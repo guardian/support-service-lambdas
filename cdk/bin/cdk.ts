@@ -32,6 +32,7 @@ import { ObserverBenefitsApi } from '../lib/observer-benefits-api';
 import { ObserverDataExport } from '../lib/observer-data-export';
 import { PressReaderEntitlements } from '../lib/press-reader-entitlements';
 import { ProductSwitchApi } from '../lib/product-switch-api';
+import { PromotionsApi } from '../lib/promotions-api';
 import { PromotionsLambdas } from '../lib/promotions-lambdas';
 import { SalesTaxApi } from '../lib/sales-tax-api';
 import { SalesforceDisasterRecovery } from '../lib/salesforce-disaster-recovery';
@@ -177,6 +178,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	HolidayStopProcessor,
 	IamPolicies,
 	ScrubNonTokenisedPaymentMethods,
+	PromotionsApi,
 	// MARKER new-lambda: cdk-bin
 ];
 
