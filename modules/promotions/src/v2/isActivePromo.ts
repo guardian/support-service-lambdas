@@ -10,6 +10,6 @@ export const isActivePromo = (promo: Promo, now: Dayjs = dayjs()): boolean => {
 
 	const hasStarted = startDate.isBefore(now) || startDate.isSame(now);
 	const hasNotEnded = endDate === undefined || now.isBefore(endDate);
-	
+
 	return hasStarted && hasNotEnded;
 };
