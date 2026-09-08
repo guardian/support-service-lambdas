@@ -94,4 +94,64 @@ describe('listPromotionsEndpoint', () => {
 
 		expect(result.statusCode).toBe(500);
 	});
+
+	it('filters out inactive promotions when active=true is requested', async () => {
+		const activePromo: Promo = {
+			...promo,
+			promoCode: 'ACTIVE',
+			startTimestamp: '2000-01-01T00:00:00.000Z',
+			endTimestamp: undefined,
+		};
+		const expiredPromo: Promo = {
+			...promo,
+			promoCode: 'EXPIRED',
+			startTimestamp: '2000-01-01T00:00:00.000Z',
+			endTimestamp: '2001-01-01T00:00:00.000Z',
+		};
+		mockGetPromotions.mockResolvedValue([activePromo, expiredPromo]);
+		mockAddCatalogInformationToPromos.mockReturnValue({
+			succeeded: [{ ...promoWithCatalogInformation, promoCode: 'ACTIVE' }],
+			failed: [],
+		});
+
+		const result = await listPromotionsEndpoint('CODE', catalogHelper, {
+			active: true,
+		});
+
+		expect(mockAddCatalogInformationToPromos).toHaveBeenCalledWith(
+			[activePromo],
+			expect.anything(),
+		);
+		expect(result.statusCode).toBe(200);
+	});
+
+	it('filters out active promotions when active=false is requested', async () => {
+		const activePromo: Promo = {
+			...promo,
+			promoCode: 'ACTIVE',
+			startTimestamp: '2000-01-01T00:00:00.000Z',
+			endTimestamp: undefined,
+		};
+		const expiredPromo: Promo = {
+			...promo,
+			promoCode: 'EXPIRED',
+			startTimestamp: '2000-01-01T00:00:00.000Z',
+			endTimestamp: '2001-01-01T00:00:00.000Z',
+		};
+		mockGetPromotions.mockResolvedValue([activePromo, expiredPromo]);
+		mockAddCatalogInformationToPromos.mockReturnValue({
+			succeeded: [{ ...promoWithCatalogInformation, promoCode: 'EXPIRED' }],
+			failed: [],
+		});
+
+		const result = await listPromotionsEndpoint('CODE', catalogHelper, {
+			active: false,
+		});
+
+		expect(mockAddCatalogInformationToPromos).toHaveBeenCalledWith(
+			[expiredPromo],
+			expect.anything(),
+		);
+		expect(result.statusCode).toBe(200);
+	});
 });
