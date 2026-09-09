@@ -118,6 +118,9 @@ components:
           description: A human-readable description of the promotion.
         landingPage:
           $ref: '#/components/schemas/LandingPage'
+        isIntroductoryPricing:
+          type: boolean
+          description: Whether this promotion offers introductory pricing.
 
     AppliesTo:
       type: object
