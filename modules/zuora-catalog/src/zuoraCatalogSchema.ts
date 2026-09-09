@@ -46,6 +46,10 @@ export const zuoraCatalogSchema = z.object({
 					TermType__c: z.string().nullable(),
 					DefaultTerm__c: z.string().nullable(),
 					FrontendId__c: z.string().nullable(),
+					Saving__c: z
+						.union([z.number(), z.string()])
+						.nullable()
+						.transform((value) => (value == null ? null : Number(value))),
 
 					productRatePlanCharges: z.array(
 						z.object({
