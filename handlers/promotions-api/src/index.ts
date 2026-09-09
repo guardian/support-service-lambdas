@@ -25,6 +25,17 @@ const listPromotionsQueryParamsSchema = z
 			),
 		productKey: productKeySchema.optional(),
 		productRatePlanKey: z.string().optional(),
+		promoCodes: z
+			.string()
+			.optional()
+			.transform((value) =>
+				value === undefined
+					? undefined
+					: value
+							.split(',')
+							.map((promoCode) => promoCode.trim())
+							.filter((promoCode) => promoCode.length > 0),
+			),
 	})
 	.refine(
 		(params) =>

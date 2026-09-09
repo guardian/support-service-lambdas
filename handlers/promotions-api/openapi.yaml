@@ -31,6 +31,16 @@ paths:
             value.
           schema:
             type: boolean
+        - name: promoCodes
+          in: query
+          required: false
+          description: A comma-separated list of promo codes. When provided, only
+            these promo codes are looked up directly (rather than scanning all
+            promotions), and codes that don't exist are simply omitted from the
+            response. Combinable with the other filters.
+          schema:
+            type: string
+          example: PROMO1,PROMO2
       responses:
         '200':
           description: A list of promotions
