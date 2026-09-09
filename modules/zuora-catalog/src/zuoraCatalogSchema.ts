@@ -46,8 +46,10 @@ export const zuoraCatalogSchema = z.object({
 					TermType__c: z.string().nullable(),
 					DefaultTerm__c: z.string().nullable(),
 					FrontendId__c: z.string().nullable(),
+					// Zuora custom fields are always returned as strings, so this numeric
+					// value needs converting.
 					Saving__c: z
-						.union([z.number(), z.string()])
+						.string()
 						.nullable()
 						.transform((value) => (value == null ? null : Number(value))),
 
