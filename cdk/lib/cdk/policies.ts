@@ -122,6 +122,7 @@ export class AllowPromoCodeTableQueryPolicy extends GuAllowPolicy {
 		super(scope, 'Promo code table query access', {
 			actions: [
 				'dynamodb:GetItem',
+				'dynamodb:BatchGetItem',
 				'dynamodb:Scan',
 				'dynamodb:Query',
 				'dynamodb:DescribeTable',
