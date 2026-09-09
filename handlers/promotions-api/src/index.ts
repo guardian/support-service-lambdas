@@ -2,10 +2,8 @@ import type { Handler } from 'aws-lambda';
 import { z } from 'zod';
 import { Lazy } from '@modules/lazy';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
-import {
-	isProductKey,
-	ProductCatalogHelper,
-} from '@modules/product-catalog/productCatalog';
+import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
+import { productKeySchema } from '@modules/product-catalog/productCatalogSchema';
 import { badRequest } from '@modules/routing/apiGatewayResponses';
 import { Router } from '@modules/routing/router';
 import { stageFromEnvironment } from '@modules/stage';
@@ -19,8 +17,13 @@ const lazyProductCatalogHelper = new Lazy(
 
 const listPromotionsQueryParamsSchema = z
 	.object({
-		active: z.enum(['true', 'false']).optional(),
-		productKey: z.string().optional(),
+		active: z
+			.enum(['true', 'false'])
+			.optional()
+			.transform((value) =>
+				value === undefined ? undefined : value === 'true',
+			),
+		productKey: productKeySchema.optional(),
 		productRatePlanKey: z.string().optional(),
 	})
 	.refine(
@@ -46,18 +49,11 @@ export const handler: Handler = Router([
 					`Invalid query parameters: ${queryParamsResult.error.message}`,
 				);
 			}
-			const { active, productKey, productRatePlanKey } = queryParamsResult.data;
-			if (productKey !== undefined && !isProductKey(productKey)) {
-				return badRequest(`Invalid productKey: ${productKey}`);
-			}
+
 			return listPromotionsEndpoint(
 				stage,
 				await lazyProductCatalogHelper.get(),
-				{
-					active: active === undefined ? undefined : active === 'true',
-					productKey,
-					productRatePlanKey,
-				},
+				queryParamsResult.data,
 			);
 		},
 	},
