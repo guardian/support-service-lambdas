@@ -1,0 +1,112 @@
+openapi: 3.0.3
+info:
+  title: payment-failure-comms-exit-api API
+  description: Sends a payment-failure communications exit event to Braze for a customer.
+  version: 1.0.0
+
+servers:
+  - url: https://payment-failure-comms-exit-api-code.support.guardianapis.com
+    description: CODE
+  - url: https://payment-failure-comms-exit-api.support.guardianapis.com
+    description: PROD
+
+security:
+  - apiKey: []
+
+paths:
+  /exit:
+    post:
+      operationId: exitPaymentFailureComms
+      summary: Exit payment-failure communications
+      description: Sends the pf_csr_exit custom event to Braze for the supplied customer Identity ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExitRequest'
+            example:
+              identityId: "200000001"
+      responses:
+        '200':
+          description: Braze accepted the pf_csr_exit event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExitResponse'
+              example:
+                status: sent
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestResponse'
+              example:
+                error: Invalid request body - wrong type
+        '404':
+          description: No Braze UUID was associated with the supplied Identity ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: Not Found
+        '500':
+          description: Unexpected server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: Internal server error
+
+components:
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key for authenticating requests.
+
+  schemas:
+    ExitRequest:
+      type: object
+      required:
+        - identityId
+      properties:
+        identityId:
+          type: string
+          description: Guardian Identity ID of the customer to exit from payment-failure communications
+          example: "200000001"
+
+    ExitResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - sent
+          description: Confirms that Braze accepted the pf_csr_exit event
+
+    BadRequestResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Validation error returned by the API request parser
+        details:
+          description: Additional validation details when available
+
+    ErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: Human-readable error message
