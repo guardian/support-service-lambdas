@@ -22,6 +22,15 @@ paths:
         module, augmented with product catalog information (the catalog rate
         plans each promotion applies to). Promotions whose rate plan ids
         cannot be resolved against the current product catalog are omitted.
+      parameters:
+        - name: active
+          in: query
+          required: false
+          description: When provided, only return promotions whose active status
+            (started and, if it has an end date, not yet ended) matches this
+            value.
+          schema:
+            type: boolean
       responses:
         '200':
           description: A list of promotions
@@ -29,6 +38,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ListPromotionsResponse'
+        '400':
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: 'Invalid query parameters: ...'
         '403':
           description: Missing or invalid API key
           content:

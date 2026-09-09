@@ -15,6 +15,7 @@
     "@aws-sdk/client-dynamodb": "^3.940.0",
     "@aws-sdk/util-dynamodb": "^3.940.0",
     "zod": "catalog:",
+    "dayjs": "^1.11.13",
     "aws": "workspace:*",
     "internationalisation": "workspace:*",
     "logger": "workspace:*",

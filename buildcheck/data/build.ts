@@ -113,6 +113,7 @@ const modulePromotions: ModuleDefinition = {
 		...dep['@aws-sdk/client-dynamodb'],
 		...dep['@aws-sdk/util-dynamodb'],
 		...dep['zod'],
+		...dep.dayjs,
 	},
 	moduleDependencies: [
 		moduleAws,
