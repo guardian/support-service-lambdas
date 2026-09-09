@@ -846,6 +846,7 @@ exports[`The Promotions api stack matches the snapshot 1`] = `
             {
               "Action": [
                 "dynamodb:GetItem",
+                "dynamodb:BatchGetItem",
                 "dynamodb:Scan",
                 "dynamodb:Query",
                 "dynamodb:DescribeTable",
@@ -1791,6 +1792,7 @@ exports[`The Promotions api stack matches the snapshot 2`] = `
             {
               "Action": [
                 "dynamodb:GetItem",
+                "dynamodb:BatchGetItem",
                 "dynamodb:Scan",
                 "dynamodb:Query",
                 "dynamodb:DescribeTable",
