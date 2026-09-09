@@ -1,4 +1,4 @@
-import { buildPaymentFailureExitPayload } from '../src/services';
+import { buildPaymentFailureExitPayload } from '../src/helpers';
 
 describe('buildPaymentFailureExitPayload', () => {
 	it('builds the exact Braze payload for the payment-failure exit canvas event', () => {

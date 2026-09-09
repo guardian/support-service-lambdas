@@ -1,4 +1,4 @@
-import { BrazeClient } from '../src/brazeClient';
+import { BrazeClient } from '../src/clients';
 
 const payload = {
 	events: [

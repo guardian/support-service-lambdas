@@ -1,6 +1,6 @@
 import { logger } from '@modules/logger/logger';
-import { paymentFailureCommsExitEndpoint } from '../src/paymentFailureCommsExitEndpoint';
-import type { RuntimeDeps } from '../src/services';
+import { paymentFailureCommsExitController } from '../src/handlers/paymentFailureCommsExitController';
+import type { RuntimeDeps } from '../src/types';
 
 const identityId = '200000001';
 const brazeUuid = 'braze-uuid';
@@ -12,7 +12,7 @@ const createDeps = (overrides: Partial<RuntimeDeps> = {}): RuntimeDeps => ({
 	...overrides,
 });
 
-describe('paymentFailureCommsExitEndpoint', () => {
+describe('paymentFailureCommsExitController', () => {
 	const addContextSpy = jest
 		.spyOn(logger, 'mutableAddContext')
 		.mockImplementation(() => undefined);
@@ -27,7 +27,7 @@ describe('paymentFailureCommsExitEndpoint', () => {
 	it('sends pf_csr_exit to the existing Braze user and confirms success', async () => {
 		const deps = createDeps();
 
-		const response = await paymentFailureCommsExitEndpoint(
+		const response = await paymentFailureCommsExitController(
 			{ identityId },
 			deps,
 		);
@@ -50,7 +50,7 @@ describe('paymentFailureCommsExitEndpoint', () => {
 			getBrazeUuidFromIdapi: jest.fn().mockResolvedValue(undefined),
 		});
 
-		const response = await paymentFailureCommsExitEndpoint(
+		const response = await paymentFailureCommsExitController(
 			{ identityId },
 			deps,
 		);
@@ -71,7 +71,7 @@ describe('paymentFailureCommsExitEndpoint', () => {
 		});
 
 		await expect(
-			paymentFailureCommsExitEndpoint({ identityId }, deps),
+			paymentFailureCommsExitController({ identityId }, deps),
 		).rejects.toThrow('Braze unavailable');
 
 		expect(dropContextSpy).toHaveBeenCalledWith(identityId);
