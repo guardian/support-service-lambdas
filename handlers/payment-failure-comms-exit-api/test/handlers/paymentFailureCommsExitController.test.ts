@@ -1,9 +1,22 @@
 import { logger } from '@modules/logger/logger';
-import { paymentFailureCommsExitController } from '../src/handlers/paymentFailureCommsExitController';
-import type { RuntimeDeps } from '../src/types';
+import { paymentFailureCommsExitController } from '../../src/handlers/paymentFailureCommsExitController';
+import { defaultDeps } from '../../src/services';
+import type { RuntimeDeps } from '../../src/types';
 
 const identityId = '200000001';
 const brazeUuid = 'braze-uuid';
+
+jest.mock('../../src/services', () => ({
+	defaultDeps: {
+		getBrazeUuidFromIdapi: jest.fn(),
+		sendPaymentFailureExitEvent: jest.fn(),
+		now: jest.fn(),
+	},
+}));
+
+const mockDefaultDeps = defaultDeps as {
+	[K in keyof RuntimeDeps]: jest.MockedFunction<RuntimeDeps[K]>;
+};
 
 const createDeps = (overrides: Partial<RuntimeDeps> = {}): RuntimeDeps => ({
 	getBrazeUuidFromIdapi: jest.fn().mockResolvedValue(brazeUuid),
@@ -22,6 +35,9 @@ describe('paymentFailureCommsExitController', () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
+		mockDefaultDeps.getBrazeUuidFromIdapi.mockResolvedValue(brazeUuid);
+		mockDefaultDeps.sendPaymentFailureExitEvent.mockResolvedValue(undefined);
+		mockDefaultDeps.now.mockReturnValue('2026-09-08T12:00:00.000Z');
 	});
 
 	it('sends pf_csr_exit to the existing Braze user and confirms success', async () => {
@@ -43,6 +59,18 @@ describe('paymentFailureCommsExitController', () => {
 		});
 		expect(addContextSpy).toHaveBeenCalledWith(identityId);
 		expect(dropContextSpy).toHaveBeenCalledWith(identityId);
+	});
+
+	it('uses the production dependency set when none is supplied', async () => {
+		await paymentFailureCommsExitController({ identityId });
+
+		expect(mockDefaultDeps.getBrazeUuidFromIdapi).toHaveBeenCalledWith(
+			identityId,
+		);
+		expect(mockDefaultDeps.sendPaymentFailureExitEvent).toHaveBeenCalledWith(
+			brazeUuid,
+			'2026-09-08T12:00:00.000Z',
+		);
 	});
 
 	it('returns 404 without calling Braze when no Braze UUID exists', async () => {
