@@ -20,7 +20,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.940.0",
     "@aws-sdk/client-secrets-manager": "^3.940.0",
-    "csv-parse": "^5.6.0",
+    "csv-parse": "^7.0.2",
     "zuora": "workspace:*"
   },
   "devDependencies": {
