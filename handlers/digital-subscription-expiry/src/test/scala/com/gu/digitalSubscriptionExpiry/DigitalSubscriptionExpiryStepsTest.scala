@@ -16,8 +16,6 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 class DigitalSubscriptionExpiryStepsTest extends AnyFlatSpec with Matchers {
-
-  // Date: September 2026
   
   // While adding server side validation for the subscription ids
   // https://github.com/guardian/support-service-lambdas/pull/3816
