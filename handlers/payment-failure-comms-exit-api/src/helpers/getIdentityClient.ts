@@ -12,8 +12,8 @@ export const getIdentityClient = (): Promise<
 	identityClientPromise ??= (async () => {
 		const config = await getAppConfig();
 		return IdentityClient.createWithAccessToken(
-			stageFromEnvironment(),
 			config.identity.accessToken,
+			stageFromEnvironment(),
 		);
 	})();
 
