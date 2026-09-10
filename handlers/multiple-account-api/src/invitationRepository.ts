@@ -16,14 +16,15 @@ import {
 } from '@modules/multiple-account/cancelledBySchema';
 import type { Stage } from '@modules/stage';
 
-// When an invitation is cancelled/rejected we keep the
-// record for a short period (rather than hard deleting it) so we can tell who
-// cancelled it, then let DynamoDB's TTL (expiryDate) remove it automatically.
-export function invitationCancellationTTL(): number {
+// When an invitation is cancelled/rejected or accepted we keep the
+// record for a short period (rather than hard deleting it) to allow time for
+// the record to be exported to the data platform, then let
+// DynamoDB's TTL (expiryDate) remove it automatically.
+export function dataRetentionTTL(): number {
 	return dayjs().add(2, 'weeks').unix();
 }
 
-export const nonCancelledInvitationRecordSchema = z.object({
+export const activeInvitationRecordSchema = z.object({
 	subscriptionName: z.string(),
 	invitationCode: z.string(),
 	primaryIdentityId: z.string(),
@@ -35,12 +36,11 @@ export const nonCancelledInvitationRecordSchema = z.object({
 	expiryDate: z.number(),
 });
 
-export const invitationRecordSchema = nonCancelledInvitationRecordSchema.extend(
-	{
-		cancelledBy: cancelledBySchema.optional(),
-		cancelledDate: z.iso.datetime().optional(),
-	},
-);
+export const invitationRecordSchema = activeInvitationRecordSchema.extend({
+	cancelledBy: cancelledBySchema.optional(),
+	cancelledDate: z.iso.datetime().optional(),
+	acceptedDate: z.iso.datetime().optional(),
+});
 
 export type InvitationRecord = z.infer<typeof invitationRecordSchema>;
 
@@ -106,9 +106,11 @@ export class InvitationRepository {
 		);
 	}
 
-	async listNonCancelled(subscriptionName: string) {
+	async listActive(subscriptionName: string) {
 		return (await this.list(subscriptionName)).filter(
-			(invitation) => invitation.cancelledBy === undefined,
+			(invitation) =>
+				invitation.cancelledBy === undefined &&
+				invitation.acceptedDate === undefined,
 		);
 	}
 
@@ -142,12 +144,33 @@ export class InvitationRepository {
 				UpdateExpression:
 					'SET expiryDate = :expiryDate, cancelledBy = :cancelledBy, cancelledDate = :cancelledDate',
 				ExpressionAttributeValues: {
-					':expiryDate': { N: invitationCancellationTTL().toString() },
+					':expiryDate': { N: dataRetentionTTL().toString() },
 					':cancelledBy': { S: cancelledBy },
 					':cancelledDate': { S: dayjs().toISOString() },
 				},
 			}),
 		);
+	}
+
+	getAcceptTransaction(
+		subscriptionName: string,
+		invitationCode: string,
+	): TransactWriteItem {
+		return {
+			Update: {
+				TableName: this.tableName,
+				Key: {
+					subscriptionName: { S: subscriptionName },
+					invitationCode: { S: invitationCode },
+				},
+				UpdateExpression:
+					'SET expiryDate = :expiryDate, acceptedDate = :acceptedDate',
+				ExpressionAttributeValues: {
+					':expiryDate': { N: dataRetentionTTL().toString() },
+					':acceptedDate': { S: dayjs().toISOString() },
+				},
+			},
+		};
 	}
 
 	getDeleteTransaction(

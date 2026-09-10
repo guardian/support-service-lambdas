@@ -20,7 +20,11 @@ export const deleteInvitationEndpoint = async (
 	try {
 		const invitation = await invitationRepository.get(invitationCode);
 
-		if (!invitation || invitation.cancelledBy !== undefined) {
+		if (
+			!invitation ||
+			invitation.cancelledBy !== undefined ||
+			invitation.acceptedDate !== undefined
+		) {
 			return notFound();
 		}
 

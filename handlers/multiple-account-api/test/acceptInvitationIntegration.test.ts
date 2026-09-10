@@ -104,9 +104,11 @@ test('acceptInvitationEndpoint accepts an invitation and creates a secondary use
 	// data record to complete
 	await new Promise((resolve) => setTimeout(resolve, 10000));
 
-	// The invitation should have been deleted as part of accepting
+	// The invitation should have been soft-accepted (kept with an acceptedDate
+	// and a shortened expiryDate) rather than deleted as part of accepting
 	const invitation = await invitationRepository.get(invitationCode);
-	expect(invitation).toBeUndefined();
+	expect(invitation).toBeDefined();
+	expect(invitation?.acceptedDate).toBeDefined();
 
 	// A secondary user record should have been created
 	const secondaryUsers =

@@ -73,26 +73,25 @@ const makeRepository = (
 	secondaryUser: SecondaryUserRecord | undefined,
 ): {
 	repository: SecondaryUserRepository;
-	mockGetNonCancelledBySubscriptionAndIdentity: jest.Mock<
+	mockGetActiveBySubscriptionAndIdentity: jest.Mock<
 		Promise<SecondaryUserRecord | undefined>,
 		[string, string]
 	>;
 	mockGetSoftDeleteTransaction: jest.Mock;
 } => {
-	const mockGetNonCancelledBySubscriptionAndIdentity = jest
+	const mockGetActiveBySubscriptionAndIdentity = jest
 		.fn<Promise<SecondaryUserRecord | undefined>, [string, string]>()
 		.mockResolvedValue(secondaryUser);
 	const mockGetSoftDeleteTransaction = jest
 		.fn()
 		.mockReturnValue(softDeleteTransactItem);
 	const repository = {
-		getNonCancelledBySubscriptionAndIdentity:
-			mockGetNonCancelledBySubscriptionAndIdentity,
+		getActiveBySubscriptionAndIdentity: mockGetActiveBySubscriptionAndIdentity,
 		getSoftDeleteTransaction: mockGetSoftDeleteTransaction,
 	} as unknown as SecondaryUserRepository;
 	return {
 		repository,
-		mockGetNonCancelledBySubscriptionAndIdentity,
+		mockGetActiveBySubscriptionAndIdentity,
 		mockGetSoftDeleteTransaction,
 	};
 };
@@ -241,7 +240,7 @@ describe('deleteSecondaryUserEndpoint', () => {
 	});
 
 	it('returns 404 when the secondary user record is already cancelled', async () => {
-		// The repository's getNonCancelledBySubscriptionAndIdentity filters out
+		// The repository's getActiveBySubscriptionAndIdentity filters out
 		// cancelled records, so it resolves undefined for an already-cancelled user.
 		const { repository, mockGetSoftDeleteTransaction } =
 			makeRepository(undefined);

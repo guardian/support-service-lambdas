@@ -10,12 +10,12 @@ import { secondaryUserRecordSchema } from '@modules/multiple-account/secondaryUs
 import { prettyPrint } from '@modules/prettyPrint';
 import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
 import {
+	activeInvitationRecordSchema,
 	type InvitationRepository,
-	nonCancelledInvitationRecordSchema,
 } from './invitationRepository';
 
 export const mmaPrimarySummaryResponseSchema = z.object({
-	invitations: z.array(nonCancelledInvitationRecordSchema),
+	invitations: z.array(activeInvitationRecordSchema),
 	secondaryUsers: z.array(
 		secondaryUserRecordSchema.extend({
 			email: z.string().optional(),
@@ -32,20 +32,19 @@ export const mmaPrimarySummaryEndpoint = async (
 	try {
 		logger.mutableAddContext(subscriptionName);
 
-		const nonCancelledInvitations =
-			await invitationRepository.listNonCancelled(subscriptionName);
+		const activeInvitations =
+			await invitationRepository.listActive(subscriptionName);
 
-		const nonCancelledSecondaryUsers =
-			await getNonCancelledSecondaryUserListWithNames(
-				subscriptionName,
-				secondaryUserRepository,
-				identityClient,
-			);
+		const activeSecondaryUsers = await getActiveSecondaryUserListWithNames(
+			subscriptionName,
+			secondaryUserRepository,
+			identityClient,
+		);
 
 		return ok(
 			{
-				invitations: nonCancelledInvitations,
-				secondaryUsers: nonCancelledSecondaryUsers,
+				invitations: activeInvitations,
+				secondaryUsers: activeSecondaryUsers,
 			},
 			mmaPrimarySummaryResponseSchema,
 		);
@@ -54,15 +53,13 @@ export const mmaPrimarySummaryEndpoint = async (
 	}
 };
 
-const getNonCancelledSecondaryUserListWithNames = async (
+const getActiveSecondaryUserListWithNames = async (
 	subscriptionName: string,
 	secondaryUserRepository: SecondaryUserRepository,
 	identityClient: IdentityClient,
 ) => {
 	const secondaryUsers =
-		await secondaryUserRepository.listNonCancelledBySubscription(
-			subscriptionName,
-		);
+		await secondaryUserRepository.listActiveBySubscription(subscriptionName);
 
 	return Promise.all(
 		secondaryUsers.map(async (secondaryUser) =>
