@@ -8,10 +8,39 @@ import {
 	notFound,
 	ok,
 } from '@modules/routing/apiGatewayResponses';
+import type { InvitationRecord } from './invitationRepository';
 import {
+	activeInvitationRecordSchema,
 	type InvitationRepository,
-	nonCancelledInvitationRecordSchema,
 } from './invitationRepository';
+
+const invitationAlreadyAccepted = async (
+	invitation: InvitationRecord | undefined,
+	secondaryUserRepository: SecondaryUserRepository,
+	invitationCode: string,
+) => {
+	// Invitations are soft-accepted, so they may still exist with an acceptedDate set.
+	if (invitation?.acceptedDate) {
+		return true;
+	}
+
+	if (invitation) {
+		return false;
+	}
+
+	// Otherwise if the invitation is missing but a secondary user record exists for this
+	// invitation code, then it has already been accepted. This happens once a
+	// soft-accepted invitation's retention period (used to allow time for export
+	// to the data platform) has expired and the record has been removed by
+	// DynamoDB's TTL.
+
+	// We can't check the signed in user here since this endpoint is not authenticated,
+	// so we look up the secondary user record by invitation code instead.
+	const alreadyAccepted =
+		(await secondaryUserRepository.listByInvitationCode(invitationCode))
+			.length > 0;
+	return alreadyAccepted;
+};
 
 export const getInvitationEndpoint = async (
 	invitationRepository: InvitationRepository,
@@ -23,20 +52,17 @@ export const getInvitationEndpoint = async (
 	try {
 		const invitation = await invitationRepository.get(invitationCode);
 
+		if (
+			await invitationAlreadyAccepted(
+				invitation,
+				secondaryUserRepository,
+				invitationCode,
+			)
+		) {
+			return gone('Invitation has already been accepted');
+		}
+
 		if (!invitation) {
-			// The invitation is hard-deleted once accepted, so if it's missing but a
-			// secondary user record already exists for this invitation code, the
-			// invitation has already been accepted. We can't check the signed in
-			// user here since this endpoint is not authenticated, so we look up the
-			// secondary user record by invitation code instead.
-			const alreadyAccepted =
-				(await secondaryUserRepository.listByInvitationCode(invitationCode))
-					.length > 0;
-
-			if (alreadyAccepted) {
-				return gone('Invitation has already been accepted');
-			}
-
 			return notFound();
 		}
 
@@ -46,7 +72,7 @@ export const getInvitationEndpoint = async (
 			);
 		}
 
-		return ok(invitation, nonCancelledInvitationRecordSchema);
+		return ok(invitation, activeInvitationRecordSchema);
 	} catch (error) {
 		logger.error('Error retrieving invitation', error);
 		return internalServerError();

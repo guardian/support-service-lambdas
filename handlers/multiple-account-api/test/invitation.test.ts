@@ -78,18 +78,18 @@ const mockList = jest
 	.fn<Promise<InvitationRecord[]>, [string]>()
 	.mockResolvedValue(mockInvitations);
 
-const mockListNonCancelled = jest
+const mockListActive = jest
 	.fn<Promise<InvitationRecord[]>, [string]>()
 	.mockResolvedValue(mockInvitations);
 
 const mockInvitationRepo: InvitationRepository = {
 	save: mockSave,
 	list: mockList,
-	listNonCancelled: mockListNonCancelled,
+	listActive: mockListActive,
 } as unknown as InvitationRepository;
 
 const mockSecondaryUserRepo = {
-	listNonCancelledBySubscription: jest
+	listActiveBySubscription: jest
 		.fn<Promise<SecondaryUserRecord[]>, [string]>()
 		.mockResolvedValue(mockSecondaryUsers),
 } as unknown as SecondaryUserRepository;
@@ -104,7 +104,7 @@ describe('createInvitationHandler', () => {
 		);
 		mockSave.mockResolvedValue(undefined);
 		mockList.mockResolvedValue(mockInvitations);
-		mockListNonCancelled.mockResolvedValue(mockInvitations);
+		mockListActive.mockResolvedValue(mockInvitations);
 	});
 
 	it('saves an invitation record and returns 201 with invitationCode', async () => {

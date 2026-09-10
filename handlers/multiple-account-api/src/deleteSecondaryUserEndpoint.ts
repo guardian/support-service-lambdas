@@ -65,7 +65,7 @@ export const deleteSecondaryUserEndpoint = async (
 		logger.mutableAddContext(composedSubscriptionName);
 
 		const secondaryUser =
-			await secondaryUserRepository.getNonCancelledBySubscriptionAndIdentity(
+			await secondaryUserRepository.getActiveBySubscriptionAndIdentity(
 				subscriptionName,
 				secondaryIdentityId,
 			);

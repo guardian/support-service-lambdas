@@ -81,7 +81,7 @@ export class SecondaryUserRepository {
 		);
 	}
 
-	async listNonCancelledByIdentity(
+	async listActiveByIdentity(
 		secondaryIdentityId: string,
 	): Promise<SecondaryUserRecord[]> {
 		return (await this.listByIdentity(secondaryIdentityId)).filter(
@@ -108,7 +108,7 @@ export class SecondaryUserRepository {
 		return secondaryUserRecordSchema.parse(unmarshall(result.Item));
 	}
 
-	async getNonCancelledBySubscriptionAndIdentity(
+	async getActiveBySubscriptionAndIdentity(
 		subscriptionName: string,
 		secondaryIdentityId: string,
 	): Promise<SecondaryUserRecord | undefined> {
@@ -160,7 +160,7 @@ export class SecondaryUserRepository {
 		);
 	}
 
-	async listNonCancelledBySubscription(
+	async listActiveBySubscription(
 		subscriptionName: string,
 	): Promise<SecondaryUserRecord[]> {
 		return (await this.listBySubscription(subscriptionName)).filter(
