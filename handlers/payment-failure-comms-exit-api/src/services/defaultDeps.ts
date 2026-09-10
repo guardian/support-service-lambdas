@@ -1,5 +1,5 @@
-import { getCurrentIsoTime } from '../helpers';
-import type { RuntimeDeps } from '../types';
+import { getCurrentIsoTime } from '../helpers/getCurrentIsoTime';
+import type { RuntimeDeps } from '../types/runtimeDeps';
 import { getBrazeUuidFromIdapi } from './getBrazeUuidFromIdapi';
 import { sendPaymentFailureExitEvent } from './sendPaymentFailureExitEvent';
 

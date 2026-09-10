@@ -1,6 +1,6 @@
 import { getUserByIdentityId } from '@modules/identity/idapi';
 import { logger } from '@modules/logger/logger';
-import { getIdentityClient } from '../helpers';
+import { getIdentityClient } from '../helpers/getIdentityClient';
 
 export class BrazeUuidMissingError extends Error {
 	constructor() {

@@ -1,5 +1,5 @@
 import { paymentFailureCommsExitEventName } from '../constants';
-import type { BrazeTrackPayload } from '../types';
+import type { BrazeTrackPayload } from '../types/braze';
 
 export const buildPaymentFailureExitPayload = (
 	brazeUuid: string,

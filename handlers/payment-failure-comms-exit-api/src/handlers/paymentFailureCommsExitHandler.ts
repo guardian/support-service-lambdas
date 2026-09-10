@@ -2,13 +2,13 @@ import type { Handler } from 'aws-lambda';
 import { Router } from '@modules/routing/router';
 import { withBodyParser } from '@modules/routing/withParsers';
 import { paymentFailureCommsExitPath } from '../constants';
-import { paymentFailureCommsExitRequestSchema } from '../schemas';
-import { defaultDeps } from '../services';
-import type { RuntimeDeps } from '../types';
+import { paymentFailureCommsExitRequestSchema } from '../schemas/paymentFailureCommsExitRequestSchema';
+import { defaultDeps } from '../services/defaultDeps';
+import type { RuntimeDeps } from '../types/runtimeDeps';
 import { paymentFailureCommsExitController } from './paymentFailureCommsExitController';
 
 export const buildPaymentFailureCommsExitHandler = (
-	deps: RuntimeDeps = defaultDeps,
+	deps: RuntimeDeps,
 ): Handler =>
 	Router([
 		{
@@ -22,4 +22,4 @@ export const buildPaymentFailureCommsExitHandler = (
 		},
 	]);
 
-export const handler = buildPaymentFailureCommsExitHandler();
+export const handler = buildPaymentFailureCommsExitHandler(defaultDeps);

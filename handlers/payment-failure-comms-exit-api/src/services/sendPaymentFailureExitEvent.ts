@@ -1,4 +1,5 @@
-import { buildPaymentFailureExitPayload, getBrazeClient } from '../helpers';
+import { buildPaymentFailureExitPayload } from '../helpers/buildPaymentFailureExitPayload';
+import { getBrazeClient } from '../helpers/getBrazeClient';
 
 export const sendPaymentFailureExitEvent = async (
 	brazeUuid: string,

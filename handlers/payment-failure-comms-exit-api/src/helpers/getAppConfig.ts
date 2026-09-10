@@ -1,6 +1,6 @@
 import { loadConfig } from '@modules/aws/appConfig';
-import { appConfigSchema } from '../schemas';
-import type { AppConfig } from '../types';
+import { appConfigSchema } from '../schemas/appConfigSchema';
+import type { AppConfig } from '../types/appConfig';
 import { getEnvironmentVariable } from './getEnvironmentVariable';
 
 export const getAppConfig = (): Promise<AppConfig> =>
