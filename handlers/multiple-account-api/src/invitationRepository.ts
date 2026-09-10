@@ -172,19 +172,4 @@ export class InvitationRepository {
 			},
 		};
 	}
-
-	getDeleteTransaction(
-		subscriptionName: string,
-		invitationCode: string,
-	): TransactWriteItem {
-		return {
-			Delete: {
-				TableName: this.tableName,
-				Key: {
-					subscriptionName: { S: subscriptionName },
-					invitationCode: { S: invitationCode },
-				},
-			},
-		};
-	}
 }
