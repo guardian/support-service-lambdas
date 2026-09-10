@@ -144,20 +144,20 @@ describe('validateInvitationInformation', () => {
 
 	const buildRepositories = ({
 		existingSecondaryUsers = [],
-		nonCancelledInvites = [],
+		activeInvites = [],
 	}: {
 		existingSecondaryUsers?: SecondaryUserRecord[];
-		nonCancelledInvites?: InvitationRecord[];
+		activeInvites?: InvitationRecord[];
 	}) => {
 		const secondaryUserRepository = {
-			listNonCancelledBySubscription: jest
+			listActiveBySubscription: jest
 				.fn<Promise<SecondaryUserRecord[]>, [string]>()
 				.mockResolvedValue(existingSecondaryUsers),
 		} as unknown as SecondaryUserRepository;
 		const invitationRepository = {
-			listNonCancelled: jest
+			listActive: jest
 				.fn<Promise<InvitationRecord[]>, [string]>()
-				.mockResolvedValue(nonCancelledInvites),
+				.mockResolvedValue(activeInvites),
 		} as unknown as InvitationRepository;
 
 		return {
@@ -188,7 +188,7 @@ describe('validateInvitationInformation', () => {
 	it('throws a ValidationError when an invitation already exists for this user', async () => {
 		const { invitationRepository, secondaryUserRepository } = buildRepositories(
 			{
-				nonCancelledInvites: [buildInvitation('secondary-id')],
+				activeInvites: [buildInvitation('secondary-id')],
 			},
 		);
 
@@ -206,7 +206,7 @@ describe('validateInvitationInformation', () => {
 		const { invitationRepository, secondaryUserRepository } = buildRepositories(
 			{
 				existingSecondaryUsers: [buildSecondaryUser('secondary-id')],
-				nonCancelledInvites: [buildInvitation('secondary-id')],
+				activeInvites: [buildInvitation('secondary-id')],
 			},
 		);
 
@@ -226,7 +226,7 @@ describe('validateInvitationInformation', () => {
 		const { invitationRepository, secondaryUserRepository } = buildRepositories(
 			{
 				existingSecondaryUsers: [buildSecondaryUser('existing-1')],
-				nonCancelledInvites: [buildInvitation('existing-2')],
+				activeInvites: [buildInvitation('existing-2')],
 			},
 		);
 
@@ -243,7 +243,7 @@ describe('validateInvitationInformation', () => {
 	it('throws a ValidationError when the subscription has reached the maximum number of invitations', async () => {
 		const { invitationRepository, secondaryUserRepository } = buildRepositories(
 			{
-				nonCancelledInvites: [
+				activeInvites: [
 					buildInvitation('existing-1'),
 					buildInvitation('existing-2'),
 					buildInvitation('existing-3'),
@@ -267,7 +267,7 @@ describe('validateInvitationInformation', () => {
 		const { invitationRepository, secondaryUserRepository } = buildRepositories(
 			{
 				existingSecondaryUsers: [buildSecondaryUser('existing-1')],
-				nonCancelledInvites: [
+				activeInvites: [
 					buildInvitation('existing-2'),
 					buildInvitation('existing-3'),
 				],

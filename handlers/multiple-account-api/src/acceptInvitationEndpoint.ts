@@ -28,10 +28,18 @@ export const acceptInvitationEndpoint = async (
 	try {
 		const invitation = await invitationRepository.get(invitationCode);
 
+		// Invitations are soft-accepted, so they may still exist with an
+		// acceptedDate set.
+		if (invitation?.acceptedDate) {
+			return gone('Invitation has already been accepted');
+		}
+
 		if (!invitation) {
-			// The invitation is hard-deleted once accepted, so if it's missing but a
-			// secondary user record already exists for this invitation code, the
-			// user has already accepted it previously.
+			// The invitation may be missing because a soft-accepted invitation's
+			// retention period (used to allow time for export to the data
+			// platform) has expired and the record has been removed by DynamoDB's
+			// TTL. If a secondary user record already exists for this invitation
+			// code, the user has already accepted it previously.
 			const alreadyAccepted = (
 				await secondaryUserRepository.listByIdentity(signedInUserId)
 			).some(
@@ -77,19 +85,19 @@ export const acceptInvitationEndpoint = async (
 
 		const createSecondaryUserTransaction =
 			secondaryUserRepository.getPutTransaction(secondaryUserRecord);
-		const deleteInvitationTransaction =
-			invitationRepository.getDeleteTransaction(
+		const acceptInvitationTransaction =
+			invitationRepository.getAcceptTransaction(
 				invitation.subscriptionName,
 				invitationCode,
 			);
 
-		// Carry out the secondary user creation and deletion of the invitation
-		// in a transaction to keep them atomic
+		// Carry out the secondary user creation and soft-accepting of the
+		// invitation in a transaction to keep them atomic
 		await dynamoClient.send(
 			new TransactWriteItemsCommand({
 				TransactItems: [
 					createSecondaryUserTransaction,
-					deleteInvitationTransaction,
+					acceptInvitationTransaction,
 				],
 			}),
 		);

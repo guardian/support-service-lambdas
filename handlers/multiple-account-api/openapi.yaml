@@ -392,7 +392,7 @@ paths:
       description: >-
         Returns an invitation by invitation code. Returns a 400 if the
         invitation has already been cancelled by the primary or secondary
-        user.
+        user, or a 410 if it has already been accepted.
       security:
         - apiKey: []
       parameters:
@@ -425,6 +425,13 @@ paths:
               schema:
                 type: string
                 example: Not Found
+        '410':
+          description: The invitation has already been accepted.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Invitation has already been accepted
         '500':
           description: Internal server error.
           content:
@@ -441,7 +448,8 @@ paths:
         secondary user of the invitation. Whether the invitation was cancelled
         by the primary or rejected by the secondary is derived from which of the
         two the identity id matches. An invitation that has already been
-        cancelled is treated as not found and cannot be cancelled again.
+        cancelled or accepted is treated as not found and cannot be cancelled
+        again.
       security:
         - apiKey: []
       parameters:
@@ -476,7 +484,7 @@ paths:
         '404':
           description: >-
             Invitation not found. Also returned when the invitation has already
-            been cancelled.
+            been cancelled or accepted.
           content:
             text/plain:
               schema:
@@ -496,7 +504,8 @@ paths:
       description: >-
         Accepts an invitation for the signed-in secondary user, linking them to
         the subscription. An invitation that has already been cancelled cannot
-        be accepted.
+        be accepted. An invitation that has already been accepted returns a
+        410.
       security:
         - bearerAuth: []
       parameters:
@@ -569,6 +578,13 @@ paths:
               schema:
                 type: string
                 example: Not Found
+        '410':
+          description: The invitation has already been accepted.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Invitation has already been accepted
         '500':
           description: Internal server error.
           content:

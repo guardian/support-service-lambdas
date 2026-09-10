@@ -84,7 +84,11 @@ export const handler: Handler = Router([
 		httpMethod: 'GET',
 		path: '/invitation/{invitationCode}',
 		handler: withPathParser(invitationPathSchema, async (_event, path) =>
-			getInvitationEndpoint(invitationRepository, path.invitationCode),
+			getInvitationEndpoint(
+				invitationRepository,
+				secondaryUserRepository,
+				path.invitationCode,
+			),
 		),
 	},
 	{

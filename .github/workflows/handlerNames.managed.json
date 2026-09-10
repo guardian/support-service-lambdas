@@ -20,6 +20,7 @@
     "observer-data-export",
     "press-reader-entitlements",
     "product-switch-api",
+    "promotions-api",
     "promotions-lambdas",
     "sales-tax-api",
     "salesforce-disaster-recovery",

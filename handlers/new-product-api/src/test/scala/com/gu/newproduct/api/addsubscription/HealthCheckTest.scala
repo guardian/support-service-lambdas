@@ -15,6 +15,7 @@ class HealthCheckTest extends AnyFlatSpec with Matchers {
       requestedAccountId should be(ZuoraAccountId("accacc"))
       ClientSuccess(
         Account(
+          AccountNumber("A00000001"),
           Some(IdentityId("1313")),
           Some(SfContactId("1414")),
           None,
@@ -33,6 +34,7 @@ class HealthCheckTest extends AnyFlatSpec with Matchers {
     def getAccount(dontcare: ZuoraAccountId): Types.ClientFailableOp[Account] = {
       ClientSuccess(
         Account(
+          AccountNumber("A00000001"),
           Some(IdentityId("asdf")),
           Some(SfContactId("1414")),
           None,

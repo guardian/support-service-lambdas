@@ -81,7 +81,7 @@ export class SecondaryUserRepository {
 		);
 	}
 
-	async listNonCancelledByIdentity(
+	async listActiveByIdentity(
 		secondaryIdentityId: string,
 	): Promise<SecondaryUserRecord[]> {
 		return (await this.listByIdentity(secondaryIdentityId)).filter(
@@ -108,7 +108,7 @@ export class SecondaryUserRepository {
 		return secondaryUserRecordSchema.parse(unmarshall(result.Item));
 	}
 
-	async getNonCancelledBySubscriptionAndIdentity(
+	async getActiveBySubscriptionAndIdentity(
 		subscriptionName: string,
 		secondaryIdentityId: string,
 	): Promise<SecondaryUserRecord | undefined> {
@@ -120,6 +120,24 @@ export class SecondaryUserRepository {
 			return undefined;
 		}
 		return secondaryUser;
+	}
+
+	async listByInvitationCode(
+		invitationCode: string,
+	): Promise<SecondaryUserRecord[]> {
+		const result = await this.client.send(
+			new QueryCommand({
+				TableName: this.tableName,
+				IndexName: 'invitationCode-index',
+				KeyConditionExpression: 'invitationCode = :invitationCode',
+				ExpressionAttributeValues: {
+					':invitationCode': { S: invitationCode },
+				},
+			}),
+		);
+		return (result.Items ?? []).map((item) =>
+			secondaryUserRecordSchema.parse(unmarshall(item)),
+		);
 	}
 
 	async listBySubscription(
@@ -142,7 +160,7 @@ export class SecondaryUserRepository {
 		);
 	}
 
-	async listNonCancelledBySubscription(
+	async listActiveBySubscription(
 		subscriptionName: string,
 	): Promise<SecondaryUserRecord[]> {
 		return (await this.listBySubscription(subscriptionName)).filter(

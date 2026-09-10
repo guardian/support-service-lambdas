@@ -67,6 +67,7 @@ class AddContribution(
       chargeOverride = ChargeOverride(Some(amountMinorUnits), planAndCharge.productRatePlanChargeId, None)
       zuoraCreateSubRequest = ZuoraCreateSubRequest(
         request = request,
+        accountNumber = account.accountNumber,
         acceptanceDate = acceptanceDate,
         ratePlans = List(
           ZuoraCreateSubRequestRatePlan(

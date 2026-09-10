@@ -6,6 +6,7 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel._
 import com.gu.newproduct.api.addsubscription._
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, ZuoraCreateSubRequestRatePlan}
+import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.productcatalog.AmountMinorUnits
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.test.EffectsTest
@@ -22,36 +23,38 @@ class CreateSubscriptionEffectsTest extends AnyFlatSpec with Matchers {
   def currentDate = () => LocalDate.of(2024, 2, 10)
   it should "create subscription in account" taggedAs EffectsTest in {
     val validCaseIdToAvoidCausingSFErrors = CaseId("5006E000005b5cf")
-    val request = CreateSubscription.ZuoraCreateSubRequest(
-      ZuoraAccountId(
-        "8ad095dd82f7aaa50182f96de24d3ddb",
-      ), // code https://apisandbox.zuora.com/apps/CustomerAccount.do?method=view&id=8ad095dd82f7aaa50182f96de24d3ddb
-      currentDate().plusDays(2),
-      validCaseIdToAvoidCausingSFErrors,
-      AcquisitionSource("sourcesource"),
-      CreatedByCSR("csrcsr"),
-      None,
-      List(
-        ZuoraCreateSubRequestRatePlan(
-          productRatePlanId = monthlyContribution.productRatePlanId,
-          maybeChargeOverride = Some(
-            ChargeOverride(
-              amountMinorUnits = Some(AmountMinorUnits(100)),
-              productRatePlanChargeId = monthlyContribution.productRatePlanChargeId,
-              triggerDate = None,
-            ),
-          ),
-        ),
-        ZuoraCreateSubRequestRatePlan(
-          productRatePlanId = ProductRatePlanId("71a1018d1c18b3c6af44b8dbb5720000"),
-          maybeChargeOverride = None,
-        ),
-      ),
-    )
     val actual = for {
       zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[ZuoraRestConfig]
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
-      post: RequestsPost[WireCreateRequest, WireSubscription] = zuoraDeps.post[WireCreateRequest, WireSubscription]
+      account <- GetAccount(zuoraDeps.get[ZuoraAccount])(
+        ZuoraAccountId("8ad095dd82f7aaa50182f96de24d3ddb"),
+      ).toDisjunction
+      request = CreateSubscription.ZuoraCreateSubRequest(
+        account.accountNumber,
+        currentDate().plusDays(2),
+        validCaseIdToAvoidCausingSFErrors,
+        AcquisitionSource("sourcesource"),
+        CreatedByCSR("csrcsr"),
+        None,
+        List(
+          ZuoraCreateSubRequestRatePlan(
+            productRatePlanId = monthlyContribution.productRatePlanId,
+            maybeChargeOverride = Some(
+              ChargeOverride(
+                amountMinorUnits = Some(AmountMinorUnits(100)),
+                productRatePlanChargeId = monthlyContribution.productRatePlanChargeId,
+                triggerDate = None,
+              ),
+            ),
+          ),
+          ZuoraCreateSubRequestRatePlan(
+            productRatePlanId = ProductRatePlanId("71a1018d1c18b3c6af44b8dbb5720000"),
+            maybeChargeOverride = None,
+          ),
+        ),
+      )
+      post: RequestsPost[WireCreateOrderRequest, WireOrderResponse] =
+        zuoraDeps.post[WireCreateOrderRequest, WireOrderResponse]
       res <- CreateSubscription(post, currentDate)(request).toDisjunction
     } yield res
     withClue(actual) {
@@ -63,31 +66,32 @@ class CreateSubscriptionEffectsTest extends AnyFlatSpec with Matchers {
   it should "create digipack in account with a discount" taggedAs EffectsTest in {
     val validCaseIdToAvoidCausingSFErrors = CaseId("5006E000005b5cf")
     val monthlyTestRatePlanZuoraId = ProductRatePlanId("2c92c0f84bbfec8b014bc655f4852d9d")
-    val request = CreateSubscription.ZuoraCreateSubRequest(
-      ZuoraAccountId(
-        "8ad095dd82f7aaa50182f96de24d3ddb",
-      ), // code https://apisandbox.zuora.com/apps/CustomerAccount.do?method=view&id=8ad095dd82f7aaa50182f96de24d3ddb
-      currentDate().plusDays(2),
-      validCaseIdToAvoidCausingSFErrors,
-      AcquisitionSource("sourcesource"),
-      CreatedByCSR("csrcsr"),
-      None,
-      List(
-        ZuoraCreateSubRequestRatePlan(
-          productRatePlanId = monthlyTestRatePlanZuoraId,
-          maybeChargeOverride = None,
-        ),
-        ZuoraCreateSubRequestRatePlan(
-          productRatePlanId = ProductRatePlanId("2c92c0f97421eeff017425ad4ef7522b"),
-          maybeChargeOverride = None,
-        ),
-      ),
-    )
-
     val actual = for {
       zuoraRestConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[ZuoraRestConfig]
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
-      post: RequestsPost[WireCreateRequest, WireSubscription] = zuoraDeps.post[WireCreateRequest, WireSubscription]
+      account <- GetAccount(zuoraDeps.get[ZuoraAccount])(
+        ZuoraAccountId("8ad095dd82f7aaa50182f96de24d3ddb"),
+      ).toDisjunction
+      request = CreateSubscription.ZuoraCreateSubRequest(
+        account.accountNumber,
+        currentDate().plusDays(2),
+        validCaseIdToAvoidCausingSFErrors,
+        AcquisitionSource("sourcesource"),
+        CreatedByCSR("csrcsr"),
+        None,
+        List(
+          ZuoraCreateSubRequestRatePlan(
+            productRatePlanId = monthlyTestRatePlanZuoraId,
+            maybeChargeOverride = None,
+          ),
+          ZuoraCreateSubRequestRatePlan(
+            productRatePlanId = ProductRatePlanId("2c92c0f97421eeff017425ad4ef7522b"),
+            maybeChargeOverride = None,
+          ),
+        ),
+      )
+      post: RequestsPost[WireCreateOrderRequest, WireOrderResponse] =
+        zuoraDeps.post[WireCreateOrderRequest, WireOrderResponse]
       res <- CreateSubscription(post, currentDate)(request).toDisjunction
     } yield res
     withClue(actual) {

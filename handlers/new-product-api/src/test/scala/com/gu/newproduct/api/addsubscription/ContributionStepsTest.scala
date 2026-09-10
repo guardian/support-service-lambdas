@@ -12,7 +12,7 @@ import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{
   ZuoraCreateSubRequest,
   ZuoraCreateSubRequestRatePlan,
 }
-import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
+import com.gu.newproduct.api.addsubscription.zuora.GetAccount.{AccountNumber, SfContactId}
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
@@ -46,7 +46,7 @@ class ContributionStepsTest extends AnyFlatSpec with Matchers {
     def getPlanAndCharge(planId: PlanId) = Some(planAndCharge)
 
     val expectedIn = ZuoraCreateSubRequest(
-      accountId = ZuoraAccountId("acccc"),
+      accountNumber = AccountNumber("A00000001"),
       acceptanceDate = LocalDate.of(2018, 7, 18),
       acquisitionCase = CaseId("case"),
       acquisitionSource = AcquisitionSource("CSR"),
