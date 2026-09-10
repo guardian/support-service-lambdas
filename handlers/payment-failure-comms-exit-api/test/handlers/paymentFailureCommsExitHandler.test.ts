@@ -1,6 +1,6 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { buildPaymentFailureCommsExitHandler } from '../../src/handlers/paymentFailureCommsExitHandler';
-import type { RuntimeDeps } from '../../src/types';
+import type { RuntimeDeps } from '../../src/types/runtimeDeps';
 
 const createEvent = (
 	body: string | null,
@@ -56,6 +56,7 @@ describe('paymentFailureCommsExitHandler', () => {
 			'{"identityId":"200000001","extra":true}',
 		],
 		['an Identity ID containing whitespace', '{"identityId":" 200000001 "}'],
+		['an Identity ID containing letters', '{"identityId":"identity-123"}'],
 	])('returns 400 for %s', async (_description, body) => {
 		const deps = createDeps();
 		const response = await invoke(deps, createEvent(body));
@@ -65,7 +66,7 @@ describe('paymentFailureCommsExitHandler', () => {
 		expect(deps.sendPaymentFailureExitEvent).not.toHaveBeenCalled();
 	});
 
-	it('returns a helpful 404 without calling Braze when the Identity ID is not found', async () => {
+	it('returns a helpful 404 without calling Braze when the Identity user is not found', async () => {
 		const deps = createDeps({
 			getBrazeUuidFromIdapi: jest.fn().mockResolvedValue(undefined),
 		});
@@ -74,7 +75,9 @@ describe('paymentFailureCommsExitHandler', () => {
 			invoke(deps, createEvent('{"identityId":"200000001"}')),
 		).resolves.toEqual({
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ message: 'Identity ID was not found' }),
+			body: JSON.stringify({
+				message: 'Identity user was not found for the supplied Identity ID',
+			}),
 			statusCode: 404,
 		});
 		expect(deps.sendPaymentFailureExitEvent).not.toHaveBeenCalled();
