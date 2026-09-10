@@ -42,7 +42,7 @@ describe('BrazeClient', () => {
 				body: JSON.stringify(payload),
 			}),
 		);
-		expect(fetchSpy.mock.calls[0]?.[1]?.signal).toBeInstanceOf(AbortSignal);
+		expect(fetchSpy.mock.calls[0]?.[1]?.signal).toBeUndefined();
 	});
 
 	it('rejects a non-successful HTTP response', async () => {

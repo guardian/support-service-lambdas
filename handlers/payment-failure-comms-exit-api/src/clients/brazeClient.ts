@@ -1,13 +1,9 @@
 import { logger } from '@modules/logger/logger';
 import type { Authorisation, BearerTokenProvider } from '@modules/zuora/auth';
 import { RestClient } from '@modules/zuora/restClient';
-import {
-	brazeRequestTimeoutMillis,
-	brazeTrackPath,
-	paymentFailureCommsExitEventName,
-} from '../constants';
-import { brazeTrackResponseSchema } from '../schemas';
-import type { BrazeTrackPayload } from '../types';
+import { brazeTrackPath, paymentFailureCommsExitEventName } from '../constants';
+import { brazeTrackResponseSchema } from '../schemas/brazeTrackResponseSchema';
+import type { BrazeTrackPayload } from '../types/braze';
 
 class BrazeTokenProvider implements BearerTokenProvider {
 	constructor(
@@ -28,18 +24,6 @@ export class BrazeClient extends RestClient {
 		super(new BrazeTokenProvider(apiUrl, apiKey));
 	}
 
-	// The standard RestClient logs request bodies. Omit it here because it contains
-	// the customer's Braze UUID.
-	fetchWithLogging = (maybeCallerInfo?: string) =>
-		logger.wrapFn(
-			this.fetch.bind(this),
-			() => 'HTTP BrazeClient',
-			maybeCallerInfo,
-			([path, method]) => ({
-				logOnEntryAndExit: `${method} ${path}`,
-			}),
-		);
-
 	async sendCustomEvent(payload: BrazeTrackPayload): Promise<void> {
 		logger.log(
 			`Sending ${paymentFailureCommsExitEventName} custom event to Braze`,
@@ -49,8 +33,6 @@ export class BrazeClient extends RestClient {
 			brazeTrackPath,
 			JSON.stringify(payload),
 			brazeTrackResponseSchema,
-			undefined,
-			brazeRequestTimeoutMillis,
 		);
 
 		if (response.errors && response.errors.length > 0) {
