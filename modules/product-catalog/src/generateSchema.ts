@@ -120,6 +120,7 @@ const generateProductRatePlanSchema = (
 		termType: termTypeSchema,
 		termLengthInMonths: z.number(),
 		taxMode: z.enum(['TaxExclusive', 'TaxInclusive']).nullable(),
+		savingVsRetail: z.number().nullable(),
 	})`;
 };
 

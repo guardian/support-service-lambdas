@@ -141,6 +141,7 @@ const getZuoraProduct = (
 						termLengthInMonths: getTermLength(productRatePlan.DefaultTerm__c),
 						...(billingPeriod && { billingPeriod }),
 						taxMode: taxModes[0],
+						savingVsRetail: productRatePlan.Saving__c,
 					},
 				};
 			}),
