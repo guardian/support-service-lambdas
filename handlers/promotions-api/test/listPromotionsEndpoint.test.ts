@@ -3,7 +3,10 @@
  */
 import type { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import { addCatalogInformationToPromos } from '@modules/promotions/v2/addCatalogInformationToPromo';
-import { getPromotions } from '@modules/promotions/v2/getPromotions';
+import {
+	getPromotions,
+	getPromotionsByCodes,
+} from '@modules/promotions/v2/getPromotions';
 import type {
 	Promo,
 	PromoWithCatalogInformation,
@@ -12,12 +15,14 @@ import { listPromotionsEndpoint } from '../src/listPromotionsEndpoint';
 
 jest.mock('@modules/promotions/v2/getPromotions', () => ({
 	getPromotions: jest.fn(),
+	getPromotionsByCodes: jest.fn(),
 }));
 jest.mock('@modules/promotions/v2/addCatalogInformationToPromo', () => ({
 	addCatalogInformationToPromos: jest.fn(),
 }));
 
 const mockGetPromotions = jest.mocked(getPromotions);
+const mockGetPromotionsByCodes = jest.mocked(getPromotionsByCodes);
 const mockAddCatalogInformationToPromos = jest.mocked(
 	addCatalogInformationToPromos,
 );
@@ -224,5 +229,63 @@ describe('listPromotionsEndpoint', () => {
 
 		expect(result.statusCode).toBe(200);
 		expect(JSON.parse(result.body)).toEqual({ promotions: [] });
+	});
+
+	it('fetches by promo code, rather than scanning, when promoCodes is provided', async () => {
+		mockGetPromotionsByCodes.mockResolvedValue([promo]);
+		mockAddCatalogInformationToPromos.mockReturnValue({
+			succeeded: [promoWithCatalogInformation],
+			failed: [],
+		});
+
+		const result = await listPromotionsEndpoint('CODE', catalogHelper, {
+			promoCodes: ['PROMO1', 'DOES_NOT_EXIST'],
+		});
+
+		expect(mockGetPromotionsByCodes).toHaveBeenCalledWith(
+			['PROMO1', 'DOES_NOT_EXIST'],
+			'CODE',
+		);
+		expect(mockGetPromotions).not.toHaveBeenCalled();
+		expect(result.statusCode).toBe(200);
+		expect(JSON.parse(result.body)).toEqual({
+			promotions: [promoWithCatalogInformation],
+		});
+	});
+
+	it('combines promoCodes with the active and product filters', async () => {
+		const activePromo: Promo = {
+			...promo,
+			promoCode: 'ACTIVE',
+			startTimestamp: '2000-01-01T00:00:00.000Z',
+			endTimestamp: undefined,
+		};
+		const expiredPromo: Promo = {
+			...promo,
+			promoCode: 'EXPIRED',
+			startTimestamp: '2000-01-01T00:00:00.000Z',
+			endTimestamp: '2001-01-01T00:00:00.000Z',
+		};
+		mockGetPromotionsByCodes.mockResolvedValue([activePromo, expiredPromo]);
+		mockAddCatalogInformationToPromos.mockReturnValue({
+			succeeded: [{ ...promoWithCatalogInformation, promoCode: 'ACTIVE' }],
+			failed: [],
+		});
+
+		const result = await listPromotionsEndpoint('CODE', catalogHelper, {
+			promoCodes: ['ACTIVE', 'EXPIRED'],
+			active: true,
+			productKey: 'SupporterPlus',
+			productRatePlanKey: 'Monthly',
+		});
+
+		expect(mockAddCatalogInformationToPromos).toHaveBeenCalledWith(
+			[activePromo],
+			expect.anything(),
+		);
+		expect(result.statusCode).toBe(200);
+		expect(JSON.parse(result.body)).toEqual({
+			promotions: [{ ...promoWithCatalogInformation, promoCode: 'ACTIVE' }],
+		});
 	});
 });
