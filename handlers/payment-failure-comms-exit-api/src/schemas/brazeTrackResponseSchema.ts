@@ -1,8 +1,6 @@
 import { z } from 'zod';
 
-export const brazeTrackResponseSchema = z
-	.object({
-		message: z.string().optional(),
-		errors: z.array(z.string()).optional(),
-	})
-	.passthrough();
+export const brazeTrackResponseSchema = z.object({
+	message: z.literal('success'),
+	errors: z.array(z.string()).optional(),
+});

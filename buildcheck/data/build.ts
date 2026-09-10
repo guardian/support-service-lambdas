@@ -924,7 +924,7 @@ const paymentFailureCommsExitApi: HandlerDefinition = {
 		...devDeps['@types/aws-lambda'],
 		...devDeps['@redocly/cli'],
 	},
-	moduleDependencies: [moduleLogger, moduleRouting, moduleIdentity],
+	moduleDependencies: [moduleLogger, moduleRouting, moduleIdentity, moduleZuora],
 	extraScripts: {
 		...openApiScripts,
 		package:

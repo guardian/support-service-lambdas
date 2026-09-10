@@ -6,4 +6,7 @@ export const appConfigSchema = z.object({
 		apiKey: z.string().min(1),
 		appId: z.string().min(1),
 	}),
+	identity: z.object({
+		accessToken: z.string().min(1),
+	}),
 });

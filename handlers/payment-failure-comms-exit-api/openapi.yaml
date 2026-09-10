@@ -45,13 +45,13 @@ paths:
               example:
                 error: Invalid request body - wrong type
         '404':
-          description: No Braze UUID was associated with the supplied Identity ID
+          description: The supplied Identity ID was not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
-                message: Not Found
+                message: Identity ID was not found
         '500':
           description: Unexpected server error
           content:

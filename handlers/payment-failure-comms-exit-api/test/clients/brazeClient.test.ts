@@ -1,4 +1,5 @@
-import { BrazeClient } from '../../src/clients';
+import { RestClientError } from '@modules/zuora/restClient';
+import { BrazeClient } from '../../src/clients/brazeClient';
 
 const payload = {
 	events: [
@@ -12,22 +13,25 @@ const payload = {
 	],
 };
 
-const createFetch = (): jest.MockedFunction<typeof fetch> =>
-	jest.fn() as jest.MockedFunction<typeof fetch>;
-
 describe('BrazeClient', () => {
+	afterEach(() => {
+		jest.restoreAllMocks();
+	});
+
 	it('posts the exact pf_csr_exit payload to Braze users/track', async () => {
-		const fetchFn = createFetch();
-		fetchFn.mockResolvedValue(new Response('', { status: 201 }));
+		const fetchSpy = jest
+			.spyOn(global, 'fetch')
+			.mockResolvedValue(
+				new Response(JSON.stringify({ message: 'success' }), { status: 201 }),
+			);
 		const client = new BrazeClient(
 			'https://rest.fra-01.braze.eu',
 			'braze-api-key',
-			fetchFn,
 		);
 
 		await expect(client.sendCustomEvent(payload)).resolves.toBeUndefined();
 
-		expect(fetchFn).toHaveBeenCalledWith(
+		expect(fetchSpy).toHaveBeenCalledWith(
 			'https://rest.fra-01.braze.eu/users/track',
 			expect.objectContaining({
 				method: 'POST',
@@ -38,55 +42,34 @@ describe('BrazeClient', () => {
 				body: JSON.stringify(payload),
 			}),
 		);
-		expect(fetchFn.mock.calls[0]?.[1]?.signal).toBeInstanceOf(AbortSignal);
+		expect(fetchSpy.mock.calls[0]?.[1]?.signal).toBeInstanceOf(AbortSignal);
 	});
 
-	it('rejects a non-successful HTTP response containing Braze errors', async () => {
-		const fetchFn = createFetch();
-		fetchFn.mockResolvedValue(
+	it('rejects a non-successful HTTP response', async () => {
+		jest.spyOn(global, 'fetch').mockResolvedValue(
 			new Response(JSON.stringify({ errors: ['invalid event'] }), {
 				status: 400,
 			}),
 		);
-		const client = new BrazeClient('https://braze.example', 'key', fetchFn);
+		const client = new BrazeClient('https://braze.example', 'key');
 
-		await expect(client.sendCustomEvent(payload)).rejects.toThrow(
-			'Braze /users/track failed with status 400',
-		);
-	});
-
-	it('includes Braze error messages when a request is rejected', async () => {
-		const fetchFn = createFetch();
-		fetchFn.mockResolvedValue(
-			new Response(JSON.stringify({ message: 'invalid app ID' }), {
-				status: 400,
-			}),
-		);
-		const client = new BrazeClient('https://braze.example', 'key', fetchFn);
-
-		await expect(client.sendCustomEvent(payload)).rejects.toThrow(
-			'invalid app ID',
-		);
-	});
-
-	it('uses an empty error object when Braze rejects without details', async () => {
-		const fetchFn = createFetch();
-		fetchFn.mockResolvedValue(new Response('', { status: 500 }));
-		const client = new BrazeClient('https://braze.example', 'key', fetchFn);
-
-		await expect(client.sendCustomEvent(payload)).rejects.toThrow(
-			'Braze /users/track failed with status 500: {}',
-		);
+		await expect(client.sendCustomEvent(payload)).rejects.toMatchObject({
+			name: 'RestClientError',
+			status: 400,
+			responseBody: { errors: ['invalid event'] },
+		});
 	});
 
 	it('rejects a successful HTTP response containing Braze errors', async () => {
-		const fetchFn = createFetch();
-		fetchFn.mockResolvedValue(
-			new Response(JSON.stringify({ errors: ['invalid event'] }), {
-				status: 201,
-			}),
-		);
-		const client = new BrazeClient('https://braze.example', 'key', fetchFn);
+		jest
+			.spyOn(global, 'fetch')
+			.mockResolvedValue(
+				new Response(
+					JSON.stringify({ message: 'success', errors: ['invalid event'] }),
+					{ status: 201 },
+				),
+			);
+		const client = new BrazeClient('https://braze.example', 'key');
 
 		await expect(client.sendCustomEvent(payload)).rejects.toThrow(
 			'Braze /users/track returned errors',
@@ -94,24 +77,24 @@ describe('BrazeClient', () => {
 	});
 
 	it('accepts a successful response with an empty Braze error list', async () => {
-		const fetchFn = createFetch();
-		fetchFn.mockResolvedValue(
-			new Response(JSON.stringify({ errors: [] }), { status: 201 }),
+		jest.spyOn(global, 'fetch').mockResolvedValue(
+			new Response(JSON.stringify({ message: 'success', errors: [] }), {
+				status: 201,
+			}),
 		);
-		const client = new BrazeClient('https://braze.example', 'key', fetchFn);
+		const client = new BrazeClient('https://braze.example', 'key');
 
 		await expect(client.sendCustomEvent(payload)).resolves.toBeUndefined();
 	});
 
-	it('uses the global fetch implementation when no client override is supplied', async () => {
-		const fetchSpy = jest
+	it('rejects an empty successful response rather than treating it as an object', async () => {
+		jest
 			.spyOn(global, 'fetch')
 			.mockResolvedValue(new Response('', { status: 201 }));
 		const client = new BrazeClient('https://braze.example', 'key');
 
-		await expect(client.sendCustomEvent(payload)).resolves.toBeUndefined();
-
-		expect(fetchSpy).toHaveBeenCalled();
-		fetchSpy.mockRestore();
+		await expect(client.sendCustomEvent(payload)).rejects.toBeInstanceOf(
+			RestClientError,
+		);
 	});
 });

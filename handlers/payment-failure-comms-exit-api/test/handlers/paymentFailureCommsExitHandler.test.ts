@@ -1,10 +1,6 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { paymentFailureCommsExitController } from '../../src/handlers/paymentFailureCommsExitController';
-import { handler } from '../../src/handlers/paymentFailureCommsExitHandler';
-
-jest.mock('../../src/handlers/paymentFailureCommsExitController', () => ({
-	paymentFailureCommsExitController: jest.fn(),
-}));
+import { buildPaymentFailureCommsExitHandler } from '../../src/handlers/paymentFailureCommsExitHandler';
+import type { RuntimeDeps } from '../../src/types';
 
 const createEvent = (
 	body: string | null,
@@ -18,30 +14,38 @@ const createEvent = (
 	}) as APIGatewayProxyEvent;
 
 const invoke = async (
+	deps: RuntimeDeps,
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> =>
-	(await handler(event, {} as never, jest.fn())) as APIGatewayProxyResult;
+	(await buildPaymentFailureCommsExitHandler(deps)(
+		event,
+		{} as never,
+		jest.fn(),
+	)) as APIGatewayProxyResult;
+
+const createDeps = (overrides: Partial<RuntimeDeps> = {}): RuntimeDeps => ({
+	getBrazeUuidFromIdapi: jest.fn().mockResolvedValue('braze-uuid'),
+	sendPaymentFailureExitEvent: jest.fn().mockResolvedValue(undefined),
+	now: jest.fn().mockReturnValue('2026-09-08T12:00:00.000Z'),
+	...overrides,
+});
 
 describe('paymentFailureCommsExitHandler', () => {
-	beforeEach(() => {
-		jest.resetAllMocks();
-		jest.mocked(paymentFailureCommsExitController).mockResolvedValue({
-			body: JSON.stringify({ status: 'sent' }),
-			statusCode: 200,
-		});
-	});
+	it('looks up the Identity user, sends its Braze exit event, and confirms success', async () => {
+		const deps = createDeps();
 
-	it('routes a valid request to the controller with a trimmed Identity ID', async () => {
 		await expect(
-			invoke(createEvent('{"identityId":"  200000001  "}')),
+			invoke(deps, createEvent('{"identityId":"200000001"}')),
 		).resolves.toEqual({
 			body: JSON.stringify({ status: 'sent' }),
 			statusCode: 200,
 		});
 
-		expect(paymentFailureCommsExitController).toHaveBeenCalledWith({
-			identityId: '200000001',
-		});
+		expect(deps.getBrazeUuidFromIdapi).toHaveBeenCalledWith('200000001');
+		expect(deps.sendPaymentFailureExitEvent).toHaveBeenCalledWith(
+			'braze-uuid',
+			'2026-09-08T12:00:00.000Z',
+		);
 	});
 
 	it.each([
@@ -51,19 +55,59 @@ describe('paymentFailureCommsExitHandler', () => {
 			'an unexpected request property',
 			'{"identityId":"200000001","extra":true}',
 		],
+		['an Identity ID containing whitespace', '{"identityId":" 200000001 "}'],
 	])('returns 400 for %s', async (_description, body) => {
-		const response = await invoke(createEvent(body));
+		const deps = createDeps();
+		const response = await invoke(deps, createEvent(body));
 
 		expect(response.statusCode).toBe(400);
-		expect(paymentFailureCommsExitController).not.toHaveBeenCalled();
+		expect(deps.getBrazeUuidFromIdapi).not.toHaveBeenCalled();
+		expect(deps.sendPaymentFailureExitEvent).not.toHaveBeenCalled();
 	});
 
-	it('returns 404 for a route outside the handler contract', async () => {
+	it('returns a helpful 404 without calling Braze when the Identity ID is not found', async () => {
+		const deps = createDeps({
+			getBrazeUuidFromIdapi: jest.fn().mockResolvedValue(undefined),
+		});
+
 		await expect(
-			invoke(createEvent('{"identityId":"200000001"}', '/other')),
+			invoke(deps, createEvent('{"identityId":"200000001"}')),
 		).resolves.toEqual({
-			body: 'Not Found',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ message: 'Identity ID was not found' }),
 			statusCode: 404,
+		});
+		expect(deps.sendPaymentFailureExitEvent).not.toHaveBeenCalled();
+	});
+
+	it.each([
+		[
+			'IDAPI returns a user without a Braze UUID',
+			{
+				getBrazeUuidFromIdapi: jest
+					.fn()
+					.mockRejectedValue(
+						new Error('Identity user does not have a Braze UUID'),
+					),
+			},
+		],
+		[
+			'Braze rejects the exit event',
+			{
+				sendPaymentFailureExitEvent: jest
+					.fn()
+					.mockRejectedValue(new Error('Braze unavailable')),
+			},
+		],
+	])('returns 500 for %s', async (_description, overrides) => {
+		const deps = createDeps(overrides);
+
+		await expect(
+			invoke(deps, createEvent('{"identityId":"200000001"}')),
+		).resolves.toEqual({
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ message: 'Internal server error' }),
+			statusCode: 500,
 		});
 	});
 });

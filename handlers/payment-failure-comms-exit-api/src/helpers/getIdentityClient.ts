@@ -1,19 +1,21 @@
 import { IdentityClient } from '@modules/identity/identityClient';
 import { stageFromEnvironment } from '@modules/stage';
-import { identityClientAccessTokenPath } from '../constants';
+import { getAppConfig } from './getAppConfig';
 
-let identityClientPromise: ReturnType<typeof IdentityClient.create> | undefined;
+let identityClientPromise:
+	| Promise<ReturnType<typeof IdentityClient.createWithAccessToken>>
+	| undefined;
 
-export const getIdentityClient = (): ReturnType<
-	typeof IdentityClient.create
+export const getIdentityClient = (): Promise<
+	ReturnType<typeof IdentityClient.createWithAccessToken>
 > => {
-	if (!identityClientPromise) {
-		const stage = stageFromEnvironment();
-		identityClientPromise = IdentityClient.create(
-			stage,
-			identityClientAccessTokenPath(stage),
+	identityClientPromise ??= (async () => {
+		const config = await getAppConfig();
+		return IdentityClient.createWithAccessToken(
+			stageFromEnvironment(),
+			config.identity.accessToken,
 		);
-	}
+	})();
 
 	return identityClientPromise;
 };

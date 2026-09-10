@@ -1,7 +1,4 @@
-export type AppConfig = {
-	braze: {
-		apiUrl: string;
-		apiKey: string;
-		appId: string;
-	};
-};
+import type { z } from 'zod';
+import type { appConfigSchema } from '../schemas/appConfigSchema';
+
+export type AppConfig = z.infer<typeof appConfigSchema>;

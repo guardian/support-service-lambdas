@@ -23,7 +23,8 @@
     "zod": "catalog:",
     "logger": "workspace:*",
     "routing": "workspace:*",
-    "identity": "workspace:*"
+    "identity": "workspace:*",
+    "zuora": "workspace:*"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147",
