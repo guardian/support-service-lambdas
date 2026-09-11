@@ -124,6 +124,7 @@ export const acceptInvitationEndpoint = async (
 			secondarySubscriptionName,
 		});
 	} catch (error) {
+		console.error('Something went wrong accepting invitation: ', error);
 		return buildErrorResponse(error);
 	}
 };
