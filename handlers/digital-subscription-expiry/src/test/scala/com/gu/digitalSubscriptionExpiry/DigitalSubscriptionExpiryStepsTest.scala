@@ -17,6 +17,12 @@ import org.scalatest.matchers.should.Matchers
 
 class DigitalSubscriptionExpiryStepsTest extends AnyFlatSpec with Matchers {
 
+  // While adding server side validation for the subscription ids
+  // https://github.com/guardian/support-service-lambdas/pull/3816
+  // We made a change in the legacy tests to use a Zuora subscription id
+  // only made of uppercase letters. This way the validation doesn't break
+  // the legacy tests.
+
   val validTokenResponse = {
     val expiry = Expiry(
       expiryDate = LocalDate.of(1985, 10, 26),
@@ -30,7 +36,7 @@ class DigitalSubscriptionExpiryStepsTest extends AnyFlatSpec with Matchers {
   val successfulResponseFromZuora = ApiResponse("123", "valid zuora response")
 
   def getSubId(s: SubscriptionId): ApiGatewayOp[SubscriptionResult] = {
-    if (s.value == "validZuoraSubId") {
+    if (s.value == "A-VALIDZUORASUBID") {
       val response = SubscriptionResult(
         id = s,
         name = SubscriptionName("someSubName"),
@@ -89,7 +95,7 @@ class DigitalSubscriptionExpiryStepsTest extends AnyFlatSpec with Matchers {
   it should "trim leading spaces and zeroes and return subscription from zuora" in {
     val request =
       """{
-    |      "subscriberId" : "   0000validZuoraSubId ",
+    |      "subscriberId" : "   0000A-VALIDZUORASUBID ",
     |      "password" : "somePassword"
     |    }
 
@@ -103,7 +109,7 @@ class DigitalSubscriptionExpiryStepsTest extends AnyFlatSpec with Matchers {
   it should "return not found for valid zuora id with no password provided" in {
     val request =
       """{
-    |      "subscriberId" : "validZuoraSubId"
+    |      "subscriberId" : "A-VALIDZUORASUBID"
     |    }
 
   """.stripMargin
@@ -205,6 +211,38 @@ class DigitalSubscriptionExpiryStepsTest extends AnyFlatSpec with Matchers {
     )
   }
 
+  it should "not call getSubscription (regex gate) when subscriberId fails validation" in {
+    var getSubscriptionCalled = false
+
+    val steps = DigitalSubscriptionExpirySteps(
+      getEmergencyTokenExpiry = getTokenExpiry,
+      getSubscription = id => {
+        getSubscriptionCalled = true
+        getSubId(id)
+      },
+      setActivationDate = setActivationDate,
+      getAccountSummary = getAccount,
+      getSubscriptionExpiry = getSubExpiry,
+      skipActivationDateUpdate = skipActivationDateUpdate,
+    )
+
+    val request =
+      """{
+        |      "subscriberId" : "invalid id!"
+        |    }
+    """.stripMargin
+
+    val actual = steps.steps(ApiGatewayRequest(None, None, Some(request), None, None, None))
+
+    getSubscriptionCalled shouldBe false
+
+    verifyResponse(
+      actualResponse = actual,
+      expectedBody = expectedNotFoundResponseBody,
+      expectedStatus = "404",
+    )
+  }
+
   def verifyResponse(actualResponse: ApiResponse, expectedStatus: String, expectedBody: String) = {
     val expectedReponseBodyJson = Json.parse(expectedBody)
     val actualResponseBodyJson = Json.parse(actualResponse.body)
@@ -251,3 +289,18 @@ class DeserialiserTest extends AnyFlatSpec with Matchers {
     Json.parse(json).validate[UrlParams] should be(JsSuccess(UrlParams(true)))
   }
 }
+
+class SubscriptionIdValidationTest extends AnyFlatSpec with Matchers {
+  it should "perform correct subscription validation, accepting" in {
+    DigitalSubscriptionExpirySteps.isValidSubscriptionId("A-S00044160") should be(true)
+    DigitalSubscriptionExpirySteps.isValidSubscriptionId("A3F4DACDD") should be(true)
+    DigitalSubscriptionExpirySteps.isValidSubscriptionId("00044160") should be(true) // the leading `0` will be trimmed out
+  }
+  it should "perform correct subscription validation, rejecting" in {
+    DigitalSubscriptionExpirySteps.isValidSubscriptionId("AB-S00044160") should be(false)
+    DigitalSubscriptionExpirySteps.isValidSubscriptionId("a3f4dAccd") should be(false) // we do not allow lowercases
+    DigitalSubscriptionExpirySteps.isValidSubscriptionId("Luke@TheResistance") should be(false) // we do not allow non alpha numerical
+    DigitalSubscriptionExpirySteps.isValidSubscriptionId("feedback for the Guardian") should be(false) // we do not allow non alpha numerical, here the spaces
+  }
+}
+
