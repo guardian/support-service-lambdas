@@ -16,7 +16,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 class DigitalSubscriptionExpiryStepsTest extends AnyFlatSpec with Matchers {
-  
+
   // While adding server side validation for the subscription ids
   // https://github.com/guardian/support-service-lambdas/pull/3816
   // We made a change in the legacy tests to use a Zuora subscription id
@@ -211,6 +211,38 @@ class DigitalSubscriptionExpiryStepsTest extends AnyFlatSpec with Matchers {
     )
   }
 
+  it should "not call getSubscription (regex gate) when subscriberId fails validation" in {
+    var getSubscriptionCalled = false
+
+    val steps = DigitalSubscriptionExpirySteps(
+      getEmergencyTokenExpiry = getTokenExpiry,
+      getSubscription = id => {
+        getSubscriptionCalled = true
+        getSubId(id)
+      },
+      setActivationDate = setActivationDate,
+      getAccountSummary = getAccount,
+      getSubscriptionExpiry = getSubExpiry,
+      skipActivationDateUpdate = skipActivationDateUpdate,
+    )
+
+    val request =
+      """{
+        |      "subscriberId" : "invalid id!"
+        |    }
+    """.stripMargin
+
+    val actual = steps.steps(ApiGatewayRequest(None, None, Some(request), None, None, None))
+
+    getSubscriptionCalled shouldBe false
+
+    verifyResponse(
+      actualResponse = actual,
+      expectedBody = expectedNotFoundResponseBody,
+      expectedStatus = "404",
+    )
+  }
+
   def verifyResponse(actualResponse: ApiResponse, expectedStatus: String, expectedBody: String) = {
     val expectedReponseBodyJson = Json.parse(expectedBody)
     val actualResponseBodyJson = Json.parse(actualResponse.body)
@@ -271,3 +303,4 @@ class SubscriptionIdValidationTest extends AnyFlatSpec with Matchers {
     DigitalSubscriptionExpirySteps.isValidSubscriptionId("feedback for the Guardian") should be(false) // we do not allow non alpha numerical, here the spaces
   }
 }
+
