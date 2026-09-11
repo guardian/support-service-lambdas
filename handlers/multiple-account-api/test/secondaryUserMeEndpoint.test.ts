@@ -39,7 +39,7 @@ describe('secondaryUserMeEndpoint', () => {
 			get: jest
 				.fn<Promise<SecondaryUserRecord[]>, [string]>()
 				.mockResolvedValue(users),
-			listNonCancelledByIdentity: jest
+			listActiveByIdentity: jest
 				.fn<Promise<SecondaryUserRecord[]>, [string]>()
 				.mockResolvedValue(users),
 		}) as unknown as SecondaryUserRepository;

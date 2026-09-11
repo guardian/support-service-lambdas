@@ -51,9 +51,7 @@ export async function validateInvitationInformation(
 	logger.log('Validating invitation information');
 
 	const existingSecondaryUsers =
-		await secondaryUserRepository.listNonCancelledBySubscription(
-			subscriptionName,
-		);
+		await secondaryUserRepository.listActiveBySubscription(subscriptionName);
 
 	// Check the secondary user is not already a secondary user for this subscription
 	const secondaryUserAlreadyExists = existingSecondaryUsers.find(
@@ -67,7 +65,7 @@ export async function validateInvitationInformation(
 	}
 
 	const nonCancelledInvites =
-		await invitationRepository.listNonCancelled(subscriptionName);
+		await invitationRepository.listActive(subscriptionName);
 
 	// Check the secondary user has not been invited already
 	const inviteAlreadyExistsForUser = nonCancelledInvites.find(

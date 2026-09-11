@@ -49,6 +49,7 @@ export const promoSchema = z.object({
 	discount: optionalDropNulls(discountDetailsSchema),
 	description: optionalDropNulls(z.string()),
 	landingPage: optionalDropNulls(landingPageSchema),
+	isIntroductoryPricing: optionalDropNulls(z.boolean()),
 });
 
 export type Promo = z.infer<typeof promoSchema>;

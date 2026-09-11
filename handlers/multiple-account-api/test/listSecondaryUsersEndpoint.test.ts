@@ -5,7 +5,7 @@ import type {
 import { listSecondaryUsersEndpoint } from '../src/listSecondaryUsersEndpoint';
 
 describe('listSecondaryUsersEndpoint', () => {
-	it('returns all non-cancelled secondary users for the subscription', async () => {
+	it('returns all active secondary users for the subscription', async () => {
 		const secondaryUsers: SecondaryUserRecord[] = [
 			{
 				subscriptionName: 'A-S00974337',
@@ -16,11 +16,11 @@ describe('listSecondaryUsersEndpoint', () => {
 				invitationCode: 'RpwR62kMnAxe',
 			},
 		];
-		const mockListNonCancelled = jest
+		const mockListActive = jest
 			.fn<Promise<SecondaryUserRecord[]>, [string]>()
 			.mockResolvedValue(secondaryUsers);
 		const secondaryUserRepository = {
-			listNonCancelledBySubscription: mockListNonCancelled,
+			listActiveBySubscription: mockListActive,
 		} as unknown as SecondaryUserRepository;
 
 		const result = await listSecondaryUsersEndpoint(
@@ -30,15 +30,15 @@ describe('listSecondaryUsersEndpoint', () => {
 
 		expect(result.statusCode).toBe(200);
 		expect(JSON.parse(result.body)).toEqual({ secondaryUsers });
-		expect(mockListNonCancelled).toHaveBeenCalledWith('A-S00974337');
+		expect(mockListActive).toHaveBeenCalledWith('A-S00974337');
 	});
 
 	it('returns a 500 response when listing fails', async () => {
-		const mockListNonCancelled = jest
+		const mockListActive = jest
 			.fn<Promise<SecondaryUserRecord[]>, [string]>()
 			.mockRejectedValue(new Error('dynamodb error'));
 		const secondaryUserRepository = {
-			listNonCancelledBySubscription: mockListNonCancelled,
+			listActiveBySubscription: mockListActive,
 		} as unknown as SecondaryUserRepository;
 
 		const result = await listSecondaryUsersEndpoint(

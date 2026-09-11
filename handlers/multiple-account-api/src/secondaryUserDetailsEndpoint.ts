@@ -31,7 +31,7 @@ export async function secondaryUserDetailsEndpoint(
 	zuoraClient: ZuoraClient,
 ): Promise<APIGatewayProxyResult> {
 	const secondaryUsers: SecondaryUserRecord[] =
-		await secondaryUserRepository.listNonCancelledByIdentity(identityId);
+		await secondaryUserRepository.listActiveByIdentity(identityId);
 
 	const subscriptionsWithPrimaryUserInformation = await Promise.all(
 		secondaryUsers.map(async (secondaryUser) =>
