@@ -19,8 +19,8 @@ export function internalServerError(): APIGatewayProxyResult {
 	return jsonResponse('Internal server error', 500);
 }
 
-export function notFound(): APIGatewayProxyResult {
-	return jsonResponse('Not Found', 404);
+export function notFound(message: string = 'Not Found'): APIGatewayProxyResult {
+	return jsonResponse(message, 404);
 }
 
 export function gone(message: string): APIGatewayProxyResult {
