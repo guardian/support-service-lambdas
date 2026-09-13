@@ -1,6 +1,6 @@
 import type { SQSEvent, SQSRecord } from 'aws-lambda';
 import { handleIdentityDeletionEvent } from '../../src/handlers/identityDeletionHandler';
-import type { IdentityDeletionCleanupDependencies } from '../../src/types';
+import type { IdentityDeletionCleanupDependencies } from '../../src/types/identityDeletionCleanup';
 
 jest.mock('@modules/logger/logger', () => ({
 	logger: { log: jest.fn() },
@@ -43,7 +43,7 @@ describe('handleIdentityDeletionEvent', () => {
 				sqsRecord({
 					Type: 'Notification',
 					Message: JSON.stringify({
-						userId: 'deleted-identity-id',
+						userId: '1234567',
 						eventType: 'DELETE',
 					}),
 				}),
@@ -52,32 +52,20 @@ describe('handleIdentityDeletionEvent', () => {
 
 		await handleIdentityDeletionEvent(event, dependenciesFactory);
 
-		expect(deps.findSalesforceContactIds).toHaveBeenCalledWith(
-			'deleted-identity-id',
-		);
-		expect(deps.findZuoraAccountIds).toHaveBeenCalledWith(
-			'deleted-identity-id',
-		);
+		expect(deps.findSalesforceContactIds).toHaveBeenCalledWith('1234567');
+		expect(deps.findZuoraAccountIds).toHaveBeenCalledWith('1234567');
 	});
 
-	it('does not initialise downstream clients for a subscription confirmation', async () => {
-		const dependenciesFactory = jest.fn();
-		const event: SQSEvent = {
-			Records: [sqsRecord({ Type: 'SubscriptionConfirmation' })],
-		};
-
-		await handleIdentityDeletionEvent(event, dependenciesFactory);
-
-		expect(dependenciesFactory).not.toHaveBeenCalled();
-	});
-
-	it('rejects malformed messages so SQS can retry and then use the DLQ', async () => {
+	it('rejects a non-numeric Identity ID so SQS can retry and then use the DLQ', async () => {
 		const dependenciesFactory = jest.fn();
 		const event: SQSEvent = {
 			Records: [
 				sqsRecord({
 					Type: 'Notification',
-					Message: JSON.stringify({}),
+					Message: JSON.stringify({
+						userId: 'not-an-identity-id',
+						eventType: 'DELETE',
+					}),
 				}),
 			],
 		};
@@ -98,7 +86,7 @@ describe('handleIdentityDeletionEvent', () => {
 				sqsRecord({
 					Type: 'Notification',
 					Message: JSON.stringify({
-						userId: 'deleted-identity-id',
+						userId: '1234567',
 						eventType: 'DELETE',
 					}),
 				}),

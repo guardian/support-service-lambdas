@@ -1,48 +1,49 @@
 import {
 	identityDeletionEventSchema,
 	identityDeletionSnsEnvelopeSchema,
-} from '../../src/schemas';
+} from '../../src/schemas/identityDeletionEventSchema';
 
 describe('Identity deletion event schemas', () => {
 	it('accepts an Identity deletion event from the account-deletion topic', () => {
 		expect(
 			identityDeletionEventSchema.parse({
-				userId: 'deleted-identity-id',
+				userId: '1234567',
 				brazeId: null,
 				eventType: 'DELETE',
 			}),
 		).toEqual({
-			userId: 'deleted-identity-id',
+			userId: '1234567',
 			brazeId: null,
 			eventType: 'DELETE',
 		});
 	});
 
-	it('rejects an event without a user ID', () => {
+	it('rejects an empty or non-numeric user ID', () => {
 		expect(
 			identityDeletionEventSchema.safeParse({ eventType: 'DELETE' }).success,
+		).toBe(false);
+		expect(
+			identityDeletionEventSchema.safeParse({
+				userId: ' 1234567 ',
+				eventType: 'DELETE',
+			}).success,
 		).toBe(false);
 	});
 
 	it('rejects an event which is not an account deletion', () => {
 		expect(
 			identityDeletionEventSchema.safeParse({
-				userId: 'identity-id',
+				userId: '1234567',
 				eventType: 'UPDATE',
 			}).success,
 		).toBe(false);
 	});
 
-	it('accepts notification and subscription confirmation SNS envelopes', () => {
+	it('accepts an SNS notification envelope', () => {
 		expect(
 			identityDeletionSnsEnvelopeSchema.safeParse({
 				Type: 'Notification',
-				Message: '{"userId":"deleted-identity-id"}',
-			}).success,
-		).toBe(true);
-		expect(
-			identityDeletionSnsEnvelopeSchema.safeParse({
-				Type: 'SubscriptionConfirmation',
+				Message: '{"userId":"1234567"}',
 			}).success,
 		).toBe(true);
 	});

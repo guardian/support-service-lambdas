@@ -1,6 +1,7 @@
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+import { Architecture } from 'aws-cdk-lib/aws-lambda';
 import {
 	AllowGetSecretValuePolicy,
 	AllowZuoraOAuthSecretsPolicy,
@@ -27,6 +28,7 @@ export class IdentityDeletionCleanup extends SrStack {
 					'a deleted Identity ID may remain on Salesforce Contacts or Zuora Customer Accounts',
 			},
 			lambdaOverrides: {
+				architecture: Architecture.ARM_64,
 				description:
 					'Clears deleted Identity IDs from matching Salesforce Contacts and Zuora Customer Accounts',
 				timeout: Duration.minutes(5),

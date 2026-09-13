@@ -2,7 +2,7 @@ import { sfApiVersion } from '@modules/salesforce/config';
 import type { SfClient } from '@modules/salesforce/sfClient';
 import { doCompositeCallout } from '@modules/salesforce/updateRecords';
 import { SALESFORCE_COMPOSITE_UPDATE_BATCH_SIZE } from '../constants';
-import { chunk } from '../helpers';
+import { chunk } from '../helpers/chunk';
 
 export async function clearSalesforceContactIds(
 	sfClient: SfClient,

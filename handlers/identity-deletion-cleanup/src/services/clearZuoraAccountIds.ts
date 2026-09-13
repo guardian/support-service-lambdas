@@ -1,7 +1,7 @@
 import { update } from '@modules/zuora/actions';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { ZUORA_UPDATE_BATCH_SIZE } from '../constants';
-import { chunk } from '../helpers';
+import { chunk } from '../helpers/chunk';
 
 export async function clearZuoraAccountIds(
 	zuoraClient: ZuoraClient,

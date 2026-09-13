@@ -1,5 +1,5 @@
-import { cleanDeletedIdentity } from '../../src/services';
-import type { IdentityDeletionCleanupDependencies } from '../../src/types';
+import { cleanDeletedIdentity } from '../../src/services/cleanDeletedIdentity';
+import type { IdentityDeletionCleanupDependencies } from '../../src/types/identityDeletionCleanup';
 
 function dependencies(
 	overrides: Partial<IdentityDeletionCleanupDependencies> = {},
@@ -16,7 +16,7 @@ function dependencies(
 describe('cleanDeletedIdentity', () => {
 	it('treats no Salesforce or Zuora matches as a successful no-op', async () => {
 		await expect(
-			cleanDeletedIdentity('deleted-identity-id', dependencies()),
+			cleanDeletedIdentity('1234567', dependencies()),
 		).resolves.toEqual({
 			salesforceContactsCleared: 0,
 			zuoraAccountsCleared: 0,
@@ -43,15 +43,11 @@ describe('cleanDeletedIdentity', () => {
 				.mockResolvedValueOnce(0),
 		});
 
-		await expect(
-			cleanDeletedIdentity('deleted-identity-id', deps),
-		).resolves.toEqual({
+		await expect(cleanDeletedIdentity('1234567', deps)).resolves.toEqual({
 			salesforceContactsCleared: 1,
 			zuoraAccountsCleared: 1,
 		});
-		await expect(
-			cleanDeletedIdentity('deleted-identity-id', deps),
-		).resolves.toEqual({
+		await expect(cleanDeletedIdentity('1234567', deps)).resolves.toEqual({
 			salesforceContactsCleared: 0,
 			zuoraAccountsCleared: 0,
 		});
@@ -78,9 +74,7 @@ describe('cleanDeletedIdentity', () => {
 			}),
 		});
 
-		await expect(
-			cleanDeletedIdentity('deleted-identity-id', deps),
-		).resolves.toEqual({
+		await expect(cleanDeletedIdentity('1234567', deps)).resolves.toEqual({
 			salesforceContactsCleared: 2,
 			zuoraAccountsCleared: 1,
 		});
@@ -101,9 +95,9 @@ describe('cleanDeletedIdentity', () => {
 			findZuoraAccountIds,
 		});
 
-		await expect(
-			cleanDeletedIdentity('deleted-identity-id', deps),
-		).rejects.toThrow('Salesforce unavailable');
+		await expect(cleanDeletedIdentity('1234567', deps)).rejects.toThrow(
+			'Salesforce unavailable',
+		);
 		expect(findZuoraAccountIds).not.toHaveBeenCalled();
 	});
 
@@ -114,9 +108,9 @@ describe('cleanDeletedIdentity', () => {
 				.mockRejectedValue(new Error('Zuora unavailable')),
 		});
 
-		await expect(
-			cleanDeletedIdentity('deleted-identity-id', deps),
-		).rejects.toThrow('Zuora unavailable');
+		await expect(cleanDeletedIdentity('1234567', deps)).rejects.toThrow(
+			'Zuora unavailable',
+		);
 		expect(deps.clearSalesforceContactIds).toHaveBeenCalled();
 	});
 });

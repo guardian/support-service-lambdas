@@ -94,6 +94,9 @@ exports[`The identity deletion cleanup stack matches the snapshot 1`] = `
         "LambdaServiceRoleA8ED4D3B",
       ],
       "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
         "Code": {
           "S3Bucket": {
             "Ref": "DistributionBucketName",
@@ -686,6 +689,9 @@ DLQ: https://",
         "LambdaServiceRoleA8ED4D3B",
       ],
       "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
         "Code": {
           "S3Bucket": {
             "Ref": "DistributionBucketName",
