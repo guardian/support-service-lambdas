@@ -18,6 +18,7 @@ import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
 import { HolidayStopProcessor } from '../lib/holiday-stop-processor';
 import { IamPolicies } from '../lib/iam-policies';
+import { IdentityDeletionCleanup } from '../lib/identity-deletion-cleanup';
 import { ImovoVoucherApi } from '../lib/imovo-voucher-api';
 import { MetricPushApi } from '../lib/metric-push-api';
 import { MobilePurchasesToSupporterProductData } from '../lib/mobile-purchases-to-supporter-product-data';
@@ -158,6 +159,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	ProductSwitchApi,
 	UpdateSupporterPlusAmount,
 	MParticleApi,
+	IdentityDeletionCleanup,
 	MetricPushApi,
 	PressReaderEntitlements,
 	UserBenefits,
