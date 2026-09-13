@@ -1,6 +1,6 @@
 import type { SfClient } from '@modules/salesforce/sfClient';
 import { doCompositeCallout } from '@modules/salesforce/updateRecords';
-import { clearSalesforceContactIds } from '../../src/services';
+import { clearSalesforceContactIds } from '../../src/services/clearSalesforceContactIds';
 
 jest.mock('@modules/salesforce/updateRecords', () => ({
 	doCompositeCallout: jest.fn(),

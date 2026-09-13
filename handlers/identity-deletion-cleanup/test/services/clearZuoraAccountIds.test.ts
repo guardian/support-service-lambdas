@@ -1,6 +1,6 @@
 import { update } from '@modules/zuora/actions';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { clearZuoraAccountIds } from '../../src/services';
+import { clearZuoraAccountIds } from '../../src/services/clearZuoraAccountIds';
 
 jest.mock('@modules/zuora/actions', () => ({
 	update: jest.fn(),

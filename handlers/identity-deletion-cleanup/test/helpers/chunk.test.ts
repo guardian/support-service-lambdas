@@ -1,4 +1,4 @@
-import { chunk } from '../../src/helpers';
+import { chunk } from '../../src/helpers/chunk';
 
 describe('chunk', () => {
 	it('splits items into batches of the requested size', () => {

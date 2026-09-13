@@ -3,9 +3,9 @@ import { logger } from '@modules/logger/logger';
 import {
 	identityDeletionEventSchema,
 	identityDeletionSnsEnvelopeSchema,
-} from '../schemas';
-import { cleanDeletedIdentity } from '../services';
-import type { IdentityDeletionCleanupDependenciesFactory } from '../types';
+} from '../schemas/identityDeletionEventSchema';
+import { cleanDeletedIdentity } from '../services/cleanDeletedIdentity';
+import type { IdentityDeletionCleanupDependenciesFactory } from '../types/identityDeletionCleanup';
 
 export async function handleIdentityDeletionEvent(
 	event: SQSEvent,
@@ -30,11 +30,6 @@ export async function handleIdentityDeletionRecord(
 		JSON.parse(record.body),
 	);
 
-	if (snsEnvelope.Type === 'SubscriptionConfirmation') {
-		logger.log('Received an SNS subscription confirmation message');
-		return;
-	}
-
 	const deletionEvent = identityDeletionEventSchema.parse(
 		JSON.parse(snsEnvelope.Message),
 	);
@@ -43,5 +38,8 @@ export async function handleIdentityDeletionRecord(
 		await dependenciesFactory(),
 	);
 
-	logger.log('Completed Identity deletion cleanup', outcome);
+	logger.log('Completed Identity deletion cleanup', {
+		identityId: deletionEvent.userId,
+		...outcome,
+	});
 }

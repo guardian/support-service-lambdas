@@ -24,9 +24,10 @@ describe('findZuoraAccountIds', () => {
 			},
 		);
 
-		await expect(
-			findZuoraAccountIds(zuoraClient, 'deleted-identity-id'),
-		).resolves.toEqual(['account-1', 'account-2']);
+		await expect(findZuoraAccountIds(zuoraClient, '1234567')).resolves.toEqual([
+			'account-1',
+			'account-2',
+		]);
 
 		expect(get).toHaveBeenNthCalledWith(
 			1,
@@ -35,7 +36,7 @@ describe('findZuoraAccountIds', () => {
 			expect.any(URLSearchParams),
 		);
 		expect(queries[0]?.toString()).toBe(
-			'pageSize=99&fields%5B%5D=id&filter%5B%5D=IdentityId__c.EQ%3Adeleted-identity-id&includeNullFields=true',
+			'pageSize=99&fields%5B%5D=id&filter%5B%5D=IdentityId__c.EQ%3A1234567&includeNullFields=true',
 		);
 		expect(queries[1]?.get('cursor')).toBe('next-page');
 	});
@@ -46,8 +47,8 @@ describe('findZuoraAccountIds', () => {
 			data: [],
 		});
 
-		await expect(
-			findZuoraAccountIds(zuoraClient, 'deleted-identity-id'),
-		).rejects.toThrow('Zuora account query returned a repeated page cursor');
+		await expect(findZuoraAccountIds(zuoraClient, '1234567')).rejects.toThrow(
+			'Zuora account query returned a repeated page cursor',
+		);
 	});
 });

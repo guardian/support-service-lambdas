@@ -1,7 +1,7 @@
 import type {
 	IdentityDeletionCleanupDependencies,
 	IdentityDeletionCleanupOutcome,
-} from '../types';
+} from '../types/identityDeletionCleanup';
 
 export async function cleanDeletedIdentity(
 	identityId: string,

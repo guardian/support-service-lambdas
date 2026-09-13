@@ -2,7 +2,7 @@ import { SfClient } from '@modules/salesforce/sfClient';
 import { stageFromEnvironment } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { SALESFORCE_CONNECTED_APP_SECRET_NAME } from '../constants';
-import type { IdentityDeletionCleanupDependencies } from '../types';
+import type { IdentityDeletionCleanupDependencies } from '../types/identityDeletionCleanup';
 import { clearSalesforceContactIds } from './clearSalesforceContactIds';
 import { clearZuoraAccountIds } from './clearZuoraAccountIds';
 import { findSalesforceContactIds } from './findSalesforceContactIds';

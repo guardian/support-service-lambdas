@@ -1,13 +1,11 @@
 import { SfClient } from '@modules/salesforce/sfClient';
 import { stageFromEnvironment } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import {
-	clearSalesforceContactIds,
-	clearZuoraAccountIds,
-	defaultDependencies,
-	findSalesforceContactIds,
-	findZuoraAccountIds,
-} from '../../src/services';
+import { clearSalesforceContactIds } from '../../src/services/clearSalesforceContactIds';
+import { clearZuoraAccountIds } from '../../src/services/clearZuoraAccountIds';
+import { defaultDependencies } from '../../src/services/defaultDependencies';
+import { findSalesforceContactIds } from '../../src/services/findSalesforceContactIds';
+import { findZuoraAccountIds } from '../../src/services/findZuoraAccountIds';
 
 jest.mock('@modules/stage', () => ({
 	stageFromEnvironment: jest.fn(),
@@ -57,14 +55,14 @@ describe('defaultDependencies', () => {
 		);
 		expect(mockCreateZuoraClient).toHaveBeenCalledWith('CODE');
 
-		await deps.findSalesforceContactIds('deleted-identity-id');
+		await deps.findSalesforceContactIds('1234567');
 		await deps.clearSalesforceContactIds(['contact-1']);
-		await deps.findZuoraAccountIds('deleted-identity-id');
+		await deps.findZuoraAccountIds('1234567');
 		await deps.clearZuoraAccountIds(['account-1']);
 
 		expect(mockFindSalesforceContactIds).toHaveBeenCalledWith(
 			expect.anything(),
-			'deleted-identity-id',
+			'1234567',
 		);
 		expect(mockClearSalesforceContactIds).toHaveBeenCalledWith(
 			expect.anything(),
@@ -72,7 +70,7 @@ describe('defaultDependencies', () => {
 		);
 		expect(mockFindZuoraAccountIds).toHaveBeenCalledWith(
 			expect.anything(),
-			'deleted-identity-id',
+			'1234567',
 		);
 		expect(mockClearZuoraAccountIds).toHaveBeenCalledWith(expect.anything(), [
 			'account-1',
