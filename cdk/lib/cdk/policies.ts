@@ -109,10 +109,20 @@ export class AllowSupporterProductDataDeletePolicy extends GuAllowPolicy {
 export class AllowSecondaryUserTableQueryPolicy extends GuAllowPolicy {
 	constructor(scope: GuStack) {
 		super(scope, 'MultipleAccountSecondaryUserTable query access', {
-			// Query is used to look up secondary users for a subscription, and
-			// UpdateItem is used to refresh their TTL once the primary subscription
-			// has been processed (see processSupporterRatePlanItem.ts)
-			actions: ['dynamodb:Query', 'dynamodb:UpdateItem'],
+			actions: ['dynamodb:Query'],
+			resources: [
+				`arn:aws:dynamodb:${scope.region}:${scope.account}:table/multiple-account-secondary-user-${scope.stage}`,
+			],
+		});
+	}
+}
+
+// Used to refresh a secondary user's TTL once the primary subscription has
+// been processed (see processSupporterRatePlanItem.ts)
+export class AllowSecondaryUserTableUpdatePolicy extends GuAllowPolicy {
+	constructor(scope: GuStack) {
+		super(scope, 'MultipleAccountSecondaryUserTable update access', {
+			actions: ['dynamodb:UpdateItem'],
 			resources: [
 				`arn:aws:dynamodb:${scope.region}:${scope.account}:table/multiple-account-secondary-user-${scope.stage}`,
 			],
