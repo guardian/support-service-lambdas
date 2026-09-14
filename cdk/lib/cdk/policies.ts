@@ -117,8 +117,6 @@ export class AllowSecondaryUserTableQueryPolicy extends GuAllowPolicy {
 	}
 }
 
-// Used to refresh a secondary user's TTL once the primary subscription has
-// been processed (see processSupporterRatePlanItem.ts)
 export class AllowSecondaryUserTableUpdatePolicy extends GuAllowPolicy {
 	constructor(scope: GuStack) {
 		super(scope, 'MultipleAccountSecondaryUserTable update access', {
