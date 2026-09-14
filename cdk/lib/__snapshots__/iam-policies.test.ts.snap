@@ -27,8 +27,8 @@ exports[`The IamPolicies stack matches the snapshot 1`] = `
               "Action": "s3:GetObject",
               "Effect": "Allow",
               "Resource": [
-                "arn:aws:s3:::membership-private/*/DEV/*",
-                "arn:aws:s3:::membership-private/*/CODE/*",
+                "arn:aws:s3:::membership-private/DEV/*",
+                "arn:aws:s3:::membership-private/CODE/*",
               ],
             },
             {
@@ -450,8 +450,8 @@ exports[`The IamPolicies stack matches the snapshot 2`] = `
               "Action": "s3:GetObject",
               "Effect": "Allow",
               "Resource": [
-                "arn:aws:s3:::membership-private/*/DEV/*",
-                "arn:aws:s3:::membership-private/*/CODE/*",
+                "arn:aws:s3:::membership-private/DEV/*",
+                "arn:aws:s3:::membership-private/CODE/*",
               ],
             },
             {
