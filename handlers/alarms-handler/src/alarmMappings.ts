@@ -80,6 +80,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'user-benefits',
 		'mobile-purchases-to-supporter-product-data',
 		'supporter-product-data-lambdas',
+		'multiple-account-api',
 	],
 	PLATFORM: [
 		// fulfilment
