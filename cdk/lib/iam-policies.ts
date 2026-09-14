@@ -23,7 +23,7 @@ export class IamPolicies extends SrStack {
 					'*/DEV/*',
 					'*/CODE/*',
 				]),
-				new AllowS3GetPolicy('membership-private', ['*/DEV/*', '*/CODE/*']),
+				new AllowS3GetPolicy('membership-private', ['DEV/*', 'CODE/*']),
 				new AllowCodeParameterStoreReadPolicy(this),
 				new AllowCodeSecretsManagerReadPolicy(this),
 				new AllowS3GetPolicy('gu-zuora-catalog', [`PROD/Zuora-CODE/*`]),
