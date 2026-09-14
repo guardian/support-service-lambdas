@@ -5,8 +5,8 @@ import {
 	ScanCommand,
 } from '@aws-sdk/client-dynamodb';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
-import { chunkArray } from '@modules/arrayFunctions';
 import { awsConfig } from '@modules/aws/config';
+import { ValidationError } from '@modules/errors';
 import { logger } from '@modules/logger/logger';
 import type { Stage } from '@modules/stage';
 import type { Promo } from './schema';
@@ -14,8 +14,10 @@ import { promoSchema } from './schema';
 
 const dynamoClient = new DynamoDBClient(awsConfig);
 
-// DynamoDB's BatchGetItem only accepts up to 100 keys per request.
-const batchGetItemMaxKeys = 100;
+// DynamoDB's BatchGetItem only accepts up to 100 keys per request, and this
+// module doesn't implement paging across multiple requests, so callers must
+// not ask for more than this many promo codes at once.
+export const batchGetItemMaxKeys = 100;
 
 const getTableName = (stage: Stage) => `support-admin-console-promos-${stage}`;
 
@@ -50,47 +52,53 @@ export const getPromotions = async (stage: Stage): Promise<Promo[]> => {
 
 /**
  * Fetches only the promotions with the given promo codes, using DynamoDB's
- * BatchGetItem (a set of cheap key lookups) rather than a full table scan.
- * Promo codes that don't exist in the table are silently omitted from the
- * result, rather than causing an error.
+ * BatchGetItem (a single set of cheap key lookups) rather than a full table
+ * scan. Promo codes that don't exist in the table are silently omitted from
+ * the result, rather than causing an error.
+ *
+ * `promoCodes` must not contain duplicates (BatchGetItem rejects requests
+ * with duplicate keys), and at most `batchGetItemMaxKeys` promo codes can be
+ * requested at once, since this doesn't implement paging across multiple
+ * BatchGetItem requests.
  */
 export const getPromotionsByCodes = async (
 	promoCodes: string[],
 	stage: Stage,
 ): Promise<Promo[]> => {
-	const uniquePromoCodes = [...new Set(promoCodes)];
-	if (uniquePromoCodes.length === 0) {
+	if (promoCodes.length === 0) {
 		return [];
+	}
+	if (promoCodes.length > batchGetItemMaxKeys) {
+		throw new ValidationError(
+			`Cannot fetch more than ${batchGetItemMaxKeys} unique promo codes at once, but ${promoCodes.length} were requested`,
+		);
 	}
 
 	const tableName = getTableName(stage);
 	logger.log(
-		`Batch getting ${uniquePromoCodes.length} promo code(s) from ${tableName}`,
+		`Batch getting ${promoCodes.length} promo code(s) from ${tableName}`,
 		{
-			promoCodes: uniquePromoCodes,
+			promoCodes,
 		},
 	);
 
-	const chunks = chunkArray(uniquePromoCodes, batchGetItemMaxKeys);
+	let keysToFetch: Array<Record<string, AttributeValue>> = promoCodes.map(
+		(promoCode) => ({ promoCode: { S: promoCode } }),
+	);
 	const items: Array<Record<string, AttributeValue>> = [];
 
-	for (const promoCodesChunk of chunks) {
-		let keysToFetch: Array<Record<string, AttributeValue>> =
-			promoCodesChunk.map((promoCode) => ({ promoCode: { S: promoCode } }));
+	// BatchGetItem can return UnprocessedKeys if it's throttled or the
+	// response would exceed the size limit, so retry until everything has
+	// been fetched.
+	while (keysToFetch.length > 0) {
+		const result = await dynamoClient.send(
+			new BatchGetItemCommand({
+				RequestItems: { [tableName]: { Keys: keysToFetch } },
+			}),
+		);
 
-		// BatchGetItem can return UnprocessedKeys if it's throttled or the
-		// response would exceed the size limit, so retry until everything has
-		// been fetched.
-		while (keysToFetch.length > 0) {
-			const result = await dynamoClient.send(
-				new BatchGetItemCommand({
-					RequestItems: { [tableName]: { Keys: keysToFetch } },
-				}),
-			);
-
-			items.push(...(result.Responses?.[tableName] ?? []));
-			keysToFetch = result.UnprocessedKeys?.[tableName]?.Keys ?? [];
-		}
+		items.push(...(result.Responses?.[tableName] ?? []));
+		keysToFetch = result.UnprocessedKeys?.[tableName]?.Keys ?? [];
 	}
 
 	return items.map(parsePromoItem);
