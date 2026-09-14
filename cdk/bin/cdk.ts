@@ -30,6 +30,7 @@ import { NewSubscriptionApi } from '../lib/new-subscription-api';
 import { NewsletterAcquisition } from '../lib/newsletter-acquisition';
 import { ObserverBenefitsApi } from '../lib/observer-benefits-api';
 import { ObserverDataExport } from '../lib/observer-data-export';
+import { PaymentFailureCommsExitApi } from '../lib/payment-failure-comms-exit-api';
 import { PressReaderEntitlements } from '../lib/press-reader-entitlements';
 import { ProductSwitchApi } from '../lib/product-switch-api';
 import { PromotionsApi } from '../lib/promotions-api';
@@ -179,6 +180,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	IamPolicies,
 	ScrubNonTokenisedPaymentMethods,
 	PromotionsApi,
+	PaymentFailureCommsExitApi,
 	// MARKER new-lambda: cdk-bin
 ];
 
