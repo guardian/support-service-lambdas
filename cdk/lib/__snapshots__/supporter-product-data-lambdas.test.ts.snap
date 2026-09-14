@@ -615,7 +615,10 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "dynamodb:Query",
+              "Action": [
+                "dynamodb:Query",
+                "dynamodb:UpdateItem",
+              ],
               "Effect": "Allow",
               "Resource": {
                 "Fn::Join": [
@@ -2380,7 +2383,10 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "dynamodb:Query",
+              "Action": [
+                "dynamodb:Query",
+                "dynamodb:UpdateItem",
+              ],
               "Effect": "Allow",
               "Resource": {
                 "Fn::Join": [
