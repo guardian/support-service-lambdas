@@ -552,6 +552,31 @@ importers:
         specifier: workspace:*
         version: link:../../modules/aws
 
+  handlers/payment-failure-comms-exit-api:
+    dependencies:
+      identity:
+        specifier: workspace:*
+        version: link:../../modules/identity
+      logger:
+        specifier: workspace:*
+        version: link:../../modules/logger
+      routing:
+        specifier: workspace:*
+        version: link:../../modules/routing
+      zod:
+        specifier: 'catalog:'
+        version: 4.4.3
+      zuora:
+        specifier: workspace:*
+        version: link:../../modules/zuora
+    devDependencies:
+      '@redocly/cli':
+        specifier: 2.30.5
+        version: 2.30.5(@opentelemetry/api@1.9.1)(core-js@3.49.0)
+      '@types/aws-lambda':
+        specifier: ^8.10.147
+        version: 8.10.161
+
   handlers/press-reader-entitlements:
     dependencies:
       '@aws-sdk/client-dynamodb':
@@ -4189,6 +4214,7 @@ packages:
   eslint@9.39.4:
     resolution: {integrity: sha512-XoMjdBOwe/esVgEvLmNsD3IRHkm7fbKIUGvrleloJXUZgDHig2IPWNniv+GwjyJXzuNqVjlr5+4yVUZjycJwfQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
     peerDependencies:
       jiti: '*'

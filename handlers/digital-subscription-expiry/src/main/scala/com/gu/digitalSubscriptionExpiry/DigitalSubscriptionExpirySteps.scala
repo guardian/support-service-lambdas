@@ -7,7 +7,7 @@ import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.apigateway.ResponseModels.ApiResponse
-import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
+import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
 import play.api.libs.json.{Json, Reads}
 
@@ -21,6 +21,14 @@ object UrlParams {
   implicit val urlParamsReads: Reads[UrlParams] = json => wireReads.reads(json).map(_.toUrlParams)
 }
 object DigitalSubscriptionExpirySteps extends Logging {
+
+  val subscriptionIdPatterns = List(
+    "^[A-Z0-9]+$".r, // upper case alphanumeric
+    "^[A-Z]-[A-Z0-9]+$".r, // this pattern: <upper case letter>-<upper case alphanumeric>
+  )
+
+  def isValidSubscriptionId(id: String): Boolean =
+    subscriptionIdPatterns.exists(_.pattern.matcher(id).matches())
 
   def apply(
       getEmergencyTokenExpiry: String => ApiGatewayOp[Unit],
@@ -38,6 +46,13 @@ object DigitalSubscriptionExpirySteps extends Logging {
         )
         _ <- getEmergencyTokenExpiry(expiryRequest.subscriberId)
         subscriptionId = SubscriptionId(expiryRequest.subscriberId.trim.dropWhile(_ == '0'))
+
+        _ <-
+          if (isValidSubscriptionId(subscriptionId.value))
+            ContinueProcessing(())
+          else
+            ReturnWithResponse(DigitalSubscriptionApiResponses.notFoundResponse)
+
         subscriptionResult <- getSubscription(subscriptionId)
         queryStringParameters <- apiGatewayRequest.queryParamsAsCaseClass[UrlParams]()
         _ <-

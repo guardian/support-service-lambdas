@@ -32,5 +32,4 @@ class DigitalSubscriptionExpiryRequestTest extends AnyFlatSpec {
 
     event should be(expected)
   }
-
 }

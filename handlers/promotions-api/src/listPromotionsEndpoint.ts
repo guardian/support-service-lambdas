@@ -4,7 +4,10 @@ import type {
 	ProductKey,
 } from '@modules/product-catalog/productCatalog';
 import { addCatalogInformationToPromos } from '@modules/promotions/v2/addCatalogInformationToPromo';
-import { getPromotions } from '@modules/promotions/v2/getPromotions';
+import {
+	getPromotions,
+	getPromotionsByCodes,
+} from '@modules/promotions/v2/getPromotions';
 import { isActivePromo } from '@modules/promotions/v2/isActivePromo';
 import type { PromoWithCatalogInformation } from '@modules/promotions/v2/schema';
 import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
@@ -26,6 +29,12 @@ export type ListPromotionsFilters = {
 	 * to this catalog ProductRatePlanKey.
 	 */
 	productRatePlanKey?: string;
+	/**
+	 * When provided, only return promotions whose promoCode is in this list,
+	 * fetched directly by key rather than scanning the whole table. Promo
+	 * codes that don't exist are simply omitted from the response.
+	 */
+	promoCodes?: string[];
 };
 
 function catalogRatePlanMatchesFilters(
@@ -67,7 +76,10 @@ export async function listPromotionsEndpoint(
 	filters: ListPromotionsFilters = {},
 ) {
 	try {
-		const allPromotions = await getPromotions(stage);
+		const allPromotions =
+			filters.promoCodes === undefined
+				? await getPromotions(stage)
+				: await getPromotionsByCodes(filters.promoCodes, stage);
 		const promotions =
 			filters.active === undefined
 				? allPromotions
