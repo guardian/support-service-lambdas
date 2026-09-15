@@ -446,6 +446,17 @@ const mparticleApi: HandlerDefinition = {
 	moduleDependencies: [moduleAws, moduleRouting],
 };
 
+const identityDeletionCleanup: HandlerDefinition = {
+	name: 'identity-deletion-cleanup',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
+	moduleDependencies: [moduleLogger, moduleSalesforce, moduleZuora],
+};
+
 const negativeInvoicesProcessor: HandlerDefinition = {
 	name: 'negative-invoices-processor',
 	functionNames: [
@@ -949,6 +960,7 @@ export const build: BuildDefinition = {
 		metricPushApi,
 		mobilePurchasesToSupporterProductData,
 		mparticleApi,
+		identityDeletionCleanup,
 		negativeInvoicesProcessor,
 		newsletterAcquisition,
 		observerDataExport,
