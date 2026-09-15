@@ -48,7 +48,15 @@ jobs:
         uses: sbt/setup-sbt@v1.5.8
 
       - name: Run tests and build subproject JAR
-        run: sbt "project ${{ matrix.subproject }}" test assembly
+        run: |
+          for attempt in 1 2 3; do
+            sbt "project ${{ matrix.subproject }}" test assembly && break
+            if [ "$attempt" -eq 3 ]; then
+              exit 1
+            fi
+            echo "sbt failed on attempt $attempt; retrying after a short delay"
+            sleep 10
+          done
       - run: npm install --global corepack@0.31.0
       - run: corepack enable
         shell: bash
@@ -118,7 +126,15 @@ jobs:
         uses: sbt/setup-sbt@v1.5.8
 
       - name: run tests and Build jar
-        run: sbt "project ${{ matrix.subproject }}" test assembly
+        run: |
+          for attempt in 1 2 3; do
+            sbt "project ${{ matrix.subproject }}" test assembly && break
+            if [ "$attempt" -eq 3 ]; then
+              exit 1
+            fi
+            echo "sbt failed on attempt $attempt; retrying after a short delay"
+            sleep 10
+          done
 
       - name: Upload to Riff-Raff
         uses: guardian/actions-riff-raff@v4.3.3
@@ -156,7 +172,15 @@ jobs:
         uses: sbt/setup-sbt@v1.5.8
 
       - name: Run tests and build subproject JAR
-        run: sbt "project zuora-callout-apis" test assembly
+        run: |
+          for attempt in 1 2 3; do
+            sbt "project zuora-callout-apis" test assembly && break
+            if [ "$attempt" -eq 3 ]; then
+              exit 1
+            fi
+            echo "sbt failed on attempt $attempt; retrying after a short delay"
+            sleep 10
+          done
 
       - run: npm install --global corepack@0.31.0
       - run: corepack enable
