@@ -999,6 +999,32 @@ exports[`The Multiple account api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "PutMetricPolicy702DBD41": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "cloudwatch:PutMetricData",
+              "Condition": {
+                "StringEquals": {
+                  "cloudwatch:namespace": "support-service-lambdas",
+                },
+              },
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "PutMetricPolicy702DBD41",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "S3catalogreadpolicyE18911B4": {
       "Properties": {
         "PolicyDocument": {
@@ -2324,6 +2350,32 @@ exports[`The Multiple account api stack matches the snapshot 2`] = `
           "Version": "2012-10-17",
         },
         "PolicyName": "LambdaServiceRoleDefaultPolicyDAE46E21",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "PutMetricPolicy702DBD41": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "cloudwatch:PutMetricData",
+              "Condition": {
+                "StringEquals": {
+                  "cloudwatch:namespace": "support-service-lambdas",
+                },
+              },
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "PutMetricPolicy702DBD41",
         "Roles": [
           {
             "Ref": "LambdaServiceRoleA8ED4D3B",
