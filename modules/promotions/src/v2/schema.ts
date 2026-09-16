@@ -59,13 +59,18 @@ export type Promo = z.infer<typeof promoSchema>;
  * `productRatePlanIds` stored in Dynamo so that promotions can be searched by
  * ProductKey and ProductRatePlanKey.
  */
-export type AppliesToCatalogInformation = AppliesTo & {
-	catalogRatePlans: GuardianCatalogKeys[];
-};
+export const catalogRatePlanSchema = z.object({
+	productKey: z.string(),
+	productRatePlanKey: z.string(),
+});
 
-export type PromoWithCatalogInformation = Omit<Promo, 'appliesTo'> & {
-	appliesTo: AppliesToCatalogInformation;
-};
+export const promoWithCatalogInformationSchema = promoSchema.extend({
+	appliesTo: appliesToSchema.extend({
+		catalogRatePlans: z.array(catalogRatePlanSchema),
+	}),
+});
+
+export type PromoWithCatalogInformation = z.infer<typeof promoWithCatalogInformationSchema>;
 
 export const appliedPromotionSchema = z.object({
 	promoCode: z.string(),
