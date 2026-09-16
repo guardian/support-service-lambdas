@@ -13,7 +13,9 @@ import type {
 } from '@modules/zuora/types/objects';
 import { zuoraSubscriptionSchema } from '@modules/zuora/types/objects';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
+import { SqsSendError } from '../../../modules/aws/src/sqs';
 import code from '../../../modules/zuora-catalog/test/fixtures/catalog-code.json';
+import { putEmailFailureMetric } from '../src/cloudwatch';
 import { createInvitationEndpoint } from '../src/createInvitationEndpoint';
 import type {
 	InvitationRecord,
@@ -26,6 +28,10 @@ jest.mock('@modules/identity/idapi');
 jest.mock('email/src/email', () => ({
 	...jest.requireActual<typeof email>('email/src/email'),
 	sendEmail: jest.fn(),
+}));
+
+jest.mock('../src/cloudwatch', () => ({
+	putEmailFailureMetric: jest.fn(),
 }));
 
 const mockGetOrCreateUserFromEmail = jest.mocked(
@@ -198,6 +204,32 @@ describe('createInvitationHandler', () => {
 		const savedRecord = mockSave.mock.calls[0]?.[0];
 		expect(savedRecord).toBeDefined();
 		expect(savedRecord?.expiryDate).toBe(now);
+	});
+
+	it('emits a Cloudwatch metric if the invitation email trigger fails', async () => {
+		mockGetOrCreateUserFromEmail.mockResolvedValue('secondary-identity-456');
+		mockSendEmail.mockRejectedValue(new SqsSendError('Something went wrong'));
+		const handler = createInvitationEndpoint(
+			stage,
+			mockInvitationRepo,
+			mockSecondaryUserRepo,
+			mockIdentityClient,
+			zuoraCatalog,
+			productCatalog,
+		);
+
+		const result = await handler(
+			{
+				subscriptionName: 'A-S00000001',
+				secondaryUserEmail: 'secondary@example.com',
+			},
+			undefined as never,
+			mockSubscription,
+			mockAccount,
+		);
+
+		expect(result.statusCode).toBe(201);
+		expect(putEmailFailureMetric).toHaveBeenCalledWith('CODE');
 	});
 
 	it('propagates errors from identity lookup as a 500', async () => {
