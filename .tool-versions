@@ -1,3 +1,4 @@
 github:guardian/devenv 20260721-123412
 java corretto-21.0.7.6.1
 node 22.18.0
+aqua:aws/aws-cli 2
