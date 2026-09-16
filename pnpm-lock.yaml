@@ -399,6 +399,9 @@ importers:
       '@aws-sdk/util-dynamodb':
         specifier: ^3.940.0
         version: 3.996.2(@aws-sdk/client-dynamodb@3.1058.0)
+      aws:
+        specifier: workspace:*
+        version: link:../../modules/aws
       dayjs:
         specifier: ^1.11.13
         version: 1.11.21
