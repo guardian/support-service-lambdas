@@ -1,6 +1,6 @@
 import { type App, CfnOutput } from 'aws-cdk-lib';
 import { EventBus, Rule } from 'aws-cdk-lib/aws-events';
-import { CloudWatchLogGroup } from 'aws-cdk-lib/aws-events-targets';
+import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
@@ -31,12 +31,29 @@ export class SubscriptionEventsBus extends SrStack {
 			retention: RetentionDays.TWO_WEEKS,
 		});
 
-		new Rule(this, 'LogAllEventsRule', {
+		const rule = new Rule(this, 'LogAllEventsRule', {
 			description: `Log all events on the ${busName} bus to CloudWatch Logs for debugging`,
 			eventBus: bus,
 			eventPattern: { account: [this.account] },
-			targets: [new CloudWatchLogGroup(logGroup)],
+			targets: [
+				// can't use CloudWatchLogGroup as it needs custom/cdk lambdas
+				{
+					bind: () => ({ arn: logGroup.logGroupArn, targetResource: logGroup }),
+				},
+			],
 		});
+
+		logGroup.addToResourcePolicy(
+			new PolicyStatement({
+				effect: Effect.ALLOW,
+				actions: ['logs:PutLogEvents', 'logs:CreateLogStream'],
+				resources: [logGroup.logGroupArn],
+				principals: [new ServicePrincipal('events.amazonaws.com')],
+				conditions: {
+					ArnEquals: { 'aws:SourceArn': rule.ruleArn },
+				},
+			}),
+		);
 
 		new CfnOutput(this, 'BusArn', {
 			exportName: SubscriptionEventsBus.exportName(stage),

@@ -19,151 +19,7 @@ exports[`The SubscriptionEventsBus stack matches the snapshot 1`] = `
       },
     },
   },
-  "Parameters": {
-    "AssetParameters56f7467bbde8a5efebcf57ae9e460027607099bab9f844669dcf5d800172ee5aArtifactHash13506F56": {
-      "Description": "Artifact hash for asset "56f7467bbde8a5efebcf57ae9e460027607099bab9f844669dcf5d800172ee5a"",
-      "Type": "String",
-    },
-    "AssetParameters56f7467bbde8a5efebcf57ae9e460027607099bab9f844669dcf5d800172ee5aS3Bucket02661D12": {
-      "Description": "S3 bucket for asset "56f7467bbde8a5efebcf57ae9e460027607099bab9f844669dcf5d800172ee5a"",
-      "Type": "String",
-    },
-    "AssetParameters56f7467bbde8a5efebcf57ae9e460027607099bab9f844669dcf5d800172ee5aS3VersionKeyA08EC745": {
-      "Description": "S3 key for asset version "56f7467bbde8a5efebcf57ae9e460027607099bab9f844669dcf5d800172ee5a"",
-      "Type": "String",
-    },
-  },
   "Resources": {
-    "AWS679f53fac002430cb0da5b7982bd22872D164C4C": {
-      "DependsOn": [
-        "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2",
-      ],
-      "Properties": {
-        "Code": {
-          "S3Bucket": {
-            "Ref": "AssetParameters56f7467bbde8a5efebcf57ae9e460027607099bab9f844669dcf5d800172ee5aS3Bucket02661D12",
-          },
-          "S3Key": {
-            "Fn::Join": [
-              "",
-              [
-                {
-                  "Fn::Select": [
-                    0,
-                    {
-                      "Fn::Split": [
-                        "||",
-                        {
-                          "Ref": "AssetParameters56f7467bbde8a5efebcf57ae9e460027607099bab9f844669dcf5d800172ee5aS3VersionKeyA08EC745",
-                        },
-                      ],
-                    },
-                  ],
-                },
-                {
-                  "Fn::Select": [
-                    1,
-                    {
-                      "Fn::Split": [
-                        "||",
-                        {
-                          "Ref": "AssetParameters56f7467bbde8a5efebcf57ae9e460027607099bab9f844669dcf5d800172ee5aS3VersionKeyA08EC745",
-                        },
-                      ],
-                    },
-                  ],
-                },
-              ],
-            ],
-          },
-        },
-        "Handler": "index.handler",
-        "Role": {
-          "Fn::GetAtt": [
-            "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2",
-            "Arn",
-          ],
-        },
-        "Runtime": "nodejs22.x",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "subscription-events-bus",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "Timeout": 120,
-      },
-      "Type": "AWS::Lambda::Function",
-    },
-    "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "subscription-events-bus",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
     "BusEA82B648": {
       "Properties": {
         "Name": "subscription-events-CODE",
@@ -191,80 +47,6 @@ exports[`The SubscriptionEventsBus stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::Events::EventBus",
-    },
-    "EventsLogGroupPolicysubscriptioneventsbusCODELogAllEventsRule4EB9B8309B037FDE": {
-      "DeletionPolicy": "Delete",
-      "DependsOn": [
-        "EventsLogGroupPolicysubscriptioneventsbusCODELogAllEventsRule4EB9B830CustomResourcePolicy490A4750",
-      ],
-      "Properties": {
-        "Create": {
-          "Fn::Join": [
-            "",
-            [
-              "{"service":"CloudWatchLogs","action":"putResourcePolicy","parameters":{"policyName":"subscriptioneventsbusCODEEventsLogGroupPolicysubscriptioneventsbusCODELogAllEventsRule4EB9B830FC62F479","policyDocument":"{\\"Statement\\":[{\\"Action\\":[\\"logs:PutLogEvents\\",\\"logs:CreateLogStream\\"],\\"Effect\\":\\"Allow\\",\\"Principal\\":{\\"Service\\":\\"events.amazonaws.com\\"},\\"Resource\\":\\"",
-              {
-                "Fn::GetAtt": [
-                  "LogAllEventsLogGroup4318D40E",
-                  "Arn",
-                ],
-              },
-              "\\"}],\\"Version\\":\\"2012-10-17\\"}"},"physicalResourceId":{"id":"EventsLogGroupPolicysubscriptioneventsbusCODELogAllEventsRule4EB9B830"}}",
-            ],
-          ],
-        },
-        "Delete": "{"service":"CloudWatchLogs","action":"deleteResourcePolicy","parameters":{"policyName":"subscriptioneventsbusCODEEventsLogGroupPolicysubscriptioneventsbusCODELogAllEventsRule4EB9B830FC62F479"},"ignoreErrorCodesMatching":"ResourceNotFoundException"}",
-        "InstallLatestAwsSdk": true,
-        "ServiceToken": {
-          "Fn::GetAtt": [
-            "AWS679f53fac002430cb0da5b7982bd22872D164C4C",
-            "Arn",
-          ],
-        },
-        "Update": {
-          "Fn::Join": [
-            "",
-            [
-              "{"service":"CloudWatchLogs","action":"putResourcePolicy","parameters":{"policyName":"subscriptioneventsbusCODEEventsLogGroupPolicysubscriptioneventsbusCODELogAllEventsRule4EB9B830FC62F479","policyDocument":"{\\"Statement\\":[{\\"Action\\":[\\"logs:PutLogEvents\\",\\"logs:CreateLogStream\\"],\\"Effect\\":\\"Allow\\",\\"Principal\\":{\\"Service\\":\\"events.amazonaws.com\\"},\\"Resource\\":\\"",
-              {
-                "Fn::GetAtt": [
-                  "LogAllEventsLogGroup4318D40E",
-                  "Arn",
-                ],
-              },
-              "\\"}],\\"Version\\":\\"2012-10-17\\"}"},"physicalResourceId":{"id":"EventsLogGroupPolicysubscriptioneventsbusCODELogAllEventsRule4EB9B830"}}",
-            ],
-          ],
-        },
-      },
-      "Type": "Custom::CloudwatchLogResourcePolicy",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "EventsLogGroupPolicysubscriptioneventsbusCODELogAllEventsRule4EB9B830CustomResourcePolicy490A4750": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "logs:PutResourcePolicy",
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-            {
-              "Action": "logs:DeleteResourcePolicy",
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "EventsLogGroupPolicysubscriptioneventsbusCODELogAllEventsRule4EB9B830CustomResourcePolicy490A4750",
-        "Roles": [
-          {
-            "Ref": "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
     },
     "LogAllEventsLogGroup4318D40E": {
       "DeletionPolicy": "Retain",
@@ -296,6 +78,34 @@ exports[`The SubscriptionEventsBus stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
+    },
+    "LogAllEventsLogGroupPolicyResourcePolicy9387ED0D": {
+      "Properties": {
+        "PolicyDocument": {
+          "Fn::Join": [
+            "",
+            [
+              "{"Statement":[{"Action":["logs:PutLogEvents","logs:CreateLogStream"],"Condition":{"ArnEquals":{"aws:SourceArn":"",
+              {
+                "Fn::GetAtt": [
+                  "LogAllEventsRule1A4D2528",
+                  "Arn",
+                ],
+              },
+              ""}},"Effect":"Allow","Principal":{"Service":"events.amazonaws.com"},"Resource":"",
+              {
+                "Fn::GetAtt": [
+                  "LogAllEventsLogGroup4318D40E",
+                  "Arn",
+                ],
+              },
+              ""}],"Version":"2012-10-17"}",
+            ],
+          ],
+        },
+        "PolicyName": "subscriptioneventsbusCODELogAllEventsLogGroupPolicyFB9DBAB3",
+      },
+      "Type": "AWS::Logs::ResourcePolicy",
     },
     "LogAllEventsRule1A4D2528": {
       "Properties": {
@@ -336,26 +146,9 @@ exports[`The SubscriptionEventsBus stack matches the snapshot 1`] = `
         "Targets": [
           {
             "Arn": {
-              "Fn::Join": [
-                "",
-                [
-                  "arn:",
-                  {
-                    "Ref": "AWS::Partition",
-                  },
-                  ":logs:",
-                  {
-                    "Ref": "AWS::Region",
-                  },
-                  ":",
-                  {
-                    "Ref": "AWS::AccountId",
-                  },
-                  ":log-group:",
-                  {
-                    "Ref": "LogAllEventsLogGroup4318D40E",
-                  },
-                ],
+              "Fn::GetAtt": [
+                "LogAllEventsLogGroup4318D40E",
+                "Arn",
               ],
             },
             "Id": "Target0",
@@ -387,151 +180,7 @@ exports[`The SubscriptionEventsBus stack matches the snapshot 2`] = `
       },
     },
   },
-  "Parameters": {
-    "AssetParameters56f7467bbde8a5efebcf57ae9e460027607099bab9f844669dcf5d800172ee5aArtifactHash13506F56": {
-      "Description": "Artifact hash for asset "56f7467bbde8a5efebcf57ae9e460027607099bab9f844669dcf5d800172ee5a"",
-      "Type": "String",
-    },
-    "AssetParameters56f7467bbde8a5efebcf57ae9e460027607099bab9f844669dcf5d800172ee5aS3Bucket02661D12": {
-      "Description": "S3 bucket for asset "56f7467bbde8a5efebcf57ae9e460027607099bab9f844669dcf5d800172ee5a"",
-      "Type": "String",
-    },
-    "AssetParameters56f7467bbde8a5efebcf57ae9e460027607099bab9f844669dcf5d800172ee5aS3VersionKeyA08EC745": {
-      "Description": "S3 key for asset version "56f7467bbde8a5efebcf57ae9e460027607099bab9f844669dcf5d800172ee5a"",
-      "Type": "String",
-    },
-  },
   "Resources": {
-    "AWS679f53fac002430cb0da5b7982bd22872D164C4C": {
-      "DependsOn": [
-        "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2",
-      ],
-      "Properties": {
-        "Code": {
-          "S3Bucket": {
-            "Ref": "AssetParameters56f7467bbde8a5efebcf57ae9e460027607099bab9f844669dcf5d800172ee5aS3Bucket02661D12",
-          },
-          "S3Key": {
-            "Fn::Join": [
-              "",
-              [
-                {
-                  "Fn::Select": [
-                    0,
-                    {
-                      "Fn::Split": [
-                        "||",
-                        {
-                          "Ref": "AssetParameters56f7467bbde8a5efebcf57ae9e460027607099bab9f844669dcf5d800172ee5aS3VersionKeyA08EC745",
-                        },
-                      ],
-                    },
-                  ],
-                },
-                {
-                  "Fn::Select": [
-                    1,
-                    {
-                      "Fn::Split": [
-                        "||",
-                        {
-                          "Ref": "AssetParameters56f7467bbde8a5efebcf57ae9e460027607099bab9f844669dcf5d800172ee5aS3VersionKeyA08EC745",
-                        },
-                      ],
-                    },
-                  ],
-                },
-              ],
-            ],
-          },
-        },
-        "Handler": "index.handler",
-        "Role": {
-          "Fn::GetAtt": [
-            "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2",
-            "Arn",
-          ],
-        },
-        "Runtime": "nodejs22.x",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "subscription-events-bus",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "Timeout": 120,
-      },
-      "Type": "AWS::Lambda::Function",
-    },
-    "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "subscription-events-bus",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
     "BusEA82B648": {
       "Properties": {
         "Name": "subscription-events-PROD",
@@ -559,80 +208,6 @@ exports[`The SubscriptionEventsBus stack matches the snapshot 2`] = `
         ],
       },
       "Type": "AWS::Events::EventBus",
-    },
-    "EventsLogGroupPolicysubscriptioneventsbusPRODLogAllEventsRuleA4A41E5C5EB31D34": {
-      "DeletionPolicy": "Delete",
-      "DependsOn": [
-        "EventsLogGroupPolicysubscriptioneventsbusPRODLogAllEventsRuleA4A41E5CCustomResourcePolicyA76D6F8E",
-      ],
-      "Properties": {
-        "Create": {
-          "Fn::Join": [
-            "",
-            [
-              "{"service":"CloudWatchLogs","action":"putResourcePolicy","parameters":{"policyName":"subscriptioneventsbusPRODEventsLogGroupPolicysubscriptioneventsbusPRODLogAllEventsRuleA4A41E5C786E4E6F","policyDocument":"{\\"Statement\\":[{\\"Action\\":[\\"logs:PutLogEvents\\",\\"logs:CreateLogStream\\"],\\"Effect\\":\\"Allow\\",\\"Principal\\":{\\"Service\\":\\"events.amazonaws.com\\"},\\"Resource\\":\\"",
-              {
-                "Fn::GetAtt": [
-                  "LogAllEventsLogGroup4318D40E",
-                  "Arn",
-                ],
-              },
-              "\\"}],\\"Version\\":\\"2012-10-17\\"}"},"physicalResourceId":{"id":"EventsLogGroupPolicysubscriptioneventsbusPRODLogAllEventsRuleA4A41E5C"}}",
-            ],
-          ],
-        },
-        "Delete": "{"service":"CloudWatchLogs","action":"deleteResourcePolicy","parameters":{"policyName":"subscriptioneventsbusPRODEventsLogGroupPolicysubscriptioneventsbusPRODLogAllEventsRuleA4A41E5C786E4E6F"},"ignoreErrorCodesMatching":"ResourceNotFoundException"}",
-        "InstallLatestAwsSdk": true,
-        "ServiceToken": {
-          "Fn::GetAtt": [
-            "AWS679f53fac002430cb0da5b7982bd22872D164C4C",
-            "Arn",
-          ],
-        },
-        "Update": {
-          "Fn::Join": [
-            "",
-            [
-              "{"service":"CloudWatchLogs","action":"putResourcePolicy","parameters":{"policyName":"subscriptioneventsbusPRODEventsLogGroupPolicysubscriptioneventsbusPRODLogAllEventsRuleA4A41E5C786E4E6F","policyDocument":"{\\"Statement\\":[{\\"Action\\":[\\"logs:PutLogEvents\\",\\"logs:CreateLogStream\\"],\\"Effect\\":\\"Allow\\",\\"Principal\\":{\\"Service\\":\\"events.amazonaws.com\\"},\\"Resource\\":\\"",
-              {
-                "Fn::GetAtt": [
-                  "LogAllEventsLogGroup4318D40E",
-                  "Arn",
-                ],
-              },
-              "\\"}],\\"Version\\":\\"2012-10-17\\"}"},"physicalResourceId":{"id":"EventsLogGroupPolicysubscriptioneventsbusPRODLogAllEventsRuleA4A41E5C"}}",
-            ],
-          ],
-        },
-      },
-      "Type": "Custom::CloudwatchLogResourcePolicy",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "EventsLogGroupPolicysubscriptioneventsbusPRODLogAllEventsRuleA4A41E5CCustomResourcePolicyA76D6F8E": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "logs:PutResourcePolicy",
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-            {
-              "Action": "logs:DeleteResourcePolicy",
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "EventsLogGroupPolicysubscriptioneventsbusPRODLogAllEventsRuleA4A41E5CCustomResourcePolicyA76D6F8E",
-        "Roles": [
-          {
-            "Ref": "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
     },
     "LogAllEventsLogGroup4318D40E": {
       "DeletionPolicy": "Retain",
@@ -664,6 +239,34 @@ exports[`The SubscriptionEventsBus stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
+    },
+    "LogAllEventsLogGroupPolicyResourcePolicy9387ED0D": {
+      "Properties": {
+        "PolicyDocument": {
+          "Fn::Join": [
+            "",
+            [
+              "{"Statement":[{"Action":["logs:PutLogEvents","logs:CreateLogStream"],"Condition":{"ArnEquals":{"aws:SourceArn":"",
+              {
+                "Fn::GetAtt": [
+                  "LogAllEventsRule1A4D2528",
+                  "Arn",
+                ],
+              },
+              ""}},"Effect":"Allow","Principal":{"Service":"events.amazonaws.com"},"Resource":"",
+              {
+                "Fn::GetAtt": [
+                  "LogAllEventsLogGroup4318D40E",
+                  "Arn",
+                ],
+              },
+              ""}],"Version":"2012-10-17"}",
+            ],
+          ],
+        },
+        "PolicyName": "subscriptioneventsbusPRODLogAllEventsLogGroupPolicy9A757C04",
+      },
+      "Type": "AWS::Logs::ResourcePolicy",
     },
     "LogAllEventsRule1A4D2528": {
       "Properties": {
@@ -704,26 +307,9 @@ exports[`The SubscriptionEventsBus stack matches the snapshot 2`] = `
         "Targets": [
           {
             "Arn": {
-              "Fn::Join": [
-                "",
-                [
-                  "arn:",
-                  {
-                    "Ref": "AWS::Partition",
-                  },
-                  ":logs:",
-                  {
-                    "Ref": "AWS::Region",
-                  },
-                  ":",
-                  {
-                    "Ref": "AWS::AccountId",
-                  },
-                  ":log-group:",
-                  {
-                    "Ref": "LogAllEventsLogGroup4318D40E",
-                  },
-                ],
+              "Fn::GetAtt": [
+                "LogAllEventsLogGroup4318D40E",
+                "Arn",
               ],
             },
             "Id": "Target0",
