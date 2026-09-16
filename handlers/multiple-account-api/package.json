@@ -31,7 +31,8 @@
     "identity": "workspace:*",
     "product-benefits": "workspace:*",
     "guardian-subscription": "workspace:*",
-    "email": "workspace:*"
+    "email": "workspace:*",
+    "aws": "workspace:*"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147",
