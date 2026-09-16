@@ -50,6 +50,7 @@ import { SoftOptInConsentSetter } from '../lib/soft-opt-in-consent-setter';
 import { StripeDisputes } from '../lib/stripe-disputes';
 import type { StripeWebhookEndpointsProps } from '../lib/stripe-webhook-endpoints';
 import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
+import { SubscriptionEventsBus } from '../lib/subscription-events-bus';
 import { SupporterProductDataLambdas } from '../lib/supporter-product-data-lambdas';
 import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
 import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
@@ -181,6 +182,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	ScrubNonTokenisedPaymentMethods,
 	PromotionsApi,
 	PaymentFailureCommsExitApi,
+	SubscriptionEventsBus,
 	// MARKER new-lambda: cdk-bin
 ];
 

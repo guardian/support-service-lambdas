@@ -1,0 +1,15 @@
+stacks:
+  - support
+regions:
+  - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  subscription-events-bus-cloudformation:
+    type: cloud-formation
+    app: subscription-events-bus
+    parameters:
+      templateStagePaths:
+        CODE: subscription-events-bus-CODE.template.json
+        PROD: subscription-events-bus-PROD.template.json

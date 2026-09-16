@@ -29,6 +29,7 @@
     "salesforce-event-bus",
     "scrub-non-tokenised-payment-methods",
     "stripe-disputes",
+    "subscription-events-bus",
     "supporter-product-data-lambdas",
     "ticket-tailor-webhook",
     "update-supporter-plus-amount",
