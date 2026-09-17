@@ -2,7 +2,11 @@ import type { BuildDefinition } from '../../../../build';
 import { notice } from '../../../../snippets/notices';
 
 // not in buildcheck but we do want to build it
-const cdkOnlyProjects = ['iam-policies', 'salesforce-event-bus'];
+const cdkOnlyProjects = [
+	'iam-policies',
+	'salesforce-event-bus',
+	'subscription-events-bus',
+];
 
 export default (build: BuildDefinition) => ({
 	NOTICE: notice(__filename),

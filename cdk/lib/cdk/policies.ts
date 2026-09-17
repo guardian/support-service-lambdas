@@ -106,6 +106,17 @@ export class AllowSupporterProductDataDeletePolicy extends GuAllowPolicy {
 	}
 }
 
+export class AllowPutSubscriptionEventPolicy extends GuAllowPolicy {
+	constructor(scope: GuStack) {
+		super(scope, 'Subscription events bus put access', {
+			actions: ['events:PutEvents'],
+			resources: [
+				`arn:aws:events:${scope.region}:${scope.account}:event-bus/subscription-events-${scope.stage}`,
+			],
+		});
+	}
+}
+
 export class AllowSecondaryUserTableQueryPolicy extends GuAllowPolicy {
 	constructor(scope: GuStack) {
 		super(scope, 'MultipleAccountSecondaryUserTable query access', {
