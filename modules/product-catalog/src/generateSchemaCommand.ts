@@ -1,5 +1,4 @@
 import fs from 'fs';
-import { generateGuardianCatalogKeysSchema } from '@modules/product-catalog/generateGuardianCatalogKeysSchema';
 import { generateProductBillingPeriods } from '@modules/product-catalog/generateProductBillingPeriods';
 import { generateProductPurchaseSchema } from '@modules/product-catalog/generateProductPurchaseSchema';
 import { generateSchema } from '@modules/product-catalog/generateSchema';
@@ -13,12 +12,6 @@ const writeSchemaToFile = async () => {
 	fs.writeFileSync('./src/productBillingPeriods.ts', productBillingPeriods);
 	const productPurchaseSchema = generateProductPurchaseSchema(prodCatalog);
 	fs.writeFileSync('./src/productPurchaseSchema.ts', productPurchaseSchema);
-	const guardianCatalogKeysSchema =
-		generateGuardianCatalogKeysSchema(prodCatalog);
-	fs.writeFileSync(
-		'./src/guardianCatalogKeysSchema.ts',
-		guardianCatalogKeysSchema,
-	);
 };
 
 void (async function () {

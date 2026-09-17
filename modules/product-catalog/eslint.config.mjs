@@ -10,7 +10,6 @@ export default [
 			'src/productCatalogSchema.ts',
 			'src/productBillingPeriods.ts',
 			'src/productPurchaseSchema.ts',
-			'src/guardianCatalogKeysSchema.ts',
 		],
 		plugins: {
 			'sort-keys-fix': sortKeysFix,
