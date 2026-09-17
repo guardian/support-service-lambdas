@@ -137,7 +137,7 @@ export type ProductRatePlanChargeKey<
 
 export type TermType = z.infer<typeof termTypeSchema>;
 
-export type GuardianCatalogKeys<
+export type ProductAndRatePlanKey<
 	P extends ProductKey = ProductKey,
 	PRP extends ProductRatePlanKey<P> = ProductRatePlanKey<P>,
 > = P extends ProductKey
@@ -148,6 +148,29 @@ export type GuardianCatalogKeys<
 			};
 		}[PRP & ProductRatePlanKey<P>]
 	: never;
+
+// Runtime validator for ProductAndRatePlanKey, derived from productCatalogSchema
+// so the two can never drift. Zod cannot reconstruct the exact per-product
+// pairing from runtime iteration, so the type is pinned via ProductAndRatePlanKey.
+const productAndRatePlanKeyMemberSchemas = objectEntries(
+	productCatalogSchema.shape,
+).map(([productKey, productSchema]) =>
+	z.object({
+		productKey: z.literal(productKey),
+		productRatePlanKey: z.enum(
+			objectKeysNonEmpty(
+				productSchema.shape.ratePlans.shape as Record<string, unknown>,
+			),
+		),
+	}),
+);
+
+export const productAndRatePlanKeySchema = z.discriminatedUnion(
+	'productKey',
+	productAndRatePlanKeyMemberSchemas as unknown as Parameters<
+		typeof z.discriminatedUnion
+	>[1],
+) as z.ZodType<ProductAndRatePlanKey>;
 
 /**
  * handy if there are duplicates in a union, makes it look better in the IDE
@@ -209,7 +232,7 @@ export class ProductCatalogHelper {
 	validate<P extends ProductKey>(
 		targetGuardianProductName: P,
 		productRatePlanKey: string,
-	): GuardianCatalogKeys<P> | undefined {
+	): ProductAndRatePlanKey<P> | undefined {
 		const ratePlans = this.catalogData[targetGuardianProductName].ratePlans;
 		if (!this.hasRatePlan(productRatePlanKey, ratePlans)) {
 			return undefined;
@@ -218,7 +241,7 @@ export class ProductCatalogHelper {
 		return {
 			productKey: targetGuardianProductName,
 			productRatePlanKey: productRatePlanKey as ProductRatePlanKey<P>,
-		} as GuardianCatalogKeys<P>;
+		} as ProductAndRatePlanKey<P>;
 	}
 
 	/**
@@ -228,7 +251,7 @@ export class ProductCatalogHelper {
 	validateOrThrow<P extends ProductKey>(
 		targetGuardianProductName: P,
 		productRatePlanKey: string,
-	): GuardianCatalogKeys<P> {
+	): ProductAndRatePlanKey<P> {
 		return getIfDefined(
 			this.validate(targetGuardianProductName, productRatePlanKey),
 
