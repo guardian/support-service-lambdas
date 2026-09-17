@@ -97,8 +97,12 @@ const moduleProductCatalog: ModuleDefinition = {
 			'prettier --write src/productPurchaseSchema.ts && pnpm run sortProductPurchaseKeys',
 		sortProductPurchaseKeys:
 			'for i in {1..2}; do eslint --fix src/productPurchaseSchema.ts; done',
+		validateGuardianCatalogKeysSchema:
+			'prettier --write src/guardianCatalogKeysSchema.ts && pnpm run sortGuardianCatalogKeysKeys',
+		sortGuardianCatalogKeysKeys:
+			'for i in {1..2}; do eslint --fix src/guardianCatalogKeysSchema.ts; done',
 		validateSchemas:
-			'pnpm run validateSchema && pnpm run validateBillingPeriods && pnpm run validateProductPurchaseSchema',
+			'pnpm run validateSchema && pnpm run validateBillingPeriods && pnpm run validateProductPurchaseSchema && pnpm run validateGuardianCatalogKeysSchema',
 		buildGeneratedFiles: 'tsc --noEmit --skipLibCheck',
 		generateSchema:
 			'pnpm run generateFiles && pnpm run validateSchemas && pnpm run buildGeneratedFiles',
