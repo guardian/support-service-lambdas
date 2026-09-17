@@ -97,57 +97,29 @@ export class HolidayStopProcessor extends SrStack {
 			});
 		}
 
-		const resourcesKeepingExistingLogicalIds: Array<{
-			construct: IConstruct;
-			forcedLogicalId: string;
-			reason: string;
-		}> = [
-			{
-				construct: lambda,
-				forcedLogicalId: 'HolidayStopProcessor',
-				reason: 'Keeping resource names consistent.',
-			},
-			{
-				construct: lambda.node.findChild('EventInvokeConfig'),
-				forcedLogicalId: 'HolidayStopProcessorRetryConfig',
-				reason: 'Keeping resource names consistent.',
-			},
-			{
-				construct: lambda.node.findChild('ServiceRole'),
-				forcedLogicalId: 'HolidayStopProcessorRole',
-				reason: 'Keeping resource names consistent.',
-			},
-			{
-				construct: lambda.node
-					.findChild('ServiceRole')
-					.node.findChild('DefaultPolicy'),
-				forcedLogicalId: 'HolidayStopProcessorPolicy',
-				reason: 'Keeping resource names consistent.',
-			},
+		const forcedLogicalIds: Record<string, IConstruct> = {
+			HolidayStopProcessor: lambda,
+			HolidayStopProcessorRetryConfig:
+				lambda.node.findChild('EventInvokeConfig'),
+			HolidayStopProcessorRole: lambda.node.findChild('ServiceRole'),
+			HolidayStopProcessorPolicy: lambda.node
+				.findChild('ServiceRole')
+				.node.findChild('DefaultPolicy'),
 			...(failureAlarm
-				? [
-						{
-							construct: failureAlarm,
-							forcedLogicalId: 'HolidayStopProcessorFailureAlarm',
-							reason: 'Keeping resource names consistent.',
-						},
-						{
-							construct: lambda.node.findChild('Rule0'),
-							forcedLogicalId: 'HolidayStopProcessorScheduleRule',
-							reason: 'Keeping resource names consistent.',
-						},
-					]
-				: []),
-		];
+				? {
+						HolidayStopProcessorFailureAlarm: failureAlarm,
+						HolidayStopProcessorScheduleRule: lambda.node.findChild('Rule0'),
+					}
+				: {}),
+		};
 
-		resourcesKeepingExistingLogicalIds.forEach(
-			({ construct, forcedLogicalId, reason }) => {
-				this.overrideLogicalId(construct, {
-					logicalId: forcedLogicalId,
-					reason,
-				});
-			},
-		);
+		Object.entries(forcedLogicalIds).forEach(([logicalId, construct]) => {
+			this.overrideLogicalId(construct, {
+				logicalId,
+				reason:
+					'Keep resource names consistent with the original cfn template.',
+			});
+		});
 
 		lambda.node.findAll().forEach((child) => {
 			if (child instanceof CfnPermission) {
