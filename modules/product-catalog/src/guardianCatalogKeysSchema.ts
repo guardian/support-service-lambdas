@@ -18,6 +18,7 @@ const memberSchemas = objectEntries(productCatalogSchema.shape).map(
 		}),
 );
 
-export const guardianCatalogKeysSchema = z.union(
-	memberSchemas as unknown as [z.ZodTypeAny, z.ZodTypeAny, ...z.ZodTypeAny[]],
+export const guardianCatalogKeysSchema = z.discriminatedUnion(
+	'productKey',
+	memberSchemas as unknown as Parameters<typeof z.discriminatedUnion>[1],
 ) as z.ZodType<GuardianCatalogKeys>;
