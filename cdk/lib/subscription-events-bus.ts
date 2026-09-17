@@ -1,17 +1,24 @@
 import { type App, CfnOutput } from 'aws-cdk-lib';
-import { EventBus, Rule } from 'aws-cdk-lib/aws-events';
-import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
-import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
+import type { IEventBus } from 'aws-cdk-lib/aws-events';
+import { EventBus, IncludeDetail, Level } from 'aws-cdk-lib/aws-events';
+import {
+	CfnDelivery,
+	CfnDeliveryDestination,
+	CfnDeliverySource,
+	LogGroup,
+	RetentionDays,
+} from 'aws-cdk-lib/aws-logs';
+import { Construct } from 'constructs';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
 
 /**
  * A shared EventBridge bus for subscription lifecycle events.
  *
- * This stack only creates the bus and a catch-all logging rule for debugging.
- * Producers and listeners are added in their own stacks/lambdas, granted access
- * via AllowPutSubscriptionEventPolicy (see cdk/policies.ts) or a subscription
- * on the exported bus ARN.
+ * This stack only creates the bus with built-in CloudWatch Logs logging
+ * for debugging. Producers and listeners are added in their own stacks/lambdas,
+ * granted access via AllowPutSubscriptionEventPolicy (see cdk/policies.ts) or a
+ * subscription on the exported bus ARN.
  */
 export class SubscriptionEventsBus extends SrStack {
 	static exportName = (stage: SrStageNames) =>
@@ -24,40 +31,66 @@ export class SubscriptionEventsBus extends SrStack {
 
 		const bus = new EventBus(this, 'Bus', {
 			eventBusName: busName,
+			logConfig: {
+				level: Level.INFO,
+				includeDetail: IncludeDetail.FULL, // include payload
+			},
 		});
 
-		const logGroup = new LogGroup(this, 'LogAllEventsLogGroup', {
-			logGroupName: `/aws/events/${busName}`,
-			retention: RetentionDays.TWO_WEEKS,
-		});
-
-		const rule = new Rule(this, 'LogAllEventsRule', {
-			description: `Log all events on the ${busName} bus to CloudWatch Logs for debugging`,
-			eventBus: bus,
-			eventPattern: { account: [this.account] },
-			targets: [
-				// can't use CloudWatchLogGroup as it needs custom/cdk lambdas
-				{
-					bind: () => ({ arn: logGroup.logGroupArn, targetResource: logGroup }),
-				},
-			],
-		});
-
-		logGroup.addToResourcePolicy(
-			new PolicyStatement({
-				effect: Effect.ALLOW,
-				actions: ['logs:PutLogEvents', 'logs:CreateLogStream'],
-				resources: [logGroup.logGroupArn],
-				principals: [new ServicePrincipal('events.amazonaws.com')],
-				conditions: {
-					ArnEquals: { 'aws:SourceArn': rule.ruleArn },
-				},
-			}),
-		);
+		new EventBusLogDelivery(this, 'LogDelivery', bus);
 
 		new CfnOutput(this, 'BusArn', {
 			exportName: SubscriptionEventsBus.exportName(stage),
 			value: bus.eventBusArn,
 		});
+	}
+}
+
+/**
+ * Creates a log group and wires an EventBridge event bus's built-in logging
+ * (https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-bus-logs.html) to it.
+ */
+class EventBusLogDelivery extends Construct {
+	readonly logGroup: LogGroup;
+
+	constructor(scope: Construct, id: string, eventBus: IEventBus) {
+		super(scope, id);
+
+		const busName = eventBus.eventBusName;
+
+		/**
+		 * Prefixing with /aws/vendedlogs gives cheaper pricing and automatic
+		 * permissions.
+		 */
+		const vendedPrefix = '/aws/vendedlogs';
+
+		this.logGroup = new LogGroup(this, 'LogGroup', {
+			logGroupName: `${vendedPrefix}/events/event-bus/${busName}`,
+			retention: RetentionDays.TWO_WEEKS,
+		});
+
+		const deliverySource = new CfnDeliverySource(this, 'DeliverySource', {
+			name: busName,
+			logType: 'INFO_LOGS',
+			resourceArn: eventBus.eventBusArn,
+		});
+
+		const deliveryDestination = new CfnDeliveryDestination(
+			this,
+			'DeliveryDestination',
+			{
+				name: `${busName}-logs-destination`,
+				destinationResourceArn: this.logGroup.logGroupArn,
+			},
+		);
+
+		const delivery = new CfnDelivery(this, 'Delivery', {
+			deliverySourceName: deliverySource.name,
+			deliveryDestinationArn: deliveryDestination.attrArn,
+		});
+
+		// deliverySourceName above is a plain string (not a token), so CDK can't infer this
+		// dependency automatically the way it does for deliveryDestinationArn.
+		delivery.addDependency(deliverySource);
 	}
 }

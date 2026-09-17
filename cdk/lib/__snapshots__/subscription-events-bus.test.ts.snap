@@ -22,6 +22,10 @@ exports[`The SubscriptionEventsBus stack matches the snapshot 1`] = `
   "Resources": {
     "BusEA82B648": {
       "Properties": {
+        "LogConfig": {
+          "IncludeDetail": "FULL",
+          "Level": "INFO",
+        },
         "Name": "subscription-events-CODE",
         "Tags": [
           {
@@ -48,10 +52,140 @@ exports[`The SubscriptionEventsBus stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Events::EventBus",
     },
-    "LogAllEventsLogGroup4318D40E": {
+    "LogDeliveryC6CE9E62": {
+      "DependsOn": [
+        "LogDeliveryDeliverySource1D6C3364",
+      ],
+      "Properties": {
+        "DeliveryDestinationArn": {
+          "Fn::GetAtt": [
+            "LogDeliveryDeliveryDestination1587285B",
+            "Arn",
+          ],
+        },
+        "DeliverySourceName": {
+          "Ref": "BusEA82B648",
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "subscription-events-bus",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::Delivery",
+    },
+    "LogDeliveryDeliveryDestination1587285B": {
+      "Properties": {
+        "DestinationResourceArn": {
+          "Fn::GetAtt": [
+            "LogDeliveryLogGroup0E28C611",
+            "Arn",
+          ],
+        },
+        "Name": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "BusEA82B648",
+              },
+              "-logs-destination",
+            ],
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "subscription-events-bus",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::DeliveryDestination",
+    },
+    "LogDeliveryDeliverySource1D6C3364": {
+      "Properties": {
+        "LogType": "INFO_LOGS",
+        "Name": {
+          "Ref": "BusEA82B648",
+        },
+        "ResourceArn": {
+          "Fn::GetAtt": [
+            "BusEA82B648",
+            "Arn",
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "subscription-events-bus",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::DeliverySource",
+    },
+    "LogDeliveryLogGroup0E28C611": {
       "DeletionPolicy": "Retain",
       "Properties": {
-        "LogGroupName": "/aws/events/subscription-events-CODE",
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/vendedlogs/events/event-bus/",
+              {
+                "Ref": "BusEA82B648",
+              },
+            ],
+          ],
+        },
         "RetentionInDays": 14,
         "Tags": [
           {
@@ -78,84 +212,6 @@ exports[`The SubscriptionEventsBus stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
-    },
-    "LogAllEventsLogGroupPolicyResourcePolicy9387ED0D": {
-      "Properties": {
-        "PolicyDocument": {
-          "Fn::Join": [
-            "",
-            [
-              "{"Statement":[{"Action":["logs:PutLogEvents","logs:CreateLogStream"],"Condition":{"ArnEquals":{"aws:SourceArn":"",
-              {
-                "Fn::GetAtt": [
-                  "LogAllEventsRule1A4D2528",
-                  "Arn",
-                ],
-              },
-              ""}},"Effect":"Allow","Principal":{"Service":"events.amazonaws.com"},"Resource":"",
-              {
-                "Fn::GetAtt": [
-                  "LogAllEventsLogGroup4318D40E",
-                  "Arn",
-                ],
-              },
-              ""}],"Version":"2012-10-17"}",
-            ],
-          ],
-        },
-        "PolicyName": "subscriptioneventsbusCODELogAllEventsLogGroupPolicyFB9DBAB3",
-      },
-      "Type": "AWS::Logs::ResourcePolicy",
-    },
-    "LogAllEventsRule1A4D2528": {
-      "Properties": {
-        "Description": "Log all events on the subscription-events-CODE bus to CloudWatch Logs for debugging",
-        "EventBusName": {
-          "Ref": "BusEA82B648",
-        },
-        "EventPattern": {
-          "account": [
-            {
-              "Ref": "AWS::AccountId",
-            },
-          ],
-        },
-        "State": "ENABLED",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "subscription-events-bus",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "Targets": [
-          {
-            "Arn": {
-              "Fn::GetAtt": [
-                "LogAllEventsLogGroup4318D40E",
-                "Arn",
-              ],
-            },
-            "Id": "Target0",
-          },
-        ],
-      },
-      "Type": "AWS::Events::Rule",
     },
   },
 }
@@ -183,6 +239,10 @@ exports[`The SubscriptionEventsBus stack matches the snapshot 2`] = `
   "Resources": {
     "BusEA82B648": {
       "Properties": {
+        "LogConfig": {
+          "IncludeDetail": "FULL",
+          "Level": "INFO",
+        },
         "Name": "subscription-events-PROD",
         "Tags": [
           {
@@ -209,10 +269,140 @@ exports[`The SubscriptionEventsBus stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Events::EventBus",
     },
-    "LogAllEventsLogGroup4318D40E": {
+    "LogDeliveryC6CE9E62": {
+      "DependsOn": [
+        "LogDeliveryDeliverySource1D6C3364",
+      ],
+      "Properties": {
+        "DeliveryDestinationArn": {
+          "Fn::GetAtt": [
+            "LogDeliveryDeliveryDestination1587285B",
+            "Arn",
+          ],
+        },
+        "DeliverySourceName": {
+          "Ref": "BusEA82B648",
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "subscription-events-bus",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::Delivery",
+    },
+    "LogDeliveryDeliveryDestination1587285B": {
+      "Properties": {
+        "DestinationResourceArn": {
+          "Fn::GetAtt": [
+            "LogDeliveryLogGroup0E28C611",
+            "Arn",
+          ],
+        },
+        "Name": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "BusEA82B648",
+              },
+              "-logs-destination",
+            ],
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "subscription-events-bus",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::DeliveryDestination",
+    },
+    "LogDeliveryDeliverySource1D6C3364": {
+      "Properties": {
+        "LogType": "INFO_LOGS",
+        "Name": {
+          "Ref": "BusEA82B648",
+        },
+        "ResourceArn": {
+          "Fn::GetAtt": [
+            "BusEA82B648",
+            "Arn",
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "subscription-events-bus",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::DeliverySource",
+    },
+    "LogDeliveryLogGroup0E28C611": {
       "DeletionPolicy": "Retain",
       "Properties": {
-        "LogGroupName": "/aws/events/subscription-events-PROD",
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/vendedlogs/events/event-bus/",
+              {
+                "Ref": "BusEA82B648",
+              },
+            ],
+          ],
+        },
         "RetentionInDays": 14,
         "Tags": [
           {
@@ -239,84 +429,6 @@ exports[`The SubscriptionEventsBus stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
-    },
-    "LogAllEventsLogGroupPolicyResourcePolicy9387ED0D": {
-      "Properties": {
-        "PolicyDocument": {
-          "Fn::Join": [
-            "",
-            [
-              "{"Statement":[{"Action":["logs:PutLogEvents","logs:CreateLogStream"],"Condition":{"ArnEquals":{"aws:SourceArn":"",
-              {
-                "Fn::GetAtt": [
-                  "LogAllEventsRule1A4D2528",
-                  "Arn",
-                ],
-              },
-              ""}},"Effect":"Allow","Principal":{"Service":"events.amazonaws.com"},"Resource":"",
-              {
-                "Fn::GetAtt": [
-                  "LogAllEventsLogGroup4318D40E",
-                  "Arn",
-                ],
-              },
-              ""}],"Version":"2012-10-17"}",
-            ],
-          ],
-        },
-        "PolicyName": "subscriptioneventsbusPRODLogAllEventsLogGroupPolicy9A757C04",
-      },
-      "Type": "AWS::Logs::ResourcePolicy",
-    },
-    "LogAllEventsRule1A4D2528": {
-      "Properties": {
-        "Description": "Log all events on the subscription-events-PROD bus to CloudWatch Logs for debugging",
-        "EventBusName": {
-          "Ref": "BusEA82B648",
-        },
-        "EventPattern": {
-          "account": [
-            {
-              "Ref": "AWS::AccountId",
-            },
-          ],
-        },
-        "State": "ENABLED",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "subscription-events-bus",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "Targets": [
-          {
-            "Arn": {
-              "Fn::GetAtt": [
-                "LogAllEventsLogGroup4318D40E",
-                "Arn",
-              ],
-            },
-            "Id": "Target0",
-          },
-        ],
-      },
-      "Type": "AWS::Events::Rule",
     },
   },
 }
