@@ -52,7 +52,7 @@ export class MultipleAccountApi extends SrStack {
 		lambda.addPolicies(new AllowSupporterProductDataQueryPolicy(this));
 		lambda.addPolicies(new AllowSupporterProductDataDeletePolicy(this));
 		lambda.addPolicies(
-			AllowSqsSendPolicy.create(this, 'supporter-product-data'),
+			AllowSqsSendPolicy.create(this, 'supporter-product-data', 'braze-emails'),
 		);
 		const putMetricPolicy: Policy = new Policy(this, 'Put Metric Policy', {
 			statements: [
