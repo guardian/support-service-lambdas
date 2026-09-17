@@ -827,8 +827,6 @@ importers:
         specifier: ^8.0.417
         version: 8.0.417(@types/node@25.9.1)
 
-  handlers/subscription-events-bus: {}
-
   handlers/supporter-product-data-lambdas:
     dependencies:
       '@aws-sdk/client-cloudwatch':
