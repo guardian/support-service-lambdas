@@ -110,6 +110,9 @@ export const deleteSecondaryUserEndpoint = async (
 			}),
 		);
 
+		// What should happen if this or the below lines fail? Right now this
+		// would result in an HTTP 500 being returned, but these only relate to
+		// emails so aren't strictly essential.
 		const [account, secondaryUserDetails] = await Promise.all([
 			getZuoraAccount(zuoraClient, subscriptionName),
 			getUserByIdentityId(identityClient, secondaryIdentityId),
