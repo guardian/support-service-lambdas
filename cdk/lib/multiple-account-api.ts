@@ -9,9 +9,9 @@ import {
 	Table,
 	TableEncryption,
 } from 'aws-cdk-lib/aws-dynamodb';
-import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { metricNamespace } from '../../modules/aws/src/cloudwatch';
 import {
+	AllowPutMetricPolicy,
 	AllowS3CatalogReadPolicy,
 	AllowSqsSendPolicy,
 	AllowSupporterProductDataDeletePolicy,
@@ -54,21 +54,7 @@ export class MultipleAccountApi extends SrStack {
 		lambda.addPolicies(
 			AllowSqsSendPolicy.create(this, 'supporter-product-data', 'braze-emails'),
 		);
-		const putMetricPolicy: Policy = new Policy(this, 'Put Metric Policy', {
-			statements: [
-				new PolicyStatement({
-					effect: Effect.ALLOW,
-					actions: ['cloudwatch:PutMetricData'],
-					resources: ['*'],
-					conditions: {
-						StringEquals: {
-							'cloudwatch:namespace': metricNamespace,
-						},
-					},
-				}),
-			],
-		});
-		lambda.addPolicies(putMetricPolicy);
+		lambda.addPolicies(new AllowPutMetricPolicy(this, metricNamespace));
 
 		const invitationTable = new Table(this, 'InvitationTable', {
 			tableName: `${app}-invitation-${this.stage}`,

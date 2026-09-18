@@ -4,7 +4,7 @@ import {
 	GuGetS3ObjectsPolicy,
 } from '@guardian/cdk/lib/constructs/iam';
 import { Fn } from 'aws-cdk-lib';
-import type { Policy } from 'aws-cdk-lib/aws-iam';
+import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 
 export class AllowGetSecretValuePolicy extends GuAllowPolicy {
 	constructor(scope: GuStack, id: string, key: string) {
@@ -140,6 +140,25 @@ export class AllowPromoCodeTableQueryPolicy extends GuAllowPolicy {
 			],
 			resources: [
 				`arn:aws:dynamodb:*:*:table/support-admin-console-promos-${scope.stage}`,
+			],
+		});
+	}
+}
+
+export class AllowPutMetricPolicy extends Policy {
+	constructor(scope: GuStack, metricNamespace: string) {
+		super(scope, 'Put Metric Policy', {
+			statements: [
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					actions: ['cloudwatch:PutMetricData'],
+					resources: ['*'],
+					conditions: {
+						StringEquals: {
+							'cloudwatch:namespace': metricNamespace,
+						},
+					},
+				}),
 			],
 		});
 	}
