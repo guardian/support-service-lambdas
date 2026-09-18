@@ -422,6 +422,17 @@ const mobilePurchasesToSupporterProductData: HandlerDefinition = {
 	],
 };
 
+const mparticleAcquisitionsPublisher: HandlerDefinition = {
+	name: 'mparticle-acquisitions-publisher',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
+	moduleDependencies: [moduleAws],
+};
+
 const mparticleApi: HandlerDefinition = {
 	name: 'mparticle-api',
 	functionNames: [
@@ -948,6 +959,7 @@ export const build: BuildDefinition = {
 		imovoVoucherApi,
 		metricPushApi,
 		mobilePurchasesToSupporterProductData,
+		mparticleAcquisitionsPublisher,
 		mparticleApi,
 		negativeInvoicesProcessor,
 		newsletterAcquisition,
