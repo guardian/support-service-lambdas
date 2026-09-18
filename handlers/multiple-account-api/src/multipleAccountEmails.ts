@@ -1,9 +1,11 @@
+import type { EmailMessageWithUserId } from '@modules/email/email';
 import {
 	buildEmailMessage,
 	DataExtensionNames,
 	sendEmail,
 } from '@modules/email/email';
 import type { Stage } from '@modules/stage';
+import { putEmailFailureMetric } from './cloudwatch';
 
 function getUrls(stage: Stage, invitationCode: string) {
 	const baseUrl =
@@ -38,7 +40,11 @@ export async function sendInvitationEmail(
 		dataAttributes,
 		{ IdentityUserId: secondaryUserIdentityId },
 	);
-	await sendEmail(stage, emailMessage);
+	await sendEmailWithErrorHandling(stage, emailMessage, (error: string) =>
+		console.log(
+			`Failed to trigger send invitation email to ${secondaryUserEmail} for invitation ${invitationCode}: ${error}`,
+		),
+	);
 }
 
 export async function sendInvitationRedeemedEmail(
@@ -179,4 +185,17 @@ export async function sendLeaveSubscriptionEmailToPrimary(
 		{ IdentityUserId: primaryUserIdentityId },
 	);
 	await sendEmail(stage, emailMessage);
+}
+
+async function sendEmailWithErrorHandling(
+	stage: Stage,
+	emailMessage: EmailMessageWithUserId,
+	errorHandler: (message: string) => void,
+) {
+	try {
+		await sendEmail(stage, emailMessage);
+	} catch (error: unknown) {
+		errorHandler(error instanceof Error ? error.message : 'unknown');
+		void putEmailFailureMetric(stage);
+	}
 }
