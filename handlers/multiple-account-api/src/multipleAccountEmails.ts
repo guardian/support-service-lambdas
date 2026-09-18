@@ -40,3 +40,143 @@ export async function sendInvitationEmail(
 	);
 	await sendEmail(stage, emailMessage);
 }
+
+export async function sendInvitationRedeemedEmail(
+	stage: Stage,
+	{
+		primaryUserIdentityId,
+		primaryUserFirstName,
+		primaryUserEmail,
+		secondaryUserEmail,
+		secondaryUserIdentityId,
+	}: {
+		primaryUserIdentityId: string;
+		primaryUserFirstName: string;
+		primaryUserEmail: string;
+		secondaryUserEmail: string;
+		secondaryUserIdentityId: string;
+	},
+) {
+	const dataAttributes = {
+		primary_user_first_name: primaryUserFirstName,
+		primary_user_email: primaryUserEmail,
+	};
+
+	const secondaryUserEmailMessage = buildEmailMessage(
+		secondaryUserEmail,
+		DataExtensionNames.multipleAccountEmails.secondaryUser.invitationRedeemed,
+		dataAttributes,
+		{ IdentityUserId: secondaryUserIdentityId },
+	);
+
+	const primaryUserEmailMessage = buildEmailMessage(
+		primaryUserEmail,
+		DataExtensionNames.multipleAccountEmails.primaryUser.invitationRedeemed,
+		{},
+		{ IdentityUserId: primaryUserIdentityId },
+	);
+
+	await Promise.all([
+		sendEmail(stage, secondaryUserEmailMessage),
+		sendEmail(stage, primaryUserEmailMessage),
+	]);
+}
+
+export async function sendAccessRemovedEmail(
+	stage: Stage,
+	{
+		primaryUserFirstName,
+		primaryUserEmail,
+		secondaryUserEmail,
+		secondaryUserIdentityId,
+	}: {
+		primaryUserFirstName: string;
+		primaryUserEmail: string;
+		secondaryUserEmail: string;
+		secondaryUserIdentityId: string;
+	},
+) {
+	const dataAttributes = {
+		primary_user_first_name: primaryUserFirstName,
+		primary_user_email: primaryUserEmail,
+		secondary_user_email: secondaryUserEmail,
+	};
+
+	const emailMessage = buildEmailMessage(
+		secondaryUserEmail,
+		DataExtensionNames.multipleAccountEmails.secondaryUser.accessRemoved,
+		dataAttributes,
+		{ IdentityUserId: secondaryUserIdentityId },
+	);
+	await sendEmail(stage, emailMessage);
+}
+
+export async function sendDeclineInvitationEmail(
+	stage: Stage,
+	{
+		primaryUserIdentityId,
+		primaryUserEmail,
+	}: {
+		primaryUserIdentityId: string;
+		primaryUserEmail: string;
+	},
+) {
+	const emailMessage = buildEmailMessage(
+		primaryUserEmail,
+		DataExtensionNames.multipleAccountEmails.primaryUser.invitationDeclined,
+		{},
+		{ IdentityUserId: primaryUserIdentityId },
+	);
+	await sendEmail(stage, emailMessage);
+}
+
+export async function sendLeaveSubscriptionEmailToSecondary(
+	stage: Stage,
+	{
+		primaryUserFirstName,
+		primaryUserEmail,
+		secondaryUserEmail,
+		secondaryUserIdentityId,
+	}: {
+		primaryUserFirstName: string;
+		primaryUserEmail: string;
+		secondaryUserEmail: string;
+		secondaryUserIdentityId: string;
+	},
+) {
+	const dataAttributes = {
+		primary_user_first_name: primaryUserFirstName,
+		primary_user_email: primaryUserEmail,
+		secondary_user_email: secondaryUserEmail,
+	};
+
+	const emailMessage = buildEmailMessage(
+		secondaryUserEmail,
+		DataExtensionNames.multipleAccountEmails.secondaryUser.leaveSubscription,
+		dataAttributes,
+		{ IdentityUserId: secondaryUserIdentityId },
+	);
+	await sendEmail(stage, emailMessage);
+}
+
+export async function sendLeaveSubscriptionEmailToPrimary(
+	stage: Stage,
+	{
+		primaryUserEmail,
+		primaryUserIdentityId,
+	}: {
+		primaryUserEmail: string;
+		primaryUserIdentityId: string;
+	},
+) {
+	const dataAttributes = {};
+
+	const emailMessage = buildEmailMessage(
+		primaryUserEmail,
+		DataExtensionNames.multipleAccountEmails.primaryUser
+			.secondaryUserLeftSubscription,
+		dataAttributes,
+		{ IdentityUserId: primaryUserIdentityId },
+	);
+	await sendEmail(stage, emailMessage);
+}

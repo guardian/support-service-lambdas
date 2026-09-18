@@ -14,8 +14,8 @@ import {
 } from '@modules/routing/apiGatewayResponses';
 import type { Stage } from '@modules/stage';
 import { getSupporterRatePlan } from '@modules/supporter-product-data/supporterProductData';
-import { sendInvitationRedeemedEmail } from './emails/acceptInvitationEmail';
 import type { InvitationRepository } from './invitationRepository';
+import { sendInvitationRedeemedEmail } from './multipleAccountEmails';
 import { sendSoftOptInAcquisitionEvent } from './softOptinConsents';
 
 export const acceptInvitationEndpoint = async (

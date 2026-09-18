@@ -20,11 +20,11 @@ import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraAccount } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { sendAccessRemovedEmail } from './emails/accessRemovedEmail';
 import {
+	sendAccessRemovedEmail,
 	sendLeaveSubscriptionEmailToPrimary,
 	sendLeaveSubscriptionEmailToSecondary,
-} from './emails/leaveSubcriptionEmail';
+} from './multipleAccountEmails';
 import { sendSoftOptInCancelEvent } from './softOptinConsents';
 
 export const deleteSecondaryUserPathSchema = z.object({
