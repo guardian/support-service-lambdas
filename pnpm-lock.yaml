@@ -363,6 +363,19 @@ importers:
         specifier: ^4.21.0
         version: 4.22.4
 
+  handlers/mparticle-acquisitions-publisher:
+    dependencies:
+      aws:
+        specifier: workspace:*
+        version: link:../../modules/aws
+      zod:
+        specifier: 'catalog:'
+        version: 4.4.3
+    devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.147
+        version: 8.10.161
+
   handlers/mparticle-api:
     dependencies:
       '@peculiar/x509':
@@ -826,6 +839,8 @@ importers:
       '@types/stripe':
         specifier: ^8.0.417
         version: 8.0.417(@types/node@25.9.1)
+
+  handlers/subscription-events-bus: {}
 
   handlers/supporter-product-data-lambdas:
     dependencies:
