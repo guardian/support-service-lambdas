@@ -103,13 +103,11 @@ export class DeliveryRecordsApi extends SrStack {
 			),
 			DeliveryRecordsApiCloudWatchRole:
 				restApi.node.findChild('CloudWatchRole'),
-			DeliveryRecordsApiAnyMethod: restApi.node
-				.findChild('Default')
-				.node.findChild('ANY'),
 			DeliveryRecordsApiProxyResource: restApi.node
 				.findChild('Default')
 				.node.findChild('{proxy+}'),
-			DeliveryRecordsApiProxyAnyMethod: restApi.node
+			// https://github.com/guardian/support-service-lambdas/blob/066bbfc2677d45ae97997c278e3117bfc1198b88/handlers/delivery-records-api/cfn.yaml#L137
+			DeliveryRecordsApiAnyMethod: restApi.node
 				.findChild('Default')
 				.node.findChild('{proxy+}')
 				.node.findChild('ANY'),
