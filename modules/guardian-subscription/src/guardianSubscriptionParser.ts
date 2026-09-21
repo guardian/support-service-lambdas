@@ -1,6 +1,6 @@
 import { joinAllLeft } from '@modules/mapFunctions';
 import type {
-	GuardianCatalogKeys,
+	ProductAndRatePlanKey,
 	ProductCatalog,
 	ProductKey,
 } from '@modules/product-catalog/productCatalog';
@@ -276,7 +276,7 @@ export class GuardianSubscriptionParser {
 	private getGuardianKeys(
 		zuoraProductName: string,
 		zuoraProductRatePlanName: string,
-	): GuardianCatalogKeys | undefined {
+	): ProductAndRatePlanKey | undefined {
 		const pch = new ProductCatalogHelper(this.productCatalog);
 		const productKey: ProductKey | undefined =
 			zuoraCatalogToProductKey[zuoraProductName];

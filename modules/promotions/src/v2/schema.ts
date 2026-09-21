@@ -3,7 +3,7 @@ import {
 	countryCodeSchema,
 	supportRegionSchema,
 } from '@modules/internationalisation/schemas';
-import type { GuardianCatalogKeys } from '@modules/product-catalog/productCatalog';
+import { productAndRatePlanKeySchema } from '@modules/product-catalog/productCatalog';
 import { optionalDropNulls } from '@modules/schemaUtils';
 
 export const promoCampaignSchema = z.object({
@@ -49,6 +49,7 @@ export const promoSchema = z.object({
 	discount: optionalDropNulls(discountDetailsSchema),
 	description: optionalDropNulls(z.string()),
 	landingPage: optionalDropNulls(landingPageSchema),
+	isIntroductoryPricing: optionalDropNulls(z.boolean()),
 });
 
 export type Promo = z.infer<typeof promoSchema>;
@@ -58,13 +59,15 @@ export type Promo = z.infer<typeof promoSchema>;
  * `productRatePlanIds` stored in Dynamo so that promotions can be searched by
  * ProductKey and ProductRatePlanKey.
  */
-export type AppliesToCatalogInformation = AppliesTo & {
-	catalogRatePlans: GuardianCatalogKeys[];
-};
+export const promoWithCatalogInformationSchema = promoSchema.extend({
+	appliesTo: appliesToSchema.extend({
+		catalogRatePlans: z.array(productAndRatePlanKeySchema),
+	}),
+});
 
-export type PromoWithCatalogInformation = Omit<Promo, 'appliesTo'> & {
-	appliesTo: AppliesToCatalogInformation;
-};
+export type PromoWithCatalogInformation = z.infer<
+	typeof promoWithCatalogInformationSchema
+>;
 
 export const appliedPromotionSchema = z.object({
 	promoCode: z.string(),

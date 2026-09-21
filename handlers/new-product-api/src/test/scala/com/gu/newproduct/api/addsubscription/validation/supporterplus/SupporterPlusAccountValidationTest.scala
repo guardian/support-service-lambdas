@@ -8,6 +8,7 @@ import org.scalatest.matchers.should.Matchers
 
 class SupporterPlusAccountValidationTest extends AnyFlatSpec with Matchers {
   val account = ValidatedAccount(
+    accountNumber = AccountNumber("A00000001"),
     identityId = Some(IdentityId("identityId")),
     sfContactId = Some(SfContactId("sfContactId")),
     paymentMethodId = PaymentMethodId("id"),

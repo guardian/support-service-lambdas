@@ -106,10 +106,32 @@ export class AllowSupporterProductDataDeletePolicy extends GuAllowPolicy {
 	}
 }
 
+export class AllowPutSubscriptionEventPolicy extends GuAllowPolicy {
+	constructor(scope: GuStack) {
+		super(scope, 'Subscription events bus put access', {
+			actions: ['events:PutEvents'],
+			resources: [
+				`arn:aws:events:${scope.region}:${scope.account}:event-bus/subscription-events-${scope.stage}`,
+			],
+		});
+	}
+}
+
 export class AllowSecondaryUserTableQueryPolicy extends GuAllowPolicy {
 	constructor(scope: GuStack) {
 		super(scope, 'MultipleAccountSecondaryUserTable query access', {
 			actions: ['dynamodb:Query'],
+			resources: [
+				`arn:aws:dynamodb:${scope.region}:${scope.account}:table/multiple-account-secondary-user-${scope.stage}`,
+			],
+		});
+	}
+}
+
+export class AllowSecondaryUserTableUpdatePolicy extends GuAllowPolicy {
+	constructor(scope: GuStack) {
+		super(scope, 'MultipleAccountSecondaryUserTable update access', {
+			actions: ['dynamodb:UpdateItem'],
 			resources: [
 				`arn:aws:dynamodb:${scope.region}:${scope.account}:table/multiple-account-secondary-user-${scope.stage}`,
 			],
@@ -122,6 +144,7 @@ export class AllowPromoCodeTableQueryPolicy extends GuAllowPolicy {
 		super(scope, 'Promo code table query access', {
 			actions: [
 				'dynamodb:GetItem',
+				'dynamodb:BatchGetItem',
 				'dynamodb:Scan',
 				'dynamodb:Query',
 				'dynamodb:DescribeTable',

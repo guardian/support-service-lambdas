@@ -84,7 +84,11 @@ export const handler: Handler = Router([
 		httpMethod: 'GET',
 		path: '/invitation/{invitationCode}',
 		handler: withPathParser(invitationPathSchema, async (_event, path) =>
-			getInvitationEndpoint(invitationRepository, path.invitationCode),
+			getInvitationEndpoint(
+				invitationRepository,
+				secondaryUserRepository,
+				path.invitationCode,
+			),
 		),
 	},
 	{
@@ -101,6 +105,7 @@ export const handler: Handler = Router([
 				invitationRepository,
 				path.invitationCode,
 				identityId,
+				stage,
 			);
 		}),
 	},
@@ -174,6 +179,8 @@ export const handler: Handler = Router([
 					stage,
 					secondaryUserRepository,
 					dynamoClient,
+					await lazyZuoraClient.get(),
+					await identityClientPromise,
 					subscriptionName,
 					secondaryIdentityId,
 					loggedInUserIdentityId,

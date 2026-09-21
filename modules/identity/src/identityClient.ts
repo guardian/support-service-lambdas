@@ -26,11 +26,18 @@ class IdentityTokenProvider implements BearerTokenProvider {
 }
 
 export class IdentityClient extends RestClient {
+	static createWithAccessToken(
+		accessToken: string,
+		stage: Stage,
+	): IdentityClient {
+		return new IdentityClient(new IdentityTokenProvider(accessToken, stage));
+	}
+
 	static async create(
 		stage: Stage,
 		ssmParamName: string,
 	): Promise<IdentityClient> {
 		const token = await getSSMParam(ssmParamName);
-		return new IdentityClient(new IdentityTokenProvider(token, stage));
+		return IdentityClient.createWithAccessToken(token, stage);
 	}
 }

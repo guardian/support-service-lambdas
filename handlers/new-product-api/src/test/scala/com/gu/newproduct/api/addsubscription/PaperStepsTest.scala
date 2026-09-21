@@ -8,7 +8,7 @@ import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{
   ZuoraCreateSubRequest,
   ZuoraCreateSubRequestRatePlan,
 }
-import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
+import com.gu.newproduct.api.addsubscription.zuora.GetAccount.{AccountNumber, SfContactId}
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.SoldToAddress
 import com.gu.newproduct.api.productcatalog.PlanId.{NationalDeliveryWeekend, VoucherEveryDay}
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
@@ -130,7 +130,7 @@ class PaperStepsTest extends AnyFlatSpec with Matchers with Inside with DiffShou
     def fakeGetVoucherCustomerData(zuoraAccountId: ZuoraAccountId) = ContinueProcessing(TestData.voucherCustomerData)
 
     val expectedIn = ZuoraCreateSubRequest(
-      accountId = ZuoraAccountId("acccc"),
+      accountNumber = AccountNumber("A00000001"),
       acceptanceDate = LocalDate.of(2018, 7, 18),
       acquisitionCase = CaseId("case"),
       acquisitionSource = AcquisitionSource("CSR"),

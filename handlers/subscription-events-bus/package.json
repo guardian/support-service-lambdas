@@ -1,0 +1,8 @@
+{
+	"name": "subscription-events-bus",
+	"description": "An EventBridge event bus for subscription lifecycle events (e.g. cancellation), shared by multiple producers and listeners",
+	"scripts": {
+		"packageQuick": "mkdir target && touch target/subscription-events-bus.zip"
+	},
+	"dependencies": {}
+}

@@ -91,6 +91,7 @@ export const countryGroups: CountryGroups = {
 			'GR',
 			'HR',
 			'HU',
+			'IC',
 			'IE',
 			'IT',
 			'LI',

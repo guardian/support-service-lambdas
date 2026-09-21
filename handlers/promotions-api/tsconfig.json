@@ -1,0 +1,37 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@modules/*": [
+        "../../modules/*"
+      ],
+      "@modules/logger/*": [
+        "../../modules/logger/src/*"
+      ],
+      "@modules/product-catalog/*": [
+        "../../modules/product-catalog/src/*"
+      ],
+      "@modules/zuora-catalog/*": [
+        "../../modules/zuora-catalog/src/*"
+      ],
+      "@modules/aws/*": [
+        "../../modules/aws/src/*"
+      ],
+      "@modules/promotions/*": [
+        "../../modules/promotions/src/*"
+      ],
+      "@modules/internationalisation/*": [
+        "../../modules/internationalisation/src/*"
+      ],
+      "@modules/routing/*": [
+        "../../modules/routing/src/*"
+      ],
+      "@modules/zuora/*": [
+        "../../modules/zuora/src/*"
+      ],
+      "@modules/promotions-api/*": [
+        "../../modules/promotions-api/src/*"
+      ]
+    }
+  }
+}

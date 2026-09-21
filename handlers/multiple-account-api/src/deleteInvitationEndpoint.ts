@@ -5,19 +5,26 @@ import {
 	internalServerError,
 	notFound,
 } from '@modules/routing/apiGatewayResponses';
+import type { Stage } from '@modules/stage';
+import { sendDeclineInvitationEmail } from './emails/declineInvitationEmail';
 import { type InvitationRepository } from './invitationRepository';
 
 export const deleteInvitationEndpoint = async (
 	invitationRepository: InvitationRepository,
 	invitationCode: string,
 	identityId: string,
+	stage: Stage,
 ): Promise<APIGatewayProxyResult> => {
 	logger.mutableAddContext(invitationCode);
 
 	try {
 		const invitation = await invitationRepository.get(invitationCode);
 
-		if (!invitation || invitation.cancelledBy !== undefined) {
+		if (
+			!invitation ||
+			invitation.cancelledBy !== undefined ||
+			invitation.acceptedDate !== undefined
+		) {
 			return notFound();
 		}
 
@@ -38,6 +45,20 @@ export const deleteInvitationEndpoint = async (
 			invitationCode,
 			cancelledBy,
 		);
+
+		if (cancelledBy === 'secondary') {
+			try {
+				await sendDeclineInvitationEmail(stage, {
+					primaryUserIdentityId: invitation.primaryIdentityId,
+					primaryUserEmail: invitation.primaryUserEmail,
+				});
+			} catch (error) {
+				logger.error(
+					'Error sending decline invitation email to primary user',
+					error,
+				);
+			}
+		}
 
 		return {
 			body: '',

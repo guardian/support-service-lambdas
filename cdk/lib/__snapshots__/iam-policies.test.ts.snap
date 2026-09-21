@@ -24,6 +24,14 @@ exports[`The IamPolicies stack matches the snapshot 1`] = `
               ],
             },
             {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:s3:::membership-private/DEV/*",
+                "arn:aws:s3:::membership-private/CODE/*",
+              ],
+            },
+            {
               "Action": [
                 "ssm:GetParameters",
                 "ssm:GetParameter",
@@ -436,6 +444,14 @@ exports[`The IamPolicies stack matches the snapshot 2`] = `
               "Resource": [
                 "arn:aws:s3:::gu-reader-revenue-private/*/DEV/*",
                 "arn:aws:s3:::gu-reader-revenue-private/*/CODE/*",
+              ],
+            },
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:s3:::membership-private/DEV/*",
+                "arn:aws:s3:::membership-private/CODE/*",
               ],
             },
             {

@@ -113,6 +113,7 @@ const modulePromotions: ModuleDefinition = {
 		...dep['@aws-sdk/client-dynamodb'],
 		...dep['@aws-sdk/util-dynamodb'],
 		...dep['zod'],
+		...dep.dayjs,
 	},
 	moduleDependencies: [
 		moduleAws,
@@ -892,6 +893,50 @@ const brazeAcquisitionEventsSync: HandlerDefinition = {
 	},
 	moduleDependencies: [moduleLogger, moduleIdentity],
 };
+const promotionsApi: HandlerDefinition = {
+	name: 'promotions-api',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+
+		...devDeps['@redocly/cli'],
+	},
+	moduleDependencies: [
+		moduleLogger,
+		moduleProductCatalog,
+		modulePromotions,
+		moduleRouting,
+	],
+	extraScripts: {
+		...openApiScripts,
+		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr promotions-api.zip ./*.js.map ./*.js`,
+	},
+};
+
+const paymentFailureCommsExitApi: HandlerDefinition = {
+	name: 'payment-failure-comms-exit-api',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+		...devDeps['@redocly/cli'],
+	},
+	moduleDependencies: [
+		moduleLogger,
+		moduleRouting,
+		moduleIdentity,
+		moduleZuora,
+	],
+	extraScripts: {
+		...openApiScripts,
+		package:
+			'pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr payment-failure-comms-exit-api.zip ./*.js.map ./*.js',
+	},
+};
+
 // MARKER new-lambda: buildcheck-const
 
 export const build: BuildDefinition = {
@@ -927,6 +972,8 @@ export const build: BuildDefinition = {
 		supporterProductDataLambdas,
 		brazeAcquisitionEventsSync,
 		scrubNonTokenisedPaymentMethods,
+		promotionsApi,
+		paymentFailureCommsExitApi,
 		// MARKER new-lambda: buildcheck-reference
 	],
 

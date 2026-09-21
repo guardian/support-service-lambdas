@@ -31,8 +31,10 @@ import { NewSubscriptionApi } from '../lib/new-subscription-api';
 import { NewsletterAcquisition } from '../lib/newsletter-acquisition';
 import { ObserverBenefitsApi } from '../lib/observer-benefits-api';
 import { ObserverDataExport } from '../lib/observer-data-export';
+import { PaymentFailureCommsExitApi } from '../lib/payment-failure-comms-exit-api';
 import { PressReaderEntitlements } from '../lib/press-reader-entitlements';
 import { ProductSwitchApi } from '../lib/product-switch-api';
+import { PromotionsApi } from '../lib/promotions-api';
 import { PromotionsLambdas } from '../lib/promotions-lambdas';
 import { SalesTaxApi } from '../lib/sales-tax-api';
 import { SalesforceDisasterRecovery } from '../lib/salesforce-disaster-recovery';
@@ -49,6 +51,7 @@ import { SoftOptInConsentSetter } from '../lib/soft-opt-in-consent-setter';
 import { StripeDisputes } from '../lib/stripe-disputes';
 import type { StripeWebhookEndpointsProps } from '../lib/stripe-webhook-endpoints';
 import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
+import { SubscriptionEventsBus } from '../lib/subscription-events-bus';
 import { SupporterProductDataLambdas } from '../lib/supporter-product-data-lambdas';
 import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
 import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
@@ -179,6 +182,9 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	HolidayStopProcessor,
 	IamPolicies,
 	ScrubNonTokenisedPaymentMethods,
+	PromotionsApi,
+	PaymentFailureCommsExitApi,
+	SubscriptionEventsBus,
 	// MARKER new-lambda: cdk-bin
 ];
 

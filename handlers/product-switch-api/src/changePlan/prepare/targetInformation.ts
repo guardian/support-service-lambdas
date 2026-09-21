@@ -2,7 +2,7 @@ import type { DataExtensionName } from '@modules/email/email';
 import type { GuardianRatePlan } from '@modules/guardian-subscription/reprocessRatePlans/guardianRatePlanBuilder';
 import { type CurrencyCode } from '@modules/internationalisation/currency';
 import type {
-	GuardianCatalogKeys,
+	ProductAndRatePlanKey,
 	ProductCatalogHelper,
 	ProductKey,
 	TaxMode,
@@ -64,7 +64,7 @@ export const getTargetInformation = (
 	includesContribution: boolean,
 	productCatalogHelper: ProductCatalogHelper,
 ): TargetInformation => {
-	const targetProductKeys: GuardianCatalogKeys<typeof input.targetProduct> =
+	const targetProductKeys: ProductAndRatePlanKey<typeof input.targetProduct> =
 		productCatalogHelper.validateOrThrow(
 			input.targetProduct,
 			productCatalogKeys.productRatePlanKey, // keep the rate plan name (frequency) as the existing sub
@@ -103,8 +103,8 @@ function getSwitchSpecificTargetInformationOrThrow<
 	TP extends ValidTargetProduct,
 >(
 	productCatalogHelper: ProductCatalogHelper,
-	sourceProductKeys: GuardianCatalogKeys<SP>,
-	targetProductKeys: GuardianCatalogKeys<TP>,
+	sourceProductKeys: ProductAndRatePlanKey<SP>,
+	targetProductKeys: ProductAndRatePlanKey<TP>,
 	switchActionData: SwitchActionData,
 ): TargetInformation {
 	const validSwitches: AvailableTargetProducts = getAvailableTargetProducts(

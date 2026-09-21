@@ -188,6 +188,12 @@ export const updateSupporterPlusAmount = async (
 	const newContributionAmount =
 		(newPaymentAmount * 100 - supporterPlusData.basePriceMinorUnits) / 100;
 
+	if (newContributionAmount < 0) {
+		throw new Error(
+			'contribution amount was negative - check the amount bands in supporterPlusAmountBands.ts',
+		);
+	}
+
 	const { chargeToUpdate } = supporterPlusData;
 
 	const applyFromDate = dayjs(

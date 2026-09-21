@@ -1089,6 +1089,10 @@ exports[`The Multiple account api stack matches the snapshot 1`] = `
             "AttributeName": "secondaryIdentityId",
             "AttributeType": "S",
           },
+          {
+            "AttributeName": "invitationCode",
+            "AttributeType": "S",
+          },
         ],
         "BillingMode": "PAY_PER_REQUEST",
         "GlobalSecondaryIndexes": [
@@ -1097,6 +1101,18 @@ exports[`The Multiple account api stack matches the snapshot 1`] = `
             "KeySchema": [
               {
                 "AttributeName": "secondaryIdentityId",
+                "KeyType": "HASH",
+              },
+            ],
+            "Projection": {
+              "ProjectionType": "ALL",
+            },
+          },
+          {
+            "IndexName": "invitationCode-index",
+            "KeySchema": [
+              {
+                "AttributeName": "invitationCode",
                 "KeyType": "HASH",
               },
             ],
@@ -2406,6 +2422,10 @@ exports[`The Multiple account api stack matches the snapshot 2`] = `
             "AttributeName": "secondaryIdentityId",
             "AttributeType": "S",
           },
+          {
+            "AttributeName": "invitationCode",
+            "AttributeType": "S",
+          },
         ],
         "BillingMode": "PAY_PER_REQUEST",
         "GlobalSecondaryIndexes": [
@@ -2414,6 +2434,18 @@ exports[`The Multiple account api stack matches the snapshot 2`] = `
             "KeySchema": [
               {
                 "AttributeName": "secondaryIdentityId",
+                "KeyType": "HASH",
+              },
+            ],
+            "Projection": {
+              "ProjectionType": "ALL",
+            },
+          },
+          {
+            "IndexName": "invitationCode-index",
+            "KeySchema": [
+              {
+                "AttributeName": "invitationCode",
                 "KeyType": "HASH",
               },
             ],

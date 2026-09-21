@@ -5,6 +5,7 @@ import com.gu.newproduct.api.addsubscription.validation.paper.PaperAccountValida
 import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed, ValidatedAccount}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.{
   AccountBalanceMinorUnits,
+  AccountNumber,
   AutoPay,
   PaymentMethodId,
   SfContactId,
@@ -14,6 +15,7 @@ import org.scalatest.matchers.should.Matchers
 
 class PaperAccountValidationTest extends AnyFlatSpec with Matchers {
   val account = ValidatedAccount(
+    accountNumber = AccountNumber("A00000001"),
     identityId = None,
     sfContactId = Some(SfContactId("sfContactId")),
     paymentMethodId = PaymentMethodId("id"),

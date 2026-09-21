@@ -19,14 +19,16 @@ class GetAccountEffectsTest extends AnyFlatSpec with Matchers {
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
       res <- GetAccount(zuoraDeps.get[ZuoraAccount])(ZuoraAccountId("8ad095dd82f7aaa50182f96de24d3ddb")).toDisjunction
     } yield res
-    val expected = Account(
-      identityId = Some(IdentityId("200045767")),
-      sfContactId = Some(SfContactId("0039E00001cEWmcQAG")),
-      paymentMethodId = Some(PaymentMethodId("8ad095dd82f7aaa50182f96de2883de1")),
-      autoPay = AutoPay(true),
-      accountBalanceMinorUnits = AccountBalanceMinorUnits(0),
-      currency = GBP,
-    )
-    actual shouldBe Right(expected)
+    actual match {
+      case Right(account) =>
+        account.accountNumber.value should not be empty
+        account.identityId shouldBe Some(IdentityId("200045767"))
+        account.sfContactId shouldBe Some(SfContactId("0039E00001cEWmcQAG"))
+        account.paymentMethodId shouldBe Some(PaymentMethodId("8ad095dd82f7aaa50182f96de2883de1"))
+        account.autoPay shouldBe AutoPay(true)
+        account.accountBalanceMinorUnits shouldBe AccountBalanceMinorUnits(0)
+        account.currency shouldBe GBP
+      case Left(error) => fail(error.toString)
+    }
   }
 }

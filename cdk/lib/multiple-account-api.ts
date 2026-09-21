@@ -88,6 +88,11 @@ export class MultipleAccountApi extends SrStack {
 			partitionKey: { name: 'secondaryIdentityId', type: AttributeType.STRING },
 		});
 
+		secondaryUserTable.addGlobalSecondaryIndex({
+			indexName: 'invitationCode-index',
+			partitionKey: { name: 'invitationCode', type: AttributeType.STRING },
+		});
+
 		secondaryUserTable.grantFullAccess(lambda);
 	}
 }
