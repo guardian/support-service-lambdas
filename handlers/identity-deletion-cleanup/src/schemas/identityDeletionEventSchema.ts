@@ -1,9 +1,16 @@
 import { z } from 'zod';
 
+export type IdentityId = string & { readonly __brand: 'IdentityId' };
+
+export const identityIdSchema = z
+	.string()
+	.regex(/^[0-9]+$/, 'Identity IDs must contain only digits')
+	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- parsing validates the branded value
+	.transform((value) => value as IdentityId);
+
 export const identityDeletionEventSchema = z.object({
-	userId: z.string().regex(/^[0-9]+$/),
+	userId: identityIdSchema,
 	eventType: z.literal('DELETE'),
-	brazeId: z.string().nullable().optional(),
 });
 
 export const identityDeletionSnsEnvelopeSchema = z.object({

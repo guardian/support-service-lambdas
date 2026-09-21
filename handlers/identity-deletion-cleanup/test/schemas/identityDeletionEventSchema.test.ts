@@ -13,7 +13,6 @@ describe('Identity deletion event schemas', () => {
 			}),
 		).toEqual({
 			userId: '1234567',
-			brazeId: null,
 			eventType: 'DELETE',
 		});
 	});
@@ -34,7 +33,7 @@ describe('Identity deletion event schemas', () => {
 		expect(
 			identityDeletionEventSchema.safeParse({
 				userId: '1234567',
-				eventType: 'UPDATE',
+				eventType: 'CREATE',
 			}).success,
 		).toBe(false);
 	});

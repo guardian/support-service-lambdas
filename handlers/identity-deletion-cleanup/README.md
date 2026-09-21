@@ -15,6 +15,10 @@ themselves in place, so both systems retain their existing audit history.
 No match in either system is a successful outcome. Multiple Salesforce Contacts
 or Zuora Accounts for the same Identity ID are all updated.
 
+Each lookup is limited to ten matches. More than ten indicates an unexpected
+data condition, so the message fails before any records are updated and can be
+investigated from the DLQ.
+
 ## Configuration
 
 The CloudFormation stack reads this non-sensitive SSM parameter:

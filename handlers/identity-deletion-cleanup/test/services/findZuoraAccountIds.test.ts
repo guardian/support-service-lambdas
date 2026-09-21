@@ -1,54 +1,56 @@
+import { objectQuery } from '@modules/zuora/objectQuery';
+import { MAXIMUM_MATCHING_RECORDS_PER_IDENTITY } from '../../src/constants';
+import { identityIdSchema } from '../../src/schemas/identityDeletionEventSchema';
 import { findZuoraAccountIds } from '../../src/services/findZuoraAccountIds';
 
+jest.mock('@modules/zuora/objectQuery', () => ({
+	objectQuery: {
+		accounts: {
+			execute: jest.fn(),
+		},
+	},
+}));
+
 describe('findZuoraAccountIds', () => {
-	const get = jest.fn<
-		Promise<unknown>,
-		[path: string, schema: unknown, query: URLSearchParams]
-	>();
-	const zuoraClient = { get } as never;
+	const zuoraClient = {} as never;
+	const identityId = identityIdSchema.parse('1234567');
+	// eslint-disable-next-line @typescript-eslint/unbound-method -- mocked query builder method does not access `this`
+	const mockExecute = jest.mocked(objectQuery.accounts.execute);
 
 	beforeEach(() => {
 		jest.resetAllMocks();
 	});
 
-	it('finds every page of matching Customer Accounts', async () => {
-		const queries: URLSearchParams[] = [];
-		const pages = [
-			{ nextPage: 'next-page', data: [{ id: 'account-1' }] },
-			{ nextPage: null, data: [{ id: 'account-2' }] },
-		];
-		get.mockImplementation(
-			(_path: string, _schema: unknown, query: URLSearchParams) => {
-				queries.push(query);
-				return Promise.resolve(pages.shift());
-			},
-		);
-
-		await expect(findZuoraAccountIds(zuoraClient, '1234567')).resolves.toEqual([
-			'account-1',
-			'account-2',
-		]);
-
-		expect(get).toHaveBeenNthCalledWith(
-			1,
-			'/object-query/accounts',
-			expect.anything(),
-			expect.any(URLSearchParams),
-		);
-		expect(queries[0]?.toString()).toBe(
-			'pageSize=99&fields%5B%5D=id&filter%5B%5D=IdentityId__c.EQ%3A1234567&includeNullFields=true',
-		);
-		expect(queries[1]?.get('cursor')).toBe('next-page');
-	});
-
-	it('fails rather than loop forever when Zuora repeats a page cursor', async () => {
-		get.mockResolvedValue({
-			nextPage: 'repeated-page',
-			data: [],
+	it('finds matching Customer Accounts with the typed object query', async () => {
+		mockExecute.mockResolvedValue({
+			nextPage: null,
+			data: [{ id: 'account-1' }, { id: 'account-2' }],
 		});
 
-		await expect(findZuoraAccountIds(zuoraClient, '1234567')).rejects.toThrow(
-			'Zuora account query returned a repeated page cursor',
+		await expect(findZuoraAccountIds(zuoraClient, identityId)).resolves.toEqual(
+			['account-1', 'account-2'],
+		);
+
+		expect(mockExecute).toHaveBeenCalledWith(
+			zuoraClient,
+			['id'],
+			[],
+			[{ field: 'IdentityId__c', operator: 'EQ', value: identityId }],
+			MAXIMUM_MATCHING_RECORDS_PER_IDENTITY + 1,
+		);
+	});
+
+	it('fails before clearing an unexpectedly large number of Customer Accounts', async () => {
+		mockExecute.mockResolvedValue({
+			nextPage: 'next-page',
+			data: Array.from(
+				{ length: MAXIMUM_MATCHING_RECORDS_PER_IDENTITY + 1 },
+				(_, index) => ({ id: `account-${index}` }),
+			),
+		});
+
+		await expect(findZuoraAccountIds(zuoraClient, identityId)).rejects.toThrow(
+			'Identity ID matched more than 10 Zuora Accounts',
 		);
 	});
 });

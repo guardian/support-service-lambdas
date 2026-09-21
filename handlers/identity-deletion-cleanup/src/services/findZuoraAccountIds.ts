@@ -1,49 +1,28 @@
-import { z } from 'zod';
+import { objectQuery } from '@modules/zuora/objectQuery';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-
-const zuoraAccountsPageSchema = z.object({
-	nextPage: z.string().nullable(),
-	data: z.array(
-		z.object({
-			id: z.string(),
-		}),
-	),
-});
+import { MAXIMUM_MATCHING_RECORDS_PER_IDENTITY } from '../constants';
+import type { IdentityId } from '../schemas/identityDeletionEventSchema';
 
 export async function findZuoraAccountIds(
 	zuoraClient: ZuoraClient,
-	identityId: string,
+	identityId: IdentityId,
 ): Promise<string[]> {
-	const accountIds: string[] = [];
-	const seenCursors = new Set<string>();
-	let cursor: string | undefined;
+	const page = await objectQuery.accounts.execute(
+		zuoraClient,
+		['id'],
+		[],
+		[{ field: 'IdentityId__c', operator: 'EQ', value: identityId }],
+		MAXIMUM_MATCHING_RECORDS_PER_IDENTITY + 1,
+	);
 
-	do {
-		const query = new URLSearchParams();
-		query.set('pageSize', '99');
-		query.append('fields[]', 'id');
-		query.append('filter[]', `IdentityId__c.EQ:${identityId}`);
-		query.set('includeNullFields', 'true');
-		if (cursor !== undefined) {
-			query.set('cursor', cursor);
-		}
-
-		const page = await zuoraClient.get(
-			'/object-query/accounts',
-			zuoraAccountsPageSchema,
-			query,
+	if (
+		page.data.length > MAXIMUM_MATCHING_RECORDS_PER_IDENTITY ||
+		page.nextPage !== null
+	) {
+		throw new Error(
+			`Identity ID matched more than ${MAXIMUM_MATCHING_RECORDS_PER_IDENTITY} Zuora Accounts`,
 		);
+	}
 
-		accountIds.push(...page.data.map((account) => account.id));
-		cursor = page.nextPage ?? undefined;
-
-		if (cursor !== undefined) {
-			if (seenCursors.has(cursor)) {
-				throw new Error('Zuora account query returned a repeated page cursor');
-			}
-			seenCursors.add(cursor);
-		}
-	} while (cursor !== undefined);
-
-	return accountIds;
+	return page.data.map((account) => account.id);
 }
