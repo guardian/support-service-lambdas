@@ -1,30 +1,19 @@
-import type { SQSEvent, SQSRecord } from 'aws-lambda';
+import type { SQSRecord } from 'aws-lambda';
 import { logger } from '@modules/logger/logger';
 import {
 	identityDeletionEventSchema,
 	identityDeletionSnsEnvelopeSchema,
 } from '../schemas/identityDeletionEventSchema';
 import { cleanDeletedIdentity } from '../services/cleanDeletedIdentity';
-import type { IdentityDeletionCleanupDependenciesFactory } from '../types/identityDeletionCleanup';
+import type { IdentityDeletionCleanupDependencies } from '../types/identityDeletionCleanup';
 
-export async function handleIdentityDeletionEvent(
-	event: SQSEvent,
-	dependenciesFactory: IdentityDeletionCleanupDependenciesFactory,
-): Promise<void> {
-	logger.log('Processing Identity deletion cleanup messages', {
-		recordCount: event.Records.length,
-	});
-
-	for (const record of event.Records) {
-		await handleIdentityDeletionRecord(record, dependenciesFactory);
-	}
-
-	logger.log('Finished processing Identity deletion cleanup messages');
-}
+type Services = {
+	dependencies: Promise<IdentityDeletionCleanupDependencies>;
+};
 
 export async function handleIdentityDeletionRecord(
 	record: SQSRecord,
-	dependenciesFactory: IdentityDeletionCleanupDependenciesFactory,
+	services: Services,
 ): Promise<void> {
 	const snsEnvelope = identityDeletionSnsEnvelopeSchema.parse(
 		JSON.parse(record.body),
@@ -35,7 +24,7 @@ export async function handleIdentityDeletionRecord(
 	);
 	const outcome = await cleanDeletedIdentity(
 		deletionEvent.userId,
-		await dependenciesFactory(),
+		await services.dependencies,
 	);
 
 	logger.log('Completed Identity deletion cleanup', {

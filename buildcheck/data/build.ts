@@ -465,7 +465,12 @@ const identityDeletionCleanup: HandlerDefinition = {
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 	},
-	moduleDependencies: [moduleLogger, moduleSalesforce, moduleZuora],
+	moduleDependencies: [
+		moduleLogger,
+		moduleRouting,
+		moduleSalesforce,
+		moduleZuora,
+	],
 };
 
 const negativeInvoicesProcessor: HandlerDefinition = {

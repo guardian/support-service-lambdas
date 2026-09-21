@@ -1,5 +1,5 @@
-import type { SQSEvent, SQSRecord } from 'aws-lambda';
-import { handleIdentityDeletionEvent } from '../../src/handlers/identityDeletionHandler';
+import type { SQSRecord } from 'aws-lambda';
+import { handleIdentityDeletionRecord } from '../../src/handlers/identityDeletionHandler';
 import type { IdentityDeletionCleanupDependencies } from '../../src/types/identityDeletionCleanup';
 
 jest.mock('@modules/logger/logger', () => ({
@@ -34,32 +34,30 @@ function dependencies(): IdentityDeletionCleanupDependencies {
 	};
 }
 
-describe('handleIdentityDeletionEvent', () => {
+describe('handleIdentityDeletionRecord', () => {
 	it('processes a valid Identity deletion event', async () => {
 		const deps = dependencies();
-		const dependenciesFactory = jest.fn().mockResolvedValue(deps);
-		const event: SQSEvent = {
-			Records: [
-				sqsRecord({
-					Type: 'Notification',
-					Message: JSON.stringify({
-						userId: '1234567',
-						eventType: 'DELETE',
-					}),
-				}),
-			],
-		};
 
-		await handleIdentityDeletionEvent(event, dependenciesFactory);
+		await handleIdentityDeletionRecord(
+			sqsRecord({
+				Type: 'Notification',
+				Message: JSON.stringify({
+					userId: '1234567',
+					eventType: 'DELETE',
+				}),
+			}),
+			{ dependencies: Promise.resolve(deps) },
+		);
 
 		expect(deps.findSalesforceContactIds).toHaveBeenCalledWith('1234567');
 		expect(deps.findZuoraAccountIds).toHaveBeenCalledWith('1234567');
 	});
 
 	it('rejects a non-numeric Identity ID so SQS can retry and then use the DLQ', async () => {
-		const dependenciesFactory = jest.fn();
-		const event: SQSEvent = {
-			Records: [
+		const deps = dependencies();
+
+		await expect(
+			handleIdentityDeletionRecord(
 				sqsRecord({
 					Type: 'Notification',
 					Message: JSON.stringify({
@@ -67,13 +65,10 @@ describe('handleIdentityDeletionEvent', () => {
 						eventType: 'DELETE',
 					}),
 				}),
-			],
-		};
-
-		await expect(
-			handleIdentityDeletionEvent(event, dependenciesFactory),
+				{ dependencies: Promise.resolve(deps) },
+			),
 		).rejects.toThrow();
-		expect(dependenciesFactory).not.toHaveBeenCalled();
+		expect(deps.findSalesforceContactIds).not.toHaveBeenCalled();
 	});
 
 	it('rejects downstream failures so the message is retried', async () => {
@@ -81,8 +76,8 @@ describe('handleIdentityDeletionEvent', () => {
 		deps.findZuoraAccountIds = jest
 			.fn()
 			.mockRejectedValue(new Error('Zuora unavailable'));
-		const event: SQSEvent = {
-			Records: [
+		await expect(
+			handleIdentityDeletionRecord(
 				sqsRecord({
 					Type: 'Notification',
 					Message: JSON.stringify({
@@ -90,11 +85,8 @@ describe('handleIdentityDeletionEvent', () => {
 						eventType: 'DELETE',
 					}),
 				}),
-			],
-		};
-
-		await expect(
-			handleIdentityDeletionEvent(event, jest.fn().mockResolvedValue(deps)),
+				{ dependencies: Promise.resolve(deps) },
+			),
 		).rejects.toThrow('Zuora unavailable');
 	});
 });

@@ -9,6 +9,3 @@ export type IdentityDeletionCleanupDependencies = {
 	findZuoraAccountIds: (identityId: string) => Promise<string[]>;
 	clearZuoraAccountIds: (accountIds: readonly string[]) => Promise<number>;
 };
-
-export type IdentityDeletionCleanupDependenciesFactory =
-	() => Promise<IdentityDeletionCleanupDependencies>;

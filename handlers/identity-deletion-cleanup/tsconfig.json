@@ -8,11 +8,8 @@
       "@modules/logger/*": [
         "../../modules/logger/src/*"
       ],
-      "@modules/salesforce/*": [
-        "../../modules/salesforce/src/*"
-      ],
-      "@modules/secrets-manager/*": [
-        "../../modules/secrets-manager/src/*"
+      "@modules/routing/*": [
+        "../../modules/routing/src/*"
       ],
       "@modules/aws/*": [
         "../../modules/aws/src/*"
@@ -31,6 +28,12 @@
       ],
       "@modules/promotions/*": [
         "../../modules/promotions/src/*"
+      ],
+      "@modules/salesforce/*": [
+        "../../modules/salesforce/src/*"
+      ],
+      "@modules/secrets-manager/*": [
+        "../../modules/secrets-manager/src/*"
       ],
       "@modules/identity-deletion-cleanup/*": [
         "../../modules/identity-deletion-cleanup/src/*"

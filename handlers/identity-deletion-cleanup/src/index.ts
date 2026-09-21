@@ -1,6 +1,10 @@
-import type { Handler, SQSEvent } from 'aws-lambda';
-import { handleIdentityDeletionEvent } from './handlers/identityDeletionHandler';
+import { z } from 'zod';
+import { SQSHandler } from '@modules/routing/sqsHandler';
+import { handleIdentityDeletionRecord } from './handlers/identityDeletionHandler';
 import { defaultDependencies } from './services/defaultDependencies';
 
-export const handler: Handler<SQSEvent, void> = async (event): Promise<void> =>
-	await handleIdentityDeletionEvent(event, defaultDependencies);
+export const handler = SQSHandler(
+	z.object({}),
+	handleIdentityDeletionRecord,
+	() => ({ dependencies: defaultDependencies() }),
+);
