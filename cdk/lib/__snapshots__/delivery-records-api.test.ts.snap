@@ -107,10 +107,7 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
           },
         },
         "ResourceId": {
-          "Fn::GetAtt": [
-            "DeliveryRecordsApi",
-            "RootResourceId",
-          ],
+          "Ref": "DeliveryRecordsApiProxyResource",
         },
         "RestApiId": {
           "Ref": "DeliveryRecordsApi",
@@ -311,9 +308,9 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
     },
     "DeliveryRecordsApiDeployment": {
       "DependsOn": [
-        "DeliveryRecordsApiProxyAnyMethod",
-        "DeliveryRecordsApiProxyResource",
         "DeliveryRecordsApiAnyMethod",
+        "DeliveryRecordsApiProxyResource",
+        "LambdaRestApiANYC3C9D364",
       ],
       "Metadata": {
         "aws:cdk:do-not-refactor": true,
@@ -473,47 +470,6 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
         "Timeout": 300,
       },
       "Type": "AWS::Lambda::Function",
-    },
-    "DeliveryRecordsApiProxyAnyMethod": {
-      "Properties": {
-        "ApiKeyRequired": true,
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "DeliveryRecordsApiLambda",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Ref": "DeliveryRecordsApiProxyResource",
-        },
-        "RestApiId": {
-          "Ref": "DeliveryRecordsApi",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
     },
     "DeliveryRecordsApiProxyResource": {
       "Properties": {
@@ -737,6 +693,50 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
         },
       },
       "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiANYC3C9D364": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "DeliveryRecordsApiLambda",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "DeliveryRecordsApi",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": {
+          "Ref": "DeliveryRecordsApi",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
     },
     "LambdaRestApiAccount4E23441E": {
       "DeletionPolicy": "Retain",
@@ -1031,10 +1031,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
           },
         },
         "ResourceId": {
-          "Fn::GetAtt": [
-            "DeliveryRecordsApi",
-            "RootResourceId",
-          ],
+          "Ref": "DeliveryRecordsApiProxyResource",
         },
         "RestApiId": {
           "Ref": "DeliveryRecordsApi",
@@ -1235,9 +1232,9 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
     },
     "DeliveryRecordsApiDeployment": {
       "DependsOn": [
-        "DeliveryRecordsApiProxyAnyMethod",
-        "DeliveryRecordsApiProxyResource",
         "DeliveryRecordsApiAnyMethod",
+        "DeliveryRecordsApiProxyResource",
+        "LambdaRestApiANYC3C9D364",
       ],
       "Metadata": {
         "aws:cdk:do-not-refactor": true,
@@ -1397,47 +1394,6 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
         "Timeout": 300,
       },
       "Type": "AWS::Lambda::Function",
-    },
-    "DeliveryRecordsApiProxyAnyMethod": {
-      "Properties": {
-        "ApiKeyRequired": true,
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "DeliveryRecordsApiLambda",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Ref": "DeliveryRecordsApiProxyResource",
-        },
-        "RestApiId": {
-          "Ref": "DeliveryRecordsApi",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
     },
     "DeliveryRecordsApiProxyResource": {
       "Properties": {
@@ -1741,6 +1697,50 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
         },
       },
       "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiANYC3C9D364": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "DeliveryRecordsApiLambda",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "DeliveryRecordsApi",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": {
+          "Ref": "DeliveryRecordsApi",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
     },
     "LambdaRestApiAccount4E23441E": {
       "DeletionPolicy": "Retain",

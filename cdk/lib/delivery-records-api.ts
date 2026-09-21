@@ -18,16 +18,6 @@ export class DeliveryRecordsApi extends SrStack {
 		super(scope, { stack: 'support', stage, app: 'delivery-records-api' });
 
 		const isProd = stage === 'PROD';
-		// const mappings = {
-		//     domainName: {
-		//         CODE: "delivery-records-api-code.support.guardianapis.com",
-		//         PROD: "delivery-records-api.support.guardianapis.com"
-		//     },
-		//     apiName: {
-		//         CODE: "delivery-records-api-CODE",
-		//         PROD: "delivery-records-api-PROD"
-		//     }
-		// }
 
 		const lambda = new SrApiLambda(this, 'Lambda', {
 			apiDescriptionOverride:
