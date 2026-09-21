@@ -27,18 +27,22 @@ The queue has a stage-specific DLQ. Malformed records and failed mParticle reque
 
 ## Configuration
 
-Configuration is loaded from encrypted SSM using the standard AppConfig path:
+The publisher-specific configuration is loaded from encrypted SSM using the standard AppConfig path:
 
 `/{stage}/support/mparticle-acquisitions-publisher`
 
 | Parameter | Purpose |
 |---|---|
-| `mparticle/apiKey` | mParticle Events API key |
-| `mparticle/apiSecret` | mParticle Events API secret |
 | `mparticle/googleEnhancedConversionsConversionActionId` | Google Enhanced Conversions action ID |
 | `mparticle/endpoint` | Optional Events API endpoint; defaults to `https://s2s.eu1.mparticle.com/v2/events` |
 
-Populate CODE and PROD values before enabling the corresponding deployment. Never commit or log the credentials.
+The mParticle Events API credentials are shared with the existing `mparticle-api` handler and are read from:
+
+`/{stage}/support/mparticle-api/inputPlatform/key`
+
+`/{stage}/support/mparticle-api/inputPlatform/secret`
+
+Populate the publisher-specific CODE and PROD values before enabling the corresponding deployment. The shared credentials must already exist in both stages. Never commit or log the credentials.
 
 ## Infrastructure
 
