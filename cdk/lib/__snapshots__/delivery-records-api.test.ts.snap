@@ -64,7 +64,7 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "support",
+            "Value": "membership",
           },
           {
             "Key": "Stage",
@@ -173,7 +173,7 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "support",
+            "Value": "membership",
           },
           {
             "Key": "Stage",
@@ -186,8 +186,8 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
     },
     "DeliveryRecordsApiDNSRecord": {
       "Properties": {
-        "HostedZoneId": "Z3KO35ELNWZMSX",
-        "Name": "delivery-records-api-code.support.guardianapis.com",
+        "HostedZoneId": "Z1E4V12LQGXFEC",
+        "Name": "delivery-records-api-code.membership.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -240,7 +240,7 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/support/CODE/delivery-records-api/delivery-records-api.jar",
+                      "/membership/CODE/delivery-records-api/delivery-records-api.jar",
                     ],
                   ],
                 },
@@ -261,7 +261,7 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/support/delivery-records-api",
+                    ":parameter/CODE/membership/delivery-records-api",
                   ],
                 ],
               },
@@ -284,7 +284,7 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/support/delivery-records-api/*",
+                    ":parameter/CODE/membership/delivery-records-api/*",
                   ],
                 ],
               },
@@ -325,7 +325,7 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
     },
     "DeliveryRecordsApiDomainName": {
       "Properties": {
-        "DomainName": "delivery-records-api-code.support.guardianapis.com",
+        "DomainName": "delivery-records-api-code.membership.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -339,7 +339,7 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
+              ":certificate/c1efc564-9ff8-4a03-be48-d1990a3d79d2",
             ],
           ],
         },
@@ -358,7 +358,7 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "support",
+            "Value": "membership",
           },
           {
             "Key": "Stage",
@@ -397,7 +397,7 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "support",
+            "Value": "membership",
           },
           {
             "Key": "Stage",
@@ -420,14 +420,14 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "support/CODE/delivery-records-api/delivery-records-api.jar",
+          "S3Key": "membership/CODE/delivery-records-api/delivery-records-api.jar",
         },
         "Description": "api for accessing delivery records in salesforce",
         "Environment": {
           "Variables": {
             "APP": "delivery-records-api",
             "NODE_OPTIONS": "--enable-source-maps",
-            "STACK": "support",
+            "STACK": "membership",
             "STAGE": "CODE",
             "Stage": "CODE",
           },
@@ -460,7 +460,7 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "support",
+            "Value": "membership",
           },
           {
             "Key": "Stage",
@@ -529,7 +529,7 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "support",
+            "Value": "membership",
           },
           {
             "Key": "Stage",
@@ -566,7 +566,7 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "support",
+            "Value": "membership",
           },
           {
             "Key": "Stage",
@@ -605,7 +605,7 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "support",
+            "Value": "membership",
           },
           {
             "Key": "Stage",
@@ -956,7 +956,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "support",
+            "Value": "membership",
           },
           {
             "Key": "Stage",
@@ -988,7 +988,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "support",
+            "Value": "membership",
           },
           {
             "Key": "Stage",
@@ -1097,7 +1097,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "support",
+            "Value": "membership",
           },
           {
             "Key": "Stage",
@@ -1110,8 +1110,8 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
     },
     "DeliveryRecordsApiDNSRecord": {
       "Properties": {
-        "HostedZoneId": "Z3KO35ELNWZMSX",
-        "Name": "delivery-records-api.support.guardianapis.com",
+        "HostedZoneId": "Z1E4V12LQGXFEC",
+        "Name": "delivery-records-api.membership.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -1164,7 +1164,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/support/PROD/delivery-records-api/delivery-records-api.jar",
+                      "/membership/PROD/delivery-records-api/delivery-records-api.jar",
                     ],
                   ],
                 },
@@ -1185,7 +1185,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/support/delivery-records-api",
+                    ":parameter/PROD/membership/delivery-records-api",
                   ],
                 ],
               },
@@ -1208,7 +1208,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/support/delivery-records-api/*",
+                    ":parameter/PROD/membership/delivery-records-api/*",
                   ],
                 ],
               },
@@ -1249,7 +1249,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
     },
     "DeliveryRecordsApiDomainName": {
       "Properties": {
-        "DomainName": "delivery-records-api.support.guardianapis.com",
+        "DomainName": "delivery-records-api.membership.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -1263,7 +1263,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
+              ":certificate/c1efc564-9ff8-4a03-be48-d1990a3d79d2",
             ],
           ],
         },
@@ -1282,7 +1282,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "support",
+            "Value": "membership",
           },
           {
             "Key": "Stage",
@@ -1321,7 +1321,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "support",
+            "Value": "membership",
           },
           {
             "Key": "Stage",
@@ -1344,14 +1344,14 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "support/PROD/delivery-records-api/delivery-records-api.jar",
+          "S3Key": "membership/PROD/delivery-records-api/delivery-records-api.jar",
         },
         "Description": "api for accessing delivery records in salesforce",
         "Environment": {
           "Variables": {
             "APP": "delivery-records-api",
             "NODE_OPTIONS": "--enable-source-maps",
-            "STACK": "support",
+            "STACK": "membership",
             "STAGE": "PROD",
             "Stage": "PROD",
           },
@@ -1384,7 +1384,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "support",
+            "Value": "membership",
           },
           {
             "Key": "Stage",
@@ -1453,7 +1453,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "support",
+            "Value": "membership",
           },
           {
             "Key": "Stage",
@@ -1490,7 +1490,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "support",
+            "Value": "membership",
           },
           {
             "Key": "Stage",
@@ -1529,7 +1529,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "support",
+            "Value": "membership",
           },
           {
             "Key": "Stage",
@@ -1608,7 +1608,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "support",
+            "Value": "membership",
           },
           {
             "Key": "Stage",

@@ -15,7 +15,7 @@ import { SrStack } from './cdk/SrStack';
 
 export class DeliveryRecordsApi extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
-		super(scope, { stack: 'support', stage, app: 'delivery-records-api' });
+		super(scope, { stack: 'membership', stage, app: 'delivery-records-api' });
 
 		const isProd = stage === 'PROD';
 
