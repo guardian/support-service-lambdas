@@ -20,7 +20,7 @@
 	"devDependencies": {
 		"eslint": "^9.38.0",
 		"@guardian/eslint-config": "^11.0.0",
-		"@guardian/prettier": "^8.0.1",
+		"@guardian/prettier": "^11.0.0",
 		"@types/jest": "^29.5.14",
 		"@types/node": "^22.14.1",
 		"esbuild": "^0.25.4",
