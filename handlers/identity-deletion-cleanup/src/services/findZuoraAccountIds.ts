@@ -1,7 +1,8 @@
 import { objectQuery } from '@modules/zuora/objectQuery';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { MAXIMUM_MATCHING_RECORDS_PER_IDENTITY } from '../constants';
 import type { IdentityId } from '../schemas/identityDeletionEventSchema';
+
+const maximumMatchingZuoraAccounts = 50;
 
 export async function findZuoraAccountIds(
 	zuoraClient: ZuoraClient,
@@ -12,15 +13,15 @@ export async function findZuoraAccountIds(
 		['id'],
 		[],
 		[{ field: 'IdentityId__c', operator: 'EQ', value: identityId }],
-		MAXIMUM_MATCHING_RECORDS_PER_IDENTITY + 1,
+		maximumMatchingZuoraAccounts + 1,
 	);
 
 	if (
-		page.data.length > MAXIMUM_MATCHING_RECORDS_PER_IDENTITY ||
+		page.data.length > maximumMatchingZuoraAccounts ||
 		page.nextPage !== null
 	) {
 		throw new Error(
-			`Identity ID matched more than ${MAXIMUM_MATCHING_RECORDS_PER_IDENTITY} Zuora Accounts`,
+			`Identity ID matched more than ${maximumMatchingZuoraAccounts} Zuora Accounts`,
 		);
 	}
 

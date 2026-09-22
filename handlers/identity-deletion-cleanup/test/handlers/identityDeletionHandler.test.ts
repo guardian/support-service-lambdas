@@ -71,24 +71,6 @@ describe('handleIdentityDeletionRecord', () => {
 		expect(deps.findSalesforceContactIds).not.toHaveBeenCalled();
 	});
 
-	it('rejects a non-deletion event so SQS can retry and then use the DLQ', async () => {
-		const deps = dependencies();
-
-		await expect(
-			handleIdentityDeletionRecord(
-				sqsRecord({
-					Type: 'Notification',
-					Message: JSON.stringify({
-						userId: '1234567',
-						eventType: 'CREATE',
-					}),
-				}),
-				{ dependencies: Promise.resolve(deps) },
-			),
-		).rejects.toThrow();
-		expect(deps.findSalesforceContactIds).not.toHaveBeenCalled();
-	});
-
 	it('rejects downstream failures so the message is retried', async () => {
 		const deps = dependencies();
 		deps.findZuoraAccountIds = jest

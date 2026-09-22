@@ -1,7 +1,8 @@
 import { chunkArray } from '@modules/arrayFunctions';
 import { update } from '@modules/zuora/actions';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { ZUORA_UPDATE_BATCH_SIZE } from '../constants';
+
+const zuoraUpdateBatchSize = 50;
 
 export async function clearZuoraAccountIds(
 	zuoraClient: ZuoraClient,
@@ -9,10 +10,7 @@ export async function clearZuoraAccountIds(
 ): Promise<number> {
 	let clearedAccounts = 0;
 
-	for (const accountIdsBatch of chunkArray(
-		accountIds,
-		ZUORA_UPDATE_BATCH_SIZE,
-	)) {
+	for (const accountIdsBatch of chunkArray(accountIds, zuoraUpdateBatchSize)) {
 		const results = await update(
 			zuoraClient,
 			JSON.stringify({

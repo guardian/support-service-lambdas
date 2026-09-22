@@ -1,6 +1,5 @@
 import { executeSalesforceQueryAll } from '@modules/salesforce/query';
 import type { SfClient } from '@modules/salesforce/sfClient';
-import { MAXIMUM_MATCHING_RECORDS_PER_IDENTITY } from '../../src/constants';
 import { identityIdSchema } from '../../src/schemas/identityDeletionEventSchema';
 import { findSalesforceContactIds } from '../../src/services/findSalesforceContactIds';
 
@@ -29,20 +28,18 @@ describe('findSalesforceContactIds', () => {
 
 		expect(mockExecuteSalesforceQueryAll).toHaveBeenCalledWith(
 			expect.anything(),
-			"SELECT Id FROM Contact WHERE IdentityID__c = '1234567' LIMIT 11",
+			"SELECT Id FROM Contact WHERE IdentityID__c = '1234567' LIMIT 6",
 			expect.anything(),
 		);
 	});
 
-	it('fails before clearing an unexpectedly large number of Contacts', async () => {
+	it('rejects more than five matching Contacts', async () => {
 		mockExecuteSalesforceQueryAll.mockResolvedValue(
-			Array.from({ length: MAXIMUM_MATCHING_RECORDS_PER_IDENTITY + 1 }, () => ({
-				Id: 'contact',
-			})),
+			Array.from({ length: 6 }, () => ({ Id: 'contact' })),
 		);
 
 		await expect(
 			findSalesforceContactIds({} as SfClient, identityId),
-		).rejects.toThrow('Identity ID matched more than 10 Salesforce Contacts');
+		).rejects.toThrow('Identity ID matched more than 5 Salesforce Contacts');
 	});
 });

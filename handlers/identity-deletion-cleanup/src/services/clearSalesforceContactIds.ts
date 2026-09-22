@@ -2,7 +2,8 @@ import { chunkArray } from '@modules/arrayFunctions';
 import { sfApiVersion } from '@modules/salesforce/config';
 import type { SfClient } from '@modules/salesforce/sfClient';
 import { doCompositeCallout } from '@modules/salesforce/updateRecords';
-import { SALESFORCE_COMPOSITE_UPDATE_BATCH_SIZE } from '../constants';
+
+const salesforceCompositeUpdateBatchSize = 200;
 
 export async function clearSalesforceContactIds(
 	sfClient: SfClient,
@@ -12,7 +13,7 @@ export async function clearSalesforceContactIds(
 
 	for (const contactIdsBatch of chunkArray(
 		contactIds,
-		SALESFORCE_COMPOSITE_UPDATE_BATCH_SIZE,
+		salesforceCompositeUpdateBatchSize,
 	)) {
 		const results = await doCompositeCallout(
 			sfClient,

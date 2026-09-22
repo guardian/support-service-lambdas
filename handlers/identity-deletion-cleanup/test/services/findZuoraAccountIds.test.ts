@@ -1,5 +1,4 @@
 import { objectQuery } from '@modules/zuora/objectQuery';
-import { MAXIMUM_MATCHING_RECORDS_PER_IDENTITY } from '../../src/constants';
 import { identityIdSchema } from '../../src/schemas/identityDeletionEventSchema';
 import { findZuoraAccountIds } from '../../src/services/findZuoraAccountIds';
 
@@ -36,21 +35,20 @@ describe('findZuoraAccountIds', () => {
 			['id'],
 			[],
 			[{ field: 'IdentityId__c', operator: 'EQ', value: identityId }],
-			MAXIMUM_MATCHING_RECORDS_PER_IDENTITY + 1,
+			51,
 		);
 	});
 
-	it('fails before clearing an unexpectedly large number of Customer Accounts', async () => {
+	it('rejects more than fifty matching Customer Accounts', async () => {
 		mockExecute.mockResolvedValue({
-			nextPage: 'next-page',
-			data: Array.from(
-				{ length: MAXIMUM_MATCHING_RECORDS_PER_IDENTITY + 1 },
-				(_, index) => ({ id: `account-${index}` }),
-			),
+			nextPage: null,
+			data: Array.from({ length: 51 }, (_, index) => ({
+				id: `account-${index}`,
+			})),
 		});
 
 		await expect(findZuoraAccountIds(zuoraClient, identityId)).rejects.toThrow(
-			'Identity ID matched more than 10 Zuora Accounts',
+			'Identity ID matched more than 50 Zuora Accounts',
 		);
 	});
 });
