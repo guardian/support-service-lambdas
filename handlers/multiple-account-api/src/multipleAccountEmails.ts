@@ -4,6 +4,7 @@ import {
 	DataExtensionNames,
 	sendEmail,
 } from '@modules/email/email';
+import { logger } from '@modules/logger/logger';
 import type { Stage } from '@modules/stage';
 import { putEmailFailureMetric } from './cloudwatch';
 
@@ -41,7 +42,7 @@ export async function sendInvitationEmail(
 		{ IdentityUserId: secondaryUserIdentityId },
 	);
 	await sendEmailWithErrorHandling(stage, emailMessage, (error: string) =>
-		console.log(
+		logger.log(
 			`Failed to trigger invitation email to ${secondaryUserIdentityId} (${secondaryUserEmail}) for invitation ${invitationCode}: ${error}`,
 		),
 	);
@@ -87,7 +88,7 @@ export async function sendInvitationRedeemedEmail(
 			stage,
 			secondaryUserEmailMessage,
 			(error: string) =>
-				console.log(
+				logger.log(
 					`Failed to trigger invitation redeemed email to secondary user ${secondaryUserEmail}: ${error}`,
 				),
 		),
@@ -95,7 +96,7 @@ export async function sendInvitationRedeemedEmail(
 			stage,
 			primaryUserEmailMessage,
 			(error: string) =>
-				console.log(
+				logger.log(
 					`Failed to trigger send invitation redeemed email to primary user ${primaryUserIdentityId} (${primaryUserEmail}): ${error}`,
 				),
 		),
@@ -129,7 +130,7 @@ export async function sendAccessRemovedEmail(
 		{ IdentityUserId: secondaryUserIdentityId },
 	);
 	await sendEmailWithErrorHandling(stage, emailMessage, (error: string) =>
-		console.log(
+		logger.log(
 			`Failed to trigger access removed email to secondary user ${secondaryUserIdentityId} (${secondaryUserEmail}): ${error}`,
 		),
 	);
@@ -152,7 +153,7 @@ export async function sendDeclineInvitationEmail(
 		{ IdentityUserId: primaryUserIdentityId },
 	);
 	await sendEmailWithErrorHandling(stage, emailMessage, (error: string) =>
-		console.log(
+		logger.log(
 			`Failed to trigger declined invitation email to primary user ${primaryUserIdentityId} (${primaryUserEmail}): ${error}`,
 		),
 	);
@@ -185,7 +186,7 @@ export async function sendLeaveSubscriptionEmailToSecondary(
 		{ IdentityUserId: secondaryUserIdentityId },
 	);
 	await sendEmailWithErrorHandling(stage, emailMessage, (error: string) =>
-		console.log(
+		logger.log(
 			`Failed to trigger leave subscription email to secondary user ${secondaryUserIdentityId} (${secondaryUserEmail}): ${error}`,
 		),
 	);
@@ -211,7 +212,7 @@ export async function sendLeaveSubscriptionEmailToPrimary(
 		{ IdentityUserId: primaryUserIdentityId },
 	);
 	await sendEmailWithErrorHandling(stage, emailMessage, (error: string) =>
-		console.log(
+		logger.log(
 			`Failed to trigger leave subscription email to primary user ${primaryUserIdentityId} (${primaryUserEmail}): ${error}`,
 		),
 	);
