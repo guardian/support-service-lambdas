@@ -25,6 +25,7 @@ import {
 	sendLeaveSubscriptionEmailToPrimary,
 	sendLeaveSubscriptionEmailToSecondary,
 } from './emails/leaveSubcriptionEmail';
+import { sendSoftOptInCancelEvent } from './softOptinConsents';
 
 export const deleteSecondaryUserPathSchema = z.object({
 	subscriptionName: z.string(),
@@ -143,6 +144,12 @@ export const deleteSecondaryUserEndpoint = async (
 				}),
 			]);
 		}
+
+		await sendSoftOptInCancelEvent(
+			stage,
+			secondaryIdentityId,
+			subscriptionName,
+		);
 
 		return {
 			statusCode: 204,
