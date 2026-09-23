@@ -99,7 +99,6 @@ object ConsentsMapping {
     ),
     "Secondary User" -> Set(
       yourSupportOnboarding,
-      similarGuardianProducts,
       supporterNewsletter,
     ),
     "Supporter Plus" -> Set(
