@@ -11,6 +11,7 @@
     "imovo-voucher-api",
     "metric-push-api",
     "mobile-purchases-to-supporter-product-data",
+    "mparticle-acquisitions-publisher",
     "mparticle-api",
     "multiple-account-api",
     "negative-invoices-processor",
