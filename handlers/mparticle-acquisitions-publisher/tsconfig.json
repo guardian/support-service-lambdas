@@ -11,6 +11,9 @@
       "@modules/logger/*": [
         "../../modules/logger/src/*"
       ],
+      "@modules/mparticle/*": [
+        "../../modules/mparticle/src/*"
+      ],
       "@modules/mparticle-acquisitions-publisher/*": [
         "../../modules/mparticle-acquisitions-publisher/src/*"
       ]

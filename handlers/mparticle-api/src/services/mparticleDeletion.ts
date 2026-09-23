@@ -1,6 +1,6 @@
 import { logger } from '@modules/logger/logger';
+import { MParticleHttpError } from '@modules/mparticle/mparticleHttpClient';
 import type { DeletionResult } from '../types/deletionMessage';
-import { HttpError } from './make-http-request';
 import type { BulkDeletionAPI, MParticleClient } from './mparticleClient';
 
 /**
@@ -97,7 +97,7 @@ export async function deleteMParticleUser(
 		}
 	} catch (error) {
 		// Handle 404 as success - user already deleted (idempotent)
-		if (error instanceof HttpError && error.statusCode === 404) {
+		if (error instanceof MParticleHttpError && error.statusCode === 404) {
 			logger.log(
 				`User ${userId} not found in mParticle (404) - treating as successful deletion`,
 			);
@@ -122,8 +122,8 @@ export async function deleteMParticleUser(
  * - 5xx errors are retryable (server errors)
  * - Network errors are retryable
  */
-function isRetryableError(error: Error | HttpError): boolean {
-	if (error instanceof HttpError) {
+function isRetryableError(error: Error | MParticleHttpError): boolean {
+	if (error instanceof MParticleHttpError) {
 		const statusCode = error.statusCode;
 		// 404 is handled separately as success
 		// 4xx client errors are not retryable

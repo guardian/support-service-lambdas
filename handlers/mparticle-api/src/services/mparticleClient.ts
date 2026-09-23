@@ -1,7 +1,9 @@
-import { getCallerInfo } from '@modules/logger/getCallerInfo';
+import {
+	MParticleHttpClient,
+	type MParticleHttpResponse,
+	type MParticleResponseSchema,
+} from '@modules/mparticle/mparticleHttpClient';
 import type { AppConfig } from './config';
-import type { HttpResponse, Schema } from './make-http-request';
-import { RestRequestMaker } from './make-http-request';
 
 export interface DataSubjectAPI {
 	readonly clientType: 'dataSubject';
@@ -24,13 +26,16 @@ export interface MParticleClient<
 	readonly clientType: T['clientType'];
 	readonly baseURL: string;
 
-	get<RESP>(path: string, schema: Schema<RESP>): Promise<HttpResponse<RESP>>;
+	get<RESP>(
+		path: string,
+		schema: MParticleResponseSchema<RESP>,
+	): Promise<MParticleHttpResponse<RESP>>;
 
 	post<REQ, RESP>(
 		path: string,
 		body: REQ,
-		schema: Schema<RESP>,
-	): Promise<HttpResponse<RESP>>;
+		schema: MParticleResponseSchema<RESP>,
+	): Promise<MParticleHttpResponse<RESP>>;
 
 	getStream(path: string): Promise<ReadableStream>;
 }
@@ -80,47 +85,31 @@ export class MParticleClientImpl<
 > implements MParticleClient<T> {
 	readonly clientType: T['clientType'];
 
-	private readonly rest: RestRequestMaker;
+	private readonly rest: MParticleHttpClient;
 	constructor(
 		readonly baseURL: string,
 		key: string,
 		secret: string,
 		clientType: T['clientType'],
+		fetchFn: typeof fetch = fetch,
 	) {
 		this.clientType = clientType;
-		// TODO:delete comment - Basic auth per workspace
-		const authHeader = `Basic ${Buffer.from(`${key}:${secret}`).toString('base64')}`;
-		this.rest = new RestRequestMaker(
-			baseURL,
-			{
-				Authorization: authHeader,
-			},
-			fetch,
-		);
+		this.rest = new MParticleHttpClient(baseURL, key, secret, fetchFn);
 	}
 
 	async get<RESP>(
 		path: string,
-		schema: Schema<RESP>,
-	): Promise<HttpResponse<RESP>> {
-		return await this.rest.makeRESTRequest(getCallerInfo(1))(
-			'GET',
-			path,
-			schema,
-		);
+		schema: MParticleResponseSchema<RESP>,
+	): Promise<MParticleHttpResponse<RESP>> {
+		return this.rest.get(path, schema);
 	}
 
 	async post<REQ, RESP>(
 		path: string,
 		body: REQ,
-		schema: Schema<RESP>,
-	): Promise<HttpResponse<RESP>> {
-		return await this.rest.makeRESTRequest(getCallerInfo(1))(
-			'POST',
-			path,
-			schema,
-			body,
-		);
+		schema: MParticleResponseSchema<RESP>,
+	): Promise<MParticleHttpResponse<RESP>> {
+		return this.rest.post(path, body, schema);
 	}
 
 	async getStream(path: string): Promise<ReadableStream> {
