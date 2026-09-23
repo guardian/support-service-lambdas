@@ -368,6 +368,9 @@ importers:
       aws:
         specifier: workspace:*
         version: link:../../modules/aws
+      mparticle:
+        specifier: workspace:*
+        version: link:../../modules/mparticle
       zod:
         specifier: 'catalog:'
         version: 4.4.3
@@ -384,6 +387,9 @@ importers:
       aws:
         specifier: workspace:*
         version: link:../../modules/aws
+      mparticle:
+        specifier: workspace:*
+        version: link:../../modules/mparticle
       routing:
         specifier: workspace:*
         version: link:../../modules/routing
@@ -412,6 +418,9 @@ importers:
       '@aws-sdk/util-dynamodb':
         specifier: ^3.940.0
         version: 3.996.2(@aws-sdk/client-dynamodb@3.1058.0)
+      aws:
+        specifier: workspace:*
+        version: link:../../modules/aws
       dayjs:
         specifier: ^1.11.13
         version: 1.11.21
@@ -1158,6 +1167,12 @@ importers:
       '@smithy/types':
         specifier: ^4.13.1
         version: 4.14.3
+
+  modules/mparticle:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 4.4.3
 
   modules/multiple-account:
     dependencies:
