@@ -112,12 +112,6 @@ export const deleteSecondaryUserEndpoint = async (
 			}),
 		);
 
-		const sendSoftOptInCancelEventPromise = sendSoftOptInCancelEvent(
-			stage,
-			secondaryIdentityId,
-			subscriptionName,
-		);
-
 		await Promise.all([
 			// This has it's own error handling and shouldn't result in a 500
 			triggerEmailNotificationsWithErrorHandling(
@@ -130,7 +124,7 @@ export const deleteSecondaryUserEndpoint = async (
 				secondaryUser,
 			),
 			// For now errors here are not caught and will result in a 500
-			sendSoftOptInCancelEventPromise,
+			sendSoftOptInCancelEvent(stage, secondaryIdentityId, subscriptionName),
 		]);
 
 		return {
