@@ -16,6 +16,7 @@ import type { Stage } from '@modules/stage';
 import { getSupporterRatePlan } from '@modules/supporter-product-data/supporterProductData';
 import { sendInvitationRedeemedEmail } from './emails/acceptInvitationEmail';
 import type { InvitationRepository } from './invitationRepository';
+import { sendSoftOptInAcquisitionEvent } from './softOptinConsents';
 
 export const acceptInvitationEndpoint = async (
 	stage: Stage,
@@ -111,13 +112,21 @@ export const acceptInvitationEndpoint = async (
 			today,
 		);
 
-		await sendInvitationRedeemedEmail(stage, {
-			primaryUserIdentityId: primaryIdentityId,
-			primaryUserFirstName: invitation.primaryUserFirstName,
-			primaryUserEmail: invitation.primaryUserEmail,
-			secondaryUserEmail: invitation.secondaryUserEmail,
-			secondaryUserIdentityId: invitation.secondaryIdentityId,
-		});
+		await Promise.all([
+			sendInvitationRedeemedEmail(stage, {
+				primaryUserIdentityId: primaryIdentityId,
+				primaryUserFirstName: invitation.primaryUserFirstName,
+				primaryUserEmail: invitation.primaryUserEmail,
+				secondaryUserEmail: invitation.secondaryUserEmail,
+				secondaryUserIdentityId: invitation.secondaryIdentityId,
+			}),
+
+			sendSoftOptInAcquisitionEvent(
+				stage,
+				secondaryIdentityId,
+				subscriptionName,
+			),
+		]);
 
 		return ok({
 			identityId: secondaryIdentityId,

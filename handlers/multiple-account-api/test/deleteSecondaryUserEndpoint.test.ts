@@ -41,6 +41,10 @@ jest.mock('../src/emails/leaveSubcriptionEmail', () => ({
 	sendLeaveSubscriptionEmailToPrimary: jest.fn(),
 }));
 
+jest.mock('../src/softOptinConsents', () => ({
+	sendSoftOptInCancelEvent: jest.fn(),
+}));
+
 const stage = 'CODE';
 const subscriptionName = 'A-S00974337';
 const secondaryIdentityId = 'secondary-id';
