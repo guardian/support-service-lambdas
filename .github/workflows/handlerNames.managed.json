@@ -29,6 +29,7 @@
     "salesforce-disaster-recovery-health-check",
     "salesforce-event-bus",
     "scrub-non-tokenised-payment-methods",
+    "send-test-data-to-mparticle",
     "stripe-disputes",
     "subscription-events-bus",
     "supporter-product-data-lambdas",

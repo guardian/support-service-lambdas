@@ -422,6 +422,17 @@ const mobilePurchasesToSupporterProductData: HandlerDefinition = {
 	],
 };
 
+const sendTestDataToMparticle: HandlerDefinition = {
+	name: 'send-test-data-to-mparticle',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
+	moduleDependencies: [moduleAws],
+};
+
 const mparticleAcquisitionsPublisher: HandlerDefinition = {
 	name: 'mparticle-acquisitions-publisher',
 	dependencies: {
@@ -987,6 +998,7 @@ export const build: BuildDefinition = {
 		scrubNonTokenisedPaymentMethods,
 		promotionsApi,
 		paymentFailureCommsExitApi,
+		sendTestDataToMparticle,
 		// MARKER new-lambda: buildcheck-reference
 	],
 
