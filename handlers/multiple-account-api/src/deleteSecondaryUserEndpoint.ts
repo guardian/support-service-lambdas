@@ -8,6 +8,7 @@ import { getUserByIdentityId } from '@modules/identity/idapi';
 import type { IdentityClient } from '@modules/identity/identityClient';
 import { logger } from '@modules/logger/logger';
 import { secondarySubscriptionName } from '@modules/multiple-account/secondarySubscription';
+import type { SecondaryUserRecord } from '@modules/multiple-account/secondaryUserRepository';
 import { type SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
 import {
 	badRequest,
@@ -20,6 +21,7 @@ import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraAccount } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { putEmailFailureMetric } from './cloudwatch';
 import {
 	sendAccessRemovedEmail,
 	sendLeaveSubscriptionEmailToPrimary,
@@ -110,55 +112,26 @@ export const deleteSecondaryUserEndpoint = async (
 			}),
 		);
 
-		// What should happen if this or the below lines fail? Right now this
-		// would result in an HTTP 500 being returned, but these only relate to
-		// emails so aren't strictly essential. Therefore should we treat this
-		// like and email failure and return a 200?
-		const [account, secondaryUserDetails] = await Promise.all([
-			getZuoraAccount(zuoraClient, subscriptionName),
-			getUserByIdentityId(identityClient, secondaryIdentityId),
-		]);
-
-		if (!secondaryUserDetails?.primaryEmailAddress) {
-			throw new Error('Secondary user does not have email address');
-		}
-
 		const sendSoftOptInCancelEventPromise = sendSoftOptInCancelEvent(
 			stage,
 			secondaryIdentityId,
 			subscriptionName,
 		);
 
-		if (cancelledBy === 'primary') {
-			await Promise.all([
-				sendSoftOptInCancelEventPromise,
-				sendAccessRemovedEmail(stage, {
-					primaryUserFirstName: account.billToContact.firstName,
-					primaryUserEmail: account.billToContact.workEmail,
-					secondaryUserEmail: secondaryUserDetails.primaryEmailAddress,
-					secondaryUserIdentityId: secondaryIdentityId,
-				}),
-				sendSoftOptInCancelEventPromise,
-			]);
-		}
-
-		if (cancelledBy === 'secondary') {
-			const primaryFirstName = account.billToContact.firstName;
-			const primaryEmail = account.billToContact.workEmail;
-			await Promise.all([
-				sendLeaveSubscriptionEmailToSecondary(stage, {
-					primaryUserFirstName: primaryFirstName,
-					primaryUserEmail: primaryEmail,
-					secondaryUserEmail: secondaryUserDetails.primaryEmailAddress,
-					secondaryUserIdentityId: secondaryIdentityId,
-				}),
-				sendLeaveSubscriptionEmailToPrimary(stage, {
-					primaryUserEmail: primaryEmail,
-					primaryUserIdentityId: secondaryUser.primaryIdentityId,
-				}),
-				sendSoftOptInCancelEventPromise,
-			]);
-		}
+		await Promise.all([
+			// This has it's own error handling and shouldn't result in a 500
+			triggerEmailNotificationsWithErrorHandling(
+				zuoraClient,
+				identityClient,
+				subscriptionName,
+				secondaryIdentityId,
+				cancelledBy,
+				stage,
+				secondaryUser,
+			),
+			// For now errors here are not caught and will result in a 500
+			sendSoftOptInCancelEventPromise,
+		]);
 
 		return {
 			statusCode: 204,
@@ -168,3 +141,76 @@ export const deleteSecondaryUserEndpoint = async (
 		return buildErrorResponse(error);
 	}
 };
+
+async function triggerEmailNotificationsWithErrorHandling(
+	zuoraClient: ZuoraClient,
+	identityClient: IdentityClient,
+	subscriptionName: string,
+	secondaryIdentityId: string,
+	cancelledBy: string,
+	stage: Stage,
+	secondaryUser: SecondaryUserRecord,
+) {
+	try {
+		await triggerEmailNotifications(
+			zuoraClient,
+			identityClient,
+			subscriptionName,
+			secondaryIdentityId,
+			cancelledBy,
+			stage,
+			secondaryUser,
+		);
+	} catch (error: unknown) {
+		const errorMessage = error instanceof Error ? error.message : 'unknown';
+		logger.log(
+			`Failed to trigger email notifications for deleteSecondaryUserEndpoint for subscription: ${subscriptionName}: ${errorMessage}`,
+		);
+		void putEmailFailureMetric(stage);
+	}
+}
+
+async function triggerEmailNotifications(
+	zuoraClient: ZuoraClient,
+	identityClient: IdentityClient,
+	subscriptionName: string,
+	secondaryIdentityId: string,
+	cancelledBy: string,
+	stage: Stage,
+	secondaryUser: SecondaryUserRecord,
+) {
+	const [account, secondaryUserDetails] = await Promise.all([
+		getZuoraAccount(zuoraClient, subscriptionName),
+		getUserByIdentityId(identityClient, secondaryIdentityId),
+	]);
+
+	if (!secondaryUserDetails?.primaryEmailAddress) {
+		throw new Error('Secondary user does not have email address');
+	}
+
+	if (cancelledBy === 'primary') {
+		await sendAccessRemovedEmail(stage, {
+			primaryUserFirstName: account.billToContact.firstName,
+			primaryUserEmail: account.billToContact.workEmail,
+			secondaryUserEmail: secondaryUserDetails.primaryEmailAddress,
+			secondaryUserIdentityId: secondaryIdentityId,
+		});
+	}
+
+	if (cancelledBy === 'secondary') {
+		const primaryFirstName = account.billToContact.firstName;
+		const primaryEmail = account.billToContact.workEmail;
+		await Promise.all([
+			sendLeaveSubscriptionEmailToSecondary(stage, {
+				primaryUserFirstName: primaryFirstName,
+				primaryUserEmail: primaryEmail,
+				secondaryUserEmail: secondaryUserDetails.primaryEmailAddress,
+				secondaryUserIdentityId: secondaryIdentityId,
+			}),
+			sendLeaveSubscriptionEmailToPrimary(stage, {
+				primaryUserEmail: primaryEmail,
+				primaryUserIdentityId: secondaryUser.primaryIdentityId,
+			}),
+		]);
+	}
+}
