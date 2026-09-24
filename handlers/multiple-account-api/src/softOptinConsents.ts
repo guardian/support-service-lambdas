@@ -10,16 +10,13 @@ async function sendSoftOptInConsent(
 	eventType: 'Acquisition' | 'Cancellation',
 ) {
 	const queueName = `soft-opt-in-consent-setter-queue-${stage}`;
-	const messageBody = JSON.stringify(
-		{
-			productName: 'SECONDARY_USER',
-			eventType,
-			identityId,
-			subscriptionId,
-		},
-		null,
-		2,
-	);
+
+	const messageBody = prettyPrint({
+		productName: 'SECONDARY_USER',
+		eventType,
+		identityId,
+		subscriptionId,
+	});
 	logger.log(
 		`Sending soft opt-in consent message ${messageBody} to queue ${queueName}`,
 	);
