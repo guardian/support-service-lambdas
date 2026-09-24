@@ -215,6 +215,44 @@ describe('deleteSecondaryUserEndpoint', () => {
 				primaryUserIdentityId: primaryIdentityId,
 			});
 		});
+
+		it('returns a successful status even if fetching the secondary user from idapi fails', async () => {
+			jest
+				.mocked(getUserByIdentityId)
+				.mockRejectedValue(new Error('Failed to fetch user'));
+
+			const result = await deleteSecondaryUserEndpoint(
+				stage,
+				repository,
+				client,
+				zuoraClient,
+				identityClient,
+				subscriptionName,
+				secondaryIdentityId,
+				secondaryIdentityId,
+			);
+
+			expect(result.statusCode).toBe(204);
+		});
+
+		it('returns a successful status even if fetching the account from Zuora fails', async () => {
+			jest
+				.mocked(getAccount)
+				.mockRejectedValue(new Error('Failed to fetch account'));
+
+			const result = await deleteSecondaryUserEndpoint(
+				stage,
+				repository,
+				client,
+				zuoraClient,
+				identityClient,
+				subscriptionName,
+				secondaryIdentityId,
+				secondaryIdentityId,
+			);
+
+			expect(result.statusCode).toBe(204);
+		});
 	});
 
 	it('returns 404 when the secondary user record is not found', async () => {
