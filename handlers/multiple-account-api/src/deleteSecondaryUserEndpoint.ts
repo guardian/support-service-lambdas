@@ -119,13 +119,23 @@ export const deleteSecondaryUserEndpoint = async (
 			throw new Error('Secondary user does not have email address');
 		}
 
+		const sendSoftOptInCancelEventPromise = sendSoftOptInCancelEvent(
+			stage,
+			secondaryIdentityId,
+			subscriptionName,
+		);
+
 		if (cancelledBy === 'primary') {
-			await sendAccessRemovedEmail(stage, {
-				primaryUserFirstName: account.billToContact.firstName,
-				primaryUserEmail: account.billToContact.workEmail,
-				secondaryUserEmail: secondaryUserDetails.primaryEmailAddress,
-				secondaryUserIdentityId: secondaryIdentityId,
-			});
+			await Promise.all([
+				sendSoftOptInCancelEventPromise,
+				sendAccessRemovedEmail(stage, {
+					primaryUserFirstName: account.billToContact.firstName,
+					primaryUserEmail: account.billToContact.workEmail,
+					secondaryUserEmail: secondaryUserDetails.primaryEmailAddress,
+					secondaryUserIdentityId: secondaryIdentityId,
+				}),
+				sendSoftOptInCancelEventPromise,
+			]);
 		}
 
 		if (cancelledBy === 'secondary') {
@@ -142,14 +152,9 @@ export const deleteSecondaryUserEndpoint = async (
 					primaryUserEmail: primaryEmail,
 					primaryUserIdentityId: secondaryUser.primaryIdentityId,
 				}),
+				sendSoftOptInCancelEventPromise,
 			]);
 		}
-
-		await sendSoftOptInCancelEvent(
-			stage,
-			secondaryIdentityId,
-			subscriptionName,
-		);
 
 		return {
 			statusCode: 204,

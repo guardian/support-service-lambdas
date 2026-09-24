@@ -112,19 +112,21 @@ export const acceptInvitationEndpoint = async (
 			today,
 		);
 
-		await sendInvitationRedeemedEmail(stage, {
-			primaryUserIdentityId: primaryIdentityId,
-			primaryUserFirstName: invitation.primaryUserFirstName,
-			primaryUserEmail: invitation.primaryUserEmail,
-			secondaryUserEmail: invitation.secondaryUserEmail,
-			secondaryUserIdentityId: invitation.secondaryIdentityId,
-		});
+		await Promise.all([
+			sendInvitationRedeemedEmail(stage, {
+				primaryUserIdentityId: primaryIdentityId,
+				primaryUserFirstName: invitation.primaryUserFirstName,
+				primaryUserEmail: invitation.primaryUserEmail,
+				secondaryUserEmail: invitation.secondaryUserEmail,
+				secondaryUserIdentityId: invitation.secondaryIdentityId,
+			}),
 
-		await sendSoftOptInAcquisitionEvent(
-			stage,
-			secondaryIdentityId,
-			subscriptionName,
-		);
+			sendSoftOptInAcquisitionEvent(
+				stage,
+				secondaryIdentityId,
+				subscriptionName,
+			),
+		]);
 
 		return ok({
 			identityId: secondaryIdentityId,
