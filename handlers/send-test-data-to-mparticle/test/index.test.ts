@@ -25,12 +25,15 @@ describe('processEvent', () => {
 	it.each([
 		['missing customer ID', { ...event, user_identities: {} }],
 		['missing user attributes', { ...event, user_attributes: undefined }],
-	])('rejects %s before sending an HTTP request', async (_name, invalidEvent) => {
-		const sendEvents = jest.fn().mockResolvedValue(200);
+	])(
+		'rejects %s before sending an HTTP request',
+		async (_name, invalidEvent) => {
+			const sendEvents = jest.fn().mockResolvedValue(200);
 
-		await expect(processEvent(invalidEvent, sendEvents)).rejects.toThrow(
-			'Invalid mParticle Events API input',
-		);
-		expect(sendEvents).not.toHaveBeenCalled();
-	});
+			await expect(processEvent(invalidEvent, sendEvents)).rejects.toThrow(
+				'Invalid mParticle Events API input',
+			);
+			expect(sendEvents).not.toHaveBeenCalled();
+		},
+	);
 });

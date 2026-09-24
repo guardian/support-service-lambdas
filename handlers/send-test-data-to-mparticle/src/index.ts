@@ -1,10 +1,7 @@
 import type { Handler } from 'aws-lambda';
 import { z } from 'zod';
 import { getAppConfig } from './config';
-import {
-	MParticleClient,
-	type EventsApiRequest,
-} from './mparticleClient';
+import { type EventsApiRequest, MParticleClient } from './mparticleClient';
 
 const eventsApiRequestSchema = z
 	.object({
@@ -24,9 +21,7 @@ export type HandlerResult = {
 
 export type SendEvents = (payload: EventsApiRequest) => Promise<number>;
 
-export const parseEventsApiRequest = (
-	event: unknown,
-): EventsApiRequest => {
+export const parseEventsApiRequest = (event: unknown): EventsApiRequest => {
 	const parsedEvent = eventsApiRequestSchema.safeParse(event);
 	if (!parsedEvent.success) {
 		throw new Error('Invalid mParticle Events API input');

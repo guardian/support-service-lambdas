@@ -13,12 +13,12 @@ const getSSMParamMock = jest.mocked(getSSMParam);
 
 describe('getAppConfig', () => {
 	it('loads the CODE mParticle credentials from the existing parameters', async () => {
-		getSSMParamMock.mockImplementation(async (name) => {
+		getSSMParamMock.mockImplementation((name) => {
 			if (name === MPARTICLE_API_KEY_PARAMETER) {
-				return 'api-key';
+				return Promise.resolve('api-key');
 			}
 			if (name === MPARTICLE_API_SECRET_PARAMETER) {
-				return 'api-secret';
+				return Promise.resolve('api-secret');
 			}
 			throw new Error(`Unexpected parameter: ${name}`);
 		});

@@ -1,6 +1,6 @@
 import {
-	MParticleClient,
 	MPARTICLE_EVENTS_ENDPOINT,
+	MParticleClient,
 } from '../src/mparticleClient';
 
 const payload = {
