@@ -57,6 +57,9 @@ export async function processRecord(
 	if (!parsedEvent.success) {
 		logger.error('Failed to validate mParticle acquisition event', {
 			messageId: record.messageId,
+			validationIssues: parsedEvent.error.issues.map(
+				({ path, code, message }) => ({ path, code, message }),
+			),
 		});
 		return failureResult(record);
 	}

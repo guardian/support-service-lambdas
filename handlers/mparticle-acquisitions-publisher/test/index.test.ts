@@ -1,4 +1,5 @@
 import type { SQSRecord } from 'aws-lambda';
+import { logger } from '@modules/logger/logger';
 import type { MParticleBatch } from '../src/acquisitions';
 import { processRecord, processRecords } from '../src/index';
 
@@ -44,6 +45,14 @@ const record = (body: string, messageId = 'message-id'): SQSRecord => ({
 type SendBatch = (batch: MParticleBatch) => Promise<void>;
 
 describe('mParticle acquisition handler', () => {
+	const errorSpy = jest
+		.spyOn(logger, 'error')
+		.mockImplementation(() => undefined);
+
+	beforeEach(() => {
+		jest.clearAllMocks();
+	});
+
 	it('acknowledges a valid event after mParticle accepts it', async () => {
 		const send = jest.fn<ReturnType<SendBatch>, Parameters<SendBatch>>();
 		send.mockResolvedValue(undefined);
@@ -88,6 +97,19 @@ describe('mParticle acquisition handler', () => {
 				{ itemIdentifier: 'bad-schema' },
 			],
 		});
+		expect(errorSpy).toHaveBeenCalledWith(
+			'Failed to validate mParticle acquisition event',
+			{
+				messageId: 'bad-schema',
+				validationIssues: [
+					{
+						path: ['detail', 'currency'],
+						code: 'invalid_type',
+						message: 'Invalid input: expected string, received number',
+					},
+				],
+			},
+		);
 		expect(send).toHaveBeenCalledTimes(1);
 		const sentBatch = send.mock.calls[0]?.[0];
 		expect(sentBatch?.events[0]?.data.product_action.action).toBe('purchase');
