@@ -1,7 +1,4 @@
-import {
-	MPARTICLE_EVENTS_ENDPOINT,
-	MParticleClient,
-} from '../src/mparticleClient';
+import { MParticleClient } from '../src/mparticleClient';
 
 const payload = {
 	user_identities: { customer_id: 'test-browser-id1' },
@@ -30,14 +27,17 @@ describe('MParticleClient', () => {
 		);
 
 		expect(status).toBe(202);
-		expect(fetchMock).toHaveBeenCalledWith(MPARTICLE_EVENTS_ENDPOINT, {
-			method: 'POST',
-			headers: {
-				Authorization: `Basic ${Buffer.from('api-key:api-secret').toString('base64')}`,
-				'Content-Type': 'application/json',
+		expect(fetchMock).toHaveBeenCalledWith(
+			'https://s2s.eu1.mparticle.com/v2/events',
+			{
+				method: 'POST',
+				headers: {
+					Authorization: `Basic ${Buffer.from('api-key:api-secret').toString('base64')}`,
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(payload),
 			},
-			body: JSON.stringify(payload),
-		});
+		);
 		expect(logSpy).not.toHaveBeenCalled();
 		logSpy.mockRestore();
 	});
