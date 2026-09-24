@@ -811,6 +811,9 @@ importers:
       aws:
         specifier: workspace:*
         version: link:../../modules/aws
+      mparticle:
+        specifier: workspace:*
+        version: link:../../modules/mparticle
       zod:
         specifier: 'catalog:'
         version: 4.4.3
@@ -1174,6 +1177,12 @@ importers:
       '@smithy/types':
         specifier: ^4.13.1
         version: 4.14.3
+
+  modules/mparticle:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 4.4.3
 
   modules/multiple-account:
     dependencies:

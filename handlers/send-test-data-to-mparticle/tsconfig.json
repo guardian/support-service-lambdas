@@ -11,6 +11,9 @@
       "@modules/logger/*": [
         "../../modules/logger/src/*"
       ],
+      "@modules/mparticle/*": [
+        "../../modules/mparticle/src/*"
+      ],
       "@modules/send-test-data-to-mparticle/*": [
         "../../modules/send-test-data-to-mparticle/src/*"
       ]

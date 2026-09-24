@@ -215,6 +215,14 @@ const moduleIdentity: ModuleDefinition = {
 	moduleDependencies: [moduleAws, moduleZuora],
 };
 
+const moduleMparticle: ModuleDefinition = {
+	name: 'mparticle',
+	dependencies: {
+		...dep.zod,
+	},
+	moduleDependencies: [],
+};
+
 const moduleSupporterProductData: ModuleDefinition = {
 	name: 'supporter-product-data',
 	devDependencies: {
@@ -432,7 +440,7 @@ const sendTestDataToMparticle: HandlerDefinition = {
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 	},
-	moduleDependencies: [moduleAws],
+	moduleDependencies: [moduleAws, moduleMparticle],
 };
 
 const mparticleAcquisitionsPublisher: HandlerDefinition = {
@@ -1012,6 +1020,7 @@ export const build: BuildDefinition = {
 		moduleIdentity,
 		moduleInternationalisation,
 		moduleLogger,
+		moduleMparticle,
 		moduleMultipleAccount,
 		moduleProductBenefits,
 		moduleProductCatalog,
