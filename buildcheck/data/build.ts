@@ -13,6 +13,7 @@ export interface HandlerDefinition extends ModuleDefinition {
 	functionNames?: string[];
 	entryPoints?: string[];
 	extraStages?: Array<'CSBX'>;
+	allowedStages?: Array<'CODE' | 'PROD' | 'CSBX'>;
 }
 
 export interface ModuleDefinition {
@@ -424,6 +425,7 @@ const mobilePurchasesToSupporterProductData: HandlerDefinition = {
 
 const sendTestDataToMparticle: HandlerDefinition = {
 	name: 'send-test-data-to-mparticle',
+	allowedStages: ['CODE'],
 	dependencies: {
 		...dep.zod,
 	},

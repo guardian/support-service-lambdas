@@ -806,6 +806,19 @@ importers:
         specifier: workspace:*
         version: link:../../modules/zuora
 
+  handlers/send-test-data-to-mparticle:
+    dependencies:
+      aws:
+        specifier: workspace:*
+        version: link:../../modules/aws
+      zod:
+        specifier: 'catalog:'
+        version: 4.4.3
+    devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.147
+        version: 8.10.161
+
   handlers/stripe-disputes:
     dependencies:
       aws-sdk:

@@ -5,7 +5,6 @@ regions:
   - eu-west-1
 allowedStages:
   - CODE
-  - PROD
 deployments:
   send-test-data-to-mparticle-cloudformation:
     type: cloud-formation
@@ -13,7 +12,6 @@ deployments:
     parameters:
       templateStagePaths:
         CODE: send-test-data-to-mparticle-CODE.template.json
-        PROD: send-test-data-to-mparticle-PROD.template.json
   send-test-data-to-mparticle:
     type: aws-lambda
     parameters:
