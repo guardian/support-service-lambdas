@@ -806,6 +806,22 @@ importers:
         specifier: workspace:*
         version: link:../../modules/zuora
 
+  handlers/send-test-data-to-mparticle:
+    dependencies:
+      aws:
+        specifier: workspace:*
+        version: link:../../modules/aws
+      mparticle:
+        specifier: workspace:*
+        version: link:../../modules/mparticle
+      zod:
+        specifier: 'catalog:'
+        version: 4.4.3
+    devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.147
+        version: 8.10.161
+
   handlers/stripe-disputes:
     dependencies:
       aws-sdk:
@@ -1161,6 +1177,12 @@ importers:
       '@smithy/types':
         specifier: ^4.13.1
         version: 4.14.3
+
+  modules/mparticle:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 4.4.3
 
   modules/multiple-account:
     dependencies:

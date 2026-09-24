@@ -9,7 +9,9 @@ const stage =
 	];
 
 export default (pkg: HandlerDefinition) => {
-	const allowedStages = ['CODE', 'PROD', ...(pkg.extraStages ?? [])].sort();
+	const allowedStages = [
+		...(pkg.allowedStages ?? ['CODE', 'PROD', ...(pkg.extraStages ?? [])]),
+	].sort();
 	return {
 		stacks: [pkg.stack ?? 'support'],
 		regions: ['eu-west-1'],

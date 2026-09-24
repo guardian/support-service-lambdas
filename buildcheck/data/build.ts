@@ -13,6 +13,7 @@ export interface HandlerDefinition extends ModuleDefinition {
 	functionNames?: string[];
 	entryPoints?: string[];
 	extraStages?: Array<'CSBX'>;
+	allowedStages?: Array<'CODE' | 'PROD' | 'CSBX'>;
 }
 
 export interface ModuleDefinition {
@@ -212,6 +213,14 @@ const moduleIdentity: ModuleDefinition = {
 		...devDeps['@types/aws-lambda'],
 	},
 	moduleDependencies: [moduleAws, moduleZuora],
+};
+
+const moduleMparticle: ModuleDefinition = {
+	name: 'mparticle',
+	dependencies: {
+		...dep.zod,
+	},
+	moduleDependencies: [],
 };
 
 const moduleSupporterProductData: ModuleDefinition = {
@@ -420,6 +429,18 @@ const mobilePurchasesToSupporterProductData: HandlerDefinition = {
 		moduleProductBenefits,
 		moduleSupporterProductData,
 	],
+};
+
+const sendTestDataToMparticle: HandlerDefinition = {
+	name: 'send-test-data-to-mparticle',
+	allowedStages: ['CODE'],
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
+	moduleDependencies: [moduleAws, moduleMparticle],
 };
 
 const mparticleAcquisitionsPublisher: HandlerDefinition = {
@@ -987,6 +1008,7 @@ export const build: BuildDefinition = {
 		scrubNonTokenisedPaymentMethods,
 		promotionsApi,
 		paymentFailureCommsExitApi,
+		sendTestDataToMparticle,
 		// MARKER new-lambda: buildcheck-reference
 	],
 
@@ -998,6 +1020,7 @@ export const build: BuildDefinition = {
 		moduleIdentity,
 		moduleInternationalisation,
 		moduleLogger,
+		moduleMparticle,
 		moduleMultipleAccount,
 		moduleProductBenefits,
 		moduleProductCatalog,

@@ -41,6 +41,7 @@ import { SalesforceDisasterRecovery } from '../lib/salesforce-disaster-recovery'
 import { SalesforceDisasterRecoveryHealthCheck } from '../lib/salesforce-disaster-recovery-health-check';
 import { SalesforceEventBus } from '../lib/salesforce-event-bus';
 import { ScrubNonTokenisedPaymentMethods } from '../lib/scrub-non-tokenised-payment-methods';
+import { SendTestDataToMparticle } from '../lib/send-test-data-to-mparticle';
 import { SfEmailsToS3Exporter } from '../lib/sf-emails-to-s3-exporter';
 import { SfMoveSubscriptionsApi } from '../lib/sf-move-subscriptions-api';
 import {
@@ -151,6 +152,8 @@ new PromotionsLambdas(app, 'CODE', {
 new PromotionsLambdas(app, 'PROD', {
 	newPromoStreamLabel: '2026-01-05T11:50:46.239',
 });
+
+new SendTestDataToMparticle(app, 'CODE');
 
 const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	ImovoVoucherApi,
