@@ -72,6 +72,12 @@ export class SoftOptInConsentSetter extends GuStack {
 		// Shared Policies
 		const sharedPolicies: PolicyStatement[] = [
 			new PolicyStatement({
+				actions: ['dynamodb:Query'],
+				resources: [
+					`arn:aws:dynamodb:${this.region}:${this.account}:table/SupporterProductData-${this.stage}`,
+				],
+			}),
+			new PolicyStatement({
 				actions: ['cloudwatch:PutMetricData'],
 				resources: ['*'],
 			}),

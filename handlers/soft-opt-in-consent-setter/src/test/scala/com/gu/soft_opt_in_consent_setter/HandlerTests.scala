@@ -31,6 +31,15 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
   val identityId = "someIdentityId"
   val subscriptionId = "A-S12345678"
 
+  test(testName = "secondary user access is treated as an active product for cancellation") {
+    Handler.productsForCancellation(Set("Membership"), hasActiveSecondaryUserAccess = true) shouldBe
+      Set("Membership", "Secondary User")
+  }
+
+  test(testName = "cancellation products remain unchanged without secondary user access") {
+    Handler.productsForCancellation(Set("Membership"), hasActiveSecondaryUserAccess = false) shouldBe Set("Membership")
+  }
+
   test(testName = "processProductSwitchSub should handle product switch event correctly") {
     val mobileSubscriptions = MobileSubscriptions(
       List(
@@ -210,6 +219,65 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     )
 
     result shouldBe Right(())
+  }
+
+  test(testName = "processCancellation preserves consents while the user has active secondary access") {
+    mockSendConsentsReq.expects(*, *).never()
+    mockGetMobileSubscriptions.expects(identityId).returning(Right(MobileSubscriptions(List.empty)))
+    mockSfConnector.getActiveSubs _ expects Seq(identityId) returning Right(
+      SFAssociatedSubResponse(0, true, records = Seq.empty),
+    )
+
+    val testMessageBody = MessageBody(
+      identityId = identityId,
+      productName = "Supporter Plus",
+      printProduct = None,
+      previousProductName = None,
+      eventType = Cancellation,
+      subscriptionId = subscriptionId,
+      userConsentsOverrides = None,
+    )
+
+    val result = processCancelledSub(
+      testMessageBody,
+      mockSendConsentsReq,
+      mockGetMobileSubscriptions,
+      calculator,
+      mockSfConnector,
+      _ => Right(true),
+    )
+
+    result shouldBe Right(())
+  }
+
+  test(testName = "processCancellation does not change consents when secondary access cannot be checked") {
+    val lookupError = SoftOptInError("SupporterProductData query failed", null)
+    mockSendConsentsReq.expects(*, *).never()
+    mockGetMobileSubscriptions.expects(identityId).returning(Right(MobileSubscriptions(List.empty)))
+    mockSfConnector.getActiveSubs _ expects Seq(identityId) returning Right(
+      SFAssociatedSubResponse(0, true, records = Seq.empty),
+    )
+
+    val testMessageBody = MessageBody(
+      identityId = identityId,
+      productName = "Supporter Plus",
+      printProduct = None,
+      previousProductName = None,
+      eventType = Cancellation,
+      subscriptionId = subscriptionId,
+      userConsentsOverrides = None,
+    )
+
+    val result = processCancelledSub(
+      testMessageBody,
+      mockSendConsentsReq,
+      mockGetMobileSubscriptions,
+      calculator,
+      mockSfConnector,
+      _ => Left(lookupError),
+    )
+
+    result shouldBe Left(lookupError)
   }
 
   test(testName =
