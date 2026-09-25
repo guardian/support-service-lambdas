@@ -1,14 +1,14 @@
 import { z } from 'zod';
+import type {
+	DataSubjectAPI,
+	MParticleClient,
+} from '@modules/mparticle/mparticleHttpClient';
 import type { DataSubjectRequestState } from '../../../apis/dataSubjectRequests/getStatus';
 import {
 	DataSubjectRequestStatus,
 	getStatusOfDataSubjectRequest,
 } from '../../../apis/dataSubjectRequests/getStatus';
 import type { BatonS3Writer } from '../../../services/batonS3Writer';
-import type {
-	DataSubjectAPI,
-	MParticleClient,
-} from '../../../services/mparticleClient';
 import type { InitiationReference } from '../initiationReference';
 import { InitiationReferenceSchema } from '../initiationReference';
 import {

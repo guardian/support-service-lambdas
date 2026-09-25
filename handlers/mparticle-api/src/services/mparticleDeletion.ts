@@ -1,14 +1,18 @@
 import { logger } from '@modules/logger/logger';
+import type { MParticleEnvironment } from '@modules/mparticle/events';
+import type {
+	BulkDeletionAPI,
+	MParticleClient,
+} from '@modules/mparticle/mparticleHttpClient';
 import { MParticleHttpError } from '@modules/mparticle/mparticleHttpClient';
 import type { DeletionResult } from '../types/deletionMessage';
-import type { BulkDeletionAPI, MParticleClient } from './mparticleClient';
 
 /**
  * mParticle Bulk Profile Deletion API Request Types
  * API Documentation: https://docs.mparticle.com/developers/apis/bulk-profile-deletion-api/
  */
 type BulkDeletionRequestItem = {
-	environment_type: 'production' | 'development';
+	environment_type: MParticleEnvironment;
 	action: 'delete';
 	mpid?: string;
 	identities?: Record<string, string>;
@@ -39,7 +43,7 @@ type BulkDeletionResponse = void;
 export async function deleteMParticleUser(
 	client: MParticleClient<BulkDeletionAPI>,
 	userId: string,
-	environment: 'production' | 'development' = 'production',
+	environment: MParticleEnvironment = 'production',
 ): Promise<DeletionResult> {
 	try {
 		logger.log(`Attempting to delete user ${userId} from mParticle`);

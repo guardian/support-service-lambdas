@@ -34,7 +34,7 @@ The publisher-specific configuration is loaded from encrypted SSM using the stan
 | Parameter | Purpose |
 |---|---|
 | `mparticle/googleEnhancedConversionsConversionActionId` | Google Enhanced Conversions action ID |
-| `mparticle/endpoint` | Optional Events API endpoint; defaults to `https://s2s.eu1.mparticle.com/v2/events` |
+| `mparticle/pod` | Optional mParticle pod hosting our workspace; defaults to `eu1`. The Events API base URL is derived from it |
 
 The mParticle Events API credentials are shared with the existing `mparticle-api` handler and are read from:
 

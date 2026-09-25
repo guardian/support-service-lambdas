@@ -2,7 +2,7 @@ import { loadConfig } from '@modules/aws/appConfig';
 import { getSSMParam } from '@modules/aws/ssm';
 import {
 	configSchema,
-	DEFAULT_MPARTICLE_ENDPOINT,
+	DEFAULT_MPARTICLE_POD,
 	getAppConfig,
 } from '../src/config';
 
@@ -31,7 +31,7 @@ describe('mParticle config', () => {
 		loadConfigMock.mockResolvedValue({
 			mparticle: {
 				googleEnhancedConversionsConversionActionId: 'conversion-action',
-				endpoint: DEFAULT_MPARTICLE_ENDPOINT,
+				pod: DEFAULT_MPARTICLE_POD,
 			},
 		});
 		getSSMParamMock.mockImplementation((name) =>
@@ -45,36 +45,36 @@ describe('mParticle config', () => {
 		process.env = originalEnv;
 	});
 
-	it('defaults the Events API endpoint to EU1', () => {
+	it('defaults the Events API pod to EU1', () => {
 		expect(
 			configSchema.parse({
 				mparticle: {
-					apiKey: 'api-key',
-					apiSecret: 'api-secret',
+					key: 'api-key',
+					secret: 'api-secret',
 					googleEnhancedConversionsConversionActionId: 'conversion-action',
 				},
 			}),
 		).toEqual({
 			mparticle: {
-				apiKey: 'api-key',
-				apiSecret: 'api-secret',
+				key: 'api-key',
+				secret: 'api-secret',
 				googleEnhancedConversionsConversionActionId: 'conversion-action',
-				endpoint: DEFAULT_MPARTICLE_ENDPOINT,
+				pod: DEFAULT_MPARTICLE_POD,
 			},
 		});
 	});
 
 	it('rejects missing credentials', () => {
 		expect(() =>
-			configSchema.parse({ mparticle: { apiKey: 'api-key' } }),
+			configSchema.parse({ mparticle: { key: 'api-key' } }),
 		).toThrow();
 	});
 
 	it('loads credentials from the existing mParticle API parameters', async () => {
 		const config = await getAppConfig();
 
-		expect(config.mparticle.apiKey).toBe('shared-api-key');
-		expect(config.mparticle.apiSecret).toBe('shared-api-secret');
+		expect(config.mparticle.key).toBe('shared-api-key');
+		expect(config.mparticle.secret).toBe('shared-api-secret');
 		expect(loadConfigMock).toHaveBeenCalledWith(
 			'CODE',
 			'support',
