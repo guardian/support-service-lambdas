@@ -1,14 +1,14 @@
 import { faker } from '@faker-js/faker';
+import type {
+	DataSubjectAPI,
+	MParticleClient,
+} from '@modules/mparticle/mparticleHttpClient';
 import { handleSarStatus } from '../src/routers/baton/access/handleStatus';
 import type {
 	GUID,
 	InitiationReference,
 } from '../src/routers/baton/initiationReference';
 import type { BatonS3Writer } from '../src/services/batonS3Writer';
-import type {
-	DataSubjectAPI,
-	MParticleClient,
-} from '../src/services/mparticleClient';
 import { invokeBatonHandler } from './invoke-baton-handler';
 import {
 	getMockCreateDataSubjectRequestResponse,

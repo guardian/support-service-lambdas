@@ -1170,6 +1170,9 @@ importers:
 
   modules/mparticle:
     dependencies:
+      logger:
+        specifier: workspace:*
+        version: link:../logger
       zod:
         specifier: 'catalog:'
         version: 4.4.3

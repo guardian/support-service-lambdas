@@ -1,10 +1,10 @@
-import { processUserDeletion } from '../../../src/apis/dataSubjectRequests/deleteUser';
-import type { BrazeClient } from '../../../src/services/brazeClient';
-import { deleteBrazeUser } from '../../../src/services/brazeClient';
 import type {
 	BulkDeletionAPI,
 	MParticleClient,
-} from '../../../src/services/mparticleClient';
+} from '@modules/mparticle/mparticleHttpClient';
+import { processUserDeletion } from '../../../src/apis/dataSubjectRequests/deleteUser';
+import type { BrazeClient } from '../../../src/services/brazeClient';
+import { deleteBrazeUser } from '../../../src/services/brazeClient';
 import { deleteMParticleUser } from '../../../src/services/mparticleDeletion';
 
 // Mock the modules

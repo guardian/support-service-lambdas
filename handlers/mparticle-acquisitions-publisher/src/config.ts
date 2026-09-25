@@ -3,20 +3,21 @@ import { loadConfig } from '@modules/aws/appConfig';
 import { getSSMParam } from '@modules/aws/ssm';
 import { getIfDefined } from '@modules/nullAndUndefined';
 
-export const DEFAULT_MPARTICLE_ENDPOINT =
-	'https://s2s.eu1.mparticle.com/v2/events';
+// The mParticle data centre hosting our workspace. The Events API base URL is
+// derived from it by @modules/mparticle/mparticleHttpClient.
+export const DEFAULT_MPARTICLE_POD = 'eu1';
 
 const publisherConfigSchema = z.object({
 	mparticle: z.object({
 		googleEnhancedConversionsConversionActionId: z.string().min(1),
-		endpoint: z.string().url().optional().default(DEFAULT_MPARTICLE_ENDPOINT),
+		pod: z.string().min(1).optional().default(DEFAULT_MPARTICLE_POD),
 	}),
 });
 
 export const configSchema = z.object({
 	mparticle: publisherConfigSchema.shape.mparticle.extend({
-		apiKey: z.string().min(1),
-		apiSecret: z.string().min(1),
+		key: z.string().min(1),
+		secret: z.string().min(1),
 	}),
 });
 
@@ -30,7 +31,7 @@ export const getAppConfig = async (): Promise<AppConfig> => {
 	const stack = getEnv('STACK');
 	const app = getEnv('APP');
 
-	const [publisherConfig, apiKey, apiSecret] = await Promise.all([
+	const [publisherConfig, key, secret] = await Promise.all([
 		loadConfig(stage, stack, app, publisherConfigSchema),
 		getSSMParam(`/${stage}/${stack}/mparticle-api/inputPlatform/key`),
 		getSSMParam(`/${stage}/${stack}/mparticle-api/inputPlatform/secret`),
@@ -40,8 +41,8 @@ export const getAppConfig = async (): Promise<AppConfig> => {
 		...publisherConfig,
 		mparticle: {
 			...publisherConfig.mparticle,
-			apiKey,
-			apiSecret,
+			key,
+			secret,
 		},
 	});
 };

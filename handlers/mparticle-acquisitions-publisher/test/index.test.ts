@@ -1,6 +1,6 @@
 import type { SQSRecord } from 'aws-lambda';
 import { logger } from '@modules/logger/logger';
-import type { MParticleBatch } from '../src/acquisitions';
+import type { AcquisitionEventBatch } from '../src/acquisitions';
 import { processRecord, processRecords } from '../src/index';
 
 const configuration = {
@@ -42,7 +42,7 @@ const record = (body: string, messageId = 'message-id'): SQSRecord => ({
 	awsRegion: 'eu-west-1',
 });
 
-type SendBatch = (batch: MParticleBatch) => Promise<void>;
+type SendBatch = (batch: AcquisitionEventBatch) => Promise<void>;
 
 describe('mParticle acquisition handler', () => {
 	const errorSpy = jest

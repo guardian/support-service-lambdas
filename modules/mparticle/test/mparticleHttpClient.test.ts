@@ -1,13 +1,18 @@
 import { z } from 'zod';
 import {
-	MParticleHttpClient,
+	createEventsApiClient,
+	eventsApiBaseUrl,
 	MParticleHttpError,
 	MParticleNetworkError,
 } from '../src/mparticleHttpClient';
 
 const apiKey = 'api-key';
 const apiSecret = 'api-secret';
-const endpoint = 'https://s2s.eu1.mparticle.com/v2';
+const pod = 'eu1';
+const endpoint = eventsApiBaseUrl(pod);
+
+const eventsClient = (fetchFn: typeof fetch) =>
+	createEventsApiClient({ key: apiKey, secret: apiSecret }, pod, fetchFn);
 
 function jsonResponse(body: unknown, status = 200): Response {
 	return new Response(JSON.stringify(body), {
@@ -21,12 +26,7 @@ describe('MParticleHttpClient', () => {
 		const fetchFn = jest
 			.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>()
 			.mockResolvedValue(jsonResponse({ accepted: true }, 202));
-		const client = new MParticleHttpClient(
-			endpoint,
-			apiKey,
-			apiSecret,
-			fetchFn,
-		);
+		const client = eventsClient(fetchFn);
 
 		const result = await client.post(
 			'/events',
@@ -58,12 +58,7 @@ describe('MParticleHttpClient', () => {
 					headers: { 'content-type': 'text/plain' },
 				}),
 			);
-		const client = new MParticleHttpClient(
-			endpoint,
-			apiKey,
-			apiSecret,
-			fetchFn,
-		);
+		const client = eventsClient(fetchFn);
 
 		const result = await client.get('/status', (body, contentType) => ({
 			body,
@@ -82,12 +77,7 @@ describe('MParticleHttpClient', () => {
 		const fetchFn = jest
 			.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>()
 			.mockResolvedValue(new Response(privateResponseBody, { status: 503 }));
-		const client = new MParticleHttpClient(
-			endpoint,
-			apiKey,
-			apiSecret,
-			fetchFn,
-		);
+		const client = eventsClient(fetchFn);
 
 		let error: unknown;
 		try {
@@ -106,12 +96,7 @@ describe('MParticleHttpClient', () => {
 		const fetchFn = jest
 			.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>()
 			.mockRejectedValue(new Error(`${apiSecret} should not escape`));
-		const client = new MParticleHttpClient(
-			endpoint,
-			apiKey,
-			apiSecret,
-			fetchFn,
-		);
+		const client = eventsClient(fetchFn);
 
 		await expect(
 			client.post('/events', { event: 'purchase' }, () => undefined),
@@ -131,12 +116,7 @@ describe('MParticleHttpClient', () => {
 					headers: { 'content-type': 'application/json' },
 				}),
 			);
-		const client = new MParticleHttpClient(
-			endpoint,
-			apiKey,
-			apiSecret,
-			fetchFn,
-		);
+		const client = eventsClient(fetchFn);
 
 		const result = await client.get(
 			'/status',

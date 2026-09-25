@@ -2,7 +2,7 @@ import { MParticleHttpError } from '@modules/mparticle/mparticleHttpClient';
 import type {
 	BulkDeletionAPI,
 	MParticleClient,
-} from '../../src/services/mparticleClient';
+} from '@modules/mparticle/mparticleHttpClient';
 import { deleteMParticleUser } from '../../src/services/mparticleDeletion';
 
 jest.mock('@modules/logger/logger', () => ({
