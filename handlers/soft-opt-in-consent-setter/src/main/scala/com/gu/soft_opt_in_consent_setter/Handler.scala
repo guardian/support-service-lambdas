@@ -49,6 +49,11 @@ object Handler extends LazyLogging {
         productSwitchSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyProcessSwitchStatus))
         productSwitchSubIdentityIds = productSwitchSubs.map(sub => sub.Buyer__r.IdentityID__c)
 
+        activeSecondaryUserIdentityIds <-
+          if (cancelledSubsIdentityIds.nonEmpty) {
+            DynamoConnector(config.stage).flatMap(_.getActiveSecondaryUserIdentityIds(cancelledSubsIdentityIds))
+          } else Right(Set.empty[String])
+
         _ = logger.info(s"About to fetch active subs from Salesforce")
         activeSubs <- sfConnector.getActiveSubs((cancelledSubsIdentityIds ++ productSwitchSubIdentityIds).distinct)
         _ = logger.info(s"Successfully fetched ${activeSubs.records.length} active subs from Salesforce")
@@ -67,6 +72,7 @@ object Handler extends LazyLogging {
           identityConnector.sendConsentsReq,
           sfConnector.updateSubs,
           consentsCalculator,
+          activeSecondaryUserIdentityIds,
         )
         _ = Metrics.put(event = "successful_run")
       } yield ()).flatten.left
@@ -180,6 +186,7 @@ object Handler extends LazyLogging {
       sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
       updateSubs: String => Either[SoftOptInError, Unit],
       consentsCalculator: ConsentsCalculator,
+      activeSecondaryUserIdentityIds: Set[String] = Set.empty,
   ): Either[SoftOptInError, Unit] = {
     def sendCancellationConsents(identityId: String, consents: Set[String]): Either[SoftOptInError, Unit] = {
       if (consents.nonEmpty) {
@@ -203,7 +210,10 @@ object Handler extends LazyLogging {
           for {
             consents <- consentsCalculator.getCancellationConsents(
               sub.Product__c,
-              associatedActiveNonGiftSubs.map(_.Product__c).toSet,
+              productsForCancellation(
+                associatedActiveNonGiftSubs.map(_.Product__c).toSet,
+                activeSecondaryUserIdentityIds.contains(sub.Buyer__r.IdentityID__c),
+              ),
             )
             consentWithoutSimilarProducts = consentsCalculator.removeSimilarGuardianProductFromSet(consents)
             _ <- sendCancellationConsents(sub.Buyer__r.IdentityID__c, consentWithoutSimilarProducts)
@@ -229,6 +239,9 @@ object Handler extends LazyLogging {
   def logErrors(updateResults: Either[SoftOptInError, Unit]): Unit = {
     updateResults.left.foreach(error => logger.warn(s"${error.getMessage}"))
   }
+
+  def productsForCancellation(activeProductNames: Set[String], hasActiveSecondaryUserAccess: Boolean): Set[String] =
+    if (hasActiveSecondaryUserAccess) activeProductNames + "Secondary User" else activeProductNames
 
   def emitIdentityMetrics(records: Seq[SFSubRecordUpdate]): Unit = {
     // Soft_Opt_in_Number_of_Attempts__c == 0 means the consents were set successfully

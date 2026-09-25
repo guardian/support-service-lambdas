@@ -5,7 +5,7 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import software.amazon.awssdk.services.dynamodb.model.{AttributeValue, PutItemRequest}
+import software.amazon.awssdk.services.dynamodb.model.{AttributeValue, PutItemRequest, QueryRequest, QueryResponse}
 
 import scala.jdk.CollectionConverters._
 import scala.util.{Success, Try}
@@ -46,5 +46,38 @@ class DynamoConnectorTests extends AnyFunSuite with Matchers with MockFactory {
 
     val dynamoConnector = new DynamoConnector(mockDbClient, "DEV")
     dynamoConnector.updateLoggingTable(subscriptionId, identityId, Switch, mockPutItem)
+  }
+
+  test(testName = "hasActiveSecondaryUserAccess queries SPPD consistently and recognises an active secondary record") {
+    val secondaryRecord = Map(
+      "primarySubscriptionName" -> AttributeValue.builder().s("A-primary").build(),
+      "termEndDate" -> AttributeValue.builder().s("2099-01-01").build(),
+    ).asJava
+    val response = QueryResponse.builder().items(Seq(secondaryRecord).asJava).build()
+    val client = mock[DynamoDbClient]
+    (client.query(_: QueryRequest)).expects(*).onCall { (request: QueryRequest) =>
+      request.tableName() shouldBe "SupporterProductData-CODE"
+      request.consistentRead() shouldBe true
+      request.keyConditionExpression() shouldBe "identityId = :identityId"
+      request.expressionAttributeValues().get(":identityId").s() shouldBe identityId
+      response
+    }
+
+    new DynamoConnector(client, "CODE").hasActiveSecondaryUserAccess(identityId) shouldBe Right(true)
+  }
+
+  test(testName = "hasActiveSecondaryUserAccess ignores expired secondary and primary records") {
+    val expiredSecondary = Map(
+      "primarySubscriptionName" -> AttributeValue.builder().s("A-primary").build(),
+      "termEndDate" -> AttributeValue.builder().s("2000-01-01").build(),
+    ).asJava
+    val primary = Map(
+      "termEndDate" -> AttributeValue.builder().s("2099-01-01").build(),
+    ).asJava
+    val response = QueryResponse.builder().items(Seq(expiredSecondary, primary).asJava).build()
+    val client = mock[DynamoDbClient]
+    (client.query(_: QueryRequest)).expects(*).returning(response)
+
+    new DynamoConnector(client, "CODE").hasActiveSecondaryUserAccess(identityId) shouldBe Right(false)
   }
 }
