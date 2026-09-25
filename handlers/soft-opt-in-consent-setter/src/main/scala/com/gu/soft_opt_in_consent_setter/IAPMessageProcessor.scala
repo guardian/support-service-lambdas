@@ -35,10 +35,11 @@ class IAPMessageProcessor(
 
         processCancelledSub(
           message,
-          identityConnector.sendConsentsReq,
-          mpapiConnector.getMobileSubscriptions,
+          identityConnector.sendConsentsReq _,
+          mpapiConnector.getMobileSubscriptions _,
           consentsCalculator,
           sfConnector,
+          dynamoConnector.hasActiveSecondaryUserAccess _,
         )
       case Switch =>
         Metrics.put(event = "product_switches_to_process", 1)
@@ -180,6 +181,7 @@ object IAPMessageProcessor extends StrictLogging {
       getMobileSubscriptions: String => Either[SoftOptInError, MobileSubscriptions],
       consentsCalculator: ConsentsCalculator,
       sfConnector: SalesforceConnector,
+      hasActiveSecondaryUserAccess: String => Either[SoftOptInError, Boolean] = _ => Right(false),
   ): Either[SoftOptInError, Unit] = {
     def sendCancellationConsents(identityId: String, consents: Set[String]): Either[SoftOptInError, Unit] = {
       val maybeError: Option[SoftOptInError] =
@@ -200,16 +202,20 @@ object IAPMessageProcessor extends StrictLogging {
     for {
       mobileSubscriptionsResponse <- getMobileSubscriptions(messageBody.identityId)
       activeSubs <- sfConnector.getActiveSubs(Seq(messageBody.identityId))
+      hasSecondaryUserAccess <- hasActiveSecondaryUserAccess(messageBody.identityId)
 
       iapSOIs = mobileSubscriptionsResponse.subscriptions
         .filter(_.valid)
         .map(_.softOptInProductName)
         .distinct
-      productNames = activeSubs.records.map(_.Product__c) ++ iapSOIs
+      productNames = Handler.productsForCancellation(
+        (activeSubs.records.map(_.Product__c) ++ iapSOIs).toSet,
+        hasSecondaryUserAccess,
+      )
 
       consents <- consentsCalculator.getCancellationConsents(
         messageBody.productName,
-        productNames.toSet,
+        productNames,
       )
       consentWithoutSimilarProducts = consentsCalculator.removeSimilarGuardianProductFromSet(consents)
       _ <- sendCancellationConsents(messageBody.identityId, consentWithoutSimilarProducts)
