@@ -6,7 +6,6 @@ import {
 } from 'aws-cdk-lib/aws-cloudwatch';
 import { EventBus, Rule } from 'aws-cdk-lib/aws-events';
 import { SqsQueue } from 'aws-cdk-lib/aws-events-targets';
-import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { SrLambda } from './cdk/SrLambda';
@@ -28,18 +27,6 @@ export class MparticleAcquisitionsPublisher extends SrStack {
 				timeout: Duration.minutes(2),
 			},
 		});
-
-		lambda.addToRolePolicy(
-			new PolicyStatement({
-				effect: Effect.ALLOW,
-				actions: ['ssm:GetParameter'],
-				resources: [
-					`arn:aws:ssm:${this.region}:${this.account}:parameter/${this.stage}/${this.stack}/mparticle-api/inputPlatform/key`,
-					`arn:aws:ssm:${this.region}:${this.account}:parameter/${this.stage}/${this.stack}/mparticle-api/inputPlatform/secret`,
-					`arn:aws:ssm:${this.region}:${this.account}:parameter/${this.stage}/${this.stack}/mparticle-api/pod`,
-				],
-			}),
-		);
 
 		const eventBridgeDlq = new Queue(this, 'EventBridgeDlq', {
 			queueName: `${app}-eventbridge-dlq-${this.stage}`,

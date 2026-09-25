@@ -45,11 +45,9 @@ describe('The mParticle acquisitions publisher stack', () => {
 		});
 		const templateJson = JSON.stringify(template.toJSON());
 		expect(templateJson).toContain(
-			'parameter/PROD/support/mparticle-api/inputPlatform/key',
+			'parameter/PROD/support/mparticle-acquisitions-publisher',
 		);
-		expect(templateJson).toContain(
-			'parameter/PROD/support/mparticle-api/inputPlatform/secret',
-		);
+		expect(templateJson).not.toContain('parameter/PROD/support/mparticle-api');
 
 		expect(template.toJSON()).toMatchSnapshot();
 	});

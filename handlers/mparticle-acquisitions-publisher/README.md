@@ -31,19 +31,16 @@ The publisher-specific configuration is loaded from encrypted SSM using the stan
 
 `/{stage}/support/mparticle-acquisitions-publisher`
 
-| Parameter                                               | Purpose                               |
-| ------------------------------------------------------- | ------------------------------------- |
-| `mparticle/googleEnhancedConversionsConversionActionId` | Google Enhanced Conversions action ID |
+| Parameter                                               | Purpose                                       |
+| ------------------------------------------------------- | --------------------------------------------- |
+| `mparticle/googleEnhancedConversionsConversionActionId` | Google Enhanced Conversions action ID         |
+| `mparticle/key`                                         | Publisher's mParticle API key                 |
+| `mparticle/secret`                                      | Publisher's mParticle API secret              |
+| `mparticle/pod`                                         | mParticle pod hosting the publisher workspace |
 
-The mParticle pod and Events API credentials are shared with the existing `mparticle-api` handler and are read from:
+The publisher's mParticle configuration is isolated from the existing `mparticle-api` handler and is read from the path above for each stage. Store `key` and `secret` as encrypted SSM parameters.
 
-`/{stage}/support/mparticle-api/pod`
-
-`/{stage}/support/mparticle-api/inputPlatform/key`
-
-`/{stage}/support/mparticle-api/inputPlatform/secret`
-
-Populate the publisher-specific CODE and PROD values before enabling the corresponding deployment. The shared credentials must already exist in both stages. Never commit or log the credentials.
+Populate the publisher-specific CODE and PROD values before enabling the corresponding deployment. Never commit or log the credentials.
 
 ## Infrastructure
 
