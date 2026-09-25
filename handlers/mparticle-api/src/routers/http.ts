@@ -1,10 +1,10 @@
-import { Router } from '@modules/routing/router';
-import { withParsers } from '@modules/routing/withParsers';
-import type { BatonS3Writer } from '../services/batonS3Writer';
 import type {
 	DataSubjectAPI,
 	MParticleClient,
-} from '../services/mparticleClient';
+} from '@modules/mparticle/mparticleHttpClient';
+import { Router } from '@modules/routing/router';
+import { withParsers } from '@modules/routing/withParsers';
+import type { BatonS3Writer } from '../services/batonS3Writer';
 import {
 	dataSubjectRequestCallbackHandler,
 	dataSubjectRequestCallbackParser,

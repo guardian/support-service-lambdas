@@ -65,6 +65,36 @@ describe('RestClient', () => {
 			);
 		});
 
+		it('should preserve response status and support a raw response parser', async () => {
+			mockFetchResponse({
+				ok: true,
+				status: 202,
+				text: 'accepted',
+				headers: { 'content-type': 'text/plain; charset=utf-8' },
+			});
+
+			const result = await client.getWithStatus(
+				'/users/123',
+				(body, contentType) => ({ body, contentType }),
+			);
+
+			expect(result).toEqual({
+				status: 202,
+				responseBody: { body: 'accepted', contentType: 'text/plain' },
+				responseHeaders: { 'content-type': 'text/plain; charset=utf-8' },
+				statusText: undefined,
+			});
+		});
+
+		it('should support an empty response body with a raw response parser', async () => {
+			mockFetchResponse({ ok: true, status: 204, text: '', headers: {} });
+
+			const result = await client.getWithStatus('/users/123', () => undefined);
+
+			expect(result.status).toBe(204);
+			expect(result.responseBody).toBeUndefined();
+		});
+
 		it('should make a GET request with URLSearchParams including duplicate keys', async () => {
 			const schema = z.object({ id: z.string(), name: z.string() });
 			const mockResponse = { id: '456', name: 'Test2' };
@@ -114,6 +144,24 @@ describe('RestClient', () => {
 					body: requestBody,
 				}),
 			);
+		});
+
+		it('should preserve response status for a POST request', async () => {
+			mockFetchResponse({
+				ok: true,
+				status: 202,
+				text: '',
+				headers: {},
+			});
+
+			const result = await client.postWithStatus(
+				'/users',
+				JSON.stringify({ data: 'test' }),
+				() => undefined,
+			);
+
+			expect(result.status).toBe(202);
+			expect(result.responseBody).toBeUndefined();
 		});
 
 		it('should include custom headers', async () => {
@@ -179,6 +227,19 @@ describe('RestClient', () => {
 				expect((err as Error).cause).toBeInstanceOf(ZodError);
 			}
 		});
+
+		it('should throw a safe network error when fetch fails', async () => {
+			fetchMock.mockRejectedValue(
+				new Error('connection details should be hidden'),
+			);
+
+			await expect(
+				client.get('/users/123', z.object({ id: z.string() })),
+			).rejects.toMatchObject({
+				name: 'RestClientNetworkError',
+				message: 'REST request failed at the network layer',
+			});
+		});
 	});
 
 	describe('authentication', () => {
@@ -240,6 +301,59 @@ describe('RestClient', () => {
 			expect(fetchMock).toHaveBeenCalledWith(
 				`${mockBaseUrl}/path/to/resource`,
 				expect.any(Object),
+			);
+		});
+
+		it('should avoid duplicate slashes when the base URL has a trailing slash', async () => {
+			const clientWithTrailingSlash = new TestRestClient(`${mockBaseUrl}/`);
+			const schema = z.object({ data: z.string() });
+
+			mockFetchResponse({
+				ok: true,
+				status: 200,
+				body: { data: 'test' },
+				headers: {},
+			});
+
+			await clientWithTrailingSlash.get('/path/to/resource', schema);
+
+			expect(fetchMock).toHaveBeenCalledWith(
+				`${mockBaseUrl}/path/to/resource`,
+				expect.any(Object),
+			);
+		});
+	});
+
+	describe('streaming', () => {
+		it('should return an unconsumed response body stream', async () => {
+			const stream = new ReadableStream<Uint8Array>({
+				start(controller) {
+					controller.enqueue(new TextEncoder().encode('stream body'));
+					controller.close();
+				},
+			});
+			fetchMock.mockResolvedValue({
+				ok: true,
+				status: 200,
+				body: stream,
+				headers: new Headers(),
+			} as Response);
+
+			const responseBody = await client.getStream('/stream');
+
+			expect(await new Response(responseBody).text()).toBe('stream body');
+		});
+
+		it('should reject when a successful response has no body', async () => {
+			fetchMock.mockResolvedValue({
+				ok: true,
+				status: 204,
+				body: null,
+				headers: new Headers(),
+			} as Response);
+
+			await expect(client.getStream('/stream')).rejects.toThrow(
+				'no http response body',
 			);
 		});
 	});

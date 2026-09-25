@@ -368,6 +368,9 @@ importers:
       aws:
         specifier: workspace:*
         version: link:../../modules/aws
+      mparticle:
+        specifier: workspace:*
+        version: link:../../modules/mparticle
       zod:
         specifier: 'catalog:'
         version: 4.4.3
@@ -384,6 +387,9 @@ importers:
       aws:
         specifier: workspace:*
         version: link:../../modules/aws
+      mparticle:
+        specifier: workspace:*
+        version: link:../../modules/mparticle
       routing:
         specifier: workspace:*
         version: link:../../modules/routing
@@ -1161,6 +1167,18 @@ importers:
       '@smithy/types':
         specifier: ^4.13.1
         version: 4.14.3
+
+  modules/mparticle:
+    dependencies:
+      logger:
+        specifier: workspace:*
+        version: link:../logger
+      zod:
+        specifier: 'catalog:'
+        version: 4.4.3
+      zuora:
+        specifier: workspace:*
+        version: link:../zuora
 
   modules/multiple-account:
     dependencies:

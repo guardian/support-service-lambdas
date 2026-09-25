@@ -5,17 +5,14 @@
       "@modules/*": [
         "../../modules/*"
       ],
-      "@modules/aws/*": [
-        "../../modules/aws/src/*"
-      ],
       "@modules/logger/*": [
         "../../modules/logger/src/*"
       ],
-      "@modules/routing/*": [
-        "../../modules/routing/src/*"
-      ],
       "@modules/zuora/*": [
         "../../modules/zuora/src/*"
+      ],
+      "@modules/aws/*": [
+        "../../modules/aws/src/*"
       ],
       "@modules/internationalisation/*": [
         "../../modules/internationalisation/src/*"
@@ -31,9 +28,6 @@
       ],
       "@modules/mparticle/*": [
         "../../modules/mparticle/src/*"
-      ],
-      "@modules/mparticle-api/*": [
-        "../../modules/mparticle-api/src/*"
       ]
     }
   }

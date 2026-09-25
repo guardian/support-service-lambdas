@@ -1,4 +1,8 @@
 import { createHash } from 'node:crypto';
+import type {
+	MParticleEnvironment,
+	MParticleEventBatch,
+} from '@modules/mparticle/events';
 import type { AcquisitionProduct } from './acquisitionEvent';
 
 export type MParticleMappingConfiguration = {
@@ -34,21 +38,17 @@ type MParticleCommerceEvent = {
 	};
 };
 
-export type MParticleBatch = {
-	schema_version: 2;
+/**
+ * An mParticle event batch as produced by this handler: the shared Events API
+ * model narrowed to the single commerce event we send per acquisition.
+ */
+export type AcquisitionEventBatch = Omit<
+	MParticleEventBatch,
+	'events' | 'source_request_id'
+> & {
 	source_request_id: string;
-	environment: 'development' | 'production';
 	events: [MParticleCommerceEvent];
-	user_attributes?: Record<string, string>;
-	user_identities?: Record<string, string>;
-	device_info?: {
-		platform: 'web';
-		http_header_user_agent: string;
-	};
-	ip?: string;
 };
-
-export type MParticleEnvironment = MParticleBatch['environment'];
 
 const parameterNames = (...names: string[]) =>
 	new Set(names.map((name) => name.toLowerCase()));
@@ -290,7 +290,7 @@ export function buildMParticleBatch(
 	acquisition: AcquisitionProduct,
 	configuration: MParticleMappingConfiguration,
 	environment: MParticleEnvironment = 'development',
-): MParticleBatch {
+): AcquisitionEventBatch {
 	const eventTimestamp = parseEventTimestamp(acquisition.eventTimeStamp);
 	const eventId = eventIdentifier(acquisition);
 	const transactionId = transactionIdentifier(acquisition, eventId);
@@ -314,25 +314,24 @@ export function buildMParticleBatch(
 	const identities = userIdentities(acquisition);
 	const userAgent = nonEmpty(acquisition.userAgent);
 	const ipAddress = nonEmpty(acquisition.ipAddress);
+	const commerceEvent: MParticleCommerceEvent = {
+		event_type: 'commerce_event',
+		data: {
+			event_name: 'purchase',
+			product_action: productAction,
+			currency_code: acquisition.currency,
+			timestamp_unixtime_ms: eventTimestamp,
+			source_message_id: eventId,
+			custom_attributes: customAttributes(acquisition),
+			custom_flags: customFlags(acquisition, configuration, eventTimestamp),
+		},
+	};
 
 	return {
 		schema_version: 2,
 		source_request_id: eventId,
 		environment,
-		events: [
-			{
-				event_type: 'commerce_event',
-				data: {
-					event_name: 'purchase',
-					product_action: productAction,
-					currency_code: acquisition.currency,
-					timestamp_unixtime_ms: eventTimestamp,
-					source_message_id: eventId,
-					custom_attributes: customAttributes(acquisition),
-					custom_flags: customFlags(acquisition, configuration, eventTimestamp),
-				},
-			},
-		],
+		events: [commerceEvent],
 		...(Object.keys(attributes).length > 0
 			? { user_attributes: attributes }
 			: {}),

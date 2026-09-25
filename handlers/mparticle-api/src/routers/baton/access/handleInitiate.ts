@@ -1,12 +1,12 @@
 import { randomUUID } from 'crypto';
 import { z } from 'zod';
-import type { DataSubjectRequestSubmission } from '../../../apis/dataSubjectRequests/submit';
-import { submitDataSubjectRequest } from '../../../apis/dataSubjectRequests/submit';
-import { getEnv } from '../../../services/config';
 import type {
 	DataSubjectAPI,
 	MParticleClient,
-} from '../../../services/mparticleClient';
+} from '@modules/mparticle/mparticleHttpClient';
+import type { DataSubjectRequestSubmission } from '../../../apis/dataSubjectRequests/submit';
+import { submitDataSubjectRequest } from '../../../apis/dataSubjectRequests/submit';
+import { getEnv } from '../../../services/config';
 import { InitiationReferenceSchema } from '../initiationReference';
 import {
 	BatonSarEventRequestBaseSchema,

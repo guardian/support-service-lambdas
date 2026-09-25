@@ -5,16 +5,17 @@ import type {
 	SQSRecord,
 } from 'aws-lambda';
 import { logger } from '@modules/logger/logger';
+import type { MParticleEnvironment } from '@modules/mparticle/events';
+import { uploadEventBatch } from '@modules/mparticle/events';
+import { createEventsApiClient } from '@modules/mparticle/mparticleHttpClient';
 import { stageFromEnvironment } from '@modules/stage';
 import { acquisitionEventSchema } from './acquisitionEvent';
-import {
-	buildMParticleBatch,
-	type MParticleBatch,
-	type MParticleEnvironment,
-	type MParticleMappingConfiguration,
+import type {
+	AcquisitionEventBatch,
+	MParticleMappingConfiguration,
 } from './acquisitions';
+import { buildMParticleBatch } from './acquisitions';
 import { getAppConfig } from './config';
-import { MParticleClient } from './mparticleClient';
 
 type FailedResult = {
 	success: false;
@@ -27,7 +28,7 @@ type SuccessfulResult = {
 
 type Result = FailedResult | SuccessfulResult;
 
-export type SendMParticle = (batch: MParticleBatch) => Promise<void>;
+export type SendMParticle = (batch: AcquisitionEventBatch) => Promise<void>;
 
 function failureResult(record: SQSRecord): FailedResult {
 	return { success: false, messageId: record.messageId };
@@ -57,6 +58,9 @@ export async function processRecord(
 	if (!parsedEvent.success) {
 		logger.error('Failed to validate mParticle acquisition event', {
 			messageId: record.messageId,
+			validationIssues: parsedEvent.error.issues.map(
+				({ path, code, message }) => ({ path, code, message }),
+			),
 		});
 		return failureResult(record);
 	}
@@ -105,14 +109,11 @@ export async function processRecords(
 export const handler: Handler<SQSEvent, SQSBatchResponse> = async (event) => {
 	const stage = stageFromEnvironment();
 	const config = await getAppConfig();
-	const client = MParticleClient.create(config.mparticle);
+	const client = createEventsApiClient(config.mparticle, config.mparticle.pod);
 	const environment: MParticleEnvironment =
 		stage === 'PROD' ? 'production' : 'development';
 
-	return processRecords(
-		event,
-		config.mparticle,
-		environment,
-		client.sendEvents.bind(client),
+	return processRecords(event, config.mparticle, environment, (batch) =>
+		uploadEventBatch(client, batch),
 	);
 };
