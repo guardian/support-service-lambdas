@@ -64,11 +64,7 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-<<<<<<< HEAD
-            "Value": "membership",
-=======
             "Value": "support",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
           },
           {
             "Key": "Stage",
@@ -111,14 +107,10 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
           },
         },
         "ResourceId": {
-<<<<<<< HEAD
-          "Ref": "DeliveryRecordsApiProxyResource",
-=======
           "Fn::GetAtt": [
             "DeliveryRecordsApi",
             "RootResourceId",
           ],
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
         },
         "RestApiId": {
           "Ref": "DeliveryRecordsApi",
@@ -184,11 +176,7 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-<<<<<<< HEAD
-            "Value": "membership",
-=======
             "Value": "support",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
           },
           {
             "Key": "Stage",
@@ -201,13 +189,8 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
     },
     "DeliveryRecordsApiDNSRecord": {
       "Properties": {
-<<<<<<< HEAD
-        "HostedZoneId": "Z1E4V12LQGXFEC",
-        "Name": "delivery-records-api-code.membership.guardianapis.com",
-=======
         "HostedZoneId": "Z3KO35ELNWZMSX",
         "Name": "delivery-records-api-code.support.guardianapis.com",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -221,124 +204,11 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Route53::RecordSet",
     },
-<<<<<<< HEAD
-    "DeliveryRecordsApiDefaultPolicy": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "s3:GetObject*",
-                "s3:GetBucket*",
-                "s3:List*",
-              ],
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                      "/membership/CODE/delivery-records-api/delivery-records-api.jar",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": "ssm:GetParametersByPath",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/CODE/membership/delivery-records-api",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "ssm:GetParameters",
-                "ssm:GetParameter",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/CODE/membership/delivery-records-api/*",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/*",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "DeliveryRecordsApiDefaultPolicy",
-        "Roles": [
-          {
-            "Ref": "DeliveryRecordsApiRole",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "DeliveryRecordsApiDeployment": {
-      "DependsOn": [
-        "DeliveryRecordsApiAnyMethod",
-        "DeliveryRecordsApiProxyResource",
-        "LambdaRestApiANYC3C9D364",
-=======
     "DeliveryRecordsApiDeployment": {
       "DependsOn": [
         "LambdaRestApiproxyANY486C4D1F",
         "DeliveryRecordsApiProxyResource",
         "DeliveryRecordsApiAnyMethod",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
       ],
       "Metadata": {
         "aws:cdk:do-not-refactor": true,
@@ -353,11 +223,7 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
     },
     "DeliveryRecordsApiDomainName": {
       "Properties": {
-<<<<<<< HEAD
-        "DomainName": "delivery-records-api-code.membership.guardianapis.com",
-=======
         "DomainName": "delivery-records-api-code.support.guardianapis.com",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -371,11 +237,7 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-<<<<<<< HEAD
-              ":certificate/c1efc564-9ff8-4a03-be48-d1990a3d79d2",
-=======
               ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
             ],
           ],
         },
@@ -394,11 +256,7 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-<<<<<<< HEAD
-            "Value": "membership",
-=======
             "Value": "support",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
           },
           {
             "Key": "Stage",
@@ -408,54 +266,9 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
-<<<<<<< HEAD
-    "DeliveryRecordsApiKey": {
-      "Properties": {
-        "Enabled": true,
-        "Name": "delivery-records-api-key-CODE",
-        "StageKeys": [
-          {
-            "RestApiId": {
-              "Ref": "DeliveryRecordsApi",
-            },
-            "StageName": {
-              "Ref": "DeliveryRecordsApiStage",
-            },
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "delivery-records-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::ApiKey",
-    },
-    "DeliveryRecordsApiLambda": {
-      "DependsOn": [
-        "DeliveryRecordsApiDefaultPolicy",
-=======
     "DeliveryRecordsApiLambda": {
       "DependsOn": [
         "LambdaServiceRoleDefaultPolicyDAE46E21",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
         "DeliveryRecordsApiRole",
       ],
       "Properties": {
@@ -466,22 +279,14 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-<<<<<<< HEAD
-          "S3Key": "membership/CODE/delivery-records-api/delivery-records-api.jar",
-=======
           "S3Key": "support/CODE/delivery-records-api/delivery-records-api.jar",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
         },
         "Description": "api for accessing delivery records in salesforce",
         "Environment": {
           "Variables": {
             "APP": "delivery-records-api",
             "NODE_OPTIONS": "--enable-source-maps",
-<<<<<<< HEAD
-            "STACK": "membership",
-=======
             "STACK": "support",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
             "STAGE": "CODE",
             "Stage": "CODE",
           },
@@ -514,11 +319,7 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-<<<<<<< HEAD
-            "Value": "membership",
-=======
             "Value": "support",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
           },
           {
             "Key": "Stage",
@@ -587,11 +388,7 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-<<<<<<< HEAD
-            "Value": "membership",
-=======
             "Value": "support",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
           },
           {
             "Key": "Stage",
@@ -628,11 +425,7 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-<<<<<<< HEAD
-            "Value": "membership",
-=======
             "Value": "support",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
           },
           {
             "Key": "Stage",
@@ -671,11 +464,7 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-<<<<<<< HEAD
-            "Value": "membership",
-=======
             "Value": "support",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
           },
           {
             "Key": "Stage",
@@ -764,9 +553,6 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-<<<<<<< HEAD
-    "LambdaRestApiANYC3C9D364": {
-=======
     "LambdaRestApiAccount4E23441E": {
       "DeletionPolicy": "Retain",
       "DependsOn": [
@@ -835,7 +621,6 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
       "Type": "AWS::ApiGateway::UsagePlanKey",
     },
     "LambdaRestApiproxyANY486C4D1F": {
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
       "Properties": {
         "ApiKeyRequired": true,
         "AuthorizationType": "NONE",
@@ -868,14 +653,7 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
           },
         },
         "ResourceId": {
-<<<<<<< HEAD
-          "Fn::GetAtt": [
-            "DeliveryRecordsApi",
-            "RootResourceId",
-          ],
-=======
           "Ref": "DeliveryRecordsApiProxyResource",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
         },
         "RestApiId": {
           "Ref": "DeliveryRecordsApi",
@@ -883,37 +661,6 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::Method",
     },
-<<<<<<< HEAD
-    "LambdaRestApiAccount4E23441E": {
-      "DeletionPolicy": "Retain",
-      "DependsOn": [
-        "DeliveryRecordsApi",
-      ],
-      "Properties": {
-        "CloudWatchRoleArn": {
-          "Fn::GetAtt": [
-            "DeliveryRecordsApiCloudWatchRole",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::ApiGateway::Account",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "LambdaRestApiUsagePlanUsagePlanKeyResourcedeliveryrecordsapiCODELambdaRestApiApiKey7834462D595229F7": {
-      "Properties": {
-        "KeyId": {
-          "Ref": "DeliveryRecordsApiKey",
-        },
-        "KeyType": "API_KEY",
-        "UsagePlanId": {
-          "Ref": "DeliveryRecordsApiUsagePlan",
-        },
-      },
-      "Type": "AWS::ApiGateway::UsagePlanKey",
-    },
-=======
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
     "LambdaRestApiproxyANYApiPermissionTestdeliveryrecordsapiCODELambdaRestApiAF1B487AANYproxy3276478A": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
@@ -992,8 +739,6 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-<<<<<<< HEAD
-=======
     "LambdaServiceRoleDefaultPolicyDAE46E21": {
       "Properties": {
         "PolicyDocument": {
@@ -1085,7 +830,7 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/*",
+              "Resource": "arn:aws:s3:::gu-reader-revenue-private/support/support-service-lambdas/CODE/*",
             },
           ],
           "Version": "2012-10-17",
@@ -1099,7 +844,6 @@ exports[`The delivery records api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
   },
 }
 `;
@@ -1212,11 +956,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-<<<<<<< HEAD
-            "Value": "membership",
-=======
             "Value": "support",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
           },
           {
             "Key": "Stage",
@@ -1248,11 +988,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-<<<<<<< HEAD
-            "Value": "membership",
-=======
             "Value": "support",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
           },
           {
             "Key": "Stage",
@@ -1295,14 +1031,10 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
           },
         },
         "ResourceId": {
-<<<<<<< HEAD
-          "Ref": "DeliveryRecordsApiProxyResource",
-=======
           "Fn::GetAtt": [
             "DeliveryRecordsApi",
             "RootResourceId",
           ],
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
         },
         "RestApiId": {
           "Ref": "DeliveryRecordsApi",
@@ -1368,11 +1100,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-<<<<<<< HEAD
-            "Value": "membership",
-=======
             "Value": "support",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
           },
           {
             "Key": "Stage",
@@ -1385,13 +1113,8 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
     },
     "DeliveryRecordsApiDNSRecord": {
       "Properties": {
-<<<<<<< HEAD
-        "HostedZoneId": "Z1E4V12LQGXFEC",
-        "Name": "delivery-records-api.membership.guardianapis.com",
-=======
         "HostedZoneId": "Z3KO35ELNWZMSX",
         "Name": "delivery-records-api.support.guardianapis.com",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -1405,124 +1128,11 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Route53::RecordSet",
     },
-<<<<<<< HEAD
-    "DeliveryRecordsApiDefaultPolicy": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "s3:GetObject*",
-                "s3:GetBucket*",
-                "s3:List*",
-              ],
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                      "/membership/PROD/delivery-records-api/delivery-records-api.jar",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": "ssm:GetParametersByPath",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/PROD/membership/delivery-records-api",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "ssm:GetParameters",
-                "ssm:GetParameter",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/PROD/membership/delivery-records-api/*",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/PROD/*",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "DeliveryRecordsApiDefaultPolicy",
-        "Roles": [
-          {
-            "Ref": "DeliveryRecordsApiRole",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "DeliveryRecordsApiDeployment": {
-      "DependsOn": [
-        "DeliveryRecordsApiAnyMethod",
-        "DeliveryRecordsApiProxyResource",
-        "LambdaRestApiANYC3C9D364",
-=======
     "DeliveryRecordsApiDeployment": {
       "DependsOn": [
         "LambdaRestApiproxyANY486C4D1F",
         "DeliveryRecordsApiProxyResource",
         "DeliveryRecordsApiAnyMethod",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
       ],
       "Metadata": {
         "aws:cdk:do-not-refactor": true,
@@ -1537,11 +1147,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
     },
     "DeliveryRecordsApiDomainName": {
       "Properties": {
-<<<<<<< HEAD
-        "DomainName": "delivery-records-api.membership.guardianapis.com",
-=======
         "DomainName": "delivery-records-api.support.guardianapis.com",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -1555,11 +1161,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-<<<<<<< HEAD
-              ":certificate/c1efc564-9ff8-4a03-be48-d1990a3d79d2",
-=======
               ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
             ],
           ],
         },
@@ -1578,11 +1180,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-<<<<<<< HEAD
-            "Value": "membership",
-=======
             "Value": "support",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
           },
           {
             "Key": "Stage",
@@ -1592,54 +1190,9 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
-<<<<<<< HEAD
-    "DeliveryRecordsApiKey": {
-      "Properties": {
-        "Enabled": true,
-        "Name": "delivery-records-api-key-PROD",
-        "StageKeys": [
-          {
-            "RestApiId": {
-              "Ref": "DeliveryRecordsApi",
-            },
-            "StageName": {
-              "Ref": "DeliveryRecordsApiStage",
-            },
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "delivery-records-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::ApiKey",
-    },
-    "DeliveryRecordsApiLambda": {
-      "DependsOn": [
-        "DeliveryRecordsApiDefaultPolicy",
-=======
     "DeliveryRecordsApiLambda": {
       "DependsOn": [
         "LambdaServiceRoleDefaultPolicyDAE46E21",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
         "DeliveryRecordsApiRole",
       ],
       "Properties": {
@@ -1650,22 +1203,14 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-<<<<<<< HEAD
-          "S3Key": "membership/PROD/delivery-records-api/delivery-records-api.jar",
-=======
           "S3Key": "support/PROD/delivery-records-api/delivery-records-api.jar",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
         },
         "Description": "api for accessing delivery records in salesforce",
         "Environment": {
           "Variables": {
             "APP": "delivery-records-api",
             "NODE_OPTIONS": "--enable-source-maps",
-<<<<<<< HEAD
-            "STACK": "membership",
-=======
             "STACK": "support",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
             "STAGE": "PROD",
             "Stage": "PROD",
           },
@@ -1698,11 +1243,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-<<<<<<< HEAD
-            "Value": "membership",
-=======
             "Value": "support",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
           },
           {
             "Key": "Stage",
@@ -1771,11 +1312,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-<<<<<<< HEAD
-            "Value": "membership",
-=======
             "Value": "support",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
           },
           {
             "Key": "Stage",
@@ -1812,11 +1349,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-<<<<<<< HEAD
-            "Value": "membership",
-=======
             "Value": "support",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
           },
           {
             "Key": "Stage",
@@ -1855,11 +1388,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-<<<<<<< HEAD
-            "Value": "membership",
-=======
             "Value": "support",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
           },
           {
             "Key": "Stage",
@@ -1938,11 +1467,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-<<<<<<< HEAD
-            "Value": "membership",
-=======
             "Value": "support",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
           },
           {
             "Key": "Stage",
@@ -2032,9 +1557,6 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-<<<<<<< HEAD
-    "LambdaRestApiANYC3C9D364": {
-=======
     "LambdaRestApiAccount4E23441E": {
       "DeletionPolicy": "Retain",
       "DependsOn": [
@@ -2103,7 +1625,6 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
       "Type": "AWS::ApiGateway::UsagePlanKey",
     },
     "LambdaRestApiproxyANY486C4D1F": {
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
       "Properties": {
         "ApiKeyRequired": true,
         "AuthorizationType": "NONE",
@@ -2136,14 +1657,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
           },
         },
         "ResourceId": {
-<<<<<<< HEAD
-          "Fn::GetAtt": [
-            "DeliveryRecordsApi",
-            "RootResourceId",
-          ],
-=======
           "Ref": "DeliveryRecordsApiProxyResource",
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
         },
         "RestApiId": {
           "Ref": "DeliveryRecordsApi",
@@ -2151,37 +1665,6 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::Method",
     },
-<<<<<<< HEAD
-    "LambdaRestApiAccount4E23441E": {
-      "DeletionPolicy": "Retain",
-      "DependsOn": [
-        "DeliveryRecordsApi",
-      ],
-      "Properties": {
-        "CloudWatchRoleArn": {
-          "Fn::GetAtt": [
-            "DeliveryRecordsApiCloudWatchRole",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::ApiGateway::Account",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "LambdaRestApiUsagePlanUsagePlanKeyResourcedeliveryrecordsapiPRODLambdaRestApiApiKey7FAC9DFE035E022C": {
-      "Properties": {
-        "KeyId": {
-          "Ref": "DeliveryRecordsApiKey",
-        },
-        "KeyType": "API_KEY",
-        "UsagePlanId": {
-          "Ref": "DeliveryRecordsApiUsagePlan",
-        },
-      },
-      "Type": "AWS::ApiGateway::UsagePlanKey",
-    },
-=======
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
     "LambdaRestApiproxyANYApiPermissionTestdeliveryrecordsapiPRODLambdaRestApi5F186F97ANYproxy2675B264": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
@@ -2260,8 +1743,6 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-<<<<<<< HEAD
-=======
     "LambdaServiceRoleDefaultPolicyDAE46E21": {
       "Properties": {
         "PolicyDocument": {
@@ -2353,7 +1834,7 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/PROD/*",
+              "Resource": "arn:aws:s3:::gu-reader-revenue-private/support/support-service-lambdas/PROD/*",
             },
           ],
           "Version": "2012-10-17",
@@ -2367,7 +1848,6 @@ exports[`The delivery records api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
->>>>>>> 00c912c0d (delivery-records-api CDK migration)
   },
 }
 `;
