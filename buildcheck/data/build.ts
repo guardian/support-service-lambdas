@@ -219,7 +219,7 @@ const moduleMparticle: ModuleDefinition = {
 	dependencies: {
 		...dep.zod,
 	},
-	moduleDependencies: [moduleLogger],
+	moduleDependencies: [moduleLogger, moduleZuora],
 };
 
 const moduleSupporterProductData: ModuleDefinition = {
