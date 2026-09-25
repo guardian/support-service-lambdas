@@ -1,13 +1,18 @@
 # identity-deletion-cleanup
 
 When an Identity account is deleted, its numeric Identity ID can remain on
-Salesforce Contacts and Zuora Accounts. This handler removes that stale link
-while leaving the records themselves in place, so both systems retain their
-existing audit history.
+Salesforce Contacts and Zuora Accounts. If that customer returns with a new
+Identity account, Salesforce can contain contacts with the same email but
+different Identity IDs. Email-based integrations, such as incoming customer
+service emails, can then match the wrong contact. This handler removes the stale
+Identity link while leaving both records in place.
 
 ## Flow
 
-1. A user deletes their account through Manage My Account.
+1. A user deletes their account through Manage My Account, or Userhelp deletes
+   it through [User Admin](https://useradmin.gutools.co.uk/). Most deletions are
+   self-service. The [Help Centre article](https://help.theguardian.com/article/how-do-i-delete-my-account)
+   describes the user flow.
 2. Identity completes the account-deletion flow and publishes a `DELETE` event
    to its account-deletions SNS topic.
 3. Identity subscribes this handler's SQS queue to that topic.
@@ -15,15 +20,21 @@ existing audit history.
    matching Salesforce Contact and `IdentityId__c` from every matching Zuora
    Account.
 
-No match in either system is a successful outcome. Multiple Salesforce Contacts
-or Zuora Accounts for the same Identity ID are all updated.
+No match in either system is a successful outcome. The Salesforce Identity ID
+field is unique, so an Identity ID should match at most one Contact. Zuora can
+have multiple Accounts per Identity ID, one per subscription.
 
-Salesforce is limited to five Contacts and Zuora to fifty Accounts. The limits
-protect against a query unexpectedly matching a broad set of records. The
-message fails before any records are updated and is sent to the DLQ after its
-retries. Check the query and the matching records manually; if the matches are
-legitimate, clear them manually and raise the limit in a reviewed change if
-needed.
+The lookups allow at most one Salesforce Contact and fifty Zuora Accounts. The
+Zuora limit is a safety guard against a query unexpectedly matching too many
+records; several hundred customers have more than ten Zuora Accounts, while
+only five have more than fifty. Both systems are looked up and checked before
+either is updated. If a limit is exceeded, the message retries and eventually
+reaches the DLQ without updating either system. Check the query and matches
+manually; clear legitimate matches manually, and raise the limit in a reviewed
+change if needed.
+
+Baton retrieves and erases Zuora data by email, so clearing the old Identity ID
+does not prevent its deletion process and keeps Zuora data cleaner.
 
 ## Configuration
 
@@ -69,7 +80,10 @@ AWS_PROFILE=membership IDENTITY_ID=<numeric-test-identity-id> pnpm exec tsx runM
 This clears the matching IDs from both CODE systems, so it must only be used with
 a dedicated test Identity ID.
 
-For the end-to-end CODE test, create a non-Guardian-domain Identity test account,
-add its numeric Identity ID to test records in Salesforce and Zuora, then delete
-the Identity account through Manage My Account. Confirm both fields were cleared
-and that the Lambda processed the queue message successfully.
+For the end-to-end CODE test, create an Identity test account using a
+non-Guardian email address. Guardian email addresses may be blocked from
+deletion in MMA because of staff subscriptions. An `@gutools.co.uk` address can
+be used instead. Add its numeric Identity ID to test records in Salesforce and
+Zuora, then delete the Identity account through Manage My Account. Confirm both
+fields were cleared and that the Lambda processed the queue message
+successfully.

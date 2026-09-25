@@ -3,7 +3,7 @@ import { executeSalesforceQueryAll } from '@modules/salesforce/query';
 import type { SfClient } from '@modules/salesforce/sfClient';
 import type { IdentityId } from '../schemas/identityDeletionEventSchema';
 
-const maximumMatchingSalesforceContacts = 5;
+const maximumMatchingSalesforceContacts = 1;
 
 const salesforceContactSchema = z.object({
 	Id: z.string(),
@@ -22,7 +22,7 @@ export async function findSalesforceContactIds(
 
 	if (contacts.length > maximumMatchingSalesforceContacts) {
 		throw new Error(
-			`Identity ID matched more than ${maximumMatchingSalesforceContacts} Salesforce Contacts`,
+			`Identity ID matched more than ${maximumMatchingSalesforceContacts} Salesforce Contact`,
 		);
 	}
 

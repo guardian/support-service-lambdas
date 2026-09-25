@@ -17,29 +17,26 @@ describe('findSalesforceContactIds', () => {
 	});
 
 	it('finds every matching Contact by Identity ID', async () => {
-		mockExecuteSalesforceQueryAll.mockResolvedValue([
-			{ Id: 'contact-1' },
-			{ Id: 'contact-2' },
-		]);
+		mockExecuteSalesforceQueryAll.mockResolvedValue([{ Id: 'contact-1' }]);
 
 		await expect(
 			findSalesforceContactIds({} as SfClient, identityId),
-		).resolves.toEqual(['contact-1', 'contact-2']);
+		).resolves.toEqual(['contact-1']);
 
 		expect(mockExecuteSalesforceQueryAll).toHaveBeenCalledWith(
 			expect.anything(),
-			"SELECT Id FROM Contact WHERE IdentityID__c = '1234567' LIMIT 6",
+			"SELECT Id FROM Contact WHERE IdentityID__c = '1234567' LIMIT 2",
 			expect.anything(),
 		);
 	});
 
-	it('rejects more than five matching Contacts', async () => {
+	it('rejects more than one matching Contact', async () => {
 		mockExecuteSalesforceQueryAll.mockResolvedValue(
-			Array.from({ length: 6 }, () => ({ Id: 'contact' })),
+			Array.from({ length: 2 }, () => ({ Id: 'contact' })),
 		);
 
 		await expect(
 			findSalesforceContactIds({} as SfClient, identityId),
-		).rejects.toThrow('Identity ID matched more than 5 Salesforce Contacts');
+		).rejects.toThrow('Identity ID matched more than 1 Salesforce Contact');
 	});
 });

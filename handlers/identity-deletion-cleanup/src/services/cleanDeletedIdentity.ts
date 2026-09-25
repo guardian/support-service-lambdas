@@ -10,10 +10,10 @@ export async function cleanDeletedIdentity(
 ): Promise<IdentityDeletionCleanupOutcome> {
 	const salesforceContactIds =
 		await dependencies.findSalesforceContactIds(identityId);
+	const zuoraAccountIds = await dependencies.findZuoraAccountIds(identityId);
+
 	const salesforceContactsCleared =
 		await dependencies.clearSalesforceContactIds(salesforceContactIds);
-
-	const zuoraAccountIds = await dependencies.findZuoraAccountIds(identityId);
 	const zuoraAccountsCleared =
 		await dependencies.clearZuoraAccountIds(zuoraAccountIds);
 
