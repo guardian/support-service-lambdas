@@ -15,7 +15,6 @@ import type {
 } from '@modules/zuora/types/objects';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ZuoraCatalog } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import { putEmailFailureMetric } from './cloudwatch';
 import type { InvitationRepository } from './invitationRepository';
 import { sendInvitationEmail } from './multipleAccountEmails';
 import {
@@ -90,23 +89,14 @@ export const createInvitationEndpoint =
 			expiryDate: now.add(1, 'month').toDate().getTime(),
 		});
 
-		try {
-			await sendInvitationEmail(
-				stage,
-				secondaryIdentityId,
-				body.secondaryUserEmail,
-				account.billToContact.firstName,
-				account.billToContact.workEmail,
-				invitationCode,
-			);
-		} catch (error: unknown) {
-			const message = error instanceof Error ? error.message : 'unknown';
-			console.log(
-				`Failed to trigger send invitation email to ${body.secondaryUserEmail} for subscription ${zuoraSubscription.subscriptionNumber}:`,
-				message,
-			);
-			void putEmailFailureMetric(stage);
-		}
+		await sendInvitationEmail(
+			stage,
+			secondaryIdentityId,
+			body.secondaryUserEmail,
+			account.billToContact.firstName,
+			account.billToContact.workEmail,
+			invitationCode,
+		);
 
 		return created(
 			{ invitationCode },
