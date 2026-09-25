@@ -72,11 +72,35 @@ describe('MParticleHttpClient', () => {
 		});
 	});
 
+	it('supports empty successful responses and preserves their status', async () => {
+		const fetchFn = jest
+			.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>()
+			.mockResolvedValue(new Response(null, { status: 202 }));
+		const client = eventsClient(fetchFn);
+
+		const result = await client.post(
+			'/events',
+			{ event: 'purchase' },
+			() => undefined,
+		);
+
+		expect(result).toEqual({
+			success: true,
+			data: undefined,
+			statusCode: 202,
+		});
+	});
+
 	it('rejects non-2xx responses without exposing the response body or credentials', async () => {
 		const privateResponseBody = 'private response body';
 		const fetchFn = jest
 			.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>()
-			.mockResolvedValue(new Response(privateResponseBody, { status: 503 }));
+			.mockResolvedValue(
+				new Response(privateResponseBody, {
+					status: 503,
+					statusText: 'Service Unavailable',
+				}),
+			);
 		const client = eventsClient(fetchFn);
 
 		let error: unknown;
@@ -87,7 +111,10 @@ describe('MParticleHttpClient', () => {
 		}
 
 		expect(error).toBeInstanceOf(MParticleHttpError);
-		expect(error).toMatchObject({ statusCode: 503 });
+		expect(error).toMatchObject({
+			statusCode: 503,
+			statusText: 'Service Unavailable',
+		});
 		expect(String(error)).not.toContain(privateResponseBody);
 		expect(String(error)).not.toContain(apiSecret);
 	});
@@ -131,5 +158,27 @@ describe('MParticleHttpClient', () => {
 			expect(result.error.message).not.toContain(privateResponseBody);
 			expect(result.error.message).not.toContain(apiSecret);
 		}
+	});
+
+	it('returns an unconsumed stream body', async () => {
+		const fetchFn = jest
+			.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>()
+			.mockResolvedValue(new Response('stream body', { status: 200 }));
+		const client = eventsClient(fetchFn);
+
+		const responseBody = await client.getStream('/status');
+
+		expect(await new Response(responseBody).text()).toBe('stream body');
+	});
+
+	it('maps stream network failures to the safe mParticle error', async () => {
+		const fetchFn = jest
+			.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>()
+			.mockRejectedValue(new Error(`${apiSecret} should not escape`));
+		const client = eventsClient(fetchFn);
+
+		await expect(client.getStream('/status')).rejects.toBeInstanceOf(
+			MParticleNetworkError,
+		);
 	});
 });

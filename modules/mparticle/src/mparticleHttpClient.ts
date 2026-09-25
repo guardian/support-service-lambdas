@@ -1,9 +1,12 @@
-import type { z } from 'zod';
-import { logger } from '@modules/logger/logger';
+import type { Authorisation, BearerTokenProvider } from '@modules/zuora/auth';
+import {
+	RestClient,
+	RestClientError,
+	RestClientNetworkError,
+} from '@modules/zuora/restClient';
+import type { RestResponseSchema } from '@modules/zuora/restClient';
 
-export type MParticleResponseSchema<RESPONSE> =
-	| z.ZodType<RESPONSE>
-	| ((body: string, contentType?: string) => RESPONSE);
+export type MParticleResponseSchema<RESPONSE> = RestResponseSchema<RESPONSE>;
 
 export type MParticleHttpResponse<RESPONSE> =
 	| {
@@ -37,7 +40,7 @@ export class MParticleNetworkError extends Error {
 	}
 }
 
-type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+type HttpMethod = 'GET' | 'POST';
 
 /**
  * mParticle exposes several APIs, each with its own base URL and credentials.
@@ -85,18 +88,48 @@ export interface MParticleClient<T extends MParticleApi = MParticleApi> {
 	getStream(path: string): Promise<ReadableStream>;
 }
 
+class MParticleAuthorisationProvider implements BearerTokenProvider {
+	private readonly authHeaders: Record<string, string>;
+
+	constructor(
+		private readonly baseUrl: string,
+		credentials: MParticleCredentials,
+	) {
+		this.authHeaders = {
+			Authorization: `Basic ${Buffer.from(`${credentials.key}:${credentials.secret}`).toString('base64')}`,
+		};
+	}
+
+	getAuthorisation(): Promise<Authorisation> {
+		return Promise.resolve({
+			baseUrl: this.baseUrl,
+			authHeaders: this.authHeaders,
+		});
+	}
+}
+
+class MParticleRestClient extends RestClient {
+	constructor(
+		baseURL: string,
+		credentials: MParticleCredentials,
+		fetchFn?: typeof fetch,
+	) {
+		super(new MParticleAuthorisationProvider(baseURL, credentials), fetchFn);
+	}
+}
+
 class MParticleHttpClient<
 	T extends MParticleApi = MParticleApi,
 > implements MParticleClient<T> {
-	private readonly authorizationHeader: string;
+	private readonly restClient: MParticleRestClient;
 
 	constructor(
 		readonly clientType: T['clientType'],
 		readonly baseURL: string,
 		credentials: MParticleCredentials,
-		private readonly fetchFn: typeof fetch = fetch,
+		fetchFn?: typeof fetch,
 	) {
-		this.authorizationHeader = `Basic ${Buffer.from(`${credentials.key}:${credentials.secret}`).toString('base64')}`;
+		this.restClient = new MParticleRestClient(baseURL, credentials, fetchFn);
 	}
 
 	async get<RESPONSE>(
@@ -114,32 +147,38 @@ class MParticleHttpClient<
 		return this.request('POST', path, schema, body);
 	}
 
-	async request<REQUEST, RESPONSE>(
+	private async request<REQUEST, RESPONSE>(
 		method: HttpMethod,
 		path: string,
 		schema: MParticleResponseSchema<RESPONSE>,
 		body?: REQUEST,
 	): Promise<MParticleHttpResponse<RESPONSE>> {
-		const response = await this.rawHttpRequest(path, method, body);
-
-		let responseText: string;
 		try {
-			responseText = await response.text();
-		} catch {
+			const response =
+				method === 'GET'
+					? await this.restClient.getWithStatus(path, schema)
+					: await this.restClient.postWithStatus(
+							path,
+							body === undefined ? undefined : JSON.stringify(body),
+							schema,
+						);
+
 			return {
-				success: false,
-				error: new Error('mParticle response body could not be read'),
+				success: true,
+				data: response.responseBody,
+				statusCode: response.status,
 			};
-		}
+		} catch (error) {
+			if (error instanceof RestClientNetworkError) {
+				throw new MParticleNetworkError();
+			}
 
-		try {
-			const contentType = getContentType(response);
-			const data = isZodSchema(schema)
-				? parseJsonResponse(responseText, contentType, schema)
-				: schema(responseText, contentType);
+			if (error instanceof RestClientError) {
+				if (error.status < 200 || error.status >= 300) {
+					throw new MParticleHttpError(error.status, error.statusText ?? '');
+				}
+			}
 
-			return { success: true, data, statusCode: response.status };
-		} catch {
 			return {
 				success: false,
 				error: new Error('mParticle response could not be parsed'),
@@ -148,55 +187,19 @@ class MParticleHttpClient<
 	}
 
 	async getStream(path: string): Promise<ReadableStream> {
-		logger.log('Sending mParticle stream request', {
-			endpoint: this.baseURL,
-			path,
-		});
-
-		const body = (await this.rawHttpRequest(path, 'GET')).body;
-		if (!body) {
-			throw new Error('no http response body');
-		}
-		return body;
-	}
-
-	async rawHttpRequest(
-		path: string,
-		method: HttpMethod = 'GET',
-		body?: unknown,
-		extraHeaders: Record<string, string> = {},
-	): Promise<Response> {
-		const headers: Record<string, string> = {
-			Authorization: this.authorizationHeader,
-			...extraHeaders,
-		};
-
-		if (body !== undefined) {
-			headers['Content-Type'] = 'application/json';
-		}
-
-		let response: Response;
 		try {
-			response = await this.fetchFn(this.urlFor(path), {
-				method,
-				headers,
-				body: body === undefined ? undefined : JSON.stringify(body),
-			});
-		} catch {
-			throw new MParticleNetworkError();
+			return await this.restClient.getStream(path);
+		} catch (error) {
+			if (error instanceof RestClientNetworkError) {
+				throw new MParticleNetworkError();
+			}
+
+			if (error instanceof RestClientError) {
+				throw new MParticleHttpError(error.status, error.statusText ?? '');
+			}
+
+			throw error;
 		}
-
-		if (!response.ok) {
-			throw new MParticleHttpError(response.status, response.statusText);
-		}
-
-		return response;
-	}
-
-	private urlFor(path: string): string {
-		const baseURL = this.baseURL.replace(/\/+$/, '');
-		const normalisedPath = path.replace(/^\/+/, '');
-		return normalisedPath ? `${baseURL}/${normalisedPath}` : baseURL;
 	}
 }
 
@@ -216,7 +219,7 @@ export const bulkDeletionBaseUrl = (pod: string): string =>
 
 export const createDataSubjectClient = (
 	credentials: MParticleCredentials,
-	fetchFn: typeof fetch = fetch,
+	fetchFn?: typeof fetch,
 ): MParticleClient<DataSubjectAPI> =>
 	new MParticleHttpClient<DataSubjectAPI>(
 		'dataSubject',
@@ -228,7 +231,7 @@ export const createDataSubjectClient = (
 export const createEventsApiClient = (
 	credentials: MParticleCredentials,
 	pod: string,
-	fetchFn: typeof fetch = fetch,
+	fetchFn?: typeof fetch,
 ): MParticleClient<EventsAPI> =>
 	new MParticleHttpClient<EventsAPI>(
 		'eventsApi',
@@ -240,7 +243,7 @@ export const createEventsApiClient = (
 export const createBulkDeletionClient = (
 	credentials: MParticleCredentials,
 	pod: string,
-	fetchFn: typeof fetch = fetch,
+	fetchFn?: typeof fetch,
 ): MParticleClient<BulkDeletionAPI> =>
 	new MParticleHttpClient<BulkDeletionAPI>(
 		'bulkDeletion',
@@ -248,29 +251,3 @@ export const createBulkDeletionClient = (
 		credentials,
 		fetchFn,
 	);
-
-function isZodSchema<RESPONSE>(
-	schema: MParticleResponseSchema<RESPONSE>,
-): schema is z.ZodType<RESPONSE> {
-	return typeof schema === 'object' && 'parse' in schema;
-}
-
-function parseJsonResponse<RESPONSE>(
-	body: string,
-	contentType: string | undefined,
-	schema: z.ZodType<RESPONSE>,
-): RESPONSE {
-	if (contentType !== 'application/json') {
-		throw new Error("mParticle response content type wasn't JSON");
-	}
-
-	return schema.parse(JSON.parse(body));
-}
-
-function getContentType(response: Response): string | undefined {
-	const contentType = [...response.headers.entries()].find(
-		([name]) => name.toLowerCase() === 'content-type',
-	)?.[1];
-
-	return contentType?.split(';', 1)[0]?.trim().toLowerCase();
-}
