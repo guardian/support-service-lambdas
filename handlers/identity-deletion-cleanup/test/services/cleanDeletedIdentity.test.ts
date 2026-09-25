@@ -106,9 +106,9 @@ describe('cleanDeletedIdentity', () => {
 		expect(deps.clearZuoraAccountIds).not.toHaveBeenCalled();
 	});
 
-	it('does not update Zuora when Salesforce cleanup fails', async () => {
+	it('still attempts Zuora cleanup when Salesforce cleanup fails', async () => {
 		const findZuoraAccountIds = jest.fn().mockResolvedValue([]);
-		const clearZuoraAccountIds = jest.fn();
+		const clearZuoraAccountIds = jest.fn().mockResolvedValue(0);
 		const deps = dependencies({
 			clearSalesforceContactIds: jest
 				.fn()
@@ -118,13 +118,13 @@ describe('cleanDeletedIdentity', () => {
 		});
 
 		await expect(cleanDeletedIdentity(identityId, deps)).rejects.toThrow(
-			'Salesforce unavailable',
+			'Salesforce cleanup failed: Salesforce unavailable',
 		);
 		expect(findZuoraAccountIds).toHaveBeenCalled();
-		expect(clearZuoraAccountIds).not.toHaveBeenCalled();
+		expect(clearZuoraAccountIds).toHaveBeenCalledWith([]);
 	});
 
-	it('surfaces a Zuora failure after the idempotent Salesforce cleanup', async () => {
+	it('surfaces a Zuora failure after attempting both cleanups', async () => {
 		const deps = dependencies({
 			clearZuoraAccountIds: jest
 				.fn()
@@ -132,8 +132,9 @@ describe('cleanDeletedIdentity', () => {
 		});
 
 		await expect(cleanDeletedIdentity(identityId, deps)).rejects.toThrow(
-			'Zuora unavailable',
+			'Zuora cleanup failed: Zuora unavailable',
 		);
 		expect(deps.clearSalesforceContactIds).toHaveBeenCalled();
+		expect(deps.clearZuoraAccountIds).toHaveBeenCalled();
 	});
 });

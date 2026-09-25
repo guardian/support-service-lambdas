@@ -12,10 +12,33 @@ export async function cleanDeletedIdentity(
 		await dependencies.findSalesforceContactIds(identityId);
 	const zuoraAccountIds = await dependencies.findZuoraAccountIds(identityId);
 
-	const salesforceContactsCleared =
-		await dependencies.clearSalesforceContactIds(salesforceContactIds);
-	const zuoraAccountsCleared =
-		await dependencies.clearZuoraAccountIds(zuoraAccountIds);
+	const [salesforceResult, zuoraResult] = await Promise.allSettled([
+		dependencies.clearSalesforceContactIds(salesforceContactIds),
+		dependencies.clearZuoraAccountIds(zuoraAccountIds),
+	]);
 
-	return { salesforceContactsCleared, zuoraAccountsCleared };
+	if (
+		salesforceResult.status === 'rejected' ||
+		zuoraResult.status === 'rejected'
+	) {
+		const failures = [
+			salesforceResult.status === 'rejected'
+				? `Salesforce cleanup failed: ${errorMessage(salesforceResult.reason)}`
+				: undefined,
+			zuoraResult.status === 'rejected'
+				? `Zuora cleanup failed: ${errorMessage(zuoraResult.reason)}`
+				: undefined,
+		].filter((failure): failure is string => failure !== undefined);
+
+		throw new Error(failures.join('; '));
+	}
+
+	return {
+		salesforceContactsCleared: salesforceResult.value,
+		zuoraAccountsCleared: zuoraResult.value,
+	};
+}
+
+function errorMessage(error: unknown): string {
+	return error instanceof Error ? error.message : String(error);
 }
