@@ -445,10 +445,7 @@ export abstract class RestClient {
 	}
 
 	private getContentType(response: Response): string | undefined {
-		return response.headers
-			.get('content-type')
-			?.split(';', 1)[0]
-			?.trim()
-			.toLowerCase();
+		const contentType = this.getResponseHeaders(response)['content-type'];
+		return contentType?.split(';', 1)[0]?.trim().toLowerCase();
 	}
 }
