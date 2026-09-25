@@ -1,10 +1,6 @@
 import { loadConfig } from '@modules/aws/appConfig';
 import { getSSMParam } from '@modules/aws/ssm';
-import {
-	configSchema,
-	DEFAULT_MPARTICLE_POD,
-	getAppConfig,
-} from '../src/config';
+import { configSchema, getAppConfig } from '../src/config';
 
 jest.mock('@modules/aws/appConfig', () => ({
 	loadConfig: jest.fn(),
@@ -31,22 +27,28 @@ describe('mParticle config', () => {
 		loadConfigMock.mockResolvedValue({
 			mparticle: {
 				googleEnhancedConversionsConversionActionId: 'conversion-action',
-				pod: DEFAULT_MPARTICLE_POD,
 			},
 		});
-		getSSMParamMock.mockImplementation((name) =>
-			Promise.resolve(
-				name.endsWith('/key') ? 'shared-api-key' : 'shared-api-secret',
-			),
-		);
+		getSSMParamMock.mockImplementation((name) => {
+			if (name.endsWith('/key')) {
+				return Promise.resolve('shared-api-key');
+			}
+			if (name.endsWith('/secret')) {
+				return Promise.resolve('shared-api-secret');
+			}
+			if (name.endsWith('/pod')) {
+				return Promise.resolve('eu1');
+			}
+			throw new Error(`Unexpected SSM parameter: ${name}`);
+		});
 	});
 
 	afterEach(() => {
 		process.env = originalEnv;
 	});
 
-	it('defaults the Events API pod to EU1', () => {
-		expect(
+	it('requires the shared Events API pod', () => {
+		expect(() =>
 			configSchema.parse({
 				mparticle: {
 					key: 'api-key',
@@ -54,14 +56,7 @@ describe('mParticle config', () => {
 					googleEnhancedConversionsConversionActionId: 'conversion-action',
 				},
 			}),
-		).toEqual({
-			mparticle: {
-				key: 'api-key',
-				secret: 'api-secret',
-				googleEnhancedConversionsConversionActionId: 'conversion-action',
-				pod: DEFAULT_MPARTICLE_POD,
-			},
-		});
+		).toThrow();
 	});
 
 	it('rejects missing credentials', () => {
@@ -75,6 +70,7 @@ describe('mParticle config', () => {
 
 		expect(config.mparticle.key).toBe('shared-api-key');
 		expect(config.mparticle.secret).toBe('shared-api-secret');
+		expect(config.mparticle.pod).toBe('eu1');
 		expect(loadConfigMock).toHaveBeenCalledWith(
 			'CODE',
 			'support',
@@ -86,6 +82,9 @@ describe('mParticle config', () => {
 		);
 		expect(getSSMParamMock).toHaveBeenCalledWith(
 			'/CODE/support/mparticle-api/inputPlatform/secret',
+		);
+		expect(getSSMParamMock).toHaveBeenCalledWith(
+			'/CODE/support/mparticle-api/pod',
 		);
 	});
 });

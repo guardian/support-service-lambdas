@@ -36,6 +36,7 @@ export class MparticleAcquisitionsPublisher extends SrStack {
 				resources: [
 					`arn:aws:ssm:${this.region}:${this.account}:parameter/${this.stage}/${this.stack}/mparticle-api/inputPlatform/key`,
 					`arn:aws:ssm:${this.region}:${this.account}:parameter/${this.stage}/${this.stack}/mparticle-api/inputPlatform/secret`,
+					`arn:aws:ssm:${this.region}:${this.account}:parameter/${this.stage}/${this.stack}/mparticle-api/pod`,
 				],
 			}),
 		);
