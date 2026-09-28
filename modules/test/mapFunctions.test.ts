@@ -374,27 +374,6 @@ describe('objectJoinBijective', () => {
 			].join('\n'),
 		);
 	});
-
-	test('truncates the matched list when there are more than 20 matches, but always lists all mismatches', () => {
-		const matchedKeys = Array.from({ length: 25 }, (_, i) => `m${i}`);
-		const left = new Map<string, number>([
-			...matchedKeys.map((k, i): [string, number] => [k, i]),
-			['onlyLeft', -1],
-		]);
-		const right = new Map<string, string>([
-			...matchedKeys.map((k): [string, string] => [k, k]),
-			['onlyRight', 'y'],
-		]);
-		expect(() => objectJoinBijective(left, right)).toThrow(
-			'...(showing 20 of 25 matched)',
-		);
-		expect(() => objectJoinBijective(left, right)).toThrow(
-			'- "onlyLeft" - only in left',
-		);
-		expect(() => objectJoinBijective(left, right)).toThrow(
-			'+ "onlyRight" - only in right',
-		);
-	});
 });
 
 describe('partitionByValueType', () => {

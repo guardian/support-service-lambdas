@@ -1,6 +1,7 @@
 import {
 	difference,
 	getSingleOrThrow,
+	intersection,
 	partitionByType,
 } from './arrayFunctions';
 import { getIfDefined } from './nullAndUndefined';
@@ -135,8 +136,6 @@ export type ObjectJoinBijectiveOptions<K, VA, VB> = {
 	labels?: { left: string; right: string };
 };
 
-const MAX_MATCHED_ENTRIES_LISTED = 20;
-
 /**
  * joins two objects by their keys, throwing if there isn't an exact match.
  *
@@ -176,33 +175,24 @@ function describeJoinMismatch<K extends string, VA, VB>(
 	const rightLabel = options?.labels?.right ?? 'right';
 	const describeL = options?.describeL ?? ((_value: VA, key: K) => key);
 	const describeR = options?.describeR ?? ((_value: VB, key: K) => key);
-	const onlyInLSet = new Set(onlyInL);
-	const onlyInRSet = new Set(onlyInR);
+	const matchedKeys = intersection([...l.keys()], [...r.keys()]);
 
-	const matchedLines = [...l.entries()]
-		.filter(([key]) => !onlyInLSet.has(key))
-		.map(([key, value]) => `  "${describeL(value, key)}" - OK`);
+	const matchedLines = matchedKeys.map(
+		(key) =>
+			`  "${describeL(getIfDefined(l.get(key), 'already confirmed present'), key)}" - OK`,
+	);
 	const removedLines = onlyInL.map(
 		(key) =>
 			`- "${describeL(getIfDefined(l.get(key), 'already confirmed present'), key)}" - only in ${leftLabel}`,
 	);
-	const addedLines = [...r.entries()]
-		.filter(([key]) => onlyInRSet.has(key))
-		.map(
-			([key, value]) => `+ "${describeR(value, key)}" - only in ${rightLabel}`,
-		);
-
-	const truncationNote =
-		matchedLines.length > MAX_MATCHED_ENTRIES_LISTED
-			? [
-					`  ...(showing ${MAX_MATCHED_ENTRIES_LISTED} of ${matchedLines.length} matched)`,
-				]
-			: [];
+	const addedLines = onlyInR.map(
+		(key) =>
+			`+ "${describeR(getIfDefined(r.get(key), 'already confirmed present'), key)}" - only in ${rightLabel}`,
+	);
 
 	return [
 		`Different keys detected when joining ${leftLabel} with ${rightLabel}:`,
-		...matchedLines.slice(0, MAX_MATCHED_ENTRIES_LISTED),
-		...truncationNote,
+		...matchedLines,
 		...removedLines,
 		...addedLines,
 	].join('\n');
