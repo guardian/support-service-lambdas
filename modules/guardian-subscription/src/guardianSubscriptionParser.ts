@@ -1,3 +1,4 @@
+import { logger } from '@modules/logger/logger';
 import { joinAllLeft } from '@modules/mapFunctions';
 import type {
 	ProductAndRatePlanKey,
@@ -239,6 +240,10 @@ export class GuardianSubscriptionParser {
 		productRatePlanNode: ZuoraProductRatePlanNode,
 		product: CatalogProduct,
 	): RatePlansBeforeCharges<SubRP> {
+		if (isKnownBroken(product, productRatePlanNode)) {
+			return { ratePlans: [], productsNotInCatalog: [] };
+		}
+
 		const maybeGuardianKeys = this.getGuardianKeys(
 			product.name,
 			productRatePlanNode.zuoraProductRatePlan.name,
@@ -315,4 +320,34 @@ function joinFlatMap<K, S, C, RP, NIC>(
 				...rp2.productsNotInCatalog,
 			],
 		}));
+}
+
+/**
+ * "Guardian Weekly Holiday Credit - old" (product: Discounts) defines two
+ * charges in the Zuora catalog, but only one is present on most subscriptions.
+ *
+ * This affects a couple of hundred active subscriptions as of mid 2026 so is a
+ * minor issue, but it stops them being converted to a guardian subscription.
+ *
+ * This is a workaround to drop any affected rate plans while still being strict
+ * about the format of the others.  This means that in general we'll remain
+ * strict.
+ */
+function isKnownBroken(
+	product: CatalogProduct,
+	productRatePlanNode: ZuoraProductRatePlanNode,
+): boolean {
+	if (
+		product.name !== 'Discounts' ||
+		productRatePlanNode.zuoraProductRatePlan.name !==
+			'Guardian Weekly Holiday Credit - old'
+	) {
+		return false;
+	}
+	logger.log(
+		`Discarding rate plan instance(s) of known-broken product rate plan ` +
+			`"${product.name}/${productRatePlanNode.zuoraProductRatePlan.name}" (id: ${productRatePlanNode.zuoraProductRatePlan.id}) - ` +
+			`its charges can never match the catalog (see plan/mma-legacy-discount-charge-mismatch-fix.md)`,
+	);
+	return true;
 }
