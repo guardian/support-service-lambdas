@@ -345,9 +345,7 @@ function isKnownBroken(
 		return false;
 	}
 	logger.log(
-		`Discarding rate plan instance(s) of known-broken product rate plan ` +
-			`"${product.name}/${productRatePlanNode.zuoraProductRatePlan.name}" (id: ${productRatePlanNode.zuoraProductRatePlan.id}) - ` +
-			`its charges can never match the catalog (see plan/mma-legacy-discount-charge-mismatch-fix.md)`,
+		`Discarding known-broken holiday stop rate plan (id: ${productRatePlanNode.zuoraProductRatePlan.id})`,
 	);
 	return true;
 }
