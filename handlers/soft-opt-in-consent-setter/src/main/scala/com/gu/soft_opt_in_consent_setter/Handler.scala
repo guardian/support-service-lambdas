@@ -16,6 +16,12 @@ import io.circe.syntax._
 
 object Handler extends LazyLogging {
 
+  type RecordMetric = (String, Int) => Unit
+  val publishMetric: RecordMetric = (event, value) => {
+    Metrics.put(event, value.toDouble)
+    ()
+  }
+
   val readyToProcessAcquisitionStatus = "Ready to process acquisition"
   val readyToProcessCancellationStatus = "Ready to process cancellation"
   val readyProcessSwitchStatus = "Ready to process switch"
@@ -49,10 +55,13 @@ object Handler extends LazyLogging {
         productSwitchSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyProcessSwitchStatus))
         productSwitchSubIdentityIds = productSwitchSubs.map(sub => sub.Buyer__r.IdentityID__c)
 
-        activeSecondaryUserIdentityIds <-
+        secondaryUserAccessByIdentityId =
           if (cancelledSubsIdentityIds.nonEmpty) {
-            DynamoConnector(config.stage).flatMap(_.getActiveSecondaryUserIdentityIds(cancelledSubsIdentityIds))
-          } else Right(Set.empty[String])
+            DynamoConnector(config.stage) match {
+              case Right(connector) => connector.getSecondaryUserAccessByIdentityId(cancelledSubsIdentityIds)
+              case Left(error) => cancelledSubsIdentityIds.distinct.map(_ -> Left(error)).toMap
+            }
+          } else Map.empty[String, Either[SoftOptInError, Boolean]]
 
         _ = logger.info(s"About to fetch active subs from Salesforce")
         activeSubs <- sfConnector.getActiveSubs((cancelledSubsIdentityIds ++ productSwitchSubIdentityIds).distinct)
@@ -72,7 +81,8 @@ object Handler extends LazyLogging {
           identityConnector.sendConsentsReq,
           sfConnector.updateSubs,
           consentsCalculator,
-          activeSecondaryUserIdentityIds,
+          secondaryUserAccessByIdentityId,
+          publishMetric,
         )
         _ = Metrics.put(event = "successful_run")
       } yield ()).flatten.left
@@ -186,9 +196,10 @@ object Handler extends LazyLogging {
       sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
       updateSubs: String => Either[SoftOptInError, Unit],
       consentsCalculator: ConsentsCalculator,
-      activeSecondaryUserIdentityIds: Set[String],
+      secondaryUserAccessByIdentityId: Map[String, Either[SoftOptInError, Boolean]],
+      recordMetric: RecordMetric,
   ): Either[SoftOptInError, Unit] = {
-    Metrics.put(event = "cancellations_to_process", cancelledSubs.size)
+    recordMetric("cancellations_to_process", cancelledSubs.size)
 
     val recordsToUpdate = cancelledSubs
       .map(EnhancedSub(_, activeSubs.records))
@@ -197,11 +208,14 @@ object Handler extends LazyLogging {
           rec,
           sendConsentsReq,
           consentsCalculator,
-          activeSecondaryUserIdentityIds.contains(rec.identityId),
+          secondaryUserAccessByIdentityId.getOrElse(
+            rec.identityId,
+            Left(SoftOptInError(s"Missing secondary user access lookup for identityId ${rec.identityId}")),
+          ),
         ),
       )
 
-    emitIdentityMetrics(recordsToUpdate)
+    emitIdentityMetrics(recordsToUpdate, recordMetric)
 
     if (recordsToUpdate.isEmpty)
       Right(())
@@ -213,7 +227,7 @@ object Handler extends LazyLogging {
       rec: EnhancedSub,
       sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
       consentsCalculator: ConsentsCalculator,
-      hasActiveSecondaryUserAccess: Boolean,
+      hasActiveSecondaryUserAccess: Either[SoftOptInError, Boolean],
   ): SFSubRecordUpdate = {
     import rec._
 
@@ -230,9 +244,10 @@ object Handler extends LazyLogging {
 
     val updateResult =
       for {
+        hasActiveAccess <- hasActiveSecondaryUserAccess
         consents <- consentsCalculator.getCancellationConsents(
           sub.Product__c,
-          productsForCancellation(associatedActiveNonGiftSubs.map(_.Product__c).toSet, hasActiveSecondaryUserAccess),
+          productsForCancellation(associatedActiveNonGiftSubs.map(_.Product__c).toSet, hasActiveAccess),
         )
         consentWithoutSimilarProducts = consentsCalculator.removeSimilarGuardianProductFromSet(consents)
         _ <- sendCancellationConsents(identityId, consentWithoutSimilarProducts)
@@ -250,13 +265,13 @@ object Handler extends LazyLogging {
   def productsForCancellation(activeProductNames: Set[String], hasActiveSecondaryUserAccess: Boolean): Set[String] =
     if (hasActiveSecondaryUserAccess) activeProductNames + "Secondary User" else activeProductNames
 
-  def emitIdentityMetrics(records: Seq[SFSubRecordUpdate]): Unit = {
+  def emitIdentityMetrics(records: Seq[SFSubRecordUpdate], recordMetric: RecordMetric = publishMetric): Unit = {
     // Soft_Opt_in_Number_of_Attempts__c == 0 means the consents were set successfully
     val successfullyUpdated = records.count(_.Soft_Opt_in_Number_of_Attempts__c == 0)
     val unsuccessfullyUpdated = records.count(_.Soft_Opt_in_Number_of_Attempts__c > 0)
 
-    Metrics.put(event = "successful_consents_updates", successfullyUpdated)
-    Metrics.put(event = "failed_consents_updates", unsuccessfullyUpdated)
+    recordMetric("successful_consents_updates", successfullyUpdated)
+    recordMetric("failed_consents_updates", unsuccessfullyUpdated)
   }
 
 }

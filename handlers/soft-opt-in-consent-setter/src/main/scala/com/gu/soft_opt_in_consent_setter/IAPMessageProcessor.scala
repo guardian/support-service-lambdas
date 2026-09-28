@@ -35,11 +35,11 @@ class IAPMessageProcessor(
 
         processCancelledSub(
           message,
-          identityConnector.sendConsentsReq _,
-          mpapiConnector.getMobileSubscriptions _,
+          identityConnector.sendConsentsReq,
+          mpapiConnector.getMobileSubscriptions,
           consentsCalculator,
           sfConnector,
-          dynamoConnector.hasActiveSecondaryUserAccess _,
+          dynamoConnector.hasActiveSecondaryUserAccess,
         )
       case Switch =>
         Metrics.put(event = "product_switches_to_process", 1)

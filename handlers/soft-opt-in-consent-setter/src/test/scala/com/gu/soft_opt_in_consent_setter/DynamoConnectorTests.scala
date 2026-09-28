@@ -111,7 +111,9 @@ class DynamoConnectorTests extends AnyFunSuite with Matchers with MockFactory {
     (client.query(_: QueryRequest)).expects(*).returning(response)
 
     val result = new DynamoConnector(client, "CODE").hasActiveSecondaryUserAccess(identityId)
-    result.left.toOption.map(_.getMessage) shouldBe Some("Secondary SupporterProductData item has no termEndDate")
+    result.left.toOption.map(_.getMessage) shouldBe Some(
+      s"Secondary SupporterProductData item for identityId $identityId, primarySubscriptionName A-primary has no termEndDate",
+    )
   }
 
   test(testName = "hasActiveSecondaryUserAccess fails when a secondary record has an invalid end date") {
@@ -124,16 +126,57 @@ class DynamoConnectorTests extends AnyFunSuite with Matchers with MockFactory {
     (client.query(_: QueryRequest)).expects(*).returning(response)
 
     val result = new DynamoConnector(client, "CODE").hasActiveSecondaryUserAccess(identityId)
-    result.left.toOption.map(_.getMessage) shouldBe Some("Secondary SupporterProductData item has invalid termEndDate")
+    result.left.toOption.map(_.getMessage) shouldBe Some(
+      s"Secondary SupporterProductData item for identityId $identityId, primarySubscriptionName A-primary has invalid termEndDate",
+    )
   }
 
-  test(testName = "hasActiveSecondaryUserAccess fails when SupporterProductData cannot be queried") {
+  test(testName = "secondary access lookups continue after a query failure for one identity") {
+    val otherIdentityId = "otherIdentityId"
+    val activeSecondary = Map(
+      "primarySubscriptionName" -> AttributeValue.builder().s("A-primary").build(),
+      "termEndDate" -> AttributeValue.builder().s("2099-01-01").build(),
+    ).asJava
     val client = mock[DynamoDbClient]
-    (client.query(_: QueryRequest)).expects(*).throwing(new RuntimeException("query failed"))
+    (client.query(_: QueryRequest)).expects(*).twice().onCall { (request: QueryRequest) =>
+      request.expressionAttributeValues().get(":identityId").s() match {
+        case `identityId` => throw new RuntimeException("query failed")
+        case `otherIdentityId` => QueryResponse.builder().items(Seq(activeSecondary).asJava).build()
+        case unexpected => throw new AssertionError(s"Unexpected identityId $unexpected")
+      }
+    }
 
-    val result = new DynamoConnector(client, "CODE").getActiveSecondaryUserIdentityIds(Seq(identityId))
-    result.left.toOption.map(_.getMessage) shouldBe Some(
-      "Failed to query SupporterProductData for secondary user access",
+    val result =
+      new DynamoConnector(client, "CODE").getSecondaryUserAccessByIdentityId(Seq(identityId, otherIdentityId))
+    result(identityId).left.toOption.map(_.getMessage) shouldBe Some(
+      s"Failed to query SupporterProductData for secondary user access for identityId $identityId",
     )
+    result(otherIdentityId) shouldBe Right(true)
+  }
+
+  test(testName = "secondary access lookups continue after a malformed item for one identity") {
+    val otherIdentityId = "otherIdentityId"
+    val malformedSecondary = Map(
+      "primarySubscriptionName" -> AttributeValue.builder().s("A-malformed").build(),
+    ).asJava
+    val activeSecondary = Map(
+      "primarySubscriptionName" -> AttributeValue.builder().s("A-active").build(),
+      "termEndDate" -> AttributeValue.builder().s("2099-01-01").build(),
+    ).asJava
+    val client = mock[DynamoDbClient]
+    (client.query(_: QueryRequest)).expects(*).twice().onCall { (request: QueryRequest) =>
+      request.expressionAttributeValues().get(":identityId").s() match {
+        case `identityId` => QueryResponse.builder().items(Seq(malformedSecondary).asJava).build()
+        case `otherIdentityId` => QueryResponse.builder().items(Seq(activeSecondary).asJava).build()
+        case unexpected => throw new AssertionError(s"Unexpected identityId $unexpected")
+      }
+    }
+
+    val result =
+      new DynamoConnector(client, "CODE").getSecondaryUserAccessByIdentityId(Seq(identityId, otherIdentityId))
+    result(identityId).left.toOption.map(_.getMessage) shouldBe Some(
+      s"Secondary SupporterProductData item for identityId $identityId, primarySubscriptionName A-malformed has no termEndDate",
+    )
+    result(otherIdentityId) shouldBe Right(true)
   }
 }

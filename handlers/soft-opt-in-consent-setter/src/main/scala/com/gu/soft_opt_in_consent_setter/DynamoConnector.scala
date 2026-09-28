@@ -28,26 +28,38 @@ class DynamoConnector(dynamoDbClient: DynamoDbClient, stage: String) extends Laz
             ":identityId" -> AttributeValue.builder().s(identityId).build(),
           ).asJava,
         )
+        /* A stale read could clear consents for someone just granted secondary access. */
         .consistentRead(true)
 
       if (startKey != null && !startKey.isEmpty) requestBuilder.exclusiveStartKey(startKey)
 
       Try(dynamoDbClient.query(requestBuilder.build())) match {
         case Failure(error) =>
-          logger.error("Failed to query SupporterProductData for secondary user access", error)
-          Left(SoftOptInError("Failed to query SupporterProductData for secondary user access", error))
+          val message = s"Failed to query SupporterProductData for secondary user access for identityId $identityId"
+          logger.error(message, error)
+          Left(SoftOptInError(message, error))
         case Success(response) =>
           val activeSecondary = response.items().asScala.foldLeft[Either[SoftOptInError, Boolean]](Right(false)) {
             case (Right(true), _) => Right(true)
             case (Right(false), item) if !item.containsKey("primarySubscriptionName") => Right(false)
             case (Right(false), item) =>
+              val subscriptionName = Option(item.get("primarySubscriptionName"))
+                .flatMap(value => Option(value.s()))
+                .getOrElse("<missing>")
+              val itemDescription = s"identityId $identityId, primarySubscriptionName $subscriptionName"
               Option(item.get("termEndDate")).flatMap(value => Option(value.s())) match {
-                case None => Left(SoftOptInError("Secondary SupporterProductData item has no termEndDate"))
+                case None =>
+                  Left(SoftOptInError(s"Secondary SupporterProductData item for $itemDescription has no termEndDate"))
                 case Some(termEndDate) =>
                   Try(LocalDate.parse(termEndDate)) match {
                     case Success(date) => Right(!date.isBefore(LocalDate.now(ZoneOffset.UTC)))
                     case Failure(error) =>
-                      Left(SoftOptInError("Secondary SupporterProductData item has invalid termEndDate", error))
+                      Left(
+                        SoftOptInError(
+                          s"Secondary SupporterProductData item for $itemDescription has invalid termEndDate",
+                          error,
+                        ),
+                      )
                   }
               }
             case (left @ Left(_), _) => left
@@ -64,12 +76,8 @@ class DynamoConnector(dynamoDbClient: DynamoDbClient, stage: String) extends Laz
     queryPage(null)
   }
 
-  def getActiveSecondaryUserIdentityIds(identityIds: Seq[String]): Either[SoftOptInError, Set[String]] =
-    identityIds.distinct.foldLeft[Either[SoftOptInError, Set[String]]](Right(Set.empty)) {
-      case (Right(activeIds), identityId) =>
-        hasActiveSecondaryUserAccess(identityId).map(isActive => if (isActive) activeIds + identityId else activeIds)
-      case (left @ Left(_), _) => left
-    }
+  def getSecondaryUserAccessByIdentityId(identityIds: Seq[String]): Map[String, Either[SoftOptInError, Boolean]] =
+    identityIds.distinct.map(identityId => identityId -> hasActiveSecondaryUserAccess(identityId)).toMap
 
   def updateLoggingTable(
       subscriptionId: String,

@@ -4,7 +4,6 @@ import IAPMessageProcessor._
 import com.gu.soft_opt_in_consent_setter.HandlerIAP._
 import com.gu.soft_opt_in_consent_setter.models.{
   ConsentsMapping,
-  EnhancedSub,
   SFAssociatedSubRecord,
   SFAssociatedSubResponse,
   SFBuyer,
@@ -18,6 +17,7 @@ import com.gu.soft_opt_in_consent_setter.{
   MobileSubscriptions,
   SalesforceConnector,
 }
+import io.circe.Json
 import io.circe.parser.parse
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.funsuite.AnyFunSuite
@@ -48,8 +48,9 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
 
   test(testName = "scheduled cancellations preserve consents only for active secondary users") {
     val secondaryIdentityId = "secondaryIdentityId"
+    val failedIdentityId = "failedIdentityId"
     val otherIdentityId = "otherIdentityId"
-    val cancelledSubs = Seq(secondaryIdentityId, otherIdentityId).map { id =>
+    val cancelledSubs = Seq(secondaryIdentityId, failedIdentityId, otherIdentityId).map { id =>
       SFSubRecord(
         Id = s"sub-$id",
         Name = s"A-$id",
@@ -58,30 +59,56 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
         Soft_Opt_in_Status__c = Handler.readyToProcessCancellationStatus,
         Buyer__r = SFBuyer(id),
         Subscription_Rate_Plan_Updates__r = None,
+        Soft_Opt_in_Number_of_Attempts__c = Some(if (id == failedIdentityId) 3 else 0),
       )
     }
     val sentRequests = ListBuffer.empty[(String, String)]
-    val activeSecondaryUserIdentityIds = Set(secondaryIdentityId)
+    val updatePayloads = ListBuffer.empty[String]
+    val metrics = ListBuffer.empty[(String, Int)]
+    val secondaryUserAccessByIdentityId: Map[String, Either[SoftOptInError, Boolean]] = Map(
+      secondaryIdentityId -> Right(true),
+      failedIdentityId -> Left(SoftOptInError("SupporterProductData lookup failed for failedIdentityId")),
+      otherIdentityId -> Right(false),
+    )
 
-    val updates = cancelledSubs.map(EnhancedSub(_, Seq.empty)).map { rec =>
-      Handler.processCancelledSub(
-        rec,
-        (id, body) => {
-          sentRequests += (id -> body)
-          Right(())
-        },
-        calculator,
-        activeSecondaryUserIdentityIds.contains(rec.identityId),
-      )
-    }
+    val result = Handler.processCancelledSubs(
+      cancelledSubs,
+      SFAssociatedSubResponse(0, true, Seq.empty),
+      (id, body) => {
+        sentRequests += (id -> body)
+        Right(())
+      },
+      body => {
+        updatePayloads += body
+        Right(())
+      },
+      calculator,
+      secondaryUserAccessByIdentityId,
+      (event, value) => {
+        metrics += (event -> value)
+        ()
+      },
+    )
 
+    result shouldBe Right(())
     sentRequests.map(_._1).toList shouldBe List(otherIdentityId)
     val unsetConsents = parse(sentRequests.head._2).toOption.get.asArray.get.map { consent =>
       consent.hcursor.get[String]("id").toOption.get -> consent.hcursor.get[Boolean]("consented").toOption.get
     }.toSet
     unsetConsents shouldBe Set("your_support_onboarding" -> false, "supporter_newsletter" -> false)
-    updates.map(_.Soft_Opt_in_Number_of_Attempts__c) shouldBe Seq(0, 0)
-    updates.map(_.Soft_Opt_in_Last_Stage_Processed__c) shouldBe Seq(Some("Cancellation"), Some("Cancellation"))
+    updatePayloads.size shouldBe 1
+    val updateJson = parse(updatePayloads.head).toOption.get
+    val updates = updateJson.hcursor.get[Vector[Json]]("records").toOption.get
+    updates.map(_.hcursor.get[String]("Id").toOption.get) shouldBe
+      Vector(s"sub-$secondaryIdentityId", s"sub-$failedIdentityId", s"sub-$otherIdentityId")
+    updates.map(_.hcursor.get[Int]("Soft_Opt_in_Number_of_Attempts__c").toOption.get) shouldBe Vector(0, 4, 0)
+    updates.map(_.hcursor.get[Option[String]]("Soft_Opt_in_Last_Stage_Processed__c").toOption.get) shouldBe
+      Vector(Some("Cancellation"), None, Some("Cancellation"))
+    metrics.toList shouldBe List(
+      "cancellations_to_process" -> 3,
+      "successful_consents_updates" -> 2,
+      "failed_consents_updates" -> 1,
+    )
   }
 
   test(testName = "processProductSwitchSub should handle product switch event correctly") {
