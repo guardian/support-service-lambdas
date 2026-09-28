@@ -142,13 +142,21 @@ export function indexAndJoinZuoraRatePlanCharges(
 	const { ratePlanCharges, productRatePlanCharges, ...rest } = ratePlan;
 	const zuoraSubscriptionRatePlanCharges: IndexedZuoraSubscriptionRatePlanCharges =
 		indexChargeList(ratePlanCharges);
-	return {
-		...rest,
-		ratePlanCharges: buildZuoraRatePlanCharges(
-			productRatePlanCharges,
-			zuoraSubscriptionRatePlanCharges,
-		),
-	};
+	try {
+		return {
+			...rest,
+			ratePlanCharges: buildZuoraRatePlanCharges(
+				productRatePlanCharges,
+				zuoraSubscriptionRatePlanCharges,
+			),
+		};
+	} catch (err) {
+		throw new Error(
+			`Failed to join charges between rate plan "${ratePlan.product.name}/${ratePlan.ratePlanName}" (id: ${ratePlan.id}) and ` +
+				`product rate plan "${ratePlan.productRatePlan.name}" (id: ${ratePlan.productRatePlan.id})`,
+			{ cause: err },
+		);
+	}
 }
 
 function buildZuoraRatePlanCharges(
@@ -159,6 +167,14 @@ function buildZuoraRatePlanCharges(
 		objectJoinBijective(
 			productRatePlanCharges,
 			zuoraSubscriptionRatePlanCharges,
+			{
+				describeL: (charge, id) => `${charge.name} (${id})`,
+				describeR: (charge, id) => `${charge.name} (${id})`,
+				labels: {
+					left: 'product rate plan charges',
+					right: 'rate plan charges',
+				},
+			},
 		),
 		([zuoraProductRatePlanCharge, subCharge]: [
 			ZuoraProductRatePlanCharge,
