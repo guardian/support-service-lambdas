@@ -4,8 +4,11 @@ import IAPMessageProcessor._
 import com.gu.soft_opt_in_consent_setter.HandlerIAP._
 import com.gu.soft_opt_in_consent_setter.models.{
   ConsentsMapping,
+  EnhancedSub,
   SFAssociatedSubRecord,
   SFAssociatedSubResponse,
+  SFBuyer,
+  SFSubRecord,
   SoftOptInError,
 }
 import com.gu.soft_opt_in_consent_setter.{
@@ -15,9 +18,12 @@ import com.gu.soft_opt_in_consent_setter.{
   MobileSubscriptions,
   SalesforceConnector,
 }
+import io.circe.parser.parse
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
+
+import scala.collection.mutable.ListBuffer
 
 // higher level tests on the 'processProductSwitch', 'processAcquisition' and 'processCancellation' functions.
 
@@ -38,6 +44,44 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
 
   test(testName = "cancellation products remain unchanged without secondary user access") {
     Handler.productsForCancellation(Set("Membership"), hasActiveSecondaryUserAccess = false) shouldBe Set("Membership")
+  }
+
+  test(testName = "scheduled cancellations preserve consents only for active secondary users") {
+    val secondaryIdentityId = "secondaryIdentityId"
+    val otherIdentityId = "otherIdentityId"
+    val cancelledSubs = Seq(secondaryIdentityId, otherIdentityId).map { id =>
+      SFSubRecord(
+        Id = s"sub-$id",
+        Name = s"A-$id",
+        Product__c = "Supporter Plus",
+        SF_Status__c = "Cancelled",
+        Soft_Opt_in_Status__c = Handler.readyToProcessCancellationStatus,
+        Buyer__r = SFBuyer(id),
+        Subscription_Rate_Plan_Updates__r = None,
+      )
+    }
+    val sentRequests = ListBuffer.empty[(String, String)]
+    val activeSecondaryUserIdentityIds = Set(secondaryIdentityId)
+
+    val updates = cancelledSubs.map(EnhancedSub(_, Seq.empty)).map { rec =>
+      Handler.processCancelledSub(
+        rec,
+        (id, body) => {
+          sentRequests += (id -> body)
+          Right(())
+        },
+        calculator,
+        activeSecondaryUserIdentityIds.contains(rec.identityId),
+      )
+    }
+
+    sentRequests.map(_._1).toList shouldBe List(otherIdentityId)
+    val unsetConsents = parse(sentRequests.head._2).toOption.get.asArray.get.map { consent =>
+      consent.hcursor.get[String]("id").toOption.get -> consent.hcursor.get[Boolean]("consented").toOption.get
+    }.toSet
+    unsetConsents shouldBe Set("your_support_onboarding" -> false, "supporter_newsletter" -> false)
+    updates.map(_.Soft_Opt_in_Number_of_Attempts__c) shouldBe Seq(0, 0)
+    updates.map(_.Soft_Opt_in_Last_Stage_Processed__c) shouldBe Seq(Some("Cancellation"), Some("Cancellation"))
   }
 
   test(testName = "processProductSwitchSub should handle product switch event correctly") {
@@ -168,6 +212,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       mockGetMobileSubscriptions,
       calculator,
       mockSfConnector,
+      _ => Right(false),
     )
 
     result shouldBe Right(())
@@ -216,6 +261,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       mockGetMobileSubscriptions,
       calculator,
       mockSfConnector,
+      _ => Right(false),
     )
 
     result shouldBe Right(())
@@ -325,6 +371,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       mockGetMobileSubscriptions,
       calculator,
       mockSfConnector,
+      _ => Right(false),
     )
 
     result shouldBe Right(())

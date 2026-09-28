@@ -181,7 +181,7 @@ object IAPMessageProcessor extends StrictLogging {
       getMobileSubscriptions: String => Either[SoftOptInError, MobileSubscriptions],
       consentsCalculator: ConsentsCalculator,
       sfConnector: SalesforceConnector,
-      hasActiveSecondaryUserAccess: String => Either[SoftOptInError, Boolean] = _ => Right(false),
+      hasActiveSecondaryUserAccess: String => Either[SoftOptInError, Boolean],
   ): Either[SoftOptInError, Unit] = {
     def sendCancellationConsents(identityId: String, consents: Set[String]): Either[SoftOptInError, Unit] = {
       val maybeError: Option[SoftOptInError] =

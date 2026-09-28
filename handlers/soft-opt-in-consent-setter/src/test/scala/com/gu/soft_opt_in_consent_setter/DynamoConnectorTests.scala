@@ -80,4 +80,60 @@ class DynamoConnectorTests extends AnyFunSuite with Matchers with MockFactory {
 
     new DynamoConnector(client, "CODE").hasActiveSecondaryUserAccess(identityId) shouldBe Right(false)
   }
+
+  test(testName = "hasActiveSecondaryUserAccess checks subsequent query pages") {
+    val nextKey = Map("identityId" -> AttributeValue.builder().s(identityId).build())
+    val firstPage = QueryResponse.builder().lastEvaluatedKey(nextKey.asJava).build()
+    val secondaryRecord = Map(
+      "primarySubscriptionName" -> AttributeValue.builder().s("A-primary").build(),
+      "termEndDate" -> AttributeValue.builder().s("2099-01-01").build(),
+    ).asJava
+    val secondPage = QueryResponse.builder().items(Seq(secondaryRecord).asJava).build()
+    val client = mock[DynamoDbClient]
+
+    inSequence {
+      (client.query(_: QueryRequest)).expects(*).returning(firstPage)
+      (client.query(_: QueryRequest)).expects(*).onCall { (request: QueryRequest) =>
+        request.exclusiveStartKey() shouldBe nextKey.asJava
+        secondPage
+      }
+    }
+
+    new DynamoConnector(client, "CODE").hasActiveSecondaryUserAccess(identityId) shouldBe Right(true)
+  }
+
+  test(testName = "hasActiveSecondaryUserAccess fails when a secondary record has no end date") {
+    val secondaryRecord = Map(
+      "primarySubscriptionName" -> AttributeValue.builder().s("A-primary").build(),
+    ).asJava
+    val response = QueryResponse.builder().items(Seq(secondaryRecord).asJava).build()
+    val client = mock[DynamoDbClient]
+    (client.query(_: QueryRequest)).expects(*).returning(response)
+
+    val result = new DynamoConnector(client, "CODE").hasActiveSecondaryUserAccess(identityId)
+    result.left.toOption.map(_.getMessage) shouldBe Some("Secondary SupporterProductData item has no termEndDate")
+  }
+
+  test(testName = "hasActiveSecondaryUserAccess fails when a secondary record has an invalid end date") {
+    val secondaryRecord = Map(
+      "primarySubscriptionName" -> AttributeValue.builder().s("A-primary").build(),
+      "termEndDate" -> AttributeValue.builder().s("invalid-date").build(),
+    ).asJava
+    val response = QueryResponse.builder().items(Seq(secondaryRecord).asJava).build()
+    val client = mock[DynamoDbClient]
+    (client.query(_: QueryRequest)).expects(*).returning(response)
+
+    val result = new DynamoConnector(client, "CODE").hasActiveSecondaryUserAccess(identityId)
+    result.left.toOption.map(_.getMessage) shouldBe Some("Secondary SupporterProductData item has invalid termEndDate")
+  }
+
+  test(testName = "hasActiveSecondaryUserAccess fails when SupporterProductData cannot be queried") {
+    val client = mock[DynamoDbClient]
+    (client.query(_: QueryRequest)).expects(*).throwing(new RuntimeException("query failed"))
+
+    val result = new DynamoConnector(client, "CODE").getActiveSecondaryUserIdentityIds(Seq(identityId))
+    result.left.toOption.map(_.getMessage) shouldBe Some(
+      "Failed to query SupporterProductData for secondary user access",
+    )
+  }
 }
