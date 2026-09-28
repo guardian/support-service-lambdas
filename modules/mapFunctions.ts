@@ -126,16 +126,12 @@ export function joinAllLeft<K, VA, VB, KR extends K>(
 	return linked;
 }
 
-/**
- * optional context used by objectJoinBijective to render a comprehensive,
- * diff-style mismatch message: describe turns a key/value into something
- * meaningful (e.g. `${value.name} (${key})`) instead of the bare key, and
- * labels name what left/right actually represent (e.g. "catalog charges").
- * If omitted, keys are used as-is and left/right are labelled generically.
- */
 export type ObjectJoinBijectiveOptions<K, VA, VB> = {
+	// function to turn a value into a concise string for display
 	describeL?: (value: VA, key: K) => string;
+	// function to turn a value into a concise string for display
 	describeR?: (value: VB, key: K) => string;
+	// what the left and right objects represent
 	labels?: { left: string; right: string };
 };
 
@@ -143,13 +139,6 @@ const MAX_MATCHED_ENTRIES_LISTED = 20;
 
 /**
  * joins two objects by their keys, throwing if there isn't an exact match.
- *
- * The thrown message is a diff: treating `l` as the "before" and `r` as the
- * "after", matched keys are listed with a leading space, keys missing from
- * `r` (only in `l`) with a leading '-', and keys missing from `l` (only in
- * `r`) with a leading '+' - so it's comprehensive without callers having to
- * redo the diff themselves. The matched list is capped so a small number of
- * mismatches isn't drowned out by a large number of matches.
  *
  * @param l
  * @param r
