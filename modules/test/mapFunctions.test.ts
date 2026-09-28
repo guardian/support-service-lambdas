@@ -300,7 +300,12 @@ describe('objectJoinBijective', () => {
 			['b', 'y'],
 		]);
 		expect(() => objectJoinBijective(left, right)).toThrow(
-			'Keys do not match between records: onlyInL: c onlyInR:',
+			[
+				'Different keys detected when joining left with right:',
+				'  "a" - OK',
+				'  "b" - OK',
+				'- "c" - only in left',
+			].join('\n'),
 		);
 	});
 
@@ -311,7 +316,11 @@ describe('objectJoinBijective', () => {
 			['b', 'y'],
 		]);
 		expect(() => objectJoinBijective(left, right)).toThrow(
-			'Keys do not match between records: onlyInL:  onlyInR: b',
+			[
+				'Different keys detected when joining left with right:',
+				'  "a" - OK',
+				'+ "b" - only in right',
+			].join('\n'),
 		);
 	});
 
@@ -325,7 +334,12 @@ describe('objectJoinBijective', () => {
 			['b', 'y'],
 		]);
 		expect(() => objectJoinBijective(left, right)).toThrow(
-			'Keys do not match between records: onlyInL: c onlyInR: b',
+			[
+				'Different keys detected when joining left with right:',
+				'  "a" - OK',
+				'- "c" - only in left',
+				'+ "b" - only in right',
+			].join('\n'),
 		);
 	});
 
@@ -334,6 +348,52 @@ describe('objectJoinBijective', () => {
 		const right = new Map<never, string>();
 		const result = objectJoinBijective(left, right);
 		expect(result).toEqual([]);
+	});
+
+	test('uses describeL/describeR and labels to render a comprehensive diff-style message', () => {
+		const left = new Map<'a' | 'b' | 'c', { name: string }>([
+			['a', { name: 'Alpha' }],
+			['c', { name: 'Charlie' }],
+		]);
+		const right = new Map<'a' | 'b' | 'c', { label: string }>([
+			['a', { label: 'x' }],
+			['b', { label: 'Bravo' }],
+		]);
+		expect(() =>
+			objectJoinBijective(left, right, {
+				describeL: (value, key) => `${value.name} (${key})`,
+				describeR: (value, key) => `${value.label} (${key})`,
+				labels: { left: 'catalog items', right: 'subscription items' },
+			}),
+		).toThrow(
+			[
+				'Different keys detected when joining catalog items with subscription items:',
+				'  "Alpha (a)" - OK',
+				'- "Charlie (c)" - only in catalog items',
+				'+ "Bravo (b)" - only in subscription items',
+			].join('\n'),
+		);
+	});
+
+	test('truncates the matched list when there are more than 20 matches, but always lists all mismatches', () => {
+		const matchedKeys = Array.from({ length: 25 }, (_, i) => `m${i}`);
+		const left = new Map<string, number>([
+			...matchedKeys.map((k, i): [string, number] => [k, i]),
+			['onlyLeft', -1],
+		]);
+		const right = new Map<string, string>([
+			...matchedKeys.map((k): [string, string] => [k, k]),
+			['onlyRight', 'y'],
+		]);
+		expect(() => objectJoinBijective(left, right)).toThrow(
+			'...(showing 20 of 25 matched)',
+		);
+		expect(() => objectJoinBijective(left, right)).toThrow(
+			'- "onlyLeft" - only in left',
+		);
+		expect(() => objectJoinBijective(left, right)).toThrow(
+			'+ "onlyRight" - only in right',
+		);
 	});
 });
 

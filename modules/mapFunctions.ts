@@ -127,13 +127,38 @@ export function joinAllLeft<K, VA, VB, KR extends K>(
 }
 
 /**
- * joins two objects by their keys, throwing if there isn't an exact match
+ * optional context used by objectJoinBijective to render a comprehensive,
+ * diff-style mismatch message: describe turns a key/value into something
+ * meaningful (e.g. `${value.name} (${key})`) instead of the bare key, and
+ * labels name what left/right actually represent (e.g. "catalog charges").
+ * If omitted, keys are used as-is and left/right are labelled generically.
+ */
+export type ObjectJoinBijectiveOptions<K, VA, VB> = {
+	describeL?: (value: VA, key: K) => string;
+	describeR?: (value: VB, key: K) => string;
+	labels?: { left: string; right: string };
+};
+
+const MAX_MATCHED_ENTRIES_LISTED = 20;
+
+/**
+ * joins two objects by their keys, throwing if there isn't an exact match.
+ *
+ * The thrown message is a diff: treating `l` as the "before" and `r` as the
+ * "after", matched keys are listed with a leading space, keys missing from
+ * `r` (only in `l`) with a leading '-', and keys missing from `l` (only in
+ * `r`) with a leading '+' - so it's comprehensive without callers having to
+ * redo the diff themselves. The matched list is capped so a small number of
+ * mismatches isn't drowned out by a large number of matches.
+ *
  * @param l
  * @param r
+ * @param options
  */
 export function objectJoinBijective<K extends string, VA, VB>(
 	l: Map<K, VA>,
 	r: Map<K, VB>,
+	options?: ObjectJoinBijectiveOptions<K, VA, VB>,
 ): Array<[VA, VB]> {
 	const lEntries: Array<[K, VA]> = [...l.entries()];
 	const [onlyInL, onlyInR] = difference(
@@ -142,15 +167,56 @@ export function objectJoinBijective<K extends string, VA, VB>(
 	);
 
 	if (onlyInL.length + onlyInR.length !== 0) {
-		throw new Error(
-			`Keys do not match between records: onlyInL: ${onlyInL.join(', ')} onlyInR: ${onlyInR.join(', ')}`,
-		);
+		throw new Error(describeJoinMismatch(l, r, onlyInL, onlyInR, options));
 	}
 
 	return lEntries.map(([key, lValue]) => {
 		const rValue = getIfDefined(r.get(key), 'already proved it is there');
 		return [lValue, rValue] as const;
 	});
+}
+
+function describeJoinMismatch<K extends string, VA, VB>(
+	l: Map<K, VA>,
+	r: Map<K, VB>,
+	onlyInL: K[],
+	onlyInR: K[],
+	options?: ObjectJoinBijectiveOptions<K, VA, VB>,
+): string {
+	const leftLabel = options?.labels?.left ?? 'left';
+	const rightLabel = options?.labels?.right ?? 'right';
+	const describeL = options?.describeL ?? ((_value: VA, key: K) => key);
+	const describeR = options?.describeR ?? ((_value: VB, key: K) => key);
+	const onlyInLSet = new Set(onlyInL);
+	const onlyInRSet = new Set(onlyInR);
+
+	const matchedLines = [...l.entries()]
+		.filter(([key]) => !onlyInLSet.has(key))
+		.map(([key, value]) => `  "${describeL(value, key)}" - OK`);
+	const removedLines = onlyInL.map(
+		(key) =>
+			`- "${describeL(getIfDefined(l.get(key), 'already confirmed present'), key)}" - only in ${leftLabel}`,
+	);
+	const addedLines = [...r.entries()]
+		.filter(([key]) => onlyInRSet.has(key))
+		.map(
+			([key, value]) => `+ "${describeR(value, key)}" - only in ${rightLabel}`,
+		);
+
+	const truncationNote =
+		matchedLines.length > MAX_MATCHED_ENTRIES_LISTED
+			? [
+					`  ...(showing ${MAX_MATCHED_ENTRIES_LISTED} of ${matchedLines.length} matched)`,
+				]
+			: [];
+
+	return [
+		`Different keys detected when joining ${leftLabel} with ${rightLabel}:`,
+		...matchedLines.slice(0, MAX_MATCHED_ENTRIES_LISTED),
+		...truncationNote,
+		...removedLines,
+		...addedLines,
+	].join('\n');
 }
 
 /**

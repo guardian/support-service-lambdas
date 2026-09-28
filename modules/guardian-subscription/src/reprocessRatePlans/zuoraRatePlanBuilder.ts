@@ -142,13 +142,25 @@ export function indexAndJoinZuoraRatePlanCharges(
 	const { ratePlanCharges, productRatePlanCharges, ...rest } = ratePlan;
 	const zuoraSubscriptionRatePlanCharges: IndexedZuoraSubscriptionRatePlanCharges =
 		indexChargeList(ratePlanCharges);
-	return {
-		...rest,
-		ratePlanCharges: buildZuoraRatePlanCharges(
-			productRatePlanCharges,
-			zuoraSubscriptionRatePlanCharges,
-		),
-	};
+	try {
+		return {
+			...rest,
+			ratePlanCharges: buildZuoraRatePlanCharges(
+				productRatePlanCharges,
+				zuoraSubscriptionRatePlanCharges,
+			),
+		};
+	} catch (err) {
+		// add the rate plan/product/product-rate-plan identity that only this
+		// layer knows about, so the underlying charge-level detail (already
+		// named/identified by objectJoinBijective's describers) can be traced
+		// back to a specific rate plan
+		throw new Error(
+			`Failed to join charges between rate plan "${ratePlan.product.name}/${ratePlan.ratePlanName}" (id: ${ratePlan.id}) and ` +
+				`product rate plan "${ratePlan.productRatePlan.name}" (id: ${ratePlan.productRatePlan.id})`,
+			{ cause: err },
+		);
+	}
 }
 
 function buildZuoraRatePlanCharges(
@@ -159,6 +171,16 @@ function buildZuoraRatePlanCharges(
 		objectJoinBijective(
 			productRatePlanCharges,
 			zuoraSubscriptionRatePlanCharges,
+			// describe mismatched/matched charges by name/id, so the thrown error is
+			// understandable without manually cross-referencing the catalog
+			{
+				describeL: (charge, id) => `${charge.name} (${id})`,
+				describeR: (charge, id) => `${charge.name} (${id})`,
+				labels: {
+					left: 'catalog product rate plan charges',
+					right: 'subscription rate plan instance charges',
+				},
+			},
 		),
 		([zuoraProductRatePlanCharge, subCharge]: [
 			ZuoraProductRatePlanCharge,
