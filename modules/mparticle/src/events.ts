@@ -62,11 +62,7 @@ export const uploadEventBatch = async (
 
 	let response: MParticleHttpResponse<undefined>;
 	try {
-		response = await client.post(
-			eventBatchPath,
-			validatedBatch,
-			() => undefined,
-		);
+		response = await client.post(eventBatchPath, validatedBatch);
 	} catch (error) {
 		if (error instanceof MParticleNetworkError) {
 			logger.error('mParticle Events API request failed at the network layer', {
@@ -90,6 +86,5 @@ export const uploadEventBatch = async (
 
 	logger.log('Received mParticle Events API response', {
 		endpoint: client.baseURL,
-		status: response.statusCode,
 	});
 };

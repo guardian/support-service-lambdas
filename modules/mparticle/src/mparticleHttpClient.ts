@@ -1,3 +1,4 @@
+import { z, type ZodType } from 'zod';
 import type { Authorisation, BearerTokenProvider } from '@modules/zuora/auth';
 import {
 	RestClient,
@@ -12,7 +13,7 @@ export type MParticleHttpResponse<RESPONSE> =
 	| {
 			success: true;
 			data: RESPONSE;
-			statusCode: number;
+			statusCode?: number;
 	  }
 	| {
 			success: false;
@@ -39,8 +40,6 @@ export class MParticleNetworkError extends Error {
 		Error.captureStackTrace(this, MParticleNetworkError);
 	}
 }
-
-type HttpMethod = 'GET' | 'POST';
 
 /**
  * mParticle exposes several APIs, each with its own base URL and credentials.
@@ -82,8 +81,13 @@ export interface MParticleClient<T extends MParticleApi = MParticleApi> {
 	post<REQUEST, RESPONSE>(
 		path: string,
 		body: REQUEST,
-		schema: MParticleResponseSchema<RESPONSE>,
+		schema: ZodType<RESPONSE>,
 	): Promise<MParticleHttpResponse<RESPONSE>>;
+
+	post<REQUEST>(
+		path: string,
+		body: REQUEST,
+	): Promise<MParticleHttpResponse<undefined>>;
 
 	getStream(path: string): Promise<ReadableStream>;
 }
@@ -136,54 +140,81 @@ class MParticleHttpClient<
 		path: string,
 		schema: MParticleResponseSchema<RESPONSE>,
 	): Promise<MParticleHttpResponse<RESPONSE>> {
-		return this.request('GET', path, schema);
-	}
-
-	async post<REQUEST, RESPONSE>(
-		path: string,
-		body: REQUEST,
-		schema: MParticleResponseSchema<RESPONSE>,
-	): Promise<MParticleHttpResponse<RESPONSE>> {
-		return this.request('POST', path, schema, body);
-	}
-
-	private async request<REQUEST, RESPONSE>(
-		method: HttpMethod,
-		path: string,
-		schema: MParticleResponseSchema<RESPONSE>,
-		body?: REQUEST,
-	): Promise<MParticleHttpResponse<RESPONSE>> {
 		try {
-			const response =
-				method === 'GET'
-					? await this.restClient.getWithStatus(path, schema)
-					: await this.restClient.postWithStatus(
-							path,
-							body === undefined ? undefined : JSON.stringify(body),
-							schema,
-						);
-
+			const response = await this.restClient.getWithStatus(path, schema);
 			return {
 				success: true,
 				data: response.responseBody,
 				statusCode: response.status,
 			};
 		} catch (error) {
-			if (error instanceof RestClientNetworkError) {
-				throw new MParticleNetworkError();
+			return this.handleRequestError(error);
+		}
+	}
+
+	post<REQUEST, RESPONSE>(
+		path: string,
+		body: REQUEST,
+		schema: ZodType<RESPONSE>,
+	): Promise<MParticleHttpResponse<RESPONSE>>;
+
+	post<REQUEST>(
+		path: string,
+		body: REQUEST,
+	): Promise<MParticleHttpResponse<undefined>>;
+
+	async post<REQUEST, RESPONSE>(
+		path: string,
+		body: REQUEST,
+		schema?: ZodType<RESPONSE>,
+	): Promise<MParticleHttpResponse<RESPONSE | undefined>> {
+		try {
+			if (schema === undefined) {
+				await this.restClient.post(path, JSON.stringify(body), z.unknown());
+				return {
+					success: true,
+					data: undefined,
+				};
 			}
 
-			if (error instanceof RestClientError) {
-				if (error.status < 200 || error.status >= 300) {
-					throw new MParticleHttpError(error.status, error.statusText ?? '');
-				}
-			}
+			const data = await this.restClient.post(
+				path,
+				JSON.stringify(body),
+				schema,
+			);
+			return {
+				success: true,
+				data,
+			};
+		} catch (error) {
+			return this.handleRequestError(error);
+		}
+	}
 
+	private handleRequestError<RESPONSE>(
+		error: unknown,
+	): MParticleHttpResponse<RESPONSE> {
+		if (error instanceof RestClientNetworkError) {
+			throw new MParticleNetworkError();
+		}
+
+		if (error instanceof RestClientError) {
+			if (error.status < 200 || error.status >= 300) {
+				throw new MParticleHttpError(error.status, error.statusText ?? '');
+			}
+		}
+
+		if (error instanceof RestClientError) {
 			return {
 				success: false,
 				error: new Error('mParticle response could not be parsed'),
 			};
 		}
+
+		return {
+			success: false,
+			error: new Error('mParticle response could not be parsed'),
+		};
 	}
 
 	async getStream(path: string): Promise<ReadableStream> {

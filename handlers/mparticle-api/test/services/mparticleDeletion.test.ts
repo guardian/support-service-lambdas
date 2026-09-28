@@ -33,11 +33,20 @@ describe('deleteMParticleUser', () => {
 	it('should have a basic test', async () => {
 		mockPost.mockResolvedValue({
 			success: true,
-			statusCode: 202,
 		});
 
 		const result = await deleteMParticleUser(mockClient, userId);
 		expect(result.success).toBe(true);
+	});
+
+	it('should accept a successful response', async () => {
+		mockPost.mockResolvedValue({
+			success: true,
+		});
+
+		const result = await deleteMParticleUser(mockClient, userId);
+
+		expect(result).toEqual({ success: true });
 	});
 
 	it('should return success when user not found (404)', async () => {
@@ -97,6 +106,7 @@ describe('deleteMParticleUser', () => {
 	it('should send correct request body format', async () => {
 		mockPost.mockResolvedValue({
 			success: true,
+			statusCode: 202,
 		});
 
 		await deleteMParticleUser(mockClient, userId);

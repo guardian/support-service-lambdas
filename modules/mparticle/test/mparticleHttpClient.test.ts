@@ -37,7 +37,6 @@ describe('MParticleHttpClient', () => {
 		expect(result).toEqual({
 			success: true,
 			data: { accepted: true },
-			statusCode: 202,
 		});
 		expect(fetchFn).toHaveBeenCalledWith(`${endpoint}/events`, {
 			method: 'POST',
@@ -46,6 +45,21 @@ describe('MParticleHttpClient', () => {
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({ event: 'purchase' }),
+		});
+	});
+
+	it('parses JSON GET responses and preserves transport status', async () => {
+		const fetchFn = jest
+			.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>()
+			.mockResolvedValue(jsonResponse({ state: 'ready' }, 200));
+		const client = eventsClient(fetchFn);
+
+		const result = await client.get('/status', z.object({ state: z.string() }));
+
+		expect(result).toEqual({
+			success: true,
+			data: { state: 'ready' },
+			statusCode: 200,
 		});
 	});
 
@@ -72,22 +86,17 @@ describe('MParticleHttpClient', () => {
 		});
 	});
 
-	it('supports empty successful responses and preserves their status', async () => {
+	it('supports empty successful responses without exposing the status', async () => {
 		const fetchFn = jest
 			.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>()
-			.mockResolvedValue(new Response(null, { status: 202 }));
+			.mockResolvedValue(new Response(null, { status: 200 }));
 		const client = eventsClient(fetchFn);
 
-		const result = await client.post(
-			'/events',
-			{ event: 'purchase' },
-			() => undefined,
-		);
+		const result = await client.post('/events', { event: 'purchase' });
 
 		expect(result).toEqual({
 			success: true,
 			data: undefined,
-			statusCode: 202,
 		});
 	});
 
@@ -105,7 +114,7 @@ describe('MParticleHttpClient', () => {
 
 		let error: unknown;
 		try {
-			await client.post('/events', { event: 'purchase' }, () => undefined);
+			await client.post('/events', { event: 'purchase' });
 		} catch (caught) {
 			error = caught;
 		}
@@ -126,11 +135,11 @@ describe('MParticleHttpClient', () => {
 		const client = eventsClient(fetchFn);
 
 		await expect(
-			client.post('/events', { event: 'purchase' }, () => undefined),
+			client.post('/events', { event: 'purchase' }),
 		).rejects.toBeInstanceOf(MParticleNetworkError);
-		await expect(
-			client.post('/events', { event: 'purchase' }, () => undefined),
-		).rejects.toThrow('network layer');
+		await expect(client.post('/events', { event: 'purchase' })).rejects.toThrow(
+			'network layer',
+		);
 	});
 
 	it('returns a safe error when a successful response cannot be parsed', async () => {
