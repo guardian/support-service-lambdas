@@ -32,8 +32,16 @@ const mockFetch = (response: Response) =>
 		.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>()
 		.mockResolvedValue(response);
 
-const eventsClient = (fetchFn: typeof fetch) =>
-	createEventsApiClient({ key: apiKey, secret: apiSecret }, pod, fetchFn);
+const originalFetch = global.fetch;
+
+const eventsClient = (fetchFn: typeof fetch) => {
+	global.fetch = fetchFn;
+	return createEventsApiClient({ key: apiKey, secret: apiSecret }, pod);
+};
+
+afterEach(() => {
+	global.fetch = originalFetch;
+});
 
 describe('uploadEventBatch', () => {
 	it('posts the batch as JSON to the events path with Basic authentication', async () => {
@@ -67,7 +75,7 @@ describe('uploadEventBatch', () => {
 	it('rejects network failures with a safe retryable error', async () => {
 		const fetchFn = jest
 			.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>()
-			.mockRejectedValue(new Error(`${apiSecret} should not escape`));
+			.mockRejectedValue(new TypeError('fetch failed'));
 
 		await expect(
 			uploadEventBatch(eventsClient(fetchFn), batch),

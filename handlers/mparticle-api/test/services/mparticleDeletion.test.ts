@@ -50,7 +50,7 @@ describe('deleteMParticleUser', () => {
 	});
 
 	it('should return success when user not found (404)', async () => {
-		const error404 = new MParticleHttpError(404, 'Not Found');
+		const error404 = new MParticleHttpError(404);
 		mockPost.mockRejectedValue(error404);
 
 		const result = await deleteMParticleUser(mockClient, userId);
@@ -59,7 +59,7 @@ describe('deleteMParticleUser', () => {
 	});
 
 	it('should return retryable error for 500', async () => {
-		const error500 = new MParticleHttpError(500, 'Internal Server Error');
+		const error500 = new MParticleHttpError(500);
 		mockPost.mockResolvedValue({
 			success: false,
 			error: error500,
@@ -71,7 +71,7 @@ describe('deleteMParticleUser', () => {
 	});
 
 	it('should return retryable error for 503', async () => {
-		const error503 = new MParticleHttpError(503, 'Service Unavailable');
+		const error503 = new MParticleHttpError(503);
 		mockPost.mockResolvedValue({
 			success: false,
 			error: error503,
@@ -83,7 +83,7 @@ describe('deleteMParticleUser', () => {
 	});
 
 	it('should return non-retryable error for 400', async () => {
-		const error400 = new MParticleHttpError(400, 'Bad Request');
+		const error400 = new MParticleHttpError(400);
 		mockPost.mockResolvedValue({
 			success: false,
 			error: error400,

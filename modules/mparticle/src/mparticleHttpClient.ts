@@ -1,19 +1,13 @@
 import { z, type ZodType } from 'zod';
 import type { Authorisation, BearerTokenProvider } from '@modules/zuora/auth';
-import {
-	RestClient,
-	RestClientError,
-	RestClientNetworkError,
-} from '@modules/zuora/restClient';
-import type { RestResponseSchema } from '@modules/zuora/restClient';
+import { RestClient, RestClientError } from '@modules/zuora/restClient';
 
-export type MParticleResponseSchema<RESPONSE> = RestResponseSchema<RESPONSE>;
+export type MParticleResponseSchema<RESPONSE> = ZodType<RESPONSE>;
 
 export type MParticleHttpResponse<RESPONSE> =
 	| {
 			success: true;
 			data: RESPONSE;
-			statusCode?: number;
 	  }
 	| {
 			success: false;
@@ -22,13 +16,11 @@ export type MParticleHttpResponse<RESPONSE> =
 
 export class MParticleHttpError extends Error {
 	readonly statusCode: number;
-	readonly statusText: string;
 
-	constructor(statusCode: number, statusText: string) {
+	constructor(statusCode: number) {
 		super(`mParticle request failed with status ${statusCode}`);
 		this.name = 'MParticleHttpError';
 		this.statusCode = statusCode;
-		this.statusText = statusText;
 		Error.captureStackTrace(this, MParticleHttpError);
 	}
 }
@@ -113,12 +105,8 @@ class MParticleAuthorisationProvider implements BearerTokenProvider {
 }
 
 class MParticleRestClient extends RestClient {
-	constructor(
-		baseURL: string,
-		credentials: MParticleCredentials,
-		fetchFn?: typeof fetch,
-	) {
-		super(new MParticleAuthorisationProvider(baseURL, credentials), fetchFn);
+	constructor(baseURL: string, credentials: MParticleCredentials) {
+		super(new MParticleAuthorisationProvider(baseURL, credentials));
 	}
 }
 
@@ -131,9 +119,8 @@ class MParticleHttpClient<
 		readonly clientType: T['clientType'],
 		readonly baseURL: string,
 		credentials: MParticleCredentials,
-		fetchFn?: typeof fetch,
 	) {
-		this.restClient = new MParticleRestClient(baseURL, credentials, fetchFn);
+		this.restClient = new MParticleRestClient(baseURL, credentials);
 	}
 
 	async get<RESPONSE>(
@@ -141,11 +128,10 @@ class MParticleHttpClient<
 		schema: MParticleResponseSchema<RESPONSE>,
 	): Promise<MParticleHttpResponse<RESPONSE>> {
 		try {
-			const response = await this.restClient.getWithStatus(path, schema);
+			const data = await this.restClient.get(path, schema);
 			return {
 				success: true,
-				data: response.responseBody,
-				statusCode: response.status,
+				data,
 			};
 		} catch (error) {
 			return this.handleRequestError(error);
@@ -194,42 +180,28 @@ class MParticleHttpClient<
 	private handleRequestError<RESPONSE>(
 		error: unknown,
 	): MParticleHttpResponse<RESPONSE> {
-		if (error instanceof RestClientNetworkError) {
-			throw new MParticleNetworkError();
-		}
-
 		if (error instanceof RestClientError) {
 			if (error.status < 200 || error.status >= 300) {
-				throw new MParticleHttpError(error.status, error.statusText ?? '');
+				throw new MParticleHttpError(error.status);
 			}
-		}
-
-		if (error instanceof RestClientError) {
 			return {
 				success: false,
 				error: new Error('mParticle response could not be parsed'),
 			};
 		}
 
-		return {
-			success: false,
-			error: new Error('mParticle response could not be parsed'),
-		};
+		throw new MParticleNetworkError();
 	}
 
 	async getStream(path: string): Promise<ReadableStream> {
 		try {
 			return await this.restClient.getStream(path);
 		} catch (error) {
-			if (error instanceof RestClientNetworkError) {
-				throw new MParticleNetworkError();
-			}
-
 			if (error instanceof RestClientError) {
-				throw new MParticleHttpError(error.status, error.statusText ?? '');
+				throw new MParticleHttpError(error.status);
 			}
 
-			throw error;
+			throw new MParticleNetworkError();
 		}
 	}
 }
@@ -250,35 +222,29 @@ export const bulkDeletionBaseUrl = (pod: string): string =>
 
 export const createDataSubjectClient = (
 	credentials: MParticleCredentials,
-	fetchFn?: typeof fetch,
 ): MParticleClient<DataSubjectAPI> =>
 	new MParticleHttpClient<DataSubjectAPI>(
 		'dataSubject',
 		dataSubjectBaseUrl(),
 		credentials,
-		fetchFn,
 	);
 
 export const createEventsApiClient = (
 	credentials: MParticleCredentials,
 	pod: string,
-	fetchFn?: typeof fetch,
 ): MParticleClient<EventsAPI> =>
 	new MParticleHttpClient<EventsAPI>(
 		'eventsApi',
 		eventsApiBaseUrl(pod),
 		credentials,
-		fetchFn,
 	);
 
 export const createBulkDeletionClient = (
 	credentials: MParticleCredentials,
 	pod: string,
-	fetchFn?: typeof fetch,
 ): MParticleClient<BulkDeletionAPI> =>
 	new MParticleHttpClient<BulkDeletionAPI>(
 		'bulkDeletion',
 		bulkDeletionBaseUrl(pod),
 		credentials,
-		fetchFn,
 	);
