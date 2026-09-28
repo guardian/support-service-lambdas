@@ -62,7 +62,7 @@ describe('getChargeOverride', () => {
 				),
 			).toEqual({
 				productRatePlanChargeId: '8a128d7085fc6dec01860234cd075270',
-				overrideAmount: 3,
+				overrideAmount: 1,
 			});
 
 			expect(
@@ -77,7 +77,7 @@ describe('getChargeOverride', () => {
 				),
 			).toEqual({
 				productRatePlanChargeId: '8a12892d85fc6df4018602451322287f',
-				overrideAmount: 30,
+				overrideAmount: 10,
 			});
 		},
 	);
@@ -93,7 +93,7 @@ describe('getChargeOverride', () => {
 				'GBP',
 			),
 		).toThrow(
-			'The contribution amount of a supporter plus subscription cannot be less than zero, but here it would be -2',
+			'The contribution amount of a supporter plus subscription cannot be less than zero, but here it would be -4',
 		);
 
 		expect(() =>
@@ -107,7 +107,7 @@ describe('getChargeOverride', () => {
 				'GBP',
 			),
 		).toThrow(
-			'The contribution amount of a supporter plus subscription cannot be less than zero, but here it would be -10',
+			'The contribution amount of a supporter plus subscription cannot be less than zero, but here it would be -30',
 		);
 	});
 	test('should not return a charge override for SupporterPlus rate plans which do not have a contribution charge', () => {
