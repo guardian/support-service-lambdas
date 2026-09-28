@@ -55,13 +55,10 @@ object Handler extends LazyLogging {
         productSwitchSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyProcessSwitchStatus))
         productSwitchSubIdentityIds = productSwitchSubs.map(sub => sub.Buyer__r.IdentityID__c)
 
-        secondaryUserAccessByIdentityId =
-          if (cancelledSubsIdentityIds.nonEmpty) {
-            DynamoConnector(config.stage) match {
-              case Right(connector) => connector.getSecondaryUserAccessByIdentityId(cancelledSubsIdentityIds)
-              case Left(error) => cancelledSubsIdentityIds.distinct.map(_ -> Left(error)).toMap
-            }
-          } else Map.empty[String, Either[SoftOptInError, Boolean]]
+        secondaryUserAccessByIdentityId <- loadSecondaryUserAccess(
+          cancelledSubsIdentityIds,
+          DynamoConnector(config.stage),
+        )
 
         _ = logger.info(s"About to fetch active subs from Salesforce")
         activeSubs <- sfConnector.getActiveSubs((cancelledSubsIdentityIds ++ productSwitchSubIdentityIds).distinct)
@@ -92,6 +89,13 @@ object Handler extends LazyLogging {
         throw new Exception(s"Run failed due to ${error.getMessage}")
       })
   }
+
+  private[soft_opt_in_consent_setter] def loadSecondaryUserAccess(
+      identityIds: Seq[String],
+      connector: => Either[SoftOptInError, DynamoConnector],
+  ): Either[SoftOptInError, Map[String, Either[SoftOptInError, Boolean]]] =
+    if (identityIds.isEmpty) Right(Map.empty)
+    else connector.map(_.getSecondaryUserAccessByIdentityId(identityIds))
 
   def markAcquiredSubsProcessed(
       acquiredSubs: Seq[SFSubRecord],

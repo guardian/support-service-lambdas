@@ -46,6 +46,20 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     Handler.productsForCancellation(Set("Membership"), hasActiveSecondaryUserAccess = false) shouldBe Set("Membership")
   }
 
+  test(testName = "scheduled run fails when the DynamoDB client cannot be created") {
+    val error = SoftOptInError("Could not create DynamoDB client")
+
+    Handler.loadSecondaryUserAccess(Seq(identityId), Left(error)) shouldBe Left(error)
+  }
+
+  test(testName = "scheduled run does not create a DynamoDB client without cancellations") {
+    Handler.loadSecondaryUserAccess(
+      Seq.empty,
+      throw new AssertionError("DynamoDB client should not be created"),
+    ) shouldBe
+      Right(Map.empty)
+  }
+
   test(testName = "scheduled cancellations preserve consents only for active secondary users") {
     val secondaryIdentityId = "secondaryIdentityId"
     val failedIdentityId = "failedIdentityId"
