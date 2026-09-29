@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { eventBridgeEnvelopeSchema } from '@modules/aws/eventBridgeEnvelope';
+import { eventBridgeEnvelopeSchema } from '@modules/aws/eventBridgeService';
 import {
 	orderNumberSchema,
 	subscriptionNumberSchema,

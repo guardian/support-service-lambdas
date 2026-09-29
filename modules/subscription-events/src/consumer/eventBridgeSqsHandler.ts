@@ -4,11 +4,17 @@ import { getCallerInfo } from '@modules/logger/getCallerInfo';
 import { logger } from '@modules/logger/logger';
 import type { HandlerEnv } from '@modules/routing/lambdaHandler';
 import { SQSHandler } from '@modules/routing/sqsHandler';
-import type { SubscriptionEvent } from '@modules/subscription-events/shared/subscriptionEventSchema';
-import { subscriptionEventSchema } from '@modules/subscription-events/shared/subscriptionEventSchema';
+import type { CancellationEvent } from '@modules/subscription-events/shared/cancellationEvent';
+import { cancellationEventSchema } from '@modules/subscription-events/shared/cancellationEvent';
 
 /**
- * Handler to process events from the subscription events bus.
+ * Handler to process `Cancellation` events from the subscription events bus.
+ *
+ * Only handles `Cancellation` events for now - there's only one event type on the
+ * bus today, so this deliberately isn't generalised to a discriminated union of
+ * multiple event types yet. Once a second event type exists, revisit whether this
+ * wrapper should take the event schema/type as a parameter, or a dedicated
+ * wrapper per event type is added instead.
  *
  * To use it
  *
@@ -28,7 +34,7 @@ import { subscriptionEventSchema } from '@modules/subscription-events/shared/sub
  */
 export function EventBridgeSQSHandler<ConfigType, Services>(
 	configSchema: z.ZodType<ConfigType>,
-	handler: (event: SubscriptionEvent, services: Services) => Promise<void>,
+	handler: (event: CancellationEvent, services: Services) => Promise<void>,
 	buildServices: (handlerProps: HandlerEnv<ConfigType>) => Services,
 ) {
 	return SQSHandler(
@@ -40,10 +46,10 @@ export function EventBridgeSQSHandler<ConfigType, Services>(
 }
 
 export function handleSubscriptionEventMessage<Services>(
-	handler: (event: SubscriptionEvent, services: Services) => Promise<void>,
+	handler: (event: CancellationEvent, services: Services) => Promise<void>,
 ) {
 	return async (record: SQSRecord, services: Services) => {
-		const event = subscriptionEventSchema.parse(JSON.parse(record.body));
+		const event = cancellationEventSchema.parse(JSON.parse(record.body));
 		// worth wrapFn on handler or logging the event to get a nicer output?
 		return logger.withContext(handler, ([e]) => e.detail.subscriptionNumber)(
 			event,
