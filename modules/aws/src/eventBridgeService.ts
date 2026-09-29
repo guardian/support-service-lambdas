@@ -3,8 +3,37 @@ import {
 	EventBridgeClient,
 	PutEventsCommand,
 } from '@aws-sdk/client-eventbridge';
+import { z } from 'zod';
 import { awsConfig } from '@modules/aws/config';
 import { wrapAwsClient } from '@modules/logger/wrapAwsClient';
+
+/**
+ * Builds the schema for one EventBridge event "shape": the standard envelope
+ * fields (as documented at
+ * https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-events-structure.html)
+ * plus a specific `detail-type` literal and `detail` schema, so a bus's full set of
+ * event types can be composed into a `z.discriminatedUnion('detail-type', [...])`.
+ *
+ * @param detailType the exact `detail-type` value this producer sends, used to
+ *   discriminate this event from others on the same bus
+ * @param detailSchema schema for this event's `detail` payload
+ */
+export function eventBridgeEnvelopeSchema<
+	DetailType extends string,
+	DetailSchema extends z.ZodType,
+>(detailType: DetailType, detailSchema: DetailSchema) {
+	return z.object({
+		version: z.string(),
+		id: z.string(),
+		'detail-type': z.literal(detailType),
+		source: z.string(),
+		account: z.string(),
+		time: z.string(),
+		region: z.string(),
+		resources: z.array(z.string()),
+		detail: detailSchema,
+	});
+}
 
 /**
  * Thin wrapper around EventBridge's PutEvents API for putting a single event onto
@@ -29,7 +58,7 @@ export class EventBridgeService {
 		source: string,
 		detailType: string,
 		detail: unknown,
-	): Promise<PutEventsCommandOutput> {
+	): Promise<void> {
 		const command = new PutEventsCommand({
 			Entries: [
 				{
@@ -46,19 +75,20 @@ export class EventBridgeService {
 		if (response.FailedEntryCount) {
 			throw new EventBridgePutError(
 				new Error(
-					`EventBridge PutEvents reported ${response.FailedEntryCount} failed entries: ${JSON.stringify(
-						response.Entries,
-					)}`,
+					`EventBridge PutEvents reported ${response.FailedEntryCount} failed entries`,
 				),
+				response,
 			);
 		}
-		return response;
 	}
 }
 
 export class EventBridgePutError extends Error {
-	constructor(cause: unknown) {
-		super(`Failed to put event to EventBridge: ${String(cause)}`, { cause });
-		this.name = 'EventBridgePutError';
+	constructor(
+		cause: unknown,
+		public response?: PutEventsCommandOutput,
+	) {
+		super(`Failed to put event to EventBridge`, { cause });
+		this.name = this.constructor.name;
 	}
 }
