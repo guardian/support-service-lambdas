@@ -1,10 +1,10 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
-import type { BatonS3Writer } from '../../../services/batonS3Writer';
 import type {
 	DataSubjectAPI,
 	MParticleClient,
-} from '../../../services/mparticleClient';
+} from '@modules/mparticle/mparticleHttpClient';
+import type { BatonS3Writer } from '../../../services/batonS3Writer';
 import { validateDataSubjectRequestCallback } from './validate-data-subject-request-callback';
 
 export type DataSubjectRequestCallback = z.infer<

@@ -116,6 +116,15 @@ export abstract class RestClient {
 		);
 	}
 
+	public async getStream(path: string): Promise<ReadableStream<Uint8Array>> {
+		return await logger.wrapFn(
+			this.fetchStream.bind(this),
+			() => 'HTTP ' + this.constructor.name,
+			getCallerInfo(1),
+			([streamPath]) => ({ logOnEntryAndExit: 'GET ' + streamPath }),
+		)(path);
+	}
+
 	// has to be a function so that the callerInfo is refreshed on every call
 	fetchWithLogging = (maybeCallerInfo?: string) =>
 		logger.wrapFn(
@@ -143,6 +152,32 @@ export abstract class RestClient {
 						: undefined,
 			}),
 		);
+
+	private async fetchStream(path: string): Promise<ReadableStream<Uint8Array>> {
+		const authorisation = await this.tokenProvider.getAuthorisation();
+		const pathWithoutLeadingSlash = path.startsWith('/') ? path.slice(1) : path;
+		const url = authorisation.baseUrl + '/' + pathWithoutLeadingSlash;
+		const response = await fetch(url, {
+			method: 'GET',
+			headers: {
+				...authorisation.authHeaders,
+				'Content-Type': 'application/json',
+			},
+		});
+		if (!response.ok) {
+			throw new RestClientError(`http call failed: ${response.status}`, {
+				status: response.status,
+				responseBody: await response.text(),
+				responseHeaders: Object.fromEntries(
+					[...response.headers.entries()].map(([k, v]) => [k.toLowerCase(), v]),
+				),
+			});
+		}
+		if (response.body === null) {
+			throw new Error('no http response body');
+		}
+		return response.body;
+	}
 
 	protected async fetch<S extends ZodType>(
 		path: string,
