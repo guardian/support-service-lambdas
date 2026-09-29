@@ -57,9 +57,11 @@ describe('cleanDeletedIdentity', () => {
 	});
 
 	it.each(['findSalesforceContactIds', 'findZuoraAccountIds'] as const)(
-		'rejects when %s fails',
+		'attempts the other cleanup but rejects when %s fails',
 		async (lookup) => {
 			const deps = dependencies({
+				findSalesforceContactIds: jest.fn().mockResolvedValue(['contact-1']),
+				findZuoraAccountIds: jest.fn().mockResolvedValue(['account-1']),
 				[lookup]: jest
 					.fn()
 					.mockRejectedValue(new Error(`${lookup} unavailable`)),
@@ -68,6 +70,15 @@ describe('cleanDeletedIdentity', () => {
 			await expect(cleanDeletedIdentity(identityId, deps)).rejects.toThrow(
 				`${lookup} unavailable`,
 			);
+			if (lookup === 'findSalesforceContactIds') {
+				expect(deps.clearZuoraAccountIds).toHaveBeenCalledWith(['account-1']);
+				expect(deps.clearSalesforceContactIds).not.toHaveBeenCalled();
+			} else {
+				expect(deps.clearSalesforceContactIds).toHaveBeenCalledWith([
+					'contact-1',
+				]);
+				expect(deps.clearZuoraAccountIds).not.toHaveBeenCalled();
+			}
 		},
 	);
 

@@ -8,13 +8,16 @@ export async function cleanDeletedIdentity(
 	identityId: IdentityId,
 	dependencies: IdentityDeletionCleanupDependencies,
 ): Promise<IdentityDeletionCleanupOutcome> {
-	const salesforceContactIds =
-		await dependencies.findSalesforceContactIds(identityId);
-	const zuoraAccountIds = await dependencies.findZuoraAccountIds(identityId);
-
 	const [salesforceResult, zuoraResult] = await Promise.allSettled([
-		dependencies.clearSalesforceContactIds(salesforceContactIds),
-		dependencies.clearZuoraAccountIds(zuoraAccountIds),
+		(async () => {
+			const contactIds =
+				await dependencies.findSalesforceContactIds(identityId);
+			return dependencies.clearSalesforceContactIds(contactIds);
+		})(),
+		(async () => {
+			const accountIds = await dependencies.findZuoraAccountIds(identityId);
+			return dependencies.clearZuoraAccountIds(accountIds);
+		})(),
 	]);
 
 	if (
