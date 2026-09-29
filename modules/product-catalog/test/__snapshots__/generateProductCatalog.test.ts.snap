@@ -30,11 +30,11 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         },
         "id": "2c92c0f85e2d19af015e3896e824092c",
         "pricing": {
-          "AUD": 100,
-          "CAD": 5,
-          "EUR": 60,
-          "GBP": 60,
-          "NZD": 60,
+          "AUD": 80,
+          "CAD": 60,
+          "EUR": 50,
+          "GBP": 50,
+          "NZD": 80,
           "USD": 60,
         },
         "savingVsRetail": null,
@@ -53,9 +53,9 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         "pricing": {
           "AUD": 10,
           "CAD": 5,
-          "EUR": 5,
-          "GBP": 5,
-          "NZD": 5,
+          "EUR": 4,
+          "GBP": 4,
+          "NZD": 10,
           "USD": 5,
         },
         "savingVsRetail": null,
@@ -85,7 +85,7 @@ exports[`generateProductCatalog function code Generated product catalog matches 
           "EUR": 200,
           "GBP": 180,
           "NZD": 300,
-          "USD": 280,
+          "USD": 250,
         },
         "savingVsRetail": null,
         "taxMode": "TaxInclusive",
@@ -137,7 +137,7 @@ exports[`generateProductCatalog function code Generated product catalog matches 
           "EUR": 20,
           "GBP": 18,
           "NZD": 30,
-          "USD": 28,
+          "USD": 25,
         },
         "savingVsRetail": null,
         "taxMode": "TaxInclusive",
@@ -321,6 +321,30 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
+      "AnnualPlusLegacy": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "DigitalPack": {
+            "id": "71a17af0e76a0d970680e994e9fd0061",
+          },
+          "GuardianWeekly": {
+            "id": "71a17af0e76a0d970680e994e99c005a",
+          },
+        },
+        "id": "71a17af0e76a0d970680e994e9070059",
+        "pricing": {
+          "AUD": 44,
+          "CAD": 36,
+          "EUR": 29,
+          "GBP": 198,
+          "NZD": 55,
+          "USD": 30,
+        },
+        "savingVsRetail": null,
+        "taxMode": "TaxInclusive",
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Discount": {
         "billingPeriod": "Month",
         "charges": {
@@ -374,6 +398,30 @@ exports[`generateProductCatalog function code Generated product catalog matches 
           "GBP": 19,
           "NZD": 55,
           "USD": 36,
+        },
+        "savingVsRetail": null,
+        "taxMode": "TaxInclusive",
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
+      "MonthlyPlusLegacy": {
+        "billingPeriod": "Month",
+        "charges": {
+          "DigitalPack": {
+            "id": "71a1b1d5a9ea0d970620e7b2686e0047",
+          },
+          "GuardianWeekly": {
+            "id": "71a1b1d5a9ea0d970620e7b2681f0040",
+          },
+        },
+        "id": "71a1b1d5a9ea0d970620e7b267e8003f",
+        "pricing": {
+          "AUD": 44,
+          "CAD": 36,
+          "EUR": 29,
+          "GBP": 16.5,
+          "NZD": 55,
+          "USD": 30,
         },
         "savingVsRetail": null,
         "taxMode": "TaxInclusive",
@@ -446,6 +494,30 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
+      "QuarterlyPlusLegacy": {
+        "billingPeriod": "Quarter",
+        "charges": {
+          "DigitalPack": {
+            "id": "71a1889a1f9a0d9599b0e977a0b00030",
+          },
+          "GuardianWeekly": {
+            "id": "71a1889a1f9a0d9599b0e977a0630029",
+          },
+        },
+        "id": "71a1889a1f9a0d9599b0e9779ffc0028",
+        "pricing": {
+          "AUD": 44,
+          "CAD": 36,
+          "EUR": 29,
+          "GBP": 49.5,
+          "NZD": 55,
+          "USD": 30,
+        },
+        "savingVsRetail": null,
+        "taxMode": "TaxInclusive",
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "ThreeMonthGift": {
         "billingPeriod": "Quarter",
         "charges": {
@@ -512,6 +584,26 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
+      "AnnualPlusLegacy": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "DigitalPack": {
+            "id": "71a1b1d5af9a0d970620e972f57c003c",
+          },
+          "GuardianWeekly": {
+            "id": "71a1b1d5af9a0d970620e972f5280035",
+          },
+        },
+        "id": "71a1b1d5af9a0d970620e972f4f80034",
+        "pricing": {
+          "GBP": 28.01,
+          "USD": 36,
+        },
+        "savingVsRetail": null,
+        "taxMode": "TaxInclusive",
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Discount": {
         "billingPeriod": "Month",
         "charges": {
@@ -557,6 +649,26 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         "pricing": {
           "GBP": 32.24,
           "USD": 38,
+        },
+        "savingVsRetail": null,
+        "taxMode": "TaxInclusive",
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
+      "MonthlyPlusLegacy": {
+        "billingPeriod": "Month",
+        "charges": {
+          "DigitalPack": {
+            "id": "a8b98ac4d66444c0bd512dfcf4214e01",
+          },
+          "GuardianWeekly": {
+            "id": "71a1b1d5a6aa0d970620e7afa77b0007",
+          },
+        },
+        "id": "71a1b1d5a6aa0d970620e7afa6bc0006",
+        "pricing": {
+          "GBP": 28,
+          "USD": 36,
         },
         "savingVsRetail": null,
         "taxMode": "TaxInclusive",
@@ -611,6 +723,26 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         "pricing": {
           "GBP": 96.61,
           "USD": 114,
+        },
+        "savingVsRetail": null,
+        "taxMode": "TaxInclusive",
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
+      "QuarterlyPlusLegacy": {
+        "billingPeriod": "Quarter",
+        "charges": {
+          "DigitalPack": {
+            "id": "71a1b1d5a4aa0d970620e96f13df002d",
+          },
+          "GuardianWeekly": {
+            "id": "71a1b1d5a4aa0d970620e96f138c0026",
+          },
+        },
+        "id": "71a1b1d5a4aa0d970620e96f12f40025",
+        "pricing": {
+          "GBP": 83.9,
+          "USD": 36,
         },
         "savingVsRetail": null,
         "taxMode": "TaxInclusive",
@@ -906,7 +1038,7 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         "pricing": {
           "GBP": 88.99,
         },
-        "savingVsRetail": 22.51,
+        "savingVsRetail": 23.94,
         "taxMode": "TaxInclusive",
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -1022,7 +1154,7 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         "pricing": {
           "GBP": 23,
         },
-        "savingVsRetail": -17.95,
+        "savingVsRetail": -6.15,
         "taxMode": "TaxExclusive",
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -1082,7 +1214,7 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         "pricing": {
           "GBP": 36.99,
         },
-        "savingVsRetail": 5.15,
+        "savingVsRetail": 10.15,
         "taxMode": "TaxInclusive",
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -1175,7 +1307,7 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         "pricing": {
           "GBP": 88.99,
         },
-        "savingVsRetail": 22.51,
+        "savingVsRetail": 23.94,
         "taxMode": "TaxInclusive",
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -1281,7 +1413,7 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         "pricing": {
           "GBP": 36.99,
         },
-        "savingVsRetail": 5.15,
+        "savingVsRetail": 10.15,
         "taxMode": "TaxInclusive",
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -1836,7 +1968,7 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         "pricing": {
           "GBP": 73.99,
         },
-        "savingVsRetail": 36.44,
+        "savingVsRetail": 37.62,
         "taxMode": "TaxInclusive",
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -1936,7 +2068,7 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         "pricing": {
           "GBP": 64.99,
         },
-        "savingVsRetail": 41.83,
+        "savingVsRetail": 31.83,
         "taxMode": null,
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -1952,7 +2084,7 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         "pricing": {
           "GBP": 18,
         },
-        "savingVsRetail": 7.69,
+        "savingVsRetail": 16.92,
         "taxMode": "TaxExclusive",
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -2012,7 +2144,7 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         "pricing": {
           "GBP": 29.99,
         },
-        "savingVsRetail": 23.1,
+        "savingVsRetail": 27.15,
         "taxMode": "TaxInclusive",
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -2171,12 +2303,12 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         },
         "id": "8ad08e1a8586721801858805663f6fab",
         "pricing": {
-          "AUD": 200,
-          "CAD": 150,
-          "EUR": 120,
-          "GBP": 120,
-          "NZD": 200,
-          "USD": 150,
+          "AUD": 250,
+          "CAD": 180,
+          "EUR": 140,
+          "GBP": 140,
+          "NZD": 250,
+          "USD": 180,
         },
         "savingVsRetail": null,
         "taxMode": "TaxInclusive",
@@ -2195,8 +2327,8 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         },
         "id": "f59be1a754254cf7bff266358fa14e7b",
         "pricing": {
-          "CAD": 150,
-          "GBP": 120,
+          "CAD": 180,
+          "GBP": 140,
         },
         "savingVsRetail": null,
         "taxMode": "TaxExclusive",
@@ -2229,12 +2361,12 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         },
         "id": "8ad08cbd8586721c01858804e3275376",
         "pricing": {
-          "AUD": 20,
-          "CAD": 15,
-          "EUR": 12,
-          "GBP": 12,
-          "NZD": 20,
-          "USD": 15,
+          "AUD": 25,
+          "CAD": 18,
+          "EUR": 14,
+          "GBP": 14,
+          "NZD": 25,
+          "USD": 18,
         },
         "savingVsRetail": null,
         "taxMode": "TaxInclusive",
@@ -2253,8 +2385,8 @@ exports[`generateProductCatalog function code Generated product catalog matches 
         },
         "id": "7a825d4a79bb49ec9a36883cad075fde",
         "pricing": {
-          "CAD": 15,
-          "GBP": 12,
+          "CAD": 18,
+          "GBP": 14,
         },
         "savingVsRetail": null,
         "taxMode": "TaxExclusive",
@@ -2624,7 +2756,7 @@ exports[`generateProductCatalog function prod Generated product catalog matches 
           "EUR": 200,
           "GBP": 180,
           "NZD": 300,
-          "USD": 280,
+          "USD": 250,
         },
         "savingVsRetail": null,
         "taxMode": "TaxInclusive",
@@ -2676,7 +2808,7 @@ exports[`generateProductCatalog function prod Generated product catalog matches 
           "EUR": 20,
           "GBP": 18,
           "NZD": 30,
-          "USD": 28,
+          "USD": 25,
         },
         "savingVsRetail": null,
         "taxMode": "TaxInclusive",
@@ -2860,6 +2992,30 @@ exports[`generateProductCatalog function prod Generated product catalog matches 
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
+      "AnnualPlusLegacy": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "DigitalPack": {
+            "id": "8a128167a0e6b38b01a0e797dd987279",
+          },
+          "GuardianWeekly": {
+            "id": "8a1296cca0e6c44b01a0e7927d734802",
+          },
+        },
+        "id": "8a1296cca0e6c44b01a0e7927d294800",
+        "pricing": {
+          "AUD": 528,
+          "CAD": 432,
+          "EUR": 348,
+          "GBP": 198,
+          "NZD": 660,
+          "USD": 360,
+        },
+        "savingVsRetail": null,
+        "taxMode": "TaxInclusive",
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Discount": {
         "billingPeriod": "Month",
         "charges": {
@@ -2913,6 +3069,30 @@ exports[`generateProductCatalog function prod Generated product catalog matches 
           "GBP": 19,
           "NZD": 55,
           "USD": 36,
+        },
+        "savingVsRetail": null,
+        "taxMode": "TaxInclusive",
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
+      "MonthlyPlusLegacy": {
+        "billingPeriod": "Month",
+        "charges": {
+          "DigitalPack": {
+            "id": "8a129aaea0e6c45b01a0e79aa56d4f32",
+          },
+          "GuardianWeekly": {
+            "id": "8a129aaea0e6c45b01a0e79aa5bf4f3a",
+          },
+        },
+        "id": "8a129aaea0e6c45b01a0e79aa5204f30",
+        "pricing": {
+          "AUD": 528,
+          "CAD": 432,
+          "EUR": 348,
+          "GBP": 16.5,
+          "NZD": 660,
+          "USD": 360,
         },
         "savingVsRetail": null,
         "taxMode": "TaxInclusive",
@@ -2985,6 +3165,30 @@ exports[`generateProductCatalog function prod Generated product catalog matches 
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
+      "QuarterlyPlusLegacy": {
+        "billingPeriod": "Quarter",
+        "charges": {
+          "DigitalPack": {
+            "id": "8a128e57a0e6b38d01a0e79834c778b2",
+          },
+          "GuardianWeekly": {
+            "id": "8a128e57a0e6b38d01a0e79834fd78ba",
+          },
+        },
+        "id": "8a128e57a0e6b38d01a0e798347978b0",
+        "pricing": {
+          "AUD": 528,
+          "CAD": 432,
+          "EUR": 348,
+          "GBP": 49.5,
+          "NZD": 660,
+          "USD": 360,
+        },
+        "savingVsRetail": null,
+        "taxMode": "TaxInclusive",
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "ThreeMonthGift": {
         "billingPeriod": "Quarter",
         "charges": {
@@ -3051,6 +3255,26 @@ exports[`generateProductCatalog function prod Generated product catalog matches 
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
+      "AnnualPlusLegacy": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "DigitalPack": {
+            "id": "8a129517a0e6c44901a0e78a5a244796",
+          },
+          "GuardianWeekly": {
+            "id": "8a128167a0e6b38b01a0e781f6cf5b97",
+          },
+        },
+        "id": "8a128167a0e6b38b01a0e781f69d5b95",
+        "pricing": {
+          "GBP": 336,
+          "USD": 432,
+        },
+        "savingVsRetail": null,
+        "taxMode": "TaxInclusive",
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Discount": {
         "billingPeriod": "Month",
         "charges": {
@@ -3096,6 +3320,26 @@ exports[`generateProductCatalog function prod Generated product catalog matches 
         "pricing": {
           "GBP": 32.24,
           "USD": 38,
+        },
+        "savingVsRetail": null,
+        "taxMode": "TaxInclusive",
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
+      "MonthlyPlusLegacy": {
+        "billingPeriod": "Month",
+        "charges": {
+          "DigitalPack": {
+            "id": "8a129517a0e6c44901a0e78e51804abe",
+          },
+          "GuardianWeekly": {
+            "id": "8a129517a0e6c44901a0e78e512d4ab6",
+          },
+        },
+        "id": "8a129517a0e6c44901a0e78e50f84ab4",
+        "pricing": {
+          "GBP": 28,
+          "USD": 432,
         },
         "savingVsRetail": null,
         "taxMode": "TaxInclusive",
@@ -3150,6 +3394,26 @@ exports[`generateProductCatalog function prod Generated product catalog matches 
         "pricing": {
           "GBP": 96.61,
           "USD": 114,
+        },
+        "savingVsRetail": null,
+        "taxMode": "TaxInclusive",
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
+      "QuarterlyPlusLegacy": {
+        "billingPeriod": "Quarter",
+        "charges": {
+          "DigitalPack": {
+            "id": "8a129dffa0e6c44701a0e78af2593cea",
+          },
+          "GuardianWeekly": {
+            "id": "8a129dffa0e6c44701a0e78af1e63ce2",
+          },
+        },
+        "id": "8a129dffa0e6c44701a0e78af1723ce0",
+        "pricing": {
+          "GBP": 83.9,
+          "USD": 432,
         },
         "savingVsRetail": null,
         "taxMode": "TaxInclusive",
@@ -3445,7 +3709,7 @@ exports[`generateProductCatalog function prod Generated product catalog matches 
         "pricing": {
           "GBP": 88.99,
         },
-        "savingVsRetail": 22.51,
+        "savingVsRetail": 23.94,
         "taxMode": "TaxInclusive",
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -3561,7 +3825,7 @@ exports[`generateProductCatalog function prod Generated product catalog matches 
         "pricing": {
           "GBP": 23,
         },
-        "savingVsRetail": -17.95,
+        "savingVsRetail": -6.15,
         "taxMode": "TaxInclusive",
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -3621,7 +3885,7 @@ exports[`generateProductCatalog function prod Generated product catalog matches 
         "pricing": {
           "GBP": 36.99,
         },
-        "savingVsRetail": 5.15,
+        "savingVsRetail": 10.15,
         "taxMode": "TaxInclusive",
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -3714,7 +3978,7 @@ exports[`generateProductCatalog function prod Generated product catalog matches 
         "pricing": {
           "GBP": 88.99,
         },
-        "savingVsRetail": 22.51,
+        "savingVsRetail": 23.94,
         "taxMode": "TaxInclusive",
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -3820,7 +4084,7 @@ exports[`generateProductCatalog function prod Generated product catalog matches 
         "pricing": {
           "GBP": 36.99,
         },
-        "savingVsRetail": 5.15,
+        "savingVsRetail": 10.15,
         "taxMode": "TaxInclusive",
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -4375,7 +4639,7 @@ exports[`generateProductCatalog function prod Generated product catalog matches 
         "pricing": {
           "GBP": 72.99,
         },
-        "savingVsRetail": 36.44,
+        "savingVsRetail": 37.62,
         "taxMode": "TaxInclusive",
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -4491,7 +4755,7 @@ exports[`generateProductCatalog function prod Generated product catalog matches 
         "pricing": {
           "GBP": 18,
         },
-        "savingVsRetail": 7.69,
+        "savingVsRetail": 16.92,
         "taxMode": "TaxInclusive",
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -4551,7 +4815,7 @@ exports[`generateProductCatalog function prod Generated product catalog matches 
         "pricing": {
           "GBP": 29.99,
         },
-        "savingVsRetail": 23.1,
+        "savingVsRetail": 27.15,
         "taxMode": "TaxInclusive",
         "termLengthInMonths": 12,
         "termType": "Recurring",
@@ -4710,12 +4974,12 @@ exports[`generateProductCatalog function prod Generated product catalog matches 
         },
         "id": "8a128ed885fc6ded01860228f77e3d5a",
         "pricing": {
-          "AUD": 200,
-          "CAD": 150,
-          "EUR": 120,
-          "GBP": 120,
-          "NZD": 200,
-          "USD": 150,
+          "AUD": 250,
+          "CAD": 180,
+          "EUR": 140,
+          "GBP": 140,
+          "NZD": 250,
+          "USD": 180,
         },
         "savingVsRetail": null,
         "taxMode": "TaxInclusive",
@@ -4734,8 +4998,8 @@ exports[`generateProductCatalog function prod Generated product catalog matches 
         },
         "id": "8a128e579e9807b1019eab92efee3f74",
         "pricing": {
-          "CAD": 150,
-          "GBP": 120,
+          "CAD": 180,
+          "GBP": 140,
         },
         "savingVsRetail": null,
         "taxMode": "TaxExclusive",
@@ -4768,12 +5032,12 @@ exports[`generateProductCatalog function prod Generated product catalog matches 
         },
         "id": "8a128ed885fc6ded018602296ace3eb8",
         "pricing": {
-          "AUD": 20,
-          "CAD": 15,
-          "EUR": 12,
-          "GBP": 12,
-          "NZD": 20,
-          "USD": 15,
+          "AUD": 25,
+          "CAD": 18,
+          "EUR": 14,
+          "GBP": 14,
+          "NZD": 25,
+          "USD": 18,
         },
         "savingVsRetail": null,
         "taxMode": "TaxInclusive",
@@ -4792,8 +5056,8 @@ exports[`generateProductCatalog function prod Generated product catalog matches 
         },
         "id": "8a1296cc9e981ec9019eab9092864ae0",
         "pricing": {
-          "CAD": 15,
-          "GBP": 12,
+          "CAD": 18,
+          "GBP": 14,
         },
         "savingVsRetail": null,
         "taxMode": "TaxExclusive",

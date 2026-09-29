@@ -21,6 +21,7 @@ import { IamPolicies } from '../lib/iam-policies';
 import { ImovoVoucherApi } from '../lib/imovo-voucher-api';
 import { MetricPushApi } from '../lib/metric-push-api';
 import { MobilePurchasesToSupporterProductData } from '../lib/mobile-purchases-to-supporter-product-data';
+import { MparticleAcquisitionsPublisher } from '../lib/mparticle-acquisitions-publisher';
 import { MParticleApi } from '../lib/mparticle-api';
 import { MultipleAccountApi } from '../lib/multiple-account-api';
 import { NegativeInvoicesProcessor } from '../lib/negative-invoices-processor';
@@ -174,6 +175,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	SalesTaxApi,
 	SupporterProductDataLambdas,
 	BrazeAcquisitionEventsSync,
+	MparticleAcquisitionsPublisher,
 	SfMoveSubscriptionsApi,
 	SfEmailsToS3Exporter,
 	DeliveryProblemCreditProcessor,

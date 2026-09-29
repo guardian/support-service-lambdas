@@ -1,0 +1,26 @@
+# MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/riff-raff.yaml.ts
+stacks:
+  - support
+regions:
+  - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  mparticle-acquisitions-publisher-cloudformation:
+    type: cloud-formation
+    app: mparticle-acquisitions-publisher
+    parameters:
+      templateStagePaths:
+        CODE: mparticle-acquisitions-publisher-CODE.template.json
+        PROD: mparticle-acquisitions-publisher-PROD.template.json
+  mparticle-acquisitions-publisher:
+    type: aws-lambda
+    parameters:
+      fileName: mparticle-acquisitions-publisher.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+        - mparticle-acquisitions-publisher-
+    dependencies:
+      - mparticle-acquisitions-publisher-cloudformation

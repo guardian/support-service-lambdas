@@ -81,7 +81,21 @@ export const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
 		'RestOfWorldAnnualV2',
 	'Supporter Plus, Guardian Weekly Domestic & Archive - Annual':
 		'DomesticAnnualV2',
-	// Current GW rate plans
+	// Acquisition GW rate plans
+	'GW + Digital - Annual - ROW': 'AnnualPlus',
+	'GW + Digital - Monthly - ROW': 'MonthlyPlus',
+	'GW + Digital - Quarterly - ROW': 'QuarterlyPlus',
+	'GW + Digital - Annual - Domestic': 'AnnualPlus',
+	'GW + Digital - Monthly - Domestic': 'MonthlyPlus',
+	'GW + Digital - Quarterly - Domestic': 'QuarterlyPlus',
+	// Legacy GW rate plans
+	'GW Legacy - Annual - ROW': 'AnnualPlusLegacy',
+	'GW Legacy - Monthly - ROW': 'MonthlyPlusLegacy',
+	'GW Legacy - Quarterly - ROW': 'QuarterlyPlusLegacy',
+	'GW Legacy - Annual - Domestic': 'AnnualPlusLegacy',
+	'GW Legacy - Monthly - Domestic': 'MonthlyPlusLegacy',
+	'GW Legacy - Quarterly - Domestic': 'QuarterlyPlusLegacy',
+	// Decommissioned GW rate plans
 	'GW Oct 18 - Annual - ROW': 'Annual',
 	'GW Oct 18 - Monthly - ROW': 'Monthly',
 	'GW Oct 18 - Quarterly - ROW': 'Quarterly',
@@ -92,13 +106,6 @@ export const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
 	'GW Oct 18 - Quarterly - Domestic': 'Quarterly',
 	'GW GIFT Oct 18 - 1 Year - Domestic': 'OneYearGift',
 	'GW GIFT Oct 18 - 3 Month - Domestic': 'ThreeMonthGift',
-	'GW + Digital - Annual - ROW': 'AnnualPlus',
-	'GW + Digital - Monthly - ROW': 'MonthlyPlus',
-	'GW + Digital - Quarterly - ROW': 'QuarterlyPlus',
-	'GW + Digital - Annual - Domestic': 'AnnualPlus',
-	'GW + Digital - Monthly - Domestic': 'MonthlyPlus',
-	'GW + Digital - Quarterly - Domestic': 'QuarterlyPlus',
-	// Old GW rate plans
 	'Guardian Weekly Annual': 'Annual',
 	'Guardian Weekly Quarterly': 'Quarterly',
 	// Paper rate plans
@@ -170,6 +177,12 @@ export const zuoraCatalogToProductRatePlanChargeKey: Record<string, string> = {
 	'GW - Annual - Domestic': 'GuardianWeekly',
 	'GW - Monthly - Domestic': 'GuardianWeekly',
 	'GW - Quarterly - Domestic': 'GuardianWeekly',
+	'GW Legacy - Annual - ROW': 'GuardianWeekly',
+	'GW Legacy - Monthly - ROW': 'GuardianWeekly',
+	'GW Legacy - Quarterly - ROW': 'GuardianWeekly',
+	'GW Legacy - Annual - Domestic': 'GuardianWeekly',
+	'GW Legacy - Monthly - Domestic': 'GuardianWeekly',
+	'GW Legacy - Quarterly - Domestic': 'GuardianWeekly',
 	// Old GW rate plan charges
 	'Zone A Annual': 'Subscription',
 	'Zone A Quarterly': 'Subscription',

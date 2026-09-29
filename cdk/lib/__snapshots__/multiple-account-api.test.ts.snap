@@ -1089,6 +1089,22 @@ exports[`The Multiple account api stack matches the snapshot 1`] = `
                     ],
                   ],
                 },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:sqs:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":soft-opt-in-consent-setter-queue-CODE",
+                    ],
+                  ],
+                },
               ],
             },
           ],
@@ -2511,6 +2527,22 @@ exports[`The Multiple account api stack matches the snapshot 2`] = `
                         "Ref": "AWS::AccountId",
                       },
                       ":braze-emails-PROD",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:sqs:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":soft-opt-in-consent-setter-queue-PROD",
                     ],
                   ],
                 },

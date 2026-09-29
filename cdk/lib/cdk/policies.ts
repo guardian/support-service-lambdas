@@ -20,7 +20,8 @@ export class AllowGetSecretValuePolicy extends GuAllowPolicy {
 export type SrQueueName =
 	| `braze-emails`
 	| 'supporter-product-data'
-	| 'product-switch-salesforce-tracking';
+	| 'product-switch-salesforce-tracking'
+	| 'soft-opt-in-consent-setter-queue';
 
 export class AllowSqsSendPolicy extends GuAllowPolicy {
 	static createWithId = (

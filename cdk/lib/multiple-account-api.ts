@@ -52,7 +52,12 @@ export class MultipleAccountApi extends SrStack {
 		lambda.addPolicies(new AllowSupporterProductDataQueryPolicy(this));
 		lambda.addPolicies(new AllowSupporterProductDataDeletePolicy(this));
 		lambda.addPolicies(
-			AllowSqsSendPolicy.create(this, 'supporter-product-data', 'braze-emails'),
+			AllowSqsSendPolicy.create(
+				this,
+				'supporter-product-data',
+				'braze-emails',
+				'soft-opt-in-consent-setter-queue',
+			),
 		);
 		lambda.addPolicies(new AllowPutMetricPolicy(this, metricNamespace));
 

@@ -94,6 +94,27 @@ object SupportedProduct {
           "GW + Digital - Annual - Domestic",
           List(SupportedRatePlanCharge("GW - Annual - Domestic", DayOfWeek.FRIDAY)),
         ),
+        SupportedRatePlan(
+          "GW Legacy - Monthly - Domestic",
+          List(
+            SupportedRatePlanCharge("GW - Monthly - Domestic", DayOfWeek.FRIDAY),
+            SupportedRatePlanCharge("Digital Pack", DayOfWeek.FRIDAY)
+          ),
+        ),
+        SupportedRatePlan(
+          "GW Legacy - Quarterly - Domestic",
+          List(
+            SupportedRatePlanCharge("GW - Quarterly - Domestic", DayOfWeek.FRIDAY),
+            SupportedRatePlanCharge("Digital Pack", DayOfWeek.FRIDAY)
+          ),
+        ),
+        SupportedRatePlan(
+          "GW Legacy - Annual - Domestic",
+          List(
+            SupportedRatePlanCharge("GW - Annual - Domestic", DayOfWeek.FRIDAY),
+            SupportedRatePlanCharge("Digital Pack", DayOfWeek.FRIDAY)
+          ),
+        )
       ),
     ),
     SupportedProduct(
@@ -147,6 +168,27 @@ object SupportedProduct {
           "GW + Digital - Annual - ROW",
           List(SupportedRatePlanCharge("GW - Annual - ROW", DayOfWeek.FRIDAY)),
         ),
+        SupportedRatePlan(
+          "GW Legacy - Monthly - ROW",
+          List(
+            SupportedRatePlanCharge("GW - Monthly - ROW", DayOfWeek.FRIDAY),
+            SupportedRatePlanCharge("Digital Pack", DayOfWeek.FRIDAY)
+          ),
+        ),
+        SupportedRatePlan(
+          "GW Legacy - Quarterly - ROW",
+          List(
+            SupportedRatePlanCharge("GW - Quarterly - ROW", DayOfWeek.FRIDAY),
+            SupportedRatePlanCharge("Digital Pack", DayOfWeek.FRIDAY)
+          ),
+        ),
+        SupportedRatePlan(
+          "GW Legacy - Annual - ROW",
+          List(
+            SupportedRatePlanCharge("GW - Annual - ROW", DayOfWeek.FRIDAY),
+            SupportedRatePlanCharge("Digital Pack", DayOfWeek.FRIDAY)
+          ),
+        )
       ),
     ),
     SupportedProduct(

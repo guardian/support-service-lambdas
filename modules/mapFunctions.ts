@@ -1,6 +1,7 @@
 import {
 	difference,
 	getSingleOrThrow,
+	intersection,
 	partitionByType,
 } from './arrayFunctions';
 import { getIfDefined } from './nullAndUndefined';
@@ -126,14 +127,26 @@ export function joinAllLeft<K, VA, VB, KR extends K>(
 	return linked;
 }
 
+export type ObjectJoinBijectiveOptions<K, VA, VB> = {
+	// function to turn a value into a concise string for display
+	describeL?: (value: VA, key: K) => string;
+	// function to turn a value into a concise string for display
+	describeR?: (value: VB, key: K) => string;
+	// what the left and right objects represent
+	labels?: { left: string; right: string };
+};
+
 /**
- * joins two objects by their keys, throwing if there isn't an exact match
+ * joins two objects by their keys, throwing if there isn't an exact match.
+ *
  * @param l
  * @param r
+ * @param options
  */
 export function objectJoinBijective<K extends string, VA, VB>(
 	l: Map<K, VA>,
 	r: Map<K, VB>,
+	options?: ObjectJoinBijectiveOptions<K, VA, VB>,
 ): Array<[VA, VB]> {
 	const lEntries: Array<[K, VA]> = [...l.entries()];
 	const [onlyInL, onlyInR] = difference(
@@ -142,15 +155,47 @@ export function objectJoinBijective<K extends string, VA, VB>(
 	);
 
 	if (onlyInL.length + onlyInR.length !== 0) {
-		throw new Error(
-			`Keys do not match between records: onlyInL: ${onlyInL.join(', ')} onlyInR: ${onlyInR.join(', ')}`,
-		);
+		throw new Error(describeJoinMismatch(l, r, onlyInL, onlyInR, options));
 	}
 
 	return lEntries.map(([key, lValue]) => {
 		const rValue = getIfDefined(r.get(key), 'already proved it is there');
 		return [lValue, rValue] as const;
 	});
+}
+
+function describeJoinMismatch<K extends string, VA, VB>(
+	l: Map<K, VA>,
+	r: Map<K, VB>,
+	onlyInL: K[],
+	onlyInR: K[],
+	options?: ObjectJoinBijectiveOptions<K, VA, VB>,
+): string {
+	const leftLabel = options?.labels?.left ?? 'left';
+	const rightLabel = options?.labels?.right ?? 'right';
+	const describeL = options?.describeL ?? ((_value: VA, key: K) => key);
+	const describeR = options?.describeR ?? ((_value: VB, key: K) => key);
+	const matchedKeys = intersection([...l.keys()], [...r.keys()]);
+
+	const matchedLines = matchedKeys.map(
+		(key) =>
+			`  "${describeL(getIfDefined(l.get(key), 'already confirmed present'), key)}" - OK`,
+	);
+	const removedLines = onlyInL.map(
+		(key) =>
+			`- "${describeL(getIfDefined(l.get(key), 'already confirmed present'), key)}" - only in ${leftLabel}`,
+	);
+	const addedLines = onlyInR.map(
+		(key) =>
+			`+ "${describeR(getIfDefined(r.get(key), 'already confirmed present'), key)}" - only in ${rightLabel}`,
+	);
+
+	return [
+		`Different keys detected when joining ${leftLabel} with ${rightLabel}:`,
+		...matchedLines,
+		...removedLines,
+		...addedLines,
+	].join('\n');
 }
 
 /**

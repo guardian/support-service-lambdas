@@ -19,6 +19,7 @@ object ConsentsMapping {
       case "SUPPORTER_PLUS" => "Supporter Plus"
       case "TIER_THREE" => "Tier Three"
       case "DIGITAL_SUBSCRIPTION" => "Digital Pack"
+      case "SECONDARY_USER" => "Secondary User"
       case "PRINT_SUBSCRIPTION" if printProduct.exists(List("HOME_DELIVERY_SUNDAY", "VOUCHER_SUNDAY").contains) =>
         "Newspaper - Observer only" // don't set any consents for observer only
       case "PRINT_SUBSCRIPTION" if !printProduct.contains("GUARDIAN_WEEKLY") => "newspaper"
@@ -94,6 +95,10 @@ object ConsentsMapping {
     "Digital Pack" -> Set(
       yourSupportOnboarding,
       similarGuardianProducts,
+      supporterNewsletter,
+    ),
+    "Secondary User" -> Set(
+      yourSupportOnboarding,
       supporterNewsletter,
     ),
     "Supporter Plus" -> Set(
