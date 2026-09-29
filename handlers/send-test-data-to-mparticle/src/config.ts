@@ -1,20 +1,18 @@
-import { getSSMParam } from '@modules/aws/ssm';
+import { z } from 'zod';
+import { loadConfig } from '@modules/aws/appConfig';
 
-export const MPARTICLE_API_KEY_PARAMETER =
-	'/CODE/support/mparticle-api/inputPlatform/key';
-export const MPARTICLE_API_SECRET_PARAMETER =
-	'/CODE/support/mparticle-api/inputPlatform/secret';
+export const MPARTICLE_CONFIG_APP = 'mparticle-acquisitions-publisher';
 
-export type AppConfig = {
-	apiKey: string;
-	apiSecret: string;
-};
+export const configSchema = z.object({
+	mparticle: z.object({
+		pod: z.string().min(1),
+		key: z.string().min(1),
+		secret: z.string().min(1),
+	}),
+});
+
+export type AppConfig = z.infer<typeof configSchema>;
 
 export const getAppConfig = async (): Promise<AppConfig> => {
-	const [apiKey, apiSecret] = await Promise.all([
-		getSSMParam(MPARTICLE_API_KEY_PARAMETER),
-		getSSMParam(MPARTICLE_API_SECRET_PARAMETER),
-	]);
-
-	return { apiKey, apiSecret };
+	return loadConfig('CODE', 'support', MPARTICLE_CONFIG_APP, configSchema);
 };

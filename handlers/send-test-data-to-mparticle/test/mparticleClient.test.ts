@@ -15,19 +15,22 @@ const payload = {
 };
 
 const config = {
-	apiKey: 'api-key',
-	apiSecret: 'api-secret',
+	mparticle: {
+		pod: 'us1',
+		key: 'api-key',
+		secret: 'api-secret',
+	},
 };
 
 const makeClient = (post: jest.Mock): EventsApiClient =>
 	({ post }) as unknown as EventsApiClient;
 
 describe('mParticle client adapter', () => {
-	it('creates an EU1 Events API client', () => {
+	it('creates an Events API client for the configured pod', () => {
 		const client = createMParticleClient(config);
 
 		expect(client.clientType).toBe('eventsApi');
-		expect(client.baseURL).toBe('https://s2s.eu1.mparticle.com/v2');
+		expect(client.baseURL).toBe('https://s2s.us1.mparticle.com/v2');
 	});
 
 	it('posts the complete payload and resolves after a successful response', async () => {

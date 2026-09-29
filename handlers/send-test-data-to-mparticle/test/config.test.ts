@@ -1,40 +1,52 @@
-import { getSSMParam } from '@modules/aws/ssm';
+import { loadConfig } from '@modules/aws/appConfig';
 import {
+	configSchema,
 	getAppConfig,
-	MPARTICLE_API_KEY_PARAMETER,
-	MPARTICLE_API_SECRET_PARAMETER,
+	MPARTICLE_CONFIG_APP,
 } from '../src/config';
 
-jest.mock('@modules/aws/ssm', () => ({
-	getSSMParam: jest.fn(),
+jest.mock('@modules/aws/appConfig', () => ({
+	loadConfig: jest.fn(),
 }));
 
-const getSSMParamMock = jest.mocked(getSSMParam);
+const loadConfigMock = jest.mocked(loadConfig);
 
-describe('getAppConfig', () => {
-	it('loads the CODE mParticle credentials from the existing parameters', async () => {
-		getSSMParamMock.mockImplementation((name) => {
-			if (name === MPARTICLE_API_KEY_PARAMETER) {
-				return Promise.resolve('api-key');
-			}
-			if (name === MPARTICLE_API_SECRET_PARAMETER) {
-				return Promise.resolve('api-secret');
-			}
-			throw new Error(`Unexpected parameter: ${name}`);
+describe('mParticle config', () => {
+	beforeEach(() => {
+		loadConfigMock.mockReset();
+		loadConfigMock.mockResolvedValue({
+			mparticle: {
+				pod: 'eu1',
+				key: 'publisher-api-key',
+				secret: 'publisher-api-secret',
+			},
 		});
+	});
 
-		await expect(getAppConfig()).resolves.toEqual({
-			apiKey: 'api-key',
-			apiSecret: 'api-secret',
+	it('requires the shared mParticle credentials and pod', () => {
+		expect(() =>
+			configSchema.parse({
+				mparticle: {
+					key: 'publisher-api-key',
+					secret: 'publisher-api-secret',
+				},
+			}),
+		).toThrow();
+	});
+
+	it('loads the shared publisher configuration from the fixed CODE SSM path', async () => {
+		const config = await getAppConfig();
+
+		expect(config.mparticle).toEqual({
+			pod: 'eu1',
+			key: 'publisher-api-key',
+			secret: 'publisher-api-secret',
 		});
-
-		expect(getSSMParamMock).toHaveBeenNthCalledWith(
-			1,
-			'/CODE/support/mparticle-api/inputPlatform/key',
-		);
-		expect(getSSMParamMock).toHaveBeenNthCalledWith(
-			2,
-			'/CODE/support/mparticle-api/inputPlatform/secret',
+		expect(loadConfigMock).toHaveBeenCalledWith(
+			'CODE',
+			'support',
+			MPARTICLE_CONFIG_APP,
+			configSchema,
 		);
 	});
 });

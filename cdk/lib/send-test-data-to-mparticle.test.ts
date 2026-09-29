@@ -17,20 +17,23 @@ describe('The send test data to mParticle stack', () => {
 		template.hasResourceProperties('AWS::IAM::Policy', {
 			PolicyDocument: Match.objectLike({
 				Statement: Match.arrayWith([
-					Match.objectLike({ Action: 'ssm:GetParameter' }),
+					Match.objectLike({ Action: 'ssm:GetParametersByPath' }),
 				]),
 			}),
 		});
 
 		const templateJson = JSON.stringify(template.toJSON());
 		expect(templateJson).toContain(
-			'parameter/CODE/support/mparticle-api/inputPlatform/key',
+			'parameter/CODE/support/mparticle-acquisitions-publisher',
 		);
 		expect(templateJson).toContain(
-			'parameter/CODE/support/mparticle-api/inputPlatform/secret',
+			'parameter/CODE/support/mparticle-acquisitions-publisher/*',
 		);
 		expect(templateJson).not.toContain(
-			'parameter/PROD/support/mparticle-api/inputPlatform',
+			'parameter/CODE/support/mparticle-api/inputPlatform',
+		);
+		expect(templateJson).not.toContain(
+			'parameter/PROD/support/mparticle-acquisitions-publisher',
 		);
 	});
 });

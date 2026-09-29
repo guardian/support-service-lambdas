@@ -19,10 +19,10 @@ export class SendTestDataToMparticle extends SrStack {
 		lambda.addToRolePolicy(
 			new PolicyStatement({
 				effect: Effect.ALLOW,
-				actions: ['ssm:GetParameter'],
+				actions: ['ssm:GetParametersByPath'],
 				resources: [
-					`arn:aws:ssm:${this.region}:${this.account}:parameter/CODE/support/mparticle-api/inputPlatform/key`,
-					`arn:aws:ssm:${this.region}:${this.account}:parameter/CODE/support/mparticle-api/inputPlatform/secret`,
+					`arn:aws:ssm:${this.region}:${this.account}:parameter/CODE/support/mparticle-acquisitions-publisher`,
+					`arn:aws:ssm:${this.region}:${this.account}:parameter/CODE/support/mparticle-acquisitions-publisher/*`,
 				],
 			}),
 		);

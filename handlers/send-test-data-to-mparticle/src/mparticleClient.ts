@@ -7,17 +7,13 @@ import {
 } from '@modules/mparticle/mparticleHttpClient';
 import type { AppConfig } from './config';
 
-const MPARTICLE_EVENTS_POD = 'eu1';
 const MPARTICLE_EVENTS_PATH = '/events';
 
 export type EventsApiRequest = Record<string, unknown>;
 export type EventsApiClient = MParticleClient<EventsAPI>;
 
 export const createMParticleClient = (config: AppConfig): EventsApiClient =>
-	createEventsApiClient(
-		{ key: config.apiKey, secret: config.apiSecret },
-		MPARTICLE_EVENTS_POD,
-	);
+	createEventsApiClient(config.mparticle, config.mparticle.pod);
 
 export const sendEvents = async (
 	client: EventsApiClient,

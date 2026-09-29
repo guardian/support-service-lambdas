@@ -58,7 +58,13 @@ describe('processEvent', () => {
 
 describe('handler', () => {
 	it('loads configuration, creates the shared client, and sends the normalized payload', async () => {
-		const config = { apiKey: 'api-key', apiSecret: 'api-secret' };
+		const config = {
+			mparticle: {
+				pod: 'eu1',
+				key: 'api-key',
+				secret: 'api-secret',
+			},
+		};
 		const context = {} as Context;
 		const client = {
 			clientType: 'eventsApi',

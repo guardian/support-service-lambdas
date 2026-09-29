@@ -20,13 +20,18 @@ On success, the invocation completes without `FunctionError`; the handler does n
 
 The payload follows the mParticle Events API request shape. `user_identities.customer_id` and `user_attributes` are required. Additional top-level fields and identity fields are preserved and forwarded.
 
-The Lambda always sets `environment` to `development`, regardless of the value supplied in the input. It sends one `POST` request to the EU1 Events API endpoint documented at [mParticle Events API](https://docs.mparticle.com/developers/apis/http/).
+The Lambda always sets `environment` to `development`, regardless of the value supplied in the input. It sends one `POST` request to the Events API endpoint for the configured mParticle pod, documented at [mParticle Events API](https://docs.mparticle.com/developers/apis/http/).
 
 ## Credentials and access
 
-The Lambda reads the existing CODE credentials from these Parameter Store paths:
+The Lambda reads the shared mParticle configuration used by `mparticle-acquisitions-publisher` from the CODE Parameter Store path:
 
-- `/CODE/support/mparticle-api/inputPlatform/key`
-- `/CODE/support/mparticle-api/inputPlatform/secret`
+`/CODE/support/mparticle-acquisitions-publisher`
 
-Its role can read only those two parameters. The Lambda is not deployed to PROD and must not be used with production data.
+The required values are:
+
+- `mparticle/key`
+- `mparticle/secret`
+- `mparticle/pod`
+
+The handler reads the mParticle values listed above from this shared path. Its additional SSM permission for this configuration is scoped to this path. The Lambda is not deployed to PROD and must not be used with production data.
