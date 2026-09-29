@@ -146,12 +146,11 @@ class DynamoConnectorTests extends AnyFunSuite with Matchers with MockFactory {
       }
     }
 
-    val result =
-      new DynamoConnector(client, "CODE").getSecondaryUserAccessByIdentityId(Seq(identityId, otherIdentityId))
-    result(identityId).left.toOption.map(_.getMessage) shouldBe Some(
+    val connector = new DynamoConnector(client, "CODE")
+    connector.hasActiveSecondaryUserAccess(identityId).left.toOption.map(_.getMessage) shouldBe Some(
       s"Failed to query SupporterProductData for secondary user access for identityId $identityId",
     )
-    result(otherIdentityId) shouldBe Right(true)
+    connector.hasActiveSecondaryUserAccess(otherIdentityId) shouldBe Right(true)
   }
 
   test(testName = "secondary access lookups continue after a malformed item for one identity") {
@@ -172,11 +171,10 @@ class DynamoConnectorTests extends AnyFunSuite with Matchers with MockFactory {
       }
     }
 
-    val result =
-      new DynamoConnector(client, "CODE").getSecondaryUserAccessByIdentityId(Seq(identityId, otherIdentityId))
-    result(identityId).left.toOption.map(_.getMessage) shouldBe Some(
+    val connector = new DynamoConnector(client, "CODE")
+    connector.hasActiveSecondaryUserAccess(identityId).left.toOption.map(_.getMessage) shouldBe Some(
       s"Secondary SupporterProductData item for identityId $identityId, primarySubscriptionName A-malformed has no termEndDate",
     )
-    result(otherIdentityId) shouldBe Right(true)
+    connector.hasActiveSecondaryUserAccess(otherIdentityId) shouldBe Right(true)
   }
 }

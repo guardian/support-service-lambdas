@@ -8,6 +8,8 @@ import com.gu.soft_opt_in_consent_setter.models.{
   SFAssociatedSubResponse,
   SFBuyer,
   SFSubRecord,
+  SubscriptionRatePlanUpdateRecord,
+  Subscription_Rate_Plan_Updates__r,
   SoftOptInError,
 }
 import com.gu.soft_opt_in_consent_setter.{
@@ -38,26 +40,13 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
   val subscriptionId = "A-S12345678"
 
   test(testName = "secondary user access is treated as an active product for cancellation") {
-    Handler.productsForCancellation(Set("Membership"), hasActiveSecondaryUserAccess = true) shouldBe
+    Handler.productsWithSecondaryAccess(Set("Membership"), hasActiveSecondaryUserAccess = true) shouldBe
       Set("Membership", "Secondary User")
   }
 
   test(testName = "cancellation products remain unchanged without secondary user access") {
-    Handler.productsForCancellation(Set("Membership"), hasActiveSecondaryUserAccess = false) shouldBe Set("Membership")
-  }
-
-  test(testName = "scheduled run fails when the DynamoDB client cannot be created") {
-    val error = SoftOptInError("Could not create DynamoDB client")
-
-    Handler.loadSecondaryUserAccess(Seq(identityId), Left(error)) shouldBe Left(error)
-  }
-
-  test(testName = "scheduled run does not create a DynamoDB client without cancellations") {
-    Handler.loadSecondaryUserAccess(
-      Seq.empty,
-      throw new AssertionError("DynamoDB client should not be created"),
-    ) shouldBe
-      Right(Map.empty)
+    Handler.productsWithSecondaryAccess(Set("Membership"), hasActiveSecondaryUserAccess = false) shouldBe
+      Set("Membership")
   }
 
   test(testName = "scheduled cancellations preserve consents only for active secondary users") {
@@ -97,7 +86,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
         Right(())
       },
       calculator,
-      secondaryUserAccessByIdentityId,
+      id => secondaryUserAccessByIdentityId(id),
       (event, value) => {
         metrics += (event -> value)
         ()
@@ -120,6 +109,83 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       Vector(Some("Cancellation"), None, Some("Cancellation"))
     metrics.toList shouldBe List(
       "cancellations_to_process" -> 3,
+      "successful_consents_updates" -> 2,
+      "failed_consents_updates" -> 1,
+    )
+  }
+
+  test(testName = "scheduled switches preserve secondary user consents and isolate lookup failures") {
+    val activeIdentityId = "activeSecondaryIdentityId"
+    val otherIdentityId = "otherIdentityId"
+    val failedIdentityId = "failedIdentityId"
+    val switchSubs = Seq(activeIdentityId, otherIdentityId, failedIdentityId).map { id =>
+      SFSubRecord(
+        Id = s"sub-$id",
+        Name = s"A-$id",
+        Product__c = "Guardian Ad-Lite",
+        SF_Status__c = "Active",
+        Soft_Opt_in_Status__c = Handler.readyProcessSwitchStatus,
+        Buyer__r = SFBuyer(id),
+        Subscription_Rate_Plan_Updates__r = Some(
+          Subscription_Rate_Plan_Updates__r(
+            1,
+            true,
+            Seq(SubscriptionRatePlanUpdateRecord(s"update-$id", "Supporter Plus")),
+          ),
+        ),
+        Soft_Opt_in_Number_of_Attempts__c = Some(if (id == failedIdentityId) 2 else 0),
+      )
+    }
+    val activeSubs = SFAssociatedSubResponse(
+      3,
+      true,
+      Seq(activeIdentityId, otherIdentityId, failedIdentityId).map(id => SFAssociatedSubRecord("Guardian Ad-Lite", id)),
+    )
+    val sentRequests = ListBuffer.empty[(String, String)]
+    val updatePayloads = ListBuffer.empty[String]
+    val metrics = ListBuffer.empty[(String, Int)]
+
+    val result = Handler.processProductSwitchSubs(
+      switchSubs,
+      activeSubs,
+      (id, body) => {
+        sentRequests += (id -> body)
+        Right(())
+      },
+      body => {
+        updatePayloads += body
+        Right(())
+      },
+      calculator,
+      {
+        case `activeIdentityId` => Right(true)
+        case `otherIdentityId` => Right(false)
+        case `failedIdentityId` => Left(SoftOptInError(s"Lookup failed for $failedIdentityId"))
+        case unexpected => throw new AssertionError(s"Unexpected identityId $unexpected")
+      },
+      (event, value) => {
+        metrics += (event -> value)
+        ()
+      },
+    )
+
+    result shouldBe Right(())
+    sentRequests.map(_._1).toList shouldBe List(activeIdentityId, otherIdentityId)
+    def unsetConsents(body: String): Set[String] =
+      parse(body).toOption.get.asArray.get
+        .filter(_.hcursor.get[Boolean]("consented").toOption.contains(false))
+        .map(
+          _.hcursor.get[String]("id").toOption.get,
+        )
+        .toSet
+    unsetConsents(sentRequests.head._2) shouldBe Set("similar_guardian_products")
+    unsetConsents(sentRequests(1)._2) shouldBe Set("similar_guardian_products", "supporter_newsletter")
+    val updates = parse(updatePayloads.head).toOption.get.hcursor.get[Vector[Json]]("records").toOption.get
+    updates.map(_.hcursor.get[Int]("Soft_Opt_in_Number_of_Attempts__c").toOption.get) shouldBe Vector(0, 0, 3)
+    updates.map(_.hcursor.get[Option[String]]("Soft_Opt_in_Last_Stage_Processed__c").toOption.get) shouldBe
+      Vector(Some("Switch"), Some("Switch"), None)
+    metrics.toList shouldBe List(
+      "product_switches_to_process" -> 3,
       "successful_consents_updates" -> 2,
       "failed_consents_updates" -> 1,
     )
@@ -169,9 +235,76 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       mockGetMobileSubscriptions,
       calculator,
       mockSfConnector,
+      _ => Right(false),
     )
 
     result shouldBe Right(())
+  }
+
+  test(testName = "IAP product switch preserves consents held by secondary access") {
+    val sentRequests = ListBuffer.empty[String]
+    mockGetMobileSubscriptions.expects(identityId).returning(Right(MobileSubscriptions(List.empty)))
+    mockSfConnector.getActiveSubs _ expects Seq(identityId) returning Right(
+      SFAssociatedSubResponse(1, true, Seq(SFAssociatedSubRecord("Guardian Ad-Lite", identityId))),
+    )
+    val message = MessageBody(
+      identityId = identityId,
+      productName = "Guardian Ad-Lite",
+      printProduct = None,
+      previousProductName = Some("Supporter Plus"),
+      eventType = Switch,
+      subscriptionId = subscriptionId,
+      userConsentsOverrides = None,
+    )
+
+    val result = IAPMessageProcessor.processProductSwitchSub(
+      message,
+      (id, body) => {
+        id shouldBe identityId
+        sentRequests += body
+        Right(())
+      },
+      mockGetMobileSubscriptions,
+      calculator,
+      mockSfConnector,
+      _ => Right(true),
+    )
+
+    result shouldBe Right(())
+    sentRequests.size shouldBe 1
+    val unsetConsents = parse(sentRequests.head).toOption.get.asArray.get
+      .filter(_.hcursor.get[Boolean]("consented").toOption.contains(false))
+      .map(_.hcursor.get[String]("id").toOption.get)
+      .toSet
+    unsetConsents shouldBe Set("similar_guardian_products")
+  }
+
+  test(testName = "IAP product switch does not send consents if secondary access lookup fails") {
+    val lookupError = SoftOptInError("SupporterProductData lookup failed")
+    mockGetMobileSubscriptions.expects(identityId).returning(Right(MobileSubscriptions(List.empty)))
+    mockSfConnector.getActiveSubs _ expects Seq(identityId) returning Right(
+      SFAssociatedSubResponse(1, true, Seq(SFAssociatedSubRecord("Guardian Ad-Lite", identityId))),
+    )
+    val message = MessageBody(
+      identityId = identityId,
+      productName = "Guardian Ad-Lite",
+      printProduct = None,
+      previousProductName = Some("Supporter Plus"),
+      eventType = Switch,
+      subscriptionId = subscriptionId,
+      userConsentsOverrides = None,
+    )
+
+    val result = IAPMessageProcessor.processProductSwitchSub(
+      message,
+      (_, _) => throw new AssertionError("Consent request should not be sent"),
+      mockGetMobileSubscriptions,
+      calculator,
+      mockSfConnector,
+      _ => Left(lookupError),
+    )
+
+    result shouldBe Left(lookupError)
   }
 
   test(testName = "processAcquiredSub should handle acquisition event correctly") {

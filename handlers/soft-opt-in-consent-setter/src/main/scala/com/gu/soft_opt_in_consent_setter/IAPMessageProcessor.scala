@@ -50,6 +50,7 @@ class IAPMessageProcessor(
           mpapiConnector.getMobileSubscriptions,
           consentsCalculator,
           sfConnector,
+          dynamoConnector.hasActiveSecondaryUserAccess,
         )
     }
 
@@ -144,6 +145,7 @@ object IAPMessageProcessor extends StrictLogging {
       getMobileSubscriptions: String => Either[SoftOptInError, MobileSubscriptions],
       consentsCalculator: ConsentsCalculator,
       sfConnector: SalesforceConnector,
+      hasActiveSecondaryUserAccess: String => Either[SoftOptInError, Boolean],
   ): Either[SoftOptInError, Unit] =
     for {
       previousProductName <- messageBody.previousProductName.toRight(
@@ -152,18 +154,22 @@ object IAPMessageProcessor extends StrictLogging {
 
       mobileSubscriptionsResponse <- getMobileSubscriptions(messageBody.identityId)
       activeSubs <- sfConnector.getActiveSubs(Seq(messageBody.identityId))
+      hasSecondaryUserAccess <- hasActiveSecondaryUserAccess(messageBody.identityId)
 
       iapSOIs = mobileSubscriptionsResponse.subscriptions
         .filter(_.valid)
         .map(_.softOptInProductName)
         .distinct
 
-      productNames = activeSubs.records.map(_.Product__c) ++ iapSOIs
+      productNames = Handler.productsWithSecondaryAccess(
+        (activeSubs.records.map(_.Product__c) ++ iapSOIs).toSet,
+        hasSecondaryUserAccess,
+      )
 
       consentsBody <- buildProductSwitchConsents(
         previousProductName,
         messageBody.productName,
-        productNames.toSet,
+        productNames,
         consentsCalculator,
       )
 
@@ -208,7 +214,7 @@ object IAPMessageProcessor extends StrictLogging {
         .filter(_.valid)
         .map(_.softOptInProductName)
         .distinct
-      productNames = Handler.productsForCancellation(
+      productNames = Handler.productsWithSecondaryAccess(
         (activeSubs.records.map(_.Product__c) ++ iapSOIs).toSet,
         hasSecondaryUserAccess,
       )

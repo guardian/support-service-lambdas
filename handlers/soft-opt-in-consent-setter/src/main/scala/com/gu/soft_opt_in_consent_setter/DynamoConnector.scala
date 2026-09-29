@@ -76,9 +76,6 @@ class DynamoConnector(dynamoDbClient: DynamoDbClient, stage: String) extends Laz
     queryPage(null)
   }
 
-  def getSecondaryUserAccessByIdentityId(identityIds: Seq[String]): Map[String, Either[SoftOptInError, Boolean]] =
-    identityIds.distinct.map(identityId => identityId -> hasActiveSecondaryUserAccess(identityId)).toMap
-
   def updateLoggingTable(
       subscriptionId: String,
       identityId: String,

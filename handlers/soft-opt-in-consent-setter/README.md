@@ -2,11 +2,21 @@
 
 This is a lambda that alters a user's Soft Opt-In setting based on the subscriptions they acquire and cancel.
 
-The lambda will fetch 200 subscriptions at a time from Salesforce, process them, set the consents in IDAPI, and update their records in Salesforce with the outcome. It will first process acquisitions and then process cancellations.
+The scheduled lambda fetches 200 subscriptions at a time from Salesforce, processes acquisitions, product switches and cancellations, sets consents in IDAPI, and updates the Salesforce records with the outcome. IAP events are processed from a queue.
 
 For an acquisition, it will enable the Soft Opt-In consents associated with that subscription according to the consents mapping.
 
 For a cancellation, it will disable the Soft Opt-In consents that are associated only with the subscription being cancelled, except similar_guardian_products
+
+## Secondary user access
+
+Cancellation and product-switch processing include an active secondary-user holding when deciding which consents to keep. The scheduled Salesforce path and the IAP event path both query [SupporterProductData](../../modules/supporter-product-data/src/supporterProductData.ts) for the customer's identity ID. A secondary row has `primarySubscriptionName`, and its `termEndDate` is treated as active through that date. Salesforce remains the source for the other Zuora holdings.
+
+The [multiple-accounts API](../multiple-account-api/openapi.yaml) lists linked subscriptions and primary-user contact details, but its existing endpoint does not check the subscription term end date. It is not an equivalent active-entitlement check. SupporterProductData is already queried directly by other services in this repository.
+
+The secondary row is sent to SupporterProductData through SQS after invitation acceptance. A strongly consistent read sees the latest committed row, but cannot remove the delay before that row is written. This is a remaining race for an invitation immediately followed by a cancellation or switch.
+
+If the DynamoDB client cannot be created, the scheduled run fails and alarms without consuming the pending records. A query or malformed-data error for one identity prevents a consent update for that record, increments its Salesforce attempt count and lets the other records continue. IAP events fail for retry instead.
 
 If it is unable to update a record, it will increment the number of retries and try again later in a subsequent run. It will only attempt to update records 5 times.
 
@@ -22,7 +32,7 @@ has been created to visualise these metrics and help monitor the lambda.
 
 **successful_consents_updates**: Shows how many successful IDAPI Soft Opt-In consent updates took place.
 
-**failed_consents_updates**: Shows how many failed IDAPI Soft Opt-In consent updates took place.
+**failed_consents_updates**: Shows how many records could not complete consent processing, including IDAPI or secondary-access lookup failures.
 
 **successful_salesforce_update**: Shows how many successful Salesforce record updates took place.
 
@@ -49,6 +59,7 @@ something actually needs addressing.
 1. Failed to contact Salesforce endpoint.
 1. Failed to authenticate in Salesforce.
 1. Error decoding Salesforce's responses.
+1. Failed to create the DynamoDB client while cancellations or product switches were pending.
 
 The [lambda's logs](https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fsoft-opt-in-consent-setter-PROD)
 will provide more details regarding which of these is taking place.
@@ -60,6 +71,7 @@ will provide more details regarding which of these is taking place.
    not have been able to update their state after processing the records.
 1. Failed to authenticate in Salesforce.
 1. Error decoding Salesforce's responses.
+1. Pending cancellations and product switches were not processed, but any acquisitions earlier in the run may have been.
 
 **FIX**: For each corresponding cause:
 
@@ -69,6 +81,7 @@ will provide more details regarding which of these is taking place.
 1. Check that the endpoint being used is correct and the version (`sfApiVersion` in CloudFormation) is correct. Check
    that the Salesforce API version being used returns what the lambda expects. Check the code for any changes to how the
    relevant response is decoded.
+1. Check the AWS credentials and DynamoDB client setup. The pending records will be retried on the next run.
 
 For all the above, fixing the underlying issues and letting it run on schedule will put the system in a correct state.
 

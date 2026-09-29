@@ -55,32 +55,37 @@ object Handler extends LazyLogging {
         productSwitchSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyProcessSwitchStatus))
         productSwitchSubIdentityIds = productSwitchSubs.map(sub => sub.Buyer__r.IdentityID__c)
 
-        secondaryUserAccessByIdentityId <- loadSecondaryUserAccess(
-          cancelledSubsIdentityIds,
-          DynamoConnector(config.stage),
-        )
-
         _ = logger.info(s"About to fetch active subs from Salesforce")
         activeSubs <- sfConnector.getActiveSubs((cancelledSubsIdentityIds ++ productSwitchSubIdentityIds).distinct)
         _ = logger.info(s"Successfully fetched ${activeSubs.records.length} active subs from Salesforce")
 
-        _ <- processProductSwitchSubs(
-          productSwitchSubs,
-          activeSubs,
-          identityConnector.sendConsentsReq,
-          sfConnector.updateSubs,
-          consentsCalculator,
-        )
-
-        _ <- processCancelledSubs(
-          cancelledSubs,
-          activeSubs,
-          identityConnector.sendConsentsReq,
-          sfConnector.updateSubs,
-          consentsCalculator,
-          secondaryUserAccessByIdentityId,
-          publishMetric,
-        )
+        _ <-
+          if (cancelledSubs.isEmpty && productSwitchSubs.isEmpty) {
+            publishMetric("product_switches_to_process", 0)
+            publishMetric("cancellations_to_process", 0)
+            Right(())
+          } else {
+            for {
+              dynamoConnector <- DynamoConnector(config.stage)
+              _ <- processProductSwitchSubs(
+                productSwitchSubs,
+                activeSubs,
+                identityConnector.sendConsentsReq,
+                sfConnector.updateSubs,
+                consentsCalculator,
+                dynamoConnector.hasActiveSecondaryUserAccess,
+              )
+              _ <- processCancelledSubs(
+                cancelledSubs,
+                activeSubs,
+                identityConnector.sendConsentsReq,
+                sfConnector.updateSubs,
+                consentsCalculator,
+                dynamoConnector.hasActiveSecondaryUserAccess,
+                publishMetric,
+              )
+            } yield ()
+          }
         _ = Metrics.put(event = "successful_run")
       } yield ()).flatten.left
       .foreach(error => {
@@ -89,13 +94,6 @@ object Handler extends LazyLogging {
         throw new Exception(s"Run failed due to ${error.getMessage}")
       })
   }
-
-  private[soft_opt_in_consent_setter] def loadSecondaryUserAccess(
-      identityIds: Seq[String],
-      connector: => Either[SoftOptInError, DynamoConnector],
-  ): Either[SoftOptInError, Map[String, Either[SoftOptInError, Boolean]]] =
-    if (identityIds.isEmpty) Right(Map.empty)
-    else connector.map(_.getSecondaryUserAccessByIdentityId(identityIds))
 
   def markAcquiredSubsProcessed(
       acquiredSubs: Seq[SFSubRecord],
@@ -153,8 +151,10 @@ object Handler extends LazyLogging {
       sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
       updateSubs: String => Either[SoftOptInError, Unit],
       consentsCalculator: ConsentsCalculator,
+      hasActiveSecondaryUserAccess: String => Either[SoftOptInError, Boolean],
+      recordMetric: RecordMetric = publishMetric,
   ): Either[SoftOptInError, Unit] = {
-    Metrics.put(event = "product_switches_to_process", productSwitchSubs.size)
+    recordMetric("product_switches_to_process", productSwitchSubs.size)
 
     val recordsToUpdate = productSwitchSubs
       .map(EnhancedSub(_, activeSubs.records))
@@ -168,10 +168,11 @@ object Handler extends LazyLogging {
                 s"processProductSwitchSubs: Subscription ${sub.Name} Subscription_Rate_Plan_Updates__r is null",
               ),
             )
+          hasActiveAccess <- hasActiveSecondaryUserAccess(identityId)
           consentsBody <- buildProductSwitchConsents(
             ratePlanUpdates.records.head.Previous_Product_Name__c,
             sub.Product__c,
-            associatedActiveNonGiftSubs.map(_.Product__c).toSet,
+            productsWithSecondaryAccess(associatedActiveNonGiftSubs.map(_.Product__c).toSet, hasActiveAccess),
             consentsCalculator,
           )
           res <- sendConsentsReq(sub.Buyer__r.IdentityID__c, consentsBody)
@@ -186,7 +187,7 @@ object Handler extends LazyLogging {
         )
       })
 
-    emitIdentityMetrics(recordsToUpdate)
+    emitIdentityMetrics(recordsToUpdate, recordMetric)
 
     if (recordsToUpdate.isEmpty)
       Right(())
@@ -200,7 +201,7 @@ object Handler extends LazyLogging {
       sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
       updateSubs: String => Either[SoftOptInError, Unit],
       consentsCalculator: ConsentsCalculator,
-      secondaryUserAccessByIdentityId: Map[String, Either[SoftOptInError, Boolean]],
+      hasActiveSecondaryUserAccess: String => Either[SoftOptInError, Boolean],
       recordMetric: RecordMetric,
   ): Either[SoftOptInError, Unit] = {
     recordMetric("cancellations_to_process", cancelledSubs.size)
@@ -212,10 +213,7 @@ object Handler extends LazyLogging {
           rec,
           sendConsentsReq,
           consentsCalculator,
-          secondaryUserAccessByIdentityId.getOrElse(
-            rec.identityId,
-            Left(SoftOptInError(s"Missing secondary user access lookup for identityId ${rec.identityId}")),
-          ),
+          hasActiveSecondaryUserAccess,
         ),
       )
 
@@ -231,7 +229,7 @@ object Handler extends LazyLogging {
       rec: EnhancedSub,
       sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
       consentsCalculator: ConsentsCalculator,
-      hasActiveSecondaryUserAccess: Either[SoftOptInError, Boolean],
+      hasActiveSecondaryUserAccess: String => Either[SoftOptInError, Boolean],
   ): SFSubRecordUpdate = {
     import rec._
 
@@ -248,10 +246,10 @@ object Handler extends LazyLogging {
 
     val updateResult =
       for {
-        hasActiveAccess <- hasActiveSecondaryUserAccess
+        hasActiveAccess <- hasActiveSecondaryUserAccess(identityId)
         consents <- consentsCalculator.getCancellationConsents(
           sub.Product__c,
-          productsForCancellation(associatedActiveNonGiftSubs.map(_.Product__c).toSet, hasActiveAccess),
+          productsWithSecondaryAccess(associatedActiveNonGiftSubs.map(_.Product__c).toSet, hasActiveAccess),
         )
         consentWithoutSimilarProducts = consentsCalculator.removeSimilarGuardianProductFromSet(consents)
         _ <- sendCancellationConsents(identityId, consentWithoutSimilarProducts)
@@ -266,7 +264,7 @@ object Handler extends LazyLogging {
     updateResults.left.foreach(error => logger.warn(s"${error.getMessage}"))
   }
 
-  def productsForCancellation(activeProductNames: Set[String], hasActiveSecondaryUserAccess: Boolean): Set[String] =
+  def productsWithSecondaryAccess(activeProductNames: Set[String], hasActiveSecondaryUserAccess: Boolean): Set[String] =
     if (hasActiveSecondaryUserAccess) activeProductNames + "Secondary User" else activeProductNames
 
   def emitIdentityMetrics(records: Seq[SFSubRecordUpdate], recordMetric: RecordMetric = publishMetric): Unit = {
