@@ -1,13 +1,26 @@
 import { z } from 'zod';
 import {
-	MParticleHttpClient,
+	createEventsApiClient,
+	eventsApiBaseUrl,
 	MParticleHttpError,
 	MParticleNetworkError,
 } from '../src/mparticleHttpClient';
 
 const apiKey = 'api-key';
 const apiSecret = 'api-secret';
-const endpoint = 'https://s2s.eu1.mparticle.com/v2';
+const pod = 'eu1';
+const endpoint = eventsApiBaseUrl(pod);
+
+const originalFetch = global.fetch;
+
+const eventsClient = (fetchFn: typeof fetch) => {
+	global.fetch = fetchFn;
+	return createEventsApiClient({ key: apiKey, secret: apiSecret }, pod);
+};
+
+afterEach(() => {
+	global.fetch = originalFetch;
+});
 
 function jsonResponse(body: unknown, status = 200): Response {
 	return new Response(JSON.stringify(body), {
@@ -21,12 +34,7 @@ describe('MParticleHttpClient', () => {
 		const fetchFn = jest
 			.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>()
 			.mockResolvedValue(jsonResponse({ accepted: true }, 202));
-		const client = new MParticleHttpClient(
-			endpoint,
-			apiKey,
-			apiSecret,
-			fetchFn,
-		);
+		const client = eventsClient(fetchFn);
 
 		const result = await client.post(
 			'/events',
@@ -37,7 +45,6 @@ describe('MParticleHttpClient', () => {
 		expect(result).toEqual({
 			success: true,
 			data: { accepted: true },
-			statusCode: 202,
 		});
 		expect(fetchFn).toHaveBeenCalledWith(`${endpoint}/events`, {
 			method: 'POST',
@@ -49,31 +56,31 @@ describe('MParticleHttpClient', () => {
 		});
 	});
 
-	it('supports response parser functions for non-JSON responses', async () => {
+	it('parses JSON GET responses', async () => {
 		const fetchFn = jest
 			.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>()
-			.mockResolvedValue(
-				new Response('accepted', {
-					status: 200,
-					headers: { 'content-type': 'text/plain' },
-				}),
-			);
-		const client = new MParticleHttpClient(
-			endpoint,
-			apiKey,
-			apiSecret,
-			fetchFn,
-		);
+			.mockResolvedValue(jsonResponse({ state: 'ready' }, 200));
+		const client = eventsClient(fetchFn);
 
-		const result = await client.get('/status', (body, contentType) => ({
-			body,
-			contentType,
-		}));
+		const result = await client.get('/status', z.object({ state: z.string() }));
 
 		expect(result).toEqual({
 			success: true,
-			data: { body: 'accepted', contentType: 'text/plain' },
-			statusCode: 200,
+			data: { state: 'ready' },
+		});
+	});
+
+	it('supports empty successful responses without exposing the status', async () => {
+		const fetchFn = jest
+			.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>()
+			.mockResolvedValue(new Response(null, { status: 202 }));
+		const client = eventsClient(fetchFn);
+
+		const result = await client.post('/events', { event: 'purchase' });
+
+		expect(result).toEqual({
+			success: true,
+			data: undefined,
 		});
 	});
 
@@ -81,23 +88,25 @@ describe('MParticleHttpClient', () => {
 		const privateResponseBody = 'private response body';
 		const fetchFn = jest
 			.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>()
-			.mockResolvedValue(new Response(privateResponseBody, { status: 503 }));
-		const client = new MParticleHttpClient(
-			endpoint,
-			apiKey,
-			apiSecret,
-			fetchFn,
-		);
+			.mockResolvedValue(
+				new Response(privateResponseBody, {
+					status: 503,
+					statusText: 'Service Unavailable',
+				}),
+			);
+		const client = eventsClient(fetchFn);
 
 		let error: unknown;
 		try {
-			await client.post('/events', { event: 'purchase' }, () => undefined);
+			await client.post('/events', { event: 'purchase' });
 		} catch (caught) {
 			error = caught;
 		}
 
 		expect(error).toBeInstanceOf(MParticleHttpError);
-		expect(error).toMatchObject({ statusCode: 503 });
+		expect(error).toMatchObject({
+			statusCode: 503,
+		});
 		expect(String(error)).not.toContain(privateResponseBody);
 		expect(String(error)).not.toContain(apiSecret);
 	});
@@ -105,20 +114,15 @@ describe('MParticleHttpClient', () => {
 	it('turns network failures into safe retryable errors', async () => {
 		const fetchFn = jest
 			.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>()
-			.mockRejectedValue(new Error(`${apiSecret} should not escape`));
-		const client = new MParticleHttpClient(
-			endpoint,
-			apiKey,
-			apiSecret,
-			fetchFn,
-		);
+			.mockRejectedValue(new TypeError('fetch failed'));
+		const client = eventsClient(fetchFn);
 
 		await expect(
-			client.post('/events', { event: 'purchase' }, () => undefined),
+			client.post('/events', { event: 'purchase' }),
 		).rejects.toBeInstanceOf(MParticleNetworkError);
-		await expect(
-			client.post('/events', { event: 'purchase' }, () => undefined),
-		).rejects.toThrow('network layer');
+		await expect(client.post('/events', { event: 'purchase' })).rejects.toThrow(
+			'network layer',
+		);
 	});
 
 	it('returns a safe error when a successful response cannot be parsed', async () => {
@@ -131,12 +135,7 @@ describe('MParticleHttpClient', () => {
 					headers: { 'content-type': 'application/json' },
 				}),
 			);
-		const client = new MParticleHttpClient(
-			endpoint,
-			apiKey,
-			apiSecret,
-			fetchFn,
-		);
+		const client = eventsClient(fetchFn);
 
 		const result = await client.get(
 			'/status',
@@ -151,5 +150,41 @@ describe('MParticleHttpClient', () => {
 			expect(result.error.message).not.toContain(privateResponseBody);
 			expect(result.error.message).not.toContain(apiSecret);
 		}
+	});
+
+	it('returns an unconsumed stream body', async () => {
+		const fetchFn = jest
+			.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>()
+			.mockResolvedValue(new Response('stream body', { status: 200 }));
+		const client = eventsClient(fetchFn);
+
+		const responseBody = await client.getStream('/status');
+
+		expect(await new Response(responseBody).text()).toBe('stream body');
+	});
+
+	it('maps stream network failures to the safe mParticle error', async () => {
+		const fetchFn = jest
+			.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>()
+			.mockRejectedValue(new TypeError('fetch failed'));
+		const client = eventsClient(fetchFn);
+
+		await expect(client.getStream('/status')).rejects.toBeInstanceOf(
+			MParticleNetworkError,
+		);
+	});
+
+	it('maps stream HTTP failures to a safe mParticle error', async () => {
+		const fetchFn = jest
+			.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>()
+			.mockResolvedValue(
+				new Response('private response body', { status: 401 }),
+			);
+		const client = eventsClient(fetchFn);
+
+		await expect(client.getStream('/status')).rejects.toMatchObject({
+			name: 'MParticleHttpError',
+			statusCode: 401,
+		});
 	});
 });

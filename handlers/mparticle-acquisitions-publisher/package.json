@@ -19,7 +19,8 @@
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
     "zod": "catalog:",
-    "aws": "workspace:*"
+    "aws": "workspace:*",
+    "mparticle": "workspace:*"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147"

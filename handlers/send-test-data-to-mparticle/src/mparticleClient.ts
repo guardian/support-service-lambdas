@@ -1,58 +1,46 @@
 import {
-	MParticleHttpClient,
+	createEventsApiClient,
+	type EventsAPI,
+	type MParticleClient,
 	MParticleHttpError,
 	MParticleNetworkError,
 } from '@modules/mparticle/mparticleHttpClient';
 import type { AppConfig } from './config';
 
-export const MPARTICLE_EVENTS_ENDPOINT =
-	'https://s2s.eu1.mparticle.com/v2/events';
-const MPARTICLE_EVENTS_BASE_URL = MPARTICLE_EVENTS_ENDPOINT.replace(
-	/\/events$/,
-	'',
-);
+const MPARTICLE_EVENTS_POD = 'eu1';
+const MPARTICLE_EVENTS_PATH = '/events';
 
 export type EventsApiRequest = Record<string, unknown>;
+export type EventsApiClient = MParticleClient<EventsAPI>;
 
-export class MParticleClient {
-	private constructor(private readonly client: MParticleHttpClient) {}
+export const createMParticleClient = (config: AppConfig): EventsApiClient =>
+	createEventsApiClient(
+		{ key: config.apiKey, secret: config.apiSecret },
+		MPARTICLE_EVENTS_POD,
+	);
 
-	static create(
-		config: AppConfig,
-		fetchFn: typeof fetch = fetch,
-	): MParticleClient {
-		return new MParticleClient(
-			new MParticleHttpClient(
-				MPARTICLE_EVENTS_BASE_URL,
-				config.apiKey,
-				config.apiSecret,
-				fetchFn,
-			),
-		);
-	}
-
-	async sendEvents(payload: EventsApiRequest): Promise<number> {
-		let response;
-		try {
-			response = await this.client.post('/events', payload, () => undefined);
-		} catch (error) {
-			if (error instanceof MParticleNetworkError) {
-				throw new Error('mParticle Events API network request failed');
-			}
-
-			if (error instanceof MParticleHttpError) {
-				throw new Error(
-					`mParticle Events API request failed with status ${error.statusCode}`,
-				);
-			}
-
-			throw error;
+export const sendEvents = async (
+	client: EventsApiClient,
+	payload: EventsApiRequest,
+): Promise<void> => {
+	let response;
+	try {
+		response = await client.post(MPARTICLE_EVENTS_PATH, payload);
+	} catch (error) {
+		if (error instanceof MParticleNetworkError) {
+			throw new Error('mParticle Events API network request failed');
 		}
 
-		if (!response.success) {
-			throw response.error;
+		if (error instanceof MParticleHttpError) {
+			throw new Error(
+				`mParticle Events API request failed with status ${error.statusCode}`,
+			);
 		}
 
-		return response.statusCode;
+		throw error;
 	}
-}
+
+	if (!response.success) {
+		throw response.error;
+	}
+};

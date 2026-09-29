@@ -1,12 +1,12 @@
 import { randomUUID } from 'crypto';
 import { z } from 'zod';
-import type { DataSubjectRequestSubmission } from '../../../apis/dataSubjectRequests/submit';
-import { submitDataSubjectRequest } from '../../../apis/dataSubjectRequests/submit';
 import type {
 	DataSubjectAPI,
 	EventsAPI,
 	MParticleClient,
-} from '../../../services/mparticleClient';
+} from '@modules/mparticle/mparticleHttpClient';
+import type { DataSubjectRequestSubmission } from '../../../apis/dataSubjectRequests/submit';
+import { submitDataSubjectRequest } from '../../../apis/dataSubjectRequests/submit';
 import { addErasureExclusionAttributes } from '../../shared/addErasureExclusionAttributes';
 import { InitiationReferenceSchema } from '../initiationReference';
 import {

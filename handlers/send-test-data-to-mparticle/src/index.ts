@@ -1,7 +1,11 @@
 import type { Handler } from 'aws-lambda';
 import { z } from 'zod';
 import { getAppConfig } from './config';
-import { type EventsApiRequest, MParticleClient } from './mparticleClient';
+import {
+	createMParticleClient,
+	type EventsApiRequest,
+	sendEvents,
+} from './mparticleClient';
 
 const eventsApiRequestSchema = z
 	.object({
@@ -15,11 +19,7 @@ const eventsApiRequestSchema = z
 	})
 	.passthrough();
 
-export type HandlerResult = {
-	statusCode: number;
-};
-
-export type SendEvents = (payload: EventsApiRequest) => Promise<number>;
+export type SendEvents = (payload: EventsApiRequest) => Promise<void>;
 
 export const parseEventsApiRequest = (event: unknown): EventsApiRequest => {
 	const parsedEvent = eventsApiRequestSchema.safeParse(event);
@@ -35,18 +35,15 @@ export const parseEventsApiRequest = (event: unknown): EventsApiRequest => {
 
 export const processEvent = async (
 	event: unknown,
-	sendEvents: SendEvents,
-): Promise<HandlerResult> => {
+	send: SendEvents,
+): Promise<void> => {
 	const payload = parseEventsApiRequest(event);
-	const statusCode = await sendEvents(payload);
-	return { statusCode };
+	await send(payload);
 };
 
-export const handler: Handler<unknown, HandlerResult> = async (event) => {
+export const handler: Handler<unknown, void> = async (event) => {
 	const payload = parseEventsApiRequest(event);
 	const config = await getAppConfig();
-	const client = MParticleClient.create(config);
-	const statusCode = await client.sendEvents(payload);
-
-	return { statusCode };
+	const client = createMParticleClient(config);
+	await sendEvents(client, payload);
 };

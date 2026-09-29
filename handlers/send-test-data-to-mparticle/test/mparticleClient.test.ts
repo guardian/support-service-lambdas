@@ -1,4 +1,12 @@
-import { MParticleClient } from '../src/mparticleClient';
+import {
+	MParticleHttpError,
+	MParticleNetworkError,
+} from '@modules/mparticle/mparticleHttpClient';
+import {
+	createMParticleClient,
+	type EventsApiClient,
+	sendEvents,
+} from '../src/mparticleClient';
 
 const payload = {
 	user_identities: { customer_id: 'test-browser-id1' },
@@ -11,57 +19,53 @@ const config = {
 	apiSecret: 'api-secret',
 };
 
-type FetchMock = jest.MockedFunction<typeof fetch>;
+const makeClient = (post: jest.Mock): EventsApiClient =>
+	({ post }) as unknown as EventsApiClient;
 
-const makeFetchMock = (): FetchMock =>
-	jest.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>();
+describe('mParticle client adapter', () => {
+	it('creates an EU1 Events API client', () => {
+		const client = createMParticleClient(config);
 
-describe('MParticleClient', () => {
-	it('posts JSON with Basic authentication and returns a 2xx status', async () => {
-		const fetchMock = makeFetchMock();
-		fetchMock.mockResolvedValue(new Response(null, { status: 202 }));
-		const logSpy = jest.spyOn(console, 'log');
-
-		const status = await MParticleClient.create(config, fetchMock).sendEvents(
-			payload,
-		);
-
-		expect(status).toBe(202);
-		expect(fetchMock).toHaveBeenCalledWith(
-			'https://s2s.eu1.mparticle.com/v2/events',
-			{
-				method: 'POST',
-				headers: {
-					Authorization: `Basic ${Buffer.from('api-key:api-secret').toString('base64')}`,
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(payload),
-			},
-		);
-		expect(logSpy).not.toHaveBeenCalled();
-		logSpy.mockRestore();
+		expect(client.clientType).toBe('eventsApi');
+		expect(client.baseURL).toBe('https://s2s.eu1.mparticle.com/v2');
 	});
 
-	it('rejects non-2xx responses without exposing the response body', async () => {
-		const fetchMock = makeFetchMock();
-		fetchMock.mockResolvedValue(
-			new Response('private response body', { status: 503 }),
-		);
+	it('posts the complete payload and resolves after a successful response', async () => {
+		const post = jest.fn().mockResolvedValue({
+			success: true,
+			data: undefined,
+		});
 
 		await expect(
-			MParticleClient.create(config, fetchMock).sendEvents(payload),
-		).rejects.toThrow('mParticle Events API request failed with status 503');
-		await expect(
-			MParticleClient.create(config, fetchMock).sendEvents(payload),
-		).rejects.not.toThrow('private response body');
+			sendEvents(makeClient(post), payload),
+		).resolves.toBeUndefined();
+		expect(post).toHaveBeenCalledWith('/events', payload);
 	});
 
-	it('rejects network failures with a safe error', async () => {
-		const fetchMock = makeFetchMock();
-		fetchMock.mockRejectedValue(new Error('secret transport detail'));
+	it('maps HTTP failures without exposing response bodies', async () => {
+		const post = jest.fn().mockRejectedValue(new MParticleHttpError(503));
 
-		await expect(
-			MParticleClient.create(config, fetchMock).sendEvents(payload),
-		).rejects.toThrow('mParticle Events API network request failed');
+		await expect(sendEvents(makeClient(post), payload)).rejects.toThrow(
+			'mParticle Events API request failed with status 503',
+		);
+	});
+
+	it('maps network failures to a safe error', async () => {
+		const post = jest.fn().mockRejectedValue(new MParticleNetworkError());
+
+		await expect(sendEvents(makeClient(post), payload)).rejects.toThrow(
+			'mParticle Events API network request failed',
+		);
+	});
+
+	it('propagates shared-client response errors', async () => {
+		const post = jest.fn().mockResolvedValue({
+			success: false,
+			error: new Error('mParticle response could not be parsed'),
+		});
+
+		await expect(sendEvents(makeClient(post), payload)).rejects.toThrow(
+			'mParticle response could not be parsed',
+		);
 	});
 });

@@ -14,11 +14,7 @@ aws lambda invoke \
   /tmp/send-test-data-to-mparticle-response.json
 ```
 
-The response contains the HTTP status returned by the Events API, for example:
-
-```json
-{"statusCode":200}
-```
+On success, the invocation completes without `FunctionError`; the handler does not return an application response payload. Events API and network failures cause the invocation to fail with a safe error.
 
 ## Payload
 

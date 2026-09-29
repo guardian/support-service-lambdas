@@ -1,6 +1,9 @@
 import { z } from 'zod';
 import { mockZuoraClient } from '../../zuora/test/mocks/mockZuoraClient';
-import { executeSalesforceQuery } from '../src/query';
+import {
+	executeSalesforceQuery,
+	executeSalesforceQueryAll,
+} from '../src/query';
 import { SalesforceQueryResponseSchema } from '../src/recordSchema';
 
 global.fetch = jest.fn();
@@ -54,5 +57,44 @@ describe('executeSalesforceQuery', () => {
 				mockInvalidResponse,
 			).success;
 		expect(actual).toBe(false);
+	});
+
+	it('should retrieve every page of a Salesforce query', async () => {
+		mockZuoraClient.get
+			.mockResolvedValueOnce({
+				totalSize: 2,
+				done: false,
+				nextRecordsUrl: '/services/data/v59.0/query/next-page',
+				records: [{ Id: '001', Name: 'First account' }],
+			})
+			.mockResolvedValueOnce({
+				totalSize: 2,
+				done: true,
+				records: [{ Id: '002', Name: 'Second account' }],
+			});
+
+		await expect(
+			executeSalesforceQueryAll(mockZuoraClient, mockQuery, mockSchema),
+		).resolves.toEqual([
+			{ Id: '001', Name: 'First account' },
+			{ Id: '002', Name: 'Second account' },
+		]);
+
+		expect(mockZuoraClient.get).toHaveBeenLastCalledWith(
+			'/services/data/v59.0/query/next-page',
+			expect.anything(),
+		);
+	});
+
+	it('should reject an incomplete Salesforce query without a next records URL', async () => {
+		mockZuoraClient.get.mockResolvedValueOnce({
+			totalSize: 2,
+			done: false,
+			records: [{ Id: '001', Name: 'First account' }],
+		});
+
+		await expect(
+			executeSalesforceQueryAll(mockZuoraClient, mockQuery, mockSchema),
+		).rejects.toThrow('Salesforce query response was incomplete');
 	});
 });

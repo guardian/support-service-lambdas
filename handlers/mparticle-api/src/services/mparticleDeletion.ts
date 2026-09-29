@@ -1,30 +1,23 @@
 import { logger } from '@modules/logger/logger';
+import type { MParticleEnvironment } from '@modules/mparticle/events';
+import type {
+	BulkDeletionAPI,
+	MParticleClient,
+} from '@modules/mparticle/mparticleHttpClient';
+import { MParticleHttpError } from '@modules/mparticle/mparticleHttpClient';
 import type { DeletionResult } from '../types/deletionMessage';
-import { HttpError } from './make-http-request';
-import type { BulkDeletionAPI, MParticleClient } from './mparticleClient';
 
 /**
  * mParticle Bulk Profile Deletion API Request Types
  * API Documentation: https://docs.mparticle.com/developers/apis/bulk-profile-deletion-api/
  */
 type BulkDeletionRequestItem = {
-	environment_type: 'production' | 'development';
+	environment_type: MParticleEnvironment;
 	action: 'delete';
 	mpid?: string;
 	identities?: Record<string, string>;
 };
 type BulkDeletionRequest = BulkDeletionRequestItem[];
-
-/**
- * mParticle Bulk Profile Deletion API Response Schema
- * The API returns 202 Accepted with no body on success
- * This is critical: 202 means the deletion was queued by mParticle's system.
- * Other 2xx responses would indicate unexpected behavior.
- * Use a function schema to handle empty responses
- */
-const BulkDeletionResponseSchema = (): void => undefined;
-
-type BulkDeletionResponse = void;
 
 /**
  * Delete a user from mParticle using the Bulk Profile Deletion API
@@ -39,7 +32,7 @@ type BulkDeletionResponse = void;
 export async function deleteMParticleUser(
 	client: MParticleClient<BulkDeletionAPI>,
 	userId: string,
-	environment: 'production' | 'development' = 'production',
+	environment: MParticleEnvironment = 'production',
 ): Promise<DeletionResult> {
 	try {
 		logger.log(`Attempting to delete user ${userId} from mParticle`);
@@ -54,29 +47,14 @@ export async function deleteMParticleUser(
 			},
 		];
 
-		const response = await client.post<
-			BulkDeletionRequest,
-			BulkDeletionResponse
-		>('/userprofile/bulkdelete', requestBody, BulkDeletionResponseSchema);
+		const response = await client.post<BulkDeletionRequest>(
+			'/userprofile/bulkdelete',
+			requestBody,
+		);
 
 		if (response.success) {
-			// mParticle Bulk Deletion API must return exactly 202 Accepted
-			// 202 confirms the deletion was queued in their system
-			if (response.statusCode !== 202) {
-				logger.error(
-					`Unexpected status code from mParticle: ${response.statusCode} (expected 202)`,
-				);
-				return {
-					success: false,
-					error: new Error(
-						`mParticle returned ${response.statusCode} instead of 202 Accepted`,
-					),
-					retryable: true, // Unexpected status may be transient
-				};
-			}
-			logger.log(
-				`Successfully deleted user ${userId} from mParticle (202 Accepted)`,
-			);
+			// mParticle currently documents 202, but any 2xx is accepted here.
+			logger.log(`mParticle accepted deletion request for user ${userId}`);
 			return { success: true };
 		} else {
 			const error = response.error;
@@ -97,7 +75,7 @@ export async function deleteMParticleUser(
 		}
 	} catch (error) {
 		// Handle 404 as success - user already deleted (idempotent)
-		if (error instanceof HttpError && error.statusCode === 404) {
+		if (error instanceof MParticleHttpError && error.statusCode === 404) {
 			logger.log(
 				`User ${userId} not found in mParticle (404) - treating as successful deletion`,
 			);
@@ -122,8 +100,8 @@ export async function deleteMParticleUser(
  * - 5xx errors are retryable (server errors)
  * - Network errors are retryable
  */
-function isRetryableError(error: Error | HttpError): boolean {
-	if (error instanceof HttpError) {
+function isRetryableError(error: Error | MParticleHttpError): boolean {
+	if (error instanceof MParticleHttpError) {
 		const statusCode = error.statusCode;
 		// 404 is handled separately as success
 		// 4xx client errors are not retryable

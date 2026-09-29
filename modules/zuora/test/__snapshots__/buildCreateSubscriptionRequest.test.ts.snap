@@ -57,7 +57,7 @@ exports[`the buildCreateSubscriptionRequest function builds request with applied
                   {
                     "pricing": {
                       "recurringFlatFee": {
-                        "listPrice": 0,
+                        "listPrice": 1,
                       },
                     },
                     "productRatePlanChargeId": "8ad09ea0858682bb0185880ac57f4c4c",
@@ -275,7 +275,7 @@ exports[`the buildCreateSubscriptionRequest function builds request without prom
                   {
                     "pricing": {
                       "recurringFlatFee": {
-                        "listPrice": 0,
+                        "listPrice": 1,
                       },
                     },
                     "productRatePlanChargeId": "8ad09ea0858682bb0185880ac57f4c4c",

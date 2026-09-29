@@ -5,7 +5,7 @@ import { z } from 'zod';
 import type {
 	DataSubjectAPI,
 	MParticleClient,
-} from '../../../services/mparticleClient';
+} from '@modules/mparticle/mparticleHttpClient';
 
 const ALLOWED_PROCESSOR_DOMAINS = [
 	'opendsr.mparticle.com',

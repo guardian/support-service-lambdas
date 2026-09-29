@@ -1,4 +1,24 @@
-import { processEvent } from '../src/index';
+import type { Context } from 'aws-lambda';
+import { getAppConfig } from '../src/config';
+import { handler, processEvent } from '../src/index';
+import {
+	createMParticleClient,
+	type EventsApiClient,
+	sendEvents,
+} from '../src/mparticleClient';
+
+jest.mock('../src/config', () => ({
+	getAppConfig: jest.fn(),
+}));
+
+jest.mock('../src/mparticleClient', () => ({
+	createMParticleClient: jest.fn(),
+	sendEvents: jest.fn(),
+}));
+
+const getAppConfigMock = jest.mocked(getAppConfig);
+const createMParticleClientMock = jest.mocked(createMParticleClient);
+const sendEventsMock = jest.mocked(sendEvents);
 
 const event = {
 	user_identities: { customer_id: 'test-browser-id1' },
@@ -9,12 +29,10 @@ const event = {
 
 describe('processEvent', () => {
 	it('preserves the Events API fields and forces the development environment', async () => {
-		const sendEvents = jest.fn().mockResolvedValue(200);
+		const send = jest.fn().mockResolvedValue(undefined);
 
-		await expect(processEvent(event, sendEvents)).resolves.toEqual({
-			statusCode: 200,
-		});
-		expect(sendEvents).toHaveBeenCalledWith({
+		await expect(processEvent(event, send)).resolves.toBeUndefined();
+		expect(send).toHaveBeenCalledWith({
 			user_identities: { customer_id: 'test-browser-id1' },
 			user_attributes: { last_single_contribution_amount: 5 },
 			environment: 'development',
@@ -28,12 +46,37 @@ describe('processEvent', () => {
 	])(
 		'rejects %s before sending an HTTP request',
 		async (_name, invalidEvent) => {
-			const sendEvents = jest.fn().mockResolvedValue(200);
+			const send = jest.fn().mockResolvedValue(undefined);
 
-			await expect(processEvent(invalidEvent, sendEvents)).rejects.toThrow(
+			await expect(processEvent(invalidEvent, send)).rejects.toThrow(
 				'Invalid mParticle Events API input',
 			);
-			expect(sendEvents).not.toHaveBeenCalled();
+			expect(send).not.toHaveBeenCalled();
 		},
 	);
+});
+
+describe('handler', () => {
+	it('loads configuration, creates the shared client, and sends the normalized payload', async () => {
+		const config = { apiKey: 'api-key', apiSecret: 'api-secret' };
+		const context = {} as Context;
+		const client = {
+			clientType: 'eventsApi',
+			baseURL: 'https://s2s.eu1.mparticle.com/v2',
+		} as unknown as EventsApiClient;
+		getAppConfigMock.mockResolvedValue(config);
+		createMParticleClientMock.mockReturnValue(client);
+		sendEventsMock.mockResolvedValue(undefined);
+
+		await expect(handler(event, context, jest.fn())).resolves.toBeUndefined();
+
+		expect(getAppConfigMock).toHaveBeenCalledWith();
+		expect(createMParticleClientMock).toHaveBeenCalledWith(config);
+		expect(sendEventsMock).toHaveBeenCalledWith(client, {
+			user_identities: { customer_id: 'test-browser-id1' },
+			user_attributes: { last_single_contribution_amount: 5 },
+			environment: 'development',
+			events: [{ event_type: 'custom_event', data: { name: 'test' } }],
+		});
+	});
 });
