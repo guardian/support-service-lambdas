@@ -27,11 +27,12 @@ have multiple Accounts per Identity ID, one per subscription.
 The lookups allow at most one Salesforce Contact and fifty Zuora Accounts. The
 Zuora limit is a safety guard against a query unexpectedly matching too many
 records; several hundred customers have more than ten Zuora Accounts, while
-only five have more than fifty. Both systems are looked up and checked before
-either is updated. If a limit is exceeded, the message retries and eventually
-reaches the DLQ without updating either system. Check the query and matches
-manually; clear legitimate matches manually, and raise the limit in a reviewed
-change if needed.
+only five have more than fifty. Each system's matches are checked before its
+records are updated. If a lookup or update fails in one system, the
+other is still attempted. The message retries and eventually reaches the DLQ if
+the failure persists. Check the query, any completed cleanup and the remaining
+matches before clearing them manually. If a limit was legitimately exceeded,
+raise it in a reviewed change if needed.
 
 Baton retrieves and erases Zuora data by email, so clearing the old Identity ID
 does not prevent its deletion process and keeps Zuora data cleaner.
