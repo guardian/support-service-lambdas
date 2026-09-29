@@ -22,7 +22,8 @@
     "@peculiar/x509": "^1.12.3",
     "zod": "catalog:",
     "aws": "workspace:*",
-    "routing": "workspace:*"
+    "routing": "workspace:*",
+    "mparticle": "workspace:*"
   },
   "devDependencies": {
     "@faker-js/faker": "^9.8.0",

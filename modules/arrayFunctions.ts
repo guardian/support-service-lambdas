@@ -87,7 +87,7 @@ export const groupCollect = <T, R, K extends string>(
 	);
 };
 
-export const chunkArray = <T>(array: T[], chunkSize: number): T[][] => {
+export const chunkArray = <T>(array: readonly T[], chunkSize: number): T[][] => {
 	if (chunkSize <= 0) {
 		throw new Error('Chunk size must be greater than 0');
 	}

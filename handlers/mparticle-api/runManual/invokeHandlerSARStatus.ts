@@ -1,10 +1,10 @@
 import { loadConfig } from '@modules/aws/appConfig';
+import { createDataSubjectClient } from '@modules/mparticle/mparticleHttpClient';
 import type { BatonSarEventStatusResponse } from '../src/routers/baton/access/handleStatus';
 import { handleSarStatus } from '../src/routers/baton/access/handleStatus';
 import type { InitiationReference } from '../src/routers/baton/initiationReference';
 import { BatonS3WriterImpl } from '../src/services/batonS3Writer';
 import { ConfigSchema } from '../src/services/config';
-import { MParticleClient } from '../src/services/mparticleClient';
 
 /*
  **************************************************************************
@@ -24,8 +24,7 @@ const sarS3BaseKey = 'handleSarStatusIntegrationTest/';
 const sarResultsBucket = 'support-service-lambdas-test';
 
 loadConfig('CODE', 'support', 'mparticle-api', ConfigSchema).then((config) => {
-	const mParticleDataSubjectClient =
-		MParticleClient.createMParticleDataSubjectClient(config.workspace);
+	const mParticleDataSubjectClient = createDataSubjectClient(config.workspace);
 
 	const batonS3Writer = new BatonS3WriterImpl(sarResultsBucket, sarS3BaseKey);
 

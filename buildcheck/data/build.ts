@@ -214,6 +214,14 @@ const moduleIdentity: ModuleDefinition = {
 	moduleDependencies: [moduleAws, moduleZuora],
 };
 
+const moduleMparticle: ModuleDefinition = {
+	name: 'mparticle',
+	dependencies: {
+		...dep.zod,
+	},
+	moduleDependencies: [moduleLogger, moduleZuora],
+};
+
 const moduleSupporterProductData: ModuleDefinition = {
 	name: 'supporter-product-data',
 	devDependencies: {
@@ -430,7 +438,7 @@ const mparticleAcquisitionsPublisher: HandlerDefinition = {
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 	},
-	moduleDependencies: [moduleAws],
+	moduleDependencies: [moduleAws, moduleMparticle],
 };
 
 const mparticleApi: HandlerDefinition = {
@@ -454,7 +462,23 @@ const mparticleApi: HandlerDefinition = {
 		...dep['@aws-sdk/client-s3'],
 		...devDeps['tsx'],
 	},
-	moduleDependencies: [moduleAws, moduleRouting],
+	moduleDependencies: [moduleAws, moduleRouting, moduleMparticle],
+};
+
+const identityDeletionCleanup: HandlerDefinition = {
+	name: 'identity-deletion-cleanup',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
+	moduleDependencies: [
+		moduleLogger,
+		moduleRouting,
+		moduleSalesforce,
+		moduleZuora,
+	],
 };
 
 const negativeInvoicesProcessor: HandlerDefinition = {
@@ -962,6 +986,7 @@ export const build: BuildDefinition = {
 		mobilePurchasesToSupporterProductData,
 		mparticleAcquisitionsPublisher,
 		mparticleApi,
+		identityDeletionCleanup,
 		negativeInvoicesProcessor,
 		newsletterAcquisition,
 		observerDataExport,
@@ -998,6 +1023,7 @@ export const build: BuildDefinition = {
 		moduleIdentity,
 		moduleInternationalisation,
 		moduleLogger,
+		moduleMparticle,
 		moduleMultipleAccount,
 		moduleProductBenefits,
 		moduleProductCatalog,
