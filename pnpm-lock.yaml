@@ -291,6 +291,28 @@ importers:
 
   handlers/iam-policies: {}
 
+  handlers/identity-deletion-cleanup:
+    dependencies:
+      logger:
+        specifier: workspace:*
+        version: link:../../modules/logger
+      routing:
+        specifier: workspace:*
+        version: link:../../modules/routing
+      salesforce:
+        specifier: workspace:*
+        version: link:../../modules/salesforce
+      zod:
+        specifier: 'catalog:'
+        version: 4.4.3
+      zuora:
+        specifier: workspace:*
+        version: link:../../modules/zuora
+    devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.147
+        version: 8.10.161
+
   handlers/imovo-voucher-api:
     dependencies:
       '@aws-sdk/client-dynamodb':

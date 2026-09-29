@@ -8,6 +8,7 @@
     "discount-expiry-notifier",
     "generate-product-catalog",
     "iam-policies",
+    "identity-deletion-cleanup",
     "imovo-voucher-api",
     "metric-push-api",
     "mobile-purchases-to-supporter-product-data",
