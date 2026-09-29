@@ -1,6 +1,5 @@
 import type { z, ZodType } from 'zod';
 import { groupMap } from '@modules/arrayFunctions';
-import type { LoggableInput } from '@modules/logger/createFunctionLoggingHooks';
 import { getCallerInfo } from '@modules/logger/getCallerInfo';
 import { logger } from '@modules/logger/logger';
 import type { BearerTokenProvider } from '@modules/zuora/auth';
@@ -17,15 +16,6 @@ export class RestClientError extends Error implements RestResult {
 		this.status = restResult.status;
 		this.responseBody = restResult.responseBody;
 		this.responseHeaders = restResult.responseHeaders;
-	}
-
-	public toJSON() {
-		// Response bodies may contain sensitive data, so omit them from serialized errors.
-		return {
-			name: this.name,
-			message: this.message,
-			status: this.status,
-		};
 	}
 }
 
@@ -126,21 +116,20 @@ export abstract class RestClient {
 		);
 	}
 
-	public async getStream(
-		path: string,
-		timeoutInMilliseconds?: number,
-	): Promise<ReadableStream<Uint8Array>> {
-		return await this.wrapWithLogging(
+	public async getStream(path: string): Promise<ReadableStream<Uint8Array>> {
+		return await logger.wrapFn(
 			this.fetchStream.bind(this),
+			() => 'HTTP ' + this.constructor.name,
 			getCallerInfo(1),
 			([streamPath]) => ({ logOnEntryAndExit: 'GET ' + streamPath }),
-		)(path, timeoutInMilliseconds);
+		)(path);
 	}
 
 	// has to be a function so that the callerInfo is refreshed on every call
 	fetchWithLogging = (maybeCallerInfo?: string) =>
-		this.wrapWithLogging(
+		logger.wrapFn(
 			this.fetch.bind(this),
+			() => 'HTTP ' + this.constructor.name,
 			maybeCallerInfo,
 			([path, method, , body, headers, params]) => ({
 				logOnEntryAndExit: `${method} ${path}`,
@@ -164,23 +153,7 @@ export abstract class RestClient {
 			}),
 		);
 
-	private wrapWithLogging<TFn extends (...args: never[]) => Promise<unknown>>(
-		fn: TFn,
-		maybeCallerInfo: string | undefined,
-		argsToLoggable: (args: Parameters<TFn>) => LoggableInput,
-	): TFn {
-		return logger.wrapFn(
-			fn,
-			() => 'HTTP ' + this.constructor.name,
-			maybeCallerInfo,
-			argsToLoggable,
-		);
-	}
-
-	private async fetchStream(
-		path: string,
-		timeoutInMilliseconds?: number,
-	): Promise<ReadableStream<Uint8Array>> {
+	private async fetchStream(path: string): Promise<ReadableStream<Uint8Array>> {
 		const authorisation = await this.tokenProvider.getAuthorisation();
 		const pathWithoutLeadingSlash = path.startsWith('/') ? path.slice(1) : path;
 		const url = authorisation.baseUrl + '/' + pathWithoutLeadingSlash;
@@ -190,16 +163,14 @@ export abstract class RestClient {
 				...authorisation.authHeaders,
 				'Content-Type': 'application/json',
 			},
-			signal:
-				timeoutInMilliseconds === undefined
-					? undefined
-					: AbortSignal.timeout(timeoutInMilliseconds),
 		});
 		if (!response.ok) {
 			throw new RestClientError(`http call failed: ${response.status}`, {
 				status: response.status,
 				responseBody: await response.text(),
-				responseHeaders: Object.fromEntries(response.headers.entries()),
+				responseHeaders: Object.fromEntries(
+					[...response.headers.entries()].map(([k, v]) => [k.toLowerCase(), v]),
+				),
 			});
 		}
 		if (response.body === null) {

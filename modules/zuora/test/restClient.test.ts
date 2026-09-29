@@ -162,17 +162,6 @@ describe('RestClient', () => {
 			});
 		});
 
-		it('should omit response bodies when serializing errors for logs', () => {
-			const error = new RestClientError('http call failed: 500', {
-				status: 500,
-				responseBody: 'private response body',
-				responseHeaders: {},
-			});
-
-			expect(JSON.stringify(error)).not.toContain('private response body');
-			expect(JSON.stringify(error)).toContain('500');
-		});
-
 		it('should throw error when schema validation fails', async () => {
 			const schema = z.object({ id: z.string() });
 
@@ -286,6 +275,26 @@ describe('RestClient', () => {
 			await expect(client.getStream('/stream')).rejects.toThrow(
 				'no http response body',
 			);
+		});
+
+		it('should throw RestClientError on HTTP error', async () => {
+			fetchMock.mockResolvedValue(
+				new Response('error body', {
+					status: 500,
+					headers: { 'X-Request-ID': 'abc123' },
+				}),
+			);
+
+			await expect(client.getStream('/stream')).rejects.toMatchObject({
+				name: 'RestClientError',
+				message: 'http call failed: 500',
+				status: 500,
+				responseBody: 'error body',
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- any is ok in a test
+				responseHeaders: expect.objectContaining({
+					'x-request-id': 'abc123',
+				}),
+			});
 		});
 	});
 });
