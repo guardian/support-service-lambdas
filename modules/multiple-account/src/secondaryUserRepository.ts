@@ -123,7 +123,7 @@ export class SecondaryUserRepository {
 			subscriptionName,
 			secondaryIdentityId,
 		);
-		if (!secondaryUser || secondaryUser.cancelledBy !== undefined) {
+		if (!secondaryUser || !this.isActive(secondaryUser)) {
 			return undefined;
 		}
 		return secondaryUser;
@@ -171,7 +171,7 @@ export class SecondaryUserRepository {
 		subscriptionName: string,
 	): Promise<SecondaryUserRecord[]> {
 		return (await this.listBySubscription(subscriptionName)).filter(
-			(secondaryUser) => secondaryUser.cancelledBy === undefined,
+			(secondaryUser) => this.isActive(secondaryUser),
 		);
 	}
 
