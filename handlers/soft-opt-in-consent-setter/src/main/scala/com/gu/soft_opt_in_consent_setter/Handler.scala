@@ -165,10 +165,11 @@ object Handler extends LazyLogging {
               ),
             )
           hasActiveAccess <- hasActiveSecondaryUserAccess(identityId)
+          productsFromSalesforce = associatedActiveNonGiftSubs.map(_.Product__c).toSet
           consentsBody <- buildProductSwitchConsents(
             ratePlanUpdates.records.head.Previous_Product_Name__c,
             sub.Product__c,
-            productsWithSecondaryAccess(associatedActiveNonGiftSubs.map(_.Product__c).toSet, hasActiveAccess),
+            productsWithSecondaryAccess(productsFromSalesforce, hasActiveAccess),
             consentsCalculator,
           )
           res <- sendConsentsReq(sub.Buyer__r.IdentityID__c, consentsBody)
@@ -243,9 +244,10 @@ object Handler extends LazyLogging {
     val updateResult =
       for {
         hasActiveAccess <- hasActiveSecondaryUserAccess(identityId)
+        productsFromSalesforce = associatedActiveNonGiftSubs.map(_.Product__c).toSet
         consents <- consentsCalculator.getCancellationConsents(
           sub.Product__c,
-          productsWithSecondaryAccess(associatedActiveNonGiftSubs.map(_.Product__c).toSet, hasActiveAccess),
+          productsWithSecondaryAccess(productsFromSalesforce, hasActiveAccess),
         )
         consentWithoutSimilarProducts = consentsCalculator.removeSimilarGuardianProductFromSet(consents)
         _ <- sendCancellationConsents(identityId, consentWithoutSimilarProducts)

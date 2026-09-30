@@ -12,11 +12,13 @@ For a cancellation, it will disable the Soft Opt-In consents that are associated
 
 Cancellation and product-switch processing include an active secondary-user holding when deciding which consents to keep. The scheduled Salesforce path and the IAP event path both query [SupporterProductData](../../modules/supporter-product-data/src/supporterProductData.ts) for the customer's identity ID. A secondary row has `primarySubscriptionName`, and its `termEndDate` is treated as active through that date. Salesforce remains the source for the other Zuora holdings.
 
+The [SPPD writer](../supporter-product-data-lambdas/src/services/dynamoService.ts) sets the DynamoDB TTL to the day after `termEndDate`, but [TTL deletion is asynchronous](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/ttl-expired-items.html). An expired row can still be returned by a query, so row presence alone does not prove active access.
+
 The [multiple-accounts API](../multiple-account-api/openapi.yaml) lists linked subscriptions and primary-user contact details, but its existing endpoint does not check the subscription term end date. It is not an equivalent active-entitlement check. SupporterProductData is already queried directly by other services in this repository.
 
 The secondary row is sent to SupporterProductData through SQS after invitation acceptance. A strongly consistent read sees the latest committed row, but cannot remove the delay before that row is written. This is a remaining race for an invitation immediately followed by a cancellation or switch.
 
-If the DynamoDB client cannot be created, the scheduled run fails and alarms without consuming the pending records. A query or malformed-data error for one identity prevents a consent update for that record, increments its Salesforce attempt count and lets the other records continue. IAP events fail for retry instead.
+If the DynamoDB client cannot be created, the scheduled run fails and alarms without consuming per-record retry attempts. A query or malformed-data error for one identity prevents a consent update for that record, increments its Salesforce attempt count and lets the other records continue. IAP events fail for retry instead.
 
 If it is unable to update a record, it will increment the number of retries and try again later in a subsequent run. It will only attempt to update records 5 times.
 
@@ -59,7 +61,7 @@ something actually needs addressing.
 1. Failed to contact Salesforce endpoint.
 1. Failed to authenticate in Salesforce.
 1. Error decoding Salesforce's responses.
-1. Failed to create the DynamoDB client while cancellations or product switches were pending.
+1. Failed to create the DynamoDB client.
 
 The [lambda's logs](https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fsoft-opt-in-consent-setter-PROD)
 will provide more details regarding which of these is taking place.
