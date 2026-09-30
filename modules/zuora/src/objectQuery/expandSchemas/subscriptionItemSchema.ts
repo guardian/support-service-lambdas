@@ -56,8 +56,11 @@ export const subscriptionItemSchema = z.object({
 	previousSubscriptionId: z.string().nullable(),
 	/** Specifies whether a termed subscription will remain TERMED or change to EVERGREEN on renewal. */
 	renewalSetting: z.enum(['RENEW_WITH_SPECIFIC_TERM', 'RENEW_TO_EVERGREEN']),
-	/** The length of the period for the subscription renewal term. */
-	renewalTerm: z.number().int(),
+	/**
+	 * The length of the period for the subscription renewal term.
+	 * Null when the subscription renews to EVERGREEN (RENEW_TO_EVERGREEN).
+	 */
+	renewalTerm: z.number().int().nullable(),
 	/** The period type for the subscription renewal term. */
 	renewalTermPeriodType: z.enum(['Month', 'Year', 'Day', 'Week']),
 	/** An auto-generated decimal value uniquely tagging this subscription version (e.g. 1.0). */
