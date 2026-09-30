@@ -13,6 +13,6 @@
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {},
   "devDependencies": {
-    "@smithy/types": "4.12.0"
+    "@smithy/types": "4.18.0"
   }
 }
