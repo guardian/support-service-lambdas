@@ -31,8 +31,8 @@ export const secondaryUserRecordSchema = z.object({
 // When a secondary user is removed we keep the record for a short period
 // (rather than hard deleting it) so we can tell who cancelled it, then let
 // DynamoDB's TTL (expiryDate) remove it automatically.
-export function expiryTTLFromTermEndDate(primaryTTL: Dayjs) {
-	return primaryTTL.add(2, 'weeks').unix();
+export function expiryTTLFromTermEndDate(termEndDate: Dayjs) {
+	return termEndDate.add(2, 'weeks').unix();
 }
 function termEndDateFromTTL(ttl: number): Dayjs {
 	return dayjs.unix(ttl).subtract(2, 'weeks');
