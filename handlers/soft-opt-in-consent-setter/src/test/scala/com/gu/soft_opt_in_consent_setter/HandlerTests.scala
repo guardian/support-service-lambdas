@@ -8,7 +8,6 @@ import com.gu.soft_opt_in_consent_setter.models.{
   SFAssociatedSubResponse,
   SFBuyer,
   SFSubRecord,
-  SecondarySubscription,
   SubscriptionRatePlanUpdateRecord,
   Subscription_Rate_Plan_Updates__r,
   SoftOptInError,
@@ -26,7 +25,6 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
-import java.time.LocalDate
 import scala.collection.mutable.ListBuffer
 
 // higher level tests on the 'processProductSwitch', 'processAcquisition' and 'processCancellation' functions.
@@ -49,17 +47,6 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
   test(testName = "cancellation products remain unchanged without secondary user access") {
     Handler.productsWithSecondaryAccess(Set("Membership"), hasActiveSecondaryUserAccess = false) shouldBe
       Set("Membership")
-  }
-
-  test(testName = "secondary access is active through its end date") {
-    val today = LocalDate.parse("2026-09-30")
-    val subscriptions = List(
-      SecondarySubscription("A-expired", today.minusDays(1)),
-      SecondarySubscription("A-current", today),
-    )
-
-    Handler.hasActiveSecondaryUserAccess(identityId, _ => Right(subscriptions), today) shouldBe Right(true)
-    Handler.hasActiveSecondaryUserAccess(identityId, _ => Right(subscriptions.take(1)), today) shouldBe Right(false)
   }
 
   test(testName =
@@ -124,7 +111,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     val metrics = ListBuffer.empty[(String, Int)]
     val secondaryUserAccessByIdentityId: Map[String, Either[SoftOptInError, Boolean]] = Map(
       secondaryIdentityId -> Right(true),
-      failedIdentityId -> Left(SoftOptInError("SupporterProductData lookup failed for failedIdentityId")),
+      failedIdentityId -> Left(SoftOptInError("Multiple account API lookup failed for failedIdentityId")),
       otherIdentityId -> Right(false),
     )
 
@@ -166,6 +153,38 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       "successful_consents_updates" -> 2,
       "failed_consents_updates" -> 1,
     )
+  }
+
+  test(testName = "an API outage fails the scheduled cancellation batch without using Salesforce attempts") {
+    val cancelledSubs = Seq("first", "second", "third").map { id =>
+      SFSubRecord(
+        Id = s"sub-$id",
+        Name = s"A-$id",
+        Product__c = "Supporter Plus",
+        SF_Status__c = "Cancelled",
+        Soft_Opt_in_Status__c = Handler.readyToProcessCancellationStatus,
+        Buyer__r = SFBuyer(id),
+        Subscription_Rate_Plan_Updates__r = None,
+        Soft_Opt_in_Number_of_Attempts__c = Some(0),
+      )
+    }
+    val requestedIdentityIds = ListBuffer.empty[String]
+
+    val result = Handler.processCancelledSubs(
+      cancelledSubs,
+      SFAssociatedSubResponse(0, true, Seq.empty),
+      (_, _) => fail("No consents should be sent when the API is unavailable"),
+      _ => fail("Salesforce attempts should not be consumed when the API is unavailable"),
+      calculator,
+      id => {
+        requestedIdentityIds += id
+        if (id == "second") Left(SoftOptInError("API unavailable", null, failRun = true)) else Right(false)
+      },
+      (_, _) => (),
+    )
+
+    result.left.toOption.map(_.getMessage) shouldBe Some("API unavailable")
+    requestedIdentityIds.toList shouldBe List("first", "second")
   }
 
   test(testName = "scheduled switches preserve secondary user consents and isolate lookup failures") {
@@ -334,7 +353,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
   }
 
   test(testName = "IAP product switch does not send consents if secondary access lookup fails") {
-    val lookupError = SoftOptInError("SupporterProductData lookup failed")
+    val lookupError = SoftOptInError("Multiple account API lookup failed")
     mockGetMobileSubscriptions.expects(identityId).returning(Right(MobileSubscriptions(List.empty)))
     mockSfConnector.getActiveSubs _ expects Seq(identityId) returning Right(
       SFAssociatedSubResponse(1, true, Seq(SFAssociatedSubRecord("Guardian Ad-Lite", identityId))),

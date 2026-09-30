@@ -12,7 +12,6 @@ import scala.util.{Failure, Success, Try}
 
 class DynamoConnector(dynamoDbClient: DynamoDbClient, stage: String) extends LazyLogging {
   private val tableName = s"soft-opt-in-consent-setter-$stage-logging"
-  val supporterProductData = new SupporterProductDataConnector(dynamoDbClient, stage)
 
   def putItem(putReq: PutItemRequest): Try[Unit] = Try(dynamoDbClient.putItem(putReq)).map(_ => ())
 

@@ -189,13 +189,18 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
               },
             },
             {
-              "Action": "dynamodb:Query",
+              "Action": "cloudwatch:PutMetricData",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": "ssm:GetParameter",
               "Effect": "Allow",
               "Resource": {
                 "Fn::Join": [
                   "",
                   [
-                    "arn:aws:dynamodb:",
+                    "arn:aws:ssm:",
                     {
                       "Ref": "AWS::Region",
                     },
@@ -203,15 +208,10 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":table/SupporterProductData-TEST",
+                    ":parameter/TEST/membership/soft-opt-in-consent-setter/multiple-account-api-key",
                   ],
                 ],
               },
-            },
-            {
-              "Action": "cloudwatch:PutMetricData",
-              "Effect": "Allow",
-              "Resource": "*",
             },
             {
               "Action": "s3:GetObject",
@@ -585,13 +585,18 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "dynamodb:Query",
+              "Action": "cloudwatch:PutMetricData",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": "ssm:GetParameter",
               "Effect": "Allow",
               "Resource": {
                 "Fn::Join": [
                   "",
                   [
-                    "arn:aws:dynamodb:",
+                    "arn:aws:ssm:",
                     {
                       "Ref": "AWS::Region",
                     },
@@ -599,15 +604,10 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":table/SupporterProductData-TEST",
+                    ":parameter/TEST/membership/soft-opt-in-consent-setter/multiple-account-api-key",
                   ],
                 ],
               },
-            },
-            {
-              "Action": "cloudwatch:PutMetricData",
-              "Effect": "Allow",
-              "Resource": "*",
             },
             {
               "Action": "s3:GetObject",

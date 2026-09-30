@@ -72,14 +72,14 @@ export class SoftOptInConsentSetter extends GuStack {
 		// Shared Policies
 		const sharedPolicies: PolicyStatement[] = [
 			new PolicyStatement({
-				actions: ['dynamodb:Query'],
-				resources: [
-					`arn:aws:dynamodb:${this.region}:${this.account}:table/SupporterProductData-${this.stage}`,
-				],
-			}),
-			new PolicyStatement({
 				actions: ['cloudwatch:PutMetricData'],
 				resources: ['*'],
+			}),
+			new PolicyStatement({
+				actions: ['ssm:GetParameter'],
+				resources: [
+					`arn:aws:ssm:${this.region}:${this.account}:parameter/${this.stage}/membership/soft-opt-in-consent-setter/multiple-account-api-key`,
+				],
 			}),
 			new PolicyStatement({
 				sid: 'readDeployedArtefact',

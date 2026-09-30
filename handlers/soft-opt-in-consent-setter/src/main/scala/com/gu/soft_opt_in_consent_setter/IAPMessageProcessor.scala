@@ -14,12 +14,13 @@ class IAPMessageProcessor(
     consentsCalculator: ConsentsCalculator,
     mpapiConnector: MpapiConnector,
     dynamoConnector: DynamoConnector,
+    stage: String,
 ) extends StrictLogging {
 
   import IAPMessageProcessor._
 
   private val checkSecondaryAccess: String => Either[SoftOptInError, Boolean] = identityId =>
-    Handler.hasActiveSecondaryUserAccess(identityId, dynamoConnector.supporterProductData.getSecondarySubscriptions)
+    MultipleAccountApiConnector.create(stage).flatMap(_.hasActiveSecondaryUserAccess(identityId))
 
   def processMessage(message: MessageBody): Any = {
     logger.info(s"Processing message: $message")
@@ -87,7 +88,14 @@ object IAPMessageProcessor extends StrictLogging {
       identityConnector = new IdentityConnector(config.identityConfig)
       consentsCalculator = new ConsentsCalculator(ConsentsMapping.consentsMapping)
       mpapiConnector = new MpapiConnector(config.mpapiConfig)
-    } yield new IAPMessageProcessor(sfConnector, identityConnector, consentsCalculator, mpapiConnector, dynamoConnector)
+    } yield new IAPMessageProcessor(
+      sfConnector,
+      identityConnector,
+      consentsCalculator,
+      mpapiConnector,
+      dynamoConnector,
+      stage,
+    )
 
     clients match {
       case Left(error) => rethrowError(error)
