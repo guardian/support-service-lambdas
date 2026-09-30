@@ -13,6 +13,7 @@ export interface HandlerDefinition extends ModuleDefinition {
 	functionNames?: string[];
 	entryPoints?: string[];
 	extraStages?: Array<'CSBX'>;
+	allowedStages?: Array<'CODE' | 'PROD' | 'CSBX'>;
 }
 
 export interface ModuleDefinition {
@@ -428,6 +429,18 @@ const mobilePurchasesToSupporterProductData: HandlerDefinition = {
 		moduleProductBenefits,
 		moduleSupporterProductData,
 	],
+};
+
+const sendTestDataToMparticle: HandlerDefinition = {
+	name: 'send-test-data-to-mparticle',
+	allowedStages: ['CODE'],
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
+	moduleDependencies: [moduleAws, moduleMparticle],
 };
 
 const mparticleAcquisitionsPublisher: HandlerDefinition = {
@@ -1012,6 +1025,7 @@ export const build: BuildDefinition = {
 		scrubNonTokenisedPaymentMethods,
 		promotionsApi,
 		paymentFailureCommsExitApi,
+		sendTestDataToMparticle,
 		// MARKER new-lambda: buildcheck-reference
 	],
 

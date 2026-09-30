@@ -28,15 +28,14 @@ export const secondaryUserRecordSchema = z.object({
 	invitationCode: z.string(),
 });
 
-export function secondaryUserTTLFromPrimarySubscriptionTTL(primaryTTL: Dayjs) {
-	return primaryTTL.add(2, 'weeks').unix();
-}
-
 // When a secondary user is removed we keep the record for a short period
 // (rather than hard deleting it) so we can tell who cancelled it, then let
 // DynamoDB's TTL (expiryDate) remove it automatically.
-export function secondaryUserCancellationTTL(): number {
-	return dayjs().add(2, 'weeks').unix();
+export function expiryTTLFromTermEndDate(termEndDate: Dayjs) {
+	return termEndDate.add(2, 'weeks').unix();
+}
+function termEndDateFromTTL(ttl: number): Dayjs {
+	return dayjs.unix(ttl).subtract(2, 'weeks');
 }
 
 export type SecondaryUserRecord = z.infer<typeof secondaryUserRecordSchema>;
@@ -81,11 +80,19 @@ export class SecondaryUserRepository {
 		);
 	}
 
+	isActive(secondaryUser: SecondaryUserRecord): boolean {
+		const notPastTermEnd = termEndDateFromTTL(secondaryUser.expiryDate).isAfter(
+			dayjs(),
+		);
+		const notCancelled = secondaryUser.cancelledBy === undefined;
+		return notPastTermEnd && notCancelled;
+	}
+
 	async listActiveByIdentity(
 		secondaryIdentityId: string,
 	): Promise<SecondaryUserRecord[]> {
 		return (await this.listByIdentity(secondaryIdentityId)).filter(
-			(secondaryUser) => secondaryUser.cancelledBy === undefined,
+			(secondaryUser) => this.isActive(secondaryUser),
 		);
 	}
 
@@ -116,7 +123,7 @@ export class SecondaryUserRepository {
 			subscriptionName,
 			secondaryIdentityId,
 		);
-		if (!secondaryUser || secondaryUser.cancelledBy !== undefined) {
+		if (!secondaryUser || !this.isActive(secondaryUser)) {
 			return undefined;
 		}
 		return secondaryUser;
@@ -164,7 +171,7 @@ export class SecondaryUserRepository {
 		subscriptionName: string,
 	): Promise<SecondaryUserRecord[]> {
 		return (await this.listBySubscription(subscriptionName)).filter(
-			(secondaryUser) => secondaryUser.cancelledBy === undefined,
+			(secondaryUser) => this.isActive(secondaryUser),
 		);
 	}
 
@@ -203,6 +210,7 @@ export class SecondaryUserRepository {
 		secondaryIdentityId: string,
 		cancelledBy: CancelledBy,
 	): TransactWriteItem {
+		const now = dayjs();
 		return {
 			Update: {
 				TableName: this.tableName,
@@ -213,9 +221,9 @@ export class SecondaryUserRepository {
 				UpdateExpression:
 					'SET expiryDate = :expiryDate, cancelledBy = :cancelledBy, cancelledDate = :cancelledDate',
 				ExpressionAttributeValues: {
-					':expiryDate': { N: secondaryUserCancellationTTL().toString() },
+					':expiryDate': { N: expiryTTLFromTermEndDate(now).toString() },
 					':cancelledBy': { S: cancelledBy },
-					':cancelledDate': { S: dayjs().toISOString() },
+					':cancelledDate': { S: now.toISOString() },
 				},
 			},
 		};
