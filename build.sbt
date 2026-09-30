@@ -4,7 +4,7 @@ import Dependencies.*
 ThisBuild / dependencyOverrides ++= nettyOverrides
 
 val scala2Settings = Seq(
-  ThisBuild / scalaVersion := "2.13.18",
+  ThisBuild / scalaVersion := "3.9.0",
   version := "0.0.1",
   organization := "com.gu",
   scalacOptions ++= Seq(
@@ -361,7 +361,7 @@ def lambdaProject(
       description := projectDescription,
       assemblyJarName := s"$projectName.jar",
       assemblyMergeStrategyDiscardModuleInfo,
-      assembly / assemblyOutputPath := file("/tmp") / (assembly/assemblyJarName).value,
+      assembly / assemblyOutputPath := file("/tmp") / (assembly / assemblyJarName).value,
       dependencyOverrides ++= jacksonDependencies,
       dependencyOverrides ++= nettyOverrides,
       libraryDependencies ++= externalDependencies ++ logging,
