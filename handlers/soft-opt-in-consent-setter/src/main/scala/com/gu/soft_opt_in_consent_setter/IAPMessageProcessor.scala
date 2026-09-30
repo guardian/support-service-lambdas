@@ -18,6 +18,9 @@ class IAPMessageProcessor(
 
   import IAPMessageProcessor._
 
+  private val checkSecondaryAccess: String => Either[SoftOptInError, Boolean] = identityId =>
+    Handler.hasActiveSecondaryUserAccess(identityId, dynamoConnector.supporterProductData.getSecondarySubscriptions)
+
   def processMessage(message: MessageBody): Any = {
     logger.info(s"Processing message: $message")
 
@@ -39,7 +42,7 @@ class IAPMessageProcessor(
           mpapiConnector.getMobileSubscriptions,
           consentsCalculator,
           sfConnector,
-          dynamoConnector.hasActiveSecondaryUserAccess,
+          checkSecondaryAccess,
         )
       case Switch =>
         Metrics.put(event = "product_switches_to_process", 1)
@@ -50,7 +53,7 @@ class IAPMessageProcessor(
           mpapiConnector.getMobileSubscriptions,
           consentsCalculator,
           sfConnector,
-          dynamoConnector.hasActiveSecondaryUserAccess,
+          checkSecondaryAccess,
         )
     }
 

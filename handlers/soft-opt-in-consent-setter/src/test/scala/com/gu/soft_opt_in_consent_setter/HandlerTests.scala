@@ -8,6 +8,7 @@ import com.gu.soft_opt_in_consent_setter.models.{
   SFAssociatedSubResponse,
   SFBuyer,
   SFSubRecord,
+  SecondarySubscription,
   SubscriptionRatePlanUpdateRecord,
   Subscription_Rate_Plan_Updates__r,
   SoftOptInError,
@@ -25,6 +26,7 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
+import java.time.LocalDate
 import scala.collection.mutable.ListBuffer
 
 // higher level tests on the 'processProductSwitch', 'processAcquisition' and 'processCancellation' functions.
@@ -47,6 +49,58 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
   test(testName = "cancellation products remain unchanged without secondary user access") {
     Handler.productsWithSecondaryAccess(Set("Membership"), hasActiveSecondaryUserAccess = false) shouldBe
       Set("Membership")
+  }
+
+  test(testName = "secondary access is active through its end date") {
+    val today = LocalDate.parse("2026-09-30")
+    val subscriptions = List(
+      SecondarySubscription("A-expired", today.minusDays(1)),
+      SecondarySubscription("A-current", today),
+    )
+
+    Handler.hasActiveSecondaryUserAccess(identityId, _ => Right(subscriptions), today) shouldBe Right(true)
+    Handler.hasActiveSecondaryUserAccess(identityId, _ => Right(subscriptions.take(1)), today) shouldBe Right(false)
+  }
+
+  test(testName =
+    "empty scheduled cancellation and switch batches do not query secondary access or update Salesforce",
+  ) {
+    val metrics = ListBuffer.empty[(String, Int)]
+    val recordMetric: Handler.RecordMetric = (event, value) => {
+      metrics += (event -> value)
+      ()
+    }
+    val noActiveSubs = SFAssociatedSubResponse(0, true, Seq.empty)
+    val failSend: (String, String) => Either[SoftOptInError, Unit] = (_, _) => fail("Unexpected consent request")
+    val failUpdate: String => Either[SoftOptInError, Unit] = _ => fail("Unexpected Salesforce update")
+    val failLookup: String => Either[SoftOptInError, Boolean] = _ => fail("Unexpected secondary access lookup")
+
+    Handler.processProductSwitchSubs(
+      Seq.empty,
+      noActiveSubs,
+      failSend,
+      failUpdate,
+      calculator,
+      failLookup,
+      recordMetric,
+    ) shouldBe Right(())
+    Handler.processCancelledSubs(
+      Seq.empty,
+      noActiveSubs,
+      failSend,
+      failUpdate,
+      calculator,
+      failLookup,
+      recordMetric,
+    ) shouldBe Right(())
+    metrics.toList shouldBe List(
+      "product_switches_to_process" -> 0,
+      "successful_consents_updates" -> 0,
+      "failed_consents_updates" -> 0,
+      "cancellations_to_process" -> 0,
+      "successful_consents_updates" -> 0,
+      "failed_consents_updates" -> 0,
+    )
   }
 
   test(testName = "scheduled cancellations preserve consents only for active secondary users") {

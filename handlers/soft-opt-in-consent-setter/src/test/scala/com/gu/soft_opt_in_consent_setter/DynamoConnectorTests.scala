@@ -1,12 +1,14 @@
 package com.gu.soft_opt_in_consent_setter
 
 import com.gu.soft_opt_in_consent_setter.HandlerIAP.Switch
+import com.gu.soft_opt_in_consent_setter.models.SecondarySubscription
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.{AttributeValue, PutItemRequest, QueryRequest, QueryResponse}
 
+import java.time.LocalDate
 import scala.jdk.CollectionConverters._
 import scala.util.{Success, Try}
 
@@ -48,7 +50,7 @@ class DynamoConnectorTests extends AnyFunSuite with Matchers with MockFactory {
     dynamoConnector.updateLoggingTable(subscriptionId, identityId, Switch, mockPutItem)
   }
 
-  test(testName = "hasActiveSecondaryUserAccess queries SPPD consistently and recognises an active secondary record") {
+  test(testName = "getSecondarySubscriptions queries SPPD consistently and parses a secondary record") {
     val secondaryRecord = Map(
       "primarySubscriptionName" -> AttributeValue.builder().s("A-primary").build(),
       "termEndDate" -> AttributeValue.builder().s("2099-01-01").build(),
@@ -63,10 +65,11 @@ class DynamoConnectorTests extends AnyFunSuite with Matchers with MockFactory {
       response
     }
 
-    new DynamoConnector(client, "CODE").hasActiveSecondaryUserAccess(identityId) shouldBe Right(true)
+    new DynamoConnector(client, "CODE").supporterProductData.getSecondarySubscriptions(identityId) shouldBe
+      Right(List(SecondarySubscription("A-primary", LocalDate.parse("2099-01-01"))))
   }
 
-  test(testName = "hasActiveSecondaryUserAccess ignores expired secondary and primary records") {
+  test(testName = "getSecondarySubscriptions returns expired secondary records and ignores primary records") {
     val expiredSecondary = Map(
       "primarySubscriptionName" -> AttributeValue.builder().s("A-primary").build(),
       "termEndDate" -> AttributeValue.builder().s("2000-01-01").build(),
@@ -78,10 +81,11 @@ class DynamoConnectorTests extends AnyFunSuite with Matchers with MockFactory {
     val client = mock[DynamoDbClient]
     (client.query(_: QueryRequest)).expects(*).returning(response)
 
-    new DynamoConnector(client, "CODE").hasActiveSecondaryUserAccess(identityId) shouldBe Right(false)
+    new DynamoConnector(client, "CODE").supporterProductData.getSecondarySubscriptions(identityId) shouldBe
+      Right(List(SecondarySubscription("A-primary", LocalDate.parse("2000-01-01"))))
   }
 
-  test(testName = "hasActiveSecondaryUserAccess checks subsequent query pages") {
+  test(testName = "getSecondarySubscriptions reads subsequent query pages") {
     val nextKey = Map("identityId" -> AttributeValue.builder().s(identityId).build())
     val firstPage = QueryResponse.builder().lastEvaluatedKey(nextKey.asJava).build()
     val secondaryRecord = Map(
@@ -99,10 +103,11 @@ class DynamoConnectorTests extends AnyFunSuite with Matchers with MockFactory {
       }
     }
 
-    new DynamoConnector(client, "CODE").hasActiveSecondaryUserAccess(identityId) shouldBe Right(true)
+    new DynamoConnector(client, "CODE").supporterProductData.getSecondarySubscriptions(identityId) shouldBe
+      Right(List(SecondarySubscription("A-primary", LocalDate.parse("2099-01-01"))))
   }
 
-  test(testName = "hasActiveSecondaryUserAccess fails when a secondary record has no end date") {
+  test(testName = "getSecondarySubscriptions fails when a secondary record has no end date") {
     val secondaryRecord = Map(
       "primarySubscriptionName" -> AttributeValue.builder().s("A-primary").build(),
     ).asJava
@@ -110,13 +115,13 @@ class DynamoConnectorTests extends AnyFunSuite with Matchers with MockFactory {
     val client = mock[DynamoDbClient]
     (client.query(_: QueryRequest)).expects(*).returning(response)
 
-    val result = new DynamoConnector(client, "CODE").hasActiveSecondaryUserAccess(identityId)
+    val result = new DynamoConnector(client, "CODE").supporterProductData.getSecondarySubscriptions(identityId)
     result.left.toOption.map(_.getMessage) shouldBe Some(
       s"Secondary SupporterProductData item for identityId $identityId, primarySubscriptionName A-primary has no termEndDate",
     )
   }
 
-  test(testName = "hasActiveSecondaryUserAccess fails when a secondary record has an invalid end date") {
+  test(testName = "getSecondarySubscriptions fails when a secondary record has an invalid end date") {
     val secondaryRecord = Map(
       "primarySubscriptionName" -> AttributeValue.builder().s("A-primary").build(),
       "termEndDate" -> AttributeValue.builder().s("invalid-date").build(),
@@ -125,7 +130,7 @@ class DynamoConnectorTests extends AnyFunSuite with Matchers with MockFactory {
     val client = mock[DynamoDbClient]
     (client.query(_: QueryRequest)).expects(*).returning(response)
 
-    val result = new DynamoConnector(client, "CODE").hasActiveSecondaryUserAccess(identityId)
+    val result = new DynamoConnector(client, "CODE").supporterProductData.getSecondarySubscriptions(identityId)
     result.left.toOption.map(_.getMessage) shouldBe Some(
       s"Secondary SupporterProductData item for identityId $identityId, primarySubscriptionName A-primary has invalid termEndDate",
     )
@@ -147,10 +152,11 @@ class DynamoConnectorTests extends AnyFunSuite with Matchers with MockFactory {
     }
 
     val connector = new DynamoConnector(client, "CODE")
-    connector.hasActiveSecondaryUserAccess(identityId).left.toOption.map(_.getMessage) shouldBe Some(
+    connector.supporterProductData.getSecondarySubscriptions(identityId).left.toOption.map(_.getMessage) shouldBe Some(
       s"Failed to query SupporterProductData for secondary user access for identityId $identityId",
     )
-    connector.hasActiveSecondaryUserAccess(otherIdentityId) shouldBe Right(true)
+    connector.supporterProductData.getSecondarySubscriptions(otherIdentityId) shouldBe
+      Right(List(SecondarySubscription("A-primary", LocalDate.parse("2099-01-01"))))
   }
 
   test(testName = "secondary access lookups continue after a malformed item for one identity") {
@@ -172,9 +178,10 @@ class DynamoConnectorTests extends AnyFunSuite with Matchers with MockFactory {
     }
 
     val connector = new DynamoConnector(client, "CODE")
-    connector.hasActiveSecondaryUserAccess(identityId).left.toOption.map(_.getMessage) shouldBe Some(
+    connector.supporterProductData.getSecondarySubscriptions(identityId).left.toOption.map(_.getMessage) shouldBe Some(
       s"Secondary SupporterProductData item for identityId $identityId, primarySubscriptionName A-malformed has no termEndDate",
     )
-    connector.hasActiveSecondaryUserAccess(otherIdentityId) shouldBe Right(true)
+    connector.supporterProductData.getSecondarySubscriptions(otherIdentityId) shouldBe
+      Right(List(SecondarySubscription("A-active", LocalDate.parse("2099-01-01"))))
   }
 }

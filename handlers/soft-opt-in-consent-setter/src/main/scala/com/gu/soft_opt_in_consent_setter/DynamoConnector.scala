@@ -5,76 +5,16 @@ import com.gu.soft_opt_in_consent_setter.models.SoftOptInError
 import com.typesafe.scalalogging.LazyLogging
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import software.amazon.awssdk.services.dynamodb.model.{AttributeValue, PutItemRequest, QueryRequest}
+import software.amazon.awssdk.services.dynamodb.model.{AttributeValue, PutItemRequest}
 
-import java.time.{LocalDate, ZoneOffset}
 import scala.jdk.CollectionConverters._
 import scala.util.{Failure, Success, Try}
 
 class DynamoConnector(dynamoDbClient: DynamoDbClient, stage: String) extends LazyLogging {
   private val tableName = s"soft-opt-in-consent-setter-$stage-logging"
-  private val supporterProductDataTableName = s"SupporterProductData-$stage"
+  val supporterProductData = new SupporterProductDataConnector(dynamoDbClient, stage)
 
   def putItem(putReq: PutItemRequest): Try[Unit] = Try(dynamoDbClient.putItem(putReq)).map(_ => ())
-
-  def hasActiveSecondaryUserAccess(identityId: String): Either[SoftOptInError, Boolean] = {
-    def queryPage(startKey: java.util.Map[String, AttributeValue]): Either[SoftOptInError, Boolean] = {
-      val requestBuilder = QueryRequest
-        .builder()
-        .tableName(supporterProductDataTableName)
-        .keyConditionExpression("identityId = :identityId")
-        .expressionAttributeValues(
-          Map(
-            ":identityId" -> AttributeValue.builder().s(identityId).build(),
-          ).asJava,
-        )
-        /* A stale read could clear consents for someone just granted secondary access. */
-        .consistentRead(true)
-
-      if (startKey != null && !startKey.isEmpty) requestBuilder.exclusiveStartKey(startKey)
-
-      Try(dynamoDbClient.query(requestBuilder.build())) match {
-        case Failure(error) =>
-          val message = s"Failed to query SupporterProductData for secondary user access for identityId $identityId"
-          logger.error(message, error)
-          Left(SoftOptInError(message, error))
-        case Success(response) =>
-          val activeSecondary = response.items().asScala.foldLeft[Either[SoftOptInError, Boolean]](Right(false)) {
-            case (Right(true), _) => Right(true)
-            case (Right(false), item) if !item.containsKey("primarySubscriptionName") => Right(false)
-            case (Right(false), item) =>
-              val subscriptionName = Option(item.get("primarySubscriptionName"))
-                .flatMap(value => Option(value.s()))
-                .getOrElse("<missing>")
-              val itemDescription = s"identityId $identityId, primarySubscriptionName $subscriptionName"
-              Option(item.get("termEndDate")).flatMap(value => Option(value.s())) match {
-                case None =>
-                  Left(SoftOptInError(s"Secondary SupporterProductData item for $itemDescription has no termEndDate"))
-                case Some(termEndDate) =>
-                  Try(LocalDate.parse(termEndDate)) match {
-                    case Success(date) => Right(!date.isBefore(LocalDate.now(ZoneOffset.UTC)))
-                    case Failure(error) =>
-                      Left(
-                        SoftOptInError(
-                          s"Secondary SupporterProductData item for $itemDescription has invalid termEndDate",
-                          error,
-                        ),
-                      )
-                  }
-              }
-            case (left @ Left(_), _) => left
-          }
-
-          activeSecondary.flatMap {
-            case true => Right(true)
-            case false if response.lastEvaluatedKey() == null || response.lastEvaluatedKey().isEmpty => Right(false)
-            case false => queryPage(response.lastEvaluatedKey())
-          }
-      }
-    }
-
-    queryPage(null)
-  }
 
   def updateLoggingTable(
       subscriptionId: String,
