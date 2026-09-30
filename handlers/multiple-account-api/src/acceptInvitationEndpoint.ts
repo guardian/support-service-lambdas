@@ -3,7 +3,7 @@ import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import dayjs from 'dayjs';
 import { createSecondarySubscription } from '@modules/multiple-account/secondarySubscription';
 import type { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
-import { secondaryUserTTLFromPrimarySubscriptionTTL } from '@modules/multiple-account/secondaryUserRepository';
+import { expiryTTLFromTermEndDate } from '@modules/multiple-account/secondaryUserRepository';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import {
 	badRequest,
@@ -78,7 +78,7 @@ export const acceptInvitationEndpoint = async (
 			secondaryIdentityId,
 			primaryIdentityId,
 			acceptedDate: today.toISOString(),
-			expiryDate: secondaryUserTTLFromPrimarySubscriptionTTL(
+			expiryDate: expiryTTLFromTermEndDate(
 				parentSupporterProductDataRecord.termEndDate,
 			),
 			invitationCode,
