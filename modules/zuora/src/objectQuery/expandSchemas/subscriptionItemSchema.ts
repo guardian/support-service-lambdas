@@ -54,7 +54,7 @@ export const subscriptionItemSchema = z.object({
 	originalId: z.string(),
 	/** The ID of the previous subscription; only available if this is a renewal subscription. */
 	previousSubscriptionId: z.string().nullable(),
-	/** Specifies whether a termed subscription will remain TERMED or change to EVERGREEN on renewal. */
+	/** Only termed subscriptions are used for active subscriptions. */
 	renewalSetting: z.literal('RENEW_WITH_SPECIFIC_TERM'),
 	/** The length of the period for the subscription renewal term. */
 	renewalTerm: z.number().int(),
