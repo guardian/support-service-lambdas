@@ -1,8 +1,40 @@
-# subscription-events
+# Subscription Events bus module
 
-Publish and consume events on the `subscription-events-STAGE` EventBridge bus -
-currently just `Cancellation` events, published whenever a subscription is
-cancelled, so that secondary multiple-accounts users can be notified.
+Library code to publish and consume events on the `subscription-events-STAGE` EventBridge bus.
+
+Currently just supports `Cancellation` events. This is to support the initial use case
+to allow secondary multiple-accounts users can be notified.
+
+- CODE bus: https://eu-west-1.console.aws.amazon.com/events/home?region=eu-west-1#/eventbus/subscription-events-CODE
+
+- PROD bus: https://eu-west-1.console.aws.amazon.com/events/home?region=eu-west-1#/eventbus/subscription-events-PROD
+
+## Data format
+
+The bus processes JSON as per the following example.
+
+The top level properties are a standard EventBridge envelope.
+
+`version`/`id`/`time`/`account`/`region`/`resources` are
+filled in automatically by EventBridge itself, not by the publisher.
+
+```json
+{
+	"version": "0",
+	"id": "...",
+	"detail-type": "Cancellation", // currently only Cancellation is supported
+	"source": "lambda:your-lambda-name-here", // this helps us access the source logs, similar to alarm tags
+	"account": "...",
+	"time": "2026-01-01T00:00:00Z",
+	"region": "eu-west-1",
+	"resources": [],
+	"detail": { // the schema of the detail is based on the detail-type.
+		"subscriptionNumber": "A-S00001234",
+		"orderNumber": "O-00005678",
+		"allowUserNotifications": true
+	}
+}
+```
 
 ## Publishing an event
 
@@ -25,7 +57,7 @@ await subscriptionEventService.publishCancellationEvent({
 });
 ```
 
-Adding a new producer? Add its source identifier to
+You will likely need to add a new source identifier to
 `shared/source.ts`'s `subscriptionEventSources`, and grant it bus access with
 `AllowPutSubscriptionEventPolicy` (see `cdk/lib/cdk/policies.ts`).
 
@@ -33,8 +65,7 @@ Adding a new producer? Add its source identifier to
 
 A lambda consumes events via SQS: an EventBridge rule on the bus forwards
 matching events to an SQS queue, which the lambda is subscribed to.
-`EventBridgeSQSHandler` wraps `@modules/routing`'s `SQSHandler` to parse each
-SQS record's body as a `Cancellation` event before calling your handler:
+`EventBridgeSQSHandler` calls your handler with a parsed `Cancellation` event.
 
 ```ts
 import { EventBridgeSQSHandler } from '@modules/subscription-events/consumer/eventBridgeSqsHandler';
@@ -59,9 +90,8 @@ any other event later added to the bus will fail to parse and end up in a
 DLQ.** There's no automatic link between the CDK rule below and the zod schema
 in this module - if you add a new event type to the bus, update both by hand.
 
-Use `SrSqsLambda` (not a hand-rolled `Queue`) - it provisions the queue, DLQ and
-alarm together, following SR standards, and exposes the queue to attach the rule
-to via `lambda.inputQueue`:
+There's no event bus lambda construct at the moment - use `SrSqsLambda` to
+provision the queue, DLQ and alarm, then attach the queue to a rule on the bus:
 
 ```ts
 import { EventBus, Rule } from 'aws-cdk-lib/aws-events';
