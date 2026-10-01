@@ -6,7 +6,7 @@ import sbtassembly.PathList
 
 object Dependencies {
 
-  val awsSdkVersion = "2.50.1"
+  val awsSdkVersion = "2.50.3"
 
   val circeVersion = "0.14.16"
   val sttpVersion = "3.11.0"
@@ -97,7 +97,7 @@ object Dependencies {
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest-should" % "0.9.0" % Test
   val scalatest = "org.scalatest" %% "scalatest" % "3.2.20" % Test
-  val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.18.1" % Test
+  val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.20.0" % Test
   val scalaMock = "org.scalamock" %% "scalamock" % "7.3.2" % Test
   val mockito = "org.mockito" % "mockito-core" % "5.23.0" % Test
 
