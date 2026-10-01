@@ -522,6 +522,8 @@ lazy val `soft-opt-in-consent-setter` = lambdaProject(
     awsS3,
     awsDynamo,
     awsSSM,
+    awsApiGateway,
+    awsCloudFormation,
     simpleConfig,
     awsLambda,
     awsSQS,

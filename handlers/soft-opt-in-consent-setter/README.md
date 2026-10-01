@@ -12,7 +12,7 @@ For a cancellation, it will disable the Soft Opt-In consents that are associated
 
 Cancellation and product-switch processing include an active secondary-user holding when deciding which consents to keep. Both the scheduled Salesforce path and the IAP event path use the [multiple-accounts API](../multiple-account-api/openapi.yaml) to check active secondary access by identity ID. Salesforce remains the source for other Zuora holdings.
 
-The API key is read from `/{STAGE}/membership/soft-opt-in-consent-setter/multiple-account-api-key` in SSM Parameter Store. A missing key or an API outage fails the scheduled run without consuming per-record retry attempts. An identity-specific API error prevents that identity's consent update while the other scheduled records continue. IAP events fail for retry instead.
+The API key is discovered from the `support-{STAGE}-multiple-account-api` CloudFormation stack and read directly from API Gateway. A key discovery failure or an API outage fails the scheduled run without consuming per-record retry attempts. An identity-specific API error prevents that identity's consent update while the other scheduled records continue. IAP events fail for retry instead.
 
 If it is unable to update a record, it will increment the number of retries and try again later in a subsequent run. It will only attempt to update records 5 times.
 
@@ -55,7 +55,7 @@ something actually needs addressing.
 1. Failed to contact Salesforce endpoint.
 1. Failed to authenticate in Salesforce.
 1. Error decoding Salesforce's responses.
-1. Failed to load the multiple-accounts API key.
+1. Failed to discover the multiple-accounts API key.
 
 The [lambda's logs](https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fsoft-opt-in-consent-setter-PROD)
 will provide more details regarding which of these is taking place.
@@ -77,7 +77,7 @@ will provide more details regarding which of these is taking place.
 1. Check that the endpoint being used is correct and the version (`sfApiVersion` in CloudFormation) is correct. Check
    that the Salesforce API version being used returns what the lambda expects. Check the code for any changes to how the
    relevant response is decoded.
-1. Check the SSM parameter and the Lambda role's permission to read it. The pending records will be retried on the next run.
+1. Check the multiple-accounts API stack, its API key and the Lambda role's permissions to read them. The pending records will be retried on the next run.
 
 For all the above, fixing the underlying issues and letting it run on schedule will put the system in a correct state.
 

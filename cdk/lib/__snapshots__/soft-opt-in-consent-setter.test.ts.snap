@@ -194,13 +194,13 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
               "Resource": "*",
             },
             {
-              "Action": "ssm:GetParameter",
+              "Action": "cloudformation:ListStackResources",
               "Effect": "Allow",
               "Resource": {
                 "Fn::Join": [
                   "",
                   [
-                    "arn:aws:ssm:",
+                    "arn:aws:cloudformation:",
                     {
                       "Ref": "AWS::Region",
                     },
@@ -208,7 +208,23 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/TEST/membership/soft-opt-in-consent-setter/multiple-account-api-key",
+                    ":stack/support-TEST-multiple-account-api/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "apigateway:GET",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:apigateway:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    "::/apikeys/*",
                   ],
                 ],
               },
@@ -590,13 +606,13 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
               "Resource": "*",
             },
             {
-              "Action": "ssm:GetParameter",
+              "Action": "cloudformation:ListStackResources",
               "Effect": "Allow",
               "Resource": {
                 "Fn::Join": [
                   "",
                   [
-                    "arn:aws:ssm:",
+                    "arn:aws:cloudformation:",
                     {
                       "Ref": "AWS::Region",
                     },
@@ -604,7 +620,23 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/TEST/membership/soft-opt-in-consent-setter/multiple-account-api-key",
+                    ":stack/support-TEST-multiple-account-api/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "apigateway:GET",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:apigateway:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    "::/apikeys/*",
                   ],
                 ],
               },

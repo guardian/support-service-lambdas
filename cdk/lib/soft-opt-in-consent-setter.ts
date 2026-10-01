@@ -76,10 +76,14 @@ export class SoftOptInConsentSetter extends GuStack {
 				resources: ['*'],
 			}),
 			new PolicyStatement({
-				actions: ['ssm:GetParameter'],
+				actions: ['cloudformation:ListStackResources'],
 				resources: [
-					`arn:aws:ssm:${this.region}:${this.account}:parameter/${this.stage}/membership/soft-opt-in-consent-setter/multiple-account-api-key`,
+					`arn:aws:cloudformation:${this.region}:${this.account}:stack/support-${this.stage}-multiple-account-api/*`,
 				],
+			}),
+			new PolicyStatement({
+				actions: ['apigateway:GET'],
+				resources: [`arn:aws:apigateway:${this.region}::/apikeys/*`],
 			}),
 			new PolicyStatement({
 				sid: 'readDeployedArtefact',
