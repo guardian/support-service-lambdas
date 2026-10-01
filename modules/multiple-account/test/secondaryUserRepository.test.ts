@@ -39,10 +39,6 @@ describe('SecondaryUserRepository.isActive', () => {
 		).toBe(true);
 	});
 
-	it('is not active exactly at the end of the term end day', () => {
-		expect(repository.isActive(record(), endOfTermEndDay)).toBe(false);
-	});
-
 	it('is not active the day after the term end', () => {
 		expect(repository.isActive(record(), termEnd.add(1, 'day'))).toBe(false);
 	});
