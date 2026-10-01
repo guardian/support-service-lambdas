@@ -113,6 +113,22 @@ export const subscriptionItemSchema = z.object({
 	orderId: z.string().nullable(),
 });
 
+// Expired subscriptions can be returned with null fields that fail the full
+// schema, so we drop them with a cheap status-only check before the full schema
+// runs - this avoids failing the whole query and keeps validation noise out of
+// the logs.
+const expiredSubscriptionSchema = z.object({ status: z.literal('Expired') });
+
+export const nonExpiredSubscriptions = <T extends z.ZodTypeAny>(schema: T) =>
+	z
+		.array(z.unknown())
+		.transform((items) =>
+			items.filter(
+				(item) => !expiredSubscriptionSchema.safeParse(item).success,
+			),
+		)
+		.pipe(z.array(schema));
+
 export const subscriptionWithRatePlansSchema = subscriptionItemSchema.extend({
 	ratePlans: z.array(ratePlanItemSchema),
 });
