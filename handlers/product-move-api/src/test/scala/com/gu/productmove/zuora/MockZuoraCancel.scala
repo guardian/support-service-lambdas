@@ -1,7 +1,7 @@
 package com.gu.productmove.zuora
 
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
-import com.gu.productmove.zuora.model.{AccountNumber, SubscriptionName}
+import com.gu.productmove.zuora.model.{AccountNumber, OrderNumber, SubscriptionName}
 import zio.*
 
 import java.time.LocalDate
@@ -18,11 +18,11 @@ class MockZuoraCancel(responses: Set[(SubscriptionName, LocalDate)]) extends Zuo
       subscriptionName: SubscriptionName,
       chargedThroughDate: LocalDate,
       orderDate: LocalDate,
-  ): Task[Unit] = {
+  ): Task[OrderNumber] = {
     mutableStore = (accountNumber, subscriptionName, chargedThroughDate, orderDate) :: mutableStore
 
     responses.contains((subscriptionName, chargedThroughDate)) match {
-      case true => ZIO.unit
+      case true => ZIO.succeed(OrderNumber("O-00000001"))
       case false =>
         ZIO.fail(
           new Throwable(
