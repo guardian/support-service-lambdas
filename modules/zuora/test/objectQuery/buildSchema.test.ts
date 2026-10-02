@@ -30,8 +30,8 @@ test('single item deserialiser', () => {
 		'Monthly Contribution',
 	);
 	// if the types aren't narrowed properly then it doesn't find the type in map as it may not exist on all
+	// Removes any expired subscriptions from the list
 	expect(actual.subscriptions.map((sub) => sub.ratePlans[0]?.name)).toEqual([
-		'Monthly Contribution',
 		'Monthly Contribution',
 	]);
 });
