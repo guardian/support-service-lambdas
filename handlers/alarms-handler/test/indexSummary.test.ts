@@ -27,6 +27,7 @@ it('should convert alarm history into summary chat messages', async () => {
 		PLATFORM: '',
 		ENGINE: '',
 		PUZZLES: '',
+		SR: '',
 	};
 
 	const chatMessages = await getChatMessages(

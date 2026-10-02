@@ -7,7 +7,8 @@ export type Team =
 	| 'PLATFORM'
 	| 'SRE'
 	| 'ENGINE'
-	| 'PUZZLES';
+	| 'PUZZLES'
+	| 'SR';
 
 const teamToAppMappings: Record<Team, string[]> = {
 	MARTECH: [
@@ -150,6 +151,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 	],
 	ENGINE: ['price-migration-engine-state-machine'],
 	PUZZLES: ['puzzles-app'],
+	SR: [],
 };
 
 const buildAppToTeamMappings = (

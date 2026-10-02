@@ -15,6 +15,7 @@ it('should convert some alarms into a chat message', async () => {
 		PLATFORM: '',
 		ENGINE: '',
 		PUZZLES: '',
+		SR: '',
 	};
 	const alarms = await getChatMessages(
 		dayjs(new Date(2025, 4, 21, 15, 16)),
