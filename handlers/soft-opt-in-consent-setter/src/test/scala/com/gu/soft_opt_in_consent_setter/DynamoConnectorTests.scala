@@ -7,44 +7,25 @@ import org.scalatest.matchers.should.Matchers
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.{AttributeValue, PutItemRequest}
 
-import scala.jdk.CollectionConverters._
 import scala.util.{Success, Try}
 
 class DynamoConnectorTests extends AnyFunSuite with Matchers with MockFactory {
-  val mockDbClient = mock[DynamoDbClient]
-  val dynamoConnector = new DynamoConnector(mockDbClient, "DEV")
-
-  val identityId = "someIdentityId"
-  val subscriptionId = "A-S12345678"
-
-  val switchLogMessage = "Soft opt-ins processed for product-switch"
-
-  val itemValues1 = Map(
-    "identityId" -> AttributeValue.builder().s(identityId).build(),
-    "subscriptionId" -> AttributeValue.builder().s(subscriptionId).build(),
-    "timestamp" -> AttributeValue.builder().n("timestamp not tested").build(),
-    "logMessage" -> AttributeValue.builder().s(switchLogMessage).build(),
-  )
-
   test(testName = "updateLoggingTable builds request correctly") {
-    val putReq = PutItemRequest
-      .builder()
-      .tableName("soft-opt-in-consent-setter-DEV-logging")
-      .item(itemValues1.asJava)
-      .build()
+    val identityId = "someIdentityId"
+    val subscriptionId = "A-S12345678"
+    val connector = new DynamoConnector(mock[DynamoDbClient], "DEV")
+    val expectedValues = Map(
+      "identityId" -> AttributeValue.builder().s(identityId).build(),
+      "subscriptionId" -> AttributeValue.builder().s(subscriptionId).build(),
+      "logMessage" -> AttributeValue.builder().s("Soft opt-ins processed for product-switch").build(),
+    )
 
-    val mockPutItem: PutItemRequest => Try[Unit] = (req: PutItemRequest) => {
-      // Check if the items in the request match the expected items (ignoring timestamp)
-      assert(
-        req.tableName() == putReq.tableName() &&
-          req.item().get("identityId") == itemValues1("identityId") &&
-          req.item().get("subscriptionId") == itemValues1("subscriptionId") &&
-          req.item().get("logMessage") == itemValues1("logMessage"),
-      )
+    val putItem: PutItemRequest => Try[Unit] = request => {
+      request.tableName() shouldBe "soft-opt-in-consent-setter-DEV-logging"
+      expectedValues.foreach { case (key, value) => request.item().get(key) shouldBe value }
       Success(())
     }
 
-    val dynamoConnector = new DynamoConnector(mockDbClient, "DEV")
-    dynamoConnector.updateLoggingTable(subscriptionId, identityId, Switch, mockPutItem)
+    connector.updateLoggingTable(subscriptionId, identityId, Switch, putItem) shouldBe Success(())
   }
 }

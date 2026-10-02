@@ -14,9 +14,13 @@ class IAPMessageProcessor(
     consentsCalculator: ConsentsCalculator,
     mpapiConnector: MpapiConnector,
     dynamoConnector: DynamoConnector,
+    stage: String,
 ) extends StrictLogging {
 
   import IAPMessageProcessor._
+
+  private val checkSecondaryAccess: String => Either[SoftOptInError, Boolean] = identityId =>
+    MultipleAccountApiConnector.create(stage).flatMap(_.hasActiveSecondaryUserAccess(identityId))
 
   def processMessage(message: MessageBody): Any = {
     logger.info(s"Processing message: $message")
@@ -39,6 +43,7 @@ class IAPMessageProcessor(
           mpapiConnector.getMobileSubscriptions,
           consentsCalculator,
           sfConnector,
+          checkSecondaryAccess,
         )
       case Switch =>
         Metrics.put(event = "product_switches_to_process", 1)
@@ -49,6 +54,7 @@ class IAPMessageProcessor(
           mpapiConnector.getMobileSubscriptions,
           consentsCalculator,
           sfConnector,
+          checkSecondaryAccess,
         )
     }
 
@@ -82,7 +88,14 @@ object IAPMessageProcessor extends StrictLogging {
       identityConnector = new IdentityConnector(config.identityConfig)
       consentsCalculator = new ConsentsCalculator(ConsentsMapping.consentsMapping)
       mpapiConnector = new MpapiConnector(config.mpapiConfig)
-    } yield new IAPMessageProcessor(sfConnector, identityConnector, consentsCalculator, mpapiConnector, dynamoConnector)
+    } yield new IAPMessageProcessor(
+      sfConnector,
+      identityConnector,
+      consentsCalculator,
+      mpapiConnector,
+      dynamoConnector,
+      stage,
+    )
 
     clients match {
       case Left(error) => rethrowError(error)
@@ -143,6 +156,7 @@ object IAPMessageProcessor extends StrictLogging {
       getMobileSubscriptions: String => Either[SoftOptInError, MobileSubscriptions],
       consentsCalculator: ConsentsCalculator,
       sfConnector: SalesforceConnector,
+      hasActiveSecondaryUserAccess: String => Either[SoftOptInError, Boolean],
   ): Either[SoftOptInError, Unit] =
     for {
       previousProductName <- messageBody.previousProductName.toRight(
@@ -151,18 +165,22 @@ object IAPMessageProcessor extends StrictLogging {
 
       mobileSubscriptionsResponse <- getMobileSubscriptions(messageBody.identityId)
       activeSubs <- sfConnector.getActiveSubs(Seq(messageBody.identityId))
+      hasSecondaryUserAccess <- hasActiveSecondaryUserAccess(messageBody.identityId)
 
       iapSOIs = mobileSubscriptionsResponse.subscriptions
         .filter(_.valid)
         .map(_.softOptInProductName)
         .distinct
 
-      productNames = activeSubs.records.map(_.Product__c) ++ iapSOIs
+      productNames = Handler.productsWithSecondaryAccess(
+        (activeSubs.records.map(_.Product__c) ++ iapSOIs).toSet,
+        hasSecondaryUserAccess,
+      )
 
       consentsBody <- buildProductSwitchConsents(
         previousProductName,
         messageBody.productName,
-        productNames.toSet,
+        productNames,
         consentsCalculator,
       )
 
@@ -180,6 +198,7 @@ object IAPMessageProcessor extends StrictLogging {
       getMobileSubscriptions: String => Either[SoftOptInError, MobileSubscriptions],
       consentsCalculator: ConsentsCalculator,
       sfConnector: SalesforceConnector,
+      hasActiveSecondaryUserAccess: String => Either[SoftOptInError, Boolean],
   ): Either[SoftOptInError, Unit] = {
     def sendCancellationConsents(identityId: String, consents: Set[String]): Either[SoftOptInError, Unit] = {
       val maybeError: Option[SoftOptInError] =
@@ -200,16 +219,20 @@ object IAPMessageProcessor extends StrictLogging {
     for {
       mobileSubscriptionsResponse <- getMobileSubscriptions(messageBody.identityId)
       activeSubs <- sfConnector.getActiveSubs(Seq(messageBody.identityId))
+      hasSecondaryUserAccess <- hasActiveSecondaryUserAccess(messageBody.identityId)
 
       iapSOIs = mobileSubscriptionsResponse.subscriptions
         .filter(_.valid)
         .map(_.softOptInProductName)
         .distinct
-      productNames = activeSubs.records.map(_.Product__c) ++ iapSOIs
+      productNames = Handler.productsWithSecondaryAccess(
+        (activeSubs.records.map(_.Product__c) ++ iapSOIs).toSet,
+        hasSecondaryUserAccess,
+      )
 
       consents <- consentsCalculator.getCancellationConsents(
         messageBody.productName,
-        productNames.toSet,
+        productNames,
       )
       consentWithoutSimilarProducts = consentsCalculator.removeSimilarGuardianProductFromSet(consents)
       _ <- sendCancellationConsents(messageBody.identityId, consentWithoutSimilarProducts)
