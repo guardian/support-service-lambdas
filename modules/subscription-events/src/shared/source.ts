@@ -15,6 +15,7 @@ import { z } from 'zod';
 export const subscriptionEventSources = [
 	'lambda:zuora-auto-cancel',
 	'lambda:cancellation-sf-cases-api',
+	'lambda:move-product', // s+ cancellation lambda is in product-move-api
 	'ec2:members-data-api',
 ] as const;
 

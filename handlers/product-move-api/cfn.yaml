@@ -185,6 +185,15 @@ Resources:
                   - arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/InvoicingApi-JBxYpW
                   - arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Zuora/User/ZuoraApiUser-zmOGho
                   - arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Zuora/User/ZuoraApiUser-oq5ISm
+        - PolicyName: ProductMoveApiLambdaRolePolicy5
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - events:PutEvents
+                Resource:
+                  - Fn::ImportValue:
+                      Fn::Sub: subscription-events-bus-${Stage}-arn
       Tags:
         - Key: lambda:createdBy
           Value: SAM

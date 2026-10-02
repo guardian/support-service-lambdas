@@ -639,6 +639,7 @@ lazy val `product-move-api` = lambdaProject(
     ),
     awsS3,
     awsSQS,
+    awsEventBridge,
     scalatest,
     "com.softwaremill.sttp.client3" %% "zio-json" % sttpVersion,
     "dev.zio" %% "zio-logging-slf4j" % "2.5.2",
