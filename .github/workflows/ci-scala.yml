@@ -23,6 +23,7 @@ jobs:
           - cancellation-sf-cases-api
           - holiday-stop-processor
           - delivery-problem-credit-processor
+          - delivery-records-api
           - new-product-api
           - sf-emails-to-s3-exporter
           - sf-move-subscriptions-api
@@ -81,7 +82,6 @@ jobs:
         subproject:
           - catalog-service
           - contact-us-api
-          - delivery-records-api
           - dev-env-cleaner
           - digital-subscription-expiry
           - digital-voucher-api
