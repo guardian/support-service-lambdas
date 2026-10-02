@@ -1,8 +1,8 @@
-import { HttpError } from '../../src/services/make-http-request';
+import { MParticleHttpError } from '@modules/mparticle/mparticleHttpClient';
 import type {
 	BulkDeletionAPI,
 	MParticleClient,
-} from '../../src/services/mparticleClient';
+} from '@modules/mparticle/mparticleHttpClient';
 import { deleteMParticleUser } from '../../src/services/mparticleDeletion';
 
 jest.mock('@modules/logger/logger', () => ({
@@ -33,20 +33,24 @@ describe('deleteMParticleUser', () => {
 	it('should have a basic test', async () => {
 		mockPost.mockResolvedValue({
 			success: true,
-			statusCode: 202,
 		});
 
 		const result = await deleteMParticleUser(mockClient, userId);
 		expect(result.success).toBe(true);
 	});
 
+	it('should accept a successful response', async () => {
+		mockPost.mockResolvedValue({
+			success: true,
+		});
+
+		const result = await deleteMParticleUser(mockClient, userId);
+
+		expect(result).toEqual({ success: true });
+	});
+
 	it('should return success when user not found (404)', async () => {
-		const error404 = new HttpError(
-			'Not found',
-			404,
-			'Not Found',
-			'User not found',
-		);
+		const error404 = new MParticleHttpError(404);
 		mockPost.mockRejectedValue(error404);
 
 		const result = await deleteMParticleUser(mockClient, userId);
@@ -55,12 +59,7 @@ describe('deleteMParticleUser', () => {
 	});
 
 	it('should return retryable error for 500', async () => {
-		const error500 = new HttpError(
-			'Internal server error',
-			500,
-			'Internal Server Error',
-			'Server error',
-		);
+		const error500 = new MParticleHttpError(500);
 		mockPost.mockResolvedValue({
 			success: false,
 			error: error500,
@@ -72,12 +71,7 @@ describe('deleteMParticleUser', () => {
 	});
 
 	it('should return retryable error for 503', async () => {
-		const error503 = new HttpError(
-			'Service unavailable',
-			503,
-			'Service Unavailable',
-			'Service down',
-		);
+		const error503 = new MParticleHttpError(503);
 		mockPost.mockResolvedValue({
 			success: false,
 			error: error503,
@@ -89,12 +83,7 @@ describe('deleteMParticleUser', () => {
 	});
 
 	it('should return non-retryable error for 400', async () => {
-		const error400 = new HttpError(
-			'Bad request',
-			400,
-			'Bad Request',
-			'Invalid input',
-		);
+		const error400 = new MParticleHttpError(400);
 		mockPost.mockResolvedValue({
 			success: false,
 			error: error400,
@@ -117,6 +106,7 @@ describe('deleteMParticleUser', () => {
 	it('should send correct request body format', async () => {
 		mockPost.mockResolvedValue({
 			success: true,
+			statusCode: 202,
 		});
 
 		await deleteMParticleUser(mockClient, userId);

@@ -29,6 +29,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'bandit',
 		'apps-metering-events',
 		'publishing-alarm-stack-cdk',
+		'mparticle-acquisitions-publisher',
 	],
 	LIFECYCLE: [
 		'cancellation-sf-cases-api',

@@ -13,6 +13,7 @@ export interface HandlerDefinition extends ModuleDefinition {
 	functionNames?: string[];
 	entryPoints?: string[];
 	extraStages?: Array<'CSBX'>;
+	allowedStages?: Array<'CODE' | 'PROD' | 'CSBX'>;
 }
 
 export interface ModuleDefinition {
@@ -226,6 +227,14 @@ const moduleIdentity: ModuleDefinition = {
 	moduleDependencies: [moduleAws, moduleZuora],
 };
 
+const moduleMparticle: ModuleDefinition = {
+	name: 'mparticle',
+	dependencies: {
+		...dep.zod,
+	},
+	moduleDependencies: [moduleLogger, moduleZuora],
+};
+
 const moduleSupporterProductData: ModuleDefinition = {
 	name: 'supporter-product-data',
 	devDependencies: {
@@ -434,6 +443,18 @@ const mobilePurchasesToSupporterProductData: HandlerDefinition = {
 	],
 };
 
+const sendTestDataToMparticle: HandlerDefinition = {
+	name: 'send-test-data-to-mparticle',
+	allowedStages: ['CODE'],
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
+	moduleDependencies: [moduleAws, moduleMparticle],
+};
+
 const mparticleAcquisitionsPublisher: HandlerDefinition = {
 	name: 'mparticle-acquisitions-publisher',
 	dependencies: {
@@ -442,7 +463,7 @@ const mparticleAcquisitionsPublisher: HandlerDefinition = {
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 	},
-	moduleDependencies: [moduleAws],
+	moduleDependencies: [moduleAws, moduleMparticle],
 };
 
 const mparticleApi: HandlerDefinition = {
@@ -466,7 +487,7 @@ const mparticleApi: HandlerDefinition = {
 		...dep['@aws-sdk/client-s3'],
 		...devDeps['tsx'],
 	},
-	moduleDependencies: [moduleAws, moduleRouting],
+	moduleDependencies: [moduleAws, moduleRouting, moduleMparticle],
 };
 
 const identityDeletionCleanup: HandlerDefinition = {
@@ -1016,6 +1037,7 @@ export const build: BuildDefinition = {
 		scrubNonTokenisedPaymentMethods,
 		promotionsApi,
 		paymentFailureCommsExitApi,
+		sendTestDataToMparticle,
 		// MARKER new-lambda: buildcheck-reference
 	],
 
@@ -1027,6 +1049,7 @@ export const build: BuildDefinition = {
 		moduleIdentity,
 		moduleInternationalisation,
 		moduleLogger,
+		moduleMparticle,
 		moduleMultipleAccount,
 		moduleProductBenefits,
 		moduleProductCatalog,

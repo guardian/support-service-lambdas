@@ -243,4 +243,58 @@ describe('RestClient', () => {
 			);
 		});
 	});
+
+	describe('streaming', () => {
+		it('should return an unconsumed response body stream', async () => {
+			const stream = new ReadableStream<Uint8Array>({
+				start(controller) {
+					controller.enqueue(new TextEncoder().encode('stream body'));
+					controller.close();
+				},
+			});
+			fetchMock.mockResolvedValue({
+				ok: true,
+				status: 200,
+				body: stream,
+				headers: new Headers(),
+			} as Response);
+
+			const responseBody = await client.getStream('/stream');
+
+			expect(await new Response(responseBody).text()).toBe('stream body');
+		});
+
+		it('should reject when a successful response has no body', async () => {
+			fetchMock.mockResolvedValue({
+				ok: true,
+				status: 204,
+				body: null,
+				headers: new Headers(),
+			} as Response);
+
+			await expect(client.getStream('/stream')).rejects.toThrow(
+				'no http response body',
+			);
+		});
+
+		it('should throw RestClientError on HTTP error', async () => {
+			fetchMock.mockResolvedValue(
+				new Response('error body', {
+					status: 500,
+					headers: { 'X-Request-ID': 'abc123' },
+				}),
+			);
+
+			await expect(client.getStream('/stream')).rejects.toMatchObject({
+				name: 'RestClientError',
+				message: 'http call failed: 500',
+				status: 500,
+				responseBody: 'error body',
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- any is ok in a test
+				responseHeaders: expect.objectContaining({
+					'x-request-id': 'abc123',
+				}),
+			});
+		});
+	});
 });
