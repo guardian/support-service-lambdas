@@ -87,41 +87,26 @@ export const handler = EventBridgeSQSHandler(
 **Only `Cancellation` events are currently parsed by the handler above - the
 EventBridge rule feeding the queue must filter to the same detail-type(s), or
 any other event later added to the bus will fail to parse and end up in a
-DLQ.** There's no automatic link between the CDK rule below and the zod schema
-in this module - if you add a new event type to the bus, update both by hand.
+DLQ.** There's no automatic link between the CDK construct below and the zod
+schema in this module - `SubscriptionEventDetailType` is hardcoded locally in
+the construct, so if you add a new event type to the bus, update both by hand.
 
-There's no event bus lambda construct at the moment - use `SrSqsLambda` to
-provision the queue, DLQ and alarm, then attach the queue to a rule on the bus:
+Use `SrSubscriptionEventsLambda` (`cdk/lib/cdk/SrSubscriptionEventsLambda.ts`)
+to provision the queue, DLQ, alarm (same as `SrSqsLambda`, which it wraps),
+*and* the EventBridge rule routing the bus to that queue, in one step:
 
 ```ts
-import { EventBus, Rule } from 'aws-cdk-lib/aws-events';
-import { SqsQueue } from 'aws-cdk-lib/aws-events-targets';
-import { SrSqsLambda } from './cdk/SrSqsLambda';
+import { SrSubscriptionEventsLambda } from './cdk/SrSubscriptionEventsLambda';
 
-const lambda = new SrSqsLambda(this, 'Lambda', {
+const lambda = new SrSubscriptionEventsLambda(this, 'CancellationEventsLambda', {
+	detailTypes: ['Cancellation'],
 	monitoring: { errorImpact: '...' },
 	maxReceiveCount: 3,
 	// ...lambdaOverrides, visibilityTimeout etc.
 });
-
-const bus = EventBus.fromEventBusArn(
-	this,
-	'SubscriptionEventsBus',
-	`arn:aws:events:${this.region}:${this.account}:event-bus/subscription-events-${this.stage}`,
-);
-
-const rule = new Rule(this, 'CancellationToQueueRule', {
-	eventBus: bus,
-	eventPattern: {
-		detailType: ['Cancellation'], // keep in step with this module's schema(s)
-	},
-});
-
-rule.addTarget(new SqsQueue(lambda.inputQueue));
 ```
 
-See `cdk/lib/mobile-purchases-to-supporter-product-data.ts` for a full worked
-example of this same bus-rule-to-`SrSqsLambda`-queue pattern.
+See `cdk/lib/cdk/SrSubscriptionEventsLambda.ts` for the implementation.
 
 ## References
 
