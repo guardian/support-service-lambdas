@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147",
-    "@redocly/cli": "2.30.5",
+    "@redocly/cli": "2.33.2",
     "tsx": "^4.21.0"
   }
 }
