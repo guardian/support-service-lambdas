@@ -9,7 +9,7 @@ class MultipleAccountApiConnectorTests extends AnyFunSuite with Matchers {
   private def response(body: String, status: Int = 200) =
     HttpResponse(body, status, Map.empty[String, IndexedSeq[String]])
 
-  test("an active secondary subscription keeps consents on") {
+  test("returns active secondary subscription names") {
     val connector = new MultipleAccountApiConnector(
       "https://multiple-account-api-code.support.guardianapis.com",
       "test-api-key",
@@ -24,7 +24,7 @@ class MultipleAccountApiConnectorTests extends AnyFunSuite with Matchers {
       },
     )
 
-    connector.hasActiveSecondaryUserAccess("12345") shouldBe Right(true)
+    connector.activeSecondarySubscriptionNames("12345") shouldBe Right(Set("A-S123"))
   }
 
   test("an empty subscription list allows cancellation consents to be removed") {
@@ -34,18 +34,24 @@ class MultipleAccountApiConnectorTests extends AnyFunSuite with Matchers {
       (_, _) => Right(response("""{"subscriptions":[]}""")),
     )
 
-    connector.hasActiveSecondaryUserAccess("12345") shouldBe Right(false)
+    connector.activeSecondarySubscriptionNames("12345") shouldBe Right(Set.empty)
   }
 
   test("HTTP failures never count as no secondary access") {
     val connector =
       new MultipleAccountApiConnector("https://example.com", "key", (_, _) => Right(response("Forbidden", 403)))
 
-    val error = connector.hasActiveSecondaryUserAccess("12345").left.toOption.get
+    val error = connector.activeSecondarySubscriptionNames("12345").left.toOption.get
     error.statusCode shouldBe Some(403)
-    error.failRun shouldBe true
     error.getMessage should include("12345")
     error.getMessage should not include "key"
+  }
+
+  test("a 404 is an API error because no secondary access is represented by an empty list") {
+    val connector =
+      new MultipleAccountApiConnector("https://example.com", "key", (_, _) => Right(response("Not found", 404)))
+
+    connector.activeSecondarySubscriptionNames("12345").left.toOption.get.statusCode shouldBe Some(404)
   }
 
   test("malformed responses never count as no secondary access") {
@@ -64,10 +70,10 @@ class MultipleAccountApiConnectorTests extends AnyFunSuite with Matchers {
       (_, _) => Right(response("""{"subscriptions":[{}]}""")),
     )
 
-    invalidJson.hasActiveSecondaryUserAccess("12345").isLeft shouldBe true
-    missingSubscriptions.hasActiveSecondaryUserAccess("12345").isLeft shouldBe true
-    invalidSubscription.hasActiveSecondaryUserAccess("12345").isLeft shouldBe true
-    missingSubscriptionName.hasActiveSecondaryUserAccess("12345").isLeft shouldBe true
+    invalidJson.activeSecondarySubscriptionNames("12345").isLeft shouldBe true
+    missingSubscriptions.activeSecondarySubscriptionNames("12345").isLeft shouldBe true
+    invalidSubscription.activeSecondarySubscriptionNames("12345").isLeft shouldBe true
+    missingSubscriptionName.activeSecondarySubscriptionNames("12345").isLeft shouldBe true
   }
 
   test("request failures never count as no secondary access") {
@@ -77,8 +83,7 @@ class MultipleAccountApiConnectorTests extends AnyFunSuite with Matchers {
       (_, _) => Left(new RuntimeException("connection failed")),
     )
 
-    connector.hasActiveSecondaryUserAccess("12345").isLeft shouldBe true
-    connector.hasActiveSecondaryUserAccess("12345").left.toOption.get.failRun shouldBe true
+    connector.activeSecondarySubscriptionNames("12345").isLeft shouldBe true
   }
 
   test("API key discovery requires exactly one CloudFormation API key") {

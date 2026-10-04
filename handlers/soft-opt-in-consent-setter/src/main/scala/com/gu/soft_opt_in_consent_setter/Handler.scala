@@ -60,14 +60,14 @@ object Handler extends LazyLogging {
         _ = logger.info(s"Successfully fetched ${activeSubs.records.length} active subs from Salesforce")
 
         multipleAccountApi <- MultipleAccountApiConnector.create(config.stage)
-        checkSecondaryAccess = multipleAccountApi.hasActiveSecondaryUserAccess _
+        getSecondarySubscriptionNames = multipleAccountApi.activeSecondarySubscriptionNames _
         _ <- processProductSwitchSubs(
           productSwitchSubs,
           activeSubs,
           identityConnector.sendConsentsReq,
           sfConnector.updateSubs,
           consentsCalculator,
-          checkSecondaryAccess,
+          getSecondarySubscriptionNames,
         )
         _ <- processCancelledSubs(
           cancelledSubs,
@@ -75,7 +75,7 @@ object Handler extends LazyLogging {
           identityConnector.sendConsentsReq,
           sfConnector.updateSubs,
           consentsCalculator,
-          checkSecondaryAccess,
+          getSecondarySubscriptionNames,
           publishMetric,
         )
         _ = Metrics.put(event = "successful_run")
@@ -143,50 +143,41 @@ object Handler extends LazyLogging {
       sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
       updateSubs: String => Either[SoftOptInError, Unit],
       consentsCalculator: ConsentsCalculator,
-      hasActiveSecondaryUserAccess: String => Either[SoftOptInError, Boolean],
+      getSecondarySubscriptionNames: String => Either[SoftOptInError, Set[String]],
       recordMetric: RecordMetric = publishMetric,
   ): Either[SoftOptInError, Unit] = {
     recordMetric("product_switches_to_process", productSwitchSubs.size)
 
-    val checkedSubs = productSwitchSubs
-      .to(LazyList)
-      .map(EnhancedSub(_, activeSubs.records))
-      .map(rec => rec -> hasActiveSecondaryUserAccess(rec.identityId))
-
-    failRunIfNeeded(checkedSubs.map(_._2)).flatMap { _ =>
-      val recordsToUpdate = checkedSubs.map { case (rec, secondaryAccess) =>
-        import rec._
-
-        val updateResult = for {
-          ratePlanUpdates <- sub.Subscription_Rate_Plan_Updates__r
-            .toRight(
-              SoftOptInError(
-                s"processProductSwitchSubs: Subscription ${sub.Name} Subscription_Rate_Plan_Updates__r is null",
-              ),
-            )
-          hasActiveAccess <- secondaryAccess
-          productsFromSalesforce = associatedActiveNonGiftSubs.map(_.Product__c).toSet
-          consentsBody <- buildProductSwitchConsents(
-            ratePlanUpdates.records.head.Previous_Product_Name__c,
-            sub.Product__c,
-            productsWithSecondaryAccess(productsFromSalesforce, hasActiveAccess),
-            consentsCalculator,
+    val recordsToUpdate = productSwitchSubs.map { sub =>
+      val updateResult = for {
+        secondarySubscriptions <- getSecondarySubscriptionNames(sub.Buyer__r.IdentityID__c)
+        rec = EnhancedSub(sub, activeSubs.records, secondarySubscriptions)
+        ratePlanUpdates <- sub.Subscription_Rate_Plan_Updates__r
+          .toRight(
+            SoftOptInError(
+              s"processProductSwitchSubs: Subscription ${sub.Name} Subscription_Rate_Plan_Updates__r is null",
+            ),
           )
-          res <- sendConsentsReq(sub.Buyer__r.IdentityID__c, consentsBody)
-        } yield res
+        productsFromSalesforce = rec.associatedActiveNonGiftSubs.map(_.Product__c).toSet
+        consentsBody <- buildProductSwitchConsents(
+          ratePlanUpdates.records.head.Previous_Product_Name__c,
+          sub.Product__c,
+          productsWithSecondaryAccess(productsFromSalesforce, rec.hasOtherSecondaryAccess),
+          consentsCalculator,
+        )
+        res <- sendConsentsReq(sub.Buyer__r.IdentityID__c, consentsBody)
+      } yield res
 
-        logErrors(updateResult)
-
-        SFSubRecordUpdate(sub, "Switch", updateResult)
-      }
-
-      emitIdentityMetrics(recordsToUpdate, recordMetric)
-
-      if (recordsToUpdate.isEmpty)
-        Right(())
-      else
-        updateSubs(SFSubRecordUpdateRequest(recordsToUpdate).asJson.spaces2)
+      logErrors(updateResult)
+      SFSubRecordUpdate(sub, "Switch", updateResult)
     }
+
+    emitIdentityMetrics(recordsToUpdate, recordMetric)
+
+    if (recordsToUpdate.isEmpty)
+      Right(())
+    else
+      updateSubs(SFSubRecordUpdateRequest(recordsToUpdate).asJson.spaces2)
   }
 
   def processCancelledSubs(
@@ -195,41 +186,34 @@ object Handler extends LazyLogging {
       sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
       updateSubs: String => Either[SoftOptInError, Unit],
       consentsCalculator: ConsentsCalculator,
-      hasActiveSecondaryUserAccess: String => Either[SoftOptInError, Boolean],
+      getSecondarySubscriptionNames: String => Either[SoftOptInError, Set[String]],
       recordMetric: RecordMetric,
   ): Either[SoftOptInError, Unit] = {
     recordMetric("cancellations_to_process", cancelledSubs.size)
 
-    val checkedSubs = cancelledSubs
-      .to(LazyList)
-      .map(EnhancedSub(_, activeSubs.records))
-      .map(rec => rec -> hasActiveSecondaryUserAccess(rec.identityId))
-
-    failRunIfNeeded(checkedSubs.map(_._2)).flatMap { _ =>
-      val recordsToUpdate = checkedSubs.map { case (rec, secondaryAccess) =>
-        processCancelledSub(rec, sendConsentsReq, consentsCalculator, secondaryAccess)
+    val recordsToUpdate = cancelledSubs.map { sub =>
+      getSecondarySubscriptionNames(sub.Buyer__r.IdentityID__c) match {
+        case Right(secondarySubscriptions) =>
+          val rec = EnhancedSub(sub, activeSubs.records, secondarySubscriptions)
+          processCancelledSub(rec, sendConsentsReq, consentsCalculator)
+        case Left(error) =>
+          logErrors(Left(error))
+          SFSubRecordUpdate.failedUpdate(sub)
       }
-
-      emitIdentityMetrics(recordsToUpdate, recordMetric)
-
-      if (recordsToUpdate.isEmpty)
-        Right(())
-      else
-        updateSubs(SFSubRecordUpdateRequest(recordsToUpdate).asJson.spaces2)
     }
+
+    emitIdentityMetrics(recordsToUpdate, recordMetric)
+
+    if (recordsToUpdate.isEmpty)
+      Right(())
+    else
+      updateSubs(SFSubRecordUpdateRequest(recordsToUpdate).asJson.spaces2)
   }
-
-  private def failRunIfNeeded(results: Seq[Either[SoftOptInError, Boolean]]): Either[SoftOptInError, Unit] =
-    results.collectFirst { case Left(error) if error.failRun => error } match {
-      case Some(error) => Left(error)
-      case None => Right(())
-    }
 
   private[soft_opt_in_consent_setter] def processCancelledSub(
       rec: EnhancedSub,
       sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
       consentsCalculator: ConsentsCalculator,
-      secondaryAccess: Either[SoftOptInError, Boolean],
   ): SFSubRecordUpdate = {
     import rec._
 
@@ -244,13 +228,12 @@ object Handler extends LazyLogging {
       }
     }
 
+    val productsFromSalesforce = associatedActiveNonGiftSubs.map(_.Product__c).toSet
     val updateResult =
       for {
-        hasActiveAccess <- secondaryAccess
-        productsFromSalesforce = associatedActiveNonGiftSubs.map(_.Product__c).toSet
         consents <- consentsCalculator.getCancellationConsents(
           sub.Product__c,
-          productsWithSecondaryAccess(productsFromSalesforce, hasActiveAccess),
+          productsWithSecondaryAccess(productsFromSalesforce, rec.hasOtherSecondaryAccess),
         )
         consentWithoutSimilarProducts = consentsCalculator.removeSimilarGuardianProductFromSet(consents)
         _ <- sendCancellationConsents(identityId, consentWithoutSimilarProducts)

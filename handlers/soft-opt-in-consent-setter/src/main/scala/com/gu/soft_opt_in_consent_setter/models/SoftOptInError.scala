@@ -4,7 +4,6 @@ case class SoftOptInError(
     message: String,
     cause: Throwable,
     statusCode: Option[Int] = None,
-    failRun: Boolean = false,
 ) extends Exception(message, cause)
 
 object SoftOptInError {

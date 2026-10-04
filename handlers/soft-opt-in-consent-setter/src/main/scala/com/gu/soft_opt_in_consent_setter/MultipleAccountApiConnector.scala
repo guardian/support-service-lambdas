@@ -23,11 +23,11 @@ class MultipleAccountApiConnector(
 ) {
   import MultipleAccountApiConnector._
 
-  def hasActiveSecondaryUserAccess(identityId: String): Either[SoftOptInError, Boolean] = {
+  def activeSecondarySubscriptionNames(identityId: String): Either[SoftOptInError, Set[String]] = {
     val encodedId = URLEncoder.encode(identityId, StandardCharsets.UTF_8)
     for {
       result <- sendReq(s"$baseUrl/secondary-user/$encodedId", apiKey).left.map(error =>
-        SoftOptInError(s"Multiple account API request failed for identityId $identityId", error, failRun = true),
+        SoftOptInError(s"Multiple account API request failed for identityId $identityId", error),
       )
       body <- Either.cond(
         result.isSuccess,
@@ -36,13 +36,12 @@ class MultipleAccountApiConnector(
           s"Multiple account API returned status ${result.code} for identityId $identityId",
           null,
           Some(result.code),
-          failRun = result.code == 401 || result.code == 403 || result.code == 429 || result.code >= 500,
         ),
       )
       details <- decode[SecondaryUserDetailsResponse](body).left.map(error =>
-        SoftOptInError(s"Invalid multiple account API response for identityId $identityId", error, failRun = true),
+        SoftOptInError(s"Invalid multiple account API response for identityId $identityId", error),
       )
-    } yield details.subscriptions.nonEmpty
+    } yield details.subscriptions.map(_.subscriptionName).toSet
   }
 }
 

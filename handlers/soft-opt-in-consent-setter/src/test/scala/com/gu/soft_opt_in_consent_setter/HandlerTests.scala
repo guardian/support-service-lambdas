@@ -60,7 +60,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     val noActiveSubs = SFAssociatedSubResponse(0, true, Seq.empty)
     val failSend: (String, String) => Either[SoftOptInError, Unit] = (_, _) => fail("Unexpected consent request")
     val failUpdate: String => Either[SoftOptInError, Unit] = _ => fail("Unexpected Salesforce update")
-    val failLookup: String => Either[SoftOptInError, Boolean] = _ => fail("Unexpected secondary access lookup")
+    val failLookup: String => Either[SoftOptInError, Set[String]] = _ => fail("Unexpected secondary access lookup")
 
     Handler.processProductSwitchSubs(
       Seq.empty,
@@ -109,10 +109,10 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     val sentRequests = ListBuffer.empty[(String, String)]
     val updatePayloads = ListBuffer.empty[String]
     val metrics = ListBuffer.empty[(String, Int)]
-    val secondaryUserAccessByIdentityId: Map[String, Either[SoftOptInError, Boolean]] = Map(
-      secondaryIdentityId -> Right(true),
+    val secondaryUserAccessByIdentityId: Map[String, Either[SoftOptInError, Set[String]]] = Map(
+      secondaryIdentityId -> Right(Set("A-other-secondary-subscription")),
       failedIdentityId -> Left(SoftOptInError("Multiple account API lookup failed for failedIdentityId")),
-      otherIdentityId -> Right(false),
+      otherIdentityId -> Right(Set.empty),
     )
 
     val result = Handler.processCancelledSubs(
@@ -155,36 +155,43 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     )
   }
 
-  test(testName = "an API outage fails the scheduled cancellation batch without using Salesforce attempts") {
-    val cancelledSubs = Seq("first", "second", "third").map { id =>
-      SFSubRecord(
-        Id = s"sub-$id",
-        Name = s"A-$id",
-        Product__c = "Supporter Plus",
-        SF_Status__c = "Cancelled",
-        Soft_Opt_in_Status__c = Handler.readyToProcessCancellationStatus,
-        Buyer__r = SFBuyer(id),
-        Subscription_Rate_Plan_Updates__r = None,
-        Soft_Opt_in_Number_of_Attempts__c = Some(0),
-      )
-    }
-    val requestedIdentityIds = ListBuffer.empty[String]
+  test(testName = "a scheduled cancellation does not treat the cancelled subscription as other secondary access") {
+    val cancelledSub = SFSubRecord(
+      Id = "cancelled-sub-id",
+      Name = subscriptionId,
+      Product__c = "Supporter Plus",
+      SF_Status__c = "Cancelled",
+      Soft_Opt_in_Status__c = Handler.readyToProcessCancellationStatus,
+      Buyer__r = SFBuyer(identityId),
+      Subscription_Rate_Plan_Updates__r = None,
+      Soft_Opt_in_Number_of_Attempts__c = Some(0),
+    )
+    val sentRequests = ListBuffer.empty[(String, String)]
+    val updatePayloads = ListBuffer.empty[String]
 
     val result = Handler.processCancelledSubs(
-      cancelledSubs,
+      Seq(cancelledSub),
       SFAssociatedSubResponse(0, true, Seq.empty),
-      (_, _) => fail("No consents should be sent when the API is unavailable"),
-      _ => fail("Salesforce attempts should not be consumed when the API is unavailable"),
-      calculator,
-      id => {
-        requestedIdentityIds += id
-        if (id == "second") Left(SoftOptInError("API unavailable", null, failRun = true)) else Right(false)
+      (id, body) => {
+        sentRequests += (id -> body)
+        Right(())
       },
+      body => {
+        updatePayloads += body
+        Right(())
+      },
+      calculator,
+      _ => Right(Set(subscriptionId)),
       (_, _) => (),
     )
 
-    result.left.toOption.map(_.getMessage) shouldBe Some("API unavailable")
-    requestedIdentityIds.toList shouldBe List("first", "second")
+    result shouldBe Right(())
+    sentRequests.map(_._1).toList shouldBe List(identityId)
+    updatePayloads should have size 1
+    parse(updatePayloads.head).toOption.get.hcursor
+      .downField("records")
+      .downArray
+      .get[String]("Soft_Opt_in_Last_Stage_Processed__c") shouldBe Right("Cancellation")
   }
 
   test(testName = "scheduled switches preserve secondary user consents and isolate lookup failures") {
@@ -231,8 +238,8 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       },
       calculator,
       {
-        case `activeIdentityId` => Right(true)
-        case `otherIdentityId` => Right(false)
+        case `activeIdentityId` => Right(Set("A-other-secondary-subscription"))
+        case `otherIdentityId` => Right(Set.empty)
         case `failedIdentityId` => Left(SoftOptInError(s"Lookup failed for $failedIdentityId"))
         case unexpected => throw new AssertionError(s"Unexpected identityId $unexpected")
       },
@@ -308,7 +315,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       mockGetMobileSubscriptions,
       calculator,
       mockSfConnector,
-      _ => Right(false),
+      _ => Right(Set.empty),
     )
 
     result shouldBe Right(())
@@ -340,7 +347,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       mockGetMobileSubscriptions,
       calculator,
       mockSfConnector,
-      _ => Right(true),
+      _ => Right(Set("A-other-secondary-subscription")),
     )
 
     result shouldBe Right(())
@@ -459,7 +466,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       mockGetMobileSubscriptions,
       calculator,
       mockSfConnector,
-      _ => Right(false),
+      _ => Right(Set.empty),
     )
 
     result shouldBe Right(())
@@ -508,7 +515,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       mockGetMobileSubscriptions,
       calculator,
       mockSfConnector,
-      _ => Right(false),
+      _ => Right(Set.empty),
     )
 
     result shouldBe Right(())
@@ -537,14 +544,47 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       mockGetMobileSubscriptions,
       calculator,
       mockSfConnector,
-      _ => Right(true),
+      _ => Right(Set("A-other-secondary-subscription")),
     )
 
     result shouldBe Right(())
   }
 
+  test(testName = "processCancellation ignores secondary access for the subscription being cancelled") {
+    val sentRequests = ListBuffer.empty[(String, String)]
+    mockGetMobileSubscriptions.expects(identityId).returning(Right(MobileSubscriptions(List.empty)))
+    mockSfConnector.getActiveSubs _ expects Seq(identityId) returning Right(
+      SFAssociatedSubResponse(0, true, records = Seq.empty),
+    )
+
+    val testMessageBody = MessageBody(
+      identityId = identityId,
+      productName = "Supporter Plus",
+      printProduct = None,
+      previousProductName = None,
+      eventType = Cancellation,
+      subscriptionId = subscriptionId,
+      userConsentsOverrides = None,
+    )
+
+    val result = processCancelledSub(
+      testMessageBody,
+      (id, body) => {
+        sentRequests += (id -> body)
+        Right(())
+      },
+      mockGetMobileSubscriptions,
+      calculator,
+      mockSfConnector,
+      _ => Right(Set(subscriptionId)),
+    )
+
+    result shouldBe Right(())
+    sentRequests.map(_._1).toList shouldBe List(identityId)
+  }
+
   test(testName = "processCancellation does not change consents when secondary access cannot be checked") {
-    val lookupError = SoftOptInError("SupporterProductData query failed", null)
+    val lookupError = SoftOptInError("Multiple account API lookup failed", null)
     mockSendConsentsReq.expects(*, *).never()
     mockGetMobileSubscriptions.expects(identityId).returning(Right(MobileSubscriptions(List.empty)))
     mockSfConnector.getActiveSubs _ expects Seq(identityId) returning Right(
@@ -618,7 +658,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       mockGetMobileSubscriptions,
       calculator,
       mockSfConnector,
-      _ => Right(false),
+      _ => Right(Set.empty),
     )
 
     result shouldBe Right(())
