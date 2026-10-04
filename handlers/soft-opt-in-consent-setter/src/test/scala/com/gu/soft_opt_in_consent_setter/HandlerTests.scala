@@ -550,7 +550,9 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     result shouldBe Right(())
   }
 
-  test(testName = "processCancellation ignores secondary access for the subscription being cancelled") {
+  test(testName =
+    "processCancellation maps a secondary-user event and ignores access for the subscription being cancelled",
+  ) {
     val sentRequests = ListBuffer.empty[(String, String)]
     mockGetMobileSubscriptions.expects(identityId).returning(Right(MobileSubscriptions(List.empty)))
     mockSfConnector.getActiveSubs _ expects Seq(identityId) returning Right(
@@ -559,7 +561,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
 
     val testMessageBody = MessageBody(
       identityId = identityId,
-      productName = "Supporter Plus",
+      productName = "SECONDARY_USER",
       printProduct = None,
       previousProductName = None,
       eventType = Cancellation,

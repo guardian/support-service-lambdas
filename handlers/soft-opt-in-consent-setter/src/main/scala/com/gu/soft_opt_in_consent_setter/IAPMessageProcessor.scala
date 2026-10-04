@@ -229,9 +229,10 @@ object IAPMessageProcessor extends StrictLogging {
         (activeSubs.records.map(_.Product__c) ++ iapSOIs).toSet,
         secondarySubscriptions.exists(_ != messageBody.subscriptionId),
       )
+      cancelledProductName = ConsentsMapping.productMappings(messageBody.productName, messageBody.printProduct)
 
       consents <- consentsCalculator.getCancellationConsents(
-        messageBody.productName,
+        cancelledProductName,
         productNames,
       )
       consentWithoutSimilarProducts = consentsCalculator.removeSimilarGuardianProductFromSet(consents)
