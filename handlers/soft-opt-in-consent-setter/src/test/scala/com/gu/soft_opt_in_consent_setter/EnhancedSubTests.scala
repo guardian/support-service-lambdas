@@ -7,30 +7,55 @@ import org.scalatest.matchers.should
 
 class EnhancedSubTests extends AnyFlatSpec with should.Matchers {
 
-  // EnhancedSub.apply tests
-  "EnhancedSub.apply" should "set the identityId correctly" in {
-    EnhancedSub(subRecord, Seq(), Set.empty).identityId shouldBe identityId
+  // EnhancedSub.fromSF tests
+  "EnhancedSub.fromSF" should "set the identityId correctly" in {
+    EnhancedSub.fromSF(subRecord, Seq(), Set.empty).identityId shouldBe identityId
   }
 
-  "EnhancedSub.apply" should "set the cancelledSub correctly" in {
-    EnhancedSub(subRecord, Seq(), Set.empty).sub shouldBe subRecord
-  }
-
-  "EnhancedSub.apply" should "set the associatedActiveNonGiftSubs correctly when one exists" in {
-    EnhancedSub(subRecord, associatedSubsWithOverlap, Set.empty).associatedActiveNonGiftSubs shouldBe Seq(
-      overlappingAssociatedSub,
+  "EnhancedSub.fromSF" should "include the active products with no secondary access" in {
+    EnhancedSub.fromSF(subRecord, associatedSubsWithOverlap, Set.empty).productsWithSecondaryAccess shouldBe Set(
+      overlappingAssociatedSub.Product__c,
     )
   }
 
-  "EnhancedSub.apply" should "set the associatedActiveNonGiftSubs correctly when one does not exist" in {
-    EnhancedSub(subRecord, associatedSubsWithoutOverlap, Set.empty).associatedActiveNonGiftSubs shouldBe Seq()
+  "EnhancedSub.fromSF" should "not include products of a non-matching identity" in {
+    EnhancedSub
+      .fromSF(subRecord, associatedSubsWithoutOverlap, Set.empty)
+      .productsWithSecondaryAccess shouldBe Set.empty
   }
 
-  it should "not count the subscription being processed as other secondary access" in {
-    EnhancedSub(subRecord, Seq.empty, Set(subRecord.Name)).hasOtherSecondaryAccess shouldBe false
+  "EnhancedSub.fromSF" should "not count the subscription being processed as other secondary access" in {
+    EnhancedSub
+      .fromSF(subRecord, associatedSubsWithOverlap, Set(subRecord.Name))
+      .productsWithSecondaryAccess shouldBe Set(overlappingAssociatedSub.Product__c)
   }
 
-  it should "detect another active secondary subscription" in {
-    EnhancedSub(subRecord, Seq.empty, Set(subRecord.Name, "A-S999999")).hasOtherSecondaryAccess shouldBe true
+  "EnhancedSub.fromSF" should "detect another active secondary subscription" in {
+    EnhancedSub
+      .fromSF(subRecord, associatedSubsWithOverlap, Set(subRecord.Name, "A-S999999"))
+      .productsWithSecondaryAccess shouldBe Set(overlappingAssociatedSub.Product__c, "Secondary User")
+  }
+
+  // EnhancedSub.fromSQS tests
+  "EnhancedSub.fromSQS" should "set the identityId correctly" in {
+    EnhancedSub.fromSQS(identityId, subRecord.Name, Seq.empty, Seq.empty, Set.empty).identityId shouldBe identityId
+  }
+
+  "EnhancedSub.fromSQS" should "combine Salesforce associated subs and IAP product names" in {
+    EnhancedSub
+      .fromSQS(identityId, subRecord.Name, associatedSubsWithOverlap, Seq("FeastInAppPurchase"), Set.empty)
+      .productsWithSecondaryAccess shouldBe Set(overlappingAssociatedSub.Product__c, "FeastInAppPurchase")
+  }
+
+  "EnhancedSub.fromSQS" should "not count the subscription being processed as other secondary access" in {
+    EnhancedSub
+      .fromSQS(identityId, subRecord.Name, associatedSubsWithOverlap, Seq.empty, Set(subRecord.Name))
+      .productsWithSecondaryAccess shouldBe Set(overlappingAssociatedSub.Product__c)
+  }
+
+  "EnhancedSub.fromSQS" should "detect another active secondary subscription" in {
+    EnhancedSub
+      .fromSQS(identityId, subRecord.Name, associatedSubsWithOverlap, Seq.empty, Set(subRecord.Name, "A-S999999"))
+      .productsWithSecondaryAccess shouldBe Set(overlappingAssociatedSub.Product__c, "Secondary User")
   }
 }

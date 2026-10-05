@@ -39,15 +39,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
   val identityId = "someIdentityId"
   val subscriptionId = "A-S12345678"
 
-  test(testName = "secondary user access is treated as an active product for cancellation") {
-    Handler.productsWithSecondaryAccess(Set("Membership"), hasActiveSecondaryUserAccess = true) shouldBe
-      Set("Membership", "Secondary User")
-  }
-
-  test(testName = "cancellation products remain unchanged without secondary user access") {
-    Handler.productsWithSecondaryAccess(Set("Membership"), hasActiveSecondaryUserAccess = false) shouldBe
-      Set("Membership")
-  }
+  // productsWithSecondaryAccess behaviour is now covered by EnhancedSubTests
 
   test(testName =
     "empty scheduled cancellation and switch batches do not query secondary access or update Salesforce",

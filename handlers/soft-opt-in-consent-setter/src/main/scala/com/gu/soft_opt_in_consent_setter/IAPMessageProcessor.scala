@@ -2,7 +2,7 @@ package com.gu.soft_opt_in_consent_setter
 
 import com.gu.soft_opt_in_consent_setter.HandlerIAP.{Acquisition, Cancellation, MessageBody, Switch, rethrowError}
 import com.gu.soft_opt_in_consent_setter.models.ConsentsMapping.similarGuardianProducts
-import com.gu.soft_opt_in_consent_setter.models.{ConsentsMapping, SoftOptInConfig, SoftOptInError}
+import com.gu.soft_opt_in_consent_setter.models.{ConsentsMapping, EnhancedSub, SoftOptInConfig, SoftOptInError}
 import com.typesafe.scalalogging.StrictLogging
 import io.circe.syntax._
 
@@ -172,10 +172,15 @@ object IAPMessageProcessor extends StrictLogging {
         .map(_.softOptInProductName)
         .distinct
 
-      productNames = Handler.productsWithSecondaryAccess(
-        (activeSubs.records.map(_.Product__c) ++ iapSOIs).toSet,
-        secondarySubscriptions.exists(_ != messageBody.subscriptionId),
-      )
+      productNames = EnhancedSub
+        .fromSQS(
+          messageBody.identityId,
+          messageBody.subscriptionId,
+          activeSubs.records,
+          iapSOIs,
+          secondarySubscriptions,
+        )
+        .productsWithSecondaryAccess
 
       consentsBody <- buildProductSwitchConsents(
         previousProductName,
@@ -225,10 +230,15 @@ object IAPMessageProcessor extends StrictLogging {
         .filter(_.valid)
         .map(_.softOptInProductName)
         .distinct
-      productNames = Handler.productsWithSecondaryAccess(
-        (activeSubs.records.map(_.Product__c) ++ iapSOIs).toSet,
-        secondarySubscriptions.exists(_ != messageBody.subscriptionId),
-      )
+      productNames = EnhancedSub
+        .fromSQS(
+          messageBody.identityId,
+          messageBody.subscriptionId,
+          activeSubs.records,
+          iapSOIs,
+          secondarySubscriptions,
+        )
+        .productsWithSecondaryAccess
       cancelledProductName = ConsentsMapping.productMappings(messageBody.productName, messageBody.printProduct)
 
       consents <- consentsCalculator.getCancellationConsents(
