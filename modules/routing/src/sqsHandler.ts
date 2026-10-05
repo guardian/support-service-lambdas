@@ -9,8 +9,8 @@ export function SQSHandler<ConfigType, Services>(
 	configSchema: z.ZodType<ConfigType>,
 	handler: (record: SQSRecord, services: Services) => Promise<void>,
 	buildServices: (handlerProps: HandlerEnv<ConfigType>) => Services,
+	callerInfo: string = getCallerInfo(),
 ) {
-	const callerInfo = getCallerInfo();
 	return LambdaHandlerWithServices(
 		configSchema,
 		handleSQSMessages(handler, callerInfo),

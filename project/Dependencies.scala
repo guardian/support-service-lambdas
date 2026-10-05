@@ -24,6 +24,7 @@ object Dependencies {
   val awsSdkLambda = "software.amazon.awssdk" % "lambda" % awsSdkVersion
   val awsSecretsManager = "software.amazon.awssdk" % "secretsmanager" % awsSdkVersion
   val awsSQS = "software.amazon.awssdk" % "sqs" % awsSdkVersion
+  val awsEventBridge = "software.amazon.awssdk" % "eventbridge" % awsSdkVersion
   val awsS3 = "software.amazon.awssdk" % "s3" % awsSdkVersion
   val awsDynamo = "software.amazon.awssdk" % "dynamodb" % awsSdkVersion
 
@@ -41,7 +42,7 @@ object Dependencies {
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.3.0"
 
   // GCP
-  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.69.0"
+  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.71.0"
   val grpcNettyOverride = "io.grpc" % "grpc-netty-shaded" % "1.82.0"
 
   // Cats
@@ -87,7 +88,7 @@ object Dependencies {
   val tapirVersion =
     "1.11.33" // stick with 1.11.33 for now as later versions indirectly pull in netty-codec-base which duplicates netty-codec content
   val enumeratum = "com.beachape" %% "enumeratum" % "1.9.7"
-  val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.4.0"
+  val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.5.0"
   val stripe = "com.stripe" % "stripe-java" % "29.1.0"
   val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.2.0"
   val commonsIO = "commons-io" % "commons-io" % "2.22.0"
@@ -120,7 +121,7 @@ object Dependencies {
   )
 
   // play-json still uses an old version of jackson-core which has a vulnerability - https://security.snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-7569538
-  val jacksonVersion = "2.18.9"
+  val jacksonVersion = "2.18.11"
 
   val jacksonDependencies: Seq[ModuleID] = Seq(
     "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,

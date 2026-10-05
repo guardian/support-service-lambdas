@@ -556,6 +556,7 @@ exports[`The mParticle acquisitions publisher stack creates an isolated EventBri
     "LambdaSqsEventSourcemparticleacquisitionspublisherPRODPublisherQueue737C1DDB07BDB4F5": {
       "Properties": {
         "BatchSize": 10,
+        "Enabled": false,
         "EventSourceArn": {
           "Fn::GetAtt": [
             "PublisherQueueB3B13BD1",
