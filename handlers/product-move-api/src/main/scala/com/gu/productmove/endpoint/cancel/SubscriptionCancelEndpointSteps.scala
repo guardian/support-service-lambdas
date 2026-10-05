@@ -13,7 +13,7 @@ import com.gu.productmove.endpoint.zuora.GetSubscriptionToCancel.RatePlanCharge
 import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.{GetAccount, GetSubscription, ZuoraCancel, ZuoraSetCancellationReason}
-import com.gu.productmove.{EmailMessage, IdentityId, SQS}
+import com.gu.productmove.{EmailMessage, IdentityId, SQS, SubscriptionEventService}
 import com.gu.util.config
 import zio.{Clock, IO, Task, ZIO}
 
@@ -28,6 +28,7 @@ class SubscriptionCancelEndpointSteps(
     stage: Stage,
     zuoraSetCancellationReason: ZuoraSetCancellationReason,
     today: LocalDate,
+    subscriptionEventService: SubscriptionEventService,
 ) {
   private[productmove] def subscriptionCancel(
       subscriptionName: SubscriptionName,
@@ -91,7 +92,7 @@ class SubscriptionCancelEndpointSteps(
       _ <- ZIO.log(s"Cancellation date is $cancellationDate")
 
       _ <- ZIO.log(s"Attempting to cancel sub")
-      _ <- zuoraCancel.cancel(subscription.accountNumber, subscriptionName, cancellationDate, today)
+      orderNumber <- zuoraCancel.cancel(subscription.accountNumber, subscriptionName, cancellationDate, today)
       _ <- ZIO.log("Sub cancelled as of: " + cancellationDate)
 
       _ <- ZIO.log(
@@ -111,7 +112,21 @@ class SubscriptionCancelEndpointSteps(
           subscription.version + 1,
           postData.reason,
         ) // Version +1 because the cancellation will have incremented the version
-      _ <- sqs.sendEmail(EmailMessage.cancellationEmail(account, cancellationDate))
+      _ <- ZIO
+        .validateParDiscard(
+          List(
+            sqs.sendEmail(EmailMessage.cancellationEmail(account, cancellationDate)),
+            subscriptionEventService
+              .publishCancellationEvent(subscriptionName, orderNumber, allowUserNotifications = true),
+          ),
+        )(identity)
+        .mapError { errors =>
+          new Throwable(
+            s"${errors.size} parallel operations failed while cancelling ${subscriptionName.value}: " +
+              errors.map(_.toString).mkString("; "),
+            errors.head,
+          )
+        }
     } yield Success(s"Subscription ${subscriptionName.value} was successfully cancelled")
     maybeResult.catchAll {
       case failure: OutputBody => ZIO.succeed(failure)

@@ -27,7 +27,7 @@ import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.zuora.GetAccount.*
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
 import com.gu.productmove.zuora.InvoiceItemAdjustment.InvoiceItemAdjustmentResult
-import com.gu.productmove.zuora.model.{AccountNumber, InvoiceId, SubscriptionId, SubscriptionName}
+import com.gu.productmove.zuora.model.{AccountNumber, InvoiceId, OrderNumber, SubscriptionId, SubscriptionName}
 import com.gu.productmove.zuora.*
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import zio.*
@@ -570,6 +570,7 @@ object HandlerSpec extends ZIOSpecDefault {
           Set((subscriptionName, LocalDate.of(2022, 9, 29))),
         )
         val mockSQS = new MockSQS(Map(emailMessage -> ()))
+        val mockSubscriptionEventService = new MockSubscriptionEventService()
         (for {
           _ <- TestClock.setTime(time)
           input = SubscriptionCancelEndpointTypes.ExpectedInput("mma_other")
@@ -583,7 +584,8 @@ object HandlerSpec extends ZIOSpecDefault {
             zuoraSetCancellationReason = new MockZuoraSetCancellationReason(
               Map((SubscriptionName("A-S00339056"), 2, "mma_other") -> UpdateResponse(true)),
             ),
-            LocalDate.ofInstant(time, zoneOffset),
+            today = LocalDate.ofInstant(time, zoneOffset),
+            subscriptionEventService = mockSubscriptionEventService,
           ).subscriptionCancel(subscriptionName, input, someIdentityId.get)
         } yield {
           assert(output)(
@@ -602,6 +604,102 @@ object HandlerSpec extends ZIOSpecDefault {
               ),
             ),
           ) &&
+          assert(mockSQS.requests)(hasSameElements(List(emailMessage))) &&
+          assert(mockSubscriptionEventService.requests.toList)(
+            equalTo(
+              List(
+                CancellationEventRequest(
+                  subscriptionName,
+                  OrderNumber("O-00000001"),
+                  allowUserNotifications = true,
+                ),
+              ),
+            ),
+          )
+        })
+      },
+      test("cancel endpoint still publishes the subscription-event (and still fails) when sending the email fails") {
+        val mockGetSubscriptionToCancel =
+          new MockGetSubscriptionToCancel(Map(subscriptionName -> getSubscriptionForCancelResponse))
+        val mockZuoraCancel = new MockZuoraCancel(
+          Set((subscriptionName, LocalDate.of(2022, 9, 29))),
+        )
+        // no responses stubbed, so sending the email always fails
+        val mockSQS = new MockSQS(Map.empty)
+        val mockSubscriptionEventService = new MockSubscriptionEventService()
+        (for {
+          _ <- TestClock.setTime(time)
+          input = SubscriptionCancelEndpointTypes.ExpectedInput("mma_other")
+          result <- new SubscriptionCancelEndpointSteps(
+            getSubscription = new MockGetSubscription(getSubscriptionStubs()),
+            getAccount = new MockGetAccount(Map(AccountNumber("accountNumber") -> getAccountResponse), Map.empty),
+            getSubscriptionToCancel = mockGetSubscriptionToCancel,
+            zuoraCancel = mockZuoraCancel,
+            sqs = mockSQS,
+            stage = Stage.valueOf("PROD"),
+            zuoraSetCancellationReason = new MockZuoraSetCancellationReason(
+              Map((SubscriptionName("A-S00339056"), 2, "mma_other") -> UpdateResponse(true)),
+            ),
+            today = LocalDate.ofInstant(time, zoneOffset),
+            subscriptionEventService = mockSubscriptionEventService,
+          ).subscriptionCancel(subscriptionName, input, someIdentityId.get).either
+        } yield {
+          assert(result)(isLeft) &&
+          assert(mockSubscriptionEventService.requests.toList)(
+            equalTo(
+              List(
+                CancellationEventRequest(
+                  subscriptionName,
+                  OrderNumber("O-00000001"),
+                  allowUserNotifications = true,
+                ),
+              ),
+            ),
+          )
+        })
+      },
+      test("cancel endpoint still sends the email (and still fails) when publishing the subscription-event fails") {
+        val emailMessage = EmailMessage(
+          EmailPayload(
+            Address = Some("example@gmail.com"),
+            ContactAttributes = EmailPayloadContactAttributes(
+              SubscriberAttributes = EmailPayloadCancellationAttributes(
+                first_name = "John",
+                last_name = "Hee",
+                product_type = "Supporter Plus",
+                cancellation_effective_date = Some("29 September 2022"),
+              ),
+            ),
+          ),
+          DataExtensionName = "subscription-cancelled-email",
+          SfContactId = "sfContactId",
+          IdentityUserId = someIdentityId,
+        )
+        val mockGetSubscriptionToCancel =
+          new MockGetSubscriptionToCancel(Map(subscriptionName -> getSubscriptionForCancelResponse))
+        val mockZuoraCancel = new MockZuoraCancel(
+          Set((subscriptionName, LocalDate.of(2022, 9, 29))),
+        )
+        val mockSQS = new MockSQS(Map(emailMessage -> ()))
+        val mockSubscriptionEventService = new MockSubscriptionEventService(shouldFail = true)
+        (for {
+          _ <- TestClock.setTime(time)
+          input = SubscriptionCancelEndpointTypes.ExpectedInput("mma_other")
+          result <- new SubscriptionCancelEndpointSteps(
+            getSubscription = new MockGetSubscription(getSubscriptionStubs()),
+            getAccount = new MockGetAccount(Map(AccountNumber("accountNumber") -> getAccountResponse), Map.empty),
+            getSubscriptionToCancel = mockGetSubscriptionToCancel,
+            zuoraCancel = mockZuoraCancel,
+            sqs = mockSQS,
+            stage = Stage.valueOf("PROD"),
+            zuoraSetCancellationReason = new MockZuoraSetCancellationReason(
+              Map((SubscriptionName("A-S00339056"), 2, "mma_other") -> UpdateResponse(true)),
+            ),
+            today = LocalDate.ofInstant(time, zoneOffset),
+            subscriptionEventService = mockSubscriptionEventService,
+          ).subscriptionCancel(subscriptionName, input, someIdentityId.get).either
+        } yield {
+          assert(result)(isLeft) &&
           assert(mockSQS.requests)(hasSameElements(List(emailMessage)))
         })
       },
