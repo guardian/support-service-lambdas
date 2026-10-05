@@ -75,9 +75,78 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       mockGetMobileSubscriptions,
       calculator,
       mockSfConnector,
+      _ => Right(Set.empty),
     )
 
     result shouldBe Right(())
+  }
+
+  test(testName = "processProductSwitchSub preserves consents held by secondary access") {
+    mockSendConsentsReq
+      .expects(
+        identityId,
+        """[
+          |  {
+          |    "id" : "similar_guardian_products",
+          |    "consented" : false
+          |  }
+          |]""".stripMargin,
+      )
+      .returning(Right(()))
+    mockGetMobileSubscriptions.expects(identityId).returning(Right(MobileSubscriptions(List.empty)))
+    mockSfConnector.getActiveSubs _ expects Seq(identityId) returning Right(
+      SFAssociatedSubResponse(1, true, Seq(SFAssociatedSubRecord("Guardian Ad-Lite", identityId))),
+    )
+
+    val testMessageBody = MessageBody(
+      identityId = identityId,
+      productName = "Guardian Ad-Lite",
+      printProduct = None,
+      previousProductName = Some("Supporter Plus"),
+      eventType = Switch,
+      subscriptionId = subscriptionId,
+      userConsentsOverrides = None,
+    )
+
+    val result = IAPMessageProcessor.processProductSwitchSub(
+      testMessageBody,
+      mockSendConsentsReq,
+      mockGetMobileSubscriptions,
+      calculator,
+      mockSfConnector,
+      _ => Right(Set("A-other-secondary-subscription")),
+    )
+
+    result shouldBe Right(())
+  }
+
+  test(testName = "processProductSwitchSub propagates a secondary access lookup failure") {
+    val lookupError = SoftOptInError("Multiple account API lookup failed")
+    mockGetMobileSubscriptions.expects(identityId).returning(Right(MobileSubscriptions(List.empty)))
+    mockSfConnector.getActiveSubs _ expects Seq(identityId) returning Right(
+      SFAssociatedSubResponse(1, true, Seq(SFAssociatedSubRecord("Guardian Ad-Lite", identityId))),
+    )
+
+    val testMessageBody = MessageBody(
+      identityId = identityId,
+      productName = "Guardian Ad-Lite",
+      printProduct = None,
+      previousProductName = Some("Supporter Plus"),
+      eventType = Switch,
+      subscriptionId = subscriptionId,
+      userConsentsOverrides = None,
+    )
+
+    val result = IAPMessageProcessor.processProductSwitchSub(
+      testMessageBody,
+      mockSendConsentsReq,
+      mockGetMobileSubscriptions,
+      calculator,
+      mockSfConnector,
+      _ => Left(lookupError),
+    )
+
+    result shouldBe Left(lookupError)
   }
 
   test(testName = "processAcquiredSub should handle acquisition event correctly") {
@@ -159,6 +228,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       mockGetMobileSubscriptions,
       calculator,
       mockSfConnector,
+      _ => Right(Set.empty),
     )
 
     result shouldBe Right(())
@@ -207,6 +277,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       mockGetMobileSubscriptions,
       calculator,
       mockSfConnector,
+      _ => Right(Set.empty),
     )
 
     result shouldBe Right(())
@@ -257,10 +328,82 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       mockGetMobileSubscriptions,
       calculator,
       mockSfConnector,
+      _ => Right(Set.empty),
     )
 
     result shouldBe Right(())
   }
+
+  test(testName =
+    "processCancellation should not unset consents which are shared with a subscription the user has secondary access to",
+  ) {
+    mockSendConsentsReq
+      .expects(*, *)
+      .never()
+    mockGetMobileSubscriptions.expects("someIdentityId").returning(Right(MobileSubscriptions(List())))
+    mockSfConnector.getActiveSubs _ expects Seq("someIdentityId") returning Right(
+      SFAssociatedSubResponse(
+        0,
+        true,
+        records = Seq(),
+      ),
+    )
+
+    val testMessageBody = MessageBody(
+      identityId = "someIdentityId",
+      productName = "Supporter Plus",
+      printProduct = None,
+      previousProductName = None,
+      eventType = Cancellation,
+      subscriptionId = "A-S12345678",
+      userConsentsOverrides = None,
+    )
+
+    val result = processCancelledSub(
+      testMessageBody,
+      mockSendConsentsReq,
+      mockGetMobileSubscriptions,
+      calculator,
+      mockSfConnector,
+      _ => Right(Set("A-other-secondary-subscription")),
+    )
+
+    result shouldBe Right(())
+  }
+
+  test(testName = "processCancellation propagates a secondary access lookup failure") {
+    val lookupError = SoftOptInError("Multiple account API lookup failed")
+    mockGetMobileSubscriptions.expects("someIdentityId").returning(Right(MobileSubscriptions(List())))
+    mockSfConnector.getActiveSubs _ expects Seq("someIdentityId") returning Right(
+      SFAssociatedSubResponse(
+        0,
+        true,
+        records = Seq(),
+      ),
+    )
+
+    val testMessageBody = MessageBody(
+      identityId = "someIdentityId",
+      productName = "Supporter Plus",
+      printProduct = None,
+      previousProductName = None,
+      eventType = Cancellation,
+      subscriptionId = "A-S12345678",
+      userConsentsOverrides = None,
+    )
+
+    val result = processCancelledSub(
+      testMessageBody,
+      mockSendConsentsReq,
+      mockGetMobileSubscriptions,
+      calculator,
+      mockSfConnector,
+      _ => Left(lookupError),
+    )
+
+    result shouldBe Left(lookupError)
+  }
+
   test(testName = "processAcquiredSub should handle a Tier Three acquisition event correctly") {
     mockSendConsentsReq
       .expects(

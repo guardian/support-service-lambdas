@@ -52,12 +52,16 @@ object Handler extends LazyLogging {
         activeSubs <- sfConnector.getActiveSubs((cancelledSubsIdentityIds ++ productSwitchSubIdentityIds).distinct)
         _ = logger.info(s"Successfully fetched ${activeSubs.records.length} active subs from Salesforce")
 
+        multipleAccountApi <- MultipleAccountApiConnector.create(config.stage)
+        getSecondarySubscriptionNames = multipleAccountApi.activeSecondarySubscriptionNames _
+
         _ <- processProductSwitchSubs(
           productSwitchSubs,
           activeSubs,
           identityConnector.sendConsentsReq,
           sfConnector.updateSubs,
           consentsCalculator,
+          getSecondarySubscriptionNames,
         )
 
         _ <- processCancelledSubs(
@@ -66,6 +70,7 @@ object Handler extends LazyLogging {
           identityConnector.sendConsentsReq,
           sfConnector.updateSubs,
           consentsCalculator,
+          getSecondarySubscriptionNames,
         )
         _ = Metrics.put(event = "successful_run")
       } yield ()).flatten.left
@@ -108,11 +113,12 @@ object Handler extends LazyLogging {
       sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
       updateSubs: String => Either[SoftOptInError, Unit],
       consentsCalculator: ConsentsCalculator,
+      getSecondarySubscriptionNames: String => Either[SoftOptInError, Set[String]],
   ): Either[SoftOptInError, Unit] = {
     Metrics.put(event = "product_switches_to_process", productSwitchSubs.size)
 
     val recordsToUpdate = productSwitchSubs.map(
-      processProductSwitchSub(_, activeSubs, sendConsentsReq, consentsCalculator),
+      processProductSwitchSub(_, activeSubs, sendConsentsReq, consentsCalculator, getSecondarySubscriptionNames),
     )
 
     emitIdentityMetrics(recordsToUpdate)
@@ -128,10 +134,11 @@ object Handler extends LazyLogging {
       activeSubs: SFAssociatedSubResponse,
       sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
       consentsCalculator: ConsentsCalculator,
+      getSecondarySubscriptionNames: String => Either[SoftOptInError, Set[String]],
   ): SFSubRecordUpdate = {
-    val rec = EnhancedSub.fromSF(sub, activeSubs.records)
-
     val updateResult = for {
+      secondarySubscriptions <- getSecondarySubscriptionNames(sub.Buyer__r.IdentityID__c)
+      rec = EnhancedSub.fromSF(sub, activeSubs.records, secondarySubscriptions)
       ratePlanUpdates <- sub.Subscription_Rate_Plan_Updates__r
         .toRight(
           SoftOptInError(
@@ -141,7 +148,7 @@ object Handler extends LazyLogging {
       consentsBody <- consentsCalculator.buildProductSwitchConsents(
         ratePlanUpdates.records.head.Previous_Product_Name__c,
         sub.Product__c,
-        rec.productNames,
+        rec.productsWithSecondaryAccess,
       )
       res <- sendConsentsReq(sub.Buyer__r.IdentityID__c, consentsBody)
     } yield res
@@ -161,11 +168,12 @@ object Handler extends LazyLogging {
       sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
       updateSubs: String => Either[SoftOptInError, Unit],
       consentsCalculator: ConsentsCalculator,
+      getSecondarySubscriptionNames: String => Either[SoftOptInError, Set[String]],
   ): Either[SoftOptInError, Unit] = {
     Metrics.put(event = "cancellations_to_process", cancelledSubs.size)
 
     val recordsToUpdate = cancelledSubs.map(
-      processCancelledSub(_, activeSubs, sendConsentsReq, consentsCalculator),
+      processCancelledSub(_, activeSubs, sendConsentsReq, consentsCalculator, getSecondarySubscriptionNames),
     )
 
     emitIdentityMetrics(recordsToUpdate)
@@ -181,13 +189,14 @@ object Handler extends LazyLogging {
       activeSubs: SFAssociatedSubResponse,
       sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
       consentsCalculator: ConsentsCalculator,
+      getSecondarySubscriptionNames: String => Either[SoftOptInError, Set[String]],
   ): SFSubRecordUpdate = {
-    val rec = EnhancedSub.fromSF(sub, activeSubs.records)
-
     val updateResult = for {
+      secondarySubscriptions <- getSecondarySubscriptionNames(sub.Buyer__r.IdentityID__c)
+      rec = EnhancedSub.fromSF(sub, activeSubs.records, secondarySubscriptions)
       consents <- consentsCalculator.getCancellationConsents(
         sub.Product__c,
-        rec.productNames,
+        rec.productsWithSecondaryAccess,
       )
       consentWithoutSimilarProducts = consentsCalculator.removeSimilarGuardianProductFromSet(consents)
       _ <- consentsCalculator.sendCancellationConsents(rec.identityId, consentWithoutSimilarProducts, sendConsentsReq)
