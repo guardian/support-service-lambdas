@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { accountItemSchema } from '@modules/zuora/objectQuery/expandSchemas/accountItemSchema';
 import { invoiceItemSchema } from '@modules/zuora/objectQuery/expandSchemas/invoiceItemSchema';
 import {
+	nonExpiredSubscriptions,
 	subscriptionItemSchema,
 	subscriptionWithRatePlanChargesSchema,
 	subscriptionWithRatePlansSchema,
@@ -19,13 +20,15 @@ https://developer.zuora.com/v1-api-reference/api/object-queries/queryaccounts
 
 export const accountExpandRegistry = {
 	subscriptions: {
-		subscriptions: z.array(subscriptionItemSchema),
+		subscriptions: nonExpiredSubscriptions(subscriptionItemSchema),
 	},
 	'subscriptions.rateplans': {
-		subscriptions: z.array(subscriptionWithRatePlansSchema),
+		subscriptions: nonExpiredSubscriptions(subscriptionWithRatePlansSchema),
 	},
 	'subscriptions.rateplans.rateplancharges': {
-		subscriptions: z.array(subscriptionWithRatePlanChargesSchema),
+		subscriptions: nonExpiredSubscriptions(
+			subscriptionWithRatePlanChargesSchema,
+		),
 	},
 	invoices: { invoices: z.array(invoiceItemSchema) },
 } as const satisfies ObjectQueryExpandRegistry;

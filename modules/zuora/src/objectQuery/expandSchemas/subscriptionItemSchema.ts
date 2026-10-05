@@ -54,8 +54,8 @@ export const subscriptionItemSchema = z.object({
 	originalId: z.string(),
 	/** The ID of the previous subscription; only available if this is a renewal subscription. */
 	previousSubscriptionId: z.string().nullable(),
-	/** Specifies whether a termed subscription will remain TERMED or change to EVERGREEN on renewal. */
-	renewalSetting: z.enum(['RENEW_WITH_SPECIFIC_TERM', 'RENEW_TO_EVERGREEN']),
+	/** Only termed subscriptions are used for active subscriptions. */
+	renewalSetting: z.literal('RENEW_WITH_SPECIFIC_TERM'),
 	/** The length of the period for the subscription renewal term. */
 	renewalTerm: z.number().int(),
 	/** The period type for the subscription renewal term. */
@@ -109,6 +109,22 @@ export const subscriptionItemSchema = z.object({
 	/** The ID of the order associated with the subscription. */
 	orderId: z.string().nullable(),
 });
+
+// Expired subscriptions can be returned with null fields that fail the full
+// schema, so we drop them with a cheap status-only check before the full schema
+// runs - this avoids failing the whole query and keeps validation noise out of
+// the logs.
+const expiredSubscriptionSchema = z.object({ status: z.literal('Expired') });
+
+export const nonExpiredSubscriptions = <T extends z.ZodTypeAny>(schema: T) =>
+	z
+		.array(z.unknown())
+		.transform((items) =>
+			items.filter(
+				(item) => !expiredSubscriptionSchema.safeParse(item).success,
+			),
+		)
+		.pipe(z.array(schema));
 
 export const subscriptionWithRatePlansSchema = subscriptionItemSchema.extend({
 	ratePlans: z.array(ratePlanItemSchema),
