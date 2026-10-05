@@ -13,9 +13,13 @@ class IAPMessageProcessor(
     consentsCalculator: ConsentsCalculator,
     mpapiConnector: MpapiConnector,
     dynamoConnector: DynamoConnector,
+    multipleAccountApiConnector: MultipleAccountApiConnector,
 ) extends StrictLogging {
 
   import IAPMessageProcessor._
+
+  private val getSecondarySubscriptionNames: String => Either[SoftOptInError, Set[String]] =
+    multipleAccountApiConnector.activeSecondarySubscriptionNames
 
   def processMessage(message: MessageBody): Any = {
     logger.info(s"Processing message: $message")
@@ -38,6 +42,7 @@ class IAPMessageProcessor(
           mpapiConnector.getMobileSubscriptions,
           consentsCalculator,
           sfConnector,
+          getSecondarySubscriptionNames,
         )
       case Switch =>
         Metrics.put(event = "product_switches_to_process", 1)
@@ -48,6 +53,7 @@ class IAPMessageProcessor(
           mpapiConnector.getMobileSubscriptions,
           consentsCalculator,
           sfConnector,
+          getSecondarySubscriptionNames,
         )
     }
 
@@ -81,7 +87,15 @@ object IAPMessageProcessor extends StrictLogging {
       identityConnector = new IdentityConnector(config.identityConfig)
       consentsCalculator = new ConsentsCalculator(ConsentsMapping.consentsMapping)
       mpapiConnector = new MpapiConnector(config.mpapiConfig)
-    } yield new IAPMessageProcessor(sfConnector, identityConnector, consentsCalculator, mpapiConnector, dynamoConnector)
+      multipleAccountApiConnector <- MultipleAccountApiConnector.create(stage)
+    } yield new IAPMessageProcessor(
+      sfConnector,
+      identityConnector,
+      consentsCalculator,
+      mpapiConnector,
+      dynamoConnector,
+      multipleAccountApiConnector,
+    )
 
     clients match {
       case Left(error) => rethrowError(error)
@@ -119,6 +133,7 @@ object IAPMessageProcessor extends StrictLogging {
       getMobileSubscriptions: String => Either[SoftOptInError, MobileSubscriptions],
       consentsCalculator: ConsentsCalculator,
       sfConnector: SalesforceConnector,
+      getSecondarySubscriptionNames: String => Either[SoftOptInError, Set[String]],
   ): Either[SoftOptInError, Unit] =
     for {
       previousProductName <- messageBody.previousProductName.toRight(
@@ -127,18 +142,25 @@ object IAPMessageProcessor extends StrictLogging {
 
       mobileSubscriptionsResponse <- getMobileSubscriptions(messageBody.identityId)
       activeSubs <- sfConnector.getActiveSubs(Seq(messageBody.identityId))
+      secondarySubscriptions <- getSecondarySubscriptionNames(messageBody.identityId)
 
       iapSOIs = mobileSubscriptionsResponse.subscriptions
         .filter(_.valid)
         .map(_.softOptInProductName)
         .distinct
 
-      rec = EnhancedSub.fromSQS(messageBody.identityId, activeSubs.records, iapSOIs)
+      rec = EnhancedSub.fromSQS(
+        messageBody.identityId,
+        activeSubs.records,
+        iapSOIs,
+        secondarySubscriptions,
+        messageBody.subscriptionId,
+      )
 
       consentsBody <- consentsCalculator.buildProductSwitchConsents(
         previousProductName,
         messageBody.productName,
-        rec.productNames,
+        rec.productsWithSecondaryAccess,
       )
 
       res <- {
@@ -155,20 +177,28 @@ object IAPMessageProcessor extends StrictLogging {
       getMobileSubscriptions: String => Either[SoftOptInError, MobileSubscriptions],
       consentsCalculator: ConsentsCalculator,
       sfConnector: SalesforceConnector,
+      getSecondarySubscriptionNames: String => Either[SoftOptInError, Set[String]],
   ): Either[SoftOptInError, Unit] = {
     for {
       mobileSubscriptionsResponse <- getMobileSubscriptions(messageBody.identityId)
       activeSubs <- sfConnector.getActiveSubs(Seq(messageBody.identityId))
+      secondarySubscriptions <- getSecondarySubscriptionNames(messageBody.identityId)
 
       iapSOIs = mobileSubscriptionsResponse.subscriptions
         .filter(_.valid)
         .map(_.softOptInProductName)
         .distinct
-      rec = EnhancedSub.fromSQS(messageBody.identityId, activeSubs.records, iapSOIs)
+      rec = EnhancedSub.fromSQS(
+        messageBody.identityId,
+        activeSubs.records,
+        iapSOIs,
+        secondarySubscriptions,
+        messageBody.subscriptionId,
+      )
 
       consents <- consentsCalculator.getCancellationConsents(
         messageBody.productName,
-        rec.productNames,
+        rec.productsWithSecondaryAccess,
       )
       consentWithoutSimilarProducts = consentsCalculator.removeSimilarGuardianProductFromSet(consents)
       _ <- consentsCalculator.sendCancellationConsents(
