@@ -80,10 +80,10 @@ export class SecondaryUserRepository {
 		);
 	}
 
-	isActive(secondaryUser: SecondaryUserRecord): boolean {
-		const notPastTermEnd = termEndDateFromTTL(secondaryUser.expiryDate).isAfter(
-			dayjs(),
-		);
+	isActive(secondaryUser: SecondaryUserRecord, now: Dayjs = dayjs()): boolean {
+		const notPastTermEnd = termEndDateFromTTL(secondaryUser.expiryDate)
+			.endOf('day')
+			.isAfter(now);
 		const notCancelled = secondaryUser.cancelledBy === undefined;
 		return notPastTermEnd && notCancelled;
 	}
