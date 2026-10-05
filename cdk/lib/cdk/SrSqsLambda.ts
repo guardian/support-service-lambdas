@@ -9,7 +9,7 @@ import type { SrMonitoring } from './SrLambdaAlarm';
 import { SrLambdaAlarm } from './SrLambdaAlarm';
 import type { SrStack } from './SrStack';
 
-type SrSqsLambdaProps = SrLambdaProps & {
+export type SrSqsLambdaProps = SrLambdaProps & {
 	/**
 	 * Optional name insert for the queue, defaults to the lambda's namePrefix, if any.
 	 *
