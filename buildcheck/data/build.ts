@@ -44,6 +44,7 @@ const moduleAws: ModuleDefinition = {
 	name: 'aws',
 	dependencies: {
 		...dep['@aws-sdk/client-cloudwatch'],
+		...dep['@aws-sdk/client-eventbridge'],
 		...dep['@aws-sdk/client-lambda'],
 		...dep['@aws-sdk/client-s3'],
 		...dep['@aws-sdk/client-sqs'],
@@ -152,6 +153,17 @@ const moduleRouting: ModuleDefinition = {
 		...devDeps['@types/aws-lambda'],
 	},
 	moduleDependencies: [moduleAws, moduleLogger, moduleZuora],
+};
+
+const moduleSubscriptionEvents: ModuleDefinition = {
+	name: 'subscription-events',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
+	moduleDependencies: [moduleAws, moduleLogger, moduleRouting, moduleZuora],
 };
 
 const moduleBigquery: ModuleDefinition = {
@@ -1045,6 +1057,7 @@ export const build: BuildDefinition = {
 		moduleRouting,
 		moduleSalesforce,
 		moduleSecretsManager,
+		moduleSubscriptionEvents,
 		moduleSupporterProductData,
 		moduleSyncSupporterProductData,
 		moduleTestUsers,

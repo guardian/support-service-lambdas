@@ -45,11 +45,15 @@ export class MparticleAcquisitionsPublisher extends SrStack {
 			},
 		});
 
+		// Disabled in PROD for now
+		const enabled = stage === 'CODE';
+
 		lambda.addEventSource(
 			new SqsEventSource(publisherQueue, {
 				batchSize: 10,
 				maxBatchingWindow: Duration.seconds(5),
 				reportBatchItemFailures: true,
+				enabled,
 			}),
 		);
 
