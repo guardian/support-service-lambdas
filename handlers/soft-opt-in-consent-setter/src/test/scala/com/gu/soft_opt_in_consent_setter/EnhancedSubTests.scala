@@ -1,6 +1,6 @@
 package com.gu.soft_opt_in_consent_setter
 
-import com.gu.soft_opt_in_consent_setter.models.{EnhancedSub, SFAssociatedSubRecord}
+import com.gu.soft_opt_in_consent_setter.models.{ConsentsMapping, EnhancedSub, SFAssociatedSubRecord}
 import com.gu.soft_opt_in_consent_setter.testData.SFSubscriptionTestData._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
@@ -31,7 +31,7 @@ class EnhancedSubTests extends AnyFlatSpec with should.Matchers {
   "EnhancedSub.fromSF" should "add 'Secondary User' when there is active secondary access to another subscription" in {
     EnhancedSub
       .fromSF(subRecord, Seq(), Set(subRecord.Name, "A-S999999"))
-      .productsWithSecondaryAccess shouldBe Set("Secondary User")
+      .productsWithSecondaryAccess shouldBe Set(ConsentsMapping.secondaryDigitalAccessProductName)
   }
 
   // EnhancedSub.fromSQS tests
@@ -64,6 +64,6 @@ class EnhancedSubTests extends AnyFlatSpec with should.Matchers {
   "EnhancedSub.fromSQS" should "add 'Secondary User' when there is active secondary access to another subscription" in {
     EnhancedSub
       .fromSQS(identityId, Seq(), Seq(), Set(subId, "A-S999999"), subId)
-      .productsWithSecondaryAccess shouldBe Set("Secondary User")
+      .productsWithSecondaryAccess shouldBe Set(ConsentsMapping.secondaryDigitalAccessProductName)
   }
 }

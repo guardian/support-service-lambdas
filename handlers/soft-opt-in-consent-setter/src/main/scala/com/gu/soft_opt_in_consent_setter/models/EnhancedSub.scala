@@ -34,7 +34,7 @@ object EnhancedSub {
     EnhancedSub(identityId, withSecondaryAccess(productNames, activeSecondarySubscriptionNames, subscriptionId))
   }
 
-  // a user has "Secondary User" access if they have active secondary access to a subscription
+  // a user has secondary access if they have active secondary access to a subscription
   // other than the one currently being processed
   private def withSecondaryAccess(
       productNames: Set[String],
@@ -42,6 +42,6 @@ object EnhancedSub {
       currentSubscriptionName: String,
   ): Set[String] = {
     val hasOtherSecondaryAccess = activeSecondarySubscriptionNames.exists(_ != currentSubscriptionName)
-    if (hasOtherSecondaryAccess) productNames + "Secondary User" else productNames
+    if (hasOtherSecondaryAccess) productNames + ConsentsMapping.secondaryDigitalAccessProductName else productNames
   }
 }
