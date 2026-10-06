@@ -160,7 +160,7 @@ object IAPMessageProcessor extends StrictLogging {
       consentsBody <- consentsCalculator.buildProductSwitchConsents(
         previousProductName,
         messageBody.productName,
-        rec.productsWithSecondaryAccess,
+        rec.productNames,
       )
 
       res <- {
@@ -198,7 +198,7 @@ object IAPMessageProcessor extends StrictLogging {
 
       consents <- consentsCalculator.getCancellationConsents(
         messageBody.productName,
-        rec.productsWithSecondaryAccess,
+        rec.productNames,
       )
       consentWithoutSimilarProducts = consentsCalculator.removeSimilarGuardianProductFromSet(consents)
       _ <- consentsCalculator.sendCancellationConsents(

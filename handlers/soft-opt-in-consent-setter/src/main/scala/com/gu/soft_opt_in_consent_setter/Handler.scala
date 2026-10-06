@@ -148,7 +148,7 @@ object Handler extends LazyLogging {
       consentsBody <- consentsCalculator.buildProductSwitchConsents(
         ratePlanUpdates.records.head.Previous_Product_Name__c,
         sub.Product__c,
-        rec.productsWithSecondaryAccess,
+        rec.productNames,
       )
       res <- sendConsentsReq(sub.Buyer__r.IdentityID__c, consentsBody)
     } yield res
@@ -196,7 +196,7 @@ object Handler extends LazyLogging {
       rec = EnhancedSub.fromSF(sub, activeSubs.records, secondarySubscriptions)
       consents <- consentsCalculator.getCancellationConsents(
         sub.Product__c,
-        rec.productsWithSecondaryAccess,
+        rec.productNames,
       )
       consentWithoutSimilarProducts = consentsCalculator.removeSimilarGuardianProductFromSet(consents)
       _ <- consentsCalculator.sendCancellationConsents(rec.identityId, consentWithoutSimilarProducts, sendConsentsReq)

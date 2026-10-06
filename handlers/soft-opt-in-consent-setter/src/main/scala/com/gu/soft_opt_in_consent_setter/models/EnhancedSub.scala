@@ -1,6 +1,6 @@
 package com.gu.soft_opt_in_consent_setter.models
 
-case class EnhancedSub(identityId: String, productsWithSecondaryAccess: Set[String])
+case class EnhancedSub(identityId: String, productNames: Set[String])
 
 object EnhancedSub {
 
