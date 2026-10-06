@@ -2,9 +2,8 @@ package com.gu.soft_opt_in_consent_setter
 
 import com.gu.soft_opt_in_consent_setter.HandlerIAP.{Acquisition, Cancellation, MessageBody, Switch, rethrowError}
 import com.gu.soft_opt_in_consent_setter.models.ConsentsMapping.similarGuardianProducts
-import com.gu.soft_opt_in_consent_setter.models.{ConsentsMapping, SoftOptInConfig, SoftOptInError}
+import com.gu.soft_opt_in_consent_setter.models.{ConsentsMapping, EnhancedSub, SoftOptInConfig, SoftOptInError}
 import com.typesafe.scalalogging.StrictLogging
-import io.circe.syntax._
 
 import scala.util.{Failure, Success}
 
@@ -114,29 +113,6 @@ object IAPMessageProcessor extends StrictLogging {
     } yield ()
   }
 
-  private[soft_opt_in_consent_setter] def buildProductSwitchConsents(
-      oldProductName: String,
-      newProductName: String,
-      allProductsForUser: Set[String],
-      consentsCalculator: ConsentsCalculator,
-  ): Either[SoftOptInError, String] = {
-    import consentsCalculator._
-
-    for {
-      oldProductSoftOptIns <- getSoftOptInsByProduct(oldProductName)
-      newProductSoftOptIns <- getSoftOptInsByProduct(newProductName)
-      currentProductSoftOptIns <- getSoftOptInsByProducts(allProductsForUser)
-      allOtherProductSoftOptIns <- getSoftOptInsByProducts(allProductsForUser - newProductName)
-
-      toRemove = oldProductSoftOptIns.diff(currentProductSoftOptIns).map(ConsentsObject(_, false))
-      toAdd = newProductSoftOptIns
-        .filter(option => !oldProductSoftOptIns.contains(option) && !allOtherProductSoftOptIns.contains(option))
-        .filterNot(_ == similarGuardianProducts)
-        .map(ConsentsObject(_, true))
-      consentsBody = (toRemove ++ toAdd).asJson.toString()
-    } yield consentsBody
-  }
-
   private[soft_opt_in_consent_setter] def processProductSwitchSub(
       messageBody: MessageBody,
       sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
@@ -157,13 +133,12 @@ object IAPMessageProcessor extends StrictLogging {
         .map(_.softOptInProductName)
         .distinct
 
-      productNames = activeSubs.records.map(_.Product__c) ++ iapSOIs
+      rec = EnhancedSub.fromSQS(messageBody.identityId, activeSubs.records, iapSOIs)
 
-      consentsBody <- buildProductSwitchConsents(
+      consentsBody <- consentsCalculator.buildProductSwitchConsents(
         previousProductName,
         messageBody.productName,
-        productNames.toSet,
-        consentsCalculator,
+        rec.productNames,
       )
 
       res <- {
@@ -181,22 +156,6 @@ object IAPMessageProcessor extends StrictLogging {
       consentsCalculator: ConsentsCalculator,
       sfConnector: SalesforceConnector,
   ): Either[SoftOptInError, Unit] = {
-    def sendCancellationConsents(identityId: String, consents: Set[String]): Either[SoftOptInError, Unit] = {
-      val maybeError: Option[SoftOptInError] =
-        for {
-          maybeConsents <- Some(consents).filter(_.nonEmpty)
-          consentsBody = consentsCalculator.buildConsentsBody(maybeConsents.map(_ -> false).toMap)
-          _ = logger.info(
-            s"(cancellation) Sending consents request for identityId $identityId with payload: $consentsBody",
-          )
-          error <- sendConsentsReq(identityId, consentsBody).swap.toOption
-          is404 = error.statusCode.contains(404)
-          _ = if (is404) logger.warn(s"(cancellation) Consents request for $identityId failed with 404 Not Found")
-          if !is404
-        } yield error
-      maybeError.toLeft(())
-    }
-
     for {
       mobileSubscriptionsResponse <- getMobileSubscriptions(messageBody.identityId)
       activeSubs <- sfConnector.getActiveSubs(Seq(messageBody.identityId))
@@ -205,14 +164,18 @@ object IAPMessageProcessor extends StrictLogging {
         .filter(_.valid)
         .map(_.softOptInProductName)
         .distinct
-      productNames = activeSubs.records.map(_.Product__c) ++ iapSOIs
+      rec = EnhancedSub.fromSQS(messageBody.identityId, activeSubs.records, iapSOIs)
 
       consents <- consentsCalculator.getCancellationConsents(
         messageBody.productName,
-        productNames.toSet,
+        rec.productNames,
       )
       consentWithoutSimilarProducts = consentsCalculator.removeSimilarGuardianProductFromSet(consents)
-      _ <- sendCancellationConsents(messageBody.identityId, consentWithoutSimilarProducts)
+      _ <- consentsCalculator.sendCancellationConsents(
+        messageBody.identityId,
+        consentWithoutSimilarProducts,
+        sendConsentsReq,
+      )
     } yield ()
   }
 

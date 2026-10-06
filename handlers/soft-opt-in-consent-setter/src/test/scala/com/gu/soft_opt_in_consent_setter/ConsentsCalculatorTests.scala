@@ -128,11 +128,10 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
   }
 
   "buildProductSwitchConsents" should "return the correct consents when switching from a Recurring Contribution to Guardian Weekly subscription" in {
-    Handler.buildProductSwitchConsents(
+    calculator.buildProductSwitchConsents(
       "Contributor",
       "Guardian Weekly",
       Set("Guardian Weekly"),
-      calculator,
     ) shouldBe Right("""[
         |  {
         |    "id" : "similar_guardian_products",
@@ -146,11 +145,10 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
   }
 
   "buildProductSwitchConsents" should "return the correct consents when switching from a Recurring Contribution to a Guardian Weekly subscription whilst the user also owns a Newspaper subscription" in {
-    Handler.buildProductSwitchConsents(
+    calculator.buildProductSwitchConsents(
       "Contributor",
       "Guardian Weekly",
       Set("Guardian Weekly", "newspaper"),
-      calculator,
     ) shouldBe Right("""[
         |  {
         |    "id" : "guardian_weekly_newsletter",
@@ -160,11 +158,10 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
   }
 
   "buildProductSwitchConsents" should "return the correct consents when switching from a Guardian Weekly to a Newspaper subscription" in {
-    Handler.buildProductSwitchConsents(
+    calculator.buildProductSwitchConsents(
       "Guardian Weekly",
       "newspaper",
       Set("newspaper"),
-      calculator,
     ) shouldBe Right("""[
         |  {
         |    "id" : "guardian_weekly_newsletter",
@@ -178,11 +175,10 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
   }
 
   "buildProductSwitchConsents" should "return the correct consents when switching from a Guardian Weekly to a Recurring Contribution whilst also owning a Newspaper subscription" in {
-    Handler.buildProductSwitchConsents(
+    calculator.buildProductSwitchConsents(
       "Guardian Weekly",
       "Contributor",
       Set("newspaper", "Contributor"),
-      calculator,
     ) shouldBe Right("""[
         |  {
         |    "id" : "guardian_weekly_newsletter",
@@ -192,11 +188,10 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
   }
 
   "buildProductSwitchConsents" should "return the correct consents when switching from a Guardian Weekly to a Newspaper subscription whilst also owning a Recurring Contribution" in {
-    Handler.buildProductSwitchConsents(
+    calculator.buildProductSwitchConsents(
       "Guardian Weekly",
       "newspaper",
       Set("newspaper", "Contributor"),
-      calculator,
     ) shouldBe Right("""[
         |  {
         |    "id" : "guardian_weekly_newsletter",
@@ -210,11 +205,10 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
   }
 
   "buildProductSwitchConsents" should "return the correct consents when switching from a Guardian Weekly to a Newspaper subscription whilst also owning a Mobile Subscription (IAP)" in {
-    Handler.buildProductSwitchConsents(
+    calculator.buildProductSwitchConsents(
       "Guardian Weekly",
       "newspaper",
       Set("newspaper", "InAppPurchase"),
-      calculator,
     ) shouldBe Right("""[
         |  {
         |    "id" : "guardian_weekly_newsletter",
@@ -227,22 +221,58 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
         |]""".stripMargin)
   }
 
-  "buildProductSwitchConsents - HandlerIAP" should "return the correct consents when switching from a Guardian Weekly to a Newspaper subscription whilst also owning a Mobile Subscription (IAP)" in {
-    IAPMessageProcessor.buildProductSwitchConsents(
-      "Guardian Weekly",
-      "newspaper",
-      Set("newspaper", "InAppPurchase"),
-      calculator,
-    ) shouldBe Right("""[
+  // sendCancellationConsents
+  "sendCancellationConsents" should "not send a request when there are no consents to send" in {
+    var called = false
+    val sendConsentsReq: (String, String) => Either[SoftOptInError, Unit] = (_, _) => {
+      called = true
+      Right(())
+    }
+
+    calculator.sendCancellationConsents("identityId", Set(), sendConsentsReq) shouldBe Right(())
+    called shouldBe false
+  }
+
+  "sendCancellationConsents" should "send a request with the consents turned off" in {
+    var sentBody: Option[String] = None
+    val sendConsentsReq: (String, String) => Either[SoftOptInError, Unit] = (_, body) => {
+      sentBody = Some(body)
+      Right(())
+    }
+
+    calculator.sendCancellationConsents(
+      "identityId",
+      Set("guardian_weekly_newsletter"),
+      sendConsentsReq,
+    ) shouldBe Right(())
+    removeWhitespace(sentBody.get) shouldBe removeWhitespace("""[
         |  {
         |    "id" : "guardian_weekly_newsletter",
         |    "consented" : false
-        |  },
-        |  {
-        |    "id" : "subscriber_preview",
-        |    "consented" : true
         |  }
         |]""".stripMargin)
+  }
+
+  "sendCancellationConsents" should "treat a 404 response (identity account doesn't exist) as success" in {
+    val sendConsentsReq: (String, String) => Either[SoftOptInError, Unit] =
+      (_, _) => Left(SoftOptInError("not found", null, Some(404)))
+
+    calculator.sendCancellationConsents(
+      "identityId",
+      Set("guardian_weekly_newsletter"),
+      sendConsentsReq,
+    ) shouldBe Right(())
+  }
+
+  "sendCancellationConsents" should "return an error when the request fails with a non-404 error" in {
+    val error = SoftOptInError("server error", null, Some(500))
+    val sendConsentsReq: (String, String) => Either[SoftOptInError, Unit] = (_, _) => Left(error)
+
+    calculator.sendCancellationConsents(
+      "identityId",
+      Set("guardian_weekly_newsletter"),
+      sendConsentsReq,
+    ) shouldBe Left(error)
   }
 
   def removeWhitespace(stringToRemoveWhitespaceFrom: String): String = {
