@@ -1,6 +1,7 @@
 package com.gu.soft_opt_in_consent_setter
 
 import com.gu.soft_opt_in_consent_setter.models.SoftOptInError
+import com.typesafe.scalalogging.LazyLogging
 import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
 import io.circe.parser.decode
@@ -19,34 +20,51 @@ import scala.util.Try
 // client for the multiple-account-api, used to find the subscriptions a user has active secondary access to
 class MultipleAccountApiConnector(
     baseUrl: String,
-    apiKey: String,
-    sendReq: (String, String) => Either[Throwable, HttpResponse[String]] = MultipleAccountApiConnector.sendReq,
-) {
+    sendReq: String => Either[Throwable, HttpResponse[String]],
+) extends LazyLogging {
+  def this(baseUrl: String, apiKey: String) =
+    this(baseUrl, (url: String) => MultipleAccountApiConnector.sendReq(url, apiKey))
+
   import MultipleAccountApiConnector._
 
   def activeSecondarySubscriptionNames(identityId: String): Either[SoftOptInError, Set[String]] = {
     val encodedId = URLEncoder.encode(identityId, StandardCharsets.UTF_8)
-    for {
-      result <- sendReq(s"$baseUrl/secondary-user/$encodedId", apiKey).left.map(error =>
-        SoftOptInError(s"MultipleAccountApiConnector: request failed for identityId $identityId", error),
+    val result = get[SecondaryUserDetailsResponse](s"$baseUrl/secondary-user/$encodedId")
+      .map(_.subscriptions.map(_.subscriptionName).toSet)
+    result.foreach(secondarySubscriptions =>
+      logger.info(s"MultipleAccountApiConnector: Successfully fetched secondary subs $secondarySubscriptions"),
+    )
+    result
+  }
+
+  private def get[T: Decoder](url: String): Either[SoftOptInError, T] = {
+    val result = for {
+      resp <- sendReq(url).left.map(error =>
+        SoftOptInError(s"MultipleAccountApiConnector: request failed for $url", error),
       )
       body <- Either.cond(
-        result.isSuccess,
-        result.body,
+        resp.isSuccess,
+        resp.body,
         SoftOptInError(
-          s"MultipleAccountApiConnector: returned status ${result.code} for identityId $identityId",
+          s"MultipleAccountApiConnector: returned status ${resp.code} for $url",
           null,
-          Some(result.code),
+          Some(resp.code),
         ),
       )
-      details <- decode[SecondaryUserDetailsResponse](body).left.map(error =>
-        SoftOptInError(s"MultipleAccountApiConnector: invalid response for identityId $identityId", error),
+      decoded <- decode[T](body).left.map(error =>
+        SoftOptInError(s"MultipleAccountApiConnector: invalid response for $url", error),
       )
-    } yield details.subscriptions.map(_.subscriptionName).toSet
+    } yield decoded
+
+    result match {
+      case Left(e) => logger.warn(s"Request to multiple-account-api failed for $url: $e")
+      case Right(decoded) => logger.info(s"Request to multiple-account-api successful for $url: $decoded")
+    }
+    result
   }
 }
 
-object MultipleAccountApiConnector {
+object MultipleAccountApiConnector extends LazyLogging {
   private case class SecondarySubscription(subscriptionName: String)
   private case class SecondaryUserDetailsResponse(subscriptions: List[SecondarySubscription])
 
@@ -102,6 +120,9 @@ object MultipleAccountApiConnector {
       case ids => throw new IllegalStateException(s"Expected one API key in $stackName, found ${ids.size}")
     }
 
-  private def sendReq(url: String, apiKey: String): Either[Throwable, HttpResponse[String]] =
-    Try(Http(url).header("x-api-key", apiKey).timeout(3000, 5000).asString).toEither
+
+  private def sendReq(url: String, apiKey: String): Either[Throwable, HttpResponse[String]] = {
+    logger.info(s"Making request to multiple-account-api: $url")
+    Try(Http(url).header("x-api-key", apiKey).timeout(3000, 15000).asString).toEither
+  }
 }
