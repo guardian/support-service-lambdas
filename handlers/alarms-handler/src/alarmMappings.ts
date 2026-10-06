@@ -122,6 +122,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		// data retention
 		'identity-backfill',
 		'identity-retention',
+		'identity-deletion-cleanup',
 		'zuora-retention', //https://github.com/guardian/zuora-retention
 		'zuora-salesforce-link-remover',
 		'scrub-non-tokenised-payment-methods',
