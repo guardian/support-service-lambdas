@@ -21,6 +21,7 @@ import {
 import { SrApiLambda } from './cdk/SrApiLambda';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
+import { SrSubscriptionEventsLambda } from './cdk/SrSubscriptionEventsLambda';
 
 export class MultipleAccountApi extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
@@ -38,6 +39,7 @@ export class MultipleAccountApi extends SrStack {
 			},
 		});
 
+		// redundant - GuLambdaFunction gives /STAGE/support/multiple-account-api/* for free
 		lambda.addPolicies(
 			new GuAllowPolicy(this, 'AllowGetIdentityClientToken', {
 				actions: ['ssm:GetParameter'],
@@ -103,6 +105,40 @@ export class MultipleAccountApi extends SrStack {
 		});
 
 		secondaryUserTable.grantFullAccess(lambda);
+
+		const subscriptionEventsListenerLambda = new SrSubscriptionEventsLambda(
+			this,
+			'SubscriptionEventsListenerLambda',
+			{
+				nameSuffix: 'cancellation',
+				detailTypes: ['Cancellation'],
+				lambdaOverrides: {
+					description:
+						'Sends secondary-user cancellation emails when a subscription with multiple accounts is cancelled',
+				},
+				monitoring: {
+					errorImpact:
+						'A secondary user may not receive a cancellation email when their subscription is cancelled',
+				},
+				maxReceiveCount: 3,
+			},
+		);
+
+		subscriptionEventsListenerLambda.addPolicies(
+			new AllowZuoraOAuthSecretsPolicy(
+				this,
+				'SubscriptionEventsListener Zuora OAuth Secrets Manager policy',
+			),
+		);
+		subscriptionEventsListenerLambda.addPolicies(
+			AllowSqsSendPolicy.createWithId(
+				this,
+				'SubscriptionEventsListener SQS send policy',
+				'braze-emails',
+			),
+		);
+
+		secondaryUserTable.grantReadData(subscriptionEventsListenerLambda);
 
 		new CfnAlarm(this, 'failedMultipleAccountsEmailTrigger', {
 			alarmActions: [
