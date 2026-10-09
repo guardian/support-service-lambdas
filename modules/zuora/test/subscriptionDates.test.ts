@@ -65,24 +65,24 @@ describe('getSubscriptionDates', () => {
 		);
 	});
 
-	it('should set customerAcceptanceDate to now + 16 days for DigitalSubscription', () => {
+	it('should set customerAcceptanceDate to now for DigitalSubscription', () => {
 		const productPurchase: ProductPurchase = {
 			product: 'DigitalSubscription',
 			ratePlan: 'Monthly',
 		};
 		const result = getSubscriptionDates(now, productPurchase);
 		expect(result.contractEffectiveDate).toEqual(now);
-		expect(result.customerAcceptanceDate).toEqual(now.add(16, 'day'));
+		expect(result.customerAcceptanceDate).toEqual(now);
 	});
 
-	it('should set customerAcceptanceDate to now + 15 days for GuardianAdLite', () => {
+	it('should set customerAcceptanceDate to now for GuardianAdLite', () => {
 		const productPurchase: ProductPurchase = {
 			product: 'GuardianAdLite',
 			ratePlan: 'Monthly',
 		};
 		const result = getSubscriptionDates(now, productPurchase);
 		expect(result.contractEffectiveDate).toEqual(now);
-		expect(result.customerAcceptanceDate).toEqual(now.add(15, 'day'));
+		expect(result.customerAcceptanceDate).toEqual(now);
 	});
 
 	it('should set customerAcceptanceDate to now for other product types', () => {
