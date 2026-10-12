@@ -16,12 +16,12 @@ private[soft_opt_in_consent_setter] object HttpClient {
   }
 
   case object DefaultTimeout extends TimeoutProfile {
-    override val connectTimeoutSeconds: Long = 10
-    override val readTimeoutSeconds: Long = 10
+    override val connectTimeoutSeconds: Long = 1
+    override val readTimeoutSeconds: Long = 5
   }
 
   case object SalesforceTimeout extends TimeoutProfile {
-    override val connectTimeoutSeconds: Long = 10
+    override val connectTimeoutSeconds: Long = 1
     override val readTimeoutSeconds: Long = 60
   }
 
@@ -93,5 +93,8 @@ private[soft_opt_in_consent_setter] object HttpClient {
     new OkHttpClient.Builder()
       .connectTimeout(timeoutProfile.connectTimeoutSeconds, TimeUnit.SECONDS)
       .readTimeout(timeoutProfile.readTimeoutSeconds, TimeUnit.SECONDS)
+      .writeTimeout(0, TimeUnit.SECONDS)
+      .followRedirects(false)
+      .followSslRedirects(false)
       .build()
 }

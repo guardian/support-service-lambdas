@@ -48,9 +48,9 @@ class HttpClientTests extends AnyFlatSpec with Matchers {
       "/query",
       exchange => {
         receivedMethod.set(exchange.getRequestMethod)
-        receivedQuery.set(exchange.getRequestURI.getQuery)
+        receivedQuery.set(exchange.getRequestURI.getRawQuery)
         val responseBody = "{}".getBytes(StandardCharsets.UTF_8)
-        exchange.sendResponseHeaders(200, responseBody.length)
+        exchange.sendResponseHeaders(200, responseBody.length.toLong)
         exchange.getResponseBody.write(responseBody)
         exchange.close()
       },
@@ -60,12 +60,12 @@ class HttpClientTests extends AnyFlatSpec with Matchers {
     try {
       val response = HttpClient.get(
         s"http://localhost:${server.getAddress.getPort}/query",
-        queryParameters = Seq("q" -> "SELECT Id FROM Subscription"),
+        queryParameters = Seq("q" -> "A&B + C"),
       )
 
       response shouldBe Right(HttpResponse("{}", 200))
       receivedMethod.get() shouldBe "GET"
-      receivedQuery.get() shouldBe "q=SELECT Id FROM Subscription"
+      receivedQuery.get() shouldBe "q=A%26B%20%2B%20C"
     } finally server.stop(0)
   }
 
@@ -81,7 +81,7 @@ class HttpClientTests extends AnyFlatSpec with Matchers {
         receivedBody.set(new String(exchange.getRequestBody.readAllBytes(), StandardCharsets.UTF_8))
         receivedContentType.set(exchange.getRequestHeaders.getFirst("Content-Type"))
         val responseBody = "{}".getBytes(StandardCharsets.UTF_8)
-        exchange.sendResponseHeaders(200, responseBody.length)
+        exchange.sendResponseHeaders(200, responseBody.length.toLong)
         exchange.getResponseBody.write(responseBody)
         exchange.close()
       },

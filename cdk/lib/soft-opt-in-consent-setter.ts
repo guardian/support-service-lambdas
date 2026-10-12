@@ -195,7 +195,7 @@ export class SoftOptInConsentSetter extends GuStack {
 			runtime: Runtime.JAVA_21,
 			handler: 'com.gu.soft_opt_in_consent_setter.Handler::handleRequest',
 			memorySize: 512,
-			timeout: Duration.seconds(900),
+			timeout: Duration.minutes(15),
 			environment: {
 				Stage: this.stage,
 				sfApiVersion: 'v46.0',
@@ -211,7 +211,7 @@ export class SoftOptInConsentSetter extends GuStack {
 			runtime: Runtime.JAVA_21,
 			handler: 'com.gu.soft_opt_in_consent_setter.HandlerIAP::handleRequest',
 			memorySize: 512,
-			timeout: Duration.seconds(300),
+			timeout: Duration.minutes(5),
 			environment: {
 				Stage: this.stage,
 				sfApiVersion: 'v56.0',
