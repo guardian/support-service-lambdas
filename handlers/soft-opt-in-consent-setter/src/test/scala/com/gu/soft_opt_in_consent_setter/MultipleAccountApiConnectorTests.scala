@@ -2,12 +2,11 @@ package com.gu.soft_opt_in_consent_setter
 
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
-import scalaj.http.HttpResponse
 import software.amazon.awssdk.services.cloudformation.model.StackResourceSummary
 
 class MultipleAccountApiConnectorTests extends AnyFunSuite with Matchers {
   private def response(body: String, status: Int = 200) =
-    HttpResponse(body, status, Map.empty[String, IndexedSeq[String]])
+    HttpResponse(body, status)
 
   test("returns active secondary subscription names") {
     val connector = new MultipleAccountApiConnector(

@@ -5,7 +5,6 @@ import com.typesafe.scalalogging.LazyLogging
 import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
 import io.circe.parser.decode
-import scalaj.http.{Http, HttpResponse}
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.apigateway.ApiGatewayClient
 import software.amazon.awssdk.services.apigateway.model.GetApiKeyRequest
@@ -20,7 +19,7 @@ import scala.util.Try
 // client for the multiple-account-api, used to find the subscriptions a user has active secondary access to
 class MultipleAccountApiConnector(
     baseUrl: String,
-    sendReq: String => Either[Throwable, HttpResponse[String]],
+    sendReq: String => Either[Throwable, HttpResponse],
 ) extends LazyLogging {
   def this(baseUrl: String, apiKey: String) =
     this(baseUrl, (url: String) => MultipleAccountApiConnector.sendReq(url, apiKey))
@@ -120,9 +119,12 @@ object MultipleAccountApiConnector extends LazyLogging {
       case ids => throw new IllegalStateException(s"Expected one API key in $stackName, found ${ids.size}")
     }
 
-
-  private def sendReq(url: String, apiKey: String): Either[Throwable, HttpResponse[String]] = {
+  private def sendReq(url: String, apiKey: String): Either[Throwable, HttpResponse] = {
     logger.info(s"Making request to multiple-account-api: $url")
-    Try(Http(url).header("x-api-key", apiKey).timeout(3000, 15000).asString).toEither
+    HttpClient.get(
+      url,
+      headers = Seq("x-api-key" -> apiKey),
+      timeoutProfile = HttpClient.MultipleAccountApiTimeout,
+    )
   }
 }
