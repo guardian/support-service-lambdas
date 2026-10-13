@@ -113,9 +113,9 @@ export class AllowBusPutEventsPolicy extends GuAllowPolicy {
 	constructor(scope: GuStack, bus: SrBusName) {
 		super(scope, 'Event bus put events access', {
 			actions: ['events:PutEvents'],
-			resources: [
-				`arn:aws:events:${scope.region}:${scope.account}:event-bus/${bus}-${scope.stage}`,
-			],
+			// using importValue lets you see dependencies in the console
+			// https://eu-west-1.console.aws.amazon.com/cloudformation/home?region=eu-west-1#/exports/cancellations-bus-CODE-arn
+			resources: [Fn.importValue(`${bus}-${scope.stage}-arn`)],
 		});
 	}
 }
