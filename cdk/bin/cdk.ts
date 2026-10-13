@@ -4,6 +4,7 @@ import { AlarmsHandler } from '../lib/alarms-handler';
 import { BatchEmailSender } from '../lib/batch-email-sender';
 import { BrazeAcquisitionEventsSync } from '../lib/braze-acquisition-events-sync';
 import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
+import { CancellationsBus } from '../lib/cancellations-bus';
 import type { SrStageNames } from '../lib/cdk/SrStack';
 import { stages } from '../lib/cdk/SrStack';
 import {
@@ -53,7 +54,6 @@ import { SoftOptInConsentSetter } from '../lib/soft-opt-in-consent-setter';
 import { StripeDisputes } from '../lib/stripe-disputes';
 import type { StripeWebhookEndpointsProps } from '../lib/stripe-webhook-endpoints';
 import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
-import { SubscriptionEventsBus } from '../lib/subscription-events-bus';
 import { SupporterProductDataLambdas } from '../lib/supporter-product-data-lambdas';
 import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
 import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
@@ -189,7 +189,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	ScrubNonTokenisedPaymentMethods,
 	PromotionsApi,
 	PaymentFailureCommsExitApi,
-	SubscriptionEventsBus,
+	CancellationsBus,
 	// MARKER new-lambda: cdk-bin
 ];
 

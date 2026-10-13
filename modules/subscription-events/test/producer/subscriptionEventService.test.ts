@@ -25,7 +25,7 @@ describe('SubscriptionEventService', () => {
 			});
 
 			expect(mockPutEvent).toHaveBeenCalledWith(
-				'subscription-events-CODE',
+				'cancellations-bus-CODE',
 				'lambda:zuora-auto-cancel-CODE',
 				'Cancellation',
 				{

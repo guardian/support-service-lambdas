@@ -5,7 +5,7 @@ import { cancellationDetailSchema } from '@modules/subscription-events/shared/ca
 import type { SubscriptionEventSource } from '@modules/subscription-events/shared/source';
 
 /**
- * Publishes events onto the subscription-events bus, for a single source.
+ * Publishes events onto the cancellations bus, for a single source.
  *
  * <pre>
  *   // in the cold start handler/wiring
@@ -26,7 +26,7 @@ export class SubscriptionEventService {
 	) {}
 
 	/**
-	 * Publishes a `Cancellation` event onto the subscription-events bus.
+	 * Publishes a `Cancellation` event onto the cancellations bus.
 	 *
 	 * @param detail the Cancellation event's detail payload
 	 */
@@ -34,7 +34,7 @@ export class SubscriptionEventService {
 		// double check runtime type before allowing onto the bus
 		const validatedDetail = cancellationDetailSchema.strict().parse(detail);
 		return this.eventBridge.putEvent(
-			`subscription-events-${this.stage}`,
+			`cancellations-bus-${this.stage}`,
 			`${this.source}-${this.stage}`,
 			'Cancellation',
 			validatedDetail,

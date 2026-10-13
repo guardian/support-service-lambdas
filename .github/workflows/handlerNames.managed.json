@@ -3,6 +3,7 @@
   "subproject": [
     "alarms-handler",
     "braze-acquisition-events-sync",
+    "cancellations-bus",
     "contributions-only-countries-api",
     "discount-api",
     "discount-expiry-notifier",
@@ -32,7 +33,6 @@
     "scrub-non-tokenised-payment-methods",
     "send-test-data-to-mparticle",
     "stripe-disputes",
-    "subscription-events-bus",
     "supporter-product-data-lambdas",
     "ticket-tailor-webhook",
     "update-supporter-plus-amount",

@@ -1,13 +1,17 @@
 # Subscription Events bus module
 
-Library code to publish and consume events on the `subscription-events-STAGE` EventBridge bus.
+Library code to publish and consume events on per-event-family EventBridge buses
+(starting with the `cancellations-bus-STAGE` bus for `Cancellation` events - a
+future event family, e.g. product switches, would get its own bus/schemas
+alongside these, sharing the same plumbing).
 
-Currently just supports `Cancellation` events. This is to support the initial use case
-to allow secondary multiple-accounts users can be notified.
+Currently just supports `Cancellation` events, on the `cancellations-bus-STAGE`
+bus. This is to support the initial use case to allow secondary multiple-accounts
+users can be notified.
 
-- CODE bus: https://eu-west-1.console.aws.amazon.com/events/home?region=eu-west-1#/eventbus/subscription-events-CODE
+- CODE bus: https://eu-west-1.console.aws.amazon.com/events/home?region=eu-west-1#/eventbus/cancellations-bus-CODE
 
-- PROD bus: https://eu-west-1.console.aws.amazon.com/events/home?region=eu-west-1#/eventbus/subscription-events-PROD
+- PROD bus: https://eu-west-1.console.aws.amazon.com/events/home?region=eu-west-1#/eventbus/cancellations-bus-PROD
 
 ## Data format
 
@@ -59,18 +63,19 @@ await subscriptionEventService.publishCancellationEvent({
 
 You will likely need to add a new source identifier to
 `shared/source.ts`'s `subscriptionEventSources`, and grant it bus access with
-`AllowPutSubscriptionEventPolicy` (see `cdk/lib/cdk/policies.ts`).
+`AllowPutSubscriptionEventPolicy` (see `cdk/lib/cdk/policies.ts`), passing
+`'cancellations-bus'` as the bus.
 
 ## Consuming events
 
 A lambda consumes events via SQS: an EventBridge rule on the bus forwards
 matching events to an SQS queue, which the lambda is subscribed to.
-`EventBridgeSQSHandler` calls your handler with a parsed `Cancellation` event.
+`CancellationEventSQSHandler` calls your handler with a parsed `Cancellation` event.
 
 ```ts
-import { EventBridgeSQSHandler } from '@modules/subscription-events/consumer/eventBridgeSqsHandler';
+import { CancellationEventSQSHandler } from '@modules/subscription-events/consumer/cancellationEventSqsHandler';
 
-export const handler = EventBridgeSQSHandler(
+export const handler = CancellationEventSQSHandler(
 	configSchema,
 	async (event, services) => {
 		// event is a validated CancellationEvent
@@ -84,29 +89,28 @@ export const handler = EventBridgeSQSHandler(
 
 ### CDK: routing bus events to the queue
 
-**Only `Cancellation` events are currently parsed by the handler above - the
-EventBridge rule feeding the queue must filter to the same detail-type(s), or
-any other event later added to the bus will fail to parse and end up in a
-DLQ.** There's no automatic link between the CDK construct below and the zod
-schema in this module - `SubscriptionEventDetailType` is hardcoded locally in
-the construct, so if you add a new event type to the bus, update both by hand.
+Each bus only ever carries one event type - a new bus is created for each new
+event type, rather than routing multiple event types through one bus via
+`detail-type` - so the EventBridge rule forwards everything on the bus to the
+queue, unfiltered. (See `PLAN-cancellation-bus-rename.md` for the
+isolation/swimlaning trade-offs behind this choice.)
 
-Use `SrSubscriptionEventsLambda` (`cdk/lib/cdk/SrSubscriptionEventsLambda.ts`)
-to provision the queue, DLQ, alarm (same as `SrSqsLambda`, which it wraps),
-*and* the EventBridge rule routing the bus to that queue, in one step:
+Use `SrEventBusLambda` (`cdk/lib/cdk/SrEventBusLambda.ts`) to provision the
+queue, DLQ, alarm (same as `SrSqsLambda`, which it wraps), *and* the
+EventBridge rule routing a bus to that queue, in one step:
 
 ```ts
-import { SrSubscriptionEventsLambda } from './cdk/SrSubscriptionEventsLambda';
+import { SrEventBusLambda } from './cdk/SrEventBusLambda';
 
-const lambda = new SrSubscriptionEventsLambda(this, 'CancellationEventsLambda', {
-	detailTypes: ['Cancellation'],
+const lambda = new SrEventBusLambda(this, 'CancellationEventsLambda', {
+	bus: 'cancellations-bus',
 	monitoring: { errorImpact: '...' },
 	maxReceiveCount: 3,
 	// ...lambdaOverrides, visibilityTimeout etc.
 });
 ```
 
-See `cdk/lib/cdk/SrSubscriptionEventsLambda.ts` for the implementation.
+See `cdk/lib/cdk/SrEventBusLambda.ts` for the implementation.
 
 ## References
 
