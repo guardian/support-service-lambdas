@@ -472,6 +472,9 @@ importers:
       routing:
         specifier: workspace:*
         version: link:../../modules/routing
+      subscription-events:
+        specifier: workspace:*
+        version: link:../../modules/subscription-events
       zod:
         specifier: 'catalog:'
         version: 4.4.3

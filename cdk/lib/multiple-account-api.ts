@@ -19,9 +19,9 @@ import {
 	AllowZuoraOAuthSecretsPolicy,
 } from './cdk/policies';
 import { SrApiLambda } from './cdk/SrApiLambda';
+import { SrEventBusLambda } from './cdk/SrEventBusLambda';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
-import { SrSubscriptionEventsLambda } from './cdk/SrSubscriptionEventsLambda';
 
 export class MultipleAccountApi extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
@@ -106,12 +106,12 @@ export class MultipleAccountApi extends SrStack {
 
 		secondaryUserTable.grantFullAccess(lambda);
 
-		const subscriptionEventsListenerLambda = new SrSubscriptionEventsLambda(
+		const subscriptionEventsListenerLambda = new SrEventBusLambda(
 			this,
 			'SubscriptionEventsListenerLambda',
 			{
+				bus: 'cancellations-bus',
 				nameSuffix: 'cancellation',
-				detailTypes: ['Cancellation'],
 				lambdaOverrides: {
 					description:
 						'Sends secondary-user cancellation emails when a subscription with multiple accounts is cancelled',

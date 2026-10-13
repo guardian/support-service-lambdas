@@ -1384,14 +1384,38 @@ exports[`The Multiple account api stack matches the snapshot 1`] = `
     },
     "SubscriptionEventsListenerLambdaRule9CAF4690": {
       "Properties": {
-        "Description": "Forwards Cancellation events from the subscription-events bus to multiple-account-api's queue.",
-        "EventBusName": "subscription-events-CODE",
-        "EventPattern": {
-          "detail-type": [
-            "Cancellation",
+        "Description": "Forwards all events from the cancellations-bus-CODE bus to multiple-account-api's queue.",
+        "EventBusName": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::Split": [
+                "/",
+                {
+                  "Fn::Select": [
+                    5,
+                    {
+                      "Fn::Split": [
+                        ":",
+                        {
+                          "Fn::ImportValue": "cancellations-bus-CODE-arn",
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
           ],
         },
-        "Name": "multiple-account-api-cancellation-subscription-events-rule-CODE",
+        "EventPattern": {
+          "account": [
+            {
+              "Ref": "AWS::AccountId",
+            },
+          ],
+        },
+        "Name": "multiple-account-api-cancellation-event-bus-rule-CODE",
         "State": "ENABLED",
         "Tags": [
           {
@@ -3510,14 +3534,38 @@ DLQ: https://",
     },
     "SubscriptionEventsListenerLambdaRule9CAF4690": {
       "Properties": {
-        "Description": "Forwards Cancellation events from the subscription-events bus to multiple-account-api's queue.",
-        "EventBusName": "subscription-events-PROD",
-        "EventPattern": {
-          "detail-type": [
-            "Cancellation",
+        "Description": "Forwards all events from the cancellations-bus-PROD bus to multiple-account-api's queue.",
+        "EventBusName": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::Split": [
+                "/",
+                {
+                  "Fn::Select": [
+                    5,
+                    {
+                      "Fn::Split": [
+                        ":",
+                        {
+                          "Fn::ImportValue": "cancellations-bus-PROD-arn",
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
           ],
         },
-        "Name": "multiple-account-api-cancellation-subscription-events-rule-PROD",
+        "EventPattern": {
+          "account": [
+            {
+              "Ref": "AWS::AccountId",
+            },
+          ],
+        },
+        "Name": "multiple-account-api-cancellation-event-bus-rule-PROD",
         "State": "ENABLED",
         "Tags": [
           {
