@@ -13,7 +13,8 @@ const busNamePrefix: SrBusName = 'cancellations-bus';
  *
  * This stack only creates the bus and a catch-all logging rule for debugging.
  * Producers and listeners are added in their own stacks/lambdas, granted access
- * via AllowBusPutEventsPolicy (see cdk/policies.ts) and
+ * via AllowBusPutEventsPolicy (see cdk/policies.ts) or SrEventBusLambda and
+ * accessed via modules/subscription-events
  */
 export class CancellationsBus extends SrStack {
 	static exportName = (stage: SrStageNames) => `${busNamePrefix}-${stage}-arn`;

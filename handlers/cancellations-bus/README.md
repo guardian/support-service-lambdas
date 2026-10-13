@@ -1,4 +1,4 @@
-## Cancellations Bus
+## Subscription Cancellations Bus
 
 This [CDK-only handler](../../cdk/lib/cancellations-bus.ts) creates an EventBridge event
 bus (`cancellations-bus-CODE` /
