@@ -1,3 +1,4 @@
+import { Fn } from 'aws-cdk-lib';
 import type { IEventBus } from 'aws-cdk-lib/aws-events';
 import { EventBus, Rule } from 'aws-cdk-lib/aws-events';
 import { SqsQueue } from 'aws-cdk-lib/aws-events-targets';
@@ -40,8 +41,11 @@ export class SrEventBusLambda extends SrSqsLambda {
 		super(scope, id, props);
 
 		const busName = `${props.bus}-${scope.stage}`;
+		// using importValue lets you see dependencies in the console
+		// https://eu-west-1.console.aws.amazon.com/cloudformation/home?region=eu-west-1#/exports/cancellations-bus-CODE-arn
+		const busArn = Fn.importValue(`${busName}-arn`);
 
-		this.bus = EventBus.fromEventBusName(scope, `${id}EventBus`, busName);
+		this.bus = EventBus.fromEventBusArn(scope, `${id}EventBus`, busArn);
 
 		this.rule = new Rule(scope, `${id}Rule`, {
 			ruleName: getNameWithStage(scope, props.nameSuffix, 'event-bus-rule'),
