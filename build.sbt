@@ -518,7 +518,7 @@ lazy val `soft-opt-in-consent-setter` = lambdaProject(
     circe,
     circeParser,
     scalatest,
-    scalajHttp,
+    okhttp3,
     awsS3,
     awsDynamo,
     simpleConfig,

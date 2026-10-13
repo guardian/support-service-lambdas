@@ -1,8 +1,9 @@
-## Subscription Events Bus
+## Subscription Cancellations Bus
 
-This [CDK-only handler](../../cdk/lib/subscription-events-bus.ts) creates a shared EventBridge event bus (`subscription-events-CODE` /
-`subscription-events-PROD`) for subscription lifecycle events, starting with subscription
-cancellation.
+This [CDK-only handler](../../cdk/lib/cancellations-bus.ts) creates an EventBridge event
+bus (`cancellations-bus-CODE` /
+`cancellations-bus-PROD`) for cancellation events, used across multiple producers and
+listeners.
 
 It exists so that multiple producers (e.g. Zuora auto cancel, Supporter Plus cancel, MDAPI,
 Salesforce cancellation) and multiple listeners (e.g. a lambda that sends secondary account

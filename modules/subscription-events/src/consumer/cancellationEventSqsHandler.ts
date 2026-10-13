@@ -8,19 +8,20 @@ import type { CancellationEvent } from '@modules/subscription-events/shared/canc
 import { cancellationEventSchema } from '@modules/subscription-events/shared/cancellationEvent';
 
 /**
- * Handler to process `Cancellation` events from the subscription events bus.
+ * Handler to process `Cancellation` events from the cancellations bus.
  *
- * Only handles `Cancellation` events for now - there's only one event type on the
- * bus today, so this deliberately isn't generalised to a discriminated union of
- * multiple event types yet. Once a second event type exists, revisit whether this
- * wrapper should take the event schema/type as a parameter, or a dedicated
- * wrapper per event type is added instead.
+ * Deliberately specific to `Cancellation` events, not generalised to a
+ * discriminated union/generic event type: each EventBridge bus only ever
+ * carries one event type (a new bus is created for each new event type,
+ * rather than routing multiple types through one bus via `detail-type` - see
+ * `PLAN-cancellation-bus-rename.md`), so a dedicated wrapper per event type
+ * is the permanent design, not a stopgap.
  *
  * To use it
  *
  * <pre>
  * // called by AWS
- * export const handler = EventBridgeSQSHandler(
+ * export const handler = CancellationEventSQSHandler(
  * 	ConfigSchema,
  * 	handlerWithStage,
  * 	buildServices,
@@ -32,20 +33,20 @@ import { cancellationEventSchema } from '@modules/subscription-events/shared/can
  * @param buildServices build anything you want created once on cold start, passed
  *   into your handler
  */
-export function EventBridgeSQSHandler<ConfigType, Services>(
+export function CancellationEventSQSHandler<ConfigType, Services>(
 	configSchema: z.ZodType<ConfigType>,
 	handler: (event: CancellationEvent, services: Services) => Promise<void>,
 	buildServices: (handlerProps: HandlerEnv<ConfigType>) => Services,
 ) {
 	return SQSHandler(
 		configSchema,
-		handleSubscriptionEventMessage(handler),
+		handleCancellationEventMessage(handler),
 		buildServices,
 		getCallerInfo(),
 	);
 }
 
-export function handleSubscriptionEventMessage<Services>(
+export function handleCancellationEventMessage<Services>(
 	handler: (event: CancellationEvent, services: Services) => Promise<void>,
 ) {
 	return async (record: SQSRecord, services: Services) => {
