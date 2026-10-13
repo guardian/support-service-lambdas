@@ -193,7 +193,7 @@ Resources:
                   - events:PutEvents
                 Resource:
                   - Fn::ImportValue:
-                      Fn::Sub: subscription-events-bus-${Stage}-arn
+                      Fn::Sub: cancellations-bus-${Stage}-arn
       Tags:
         - Key: lambda:createdBy
           Value: SAM

@@ -12,9 +12,9 @@ import zio.{RIO, RLayer, Task, ZIO, ZLayer}
 import scala.jdk.CollectionConverters.*
 import scala.util.Try
 
-/** Publishes events onto the `subscription-events-STAGE` EventBridge bus (see `modules/subscription-events/README.md`
-  * in the main TS codebase for the full JSON shape and consumer-side docs - there's no shared schema across languages,
-  * so this is a hand-written case class kept in step with that shape by hand).
+/** Publishes events onto the `cancellations-bus-STAGE` EventBridge bus (see `modules/subscription-events/README.md` in
+  * the main TS codebase for the full JSON shape and consumer-side docs - there's no shared schema across languages, so
+  * this is a hand-written case class kept in step with that shape by hand).
   */
 trait SubscriptionEventService {
   def publishCancellationEvent(
@@ -100,7 +100,7 @@ object SubscriptionEventServiceLive {
     ).map { client =>
       new SubscriptionEventServiceLive(
         client,
-        busName = s"subscription-events-$stage",
+        busName = s"cancellations-bus-$stage",
         source = "lambda:move-product",
       )
     }
