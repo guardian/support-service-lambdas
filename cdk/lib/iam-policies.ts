@@ -81,6 +81,8 @@ class AllowCodeParameterStoreReadPolicy extends PolicyStatement {
 				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/support/frontend/DEV/*`,
 				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/admin-console/CODE`,
 				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/admin-console/CODE/*`,
+				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/membership/support-dotcom-components/CODE`,
+				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/membership/support-dotcom-components/CODE/*`,
 			],
 		});
 	}
