@@ -4,6 +4,7 @@ import type { EmailMessageWithUserId } from '@modules/email/email';
 import { buildEmailMessage, DataExtensionNames } from '@modules/email/email';
 import { getUserByIdentityId } from '@modules/identity/idapi';
 import type { IdentityClient } from '@modules/identity/identityClient';
+import { identityIdSchema } from '@modules/identity/identityId';
 import { logger } from '@modules/logger/logger';
 import type { SecondaryUserRecord } from '@modules/multiple-account/secondaryUserRepository';
 import type { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
@@ -18,7 +19,6 @@ import type { GetOrderResponse } from '@modules/zuora/orders/getOrder';
 import { getOrder } from '@modules/zuora/orders/getOrder';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getCancellationEffectiveDate } from './getCancellationEffectiveDate';
-import { identityIdSchema } from './identityId';
 
 export type HandleCancellationServices = {
 	stage: Stage;
