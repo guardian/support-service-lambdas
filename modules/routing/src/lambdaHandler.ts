@@ -6,10 +6,12 @@ import { Lazy } from '@modules/lazy';
 import { getCallerInfo } from '@modules/logger/getCallerInfo';
 import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
+import type { Stage } from '@modules/stage';
+import { stageFromEnvironment } from '@modules/stage';
 
 export type HandlerEnv<ConfigType> = {
 	now: () => dayjs.Dayjs;
-	stage: string;
+	stage: Stage;
 	config: ConfigType;
 };
 
@@ -44,7 +46,7 @@ export function LambdaHandler<ConfigType, E>(
 	);
 }
 
-type GuEnv = { stage: string; stack: string; app: string };
+type GuEnv = { stage: Stage; stack: string; app: string };
 
 /**
  * This is a similar wrapper to the Router only it handles loading config and
@@ -54,18 +56,23 @@ type GuEnv = { stage: string; stack: string; app: string };
  *
  * @param configSchema schema for the SSM config for this lambda
  * @param handler
- * @param buildServices build anything you want to be created on cold start only, it will be passed into your handler
+ * @param buildServices build anything you want to be created on cold start only, it will be passed into your handler.
+ *   May be async (e.g. to await a client that reads secrets) - it is fully
+ *   awaited before the handler runs, and a rejection is treated the same as
+ *   any other cold-start failure (retried on the next invocation).
  * @constructor
  */
 export function LambdaHandlerWithServices<ConfigType, Services, E>(
 	configSchema: z.ZodType<ConfigType>,
 	handler: (event: E, services: Services) => Promise<void>,
-	buildServices: (handlerProps: HandlerEnv<ConfigType>) => Services,
+	buildServices: (
+		handlerProps: HandlerEnv<ConfigType>,
+	) => Services | Promise<Services>,
 	callerInfo: string,
 ) {
 	// only expect env vars on a cold start, don't load if this file is referenced in tests
 	const lazyEnv = new Lazy<GuEnv>(() => {
-		const stage = getEnv('STAGE');
+		const stage = stageFromEnvironment();
 		const stack = getEnv('STACK');
 		const app = getEnv('APP');
 		return Promise.resolve({ stage, stack, app });

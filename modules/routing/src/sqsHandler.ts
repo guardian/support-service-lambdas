@@ -8,7 +8,9 @@ import { LambdaHandlerWithServices } from '@modules/routing/lambdaHandler';
 export function SQSHandler<ConfigType, Services>(
 	configSchema: z.ZodType<ConfigType>,
 	handler: (record: SQSRecord, services: Services) => Promise<void>,
-	buildServices: (handlerProps: HandlerEnv<ConfigType>) => Services,
+	buildServices: (
+		handlerProps: HandlerEnv<ConfigType>,
+	) => Services | Promise<Services>,
 	callerInfo: string = getCallerInfo(),
 ) {
 	return LambdaHandlerWithServices(

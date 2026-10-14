@@ -36,7 +36,7 @@ const mockSendBatchMessagesToQueue = sendBatchMessagesToQueue as jest.Mock;
 
 const subscriptionNumber = 'A-S00001234';
 const orderNumber = 'O-00005678';
-const primaryIdentityId = 'primary-id';
+const primaryIdentityId = '999999';
 
 const buildEvent = (allowUserNotifications = true): CancellationEvent =>
 	cancellationEventSchema.parse({
@@ -77,7 +77,7 @@ const buildServices = (
 			listActiveBySubscription: jest.fn().mockResolvedValue(secondaryUsers),
 		} as unknown as SecondaryUserRepository as never,
 		identityClient: {} as never,
-		zuoraClient: Promise.resolve({} as never),
+		zuoraClient: {} as never,
 	}) as never;
 
 describe('handleCancellation', () => {
@@ -102,7 +102,7 @@ describe('handleCancellation', () => {
 	});
 
 	it('skips entirely when allowUserNotifications is false', async () => {
-		const services = buildServices([makeSecondaryUser('secondary-1')]);
+		const services = buildServices([makeSecondaryUser('111111')]);
 
 		await handleCancellation(buildEvent(false), services);
 
@@ -113,7 +113,7 @@ describe('handleCancellation', () => {
 	});
 
 	it('sends a single batch email for one secondary user', async () => {
-		const services = buildServices([makeSecondaryUser('secondary-1')]);
+		const services = buildServices([makeSecondaryUser('111111')]);
 		mockGetUserByIdentityId.mockImplementation((_client, identityId: string) =>
 			Promise.resolve({
 				primaryEmailAddress: `${identityId}@example.com`,
@@ -138,8 +138,8 @@ describe('handleCancellation', () => {
 
 	it('sends a single batch email for multiple secondary users', async () => {
 		const services = buildServices([
-			makeSecondaryUser('secondary-1'),
-			makeSecondaryUser('secondary-2'),
+			makeSecondaryUser('111111'),
+			makeSecondaryUser('222222'),
 		]);
 		mockGetUserByIdentityId.mockImplementation((_client, identityId: string) =>
 			Promise.resolve({
@@ -159,12 +159,12 @@ describe('handleCancellation', () => {
 
 	it('throws and sends nothing if a gather-phase lookup fails', async () => {
 		const services = buildServices([
-			makeSecondaryUser('secondary-1'),
-			makeSecondaryUser('secondary-2'),
+			makeSecondaryUser('111111'),
+			makeSecondaryUser('222222'),
 		]);
 		mockGetUserByIdentityId.mockImplementation((_client, identityId: string) =>
 			Promise.resolve(
-				identityId === 'secondary-2'
+				identityId === '222222'
 					? undefined
 					: {
 							primaryEmailAddress: `${identityId}@example.com`,
@@ -179,7 +179,7 @@ describe('handleCancellation', () => {
 	});
 
 	it('throws if the batch send reports a partial failure', async () => {
-		const services = buildServices([makeSecondaryUser('secondary-1')]);
+		const services = buildServices([makeSecondaryUser('111111')]);
 		mockGetUserByIdentityId.mockImplementation((_client, identityId: string) =>
 			Promise.resolve({
 				primaryEmailAddress: `${identityId}@example.com`,
