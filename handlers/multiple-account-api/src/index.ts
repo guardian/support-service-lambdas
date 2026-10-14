@@ -7,6 +7,7 @@ import { Lazy } from '@modules/lazy';
 import { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { badRequest } from '@modules/routing/apiGatewayResponses';
+import { loadHandlerEnv } from '@modules/routing/lambdaHandler';
 import { Router } from '@modules/routing/router';
 import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
 import { withBodyParser, withPathParser } from '@modules/routing/withParsers';
@@ -14,7 +15,7 @@ import { stageFromEnvironment } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 import { acceptInvitationEndpoint } from './acceptInvitationEndpoint';
-import { getAppConfig } from './appConfig';
+import { ConfigSchema } from './appConfig';
 import {
 	createInvitationBodySchema,
 	createInvitationEndpoint,
@@ -42,11 +43,12 @@ const dynamoClient = new DynamoDBClient(awsConfig);
 const invitationRepository = InvitationRepository.create(stage);
 const secondaryUserRepository = SecondaryUserRepository.create(stage);
 
-const identityClientPromise = getAppConfig().then((config) =>
-	IdentityClient.createWithAccessToken(
-		config['identity-client-access-token'],
-		stage,
-	),
+const identityClientPromise = loadHandlerEnv(ConfigSchema).then(
+	({ config, stage }) =>
+		IdentityClient.createWithAccessToken(
+			config['identity-client-access-token'],
+			stage,
+		),
 );
 const lazyProductCatalog = new Lazy(
 	async () => await getProductCatalogFromApi(stage),

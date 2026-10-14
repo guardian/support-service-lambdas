@@ -46,8 +46,6 @@ export function LambdaHandler<ConfigType, E>(
 	);
 }
 
-type GuEnv = { stage: Stage; stack: string; app: string };
-
 /**
  * This is a similar wrapper to the Router only it handles loading config and
  * building any services e.g. ZuoraClient on cold start
@@ -71,24 +69,14 @@ export function LambdaHandlerWithServices<ConfigType, Services, E>(
 	callerInfo: string,
 ) {
 	// only expect env vars on a cold start, don't load if this file is referenced in tests
-	const lazyEnv = new Lazy<GuEnv>(() => {
-		const stage = stageFromEnvironment();
-		const stack = getEnv('STACK');
-		const app = getEnv('APP');
-		return Promise.resolve({ stage, stack, app });
-	}, 'load config from SSM');
-
-	const handlerProps: Lazy<Services> = lazyEnv.then(
+	const handlerProps: Lazy<Services> = new Lazy(
 		logger.wrapFn(
-			async ({ stage, stack, app }: GuEnv) => {
-				const config = await loadConfig(stage, stack, app, configSchema);
-				const handlerProps = { now: () => dayjs(), stage, config };
-				return buildServices(handlerProps);
-			},
+			async () => buildServices(await loadHandlerEnv(configSchema)),
 			'lambdaColdStart',
 			callerInfo,
 			(args) => ({ logOnEntryOnly: args }),
 		),
+		'load config from SSM',
 	);
 
 	const handlerWithContextClearance = logger.withContext(
@@ -100,6 +88,27 @@ export function LambdaHandlerWithServices<ConfigType, Services, E>(
 	return async (event: E) => {
 		return await handlerWithContextClearance(event, await handlerProps.get());
 	};
+}
+
+/**
+ * Reads the standard `STAGE`/`STACK`/`APP` env vars (set for every lambda by
+ * `GuLambdaFunction`) and loads this lambda's SSM config, in the standard
+ * `loadConfig`/`appConfig.ts` path convention.
+ *
+ * Used internally by `LambdaHandlerWithServices` on cold start, but also
+ * exported for Router-based lambdas (which don't go through that wrapper) to
+ * call directly.
+ *
+ * @param configSchema schema for the SSM config for this lambda
+ */
+export async function loadHandlerEnv<ConfigType>(
+	configSchema: z.ZodType<ConfigType>,
+): Promise<HandlerEnv<ConfigType>> {
+	const stage = stageFromEnvironment();
+	const stack = getEnv('STACK');
+	const app = getEnv('APP');
+	const config = await loadConfig(stage, stack, app, configSchema);
+	return { now: () => dayjs(), stage, config };
 }
 
 /**
