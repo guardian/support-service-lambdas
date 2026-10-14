@@ -14,6 +14,7 @@ import { stageFromEnvironment } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 import { acceptInvitationEndpoint } from './acceptInvitationEndpoint';
+import { getAppConfig } from './appConfig';
 import {
 	createInvitationBodySchema,
 	createInvitationEndpoint,
@@ -40,13 +41,12 @@ const authenticate = buildAuthenticate(stage, []);
 const dynamoClient = new DynamoDBClient(awsConfig);
 const invitationRepository = InvitationRepository.create(stage);
 const secondaryUserRepository = SecondaryUserRepository.create(stage);
-// TODO:delete comment - this does a one-off ssm:GetParameter call, bypassing the
-// standard loadConfig/appConfig.ts convention. Could instead load this via a zod
-// config schema (key 'identity-client-access-token') and call
-// IdentityClient.createWithAccessToken(config[...], stage) - see indexCancellation.ts.
-const identityClientPromise = IdentityClient.create(
-	stage,
-	`/${stage}/support/multiple-account-api/identity-client-access-token`,
+
+const identityClientPromise = getAppConfig().then((config) =>
+	IdentityClient.createWithAccessToken(
+		config['identity-client-access-token'],
+		stage,
+	),
 );
 const lazyProductCatalog = new Lazy(
 	async () => await getProductCatalogFromApi(stage),

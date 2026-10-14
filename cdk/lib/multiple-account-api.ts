@@ -1,4 +1,3 @@
-import { GuAllowPolicy } from '@guardian/cdk/lib/constructs/iam';
 import type { App } from 'aws-cdk-lib';
 import { RemovalPolicy } from 'aws-cdk-lib';
 import { CfnAlarm } from 'aws-cdk-lib/aws-cloudwatch';
@@ -38,16 +37,6 @@ export class MultipleAccountApi extends SrStack {
 				errorImpact: 'The multiple account system is experiencing errors',
 			},
 		});
-
-		// redundant - GuLambdaFunction gives /STAGE/support/multiple-account-api/* for free
-		lambda.addPolicies(
-			new GuAllowPolicy(this, 'AllowGetIdentityClientToken', {
-				actions: ['ssm:GetParameter'],
-				resources: [
-					`arn:aws:ssm:${this.region}:${this.account}:parameter/${this.stage}/support/multiple-account-api/identity-client-access-token`,
-				],
-			}),
-		);
 
 		const zuoraPolicy = new AllowZuoraOAuthSecretsPolicy(this);
 		lambda.addPolicies(zuoraPolicy);

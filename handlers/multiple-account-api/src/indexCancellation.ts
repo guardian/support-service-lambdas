@@ -1,27 +1,22 @@
-import { z } from 'zod';
 import { IdentityClient } from '@modules/identity/identityClient';
 import { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
 import type { HandlerEnv } from '@modules/routing/lambdaHandler';
 import { CancellationEventSQSHandler } from '@modules/subscription-events/consumer/cancellationEventSqsHandler';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { AppConfig } from './appConfig';
+import { ConfigSchema } from './appConfig';
 import type { HandleCancellationServices } from './cancellation/handleCancellation';
 import { handleCancellation } from './cancellation/handleCancellation';
 
-const configSchema = z.object({
-	'identity-client-access-token': z.string(),
-});
-
-type ConfigType = z.infer<typeof configSchema>;
-
 // main entry point for AWS
 export const handler = CancellationEventSQSHandler(
-	configSchema,
+	ConfigSchema,
 	handleCancellation,
 	buildServices,
 );
 
 async function buildServices(
-	env: HandlerEnv<ConfigType>,
+	env: HandlerEnv<AppConfig>,
 ): Promise<HandleCancellationServices> {
 	return {
 		stage: env.stage,
