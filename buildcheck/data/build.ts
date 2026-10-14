@@ -813,7 +813,10 @@ const multipleAccountApi: HandlerDefinition = {
 		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr multiple-account-api.zip ./*.js.map ./*.js`,
 	},
 	entryPoints: ['src/index.ts', 'src/indexCancellation.ts'],
-	functionNames: ['multiple-account-api-', 'multiple-account-api-cancellation-'],
+	functionNames: [
+		'multiple-account-api-',
+		'multiple-account-api-cancellation-',
+	],
 	moduleDependencies: [
 		moduleMultipleAccount,
 		moduleRouting,
