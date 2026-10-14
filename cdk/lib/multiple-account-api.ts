@@ -49,7 +49,8 @@ export class MultipleAccountApi extends SrStack {
 			}),
 		);
 
-		lambda.addPolicies(new AllowZuoraOAuthSecretsPolicy(this));
+		const zuoraPolicy = new AllowZuoraOAuthSecretsPolicy(this);
+		lambda.addPolicies(zuoraPolicy);
 		lambda.addPolicies(new AllowS3CatalogReadPolicy(this));
 		lambda.addPolicies(new AllowSupporterProductDataQueryPolicy(this));
 		lambda.addPolicies(new AllowSupporterProductDataDeletePolicy(this));
@@ -106,9 +107,9 @@ export class MultipleAccountApi extends SrStack {
 
 		secondaryUserTable.grantFullAccess(lambda);
 
-		const subscriptionEventsListenerLambda = new SrEventBusLambda(
+		const cancellationsListenerLambda = new SrEventBusLambda(
 			this,
-			'SubscriptionEventsListenerLambda',
+			'CancellationsListenerLambda',
 			{
 				bus: 'cancellations-bus',
 				nameSuffix: 'cancellation',
@@ -124,21 +125,16 @@ export class MultipleAccountApi extends SrStack {
 			},
 		);
 
-		subscriptionEventsListenerLambda.addPolicies(
-			new AllowZuoraOAuthSecretsPolicy(
-				this,
-				'SubscriptionEventsListener Zuora OAuth Secrets Manager policy',
-			),
-		);
-		subscriptionEventsListenerLambda.addPolicies(
+		cancellationsListenerLambda.addPolicies(zuoraPolicy);
+		cancellationsListenerLambda.addPolicies(
 			AllowSqsSendPolicy.createWithId(
 				this,
-				'SubscriptionEventsListener SQS send policy',
+				'CancellationsListenerLambdaSqsSendPolicy',
 				'braze-emails',
 			),
 		);
 
-		secondaryUserTable.grantReadData(subscriptionEventsListenerLambda);
+		secondaryUserTable.grantReadData(cancellationsListenerLambda);
 
 		new CfnAlarm(this, 'failedMultipleAccountsEmailTrigger', {
 			alarmActions: [

@@ -95,6 +95,444 @@ exports[`The Multiple account api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::BasePathMapping",
     },
+    "CancellationsListenerLambda78796685": {
+      "DependsOn": [
+        "CancellationsListenerLambdaServiceRoleDefaultPolicy5A64756F",
+        "CancellationsListenerLambdaServiceRoleC49648C4",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/CODE/multiple-account-api/multiple-account-api.zip",
+        },
+        "Description": "Sends secondary-user cancellation emails when a subscription with multiple accounts is cancelled",
+        "Environment": {
+          "Variables": {
+            "APP": "multiple-account-api",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
+            "STAGE": "CODE",
+          },
+        },
+        "FunctionName": "multiple-account-api-cancellation-CODE",
+        "Handler": "indexCancellation.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "CancellationsListenerLambdaServiceRoleC49648C4",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs22.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "multiple-account-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 15,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "CancellationsListenerLambdaRuleD14C34FC": {
+      "Properties": {
+        "Description": "Forwards all events from the cancellations-bus-CODE bus to multiple-account-api's queue.",
+        "EventBusName": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::Split": [
+                "/",
+                {
+                  "Fn::Select": [
+                    5,
+                    {
+                      "Fn::Split": [
+                        ":",
+                        {
+                          "Fn::ImportValue": "cancellations-bus-CODE-arn",
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        "EventPattern": {
+          "account": [
+            {
+              "Ref": "AWS::AccountId",
+            },
+          ],
+        },
+        "Name": "multiple-account-api-cancellation-event-bus-rule-CODE",
+        "State": "ENABLED",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "multiple-account-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "Queue4A7E3555",
+                "Arn",
+              ],
+            },
+            "Id": "Target0",
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "CancellationsListenerLambdaServiceRoleC49648C4": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "multiple-account-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "CancellationsListenerLambdaServiceRoleDefaultPolicy5A64756F": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/CODE/multiple-account-api/multiple-account-api.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/multiple-account-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/multiple-account-api/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "Queue4A7E3555",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:DescribeTable",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "SecondaryUserTable22C9D3B4",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "SecondaryUserTable22C9D3B4",
+                          "Arn",
+                        ],
+                      },
+                      "/index/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": [
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "SecondaryUserTable22C9D3B4",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "SecondaryUserTable22C9D3B4",
+                          "Arn",
+                        ],
+                      },
+                      "/index/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "CancellationsListenerLambdaServiceRoleDefaultPolicy5A64756F",
+        "Roles": [
+          {
+            "Ref": "CancellationsListenerLambdaServiceRoleC49648C4",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "CancellationsListenerLambdaSqsEventSourcemultipleaccountapiCODEQueueBAA4D564C3E432F8": {
+      "Properties": {
+        "BatchSize": 1,
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "Queue4A7E3555",
+            "Arn",
+          ],
+        },
+        "FunctionName": {
+          "Ref": "CancellationsListenerLambda78796685",
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "multiple-account-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "CancellationsListenerLambdaSqsSendPolicy75A305F0": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:GetQueueUrl",
+                "sqs:SendMessage",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sqs:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":braze-emails-CODE",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "CancellationsListenerLambdaSqsSendPolicy75A305F0",
+        "Roles": [
+          {
+            "Ref": "CancellationsListenerLambdaServiceRoleC49648C4",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "DLQ581697C4": {
       "DeletionPolicy": "Delete",
       "Properties": {
@@ -1109,7 +1547,7 @@ exports[`The Multiple account api stack matches the snapshot 1`] = `
                 "ArnEquals": {
                   "aws:SourceArn": {
                     "Fn::GetAtt": [
-                      "SubscriptionEventsListenerLambdaRule9CAF4690",
+                      "CancellationsListenerLambdaRuleD14C34FC",
                       "Arn",
                     ],
                   },
@@ -1322,480 +1760,6 @@ exports[`The Multiple account api stack matches the snapshot 1`] = `
       "Type": "AWS::DynamoDB::Table",
       "UpdateReplacePolicy": "Delete",
     },
-    "SubscriptionEventsListenerLambda36DCCB5F": {
-      "DependsOn": [
-        "SubscriptionEventsListenerLambdaServiceRoleDefaultPolicyF3EE29E4",
-        "SubscriptionEventsListenerLambdaServiceRole30274FBC",
-      ],
-      "Properties": {
-        "Code": {
-          "S3Bucket": {
-            "Ref": "DistributionBucketName",
-          },
-          "S3Key": "support/CODE/multiple-account-api/multiple-account-api.zip",
-        },
-        "Description": "Sends secondary-user cancellation emails when a subscription with multiple accounts is cancelled",
-        "Environment": {
-          "Variables": {
-            "APP": "multiple-account-api",
-            "NODE_OPTIONS": "--enable-source-maps",
-            "STACK": "support",
-            "STAGE": "CODE",
-          },
-        },
-        "FunctionName": "multiple-account-api-cancellation-CODE",
-        "Handler": "indexCancellation.handler",
-        "LoggingConfig": {
-          "LogFormat": "Text",
-        },
-        "MemorySize": 1024,
-        "Role": {
-          "Fn::GetAtt": [
-            "SubscriptionEventsListenerLambdaServiceRole30274FBC",
-            "Arn",
-          ],
-        },
-        "Runtime": "nodejs22.x",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "multiple-account-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "Timeout": 15,
-      },
-      "Type": "AWS::Lambda::Function",
-    },
-    "SubscriptionEventsListenerLambdaRule9CAF4690": {
-      "Properties": {
-        "Description": "Forwards all events from the cancellations-bus-CODE bus to multiple-account-api's queue.",
-        "EventBusName": {
-          "Fn::Select": [
-            1,
-            {
-              "Fn::Split": [
-                "/",
-                {
-                  "Fn::Select": [
-                    5,
-                    {
-                      "Fn::Split": [
-                        ":",
-                        {
-                          "Fn::ImportValue": "cancellations-bus-CODE-arn",
-                        },
-                      ],
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-        "EventPattern": {
-          "account": [
-            {
-              "Ref": "AWS::AccountId",
-            },
-          ],
-        },
-        "Name": "multiple-account-api-cancellation-event-bus-rule-CODE",
-        "State": "ENABLED",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "multiple-account-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "Targets": [
-          {
-            "Arn": {
-              "Fn::GetAtt": [
-                "Queue4A7E3555",
-                "Arn",
-              ],
-            },
-            "Id": "Target0",
-          },
-        ],
-      },
-      "Type": "AWS::Events::Rule",
-    },
-    "SubscriptionEventsListenerLambdaServiceRole30274FBC": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "multiple-account-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "SubscriptionEventsListenerLambdaServiceRoleDefaultPolicyF3EE29E4": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "s3:GetObject*",
-                "s3:GetBucket*",
-                "s3:List*",
-              ],
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                      "/support/CODE/multiple-account-api/multiple-account-api.zip",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": "ssm:GetParametersByPath",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/CODE/support/multiple-account-api",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "ssm:GetParameters",
-                "ssm:GetParameter",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/CODE/support/multiple-account-api/*",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "sqs:ReceiveMessage",
-                "sqs:ChangeMessageVisibility",
-                "sqs:GetQueueUrl",
-                "sqs:DeleteMessage",
-                "sqs:GetQueueAttributes",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "Queue4A7E3555",
-                  "Arn",
-                ],
-              },
-            },
-            {
-              "Action": [
-                "dynamodb:BatchGetItem",
-                "dynamodb:Query",
-                "dynamodb:GetItem",
-                "dynamodb:Scan",
-                "dynamodb:ConditionCheckItem",
-                "dynamodb:DescribeTable",
-              ],
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "SecondaryUserTable22C9D3B4",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "SecondaryUserTable22C9D3B4",
-                          "Arn",
-                        ],
-                      },
-                      "/index/*",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": [
-                "dynamodb:GetRecords",
-                "dynamodb:GetShardIterator",
-              ],
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "SecondaryUserTable22C9D3B4",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "SecondaryUserTable22C9D3B4",
-                          "Arn",
-                        ],
-                      },
-                      "/index/*",
-                    ],
-                  ],
-                },
-              ],
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "SubscriptionEventsListenerLambdaServiceRoleDefaultPolicyF3EE29E4",
-        "Roles": [
-          {
-            "Ref": "SubscriptionEventsListenerLambdaServiceRole30274FBC",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "SubscriptionEventsListenerLambdaSqsEventSourcemultipleaccountapiCODEQueueBAA4D56414A09749": {
-      "Properties": {
-        "BatchSize": 1,
-        "EventSourceArn": {
-          "Fn::GetAtt": [
-            "Queue4A7E3555",
-            "Arn",
-          ],
-        },
-        "FunctionName": {
-          "Ref": "SubscriptionEventsListenerLambda36DCCB5F",
-        },
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "multiple-account-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::Lambda::EventSourceMapping",
-    },
-    "SubscriptionEventsListenerSQSsendpolicy362304F3": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "sqs:GetQueueUrl",
-                "sqs:SendMessage",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:sqs:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":braze-emails-CODE",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "SubscriptionEventsListenerSQSsendpolicy362304F3",
-        "Roles": [
-          {
-            "Ref": "SubscriptionEventsListenerLambdaServiceRole30274FBC",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "SubscriptionEventsListenerZuoraOAuthSecretsManagerpolicy0929BCBB": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "secretsmanager:GetSecretValue",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:secretsmanager:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":secret:CODE/Zuora-OAuth/SupportServiceLambdas-*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "SubscriptionEventsListenerZuoraOAuthSecretsManagerpolicy0929BCBB",
-        "Roles": [
-          {
-            "Ref": "SubscriptionEventsListenerLambdaServiceRole30274FBC",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
     "SupporterProductDataTabledeleteaccess55563630": {
       "Properties": {
         "PolicyDocument": {
@@ -1876,6 +1840,9 @@ exports[`The Multiple account api stack matches the snapshot 1`] = `
         "Roles": [
           {
             "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+          {
+            "Ref": "CancellationsListenerLambdaServiceRoleC49648C4",
           },
         ],
       },
@@ -2092,7 +2059,7 @@ DLQ: https://",
                 [
                   "lambda:",
                   {
-                    "Ref": "SubscriptionEventsListenerLambda36DCCB5F",
+                    "Ref": "CancellationsListenerLambda78796685",
                   },
                 ],
               ],
@@ -2244,6 +2211,444 @@ DLQ: https://",
         },
       },
       "Type": "AWS::ApiGateway::BasePathMapping",
+    },
+    "CancellationsListenerLambda78796685": {
+      "DependsOn": [
+        "CancellationsListenerLambdaServiceRoleDefaultPolicy5A64756F",
+        "CancellationsListenerLambdaServiceRoleC49648C4",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/PROD/multiple-account-api/multiple-account-api.zip",
+        },
+        "Description": "Sends secondary-user cancellation emails when a subscription with multiple accounts is cancelled",
+        "Environment": {
+          "Variables": {
+            "APP": "multiple-account-api",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
+            "STAGE": "PROD",
+          },
+        },
+        "FunctionName": "multiple-account-api-cancellation-PROD",
+        "Handler": "indexCancellation.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "CancellationsListenerLambdaServiceRoleC49648C4",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs22.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "multiple-account-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 15,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "CancellationsListenerLambdaRuleD14C34FC": {
+      "Properties": {
+        "Description": "Forwards all events from the cancellations-bus-PROD bus to multiple-account-api's queue.",
+        "EventBusName": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::Split": [
+                "/",
+                {
+                  "Fn::Select": [
+                    5,
+                    {
+                      "Fn::Split": [
+                        ":",
+                        {
+                          "Fn::ImportValue": "cancellations-bus-PROD-arn",
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        "EventPattern": {
+          "account": [
+            {
+              "Ref": "AWS::AccountId",
+            },
+          ],
+        },
+        "Name": "multiple-account-api-cancellation-event-bus-rule-PROD",
+        "State": "ENABLED",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "multiple-account-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "Queue4A7E3555",
+                "Arn",
+              ],
+            },
+            "Id": "Target0",
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "CancellationsListenerLambdaServiceRoleC49648C4": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "multiple-account-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "CancellationsListenerLambdaServiceRoleDefaultPolicy5A64756F": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/PROD/multiple-account-api/multiple-account-api.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/multiple-account-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/multiple-account-api/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "Queue4A7E3555",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:DescribeTable",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "SecondaryUserTable22C9D3B4",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "SecondaryUserTable22C9D3B4",
+                          "Arn",
+                        ],
+                      },
+                      "/index/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": [
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "SecondaryUserTable22C9D3B4",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "SecondaryUserTable22C9D3B4",
+                          "Arn",
+                        ],
+                      },
+                      "/index/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "CancellationsListenerLambdaServiceRoleDefaultPolicy5A64756F",
+        "Roles": [
+          {
+            "Ref": "CancellationsListenerLambdaServiceRoleC49648C4",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "CancellationsListenerLambdaSqsEventSourcemultipleaccountapiPRODQueue94388EF64D31C625": {
+      "Properties": {
+        "BatchSize": 1,
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "Queue4A7E3555",
+            "Arn",
+          ],
+        },
+        "FunctionName": {
+          "Ref": "CancellationsListenerLambda78796685",
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "multiple-account-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "CancellationsListenerLambdaSqsSendPolicy75A305F0": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:GetQueueUrl",
+                "sqs:SendMessage",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sqs:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":braze-emails-PROD",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "CancellationsListenerLambdaSqsSendPolicy75A305F0",
+        "Roles": [
+          {
+            "Ref": "CancellationsListenerLambdaServiceRoleC49648C4",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
     "DLQ581697C4": {
       "DeletionPolicy": "Delete",
@@ -3259,7 +3664,7 @@ DLQ: https://",
                 "ArnEquals": {
                   "aws:SourceArn": {
                     "Fn::GetAtt": [
-                      "SubscriptionEventsListenerLambdaRule9CAF4690",
+                      "CancellationsListenerLambdaRuleD14C34FC",
                       "Arn",
                     ],
                   },
@@ -3472,480 +3877,6 @@ DLQ: https://",
       "Type": "AWS::DynamoDB::Table",
       "UpdateReplacePolicy": "Retain",
     },
-    "SubscriptionEventsListenerLambda36DCCB5F": {
-      "DependsOn": [
-        "SubscriptionEventsListenerLambdaServiceRoleDefaultPolicyF3EE29E4",
-        "SubscriptionEventsListenerLambdaServiceRole30274FBC",
-      ],
-      "Properties": {
-        "Code": {
-          "S3Bucket": {
-            "Ref": "DistributionBucketName",
-          },
-          "S3Key": "support/PROD/multiple-account-api/multiple-account-api.zip",
-        },
-        "Description": "Sends secondary-user cancellation emails when a subscription with multiple accounts is cancelled",
-        "Environment": {
-          "Variables": {
-            "APP": "multiple-account-api",
-            "NODE_OPTIONS": "--enable-source-maps",
-            "STACK": "support",
-            "STAGE": "PROD",
-          },
-        },
-        "FunctionName": "multiple-account-api-cancellation-PROD",
-        "Handler": "indexCancellation.handler",
-        "LoggingConfig": {
-          "LogFormat": "Text",
-        },
-        "MemorySize": 1024,
-        "Role": {
-          "Fn::GetAtt": [
-            "SubscriptionEventsListenerLambdaServiceRole30274FBC",
-            "Arn",
-          ],
-        },
-        "Runtime": "nodejs22.x",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "multiple-account-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "Timeout": 15,
-      },
-      "Type": "AWS::Lambda::Function",
-    },
-    "SubscriptionEventsListenerLambdaRule9CAF4690": {
-      "Properties": {
-        "Description": "Forwards all events from the cancellations-bus-PROD bus to multiple-account-api's queue.",
-        "EventBusName": {
-          "Fn::Select": [
-            1,
-            {
-              "Fn::Split": [
-                "/",
-                {
-                  "Fn::Select": [
-                    5,
-                    {
-                      "Fn::Split": [
-                        ":",
-                        {
-                          "Fn::ImportValue": "cancellations-bus-PROD-arn",
-                        },
-                      ],
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-        "EventPattern": {
-          "account": [
-            {
-              "Ref": "AWS::AccountId",
-            },
-          ],
-        },
-        "Name": "multiple-account-api-cancellation-event-bus-rule-PROD",
-        "State": "ENABLED",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "multiple-account-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "Targets": [
-          {
-            "Arn": {
-              "Fn::GetAtt": [
-                "Queue4A7E3555",
-                "Arn",
-              ],
-            },
-            "Id": "Target0",
-          },
-        ],
-      },
-      "Type": "AWS::Events::Rule",
-    },
-    "SubscriptionEventsListenerLambdaServiceRole30274FBC": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "multiple-account-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "SubscriptionEventsListenerLambdaServiceRoleDefaultPolicyF3EE29E4": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "s3:GetObject*",
-                "s3:GetBucket*",
-                "s3:List*",
-              ],
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                      "/support/PROD/multiple-account-api/multiple-account-api.zip",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": "ssm:GetParametersByPath",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/PROD/support/multiple-account-api",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "ssm:GetParameters",
-                "ssm:GetParameter",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/PROD/support/multiple-account-api/*",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "sqs:ReceiveMessage",
-                "sqs:ChangeMessageVisibility",
-                "sqs:GetQueueUrl",
-                "sqs:DeleteMessage",
-                "sqs:GetQueueAttributes",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "Queue4A7E3555",
-                  "Arn",
-                ],
-              },
-            },
-            {
-              "Action": [
-                "dynamodb:BatchGetItem",
-                "dynamodb:Query",
-                "dynamodb:GetItem",
-                "dynamodb:Scan",
-                "dynamodb:ConditionCheckItem",
-                "dynamodb:DescribeTable",
-              ],
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "SecondaryUserTable22C9D3B4",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "SecondaryUserTable22C9D3B4",
-                          "Arn",
-                        ],
-                      },
-                      "/index/*",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": [
-                "dynamodb:GetRecords",
-                "dynamodb:GetShardIterator",
-              ],
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "SecondaryUserTable22C9D3B4",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "SecondaryUserTable22C9D3B4",
-                          "Arn",
-                        ],
-                      },
-                      "/index/*",
-                    ],
-                  ],
-                },
-              ],
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "SubscriptionEventsListenerLambdaServiceRoleDefaultPolicyF3EE29E4",
-        "Roles": [
-          {
-            "Ref": "SubscriptionEventsListenerLambdaServiceRole30274FBC",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "SubscriptionEventsListenerLambdaSqsEventSourcemultipleaccountapiPRODQueue94388EF6B258B33F": {
-      "Properties": {
-        "BatchSize": 1,
-        "EventSourceArn": {
-          "Fn::GetAtt": [
-            "Queue4A7E3555",
-            "Arn",
-          ],
-        },
-        "FunctionName": {
-          "Ref": "SubscriptionEventsListenerLambda36DCCB5F",
-        },
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "multiple-account-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::Lambda::EventSourceMapping",
-    },
-    "SubscriptionEventsListenerSQSsendpolicy362304F3": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "sqs:GetQueueUrl",
-                "sqs:SendMessage",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:sqs:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":braze-emails-PROD",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "SubscriptionEventsListenerSQSsendpolicy362304F3",
-        "Roles": [
-          {
-            "Ref": "SubscriptionEventsListenerLambdaServiceRole30274FBC",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "SubscriptionEventsListenerZuoraOAuthSecretsManagerpolicy0929BCBB": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "secretsmanager:GetSecretValue",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:secretsmanager:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":secret:PROD/Zuora-OAuth/SupportServiceLambdas-*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "SubscriptionEventsListenerZuoraOAuthSecretsManagerpolicy0929BCBB",
-        "Roles": [
-          {
-            "Ref": "SubscriptionEventsListenerLambdaServiceRole30274FBC",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
     "SupporterProductDataTabledeleteaccess55563630": {
       "Properties": {
         "PolicyDocument": {
@@ -4026,6 +3957,9 @@ DLQ: https://",
         "Roles": [
           {
             "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+          {
+            "Ref": "CancellationsListenerLambdaServiceRoleC49648C4",
           },
         ],
       },
