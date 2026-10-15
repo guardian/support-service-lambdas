@@ -42,6 +42,23 @@ The publisher's mParticle configuration is isolated from the existing `mparticle
 
 Populate the publisher-specific CODE and PROD values before enabling the corresponding deployment. Never commit or log the credentials.
 
+## Consent state
+
+The publisher sends two GDPR purposes in the event batch's `consent_state`:
+
+- `paid_media_conversion_measurement_google`
+- `paid_media_conversion_measurement_meta`
+
+Create both purpose names in each mParticle workspace before enabling this publisher. GDPR purpose names are configured per workspace and must match these strings exactly. Configure each Google Ads and Meta event connection to forward only when its matching purpose is consented. No connection or workspace settings are changed by this repository.
+
+For TCFv2, a purpose is true only when GDPR applies, TCF purpose 7 is true, the corresponding Google Remarketing or Facebook vendor choice is true, and the snapshot has a valid capture timestamp. Other frameworks and missing or unreadable snapshots are sent as false. This does not grant permission for personalised advertising, audience building, or other uses.
+
+The `consent_state` is attached to the user profile, not the purchase event. mParticle requires HTTP API callers to supply `timestamp_unixtime_ms`, and it applies a consent update only when its timestamp is newer than the one already stored for that purpose. The publisher uses the CMP capture time when valid and the acquisition event time for false states without a valid capture time. Consequently, a delayed acquisition with an older timestamp cannot overwrite a newer profile state.
+
+The API key and secret configured above must belong to an mParticle Platform or Custom Feed input; Partner Feed credentials cannot update consent state. Verify the input type and the purpose names in each workspace before relying on forwarding rules.
+
+The complete source snapshot is also sent as the `cmp_consent_snapshot` purchase custom attribute. It includes vendor choices and can reach Meta as custom event data if that connection forwards the attribute. Check the Meta mapping and remove or exclude this attribute if the full snapshot should not be sent there.
+
 ## Infrastructure
 
 Infrastructure is defined in `cdk/lib/mparticle-acquisitions-publisher.ts` and registered for both stages in `cdk/bin/cdk.ts`.
