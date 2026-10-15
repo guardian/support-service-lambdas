@@ -62,7 +62,9 @@ export const handleCancellation = async (
 		subscriptionNumber,
 	);
 
-	// send emails in a single batch at the end to avoid sending repeat emails on retries
+	// only send emails right at the end.  This means that most failures (and therefore
+	// retries) are likely to happen before any emails are sent, so retrying the whole
+	// lambda is safer.
 	await sendEmails(stage, emailMessages, subscriptionNumber);
 };
 
@@ -73,7 +75,6 @@ async function buildEmails(
 	orderNumber: OrderNumber,
 	subscriptionNumber: SubscriptionNumber,
 ) {
-	// ideally the secondary user repo should parse the identity ids up front for everyone's benefit
 	const primaryIdentityId = identityIdSchema.parse(
 		secondaryUsers[0].primaryIdentityId,
 	);
