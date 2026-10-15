@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`The SubscriptionEventsBus stack matches the snapshot 1`] = `
+exports[`The CancellationsBus stack matches the snapshot 1`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [],
@@ -9,7 +9,7 @@ exports[`The SubscriptionEventsBus stack matches the snapshot 1`] = `
   "Outputs": {
     "BusArn": {
       "Export": {
-        "Name": "subscription-events-bus-CODE-arn",
+        "Name": "cancellations-bus-CODE-arn",
       },
       "Value": {
         "Fn::GetAtt": [
@@ -22,11 +22,11 @@ exports[`The SubscriptionEventsBus stack matches the snapshot 1`] = `
   "Resources": {
     "BusEA82B648": {
       "Properties": {
-        "Name": "subscription-events-CODE",
+        "Name": "cancellations-bus-CODE",
         "Tags": [
           {
             "Key": "App",
-            "Value": "subscription-events-bus",
+            "Value": "cancellations-bus",
           },
           {
             "Key": "gu:cdk:version",
@@ -51,12 +51,12 @@ exports[`The SubscriptionEventsBus stack matches the snapshot 1`] = `
     "LogAllEventsLogGroup4318D40E": {
       "DeletionPolicy": "Retain",
       "Properties": {
-        "LogGroupName": "/aws/events/subscription-events-CODE",
+        "LogGroupName": "/aws/events/cancellations-bus-CODE",
         "RetentionInDays": 14,
         "Tags": [
           {
             "Key": "App",
-            "Value": "subscription-events-bus",
+            "Value": "cancellations-bus",
           },
           {
             "Key": "gu:cdk:version",
@@ -103,13 +103,13 @@ exports[`The SubscriptionEventsBus stack matches the snapshot 1`] = `
             ],
           ],
         },
-        "PolicyName": "subscriptioneventsbusCODELogAllEventsLogGroupPolicyFB9DBAB3",
+        "PolicyName": "cancellationsbusCODELogAllEventsLogGroupPolicy2B06B51F",
       },
       "Type": "AWS::Logs::ResourcePolicy",
     },
     "LogAllEventsRule1A4D2528": {
       "Properties": {
-        "Description": "Log all events on the subscription-events-CODE bus to CloudWatch Logs for debugging",
+        "Description": "Log all events on the cancellations-bus-CODE bus to CloudWatch Logs for debugging",
         "EventBusName": {
           "Ref": "BusEA82B648",
         },
@@ -124,7 +124,7 @@ exports[`The SubscriptionEventsBus stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "subscription-events-bus",
+            "Value": "cancellations-bus",
           },
           {
             "Key": "gu:cdk:version",
@@ -161,7 +161,7 @@ exports[`The SubscriptionEventsBus stack matches the snapshot 1`] = `
 }
 `;
 
-exports[`The SubscriptionEventsBus stack matches the snapshot 2`] = `
+exports[`The CancellationsBus stack matches the snapshot 2`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [],
@@ -170,7 +170,7 @@ exports[`The SubscriptionEventsBus stack matches the snapshot 2`] = `
   "Outputs": {
     "BusArn": {
       "Export": {
-        "Name": "subscription-events-bus-PROD-arn",
+        "Name": "cancellations-bus-PROD-arn",
       },
       "Value": {
         "Fn::GetAtt": [
@@ -183,11 +183,11 @@ exports[`The SubscriptionEventsBus stack matches the snapshot 2`] = `
   "Resources": {
     "BusEA82B648": {
       "Properties": {
-        "Name": "subscription-events-PROD",
+        "Name": "cancellations-bus-PROD",
         "Tags": [
           {
             "Key": "App",
-            "Value": "subscription-events-bus",
+            "Value": "cancellations-bus",
           },
           {
             "Key": "gu:cdk:version",
@@ -212,12 +212,12 @@ exports[`The SubscriptionEventsBus stack matches the snapshot 2`] = `
     "LogAllEventsLogGroup4318D40E": {
       "DeletionPolicy": "Retain",
       "Properties": {
-        "LogGroupName": "/aws/events/subscription-events-PROD",
+        "LogGroupName": "/aws/events/cancellations-bus-PROD",
         "RetentionInDays": 14,
         "Tags": [
           {
             "Key": "App",
-            "Value": "subscription-events-bus",
+            "Value": "cancellations-bus",
           },
           {
             "Key": "gu:cdk:version",
@@ -264,13 +264,13 @@ exports[`The SubscriptionEventsBus stack matches the snapshot 2`] = `
             ],
           ],
         },
-        "PolicyName": "subscriptioneventsbusPRODLogAllEventsLogGroupPolicy9A757C04",
+        "PolicyName": "cancellationsbusPRODLogAllEventsLogGroupPolicy92AE4C08",
       },
       "Type": "AWS::Logs::ResourcePolicy",
     },
     "LogAllEventsRule1A4D2528": {
       "Properties": {
-        "Description": "Log all events on the subscription-events-PROD bus to CloudWatch Logs for debugging",
+        "Description": "Log all events on the cancellations-bus-PROD bus to CloudWatch Logs for debugging",
         "EventBusName": {
           "Ref": "BusEA82B648",
         },
@@ -285,7 +285,7 @@ exports[`The SubscriptionEventsBus stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "subscription-events-bus",
+            "Value": "cancellations-bus",
           },
           {
             "Key": "gu:cdk:version",

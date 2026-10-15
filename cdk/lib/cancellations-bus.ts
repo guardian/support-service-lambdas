@@ -2,25 +2,27 @@ import { type App, CfnOutput } from 'aws-cdk-lib';
 import { EventBus, Rule } from 'aws-cdk-lib/aws-events';
 import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
+import type { SrBusName } from './cdk/policies';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
 
+const busNamePrefix: SrBusName = 'cancellations-bus';
+
 /**
- * A shared EventBridge bus for subscription lifecycle events.
+ * A dedicated EventBridge bus for subscription `Cancellation` events.
  *
  * This stack only creates the bus and a catch-all logging rule for debugging.
  * Producers and listeners are added in their own stacks/lambdas, granted access
- * via AllowPutSubscriptionEventPolicy (see cdk/policies.ts) or a subscription
- * on the exported bus ARN.
+ * via AllowBusPutEventsPolicy (see cdk/policies.ts) or SrEventBusLambda and
+ * accessed via modules/subscription-events
  */
-export class SubscriptionEventsBus extends SrStack {
-	static exportName = (stage: SrStageNames) =>
-		`subscription-events-bus-${stage}-arn`;
+export class CancellationsBus extends SrStack {
+	static exportName = (stage: SrStageNames) => `${busNamePrefix}-${stage}-arn`;
 
 	constructor(scope: App, stage: SrStageNames) {
-		super(scope, { app: 'subscription-events-bus', stage });
+		super(scope, { app: 'cancellations-bus', stage });
 
-		const busName = `subscription-events-${this.stage}`;
+		const busName = `${busNamePrefix}-${this.stage}`;
 
 		const bus = new EventBus(this, 'Bus', {
 			eventBusName: busName,
@@ -56,7 +58,7 @@ export class SubscriptionEventsBus extends SrStack {
 		);
 
 		new CfnOutput(this, 'BusArn', {
-			exportName: SubscriptionEventsBus.exportName(stage),
+			exportName: CancellationsBus.exportName(stage),
 			value: bus.eventBusArn,
 		});
 	}

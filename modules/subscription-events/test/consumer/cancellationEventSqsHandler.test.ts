@@ -1,5 +1,5 @@
 import type { SQSRecord } from 'aws-lambda';
-import { handleSubscriptionEventMessage } from '@modules/subscription-events/consumer/eventBridgeSqsHandler';
+import { handleCancellationEventMessage } from '@modules/subscription-events/consumer/cancellationEventSqsHandler';
 
 const validCancellationEvent = {
 	version: '0',
@@ -23,12 +23,12 @@ const recordWith = (body: unknown): SQSRecord =>
 		body: JSON.stringify(body),
 	}) as SQSRecord;
 
-describe('handleSubscriptionEventMessage', () => {
+describe('handleCancellationEventMessage', () => {
 	it('parses the record and calls the handler with the validated event', async () => {
 		const handler = jest.fn().mockResolvedValue(undefined);
 		const services = { some: 'service' };
 
-		await handleSubscriptionEventMessage(handler)(
+		await handleCancellationEventMessage(handler)(
 			recordWith(validCancellationEvent),
 			services,
 		);
@@ -44,7 +44,7 @@ describe('handleSubscriptionEventMessage', () => {
 		const handler = jest.fn().mockResolvedValue(undefined);
 
 		await expect(
-			handleSubscriptionEventMessage(handler)(
+			handleCancellationEventMessage(handler)(
 				recordWith({ ...validCancellationEvent, detail: {} }),
 				{},
 			),
@@ -57,7 +57,7 @@ describe('handleSubscriptionEventMessage', () => {
 		const handler = jest.fn().mockRejectedValue(new Error('handler failed'));
 
 		await expect(
-			handleSubscriptionEventMessage(handler)(
+			handleCancellationEventMessage(handler)(
 				recordWith(validCancellationEvent),
 				{},
 			),
