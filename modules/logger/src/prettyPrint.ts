@@ -18,24 +18,20 @@ export const prettyPrint = (value: unknown): string => {
 	return String(value);
 };
 
-// Matches the quoted marker strings produced by makeRefReplacer, e.g. "@@REF_Object_1@@",
-// and unwraps them into the unquoted `[Object@1] (back reference)` form.
-const backReferencePattern = /"@@REF_(\w+)_(\d+)@@"/g;
-const unwrapBackReferences = (s: string) =>
-	s.replace(backReferencePattern, '[$1@$2] (back reference)');
-
 function objectToPrettyString(object: unknown) {
 	try {
-		const jsonString = unwrapBackReferences(
-			JSON.stringify(object, makeRefReplacer())
+		const { replacer, resolveBackReferences } = makeRefReplacer();
+		const jsonString = resolveBackReferences(
+			JSON.stringify(object, replacer)
 				.replace(/"([A-Za-z0-9]+)":/g, ' $1: ') // Remove quotes around keys
 				.replace(/}$/, ' }'),
 		);
 		if (jsonString.length <= 80) {
 			return jsonString;
 		}
-		return unwrapBackReferences(
-			JSON.stringify(object, makeRefReplacer(), 2).replace(
+		const pretty = makeRefReplacer();
+		return pretty.resolveBackReferences(
+			JSON.stringify(object, pretty.replacer, 2).replace(
 				/"([A-Za-z0-9]+)":/g,
 				'$1:',
 			),
@@ -46,19 +42,40 @@ function objectToPrettyString(object: unknown) {
 	}
 }
 
-export function makeRefReplacer(): (key: string, value: unknown) => unknown {
+export function makeRefReplacer(): {
+	replacer: (key: string, value: unknown) => unknown;
+	resolveBackReferences: (jsonString: string) => string;
+} {
 	const seen = new Map<object, number>();
 	let nextIndex = 1;
+	const displayTextByPlaceholder = new Map<string, string>();
+	// avoid real data colliding with the references
+	const callNonce = Math.floor(Math.random() * 1e9).toString(36);
 
-	return (_key: string, value: unknown): unknown => {
+	const replacer = (_key: string, value: unknown): unknown => {
 		if (value !== null && typeof value === 'object') {
 			const existingIndex = seen.get(value);
 			if (existingIndex !== undefined) {
 				const type = value.constructor.name || 'Object';
-				return `@@REF_${type}_${existingIndex}@@`;
+				const placeholder = `${callNonce}_${displayTextByPlaceholder.size}`;
+				displayTextByPlaceholder.set(
+					placeholder,
+					`[${type}@${existingIndex}] (back reference)`,
+				);
+				return placeholder;
 			}
 			seen.set(value, nextIndex++);
 		}
 		return value;
 	};
+
+	const resolveBackReferences = (jsonString: string) => {
+		let result = jsonString;
+		for (const [placeholder, displayText] of displayTextByPlaceholder) {
+			result = result.split(`"${placeholder}"`).join(displayText);
+		}
+		return result;
+	};
+
+	return { replacer, resolveBackReferences };
 }
