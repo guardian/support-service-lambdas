@@ -7,7 +7,8 @@ export type Team =
 	| 'PLATFORM'
 	| 'SRE'
 	| 'ENGINE'
-	| 'PUZZLES';
+	| 'PUZZLES'
+	| 'SRDEV';
 
 const teamToAppMappings: Record<Team, string[]> = {
 	MARTECH: [
@@ -60,9 +61,6 @@ const teamToAppMappings: Record<Team, string[]> = {
 
 		// zuora-finance
 		'zuora-creditor',
-
-		// zuora-config
-		'canonical-config',
 
 		// support-frontend
 		'frontend',
@@ -151,6 +149,10 @@ const teamToAppMappings: Record<Team, string[]> = {
 	],
 	ENGINE: ['price-migration-engine-state-machine'],
 	PUZZLES: ['puzzles-app'],
+	SRDEV: [
+		// Zuora Config
+		'canonical-config',
+	],
 };
 
 const buildAppToTeamMappings = (

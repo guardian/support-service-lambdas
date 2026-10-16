@@ -22,6 +22,7 @@ loadConfig('CODE', 'support', 'alarms-handler', ConfigSchema)
 					PLATFORM: testWebhook,
 					ENGINE: testWebhook,
 					PUZZLES: testWebhook,
+					SRDEV: testWebhook,
 				},
 				accounts: config.accounts,
 			},
