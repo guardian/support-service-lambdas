@@ -22,5 +22,6 @@ deployments:
       prefixStack: false
       functionNames:
         - multiple-account-api-
+        - multiple-account-api-cancellation-
     dependencies:
       - multiple-account-api-cloudformation

@@ -36,7 +36,7 @@ import { cancellationEventSchema } from '@modules/subscription-events/shared/can
 export function CancellationEventSQSHandler<ConfigType, Services>(
 	configSchema: z.ZodType<ConfigType>,
 	handler: (event: CancellationEvent, services: Services) => Promise<void>,
-	buildServices: (handlerProps: HandlerEnv<ConfigType>) => Services,
+	buildServices: (handlerProps: HandlerEnv<ConfigType>) => Promise<Services>,
 ) {
 	return SQSHandler(
 		configSchema,
