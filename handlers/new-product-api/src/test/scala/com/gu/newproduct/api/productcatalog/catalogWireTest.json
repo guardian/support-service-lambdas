@@ -95,7 +95,7 @@
       "startDateRules" : {
         "daysOfWeek" : [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ],
         "selectableWindow" : {
-          "startDate" : "2019-12-15",
+          "startDate" : "2019-12-01",
           "sizeInDays" : 90
         }
       },
@@ -118,7 +118,7 @@
       "startDateRules" : {
         "daysOfWeek" : [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ],
         "selectableWindow" : {
-          "startDate" : "2019-12-15",
+          "startDate" : "2019-12-01",
           "sizeInDays" : 90
         }
       },
@@ -141,7 +141,7 @@
       "startDateRules" : {
         "daysOfWeek" : [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ],
         "selectableWindow" : {
-          "startDate" : "2019-12-15",
+          "startDate" : "2019-12-01",
           "sizeInDays" : 90
         }
       },
@@ -159,7 +159,7 @@
       "startDateRules" : {
         "daysOfWeek" : [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ],
         "selectableWindow" : {
-          "startDate" : "2019-12-15",
+          "startDate" : "2019-12-01",
           "sizeInDays" : 90
         }
       },
