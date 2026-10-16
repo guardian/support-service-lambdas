@@ -1,11 +1,7 @@
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import {
-	Architecture,
-	CfnEventSourceMapping,
-	Runtime,
-} from 'aws-cdk-lib/aws-lambda';
+import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { ApiGatewayToSqs } from './cdk/ApiGatewayToSqs';
 import { SrSqsLambda } from './cdk/SrSqsLambda';
 import type { SrStageNames } from './cdk/SrStack';
@@ -19,14 +15,14 @@ export class ZuoraAutoCancel extends SrStack {
 			'Zuora auto-cancellations are not being processed. Subscriptions with failed payments may not be cancelled.';
 
 		const lambda = new SrSqsLambda(this, 'Lambda', {
-			nameSuffix: 'sqs', // Avoid conflict with existing zuora-auto-cancel-PROD Lambda
 			monitoring: { errorImpact },
 			maxReceiveCount: 3,
 			visibilityTimeout: Duration.minutes(6), // Must be > Lambda timeout
+			maxConcurrency: 5, // Rate-limit concurrent Zuora API calls to avoid 429 errors
 			lambdaOverrides: {
 				description:
 					'Processes auto-cancellation requests from SQS queue (rate-limited)',
-				fileName: 'zuora-callout-apis.jar',
+				fileName: 'zuora-auto-cancel.jar',
 				handler: 'com.gu.autoCancel.AutoCancelSqsHandler::handleRequest',
 				runtime: Runtime.JAVA_21,
 				architecture: Architecture.ARM_64,
@@ -37,14 +33,6 @@ export class ZuoraAutoCancel extends SrStack {
 					EmailQueueName: `braze-emails-${this.stage}`,
 				},
 			},
-		});
-
-		// Rate-limit concurrent Zuora API calls to avoid 429 errors (escape hatch - SrSqsLambda doesn't expose maxConcurrency)
-		lambda.node.findAll().forEach((child) => {
-			const cfnResource = child.node.defaultChild;
-			if (cfnResource instanceof CfnEventSourceMapping) {
-				cfnResource.scalingConfig = { maximumConcurrency: 5 };
-			}
 		});
 
 		// IAM Policies
