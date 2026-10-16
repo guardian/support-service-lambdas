@@ -131,7 +131,7 @@ exports[`The zuora-auto-cancel stack matches the snapshot 1`] = `
       "DeletionPolicy": "Delete",
       "Properties": {
         "MessageRetentionPeriod": 1209600,
-        "QueueName": "zuora-auto-cancel-sqs-dlq-CODE",
+        "QueueName": "zuora-auto-cancel-dlq-CODE",
         "Tags": [
           {
             "Key": "App",
@@ -233,7 +233,7 @@ exports[`The zuora-auto-cancel stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/CODE/zuora-auto-cancel/zuora-callout-apis.jar",
+          "S3Key": "membership/CODE/zuora-auto-cancel/zuora-auto-cancel.jar",
         },
         "Description": "Processes auto-cancellation requests from SQS queue (rate-limited)",
         "Environment": {
@@ -246,7 +246,7 @@ exports[`The zuora-auto-cancel stack matches the snapshot 1`] = `
             "Stage": "CODE",
           },
         },
-        "FunctionName": "zuora-auto-cancel-sqs-CODE",
+        "FunctionName": "zuora-auto-cancel-CODE",
         "Handler": "com.gu.autoCancel.AutoCancelSqsHandler::handleRequest",
         "LoggingConfig": {
           "LogFormat": "Text",
@@ -377,7 +377,7 @@ exports[`The zuora-auto-cancel stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/CODE/zuora-auto-cancel/zuora-callout-apis.jar",
+                      "/membership/CODE/zuora-auto-cancel/zuora-auto-cancel.jar",
                     ],
                   ],
                 },
@@ -497,7 +497,7 @@ exports[`The zuora-auto-cancel stack matches the snapshot 1`] = `
     "Queue4A7E3555": {
       "DeletionPolicy": "Delete",
       "Properties": {
-        "QueueName": "zuora-auto-cancel-sqs-queue-CODE",
+        "QueueName": "zuora-auto-cancel-queue-CODE",
         "RedrivePolicy": {
           "deadLetterTargetArn": {
             "Fn::GetAtt": [
@@ -1183,7 +1183,7 @@ DLQ: https://",
       "DeletionPolicy": "Delete",
       "Properties": {
         "MessageRetentionPeriod": 1209600,
-        "QueueName": "zuora-auto-cancel-sqs-dlq-PROD",
+        "QueueName": "zuora-auto-cancel-dlq-PROD",
         "Tags": [
           {
             "Key": "App",
@@ -1285,7 +1285,7 @@ DLQ: https://",
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/PROD/zuora-auto-cancel/zuora-callout-apis.jar",
+          "S3Key": "membership/PROD/zuora-auto-cancel/zuora-auto-cancel.jar",
         },
         "Description": "Processes auto-cancellation requests from SQS queue (rate-limited)",
         "Environment": {
@@ -1298,7 +1298,7 @@ DLQ: https://",
             "Stage": "PROD",
           },
         },
-        "FunctionName": "zuora-auto-cancel-sqs-PROD",
+        "FunctionName": "zuora-auto-cancel-PROD",
         "Handler": "com.gu.autoCancel.AutoCancelSqsHandler::handleRequest",
         "LoggingConfig": {
           "LogFormat": "Text",
@@ -1429,7 +1429,7 @@ DLQ: https://",
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/PROD/zuora-auto-cancel/zuora-callout-apis.jar",
+                      "/membership/PROD/zuora-auto-cancel/zuora-auto-cancel.jar",
                     ],
                   ],
                 },
@@ -1549,7 +1549,7 @@ DLQ: https://",
     "Queue4A7E3555": {
       "DeletionPolicy": "Delete",
       "Properties": {
-        "QueueName": "zuora-auto-cancel-sqs-queue-PROD",
+        "QueueName": "zuora-auto-cancel-queue-PROD",
         "RedrivePolicy": {
           "deadLetterTargetArn": {
             "Fn::GetAtt": [

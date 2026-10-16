@@ -1,0 +1,26 @@
+stacks:
+  - membership
+regions:
+  - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  zuora-auto-cancel-cloudformation:
+    type: cloud-formation
+    app: zuora-auto-cancel
+    parameters:
+      templateStagePaths:
+        CODE: zuora-auto-cancel-CODE.template.json
+        PROD: zuora-auto-cancel-PROD.template.json
+  zuora-auto-cancel:
+    type: aws-lambda
+    parameters:
+      fileName: zuora-auto-cancel.jar
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+        - zuora-auto-cancel-
+    dependencies:
+      - zuora-auto-cancel-cloudformation
+

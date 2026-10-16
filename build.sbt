@@ -371,8 +371,8 @@ def lambdaProject(
     )
 }
 
-lazy val `zuora-callout-apis` = lambdaProject(
-  "zuora-callout-apis",
+lazy val `zuora-auto-cancel` = lambdaProject(
+  "zuora-auto-cancel",
   "Handles auto-cancellations for membership and subscriptions",
   Seq(
     awsLambda,
