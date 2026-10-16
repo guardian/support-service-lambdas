@@ -15,6 +15,12 @@ export type HandlerEnv<ConfigType> = {
 	config: ConfigType;
 };
 
+function summariseServices(services: unknown): unknown {
+	return typeof services === 'object' && services !== null
+		? Object.keys(services)
+		: services;
+}
+
 /**
  * This is a similar wrapper to the Router, it handles loading config on
  * cold start.
@@ -75,6 +81,7 @@ export function LambdaHandlerWithServices<ConfigType, Services, E>(
 			'lambdaColdStart',
 			callerInfo,
 			(args) => ({ logOnEntryOnly: args }),
+			summariseServices,
 		),
 		'load config from SSM',
 	);
