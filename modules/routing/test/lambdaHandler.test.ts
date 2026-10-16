@@ -42,7 +42,7 @@ afterEach(() => {
 
 describe('LambdaHandlerWithServices', () => {
 	it('does not do any cold start work until the first invocation', () => {
-		const buildServices = jest.fn(() => ({}));
+		const buildServices = jest.fn(() => Promise.resolve({}));
 		LambdaHandlerWithServices(
 			configSchema,
 			() => Promise.resolve(),
@@ -83,7 +83,7 @@ describe('LambdaHandlerWithServices', () => {
 	});
 
 	it('passes handler errors out to the lambda runtime without redoing the cold start', async () => {
-		const buildServices = jest.fn(() => ({}));
+		const buildServices = jest.fn(() => Promise.resolve({}));
 		const handler = jest
 			.fn<Promise<void>, [number, object]>()
 			.mockRejectedValueOnce(new Error('handler failed'))
@@ -129,7 +129,7 @@ describe('LambdaHandlerWithServices', () => {
 		const lambda = LambdaHandlerWithServices(
 			configSchema,
 			() => Promise.resolve(),
-			() => ({ bigClient: { nested: 'DEEP_VALUE' } }),
+			() => Promise.resolve({ bigClient: { nested: 'DEEP_VALUE' } }),
 			'test caller',
 		);
 

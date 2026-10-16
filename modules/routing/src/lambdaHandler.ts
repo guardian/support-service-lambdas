@@ -47,7 +47,7 @@ export function LambdaHandler<ConfigType, E>(
 	return LambdaHandlerWithServices(
 		configSchema,
 		handlerWithEntryExitLogging,
-		(servicesAndConfig) => servicesAndConfig,
+		(servicesAndConfig) => Promise.resolve(servicesAndConfig),
 		callerInfo,
 	);
 }
@@ -69,9 +69,7 @@ export function LambdaHandler<ConfigType, E>(
 export function LambdaHandlerWithServices<ConfigType, Services, E>(
 	configSchema: z.ZodType<ConfigType>,
 	handler: (event: E, services: Services) => Promise<void>,
-	buildServices: (
-		handlerProps: HandlerEnv<ConfigType>,
-	) => Services | Promise<Services>,
+	buildServices: (handlerProps: HandlerEnv<ConfigType>) => Promise<Services>,
 	callerInfo: string,
 ) {
 	// only expect env vars on a cold start, don't load if this file is referenced in tests

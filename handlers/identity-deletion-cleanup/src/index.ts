@@ -6,5 +6,5 @@ import { defaultDependencies } from './services/defaultDependencies';
 export const handler = SQSHandler(
 	z.object({}),
 	handleIdentityDeletionRecord,
-	() => ({ dependencies: defaultDependencies() }),
+	() => Promise.resolve({ dependencies: defaultDependencies() }),
 );
