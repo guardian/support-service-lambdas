@@ -38,6 +38,51 @@ type MParticleCommerceEvent = {
 	};
 };
 
+const googleRemarketingVendorId = '5ed0eb688a76503f1016578f';
+const metaVendorId = '5e7e1298b8e05c54a85c52d2';
+
+function parseConsentTimestamp(
+	timestamp: string | undefined,
+): number | undefined {
+	if (!timestamp) {
+		return undefined;
+	}
+
+	const parsedTimestamp = Date.parse(timestamp);
+	return Number.isFinite(parsedTimestamp) &&
+		new Date(parsedTimestamp).toISOString() === timestamp
+		? parsedTimestamp
+		: undefined;
+}
+
+function consentState(
+	acquisition: AcquisitionProduct,
+	eventTimestamp: number,
+): NonNullable<MParticleEventBatch['consent_state']> {
+	const snapshot = acquisition.cmpConsentSnapshot;
+	const tcfv2 = snapshot?.framework === 'tcfv2' ? snapshot.tcfv2 : undefined;
+	const capturedAt = parseConsentTimestamp(snapshot?.capturedAt);
+	const consentedFor = (vendorId: string) =>
+		capturedAt !== undefined &&
+		tcfv2?.gdprApplies === true &&
+		tcfv2.consents['7'] === true &&
+		tcfv2.vendorConsents[vendorId] === true;
+	const timestamp = capturedAt ?? eventTimestamp;
+
+	return {
+		gdpr: {
+			paid_media_conversion_measurement_google: {
+				consented: consentedFor(googleRemarketingVendorId),
+				timestamp_unixtime_ms: timestamp,
+			},
+			paid_media_conversion_measurement_meta: {
+				consented: consentedFor(metaVendorId),
+				timestamp_unixtime_ms: timestamp,
+			},
+		},
+	};
+}
+
 /**
  * An mParticle event batch as produced by this handler: the shared Events API
  * model narrowed to the single commerce event we send per acquisition.
@@ -96,7 +141,9 @@ function eventIdentifier(acquisition: AcquisitionProduct): string {
 		return explicitIdentifier;
 	}
 
-	return createHash('sha256').update(JSON.stringify(acquisition)).digest('hex');
+	return createHash('sha256')
+		.update(JSON.stringify({ ...acquisition, cmpConsentSnapshot: undefined }))
+		.digest('hex');
 }
 
 function transactionIdentifier(
@@ -202,6 +249,11 @@ function customAttributes(
 	add('state', acquisition.state);
 	add('email', acquisition.email);
 	add('similar_products_consent', acquisition.similarProductsConsent);
+	if (acquisition.cmpConsentSnapshot !== undefined) {
+		attributes.cmp_consent_snapshot = JSON.stringify(
+			acquisition.cmpConsentSnapshot,
+		);
+	}
 	add('paypal_transaction_id', acquisition.paypalTransactionId);
 
 	return attributes;
@@ -332,6 +384,7 @@ export function buildMParticleBatch(
 		source_request_id: eventId,
 		environment,
 		events: [commerceEvent],
+		consent_state: consentState(acquisition, eventTimestamp),
 		...(Object.keys(attributes).length > 0
 			? { user_attributes: attributes }
 			: {}),
