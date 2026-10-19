@@ -4,7 +4,7 @@ import com.gu.autoCancel.AutoCancelSteps.AutoCancelUrlParams
 import play.api.libs.json.{JsSuccess, Json}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-object AutoCancelHandlerTest {
+object AutoCancelInputFilterTest {
 
   def fakeCallout(autoPay: Boolean) = {
     AutoCancelCallout(
@@ -24,9 +24,9 @@ object AutoCancelHandlerTest {
   }
 
 }
-class AutoCancelHandlerTest extends AnyFlatSpec {
+class AutoCancelInputFilterTest extends AnyFlatSpec {
 
-  import AutoCancelHandlerTest._
+  import AutoCancelInputFilterTest._
   import AutoCancelInputFilter._
 
   "filterInvalidAccount" should "return a left if AutoPay = false" in {

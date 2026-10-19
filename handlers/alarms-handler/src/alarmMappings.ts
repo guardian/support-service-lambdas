@@ -107,7 +107,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 
 		// zuora
 		'invoicing-api',
-		'zuora-callout-apis',
+		'zuora-auto-cancel',
 		'zuora-oracle-fusion',
 		'write-off-unpaid-invoices',
 		'negative-invoices-processor',

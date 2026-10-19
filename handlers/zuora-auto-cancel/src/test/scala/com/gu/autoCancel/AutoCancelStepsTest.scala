@@ -59,7 +59,7 @@ class AutoCancelStepsTest extends AnyFlatSpec with Matchers {
       getSubscriptionsOnInvoice =
         _ => ClientSuccess(invoiceDueMultipleSubscriptions.map(s => SubscriptionNumber(s.subscriptionNumber))),
     ) _
-    val autoCancelCallout = AutoCancelHandlerTest
+    val autoCancelCallout = AutoCancelInputFilterTest
       .fakeCallout(true)
       .copy(
         invoiceId = calloutInvoiceId,
