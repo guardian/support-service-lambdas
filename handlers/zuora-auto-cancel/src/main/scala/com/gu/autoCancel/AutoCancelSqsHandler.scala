@@ -157,7 +157,7 @@ class ProcessCalloutSteps(
       ) _
 
       // Check if we should process this callout
-      _ <- AutoCancelInputFilter(autoCancelCallout, onlyCancelDirectDebit = false)
+      _ <- AutoCancelInputFilter(autoCancelCallout).withLogging("filter on auto pay")
 
       // Get the auto-cancel requests
       autoCancelRequests <- cancelRequestsProducer(autoCancelCallout).withLogging(
@@ -171,10 +171,7 @@ class ProcessCalloutSteps(
         zuoraOrdersBackend,
         getRemainingTimeInMillis,
         processingDate,
-      )(
-        autoCancelRequests,
-        AutoCancelSteps.AutoCancelUrlParams(onlyCancelDirectDebit = false, dryRun = false),
-      )
+      )(autoCancelRequests)
         .withLogging(s"auto-cancellation for ${autoCancelCallout.accountId}")
 
       request = ToMessage(autoCancelCallout, _: PaymentFailureInformation, EmailId.cancelledId)

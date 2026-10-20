@@ -1,12 +1,11 @@
 package com.gu.util.zuora
 
 import com.gu.util.resthttp.RestRequestMaker.Requests
-import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
+import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.ZuoraCreditTransfer.AdjustmentType
-import com.typesafe.scalalogging.LazyLogging
 import play.api.libs.json._
 
-object ZuoraCreditTransfer extends LazyLogging {
+object ZuoraCreditTransfer {
 
   sealed abstract class AdjustmentType(val value: String)
   object AdjustmentType {
@@ -34,7 +33,7 @@ object ZuoraCreditTransfer extends LazyLogging {
     (CreditTransfer(invoiceId, amount, adjustmentType, comment), "object/credit-balance-adjustment")
 }
 
-object TransferToCreditBalance extends LazyLogging {
+object TransferToCreditBalance {
 
   implicit val unitReads: Reads[Unit] =
     Reads(_ => JsSuccess(()))
@@ -43,16 +42,9 @@ object TransferToCreditBalance extends LazyLogging {
     val (body, path) = ZuoraCreditTransfer.toBodyAndPath(invoiceId, amount, AdjustmentType.Increase, comment)
     requests.post(body, path)
   }
-
-  def dryRun(requests: Requests)(invoiceId: String, amount: BigDecimal, comment: String): ClientFailableOp[Unit] = {
-    val (body, path) = ZuoraCreditTransfer.toBodyAndPath(invoiceId, amount, AdjustmentType.Increase, comment)
-    val msg = s"DryRun for ZuoraCreditTransfer: body=$body, path=$path"
-    logger.info(msg)
-    ClientSuccess(())
-  }
 }
 
-object ApplyCreditBalance extends LazyLogging {
+object ApplyCreditBalance {
 
   implicit val unitReads: Reads[Unit] =
     Reads(_ => JsSuccess(()))
@@ -60,12 +52,5 @@ object ApplyCreditBalance extends LazyLogging {
   def apply(requests: Requests)(invoiceId: String, amount: Double, comment: String): ClientFailableOp[Unit] = {
     val (body, path) = ZuoraCreditTransfer.toBodyAndPath(invoiceId, amount, AdjustmentType.Decrease, comment)
     requests.post(body, path)
-  }
-
-  def dryRun(requests: Requests)(invoiceId: String, amount: Double, comment: String): ClientFailableOp[Unit] = {
-    val (body, path) = ZuoraCreditTransfer.toBodyAndPath(invoiceId, amount, AdjustmentType.Decrease, comment)
-    val msg = s"DryRun for ZuoraCreditTransfer: body=$body, path=$path"
-    logger.info(msg)
-    ClientSuccess(())
   }
 }

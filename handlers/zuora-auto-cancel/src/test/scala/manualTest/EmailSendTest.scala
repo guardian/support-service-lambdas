@@ -25,7 +25,7 @@ object EmailSendTest extends App with Logging {
           card_expiry_date = "cardExpiryValue",
           first_name = s"firstNameValue",
           last_name = "lastNameValue",
-          primaryKey = PaymentId(UUID.randomUUID().toString),
+          primaryKey = InvoiceId(UUID.randomUUID().toString),
           serviceStartDate = "31 January 2016",
           serviceEndDate = "31 January 2017",
         ),
@@ -35,12 +35,7 @@ object EmailSendTest extends App with Logging {
     SfContactId = "18328400",
   )
 
-  val emailNames: Seq[EmailId] = (1 to 4)
-    .map(EmailId.paymentFailureId)
-    .collect { case Right(emailName) =>
-      emailName
-    }
-    .:+(EmailId.cancelledId)
+  val emailNames: Seq[EmailId] = Seq(EmailId.cancelledId)
 
   val products = Seq(
     "Supporter",

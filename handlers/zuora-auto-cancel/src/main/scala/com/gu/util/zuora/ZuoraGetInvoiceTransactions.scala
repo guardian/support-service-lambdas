@@ -1,14 +1,13 @@
 package com.gu.util.zuora
 
 import com.gu.util.resthttp.RestRequestMaker.Requests
-import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
-import com.typesafe.scalalogging.LazyLogging
+import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{JsPath, Reads}
 
 import java.time.LocalDate
 
-object ZuoraGetInvoiceTransactions extends LazyLogging {
+object ZuoraGetInvoiceTransactions {
 
   case class InvoiceItem(
       id: String,
@@ -59,10 +58,4 @@ object ZuoraGetInvoiceTransactions extends LazyLogging {
 
   def apply(requests: Requests)(accountId: String): ClientFailableOp[InvoiceTransactionSummary] =
     requests.get[InvoiceTransactionSummary](s"transactions/invoices/accounts/$accountId")
-
-  def dryRun(requests: Requests)(accountId: String): ClientFailableOp[InvoiceTransactionSummary] = {
-    val msg = s"DryRun for ZuoraGetInvoiceTransactions: ID $accountId"
-    logger.info(msg)
-    ClientSuccess(InvoiceTransactionSummary(invoices = Nil))
-  }
 }

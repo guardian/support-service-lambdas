@@ -1,11 +1,10 @@
 package com.gu.util.zuora
 
 import com.gu.util.resthttp.RestRequestMaker.Requests
-import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
-import com.typesafe.scalalogging.LazyLogging
+import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.{JsSuccess, Json, Reads, Writes}
 
-object ZuoraUpdateCancellationReason extends LazyLogging {
+object ZuoraUpdateCancellationReason {
 
   case class SubscriptionUpdate(cancellationReason: String)
 
@@ -24,13 +23,6 @@ object ZuoraUpdateCancellationReason extends LazyLogging {
   def apply(requests: Requests)(subscription: SubscriptionNumber): ClientFailableOp[Unit] = {
     val (body, path) = toBodyAndPath(subscription)
     requests.put(body, path): ClientFailableOp[Unit]
-  }
-
-  def dryRun(requests: Requests)(subscription: SubscriptionNumber): ClientFailableOp[Unit] = {
-    val (body, path) = toBodyAndPath(subscription)
-    val msg = s"DryRun for ZuoraUpdateCancellationReason: body=$body, path=$path"
-    logger.info(msg)
-    ClientSuccess(())
   }
 
 }

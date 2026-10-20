@@ -25,7 +25,7 @@ class EmailSendStepsTest extends AnyFlatSpec with Matchers {
             card_expiry_date = "cardExpiryValue",
             first_name = "firstNameValue",
             last_name = "lastNameValue",
-            primaryKey = PaymentId("paymentId"),
+            primaryKey = InvoiceId("invoiceId"),
             serviceStartDate = "31 January 2016",
             serviceEndDate = "31 January 2017",
           ),
@@ -51,7 +51,7 @@ class EmailSendStepsTest extends AnyFlatSpec with Matchers {
         |      "SubscriberAttributes": {
         |        "serviceEndDate": "31 January 2017",
         |        "first_name": "firstNameValue",
-        |        "paymentId": "paymentId",
+        |        "invoiceId": "invoiceId",
         |        "serviceStartDate": "31 January 2016",
         |        "subscriber_id": "subIdValue",
         |        "card_expiry_date": "cardExpiryValue",

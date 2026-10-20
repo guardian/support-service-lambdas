@@ -17,7 +17,6 @@ case class AutoCancelCallout(
     sfContactId: String,
 ) {
   def isAutoPay = autoPay == "true"
-  def nonDirectDebit = paymentMethodType != "BankTransfer"
 }
 
 object AutoCancelCallout {
