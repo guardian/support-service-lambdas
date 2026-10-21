@@ -11,7 +11,7 @@ describe('listSecondaryUsersForCancellationEndpoint', () => {
 		const expiredTermEnd = dayjs().subtract(13, 'days');
 		const secondaryUsers: SecondaryUserRecord[] = [
 			{
-				subscriptionName: 'A-S00974337',
+				subscriptionName: 'A-S00000000',
 				secondaryIdentityId: 'term-ended-secondary-id',
 				primaryIdentityId: 'primary-id',
 				acceptedDate: '2026-06-12T00:00:00.000Z',
@@ -19,7 +19,7 @@ describe('listSecondaryUsersForCancellationEndpoint', () => {
 				invitationCode: 'first-invitation-code',
 			},
 			{
-				subscriptionName: 'A-S00974337',
+				subscriptionName: 'A-S00000000',
 				secondaryIdentityId: 'removed-secondary-id',
 				primaryIdentityId: 'primary-id',
 				acceptedDate: '2026-06-12T00:00:00.000Z',
@@ -38,14 +38,14 @@ describe('listSecondaryUsersForCancellationEndpoint', () => {
 
 		const result = await listSecondaryUsersForCancellationEndpoint(
 			secondaryUserRepository,
-			'A-S00974337',
+			'A-S00000000',
 		);
 
 		expect(result.statusCode).toBe(200);
 		expect(JSON.parse(result.body)).toEqual({
 			secondaryIdentityIds: ['term-ended-secondary-id'],
 		});
-		expect(listBySubscription).toHaveBeenCalledWith('A-S00974337');
+		expect(listBySubscription).toHaveBeenCalledWith('A-S00000000');
 	});
 
 	it('returns a 500 response when listing fails', async () => {
@@ -57,7 +57,7 @@ describe('listSecondaryUsersForCancellationEndpoint', () => {
 
 		const result = await listSecondaryUsersForCancellationEndpoint(
 			secondaryUserRepository,
-			'A-S00974337',
+			'A-S00000000',
 		);
 
 		expect(result.statusCode).toBe(500);
