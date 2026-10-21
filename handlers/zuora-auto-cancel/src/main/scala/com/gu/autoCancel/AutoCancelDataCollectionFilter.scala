@@ -6,36 +6,44 @@ import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse.noActionRequired
 import com.gu.util.reader.Types.ApiGatewayOp._
 import com.gu.util.reader.Types._
-import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.ZuoraGetAccountSummary.{AccountSummary, Invoice}
-import com.gu.util.zuora.{SubscriptionNumber, SubscriptionNumberWithStatus}
+import com.gu.util.zuora.{
+  GetAccountSubscriptions,
+  GetAccountSummary,
+  GetSubscriptionsOnInvoice,
+  SubscriptionNumber,
+  SubscriptionNumberWithStatus,
+}
 
 import java.time.LocalDate
 
-object AutoCancelDataCollectionFilter extends Logging {
+class AutoCancelDataCollectionFilter(
+    accountSummaries: GetAccountSummary,
+    accountSubscriptions: GetAccountSubscriptions,
+    invoiceSubscriptions: GetSubscriptionsOnInvoice,
+) {
+  import AutoCancelDataCollectionFilter._
 
-  def apply(
-      now: LocalDate,
-      getAccountSummary: String => ClientFailableOp[AccountSummary],
-      getAccountSubscriptions: String => ClientFailableOp[List[SubscriptionNumberWithStatus]],
-      getSubscriptionsOnInvoice: String => ClientFailableOp[List[SubscriptionNumber]],
-  )(autoCancelCallout: AutoCancelCallout): ApiGatewayOp[List[AutoCancelRequest]] = {
+  def apply(autoCancelCallout: AutoCancelCallout, today: LocalDate): ApiGatewayOp[List[AutoCancelRequest]] = {
     import autoCancelCallout._
 
     for {
-      accountSummary <- getAccountSummary(accountId)
+      accountSummary <- accountSummaries
+        .getAccountSummary(accountId)
         .toApiGatewayOp("getAccountSummary")
         .withLogging("getAccountSummary")
-      subsOnInvoice <- getSubscriptionsOnInvoice(invoiceId)
+      subsOnInvoice <- invoiceSubscriptions
+        .getSubscriptionsOnInvoice(invoiceId)
         .toApiGatewayOp("getSubscriptionsOnInvoice")
         .withLogging("getSubscriptionsOnInvoice")
-      subsOnAccount <- getAccountSubscriptions(accountId)
+      subsOnAccount <- accountSubscriptions
+        .getAccountSubscriptions(accountId)
         .toApiGatewayOp("getAccountSubscriptions")
         .withLogging("getAccountSubscriptions")
       subsToCancel <- filterNotActiveSubscriptions(subsOnAccount, subsOnInvoice).withLogging(
         "filterNotActiveSubscriptions",
       )
-      cancellationDate <- getCancellationDateFromInvoice(invoiceId, accountSummary, now).withLogging(
+      cancellationDate <- getCancellationDateFromInvoice(invoiceId, accountSummary, today).withLogging(
         "getCancellationDateFromInvoice",
       )
     } yield subsToCancel
@@ -43,7 +51,9 @@ object AutoCancelDataCollectionFilter extends Logging {
         AutoCancelRequest(accountId, subToCancel, cancellationDate)
       }
   }
+}
 
+object AutoCancelDataCollectionFilter extends Logging {
   def getCancellationDateFromInvoice(
       invoiceId: String,
       accountSummary: AccountSummary,

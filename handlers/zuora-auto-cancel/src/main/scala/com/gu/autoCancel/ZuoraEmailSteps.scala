@@ -1,29 +1,29 @@
 package com.gu.autoCancel
 
-import com.gu.autoCancel.GetPaymentData.PaymentFailureInformation
 import com.gu.util.TypeConvert.TypeConvertClientOp
-import com.gu.util.email.EmailMessage
+import com.gu.util.email.{EmailId, EmailSender}
 import com.gu.util.resthttp.Types.{ClientFailableOp, GenericError}
-import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
+import com.gu.util.zuora.GetInvoiceTransactions
 
 class ZuoraEmailSteps(
-    sendEmail: EmailMessage => ClientFailableOp[Unit],
-    getInvoiceTransactions: String => ClientFailableOp[InvoiceTransactionSummary],
+    emailSender: EmailSender,
+    invoiceTransactions: GetInvoiceTransactions,
 ) {
 
-  def sendEmailRegardingAccount(
-      accountId: String,
-      toMessage: PaymentFailureInformation => Either[String, EmailMessage],
-  ): ClientFailableOp[Unit] = {
+  def sendCancellationEmail(callout: AutoCancelCallout): ClientFailableOp[Unit] = {
     for {
-      invoiceTransactionSummary <- getInvoiceTransactions(accountId)
-      paymentInformation <- GetPaymentData(accountId)(invoiceTransactionSummary).left
+      invoiceTransactionSummary <- invoiceTransactions.getInvoiceTransactions(callout.accountId)
+      paymentInformation <- GetPaymentData(callout.accountId)(invoiceTransactionSummary).left
         .map(GenericError(_))
         .toClientFailableOp
-      message <- toMessage(paymentInformation).left.map(GenericError(_)).toClientFailableOp
-      _ <- sendEmail(message).withAmendedError(oldError =>
-        GenericError(s"email not sent for account ${accountId}, error: ${oldError.message}"),
-      )
+      message <- ToMessage(callout, paymentInformation, EmailId.cancelledId).left
+        .map(GenericError(_))
+        .toClientFailableOp
+      _ <- emailSender
+        .send(message)
+        .withAmendedError(oldError =>
+          GenericError(s"email not sent for account ${callout.accountId}, error: ${oldError.message}"),
+        )
     } yield ()
   }
 }

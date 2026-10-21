@@ -52,9 +52,8 @@ object EmailSendTest extends App with Logging {
     emailName <- emailNames
     product <- products
   } {
-    val result = EmailSendSteps(SqsSync.send(SqsSync.buildClient)(QueueName("braze-emails-PROD")))(
-      createMessage(product, emailName.id),
-    )
+    val result = new EmailSendSteps(SqsSync.send(SqsSync.buildClient)(QueueName("braze-emails-PROD")))
+      .send(createMessage(product, emailName.id))
     println(s"result for $emailName $product is $result")
   }
 

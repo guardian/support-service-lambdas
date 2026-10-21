@@ -2,10 +2,22 @@ package com.gu.util.zuora
 
 import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.resthttp.Types.ClientFailableOp
+import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{JsPath, Reads}
 
 import java.time.LocalDate
+
+trait GetInvoiceTransactions {
+  def getInvoiceTransactions(accountId: String): ClientFailableOp[InvoiceTransactionSummary]
+}
+
+class ZuoraGetInvoiceTransactions(requests: Requests) extends GetInvoiceTransactions {
+  import ZuoraGetInvoiceTransactions._
+
+  override def getInvoiceTransactions(accountId: String): ClientFailableOp[InvoiceTransactionSummary] =
+    requests.get[InvoiceTransactionSummary](s"transactions/invoices/accounts/$accountId")
+}
 
 object ZuoraGetInvoiceTransactions {
 
@@ -56,6 +68,4 @@ object ZuoraGetInvoiceTransactions {
       InvoiceTransactionSummary(invoices)
     }
 
-  def apply(requests: Requests)(accountId: String): ClientFailableOp[InvoiceTransactionSummary] =
-    requests.get[InvoiceTransactionSummary](s"transactions/invoices/accounts/$accountId")
 }

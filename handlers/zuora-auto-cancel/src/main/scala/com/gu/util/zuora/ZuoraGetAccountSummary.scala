@@ -3,9 +3,22 @@ package com.gu.util.zuora
 import java.time.LocalDate
 import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.resthttp.Types.ClientFailableOp
+import com.gu.util.zuora.ZuoraGetAccountSummary.AccountSummary
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, PaymentMethodId}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+
+trait GetAccountSummary {
+  def getAccountSummary(accountId: String): ClientFailableOp[AccountSummary]
+}
+
+class ZuoraGetAccountSummary(requests: Requests) extends GetAccountSummary {
+  import ZuoraGetAccountSummary._
+
+  override def getAccountSummary(accountId: String): ClientFailableOp[AccountSummary] =
+    requests.get[AccountSummary](s"accounts/$accountId/summary")
+
+}
 
 object ZuoraGetAccountSummary {
 
@@ -74,6 +87,4 @@ object ZuoraGetAccountSummary {
       (JsPath \ "invoices").read[List[Invoice]]
   )(AccountSummary.apply _)
 
-  def apply(requests: Requests)(accountId: String): ClientFailableOp[AccountSummary] =
-    requests.get[AccountSummary](s"accounts/$accountId/summary")
 }

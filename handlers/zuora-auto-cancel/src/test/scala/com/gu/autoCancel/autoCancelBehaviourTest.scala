@@ -1,12 +1,25 @@
 package com.gu.autoCancel
 
+import com.amazonaws.services.lambda.runtime.{ClientContext, CognitoIdentity, Context, LambdaLogger}
+import com.amazonaws.services.lambda.runtime.events.SQSEvent
 import com.gu.autoCancel.AutoCancel.AutoCancelRequest
 import com.gu.util.apigateway.ApiGatewayResponse.{internalServerError, noActionRequired, unauthorized}
 import com.gu.util.apigateway.Auth.TrustedApiConfig
-import com.gu.util.email.EmailMessage
+import com.gu.util.config.ConfigReads.ConfigFailure
+import com.gu.util.email.{EmailMessage, EmailSender}
 import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
-import com.gu.util.zuora.{SubscriptionNumber, ZuoraGetInvoiceTransactions, ZuoraRestRequestMaker}
+import com.gu.util.zuora.{
+  SubscriptionNumber,
+  ApplyCreditBalance,
+  TransferToCreditBalance,
+  ZuoraGetAccountSubscriptions,
+  ZuoraGetAccountSummary,
+  ZuoraGetInvoiceTransactions,
+  ZuoraGetSubsNamesOnInvoice,
+  ZuoraRestRequestMaker,
+  ZuoraUpdateCancellationReason,
+}
 import com.gu.zuora.{HolidayStopProcessor, HolidayStopProcessorZuoraConfig, Oauth}
 import okhttp3.{MediaType, Protocol, Request, Response, ResponseBody}
 import okio.Buffer
@@ -19,6 +32,7 @@ import sttp.model.StatusCode
 
 import java.time.LocalDate
 import scala.collection.mutable
+import scala.jdk.CollectionConverters._
 
 class AutoCancelBehaviourTest extends AnyFlatSpec with Matchers {
 
@@ -84,48 +98,125 @@ class AutoCancelBehaviourTest extends AnyFlatSpec with Matchers {
       sttp.client3.Response(Json.stringify(expected.response), StatusCode(expected.status))
     }
 
+    private val invoiceTransactions = new ZuoraGetInvoiceTransactions(requests)
+    val autoCancel = new AutoCancel(
+      ZuoraOrderCancellationSteps.factory(requests, config, backend),
+      invoiceTransactions,
+      new TransferToCreditBalance(requests),
+      new ApplyCreditBalance(requests),
+      new ZuoraUpdateCancellationReason(requests),
+    )
+
     def cancel(requestsToCancel: List[AutoCancelRequest] = List(request), remainingMillis: Int = 300000) =
-      AutoCancel(requests, config, backend, () => remainingMillis, orderDate)(requestsToCancel).toDisjunction
+      autoCancel
+        .cancelAll(requestsToCancel, deadline(remainingMillis), orderDate)
+        .toDisjunction
 
     def assertComplete() = remaining shouldBe empty
+
+    val callout = AutoCancelInputFilterTest
+      .fakeCallout(true)
+      .copy(
+        accountId = request.accountId,
+        invoiceId = "unpaid-1",
+      )
+    var currentDate: LocalDate = orderDate
+
+    def processor(emailResult: ClientFailableOp[Unit] = ClientSuccess(())): ProcessCalloutSteps =
+      new ProcessCalloutSteps(
+        autoCancel,
+        new AutoCancelDataCollectionFilter(
+          new ZuoraGetAccountSummary(requests),
+          new ZuoraGetAccountSubscriptions(requests),
+          new ZuoraGetSubsNamesOnInvoice(requests),
+        ),
+        new ZuoraEmailSteps(
+          new EmailSender {
+            override def send(message: EmailMessage): ClientFailableOp[Unit] = {
+              assertComplete()
+              message.To.Address shouldBe callout.email.get
+              message.SfContactId shouldBe callout.sfContactId
+              message.DataExtensionName shouldBe "cancelled-payment-email"
+              val attributes = message.To.ContactAttributes.SubscriberAttributes
+              attributes.subscriber_id shouldBe request.subToCancel.value
+              attributes.product shouldBe "Supporter Plus"
+              attributes.primaryKey shouldBe com.gu.util.email.InvoiceId(callout.invoiceId)
+              sentEmails += message
+              emailResult
+            }
+          },
+          invoiceTransactions,
+        ),
+        new ProcessingClock {
+          override def today: LocalDate = currentDate
+        },
+        TrustedApiConfig("test-token", "test-tenant"),
+      )
 
     def process(
         autoPay: Boolean = true,
         token: String = "test-token",
         emailResult: ClientFailableOp[Unit] = ClientSuccess(()),
-    ) = {
-      val callout = AutoCancelInputFilterTest
-        .fakeCallout(autoPay)
-        .copy(
-          accountId = request.accountId,
-          invoiceId = "unpaid-1",
-        )
-      val emailSteps = new ZuoraEmailSteps(
-        sendEmail = (message: EmailMessage) => {
-          assertComplete()
-          message.To.Address shouldBe callout.email.get
-          message.SfContactId shouldBe callout.sfContactId
-          message.DataExtensionName shouldBe "cancelled-payment-email"
-          val attributes = message.To.ContactAttributes.SubscriberAttributes
-          attributes.subscriber_id shouldBe request.subToCancel.value
-          attributes.product shouldBe "Supporter Plus"
-          attributes.primaryKey shouldBe com.gu.util.email.InvoiceId(callout.invoiceId)
-          sentEmails += message
-          emailResult
-        },
-        getInvoiceTransactions = ZuoraGetInvoiceTransactions(requests),
-      )
-      new ProcessCalloutSteps(
-        requests,
-        config,
-        backend,
-        () => orderDate.atStartOfDay(),
-        TrustedApiConfig("test-token", "test-tenant"),
-        emailSteps,
-      ).execute(callout, token, () => 300000).toDisjunction
-    }
+    ) =
+      processor(emailResult)
+        .execute(callout.copy(autoPay = autoPay.toString), token, deadline(300000))
+        .toDisjunction
 
     val sentEmails: mutable.ListBuffer[EmailMessage] = mutable.ListBuffer.empty
+  }
+
+  private def deadline(remainingMillis: Int): Deadline = new Deadline {
+    override def remainingTimeInMillis: Int = remainingMillis
+  }
+
+  private class InvocationContext(remainingMillis: Int) extends Context {
+    var deadlineReads = 0
+
+    override def getRemainingTimeInMillis: Int = {
+      deadlineReads += 1
+      remainingMillis
+    }
+
+    override def getAwsRequestId: String = "test-request"
+    override def getLogGroupName: String = "test-log-group"
+    override def getLogStreamName: String = "test-log-stream"
+    override def getFunctionName: String = "test-function"
+    override def getFunctionVersion: String = "test-version"
+    override def getInvokedFunctionArn: String = "test-function-arn"
+    override def getMemoryLimitInMB: Int = 1024
+    override def getIdentity: CognitoIdentity = fail("Unexpected identity lookup")
+    override def getClientContext: ClientContext = fail("Unexpected client context lookup")
+    override def getLogger: LambdaLogger = fail("Unexpected Lambda logger lookup")
+  }
+
+  private class ReusingHandler(calloutProcessor: ProcessCalloutSteps, failFirstBuild: Boolean = false)
+      extends AutoCancelSqsHandler {
+    var builds = 0
+
+    override protected def buildProcessor(): Either[ConfigFailure, ProcessCalloutSteps] = {
+      builds += 1
+      if (failFirstBuild && builds == 1) Left(ConfigFailure("Temporary configuration failure"))
+      else Right(calloutProcessor)
+    }
+  }
+
+  private def event(callout: AutoCancelCallout, count: Int = 1): SQSEvent = {
+    val records = (1 to count).map { index =>
+      val record = new SQSEvent.SQSMessage()
+      record.setMessageId(s"message-$index")
+      record.setBody(
+        Json.stringify(
+          Json.obj(
+            "queryStringParameters" -> Json.obj("apiToken" -> "test-token"),
+            "body" -> Json.stringify(Json.toJson(callout)(Json.writes[AutoCancelCallout])),
+          ),
+        ),
+      )
+      record
+    }
+    val sqsEvent = new SQSEvent()
+    sqsEvent.setRecords(records.asJava)
+    sqsEvent
   }
 
   private def item(subscription: String, charge: Double, tax: Double = 0): JsObject = Json.obj(
@@ -329,6 +420,20 @@ class AutoCancelBehaviourTest extends AnyFlatSpec with Matchers {
     script.assertComplete()
   }
 
+  it should "read the current deadline again before each subscription's order" in {
+    val script = new HttpScript(token :: (cancellation() :+ updateReason("A-S002")))
+    val remainingTimes = Iterator(300000, 129999)
+    val liveDeadline = new Deadline {
+      override def remainingTimeInMillis: Int = remainingTimes.next()
+    }
+
+    script.autoCancel
+      .cancelAll(List(request, request.copy(subToCancel = SubscriptionNumber("A-S002"))), liveDeadline, orderDate)
+      .toDisjunction shouldBe Left(internalServerError("AutoCancel failed"))
+    remainingTimes.hasNext shouldBe false
+    script.assertComplete()
+  }
+
   List(
     "the balancing invoice is missing" -> List(unpaidInvoice),
     "there are no unpaid invoices" -> List(balancingInvoice, invoice("settled", 0, Nil)),
@@ -452,6 +557,57 @@ class AutoCancelBehaviourTest extends AnyFlatSpec with Matchers {
     val script = new HttpScript(Nil)
 
     script.process(autoPay = false) shouldBe Left(noActionRequired("AutoPay is false"))
+    script.sentEmails shouldBe empty
+    script.assertComplete()
+  }
+
+  "AutoCancelSqsHandler" should "reuse its processor across records and invocations without retaining deadlines or dates" in {
+    val failedAttempt = collection ++ List(token, updateReason("A-S001"))
+    val nextDate = orderDate.plusDays(1)
+    val nextCancellation = cancellation().map { exchange =>
+      if (exchange.path == "/v1/async/orders")
+        exchange.copy(body = exchange.body.map(_.as[JsObject] ++ Json.obj("orderDate" -> nextDate.toString)))
+      else exchange
+    }
+    val script = new HttpScript(
+      failedAttempt ++ failedAttempt ++ collection ++ List(token) ++ nextCancellation ++ List(transactions),
+    )
+    val handler = new ReusingHandler(script.processor())
+    val firstContext = new InvocationContext(129999)
+    val nextContext = new InvocationContext(300000)
+
+    val error = intercept[RuntimeException] {
+      handler.handleRequest(event(script.callout, count = 2), firstContext)
+    }
+    error.getMessage should include("Failed to process 2 message(s)")
+    script.sentEmails shouldBe empty
+
+    script.currentDate = nextDate
+    handler.handleRequest(event(script.callout), nextContext)
+
+    handler.builds shouldBe 1
+    firstContext.deadlineReads shouldBe 2
+    nextContext.deadlineReads shouldBe 1
+    script.sentEmails should have size 1
+    script.assertComplete()
+  }
+
+  it should "retry a failed processor initialization rather than caching the configuration failure" in {
+    val script = new HttpScript(Nil)
+    val handler = new ReusingHandler(script.processor(), failFirstBuild = true)
+    val context = new InvocationContext(300000)
+    val callout = script.callout.copy(autoPay = "false")
+
+    val error = intercept[RuntimeException] {
+      handler.handleRequest(event(callout, count = 2), context)
+    }
+    error.getMessage should include("Failed to process 1 message(s)")
+    handler.builds shouldBe 2
+
+    handler.handleRequest(event(callout), context)
+
+    handler.builds shouldBe 2
+    context.deadlineReads shouldBe 0
     script.sentEmails shouldBe empty
     script.assertComplete()
   }

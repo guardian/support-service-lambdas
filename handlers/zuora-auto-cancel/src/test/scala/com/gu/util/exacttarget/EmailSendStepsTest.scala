@@ -40,7 +40,7 @@ class EmailSendStepsTest extends AnyFlatSpec with Matchers {
     var capturedPayload: Option[Payload] = None
     def sqsSend(payload: Payload): Try[Unit] = Success { capturedPayload = Some(payload) }
 
-    EmailSendSteps(sqsSend)(makeMessage("james@jameson.com")) shouldBe ClientSuccess(())
+    new EmailSendSteps(sqsSend).send(makeMessage("james@jameson.com")) shouldBe ClientSuccess(())
     Json.parse(capturedPayload.get.value) shouldBe Json.parse(
       """
         |{
@@ -72,7 +72,7 @@ class EmailSendStepsTest extends AnyFlatSpec with Matchers {
   "EmailSendSteps" should "return with response on failure" in {
     def sqsSend(payload: Payload): Try[Unit] = Failure(new RuntimeException("foo"))
 
-    EmailSendSteps(sqsSend)(makeMessage("james@jameson.com")) shouldBe GenericError(
+    new EmailSendSteps(sqsSend).send(makeMessage("james@jameson.com")) shouldBe GenericError(
       "failure to send email payload to sqs",
       "java.lang.RuntimeException: foo",
     )

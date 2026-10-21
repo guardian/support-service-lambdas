@@ -62,8 +62,12 @@ trait EmailSqsSerialisation {
   implicit val emailMessageWrites = Json.writes[EmailMessage]
 }
 
-object EmailSendSteps extends EmailSqsSerialisation with LazyLogging {
-  def apply(sqsSend: Payload => Try[Unit])(emailRequest: EmailMessage): ClientFailableOp[Unit] = {
+trait EmailSender {
+  def send(message: EmailMessage): ClientFailableOp[Unit]
+}
+
+class EmailSendSteps(sqsSend: Payload => Try[Unit]) extends EmailSender with EmailSqsSerialisation with LazyLogging {
+  override def send(emailRequest: EmailMessage): ClientFailableOp[Unit] = {
     logger.info(s"EmailSendSteps msg: $emailRequest")
     sqsSend(Payload(Json.toJson(emailRequest).toString)) match {
       case Success(_) =>
