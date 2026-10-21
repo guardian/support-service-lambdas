@@ -157,6 +157,52 @@ paths:
               schema:
                 type: string
                 example: Internal server error
+  /internal/subscriptions/{subscriptionName}/secondary-users:
+    get:
+      operationId: listSecondaryUsersForCancellation
+      summary: List secondary users for subscription cancellation
+      description: >-
+        Lists the identity IDs of secondary users whose access should be
+        cancelled when the primary subscription ends. Includes retained
+        records whose term end date has passed and excludes users who were
+        already removed individually.
+      security:
+        - apiKey: []
+      parameters:
+        - name: subscriptionName
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Zuora subscription number for the primary user.
+          example: A-S00974337
+      responses:
+        '200':
+          description: Secondary user identity IDs listed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListSecondaryUsersForCancellationResponse'
+        '400':
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParserError'
+        '404':
+          description: Route not found.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Not Found
+        '500':
+          description: Internal server error.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Internal server error
   /subscriptions/{subscriptionName}/secondary-users/{secondaryIdentityId}:
     delete:
       operationId: deleteSecondaryUser
@@ -809,6 +855,18 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SecondaryUser'
+    ListSecondaryUsersForCancellationResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - secondaryIdentityIds
+      properties:
+        secondaryIdentityIds:
+          type: array
+          items:
+            type: string
+          example:
+            - '30067890'
     SubscriptionWithPrimaryUser:
       type: object
       additionalProperties: false

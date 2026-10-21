@@ -110,6 +110,27 @@ Example path: /subscriptions/A-S00974337/secondary-users
 }
 ```
 
+### List secondary users for subscription cancellation
+
+This internal endpoint is for services that need to clean up secondary-user
+data when a primary subscription ends. It uses API-key authentication and does
+not require an `x-identity-id` header.
+
+#### Request:
+
+GET /internal/subscriptions/{subscriptionName}/secondary-users
+
+#### Response:
+
+```JSON
+{
+  "secondaryIdentityIds": ["30067890"]
+}
+```
+
+The response includes retained users whose access term has ended, but excludes
+users who were already removed individually.
+
 ### Delete a secondary user from a subscription
 
 #### Request:

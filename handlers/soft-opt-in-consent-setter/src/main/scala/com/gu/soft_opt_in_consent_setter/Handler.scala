@@ -54,7 +54,7 @@ object Handler extends LazyLogging {
 
         multipleAccountApi <- MultipleAccountApiConnector.create(config.stage)
         getSecondarySubscriptionNames = multipleAccountApi.activeSecondarySubscriptionNames _
-        getSecondaryIdentityIds = multipleAccountApi.secondaryIdentityIds _
+        getSecondaryIdentityIdsForCancellation = multipleAccountApi.secondaryIdentityIdsForCancellation _
         secondaryUserConsentPublisher <- SecondaryUserConsentPublisher.create(sys.env.get("softOptInQueueUrl"))
 
         _ <- processProductSwitchSubs(
@@ -73,7 +73,7 @@ object Handler extends LazyLogging {
           sfConnector.updateSubs,
           consentsCalculator,
           getSecondarySubscriptionNames,
-          getSecondaryIdentityIds,
+          getSecondaryIdentityIdsForCancellation,
           secondaryUserConsentPublisher.sendCancellation,
         )
         _ = Metrics.put(event = "successful_run")
@@ -173,7 +173,7 @@ object Handler extends LazyLogging {
       updateSubs: String => Either[SoftOptInError, Unit],
       consentsCalculator: ConsentsCalculator,
       getSecondarySubscriptionNames: String => Either[SoftOptInError, Set[String]],
-      getSecondaryIdentityIds: String => Either[SoftOptInError, Set[String]],
+      getSecondaryIdentityIdsForCancellation: String => Either[SoftOptInError, Set[String]],
       sendSecondaryCancellation: (String, String) => Either[SoftOptInError, Unit],
   ): Either[SoftOptInError, Unit] = {
     Metrics.put(event = "cancellations_to_process", cancelledSubs.size)
@@ -185,7 +185,7 @@ object Handler extends LazyLogging {
         sendConsentsReq,
         consentsCalculator,
         getSecondarySubscriptionNames,
-        getSecondaryIdentityIds,
+        getSecondaryIdentityIdsForCancellation,
         sendSecondaryCancellation,
       ),
     )
@@ -204,12 +204,12 @@ object Handler extends LazyLogging {
       sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
       consentsCalculator: ConsentsCalculator,
       getSecondarySubscriptionNames: String => Either[SoftOptInError, Set[String]],
-      getSecondaryIdentityIds: String => Either[SoftOptInError, Set[String]],
+      getSecondaryIdentityIdsForCancellation: String => Either[SoftOptInError, Set[String]],
       sendSecondaryCancellation: (String, String) => Either[SoftOptInError, Unit],
   ): SFSubRecordUpdate = {
     val updateResult = for {
       secondarySubscriptions <- getSecondarySubscriptionNames(sub.Buyer__r.IdentityID__c)
-      secondaryIdentityIds <- getSecondaryIdentityIds(sub.Name)
+      secondaryIdentityIds <- getSecondaryIdentityIdsForCancellation(sub.Name)
       rec = EnhancedSub.fromSF(sub, activeSubs.records, secondarySubscriptions)
       consents <- consentsCalculator.getCancellationConsents(
         sub.Product__c,

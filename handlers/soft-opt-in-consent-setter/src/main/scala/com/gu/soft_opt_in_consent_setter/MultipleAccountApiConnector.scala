@@ -16,7 +16,6 @@ import java.nio.charset.StandardCharsets
 import scala.jdk.CollectionConverters._
 import scala.util.Try
 
-// client for the multiple-account-api, used to find the subscriptions a user has active secondary access to
 class MultipleAccountApiConnector(
     baseUrl: String,
     sendReq: String => Either[Throwable, HttpResponse],
@@ -36,10 +35,10 @@ class MultipleAccountApiConnector(
     result
   }
 
-  def secondaryIdentityIds(subscriptionName: String): Either[SoftOptInError, Set[String]] = {
+  def secondaryIdentityIdsForCancellation(subscriptionName: String): Either[SoftOptInError, Set[String]] = {
     val encodedSubscriptionName = URLEncoder.encode(subscriptionName, StandardCharsets.UTF_8)
-    get[SecondaryUsersResponse](s"$baseUrl/subscriptions/$encodedSubscriptionName/secondary-users")
-      .map(_.secondaryUsers.map(_.secondaryIdentityId).toSet)
+    get[SecondaryIdentityIdsResponse](s"$baseUrl/internal/subscriptions/$encodedSubscriptionName/secondary-users")
+      .map(_.secondaryIdentityIds.toSet)
   }
 
   private def get[T: Decoder](url: String): Either[SoftOptInError, T] = {
@@ -72,13 +71,11 @@ class MultipleAccountApiConnector(
 object MultipleAccountApiConnector extends LazyLogging {
   private case class SecondarySubscription(subscriptionName: String)
   private case class SecondaryUserDetailsResponse(subscriptions: List[SecondarySubscription])
-  private case class SecondaryUser(secondaryIdentityId: String)
-  private case class SecondaryUsersResponse(secondaryUsers: List[SecondaryUser])
+  private case class SecondaryIdentityIdsResponse(secondaryIdentityIds: List[String])
 
   private implicit val secondarySubscriptionDecoder: Decoder[SecondarySubscription] = deriveDecoder
   private implicit val secondaryUserDetailsResponseDecoder: Decoder[SecondaryUserDetailsResponse] = deriveDecoder
-  private implicit val secondaryUserDecoder: Decoder[SecondaryUser] = deriveDecoder
-  private implicit val secondaryUsersResponseDecoder: Decoder[SecondaryUsersResponse] = deriveDecoder
+  private implicit val secondaryIdentityIdsResponseDecoder: Decoder[SecondaryIdentityIdsResponse] = deriveDecoder
 
   private val baseUrls = Map(
     "CODE" -> "https://multiple-account-api-code.support.guardianapis.com",

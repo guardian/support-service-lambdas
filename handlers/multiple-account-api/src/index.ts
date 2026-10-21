@@ -29,6 +29,7 @@ import { getInvitationEndpoint } from './getInvitationEndpoint';
 import { InvitationRepository } from './invitationRepository';
 import { listInvitationsEndpoint } from './listInvitationsEndpoint';
 import { listSecondaryUsersEndpoint } from './listSecondaryUsersEndpoint';
+import { listSecondaryUsersForCancellationEndpoint } from './listSecondaryUsersForCancellationEndpoint';
 import { mmaPrimarySummaryEndpoint } from './mmaPrimarySummaryEndpoint';
 import {
 	identityIdPathSchema,
@@ -164,6 +165,16 @@ export const handler: Handler = Router([
 						subscription.subscriptionNumber,
 					),
 				({ path }) => path.subscriptionName,
+			),
+		),
+	},
+	{
+		httpMethod: 'GET',
+		path: '/internal/subscriptions/{subscriptionName}/secondary-users',
+		handler: withPathParser(subscriptionPathSchema, async (_event, path) =>
+			listSecondaryUsersForCancellationEndpoint(
+				secondaryUserRepository,
+				path.subscriptionName,
 			),
 		),
 	},

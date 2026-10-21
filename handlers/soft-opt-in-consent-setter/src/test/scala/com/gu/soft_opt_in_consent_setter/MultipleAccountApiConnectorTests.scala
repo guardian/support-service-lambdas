@@ -37,46 +37,46 @@ class MultipleAccountApiConnectorTests extends AnyFunSuite with Matchers {
     val connector = new MultipleAccountApiConnector(
       "https://multiple-account-api-code.support.guardianapis.com",
       (url) => {
-        url shouldBe "https://multiple-account-api-code.support.guardianapis.com/subscriptions/A-S123%2F456/secondary-users"
+        url shouldBe "https://multiple-account-api-code.support.guardianapis.com/internal/subscriptions/A-S123%2F456/secondary-users"
         Right(
           response(
-            """{"secondaryUsers":[{"subscriptionName":"A-S123/456","secondaryIdentityId":"first","primaryIdentityId":"primary"},{"subscriptionName":"A-S123/456","secondaryIdentityId":"second","primaryIdentityId":"primary"}]}""",
+            """{"secondaryIdentityIds":["first","second"]}""",
           ),
         )
       },
     )
 
-    connector.secondaryIdentityIds("A-S123/456") shouldBe Right(Set("first", "second"))
+    connector.secondaryIdentityIdsForCancellation("A-S123/456") shouldBe Right(Set("first", "second"))
   }
 
   test("an empty secondary user list returns no identities") {
     val connector = new MultipleAccountApiConnector(
       "https://example.com",
-      (_) => Right(response("""{"secondaryUsers":[]}""")),
+      (_) => Right(response("""{"secondaryIdentityIds":[]}""")),
     )
 
-    connector.secondaryIdentityIds("A-S123") shouldBe Right(Set.empty)
+    connector.secondaryIdentityIdsForCancellation("A-S123") shouldBe Right(Set.empty)
   }
 
   test("malformed secondary user responses fail") {
-    val missingSecondaryUsers = new MultipleAccountApiConnector(
+    val missingSecondaryIdentityIds = new MultipleAccountApiConnector(
       "https://example.com",
       (_) => Right(response("{}")),
     )
     val missingIdentityId = new MultipleAccountApiConnector(
       "https://example.com",
-      (_) => Right(response("""{"secondaryUsers":[{}]}""")),
+      (_) => Right(response("""{"secondaryIdentityIds":[null]}""")),
     )
 
-    missingSecondaryUsers.secondaryIdentityIds("A-S123").isLeft shouldBe true
-    missingIdentityId.secondaryIdentityIds("A-S123").isLeft shouldBe true
+    missingSecondaryIdentityIds.secondaryIdentityIdsForCancellation("A-S123").isLeft shouldBe true
+    missingIdentityId.secondaryIdentityIdsForCancellation("A-S123").isLeft shouldBe true
   }
 
   test("HTTP failures from the secondary user endpoint are returned") {
     val connector =
       new MultipleAccountApiConnector("https://example.com", (_) => Right(response("Bad gateway", 502)))
 
-    val error = connector.secondaryIdentityIds("A-S123").left.toOption.get
+    val error = connector.secondaryIdentityIdsForCancellation("A-S123").left.toOption.get
     error.statusCode shouldBe Some(502)
     error.getMessage should include("A-S123")
   }
