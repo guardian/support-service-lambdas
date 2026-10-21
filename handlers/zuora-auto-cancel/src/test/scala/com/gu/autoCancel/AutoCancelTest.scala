@@ -8,6 +8,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 import java.time.LocalDate
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration.DurationInt
 
 class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
@@ -33,7 +34,7 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
     ZuoraOrderCancellationSteps.orderDuration(2.minutes.toMillis.toInt) shouldBe None
   }
 
-  "executeAll" should "attempt every cancellation before returning the first failure" in {
+  "attemptAll" should "attempt every cancellation before returning the first failure" in {
     val first = AutoCancel.AutoCancelRequest("account", SubscriptionNumber("first"), LocalDate.of(2026, 8, 18))
     val second = AutoCancel.AutoCancelRequest("account", SubscriptionNumber("second"), LocalDate.of(2026, 8, 18))
     val execute = mockFunction[AutoCancel.AutoCancelRequest, ClientFailableOp[Unit]]
@@ -44,7 +45,29 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
       execute.expects(second).returning(ClientSuccess(())).once()
     }
 
-    AutoCancel.executeAll(List(first, second))(execute) shouldBe failure
+    AutoCancel.attemptAll(List(first, second))(execute) shouldBe failure
+  }
+
+  it should "succeed without invoking the operation for an empty collection" in {
+    val attempted = ListBuffer.empty[Int]
+
+    AutoCancel.attemptAll(List.empty[Int]) { item =>
+      attempted += item
+      ClientSuccess(item.toString)
+    } shouldBe ClientSuccess(())
+
+    attempted shouldBe empty
+  }
+
+  it should "attempt each item once in order and discard successful result values" in {
+    val attempted = ListBuffer.empty[Int]
+
+    AutoCancel.attemptAll(List(3, 1, 2)) { item =>
+      attempted += item
+      ClientSuccess(item.toString)
+    } shouldBe ClientSuccess(())
+
+    attempted.toList shouldBe List(3, 1, 2)
   }
 
   "applyCreditBalances" should "apply credit to multiple invoices" in {
@@ -229,7 +252,7 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
     AutoCancel.applyCreditBalances(applyCreditBalance)(subToCancel, invoices, "comment") shouldBe ClientSuccess(())
   }
 
-  "executeAll" should "retain the first failure when several subscriptions fail and still attempt later subscriptions" in {
+  "attemptAll" should "retain the first failure when several subscriptions fail and still attempt later subscriptions" in {
     val requests = List("first", "second", "third", "fourth").map { subscription =>
       AutoCancel.AutoCancelRequest("account", SubscriptionNumber(subscription), LocalDate.of(2026, 10, 20))
     }
@@ -244,7 +267,7 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
       execute.expects(requests(3)).returning(ClientSuccess(())).once()
     }
 
-    AutoCancel.executeAll(requests)(execute) shouldBe firstFailure
+    AutoCancel.attemptAll(requests)(execute) shouldBe firstFailure
   }
 
   "applyCreditBalances" should "retain the first failure when several invoices fail and still attempt later invoices" in {

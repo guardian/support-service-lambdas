@@ -464,6 +464,24 @@ class AutoCancelBehaviourTest extends AnyFlatSpec with Matchers {
     operations.sentEmails should have size 1
   }
 
+  it should "process later records after a malformed message and report the batch failure" in {
+    val operations = new FakeOperations
+    operations.expectEmailInvoiceRead()
+    val handler = new ReusingHandler(operations.processor)
+    val context = new InvocationContext(300000)
+    val batch = event(callout, count = 2)
+    batch.getRecords.get(0).setBody("invalid JSON")
+
+    val error = intercept[RuntimeException] {
+      handler.handleRequest(batch, context)
+    }
+
+    error.getMessage should include("Failed to process 1 message(s)")
+    handler.builds shouldBe 1
+    operations.calls.toList shouldBe collectionCalls ++ cancellationCalls ++ List("transactions", "email")
+    operations.sentEmails should have size 1
+  }
+
   it should "retry failed processor initialization rather than cache a configuration failure" in {
     val operations = new FakeOperations
     val handler = new ReusingHandler(operations.processor, failFirstBuild = true)

@@ -19,35 +19,35 @@ object AutoCancel extends Logging {
       cancellationDate: LocalDate,
   )
 
-  private[autoCancel] def executeAll[A](
-      requests: List[AutoCancelRequest],
-  )(execute: AutoCancelRequest => ClientFailableOp[A]): ClientFailableOp[Unit] =
-    requests
-      .map(execute)
-      .collectFirst { case failure: ClientFailure => failure }
-      .getOrElse(ClientSuccess(()))
+  private[autoCancel] def attemptAll[A, B](
+      items: Seq[A],
+  )(execute: A => ClientFailableOp[B]): ClientFailableOp[Unit] =
+    items.foldLeft[ClientFailableOp[Unit]](ClientSuccess(())) { (firstResult, item) =>
+      val currentResult = execute(item)
+      firstResult match {
+        case failure: ClientFailure => failure
+        case ClientSuccess(_) => currentResult.map(_ => ())
+      }
+    }
 
   private[autoCancel] def applyCreditBalances(applyCreditBalance: (String, Double, String) => ClientFailableOp[Unit])(
       subToCancel: SubscriptionNumber,
       invoices: Seq[ItemisedInvoice],
       comment: String,
   ): ClientFailableOp[Unit] = {
-    invoices
-      .map(invoice =>
-        invoice.invoiceItems.length match {
-          case 0 => GenericError(s"Invoice ${invoice.id} has no items")
-          case 1 => applyCreditBalance(invoice.id, invoice.balance, comment)
-          case _ =>
-            invoice.invoiceItems.filter(_.subscriptionName == subToCancel.value) match {
-              case Nil => GenericError(s"Invoice ${invoice.id} isn't for subscription $subToCancel")
-              case items =>
-                val amount = items.map(item => item.chargeAmount + item.taxAmount).sum
-                applyCreditBalance(invoice.id, amount, comment)
-            }
-        },
-      )
-      .collectFirst { case failure: ClientFailure => failure }
-      .getOrElse(ClientSuccess(()))
+    attemptAll(invoices) { invoice =>
+      invoice.invoiceItems.length match {
+        case 0 => GenericError(s"Invoice ${invoice.id} has no items")
+        case 1 => applyCreditBalance(invoice.id, invoice.balance, comment)
+        case _ =>
+          invoice.invoiceItems.filter(_.subscriptionName == subToCancel.value) match {
+            case Nil => GenericError(s"Invoice ${invoice.id} isn't for subscription $subToCancel")
+            case items =>
+              val amount = items.map(item => item.chargeAmount + item.taxAmount).sum
+              applyCreditBalance(invoice.id, amount, comment)
+          }
+      }
+    }
   }
 
   case class UnbalancedInvoices(negativeInvoice: ItemisedInvoice, unpaidInvoices: Seq[ItemisedInvoice])
@@ -87,7 +87,7 @@ class AutoCancel(
   ): ApiGatewayOp[Unit] =
     cancellations
       .create(deadline, orderDate)
-      .flatMap(cancellation => executeAll(requests)(executeCancel(cancellation)))
+      .flatMap(cancellation => attemptAll(requests)(executeCancel(cancellation)))
       .toApiGatewayOp("AutoCancel failed")
 
   /*

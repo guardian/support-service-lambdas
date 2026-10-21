@@ -73,17 +73,7 @@ class AutoCancelSqsHandler extends RequestHandler[SQSEvent, Unit] with Logging {
     }
     logger.info(s"Processing ${records.size} SQS message(s)")
 
-    val results = for {
-      record <- records
-    } yield {
-      for {
-        parsedCallout <- parseRecord(record)
-        (zuoraCalloutRecord, apiToken) = parsedCallout
-        calloutProcessor <- Try(processor)
-        _ <- calloutProcessor.execute(zuoraCalloutRecord, apiToken, deadline).toTry(())
-      } yield ()
-    }
-
+    val results = records.map(record => processRecord(record, deadline))
     val failures = results.collect { case Failure(error) => error }
     if (failures.nonEmpty) {
       logger.error(s"${failures.size} message(s) failed to process")
@@ -93,6 +83,11 @@ class AutoCancelSqsHandler extends RequestHandler[SQSEvent, Unit] with Logging {
 
     logger.info(s"Successfully processed ${records.size} message(s)")
   }
+
+  private def processRecord(record: SQSEvent.SQSMessage, deadline: Deadline): Try[Unit] =
+    parseRecord(record).flatMap { case (callout, apiToken) =>
+      Try(processor).flatMap(_.execute(callout, apiToken, deadline).toTry(()))
+    }
 
   private def parseRecord(record: SQSEvent.SQSMessage): Try[(AutoCancelCallout, String)] = {
     val messageId = record.getMessageId

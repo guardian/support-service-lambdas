@@ -5,6 +5,7 @@ import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.resthttp.Types.{ClientFailableOp, GenericError}
 import com.gu.util.zuora.ZuoraGetInvoice
 import com.gu.zuora.orders.CreateOrderRequest
+import com.gu.zuora.subscription.ZuoraApiResponse
 import com.gu.zuora.{AccessToken, HolidayStopProcessorZuoraConfig, Zuora, ZuoraOrders}
 import sttp.client3.{Identity, SttpBackend}
 
@@ -30,15 +31,14 @@ object ZuoraOrderCancellationSteps {
   ): SubscriptionCancellationFactory =
     new SubscriptionCancellationFactory {
       override def create(deadline: Deadline, orderDate: LocalDate): ClientFailableOp[SubscriptionCancellation] =
-        Zuora
-          .accessTokenGetResponse(config, backend)
-          .left
-          .map(failure => GenericError(failure.reason))
-          .toClientFailableOp
+        toClientResult(Zuora.accessTokenGetResponse(config, backend))
           .map(accessToken =>
             new ZuoraOrderCancellationSteps(requests, config, accessToken, backend, deadline, orderDate),
           )
     }
+
+  private def toClientResult[A](response: ZuoraApiResponse[A]): ClientFailableOp[A] =
+    response.left.map(failure => GenericError(failure.reason)).toClientFailableOp
 
   private[autoCancel] def singleInvoiceNumber(invoiceNumbers: Option[List[String]]): Either[GenericError, String] =
     invoiceNumbers match {
@@ -74,18 +74,16 @@ class ZuoraOrderCancellationSteps(
           GenericError("Not enough Lambda time remains to safely submit the Zuora cancellation order"),
         )
         .toClientFailableOp
-      orderResult <- ZuoraOrders
-        .createOrderAsynchronously(config, accessToken, backend, maximumOrderDuration)(
+      orderResult <- toClientResult(
+        ZuoraOrders.createOrderAsynchronously(config, accessToken, backend, maximumOrderDuration)(
           CreateOrderRequest.forCancellation(
             accountId = request.accountId,
             subscriptionNumber = request.subToCancel.value,
             cancellationDate = request.cancellationDate,
             orderDate = orderDate,
           ),
-        )
-        .left
-        .map(failure => GenericError(failure.reason))
-        .toClientFailableOp
+        ),
+      )
       invoiceNumber <- singleInvoiceNumber(orderResult.invoiceNumbers).toClientFailableOp
       invoiceId <- ZuoraGetInvoice(requests)(invoiceNumber)
     } yield CancellationResponse(invoiceId)
