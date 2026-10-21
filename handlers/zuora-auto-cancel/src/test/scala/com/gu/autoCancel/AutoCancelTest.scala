@@ -92,7 +92,7 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
         ),
       ),
     )
-    AutoCancel.applyCreditBalances(applyCreditBalance)(subToCancel, invoices, "comment")
+    AutoCancel.applyCreditBalances(applyCreditBalance)(subToCancel, invoices, "comment") shouldBe ClientSuccess(())
   }
 
   it should "apply partial credit to an invoice for multiple subscriptions" in {
@@ -130,7 +130,7 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
         ),
       ),
     )
-    AutoCancel.applyCreditBalances(applyCreditBalance)(subToCancel, invoices, "comment")
+    AutoCancel.applyCreditBalances(applyCreditBalance)(subToCancel, invoices, "comment") shouldBe ClientSuccess(())
   }
 
   it should "apply partial credit to an invoice for all items of the subscription to cancel" in {
@@ -188,7 +188,7 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
         ),
       ),
     )
-    AutoCancel.applyCreditBalances(applyCreditBalance)(subToCancel, invoices, "comment")
+    AutoCancel.applyCreditBalances(applyCreditBalance)(subToCancel, invoices, "comment") shouldBe ClientSuccess(())
   }
 
   it should "apply credit including items tax amount (not just charge amount)" in {
@@ -226,6 +226,51 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
         ),
       ),
     )
-    AutoCancel.applyCreditBalances(applyCreditBalance)(subToCancel, invoices, "comment")
+    AutoCancel.applyCreditBalances(applyCreditBalance)(subToCancel, invoices, "comment") shouldBe ClientSuccess(())
+  }
+
+  "executeAll" should "retain the first failure when several subscriptions fail and still attempt later subscriptions" in {
+    val requests = List("first", "second", "third", "fourth").map { subscription =>
+      AutoCancel.AutoCancelRequest("account", SubscriptionNumber(subscription), LocalDate.of(2026, 10, 20))
+    }
+    val execute = mockFunction[AutoCancel.AutoCancelRequest, ClientFailableOp[Unit]]
+    val firstFailure = GenericError("first failure")
+    val secondFailure = GenericError("second failure")
+
+    inSequence {
+      execute.expects(requests(0)).returning(ClientSuccess(())).once()
+      execute.expects(requests(1)).returning(firstFailure).once()
+      execute.expects(requests(2)).returning(secondFailure).once()
+      execute.expects(requests(3)).returning(ClientSuccess(())).once()
+    }
+
+    AutoCancel.executeAll(requests)(execute) shouldBe firstFailure
+  }
+
+  "applyCreditBalances" should "retain the first failure when several invoices fail and still attempt later invoices" in {
+    val subscription = SubscriptionNumber("A-S001")
+    val date = LocalDate.of(2026, 10, 20)
+    val invoices = List("first", "second", "third", "fourth").map { id =>
+      ItemisedInvoice(
+        id = id,
+        invoiceDate = date,
+        amount = 10,
+        balance = 10,
+        status = "Posted",
+        invoiceItems = List(InvoiceItem(s"$id-item", subscription.value, date, date, 10, "charge", "product", 0)),
+      )
+    }
+    val applyCredit = mockFunction[String, Double, String, ClientFailableOp[Unit]]
+    val firstFailure = GenericError("first failure")
+    val secondFailure = GenericError("second failure")
+
+    inSequence {
+      applyCredit.expects("first", 10.0, "Auto-cancellation").returning(ClientSuccess(())).once()
+      applyCredit.expects("second", 10.0, "Auto-cancellation").returning(firstFailure).once()
+      applyCredit.expects("third", 10.0, "Auto-cancellation").returning(secondFailure).once()
+      applyCredit.expects("fourth", 10.0, "Auto-cancellation").returning(ClientSuccess(())).once()
+    }
+
+    AutoCancel.applyCreditBalances(applyCredit)(subscription, invoices, "Auto-cancellation") shouldBe firstFailure
   }
 }
