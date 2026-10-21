@@ -49,6 +49,9 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
             "STAGE": "TEST",
             "Stage": "TEST",
             "sfApiVersion": "v46.0",
+            "softOptInQueueUrl": {
+              "Ref": "SoftOptInsQueue",
+            },
           },
         },
         "FunctionName": "soft-opt-in-consent-setter-TEST",
@@ -833,6 +836,20 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
                     },
                     ":parameter/TEST/membership/soft-opt-in-consent-setter/*",
                   ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SoftOptInsQueue",
+                  "Arn",
                 ],
               },
             },

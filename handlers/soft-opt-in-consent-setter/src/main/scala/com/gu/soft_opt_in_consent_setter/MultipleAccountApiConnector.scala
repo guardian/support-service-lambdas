@@ -36,6 +36,12 @@ class MultipleAccountApiConnector(
     result
   }
 
+  def secondaryIdentityIds(subscriptionName: String): Either[SoftOptInError, Set[String]] = {
+    val encodedSubscriptionName = URLEncoder.encode(subscriptionName, StandardCharsets.UTF_8)
+    get[SecondaryUsersResponse](s"$baseUrl/subscriptions/$encodedSubscriptionName/secondary-users")
+      .map(_.secondaryUsers.map(_.secondaryIdentityId).toSet)
+  }
+
   private def get[T: Decoder](url: String): Either[SoftOptInError, T] = {
     val result = for {
       resp <- sendReq(url).left.map(error =>
@@ -66,9 +72,13 @@ class MultipleAccountApiConnector(
 object MultipleAccountApiConnector extends LazyLogging {
   private case class SecondarySubscription(subscriptionName: String)
   private case class SecondaryUserDetailsResponse(subscriptions: List[SecondarySubscription])
+  private case class SecondaryUser(secondaryIdentityId: String)
+  private case class SecondaryUsersResponse(secondaryUsers: List[SecondaryUser])
 
   private implicit val secondarySubscriptionDecoder: Decoder[SecondarySubscription] = deriveDecoder
   private implicit val secondaryUserDetailsResponseDecoder: Decoder[SecondaryUserDetailsResponse] = deriveDecoder
+  private implicit val secondaryUserDecoder: Decoder[SecondaryUser] = deriveDecoder
+  private implicit val secondaryUsersResponseDecoder: Decoder[SecondaryUsersResponse] = deriveDecoder
 
   private val baseUrls = Map(
     "CODE" -> "https://multiple-account-api-code.support.guardianapis.com",
