@@ -33,6 +33,54 @@ class MultipleAccountApiConnectorTests extends AnyFunSuite with Matchers {
     connector.activeSecondarySubscriptionNames("12345") shouldBe Right(Set.empty)
   }
 
+  test("returns secondary identity ids for a subscription") {
+    val connector = new MultipleAccountApiConnector(
+      "https://multiple-account-api-code.support.guardianapis.com",
+      (url) => {
+        url shouldBe "https://multiple-account-api-code.support.guardianapis.com/subscriptions/A-S123%2F456/secondary-users/cancellation-candidates"
+        Right(
+          response(
+            """{"secondaryIdentityIds":["first","second"]}""",
+          ),
+        )
+      },
+    )
+
+    connector.secondaryIdentityIdsForCancellation("A-S123/456") shouldBe Right(Set("first", "second"))
+  }
+
+  test("an empty secondary user list returns no identities") {
+    val connector = new MultipleAccountApiConnector(
+      "https://example.com",
+      (_) => Right(response("""{"secondaryIdentityIds":[]}""")),
+    )
+
+    connector.secondaryIdentityIdsForCancellation("A-S123") shouldBe Right(Set.empty)
+  }
+
+  test("malformed secondary user responses fail") {
+    val missingSecondaryIdentityIds = new MultipleAccountApiConnector(
+      "https://example.com",
+      (_) => Right(response("{}")),
+    )
+    val missingIdentityId = new MultipleAccountApiConnector(
+      "https://example.com",
+      (_) => Right(response("""{"secondaryIdentityIds":[null]}""")),
+    )
+
+    missingSecondaryIdentityIds.secondaryIdentityIdsForCancellation("A-S123").isLeft shouldBe true
+    missingIdentityId.secondaryIdentityIdsForCancellation("A-S123").isLeft shouldBe true
+  }
+
+  test("HTTP failures from the secondary user endpoint are returned") {
+    val connector =
+      new MultipleAccountApiConnector("https://example.com", (_) => Right(response("Bad gateway", 502)))
+
+    val error = connector.secondaryIdentityIdsForCancellation("A-S123").left.toOption.get
+    error.statusCode shouldBe Some(502)
+    error.getMessage should include("A-S123")
+  }
+
   test("HTTP failures never count as no secondary access") {
     val connector =
       new MultipleAccountApiConnector("https://example.com", (_) => Right(response("Forbidden", 403)))

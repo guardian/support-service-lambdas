@@ -199,8 +199,10 @@ export class SoftOptInConsentSetter extends GuStack {
 			environment: {
 				Stage: this.stage,
 				sfApiVersion: 'v46.0',
+				softOptInQueueUrl: softOptInsQueue.queueUrl,
 			},
 		});
+		softOptInsQueue.grantSendMessages(lambdaFunction);
 
 		const lambdaFunctionIAP = new GuLambdaFunction(this, 'LambdaFunctionIAP', {
 			app: 'soft-opt-in-consent-setter',

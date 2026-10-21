@@ -1,0 +1,20 @@
+import { logger } from '@modules/logger/logger';
+import type { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
+import { buildErrorResponse, ok } from '@modules/routing/apiGatewayResponses';
+
+export const listSecondaryUsersForCancellationEndpoint = async (
+	secondaryUserRepository: SecondaryUserRepository,
+	subscriptionName: string,
+) => {
+	try {
+		logger.mutableAddContext(subscriptionName);
+		const secondaryUsers =
+			await secondaryUserRepository.listBySubscription(subscriptionName);
+		const secondaryIdentityIds = secondaryUsers
+			.filter(({ cancelledBy }) => cancelledBy === undefined)
+			.map(({ secondaryIdentityId }) => secondaryIdentityId);
+		return ok({ secondaryIdentityIds });
+	} catch (error) {
+		return buildErrorResponse(error);
+	}
+};

@@ -283,6 +283,88 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     result shouldBe Right(())
   }
 
+  test(testName = "processCancellation should turn off secondary user consents") {
+    mockSendConsentsReq
+      .expects(
+        identityId,
+        """[
+          |  {
+          |    "id" : "your_support_onboarding",
+          |    "consented" : false
+          |  },
+          |  {
+          |    "id" : "supporter_newsletter",
+          |    "consented" : false
+          |  }
+          |]""".stripMargin,
+      )
+      .returning(Right(()))
+    mockGetMobileSubscriptions.expects(identityId).returning(Right(MobileSubscriptions(List.empty)))
+    mockSfConnector.getActiveSubs _ expects Seq(identityId) returning Right(
+      SFAssociatedSubResponse(0, true, Seq.empty),
+    )
+
+    val result = processCancelledSub(
+      MessageBody(
+        identityId = identityId,
+        productName = "SECONDARY_USER",
+        printProduct = None,
+        previousProductName = None,
+        eventType = Cancellation,
+        subscriptionId = subscriptionId,
+        userConsentsOverrides = None,
+      ),
+      mockSendConsentsReq,
+      mockGetMobileSubscriptions,
+      calculator,
+      mockSfConnector,
+      _ => Right(Set.empty),
+    )
+
+    result shouldBe Right(())
+  }
+
+  test(testName = "processCancellation should preserve secondary user consents held by another product") {
+    mockSendConsentsReq
+      .expects(
+        identityId,
+        """[
+          |  {
+          |    "id" : "supporter_newsletter",
+          |    "consented" : false
+          |  }
+          |]""".stripMargin,
+      )
+      .returning(Right(()))
+    mockGetMobileSubscriptions.expects(identityId).returning(Right(MobileSubscriptions(List.empty)))
+    mockSfConnector.getActiveSubs _ expects Seq(identityId) returning Right(
+      SFAssociatedSubResponse(
+        1,
+        true,
+        Seq(SFAssociatedSubRecord("Guardian Ad-Lite", identityId)),
+      ),
+    )
+
+    val result = processCancelledSub(
+      MessageBody(
+        identityId = identityId,
+        productName = "SECONDARY_USER",
+        printProduct = None,
+        previousProductName = None,
+        eventType = Cancellation,
+        subscriptionId = subscriptionId,
+        userConsentsOverrides = None,
+      ),
+      mockSendConsentsReq,
+      mockGetMobileSubscriptions,
+      calculator,
+      mockSfConnector,
+      _ => Right(Set.empty),
+    )
+
+    result shouldBe Right(())
+  }
+
   test(testName =
     "when cancelling Supporter Plus, while also holding a Feast IAP, processCancellation should unset the Supporter Plus consents which are not shared with the Feast IAP",
   ) {

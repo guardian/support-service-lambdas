@@ -179,6 +179,7 @@ object IAPMessageProcessor extends StrictLogging {
       sfConnector: SalesforceConnector,
       getSecondarySubscriptionNames: String => Either[SoftOptInError, Set[String]],
   ): Either[SoftOptInError, Unit] = {
+    val mappingProductName = ConsentsMapping.productMappings(messageBody.productName, messageBody.printProduct)
     for {
       mobileSubscriptionsResponse <- getMobileSubscriptions(messageBody.identityId)
       activeSubs <- sfConnector.getActiveSubs(Seq(messageBody.identityId))
@@ -197,7 +198,7 @@ object IAPMessageProcessor extends StrictLogging {
       )
 
       consents <- consentsCalculator.getCancellationConsents(
-        messageBody.productName,
+        mappingProductName,
         rec.productNames,
       )
       consentWithoutSimilarProducts = consentsCalculator.removeSimilarGuardianProductFromSet(consents)
