@@ -157,7 +157,7 @@ paths:
               schema:
                 type: string
                 example: Internal server error
-  /internal/subscriptions/{subscriptionName}/secondary-users:
+  /subscriptions/{subscriptionName}/secondary-users/cancellation-candidates:
     get:
       operationId: listSecondaryUsersForCancellation
       summary: List secondary users for subscription cancellation

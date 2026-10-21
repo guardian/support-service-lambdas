@@ -112,13 +112,13 @@ Example path: /subscriptions/A-S00974337/secondary-users
 
 ### List secondary users for subscription cancellation
 
-This internal endpoint is for services that need to clean up secondary-user
+This service-to-service endpoint is for callers that need to clean up secondary-user
 data when a primary subscription ends. It uses API-key authentication and does
 not require an `x-identity-id` header.
 
 #### Request:
 
-GET /internal/subscriptions/{subscriptionName}/secondary-users
+GET /subscriptions/{subscriptionName}/secondary-users/cancellation-candidates
 
 #### Response:
 

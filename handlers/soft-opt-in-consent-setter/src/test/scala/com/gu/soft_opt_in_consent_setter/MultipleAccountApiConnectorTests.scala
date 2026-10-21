@@ -37,7 +37,7 @@ class MultipleAccountApiConnectorTests extends AnyFunSuite with Matchers {
     val connector = new MultipleAccountApiConnector(
       "https://multiple-account-api-code.support.guardianapis.com",
       (url) => {
-        url shouldBe "https://multiple-account-api-code.support.guardianapis.com/internal/subscriptions/A-S123%2F456/secondary-users"
+        url shouldBe "https://multiple-account-api-code.support.guardianapis.com/subscriptions/A-S123%2F456/secondary-users/cancellation-candidates"
         Right(
           response(
             """{"secondaryIdentityIds":["first","second"]}""",

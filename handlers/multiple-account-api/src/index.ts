@@ -170,7 +170,7 @@ export const handler: Handler = Router([
 	},
 	{
 		httpMethod: 'GET',
-		path: '/internal/subscriptions/{subscriptionName}/secondary-users',
+		path: '/subscriptions/{subscriptionName}/secondary-users/cancellation-candidates',
 		handler: withPathParser(subscriptionPathSchema, async (_event, path) =>
 			listSecondaryUsersForCancellationEndpoint(
 				secondaryUserRepository,

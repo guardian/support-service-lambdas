@@ -37,7 +37,9 @@ class MultipleAccountApiConnector(
 
   def secondaryIdentityIdsForCancellation(subscriptionName: String): Either[SoftOptInError, Set[String]] = {
     val encodedSubscriptionName = URLEncoder.encode(subscriptionName, StandardCharsets.UTF_8)
-    get[SecondaryIdentityIdsResponse](s"$baseUrl/internal/subscriptions/$encodedSubscriptionName/secondary-users")
+    get[SecondaryIdentityIdsResponse](
+      s"$baseUrl/subscriptions/$encodedSubscriptionName/secondary-users/cancellation-candidates",
+    )
       .map(_.secondaryIdentityIds.toSet)
   }
 
