@@ -2,7 +2,7 @@ package com.gu.autoCancel
 
 import com.amazonaws.services.lambda.runtime.events.SQSEvent
 import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
-import com.gu.effects.{GetFromS3, GetFromSecretsManager, RawEffects}
+import com.gu.effects.{GetFromS3, GetFromSecretsManager, Http, RawEffects}
 import com.gu.util.Logging
 import com.gu.util.TypeConvert._
 import com.gu.util.apigateway.ApiGatewayResponse.unauthorized
@@ -72,7 +72,7 @@ class AutoCancelSqsHandler(
     ZuoraGetAccessToken(RawEffects.stage, GetFromSecretsManager.fetchString, RawEffects.response),
     EmailSendSteps(),
     TodayLive,
-    RawEffects.response,
+    Http.responseWithTimeout(120),
     RawEffects.stage,
   )
 
