@@ -120,7 +120,7 @@ object Steps {
         },
       )
       createSubscription = CreateSubscription(
-        zuoraClient.post[WireCreateOrderRequest, WireOrderResponse],
+        zuoraClient.post[WireCreateOrderRequest, WireOrderResponse](_, _, _),
         currentDate,
       ) _
 

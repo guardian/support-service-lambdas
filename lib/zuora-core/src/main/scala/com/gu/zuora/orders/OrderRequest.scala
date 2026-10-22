@@ -34,30 +34,6 @@ object CreateOrderRequest {
       processingOptions = ProcessingOptions(runBilling = false, collectPayment = false),
     )
 
-  /** https://developer.zuora.com/docs/get-started/tutorials/cancel-subscription */
-  def forCancellation(
-      accountId: String,
-      subscriptionNumber: String,
-      cancellationDate: LocalDate,
-      orderDate: LocalDate,
-  ): CreateOrderRequest =
-    CreateOrderRequest(
-      orderDate = orderDate,
-      existingAccount = ExistingAccount.Id(accountId),
-      subscriptions = List(
-        OrderSubscription(
-          subscriptionNumber = subscriptionNumber,
-          orderActions = List(
-            CancelSubscriptionOrderAction(
-              triggerDates = List(TriggerDate(TriggerDateName.ContractEffective, cancellationDate)),
-              cancelSubscription = Cancellation(SpecificDate, cancellationDate),
-            ),
-          ),
-        ),
-      ),
-      processingOptions = ProcessingOptions(runBilling = true, collectPayment = false),
-    )
-
   private def termsAndConditionsAction(
       update: SubscriptionUpdate,
       orderDate: LocalDate,
@@ -118,9 +94,6 @@ object ExistingAccount {
     override val jsonField = "existingAccountNumber"
   }
 
-  case class Id(value: String) extends ExistingAccount {
-    override val jsonField = "existingAccountId"
-  }
 }
 
 case class OrderSubscription(
@@ -144,12 +117,6 @@ object OrderAction {
         "triggerDates" -> action.triggerDates.asJson,
         "termsAndConditions" -> action.termsAndConditions.asJson,
       )
-    case action: CancelSubscriptionOrderAction =>
-      Json.obj(
-        "type" -> Json.fromString("CancelSubscription"),
-        "triggerDates" -> action.triggerDates.asJson,
-        "cancelSubscription" -> action.cancelSubscription.asJson,
-      )
   }
 }
 
@@ -162,25 +129,6 @@ case class TermsAndConditionsOrderAction(
     triggerDates: List[TriggerDate],
     termsAndConditions: TermsAndConditions,
 ) extends OrderAction
-
-case class CancelSubscriptionOrderAction(
-    triggerDates: List[TriggerDate],
-    cancelSubscription: Cancellation,
-) extends OrderAction
-
-case class Cancellation(cancellationPolicy: CancellationPolicy, cancellationEffectiveDate: LocalDate)
-
-sealed trait CancellationPolicy {
-  def value: String
-}
-
-case object SpecificDate extends CancellationPolicy {
-  override val value: String = "SpecificDate"
-}
-
-object CancellationPolicy {
-  implicit val encoder: Encoder[CancellationPolicy] = Encoder.encodeString.contramap(_.value)
-}
 
 case class ProductToAdd(
     productRatePlanId: String,

@@ -72,7 +72,7 @@ object AutoCancel extends Logging {
 }
 
 class AutoCancel(
-    cancellations: SubscriptionCancellationFactory,
+    cancellation: SubscriptionCancellation,
     invoiceTransactions: GetInvoiceTransactions,
     creditTransfer: CreditBalanceTransfer,
     creditApplication: CreditBalanceApplication,
@@ -82,12 +82,10 @@ class AutoCancel(
 
   def cancelAll(
       requests: List[AutoCancelRequest],
-      deadline: Deadline,
+      calloutInvoiceId: String,
       orderDate: LocalDate,
   ): ApiGatewayOp[Unit] =
-    cancellations
-      .create(deadline, orderDate)
-      .flatMap(cancellation => attemptAll(requests)(executeCancel(cancellation)))
+    attemptAll(requests)(request => executeCancel(request, calloutInvoiceId, orderDate))
       .toApiGatewayOp("AutoCancel failed")
 
   /*
@@ -98,8 +96,10 @@ class AutoCancel(
    * This means that after all subscriptions on an invoice have been cancelled, the balance of all
    * invoices should be 0.
    */
-  private def executeCancel(cancellation: SubscriptionCancellation)(
+  private def executeCancel(
       request: AutoCancelRequest,
+      calloutInvoiceId: String,
+      orderDate: LocalDate,
   ): ClientFailableOp[Unit] = {
     val AutoCancelRequest(accountId, subToCancel, _) = request
     logger.info(
@@ -107,7 +107,9 @@ class AutoCancel(
     )
     for {
       _ <- cancellationReason.update(subToCancel).withLogging("updateCancellationReason")
-      cancellationResponse <- cancellation.cancel(request).withLogging("cancelSubscription")
+      cancellationResponse <- cancellation
+        .cancel(request, calloutInvoiceId, orderDate)
+        .withLogging("cancelSubscription")
       invoiceTransactionSummary <- invoiceTransactions.getInvoiceTransactions(accountId)
       unbalancedInvoices <- UnbalancedInvoices.fromSummary(
         accountId,

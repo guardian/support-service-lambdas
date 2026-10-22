@@ -10,6 +10,14 @@ import play.api.libs.json._
 
 object ZuoraRestRequestMaker extends LazyLogging {
 
+  def oauth(response: Request => Response, baseUrl: String, accessToken: String): RestRequestMaker.Requests =
+    new RestRequestMaker.Requests(
+      headers = Map("Authorization" -> s"Bearer $accessToken"),
+      baseUrl = baseUrl.stripSuffix("/") + "/",
+      getResponse = response,
+      jsonIsSuccessful = zuoraIsSuccessful,
+    )
+
   def apply(response: Request => Response, config: ZuoraRestConfig): RestRequestMaker.Requests = {
     new RestRequestMaker.Requests(
       headers = Map(

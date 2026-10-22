@@ -1,6 +1,7 @@
 package com.gu.util.email
 
-import com.gu.effects.sqs.AwsSQSSend.Payload
+import com.gu.effects.sqs.AwsSQSSend.{EmailQueueName, Payload}
+import com.gu.effects.sqs.SqsSync
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 import com.typesafe.scalalogging.LazyLogging
 import play.api.libs.json.{Json, Writes, _}
@@ -64,6 +65,10 @@ trait EmailSqsSerialisation {
 
 trait EmailSender {
   def send(message: EmailMessage): ClientFailableOp[Unit]
+}
+
+object EmailSendSteps {
+  def apply(): EmailSendSteps = new EmailSendSteps(SqsSync.send(SqsSync.buildClient)(EmailQueueName))
 }
 
 class EmailSendSteps(sqsSend: Payload => Try[Unit]) extends EmailSender with EmailSqsSerialisation with LazyLogging {
