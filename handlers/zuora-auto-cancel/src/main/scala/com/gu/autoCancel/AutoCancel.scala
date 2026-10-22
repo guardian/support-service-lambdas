@@ -3,6 +3,7 @@ package com.gu.autoCancel
 import com.gu.util.TypeConvert._
 import com.gu.util.Logging
 import com.gu.util.reader.Types._
+import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, ClientSuccess, GenericError, NotFound}
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.{InvoiceTransactionSummary, ItemisedInvoice}
 import com.gu.util.zuora._
@@ -19,6 +20,38 @@ object AutoCancel extends Logging {
       cancellationDate: LocalDate,
   )
 
+  def apply(requests: Requests)(
+      autoCancelRequests: List[AutoCancelRequest],
+      calloutInvoiceId: String,
+      orderDate: LocalDate,
+  ): ApiGatewayOp[Unit] =
+    apply(
+      new ZuoraOrderCancellation(requests),
+      new ZuoraGetInvoiceTransactions(requests),
+      new TransferToCreditBalance(requests),
+      new ApplyCreditBalance(requests),
+      new ZuoraUpdateCancellationReason(requests),
+    )(autoCancelRequests, calloutInvoiceId, orderDate)
+
+  def apply(
+      cancellation: SubscriptionCancellation,
+      invoiceTransactions: GetInvoiceTransactions,
+      creditTransfer: CreditBalanceTransfer,
+      creditApplication: CreditBalanceApplication,
+      cancellationReason: CancellationReasonUpdater,
+  )(
+      requests: List[AutoCancelRequest],
+      calloutInvoiceId: String,
+      orderDate: LocalDate,
+  ): ApiGatewayOp[Unit] =
+    attemptAll(requests)(request =>
+      executeCancel(cancellation, invoiceTransactions, creditTransfer, creditApplication, cancellationReason)(
+        request,
+        calloutInvoiceId,
+        orderDate,
+      ),
+    ).toApiGatewayOp("AutoCancel failed")
+
   private[autoCancel] def attemptAll[A, B](
       items: Seq[A],
   )(execute: A => ClientFailableOp[B]): ClientFailableOp[Unit] =
@@ -29,6 +62,52 @@ object AutoCancel extends Logging {
         case ClientSuccess(_) => currentResult.map(_ => ())
       }
     }
+
+  /*
+   * This process applies at the subscription level.  It will potentially run multiple times per invoice.
+   * The cancellation call generates a balancing invoice that should be negative and the same amount
+   * as the amount outstanding for the invoice items corresponding to the subscription being processed
+   * (there could be multiple invoice items per sub - it could include discounts and multi-day paper subs)
+   * This means that after all subscriptions on an invoice have been cancelled, the balance of all
+   * invoices should be 0.
+   */
+  private def executeCancel(
+      cancellation: SubscriptionCancellation,
+      invoiceTransactions: GetInvoiceTransactions,
+      creditTransfer: CreditBalanceTransfer,
+      creditApplication: CreditBalanceApplication,
+      cancellationReason: CancellationReasonUpdater,
+  )(
+      request: AutoCancelRequest,
+      calloutInvoiceId: String,
+      orderDate: LocalDate,
+  ): ClientFailableOp[Unit] = {
+    val AutoCancelRequest(accountId, subToCancel, _) = request
+    logger.info(
+      s"Attempting to perform auto-cancellation on account: $accountId for subscription: ${subToCancel.value}",
+    )
+    for {
+      _ <- cancellationReason.update(subToCancel).withLogging("updateCancellationReason")
+      cancellationResponse <- cancellation
+        .cancel(request, calloutInvoiceId, orderDate)
+        .withLogging("cancelSubscription")
+      invoiceTransactionSummary <- invoiceTransactions.getInvoiceTransactions(accountId)
+      unbalancedInvoices <- UnbalancedInvoices.fromSummary(
+        accountId,
+        invoiceTransactionSummary,
+        cancellationResponse.invoiceId,
+      )
+      creditTransferAmount = -unbalancedInvoices.negativeInvoice.balance
+      _ <- creditTransfer
+        .transferToCreditBalance(cancellationResponse.invoiceId, creditTransferAmount, "Auto-cancellation")
+        .withLogging("transferToCreditBalance")
+      _ <- applyCreditBalances(creditApplication.applyCreditBalance)(
+        subToCancel,
+        unbalancedInvoices.unpaidInvoices,
+        "Auto-cancellation",
+      ).withLogging("applyCreditBalance")
+    } yield ()
+  }
 
   private[autoCancel] def applyCreditBalances(applyCreditBalance: (String, Double, String) => ClientFailableOp[Unit])(
       subToCancel: SubscriptionNumber,
@@ -68,63 +147,5 @@ object AutoCancel extends Logging {
           case invoices => ClientSuccess(invoices)
         }
       } yield UnbalancedInvoices(negativeInvoice, unpaidInvoices)
-  }
-}
-
-class AutoCancel(
-    cancellation: SubscriptionCancellation,
-    invoiceTransactions: GetInvoiceTransactions,
-    creditTransfer: CreditBalanceTransfer,
-    creditApplication: CreditBalanceApplication,
-    cancellationReason: CancellationReasonUpdater,
-) extends Logging {
-  import AutoCancel._
-
-  def cancelAll(
-      requests: List[AutoCancelRequest],
-      calloutInvoiceId: String,
-      orderDate: LocalDate,
-  ): ApiGatewayOp[Unit] =
-    attemptAll(requests)(request => executeCancel(request, calloutInvoiceId, orderDate))
-      .toApiGatewayOp("AutoCancel failed")
-
-  /*
-   * This process applies at the subscription level.  It will potentially run multiple times per invoice.
-   * The cancellation call generates a balancing invoice that should be negative and the same amount
-   * as the amount outstanding for the invoice items corresponding to the subscription being processed
-   * (there could be multiple invoice items per sub - it could include discounts and multi-day paper subs)
-   * This means that after all subscriptions on an invoice have been cancelled, the balance of all
-   * invoices should be 0.
-   */
-  private def executeCancel(
-      request: AutoCancelRequest,
-      calloutInvoiceId: String,
-      orderDate: LocalDate,
-  ): ClientFailableOp[Unit] = {
-    val AutoCancelRequest(accountId, subToCancel, _) = request
-    logger.info(
-      s"Attempting to perform auto-cancellation on account: $accountId for subscription: ${subToCancel.value}",
-    )
-    for {
-      _ <- cancellationReason.update(subToCancel).withLogging("updateCancellationReason")
-      cancellationResponse <- cancellation
-        .cancel(request, calloutInvoiceId, orderDate)
-        .withLogging("cancelSubscription")
-      invoiceTransactionSummary <- invoiceTransactions.getInvoiceTransactions(accountId)
-      unbalancedInvoices <- UnbalancedInvoices.fromSummary(
-        accountId,
-        invoiceTransactionSummary,
-        cancellationResponse.invoiceId,
-      )
-      creditTransferAmount = -unbalancedInvoices.negativeInvoice.balance
-      _ <- creditTransfer
-        .transferToCreditBalance(cancellationResponse.invoiceId, creditTransferAmount, "Auto-cancellation")
-        .withLogging("transferToCreditBalance")
-      _ <- applyCreditBalances(creditApplication.applyCreditBalance)(
-        subToCancel,
-        unbalancedInvoices.unpaidInvoices,
-        "Auto-cancellation",
-      ).withLogging("applyCreditBalance")
-    } yield ()
   }
 }

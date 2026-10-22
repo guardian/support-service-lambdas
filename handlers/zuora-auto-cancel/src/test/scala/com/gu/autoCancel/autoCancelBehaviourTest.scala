@@ -193,18 +193,18 @@ class AutoCancelBehaviourTest extends AnyFlatSpec with Matchers {
       run("email")(ClientSuccess(()))
     }
 
-    val autoCancel = new AutoCancel(this, this, this, this, this)
+    val autoCancel = AutoCancel(this, this, this, this, this) _
 
     def cancel(requests: List[AutoCancelRequest] = List(request)) =
-      autoCancel.cancelAll(requests, callout.invoiceId, orderDate).toDisjunction
+      autoCancel(requests, callout.invoiceId, orderDate).toDisjunction
 
-    val steps = new CalloutSteps(
+    val processCallout = AutoCancelSqsHandler.executeCallout(
       autoCancel,
       new AutoCancelDataCollectionFilter(this, this, this),
       new ZuoraEmailSteps(this, this),
-    )
+    ) _
 
-    def process() = steps.execute(callout, orderDate).toDisjunction
+    def process() = processCallout(callout, orderDate).toDisjunction
 
     def expectEmailInvoiceRead(): Unit =
       invoiceResponses = List(ClientSuccess(summary), ClientSuccess(summary))
@@ -304,7 +304,7 @@ class AutoCancelBehaviourTest extends AnyFlatSpec with Matchers {
     }
   }
 
-  "CalloutSteps" should "send the cancellation email only after all credit work succeeds" in {
+  "Callout workflow" should "send the cancellation email only after all credit work succeeds" in {
     val operations = new FakeOperations
     operations.expectEmailInvoiceRead()
 
