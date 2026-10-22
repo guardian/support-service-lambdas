@@ -223,7 +223,7 @@ lazy val effects = library(
 )
   .settings(
     dependencyOverrides ++= jacksonDependencies,
-    libraryDependencies ++= Seq(okhttp3, playJson, scalatest, awsS3) ++ logging,
+    libraryDependencies ++= Seq(okhttp3, playJson, scalatest, awsS3, awsSecretsManager) ++ logging,
   )
 lazy val `effects-s3` = library(project in file("lib/effects-s3"))
   .settings(
@@ -382,7 +382,7 @@ lazy val `zuora-auto-cancel` = lambdaProject(
     stripe,
     scalaMock,
   ),
-  Seq(zuora, `zuora-core`, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep),
+  Seq(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep),
 )
 
 lazy val `identity-backfill` = lambdaProject(

@@ -2,7 +2,7 @@ package com.gu.autoCancel
 
 import com.gu.autoCancel.AutoCancel.AutoCancelRequest
 import com.gu.util.reader.Types._
-import com.gu.util.resthttp.Types.ClientSuccess
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, PaymentMethodId}
 import com.gu.util.zuora.ZuoraGetAccountSummary.{
   AccountSummary,
@@ -11,7 +11,13 @@ import com.gu.util.zuora.ZuoraGetAccountSummary.{
   SubscriptionId,
   SubscriptionSummary,
 }
-import com.gu.util.zuora.{SubscriptionNumber, SubscriptionNumberWithStatus}
+import com.gu.util.zuora.{
+  GetAccountSubscriptions,
+  GetAccountSummary,
+  GetSubscriptionsOnInvoice,
+  SubscriptionNumber,
+  SubscriptionNumberWithStatus,
+}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -45,20 +51,20 @@ class AutoCancelStepsTest extends AnyFlatSpec with Matchers {
   )
 
   it should "prepare correct AutoCancelRequests" in {
-    val autoCancelReqestsProducer = AutoCancelDataCollectionFilter(
-      now = LocalDate.now,
-      getAccountSummary = _ =>
-        ClientSuccess(
-          AccountSummary(basicInfo, allAccountSubs, twoOverdueInvoices),
-        ),
-      getAccountSubscriptions = _ =>
-        ClientSuccess(
-          allAccountSubs
-            .map(s => SubscriptionNumberWithStatus(s.subscriptionNumber, s.status)),
-        ),
-      getSubscriptionsOnInvoice =
-        _ => ClientSuccess(invoiceDueMultipleSubscriptions.map(s => SubscriptionNumber(s.subscriptionNumber))),
-    ) _
+    val accountSummaries = new GetAccountSummary {
+      override def getAccountSummary(accountId: String): ClientFailableOp[AccountSummary] =
+        ClientSuccess(AccountSummary(basicInfo, allAccountSubs, twoOverdueInvoices))
+    }
+    val accountSubscriptions = new GetAccountSubscriptions {
+      override def getAccountSubscriptions(accountId: String): ClientFailableOp[List[SubscriptionNumberWithStatus]] =
+        ClientSuccess(allAccountSubs.map(s => SubscriptionNumberWithStatus(s.subscriptionNumber, s.status)))
+    }
+    val invoiceSubscriptions = new GetSubscriptionsOnInvoice {
+      override def getSubscriptionsOnInvoice(invoiceId: String): ClientFailableOp[List[SubscriptionNumber]] =
+        ClientSuccess(invoiceDueMultipleSubscriptions.map(s => SubscriptionNumber(s.subscriptionNumber)))
+    }
+    val autoCancelRequestsProducer =
+      new AutoCancelDataCollectionFilter(accountSummaries, accountSubscriptions, invoiceSubscriptions)
     val autoCancelCallout = AutoCancelInputFilterTest
       .fakeCallout(true)
       .copy(
@@ -66,7 +72,7 @@ class AutoCancelStepsTest extends AnyFlatSpec with Matchers {
         accountId = basicInfo.id.value,
       )
 
-    val actual: ApiGatewayOp[List[AutoCancelRequest]] = autoCancelReqestsProducer(autoCancelCallout)
+    val actual: ApiGatewayOp[List[AutoCancelRequest]] = autoCancelRequestsProducer(autoCancelCallout, LocalDate.now)
 
     // Should use the earliest overdue invoice date (minusDays(35)) to ensure sufficient credit for all unpaid invoices
     val expected = Right(

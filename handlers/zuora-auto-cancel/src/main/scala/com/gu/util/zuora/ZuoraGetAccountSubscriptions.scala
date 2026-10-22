@@ -6,12 +6,15 @@ import play.api.libs.json.{JsArray, JsValue}
 
 final case class SubscriptionNumberWithStatus(number: String, status: String)
 
-object ZuoraGetAccountSubscriptions {
+trait GetAccountSubscriptions {
+  def getAccountSubscriptions(accountId: String): ClientFailableOp[List[SubscriptionNumberWithStatus]]
+}
 
+class ZuoraGetAccountSubscriptions(requests: Requests) extends GetAccountSubscriptions {
   // pageSize by default is 20
   // TODO setting here to 40, consider changing that value in the future
 
-  def apply(requests: Requests)(accountId: String): ClientFailableOp[List[SubscriptionNumberWithStatus]] = {
+  override def getAccountSubscriptions(accountId: String): ClientFailableOp[List[SubscriptionNumberWithStatus]] = {
     requests.get[JsValue](s"subscriptions/accounts/$accountId?pageSize=40").map { topJson =>
       val jsonArr = (topJson \ "subscriptions").as[JsArray]
       val accSubs = jsonArr.value.map { json =>
@@ -22,5 +25,4 @@ object ZuoraGetAccountSubscriptions {
       accSubs
     }
   }
-
 }

@@ -7,9 +7,12 @@ import play.api.libs.json.JsValue
 
 final case class SubscriptionNumber(value: String)
 
-object ZuoraGetSubsNamesOnInvoice extends LazyLogging {
+trait GetSubscriptionsOnInvoice {
+  def getSubscriptionsOnInvoice(invoiceId: String): ClientFailableOp[List[SubscriptionNumber]]
+}
 
-  def apply(requests: Requests)(invoiceId: String): ClientFailableOp[List[SubscriptionNumber]] = {
+class ZuoraGetSubsNamesOnInvoice(requests: Requests) extends GetSubscriptionsOnInvoice with LazyLogging {
+  override def getSubscriptionsOnInvoice(invoiceId: String): ClientFailableOp[List[SubscriptionNumber]] = {
     requests.get[JsValue](s"invoices/$invoiceId/items").map { json =>
       invoiceItemsToSubscriptionsIds(json)
     }
@@ -23,5 +26,4 @@ object ZuoraGetSubsNamesOnInvoice extends LazyLogging {
     logger.info(s"invoice unique subscriptions ids: $parsed")
     parsed.toList
   }
-
 }

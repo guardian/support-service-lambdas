@@ -3,6 +3,7 @@ import { Duration } from 'aws-cdk-lib';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { ApiGatewayToSqs } from './cdk/ApiGatewayToSqs';
+import { AllowZuoraOAuthSecretsPolicy } from './cdk/policies';
 import { SrSqsLambda } from './cdk/SrSqsLambda';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
@@ -37,12 +38,12 @@ export class ZuoraAutoCancel extends SrStack {
 
 		// IAM Policies
 		lambda.addPolicies(
+			new AllowZuoraOAuthSecretsPolicy(this),
 			new Policy(this, 'ReadPrivateCredentials', {
 				statements: [
 					new PolicyStatement({
 						actions: ['s3:GetObject'],
 						resources: [
-							`arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${this.stage}/zuoraRest-${this.stage}.*.json`,
 							`arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${this.stage}/trustedApi-${this.stage}.*.json`,
 							`arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${this.stage}/exactTarget-${this.stage}.*.json`,
 							`arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${this.stage}/stripe-${this.stage}.*.json`,

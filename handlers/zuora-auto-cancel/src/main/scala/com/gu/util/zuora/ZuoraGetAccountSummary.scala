@@ -2,13 +2,25 @@ package com.gu.util.zuora
 
 import java.time.LocalDate
 import com.gu.util.resthttp.RestRequestMaker.Requests
-import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
+import com.gu.util.resthttp.Types.ClientFailableOp
+import com.gu.util.zuora.ZuoraGetAccountSummary.AccountSummary
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, PaymentMethodId}
-import com.typesafe.scalalogging.LazyLogging
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-object ZuoraGetAccountSummary extends LazyLogging {
+trait GetAccountSummary {
+  def getAccountSummary(accountId: String): ClientFailableOp[AccountSummary]
+}
+
+class ZuoraGetAccountSummary(requests: Requests) extends GetAccountSummary {
+  import ZuoraGetAccountSummary._
+
+  override def getAccountSummary(accountId: String): ClientFailableOp[AccountSummary] =
+    requests.get[AccountSummary](s"accounts/$accountId/summary")
+
+}
+
+object ZuoraGetAccountSummary {
 
   case class SubscriptionId(id: String) extends AnyVal
 
@@ -75,18 +87,4 @@ object ZuoraGetAccountSummary extends LazyLogging {
       (JsPath \ "invoices").read[List[Invoice]]
   )(AccountSummary.apply _)
 
-  def apply(requests: Requests)(accountId: String): ClientFailableOp[AccountSummary] =
-    requests.get[AccountSummary](s"accounts/$accountId/summary")
-
-  def dryRun(requests: Requests)(accountId: String): ClientFailableOp[AccountSummary] = {
-    val msg = s"DryRun for ZuoraGetAccountSummary: ID $accountId"
-    logger.info(msg)
-    ClientSuccess(
-      AccountSummary(
-        basicInfo = BasicAccountInfo(id = AccountId(""), balance = 0, defaultPaymentMethod = PaymentMethodId("")),
-        subscriptions = Nil,
-        invoices = Nil,
-      ),
-    )
-  }
 }

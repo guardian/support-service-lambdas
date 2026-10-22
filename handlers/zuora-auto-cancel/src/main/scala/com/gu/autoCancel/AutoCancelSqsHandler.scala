@@ -2,24 +2,20 @@ package com.gu.autoCancel
 
 import com.amazonaws.services.lambda.runtime.events.SQSEvent
 import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
-import com.gu.autoCancel.GetPaymentData.PaymentFailureInformation
-import com.gu.effects.sqs.AwsSQSSend.EmailQueueName
-import com.gu.effects.sqs.SqsSync
-import com.gu.effects.{GetFromS3, RawEffects}
+import com.gu.effects.{GetFromS3, GetFromSecretsManager, Http, RawEffects}
 import com.gu.util.Logging
+import com.gu.util.TypeConvert._
 import com.gu.util.apigateway.ApiGatewayResponse.unauthorized
 import com.gu.util.apigateway.Auth
 import com.gu.util.apigateway.Auth.TrustedApiConfig
-import com.gu.util.config.{ConfigLocation, ConfigReads, LoadConfigModule}
-import com.gu.util.email.{EmailId, EmailSendSteps}
+import com.gu.util.config.{LoadConfigModule, Stage}
+import com.gu.util.email.{EmailSender, EmailSendSteps}
 import com.gu.util.reader.Types._
-import com.gu.util.resthttp.RestRequestMaker
 import com.gu.util.zuora._
-import com.gu.zuora.HolidayStopProcessorZuoraConfig
+import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
-import sttp.client3.{HttpURLConnectionBackend, Identity, SttpBackend}
 
-import java.time.LocalDateTime
+import java.time.LocalDate
 import scala.jdk.CollectionConverters._
 import scala.util.{Failure, Try}
 
@@ -39,24 +35,28 @@ object ApiGatewayToSqsMessage {
   * Messages come from ApiGatewayToSqs which wraps the HTTP request in a JSON envelope with queryStringParameters
   * (including apiToken) and body (the AutoCancelCallout JSON).
   */
-class AutoCancelSqsHandler extends RequestHandler[SQSEvent, Unit] with Logging {
+class AutoCancelSqsHandler(
+    trustedConfig: => TrustedApiConfig,
+    tokenProvider: => GetAccessToken,
+    emailService: => EmailSender,
+    dateProvider: Today,
+    response: Request => Response,
+    stage: Stage,
+) extends RequestHandler[SQSEvent, Unit]
+    with Logging {
 
   // main entry point from AWS lambda
   override def handleRequest(event: SQSEvent, context: Context): Unit = {
     val records = event.getRecords.asScala.toList
     logger.info(s"Processing ${records.size} SQS message(s)")
 
-    val results = for {
-      record <- records
-    } yield {
+    val results = records.map(record =>
       for {
-        parsedCallout <- parseRecord(record)
-        (zuoraCalloutRecord, apiToken) = parsedCallout
-        processor <- ProcessCalloutSteps.build().toTry
-        _ <- processor.execute(zuoraCalloutRecord, apiToken, context.getRemainingTimeInMillis _).toTry(())
-      } yield ()
-    }
-
+        (callout, apiToken) <- parseRecord(record)
+        result <- Try(processCallout(callout, apiToken))
+        _ <- result.toTry(())
+      } yield (),
+    )
     val failures = results.collect { case Failure(error) => error }
     if (failures.nonEmpty) {
       logger.error(s"${failures.size} message(s) failed to process")
@@ -87,102 +87,54 @@ class AutoCancelSqsHandler extends RequestHandler[SQSEvent, Unit] with Logging {
 
   }
 
-}
+  def this() = this(
+    LoadConfigModule(RawEffects.stage, GetFromS3.fetchString).load[TrustedApiConfig].fold(throw _, identity),
+    ZuoraGetAccessToken(RawEffects.stage, GetFromSecretsManager.fetchString, RawEffects.response),
+    EmailSendSteps(),
+    TodayLive,
+    Http.responseWithTimeout(120),
+    RawEffects.stage,
+  )
 
-object ProcessCalloutSteps extends Logging {
+  private lazy val trustedApiConfig = trustedConfig
+  private lazy val getAccessToken = tokenProvider
+  private lazy val emailSender = emailService
 
-  def build(): Either[ConfigReads.ConfigFailure, ProcessCalloutSteps] = {
-    val stage = RawEffects.stage
-    val fetchString = GetFromS3.fetchString _
-    val response = RawEffects.response
-    val now = RawEffects.now
-    val sqsSend = SqsSync.send(SqsSync.buildClient) _
-    val loadConfigModule = LoadConfigModule(stage, fetchString)
-
-    for {
-      zuoraRestConfig <- loadConfigModule.load[ZuoraRestConfig]
-      _ = logger.info(s"Loaded Zuora config for stage: $stage")
-      zuoraOrdersConfig <- loadConfigModule.load[HolidayStopProcessorZuoraConfig](
-        ConfigLocation("zuoraRest", 1),
-        HolidayStopProcessorZuoraConfig.reads,
-      )
-
-      zuoraRequest = ZuoraRestRequestMaker(response, zuoraRestConfig)
-
-      zuoraEmailSteps = new ZuoraEmailSteps(
-        EmailSendSteps(sqsSend(EmailQueueName)),
-        ZuoraGetInvoiceTransactions(ZuoraRestRequestMaker(response, zuoraRestConfig)),
-      )
-      trustedApiConfig <- loadConfigModule.load[TrustedApiConfig]
-
-    } yield new ProcessCalloutSteps(
-      zuoraRequest,
-      zuoraOrdersConfig,
-      HttpURLConnectionBackend(),
-      now,
-      trustedApiConfig,
-      zuoraEmailSteps,
-    )
-  }
-
-}
-
-class ProcessCalloutSteps(
-    zuoraRequest: RestRequestMaker.Requests,
-    zuoraOrdersConfig: HolidayStopProcessorZuoraConfig,
-    zuoraOrdersBackend: SttpBackend[Identity, Any],
-    now: () => LocalDateTime,
-    trustedApiConfig: TrustedApiConfig,
-    zuoraEmailSteps: ZuoraEmailSteps,
-) {
-  def execute(
-      autoCancelCallout: AutoCancelCallout,
-      apiToken: String,
-      getRemainingTimeInMillis: () => Int,
-  ): ApiGatewayOp[Unit] = {
-
-    val processingDate = now().toLocalDate
-
+  private def processCallout(callout: AutoCancelCallout, apiToken: String): ApiGatewayOp[Unit] = {
+    val processingDate = dateProvider.today
     for {
       _ <- Auth
         .credentialsAreValid(trustedApiConfig, Auth.RequestAuth(Some(apiToken)))
         .toApiGatewayContinueProcessing(unauthorized)
         .withLogging("authentication")
-
-      cancelRequestsProducer = AutoCancelDataCollectionFilter(
-        processingDate,
-        ZuoraGetAccountSummary(zuoraRequest),
-        ZuoraGetAccountSubscriptions(zuoraRequest),
-        ZuoraGetSubsNamesOnInvoice(zuoraRequest),
-      ) _
-
-      // Check if we should process this callout
-      _ <- AutoCancelInputFilter(autoCancelCallout, onlyCancelDirectDebit = false)
+      _ <- AutoCancelInputFilter(callout).withLogging("filter on auto pay")
+      requests <- ZuoraRestRequestMaker
+        .authenticated(response, stage.value, getAccessToken)
+        .toApiGatewayOp("authenticate with Zuora")
+      emailSteps = ZuoraEmailSteps(requests, emailSender)
 
       // Get the auto-cancel requests
-      autoCancelRequests <- cancelRequestsProducer(autoCancelCallout).withLogging(
-        s"auto-cancellation requests for ${autoCancelCallout.accountId}",
+      autoCancelRequests <- AutoCancelDataCollectionFilter(requests)(callout, processingDate).withLogging(
+        s"auto-cancellation requests for ${callout.accountId}",
       )
 
       // Execute the cancellation
-      _ <- AutoCancel(
-        zuoraRequest,
-        zuoraOrdersConfig,
-        zuoraOrdersBackend,
-        getRemainingTimeInMillis,
-        processingDate,
-      )(
-        autoCancelRequests,
-        AutoCancelSteps.AutoCancelUrlParams(onlyCancelDirectDebit = false, dryRun = false),
-      )
-        .withLogging(s"auto-cancellation for ${autoCancelCallout.accountId}")
+      _ <- AutoCancel(requests)(autoCancelRequests, callout.invoiceId, processingDate)
+        .withLogging(s"auto-cancellation for ${callout.accountId}")
 
-      request = ToMessage(autoCancelCallout, _: PaymentFailureInformation, EmailId.cancelledId)
-      _ <- zuoraEmailSteps
-        .sendEmailRegardingAccount(autoCancelCallout.accountId, request)
+      _ <- emailSteps
+        .sendCancellationEmail(callout)
         .toDisjunction
         .toApiGatewayOp("send email")
 
     } yield ()
   }
+}
+
+trait Today {
+  def today: LocalDate
+}
+
+object TodayLive extends Today {
+  override def today: LocalDate = RawEffects.now().toLocalDate
 }
