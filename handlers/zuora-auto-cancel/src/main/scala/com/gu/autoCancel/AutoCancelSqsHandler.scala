@@ -108,44 +108,27 @@ class AutoCancelSqsHandler(
         .toApiGatewayContinueProcessing(unauthorized)
         .withLogging("authentication")
       _ <- AutoCancelInputFilter(callout).withLogging("filter on auto pay")
-      token <- getAccessToken.get().toApiGatewayOp("authenticate with Zuora")
-      requests = ZuoraRestRequestMaker.oauth(response, ZuoraOAuthConfig.serverUrl(stage.value) + "/v1", token)
-      invoiceTransactions = new ZuoraGetInvoiceTransactions(requests)
-      _ <- AutoCancelSqsHandler.executeCallout(
-        AutoCancel(requests),
-        new AutoCancelDataCollectionFilter(
-          new ZuoraGetAccountSummary(requests),
-          new ZuoraGetAccountSubscriptions(requests),
-          new ZuoraGetSubsNamesOnInvoice(requests),
-        ),
-        new ZuoraEmailSteps(emailSender, invoiceTransactions),
-      )(callout, processingDate)
-    } yield ()
-  }
-}
+      requests <- ZuoraRestRequestMaker
+        .authenticated(response, stage.value, getAccessToken)
+        .toApiGatewayOp("authenticate with Zuora")
+      emailSteps = ZuoraEmailSteps(requests, emailSender)
 
-object AutoCancelSqsHandler {
-  private[autoCancel] def executeCallout(
-      autoCancel: (List[AutoCancel.AutoCancelRequest], String, LocalDate) => ApiGatewayOp[Unit],
-      cancelRequestsProducer: AutoCancelDataCollectionFilter,
-      emailSteps: ZuoraEmailSteps,
-  )(autoCancelCallout: AutoCancelCallout, processingDate: LocalDate): ApiGatewayOp[Unit] =
-    for {
       // Get the auto-cancel requests
-      autoCancelRequests <- cancelRequestsProducer(autoCancelCallout, processingDate).withLogging(
-        s"auto-cancellation requests for ${autoCancelCallout.accountId}",
+      autoCancelRequests <- AutoCancelDataCollectionFilter(requests)(callout, processingDate).withLogging(
+        s"auto-cancellation requests for ${callout.accountId}",
       )
 
       // Execute the cancellation
-      _ <- autoCancel(autoCancelRequests, autoCancelCallout.invoiceId, processingDate)
-        .withLogging(s"auto-cancellation for ${autoCancelCallout.accountId}")
+      _ <- AutoCancel(requests)(autoCancelRequests, callout.invoiceId, processingDate)
+        .withLogging(s"auto-cancellation for ${callout.accountId}")
 
       _ <- emailSteps
-        .sendCancellationEmail(autoCancelCallout)
+        .sendCancellationEmail(callout)
         .toDisjunction
         .toApiGatewayOp("send email")
 
     } yield ()
+  }
 }
 
 trait Today {

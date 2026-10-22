@@ -6,6 +6,7 @@ import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse.noActionRequired
 import com.gu.util.reader.Types.ApiGatewayOp._
 import com.gu.util.reader.Types._
+import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.zuora.ZuoraGetAccountSummary.{AccountSummary, Invoice}
 import com.gu.util.zuora.{
   GetAccountSubscriptions,
@@ -13,6 +14,9 @@ import com.gu.util.zuora.{
   GetSubscriptionsOnInvoice,
   SubscriptionNumber,
   SubscriptionNumberWithStatus,
+  ZuoraGetAccountSummary,
+  ZuoraGetAccountSubscriptions,
+  ZuoraGetSubsNamesOnInvoice,
 }
 
 import java.time.LocalDate
@@ -54,6 +58,13 @@ class AutoCancelDataCollectionFilter(
 }
 
 object AutoCancelDataCollectionFilter extends Logging {
+  def apply(requests: Requests): AutoCancelDataCollectionFilter =
+    new AutoCancelDataCollectionFilter(
+      new ZuoraGetAccountSummary(requests),
+      new ZuoraGetAccountSubscriptions(requests),
+      new ZuoraGetSubsNamesOnInvoice(requests),
+    )
+
   def getCancellationDateFromInvoice(
       invoiceId: String,
       accountSummary: AccountSummary,

@@ -2,17 +2,8 @@ package com.gu.autoCancel
 
 import com.gu.autoCancel.AutoCancel.{AutoCancelRequest, CancellationResponse}
 import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
-import com.gu.util.email.{EmailMessage, EmailSender, InvoiceId}
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, ClientSuccess, GenericError}
 import com.gu.util.zuora._
-import com.gu.util.zuora.ZuoraGetAccountSummary.{
-  AccountSummary,
-  BasicAccountInfo,
-  Invoice,
-  SubscriptionSummary,
-  SubscriptionId,
-}
-import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, PaymentMethodId}
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.{InvoiceItem, InvoiceTransactionSummary, ItemisedInvoice}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -26,12 +17,7 @@ class AutoCancelBehaviourTest extends AnyFlatSpec with Matchers {
   private val request = AutoCancelRequest("account-1", SubscriptionNumber("A-S001"), cancellationDate)
   private val secondRequest = request.copy(subToCancel = SubscriptionNumber("A-S002"))
   private val failure = GenericError("Service unavailable")
-  private val callout = AutoCancelInputFilterTest
-    .fakeCallout(true)
-    .copy(
-      accountId = request.accountId,
-      invoiceId = "unpaid-1",
-    )
+  private val calloutInvoiceId = "unpaid-1"
 
   private def item(subscription: String, charge: Double, tax: Double = 0): InvoiceItem =
     InvoiceItem(
@@ -63,7 +49,6 @@ class AutoCancelBehaviourTest extends AnyFlatSpec with Matchers {
       sharedInvoice.copy(balance = 30),
     ),
   )
-  private val collectionCalls = List("account summary", "invoice subscriptions", "account subscriptions")
   private val cancellationCalls = List(
     "reason:A-S001",
     "cancel:A-S001",
@@ -91,21 +76,15 @@ class AutoCancelBehaviourTest extends AnyFlatSpec with Matchers {
       with CancellationReasonUpdater
       with GetInvoiceTransactions
       with CreditBalanceTransfer
-      with CreditBalanceApplication
-      with GetAccountSummary
-      with GetAccountSubscriptions
-      with GetSubscriptionsOnInvoice
-      with EmailSender {
+      with CreditBalanceApplication {
     val calls = ListBuffer.empty[String]
     val cancelledRequests = ListBuffer.empty[AutoCancelRequest]
     val orderDates = ListBuffer.empty[LocalDate]
     val calloutInvoiceIds = ListBuffer.empty[String]
     val transfers = ListBuffer.empty[(String, BigDecimal, String)]
     val applications = ListBuffer.empty[(String, Double, String)]
-    val sentEmails = ListBuffer.empty[EmailMessage]
     var failures = Map.empty[String, ClientFailure]
     var invoiceResponses: List[ClientFailableOp[InvoiceTransactionSummary]] = List(ClientSuccess(summary))
-    var subscriptionsToCancel: List[SubscriptionNumber] = List(request.subToCancel)
 
     private def run[A](operation: String)(result: => ClientFailableOp[A]): ClientFailableOp[A] = {
       calls += operation
@@ -156,58 +135,10 @@ class AutoCancelBehaviourTest extends AnyFlatSpec with Matchers {
       run(s"apply:$id")(ClientSuccess(()))
     }
 
-    override def getAccountSummary(accountId: String): ClientFailableOp[AccountSummary] = {
-      accountId shouldBe request.accountId
-      run("account summary") {
-        ClientSuccess(
-          AccountSummary(
-            BasicAccountInfo(AccountId(accountId), 60, PaymentMethodId("payment-method")),
-            subscriptionsToCancel.map(subscription =>
-              SubscriptionSummary(SubscriptionId(subscription.value), subscription.value, "Active"),
-            ),
-            List(
-              Invoice("unpaid-1", LocalDate.of(2026, 10, 1), 20, "Posted"),
-              Invoice("unpaid-2", cancellationDate, 40, "Posted"),
-            ),
-          ),
-        )
-      }
-    }
-
-    override def getAccountSubscriptions(accountId: String): ClientFailableOp[List[SubscriptionNumberWithStatus]] = {
-      accountId shouldBe request.accountId
-      run("account subscriptions")(
-        ClientSuccess(
-          subscriptionsToCancel.map(subscription => SubscriptionNumberWithStatus(subscription.value, "Active")),
-        ),
-      )
-    }
-
-    override def getSubscriptionsOnInvoice(invoiceId: String): ClientFailableOp[List[SubscriptionNumber]] = {
-      invoiceId shouldBe callout.invoiceId
-      run("invoice subscriptions")(ClientSuccess(subscriptionsToCancel))
-    }
-
-    override def send(message: EmailMessage): ClientFailableOp[Unit] = {
-      sentEmails += message
-      run("email")(ClientSuccess(()))
-    }
-
     val autoCancel = AutoCancel(this, this, this, this, this) _
 
     def cancel(requests: List[AutoCancelRequest] = List(request)) =
-      autoCancel(requests, callout.invoiceId, orderDate).toDisjunction
-
-    val processCallout = AutoCancelSqsHandler.executeCallout(
-      autoCancel,
-      new AutoCancelDataCollectionFilter(this, this, this),
-      new ZuoraEmailSteps(this, this),
-    ) _
-
-    def process() = processCallout(callout, orderDate).toDisjunction
-
-    def expectEmailInvoiceRead(): Unit =
-      invoiceResponses = List(ClientSuccess(summary), ClientSuccess(summary))
+      autoCancel(requests, calloutInvoiceId, orderDate).toDisjunction
   }
 
   "AutoCancel" should "cancel and balance invoices in order with the correct requests, tax and discounts" in {
@@ -218,7 +149,7 @@ class AutoCancelBehaviourTest extends AnyFlatSpec with Matchers {
     operations.calls.toList shouldBe cancellationCalls
     operations.cancelledRequests.toList shouldBe List(request)
     operations.orderDates.toList shouldBe List(orderDate)
-    operations.calloutInvoiceIds.toList shouldBe List(callout.invoiceId)
+    operations.calloutInvoiceIds.toList shouldBe List(calloutInvoiceId)
     operations.transfers.toList shouldBe List(("balancing-1", BigDecimal(30), "Auto-cancellation"))
     operations.applications.toList shouldBe List(
       ("unpaid-1", 20.0, "Auto-cancellation"),
@@ -259,7 +190,7 @@ class AutoCancelBehaviourTest extends AnyFlatSpec with Matchers {
     operations.calls.toList shouldBe cancellationCalls ++ secondCancellationCalls
     operations.cancelledRequests.toList shouldBe List(request, secondRequest)
     operations.orderDates.toList shouldBe List(orderDate, orderDate)
-    operations.calloutInvoiceIds.toList shouldBe List(callout.invoiceId, callout.invoiceId)
+    operations.calloutInvoiceIds.toList shouldBe List(calloutInvoiceId, calloutInvoiceId)
     operations.transfers.toList shouldBe List(
       ("balancing-1", BigDecimal(30), "Auto-cancellation"),
       ("balancing-2", BigDecimal(30), "Auto-cancellation"),
@@ -302,81 +233,6 @@ class AutoCancelBehaviourTest extends AnyFlatSpec with Matchers {
       operations.calls.toList shouldBe cancellationCalls.take(4) :+ "apply:unpaid-2"
       operations.applications.toList shouldBe List(("unpaid-2", 10.0, "Auto-cancellation"))
     }
-  }
-
-  "Callout workflow" should "send the cancellation email only after all credit work succeeds" in {
-    val operations = new FakeOperations
-    operations.expectEmailInvoiceRead()
-
-    operations.process() shouldBe Right(())
-
-    operations.calls.toList shouldBe collectionCalls ++ cancellationCalls ++ List(
-      "transactions",
-      "email",
-    )
-    operations.cancelledRequests.toList shouldBe List(request)
-    operations.sentEmails should have size 1
-    val message = operations.sentEmails.head
-    message.To.Address shouldBe callout.email.get
-    message.SfContactId shouldBe callout.sfContactId
-    message.DataExtensionName shouldBe "cancelled-payment-email"
-    val attributes = message.To.ContactAttributes.SubscriberAttributes
-    attributes.subscriber_id shouldBe request.subToCancel.value
-    attributes.product shouldBe "Supporter Plus"
-    attributes.primaryKey shouldBe InvoiceId(callout.invoiceId)
-  }
-
-  it should "process all subscriptions before sending the callout's cancellation email" in {
-    val operations = new FakeOperations
-    operations.subscriptionsToCancel = List(request.subToCancel, secondRequest.subToCancel)
-    operations.invoiceResponses = List(ClientSuccess(summary), ClientSuccess(secondSummary), ClientSuccess(summary))
-
-    operations.process() shouldBe Right(())
-
-    operations.calls.toList shouldBe
-      collectionCalls ++ cancellationCalls ++ secondCancellationCalls ++ List(
-        "transactions",
-        "email",
-      )
-    operations.cancelledRequests.toList shouldBe List(request, secondRequest)
-    operations.calloutInvoiceIds.toList shouldBe List(callout.invoiceId, callout.invoiceId)
-    operations.sentEmails should have size 1
-  }
-
-  failureStages.foreach { stage =>
-    it should s"not send an email when $stage fails" in {
-      val operations = new FakeOperations
-      operations.failures = Map(stage -> failure)
-
-      operations.process() shouldBe Left(internalServerError("AutoCancel failed"))
-
-      operations.calls.toList shouldBe collectionCalls ++ callsWithFailure(stage)
-      operations.sentEmails shouldBe empty
-    }
-  }
-
-  it should "propagate an email sending failure after completing cancellation" in {
-    val operations = new FakeOperations
-    operations.expectEmailInvoiceRead()
-    operations.failures = Map("email" -> failure)
-
-    operations.process() shouldBe Left(internalServerError("send email"))
-
-    operations.calls.toList shouldBe collectionCalls ++ cancellationCalls ++ List(
-      "transactions",
-      "email",
-    )
-    operations.sentEmails should have size 1
-  }
-
-  it should "not send an email when fetching its invoice data fails" in {
-    val operations = new FakeOperations
-    operations.invoiceResponses = List(ClientSuccess(summary), failure)
-
-    operations.process() shouldBe Left(internalServerError("send email"))
-
-    operations.calls.toList shouldBe collectionCalls ++ cancellationCalls :+ "transactions"
-    operations.sentEmails shouldBe empty
   }
 
 }

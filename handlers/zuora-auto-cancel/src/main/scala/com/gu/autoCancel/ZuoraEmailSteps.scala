@@ -3,7 +3,13 @@ package com.gu.autoCancel
 import com.gu.util.TypeConvert.TypeConvertClientOp
 import com.gu.util.email.{EmailId, EmailSender}
 import com.gu.util.resthttp.Types.{ClientFailableOp, GenericError}
-import com.gu.util.zuora.GetInvoiceTransactions
+import com.gu.util.resthttp.RestRequestMaker.Requests
+import com.gu.util.zuora.{GetInvoiceTransactions, ZuoraGetInvoiceTransactions}
+
+object ZuoraEmailSteps {
+  def apply(requests: Requests, emailSender: EmailSender): ZuoraEmailSteps =
+    new ZuoraEmailSteps(emailSender, new ZuoraGetInvoiceTransactions(requests))
+}
 
 class ZuoraEmailSteps(
     emailSender: EmailSender,

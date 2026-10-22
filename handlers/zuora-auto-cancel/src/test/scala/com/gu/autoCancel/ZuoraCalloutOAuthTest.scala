@@ -6,7 +6,7 @@ import com.gu.util.apigateway.Auth.TrustedApiConfig
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.Stage
 import com.gu.util.email.{EmailMessage, EmailSender}
-import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 import com.gu.util.zuora.{ZuoraGetAccessToken, ZuoraOAuthConfig}
 import okhttp3.{MediaType, Protocol, Request, Response, ResponseBody}
 import okio.Buffer
@@ -81,8 +81,13 @@ class ZuoraCalloutOAuthTest extends AnyFlatSpec with Matchers with EitherValues 
     var failFirstConfig = false
     var failFirstTokenProvider = false
     var currentDate: LocalDate = date
+    var failedPath: Option[String] = None
+    var failEmailInvoiceRead = false
+    var subscriptionStatus = "Active"
+    var emailResult: ClientFailableOp[Unit] = ClientSuccess(())
     val apiRequests = ListBuffer.empty[(String, String, String)]
     val emails = ListBuffer.empty[EmailMessage]
+    val emailRequestCounts = ListBuffer.empty[Int]
     val orderDates = ListBuffer.empty[String]
 
     private def respond(request: Request, body: String, status: Int): Response =
@@ -118,7 +123,7 @@ class ZuoraCalloutOAuthTest extends AnyFlatSpec with Matchers with EitherValues 
           case ("GET", "/v1/subscriptions/accounts/account-1") =>
             request.url().queryParameter("pageSize") shouldBe "40"
             success ++ Json.obj(
-              "subscriptions" -> Json.arr(Json.obj("subscriptionNumber" -> "A-S001", "status" -> "Active")),
+              "subscriptions" -> Json.arr(Json.obj("subscriptionNumber" -> "A-S001", "status" -> subscriptionStatus)),
             )
           case ("PUT", "/v1/subscriptions/A-S001") => success
           case ("POST", "/v1/orders") =>
@@ -132,7 +137,12 @@ class ZuoraCalloutOAuthTest extends AnyFlatSpec with Matchers with EitherValues 
           case ("POST", "/v1/object/credit-balance-adjustment") => success
           case other => fail(s"Unexpected API request: $other")
         }
-        respond(request, Json.stringify(body), apiStatus)
+        val emailInvoiceFailure =
+          failEmailInvoiceRead &&
+            path == "/v1/transactions/invoices/accounts/account-1" &&
+            apiRequests.count(_._2 == path) == 2
+        val status = if (failedPath.contains(path) || emailInvoiceFailure) 500 else apiStatus
+        respond(request, Json.stringify(body), status)
       }
     }
 
@@ -151,7 +161,8 @@ class ZuoraCalloutOAuthTest extends AnyFlatSpec with Matchers with EitherValues 
       emailService = new EmailSender {
         override def send(message: EmailMessage): ClientFailableOp[Unit] = {
           emails += message
-          ClientSuccess(())
+          emailRequestCounts += apiRequests.size
+          emailResult
         }
       },
       dateProvider = new Today {
@@ -223,6 +234,18 @@ class ZuoraCalloutOAuthTest extends AnyFlatSpec with Matchers with EitherValues 
       "POST" -> "/v1/object/credit-balance-adjustment",
     )
     api.emails should have size 3
+    api.emailRequestCounts.toList shouldBe List(9, 18, 27)
+    api.apiRequests.take(9).map { case (method, path, _) => method -> path }.toList shouldBe List(
+      "GET" -> "/v1/accounts/account-1/summary",
+      "GET" -> "/v1/invoices/unpaid-1/items",
+      "GET" -> "/v1/subscriptions/accounts/account-1",
+      "PUT" -> "/v1/subscriptions/A-S001",
+      "POST" -> "/v1/orders",
+      "GET" -> "/v1/transactions/invoices/accounts/account-1",
+      "POST" -> "/v1/object/credit-balance-adjustment",
+      "POST" -> "/v1/object/credit-balance-adjustment",
+      "GET" -> "/v1/transactions/invoices/accounts/account-1",
+    )
   }
 
   it should "stop if token acquisition fails and obtain a fresh token for a later callout" in {
@@ -262,6 +285,58 @@ class ZuoraCalloutOAuthTest extends AnyFlatSpec with Matchers with EitherValues 
     api.tokenRequests shouldBe 0
     api.tokenProviderBuilds shouldBe 0
     api.apiRequests shouldBe empty
+  }
+
+  it should "acknowledge a callout without cancelling or emailing when no invoice subscriptions are active" in {
+    val api = new Api
+    api.subscriptionStatus = "Cancelled"
+
+    api.execute() shouldBe Right(())
+
+    api.tokenRequests shouldBe 1
+    api.apiRequests should have size 3
+    api.emails shouldBe empty
+  }
+
+  List(
+    "cancellation reason update" -> "/v1/subscriptions/A-S001",
+    "cancellation order" -> "/v1/orders",
+    "credit transfer" -> "/v1/object/credit-balance-adjustment",
+  ).foreach { case (description, path) =>
+    it should s"fail the callout without sending an email when the $description fails" in {
+      val api = new Api
+      api.failedPath = Some(path)
+
+      api.execute().left.value.getMessage should include("Failed to process 1 message(s)")
+
+      api.tokenRequests shouldBe 1
+      api.apiRequests.last._2 shouldBe path
+      api.apiRequests.count(_._2 == path) shouldBe 1
+      api.emails shouldBe empty
+    }
+  }
+
+  it should "fail without sending an email when reading the email's invoice data fails after credit processing" in {
+    val api = new Api
+    api.failEmailInvoiceRead = true
+
+    api.execute().left.value.getMessage should include("Failed to process 1 message(s)")
+
+    api.apiRequests should have size 9
+    api.apiRequests.count(_._2 == "/v1/object/credit-balance-adjustment") shouldBe 2
+    api.emails shouldBe empty
+  }
+
+  it should "surface an email failure after completing credit processing without retrying the send" in {
+    val api = new Api
+    api.emailResult = GenericError("Queue unavailable")
+
+    api.execute().left.value.getMessage should include("Failed to process 1 message(s)")
+
+    api.apiRequests should have size 9
+    api.emails should have size 1
+    api.emailRequestCounts.toList shouldBe List(9)
+    api.tokenRequests shouldBe 1
   }
 
   it should "continue processing records after failures and use the date of each new invocation" in {
