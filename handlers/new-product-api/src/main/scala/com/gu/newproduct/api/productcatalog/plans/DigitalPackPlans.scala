@@ -16,7 +16,7 @@ class DigitalPackPlans(today: LocalDate) {
 
   private val startRules = StartDateRules(
     windowRule = WindowRule(
-      startDate = today.plusDays(FreeTrialPeriodDays.toLong),
+      startDate = today,
       maybeSize = Some(WindowSizeDays(90)),
     ),
   )
