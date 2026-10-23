@@ -1,7 +1,7 @@
 package com.gu.autoCancel
 
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
-import com.gu.util.zuora.SubscriptionNumber
+import com.gu.util.zuora.{CreditBalanceApplication, SubscriptionNumber}
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.{InvoiceItem, ItemisedInvoice}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.flatspec.AnyFlatSpec
@@ -50,9 +50,9 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
 
   "applyCreditBalances" should "apply credit to multiple invoices" in {
     val subToCancel = SubscriptionNumber("s1")
-    val applyCreditBalance = mockFunction[String, Double, String, ClientFailableOp[Unit]]
-    applyCreditBalance.expects("invoice1", 12.34, "comment").returning(ClientSuccess(())).once()
-    applyCreditBalance.expects("invoice2", 11.34, "comment").returning(ClientSuccess(())).once()
+    val applyCreditBalance = mock[CreditBalanceApplication]
+    (applyCreditBalance.applyCreditBalance _).expects("invoice1", 12.34, "comment").returning(ClientSuccess(())).once()
+    (applyCreditBalance.applyCreditBalance _).expects("invoice2", 11.34, "comment").returning(ClientSuccess(())).once()
     val invoices = Seq(
       ItemisedInvoice(
         id = "invoice1",
@@ -98,8 +98,8 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
 
   it should "apply partial credit to an invoice for multiple subscriptions" in {
     val subToCancel = SubscriptionNumber("s1")
-    val applyCreditBalance = mockFunction[String, Double, String, ClientFailableOp[Unit]]
-    applyCreditBalance.expects("invoice1", 6.87, "comment").returning(ClientSuccess(())).once()
+    val applyCreditBalance = mock[CreditBalanceApplication]
+    (applyCreditBalance.applyCreditBalance _).expects("invoice1", 6.87, "comment").returning(ClientSuccess(())).once()
     val invoices = Seq(
       ItemisedInvoice(
         id = "invoice1",
@@ -136,8 +136,8 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
 
   it should "apply partial credit to an invoice for all items of the subscription to cancel" in {
     val subToCancel = SubscriptionNumber("s1")
-    val applyCreditBalance = mockFunction[String, Double, String, ClientFailableOp[Unit]]
-    applyCreditBalance.expects("invoice1", 11.09, "comment").returning(ClientSuccess(())).once()
+    val applyCreditBalance = mock[CreditBalanceApplication]
+    (applyCreditBalance.applyCreditBalance _).expects("invoice1", 11.09, "comment").returning(ClientSuccess(())).once()
     val invoices = Seq(
       ItemisedInvoice(
         id = "invoice1",
@@ -194,8 +194,8 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
 
   it should "apply credit including items tax amount (not just charge amount)" in {
     val subToCancel = SubscriptionNumber("s1")
-    val applyCreditBalance = mockFunction[String, Double, String, ClientFailableOp[Unit]]
-    applyCreditBalance.expects("invoice1", 26.00, "comment").returning(ClientSuccess(())).once()
+    val applyCreditBalance = mock[CreditBalanceApplication]
+    (applyCreditBalance.applyCreditBalance _).expects("invoice1", 26.00, "comment").returning(ClientSuccess(())).once()
     val invoices = Seq(
       ItemisedInvoice(
         id = "invoice1",
@@ -261,15 +261,18 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
         invoiceItems = List(InvoiceItem(s"$id-item", subscription.value, date, date, 10, "charge", "product", 0)),
       )
     }
-    val applyCredit = mockFunction[String, Double, String, ClientFailableOp[Unit]]
+    val applyCredit = mock[CreditBalanceApplication]
     val firstFailure = GenericError("first failure")
     val secondFailure = GenericError("second failure")
 
     inSequence {
-      applyCredit.expects("first", 10.0, "Auto-cancellation").returning(ClientSuccess(())).once()
-      applyCredit.expects("second", 10.0, "Auto-cancellation").returning(firstFailure).once()
-      applyCredit.expects("third", 10.0, "Auto-cancellation").returning(secondFailure).once()
-      applyCredit.expects("fourth", 10.0, "Auto-cancellation").returning(ClientSuccess(())).once()
+      (applyCredit.applyCreditBalance _).expects("first", 10.0, "Auto-cancellation").returning(ClientSuccess(())).once()
+      (applyCredit.applyCreditBalance _).expects("second", 10.0, "Auto-cancellation").returning(firstFailure).once()
+      (applyCredit.applyCreditBalance _).expects("third", 10.0, "Auto-cancellation").returning(secondFailure).once()
+      (applyCredit.applyCreditBalance _)
+        .expects("fourth", 10.0, "Auto-cancellation")
+        .returning(ClientSuccess(()))
+        .once()
     }
 
     AutoCancel.applyCreditBalances(applyCredit)(subscription, invoices, "Auto-cancellation") shouldBe firstFailure

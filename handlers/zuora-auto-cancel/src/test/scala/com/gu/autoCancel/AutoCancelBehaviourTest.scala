@@ -1,6 +1,7 @@
 package com.gu.autoCancel
 
 import com.gu.autoCancel.AutoCancel.{AutoCancelRequest, CancellationResponse}
+import com.gu.util.TypeConvert._
 import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, ClientSuccess, GenericError}
 import com.gu.util.zuora._
@@ -84,10 +85,12 @@ class AutoCancelBehaviourTest extends AnyFlatSpec with Matchers {
     val transfers = ListBuffer.empty[(String, BigDecimal, String)]
     val applications = ListBuffer.empty[(String, Double, String)]
     var failures = Map.empty[String, ClientFailure]
+    var throwAt = Set.empty[String]
     var invoiceResponses: List[ClientFailableOp[InvoiceTransactionSummary]] = List(ClientSuccess(summary))
 
     private def run[A](operation: String)(result: => ClientFailableOp[A]): ClientFailableOp[A] = {
       calls += operation
+      if (throwAt.contains(operation)) throw new RuntimeException(s"$operation threw")
       failures.get(operation) match {
         case Some(error) => error
         case None => result
@@ -108,7 +111,7 @@ class AutoCancelBehaviourTest extends AnyFlatSpec with Matchers {
           case "A-S002" => "balancing-2"
           case other => fail(s"Unexpected subscription $other")
         }
-        ClientSuccess(CancellationResponse(invoiceId))
+        ClientSuccess(CancellationResponse(invoiceId, OrderNumber(s"O-${actual.subToCancel.value.stripPrefix("A-S")}")))
       }
     }
 
@@ -135,13 +138,16 @@ class AutoCancelBehaviourTest extends AnyFlatSpec with Matchers {
       run(s"apply:$id")(ClientSuccess(()))
     }
 
-    val autoCancel = AutoCancel(this, this, this, this, this) _
+    val balancing: InvoiceBalancing = new ZuoraInvoiceBalancing(this, this, this)
 
     def cancel(requests: List[AutoCancelRequest] = List(request)) =
-      autoCancel(requests, calloutInvoiceId, orderDate).toDisjunction
+      (for {
+        cancellations <- AutoCancel(this, this)(requests, calloutInvoiceId, orderDate)
+        _ <- balancing.balance(cancellations)
+      } yield ()).toApiGatewayOp("AutoCancel failed").toDisjunction
   }
 
-  "AutoCancel" should "cancel and balance invoices in order with the correct requests, tax and discounts" in {
+  "AutoCancel and InvoiceBalancing" should "cancel and balance with the correct requests, tax and discounts" in {
     val operations = new FakeOperations
 
     operations.cancel() shouldBe Right(())
@@ -157,6 +163,21 @@ class AutoCancelBehaviourTest extends AnyFlatSpec with Matchers {
     )
   }
 
+  it should "return each subscription paired with its cancellation response without balancing it" in {
+    val operations = new FakeOperations
+
+    AutoCancel(operations, operations)(List(request, secondRequest), calloutInvoiceId, orderDate).toDisjunction shouldBe
+      Right(
+        List(
+          AutoCancel.CancelledSubscription(request, CancellationResponse("balancing-1", OrderNumber("O-001"))),
+          AutoCancel.CancelledSubscription(secondRequest, CancellationResponse("balancing-2", OrderNumber("O-002"))),
+        ),
+      )
+
+    operations.calls.toList shouldBe cancellationCalls.take(2) ++ secondCancellationCalls.take(2)
+    operations.transfers shouldBe empty
+  }
+
   failureStages.foreach { stage =>
     it should s"propagate failure at $stage without running dependent operations" in {
       val operations = new FakeOperations
@@ -168,17 +189,29 @@ class AutoCancelBehaviourTest extends AnyFlatSpec with Matchers {
     }
   }
 
-  it should "attempt the next subscription after an earlier cancellation fails" in {
+  it should "attempt the next cancellation but skip all balancing after an earlier cancellation fails" in {
     val operations = new FakeOperations
     operations.failures = Map("cancel:A-S001" -> failure)
     operations.invoiceResponses = List(ClientSuccess(secondSummary))
 
     operations.cancel(List(request, secondRequest)) shouldBe Left(internalServerError("AutoCancel failed"))
 
-    operations.calls.toList shouldBe cancellationCalls.take(2) ++ secondCancellationCalls
+    operations.calls.toList shouldBe cancellationCalls.take(2) ++ secondCancellationCalls.take(2)
     operations.cancelledRequests.toList shouldBe List(request, secondRequest)
     operations.orderDates.toList shouldBe List(orderDate, orderDate)
-    operations.applications.toList shouldBe List(("unpaid-2", 30.0, "Auto-cancellation"))
+    operations.applications shouldBe empty
+    operations.transfers shouldBe empty
+  }
+
+  it should "skip balancing an earlier successful cancellation when a later cancellation fails" in {
+    val operations = new FakeOperations
+    operations.failures = Map("cancel:A-S002" -> failure)
+
+    operations.cancel(List(request, secondRequest)) shouldBe Left(internalServerError("AutoCancel failed"))
+
+    operations.calls.toList shouldBe cancellationCalls.take(2) ++ secondCancellationCalls.take(2)
+    operations.applications shouldBe empty
+    operations.transfers shouldBe empty
   }
 
   it should "process all subscriptions with the same callout invoice and order date" in {
@@ -187,7 +220,9 @@ class AutoCancelBehaviourTest extends AnyFlatSpec with Matchers {
 
     operations.cancel(List(request, secondRequest)) shouldBe Right(())
 
-    operations.calls.toList shouldBe cancellationCalls ++ secondCancellationCalls
+    operations.calls.toList shouldBe
+      cancellationCalls.take(2) ++ secondCancellationCalls.take(2) ++
+      cancellationCalls.drop(2) ++ secondCancellationCalls.drop(2)
     operations.cancelledRequests.toList shouldBe List(request, secondRequest)
     operations.orderDates.toList shouldBe List(orderDate, orderDate)
     operations.calloutInvoiceIds.toList shouldBe List(calloutInvoiceId, calloutInvoiceId)
@@ -235,4 +270,39 @@ class AutoCancelBehaviourTest extends AnyFlatSpec with Matchers {
     }
   }
 
+  it should "let unexpected balancing exceptions escape instead of converting them into business failures" in {
+    val operations = new FakeOperations
+    operations.throwAt = Set("transfer:balancing-1")
+    operations.invoiceResponses = List(ClientSuccess(summary), ClientSuccess(secondSummary))
+
+    val error = intercept[RuntimeException] {
+      operations.cancel(List(request, secondRequest))
+    }
+
+    error.getMessage shouldBe "transfer:balancing-1 threw"
+    operations.transfers.map(_._1).toList shouldBe List("balancing-1")
+  }
+
+  it should "let unexpected cancellation exceptions escape instead of continuing the cancellation loop" in {
+    val operations = new FakeOperations
+    operations.throwAt = Set("cancel:A-S001")
+    operations.invoiceResponses = List(ClientSuccess(secondSummary))
+
+    val error = intercept[RuntimeException] {
+      operations.cancel(List(request, secondRequest))
+    }
+
+    error.getMessage shouldBe "cancel:A-S001 threw"
+    operations.calls.toList shouldBe cancellationCalls.take(2)
+    operations.applications shouldBe empty
+    operations.transfers shouldBe empty
+  }
+
+  it should "perform no cancellations or balancing for an empty request list" in {
+    val operations = new FakeOperations
+
+    operations.cancel(Nil) shouldBe Right(())
+
+    operations.calls shouldBe empty
+  }
 }

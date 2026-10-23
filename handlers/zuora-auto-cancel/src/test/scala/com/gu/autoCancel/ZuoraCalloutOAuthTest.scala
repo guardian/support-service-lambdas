@@ -14,6 +14,7 @@ import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.Json
+import software.amazon.awssdk.services.eventbridge.model.{PutEventsRequest, PutEventsResponse, PutEventsResultEntry}
 
 import java.time.LocalDate
 import scala.collection.mutable.ListBuffer
@@ -84,7 +85,15 @@ class ZuoraCalloutOAuthTest extends AnyFlatSpec with Matchers with EitherValues 
     var failedPath: Option[String] = None
     var failEmailInvoiceRead = false
     var subscriptionStatus = "Active"
+    var subscriptionNumbers = List("A-S001")
+    var failedCancellations = Set.empty[String]
     var emailResult: ClientFailableOp[Unit] = ClientSuccess(())
+    var emailThrows = false
+    var publicationFails = false
+    var omitOrderNumber = false
+    var orderNumberOverride: Option[String] = None
+    val publishedEvents = ListBuffer.empty[PutEventsRequest]
+    val phases = ListBuffer.empty[String]
     val apiRequests = ListBuffer.empty[(String, String, String)]
     val emails = ListBuffer.empty[EmailMessage]
     val emailRequestCounts = ListBuffer.empty[Int]
@@ -116,32 +125,52 @@ class ZuoraCalloutOAuthTest extends AnyFlatSpec with Matchers with EitherValues 
         request.header("apiSecretAccessKey") shouldBe null
         if (path != "/v1/orders") request.header("Idempotency-Key") shouldBe null
         apiRequests += ((request.method(), path, token))
+        var orderFailed = false
         val body = (request.method(), path) match {
           case ("GET", "/v1/accounts/account-1/summary") => account
           case ("GET", "/v1/invoices/unpaid-1/items") =>
-            success ++ Json.obj("invoiceItems" -> Json.arr(invoiceItem))
+            success ++ Json.obj(
+              "invoiceItems" -> subscriptionNumbers.map(number => invoiceItem ++ Json.obj("subscriptionName" -> number)),
+            )
           case ("GET", "/v1/subscriptions/accounts/account-1") =>
             request.url().queryParameter("pageSize") shouldBe "40"
             success ++ Json.obj(
-              "subscriptions" -> Json.arr(Json.obj("subscriptionNumber" -> "A-S001", "status" -> subscriptionStatus)),
+              "subscriptions" -> subscriptionNumbers.map(number =>
+                Json.obj("subscriptionNumber" -> number, "status" -> subscriptionStatus),
+              ),
             )
-          case ("PUT", "/v1/subscriptions/A-S001") => success
+          case ("PUT", "/v1/subscriptions/A-S001" | "/v1/subscriptions/A-S002") => success
           case ("POST", "/v1/orders") =>
-            request.url().queryParameter("returnIds") shouldBe "true"
+            phases += "order"
+            request.url().queryParameter("returnIds") shouldBe null
             Option(request.header("Idempotency-Key")) should not be empty
             val buffer = new Buffer()
             request.body().writeTo(buffer)
-            orderDates += (Json.parse(buffer.readUtf8()) \ "orderDate").as[String]
-            success ++ Json.obj("status" -> "Completed", "invoiceIds" -> List("balancing-1"))
+            val order = Json.parse(buffer.readUtf8())
+            orderDates += (order \ "orderDate").as[String]
+            val subscription = ((order \ "subscriptions")(0) \ "subscriptionNumber").as[String]
+            val suffix = subscription.takeRight(1)
+            orderFailed = failedCancellations.contains(subscription)
+            val result = success ++ Json.obj(
+              "status" -> "Completed",
+              "invoiceNumbers" -> List(s"INV-00000$suffix"),
+            )
+            val returnedOrderNumber = orderNumberOverride.getOrElse(s"O-00$suffix")
+            if (omitOrderNumber) result
+            else result ++ Json.obj("orderNumber" -> returnedOrderNumber)
+          case ("GET", "/v1/invoices/INV-000001") => Json.obj("id" -> "balancing-1")
+          case ("GET", "/v1/invoices/INV-000002") => Json.obj("id" -> "balancing-2")
           case ("GET", "/v1/transactions/invoices/accounts/account-1") => transactions
-          case ("POST", "/v1/object/credit-balance-adjustment") => success
+          case ("POST", "/v1/object/credit-balance-adjustment") =>
+            phases += "balance"
+            success
           case other => fail(s"Unexpected API request: $other")
         }
         val emailInvoiceFailure =
           failEmailInvoiceRead &&
             path == "/v1/transactions/invoices/accounts/account-1" &&
-            apiRequests.count(_._2 == path) == 2
-        val status = if (failedPath.contains(path) || emailInvoiceFailure) 500 else apiStatus
+            apiRequests.count(_._2 == path) == 1
+        val status = if (failedPath.contains(path) || emailInvoiceFailure || orderFailed) 500 else apiStatus
         respond(request, Json.stringify(body), status)
       }
     }
@@ -160,11 +189,25 @@ class ZuoraCalloutOAuthTest extends AnyFlatSpec with Matchers with EitherValues 
       },
       emailService = new EmailSender {
         override def send(message: EmailMessage): ClientFailableOp[Unit] = {
+          phases += "email"
           emails += message
           emailRequestCounts += apiRequests.size
+          if (emailThrows) throw new RuntimeException("Email unavailable")
           emailResult
         }
       },
+      eventPublisher = new EventBridgeCancellationEventPublisher(
+        Stage("CODE"),
+        request => {
+          phases += "event"
+          publishedEvents += request
+          if (publicationFails) throw new RuntimeException("EventBridge unavailable")
+          PutEventsResponse.builder
+            .failedEntryCount(0)
+            .entries(PutEventsResultEntry.builder.eventId("event-1").build())
+            .build()
+        },
+      ),
       dateProvider = new Today {
         override def today: LocalDate = currentDate
       },
@@ -213,46 +256,58 @@ class ZuoraCalloutOAuthTest extends AnyFlatSpec with Matchers with EitherValues 
     sqsEvent
   }
 
-  "Callout OAuth" should "fetch one token per callout and share it across every operation without leaking it to the next callout" in {
+  "combinedResult" should "retain the first failure after independent results have been evaluated" in {
+    val handler = new Api().handler
+    val firstFailure = GenericError("Email failed")
+    val secondFailure = GenericError("Publication failed")
+
+    handler.combinedResult(ClientSuccess(()), firstFailure, secondFailure) shouldBe firstFailure
+    handler.combinedResult(ClientSuccess(()), ClientSuccess(())) shouldBe ClientSuccess(())
+  }
+
+  "Callout OAuth" should "share one token across the batch and fetch a fresh token for the next batch" in {
     val api = new Api
 
     api.execute(count = 2) shouldBe Right(())
     api.execute() shouldBe Right(())
 
-    api.tokenRequests shouldBe 3
+    api.tokenRequests shouldBe 2
     api.trustedConfigLoads shouldBe 1
     api.tokenProviderBuilds shouldBe 1
-    api.apiRequests.groupMapReduce(_._3)(_ => 1)(_ + _) shouldBe
-      Map("Bearer token-1" -> 9, "Bearer token-2" -> 9, "Bearer token-3" -> 9)
+    api.apiRequests.groupMapReduce(_._3)(_ => 1)(_ + _).values.toList.sorted shouldBe List(10, 20)
     api.apiRequests.map { case (method, path, _) => method -> path }.toSet shouldBe Set(
       "GET" -> "/v1/accounts/account-1/summary",
       "GET" -> "/v1/invoices/unpaid-1/items",
       "GET" -> "/v1/subscriptions/accounts/account-1",
       "PUT" -> "/v1/subscriptions/A-S001",
       "POST" -> "/v1/orders",
+      "GET" -> "/v1/invoices/INV-000001",
       "GET" -> "/v1/transactions/invoices/accounts/account-1",
       "POST" -> "/v1/object/credit-balance-adjustment",
     )
     api.emails should have size 3
-    api.emailRequestCounts.toList shouldBe List(9, 18, 27)
-    api.apiRequests.take(9).map { case (method, path, _) => method -> path }.toList shouldBe List(
+    api.emailRequestCounts.toList shouldBe List(7, 17, 27)
+    api.apiRequests.take(10).map { case (method, path, _) => method -> path }.toList shouldBe List(
       "GET" -> "/v1/accounts/account-1/summary",
       "GET" -> "/v1/invoices/unpaid-1/items",
       "GET" -> "/v1/subscriptions/accounts/account-1",
       "PUT" -> "/v1/subscriptions/A-S001",
       "POST" -> "/v1/orders",
+      "GET" -> "/v1/invoices/INV-000001",
+      "GET" -> "/v1/transactions/invoices/accounts/account-1",
       "GET" -> "/v1/transactions/invoices/accounts/account-1",
       "POST" -> "/v1/object/credit-balance-adjustment",
       "POST" -> "/v1/object/credit-balance-adjustment",
-      "GET" -> "/v1/transactions/invoices/accounts/account-1",
     )
+    api.publishedEvents should have size 3
+    api.phases.toList shouldBe List.fill(3)(List("order", "email", "event", "balance", "balance")).flatten
   }
 
-  it should "stop if token acquisition fails and obtain a fresh token for a later callout" in {
+  it should "share a token acquisition failure within the batch and obtain a fresh token for the next batch" in {
     val api = new Api
     api.tokenStatus = 401
 
-    api.execute().left.value.getMessage should include("Failed to process 1 message(s)")
+    api.execute(count = 2).left.value.getMessage should include("Failed to process 2 message(s)")
     api.tokenRequests shouldBe 1
     api.apiRequests shouldBe empty
     api.emails shouldBe empty
@@ -287,6 +342,24 @@ class ZuoraCalloutOAuthTest extends AnyFlatSpec with Matchers with EitherValues 
     api.apiRequests shouldBe empty
   }
 
+  it should "leave the client unevaluated for rejected records and initialise it once for a later valid record in the batch" in {
+    val api = new Api
+    val batch = event(count = 3)
+    batch.getRecords.get(0).setBody(event(apiToken = "invalid-token", count = 1).getRecords.get(0).getBody)
+    batch.getRecords.get(1).setBody(event(callout.copy(autoPay = "false"), count = 1).getRecords.get(0).getBody)
+
+    val error = intercept[RuntimeException] {
+      api.handler.handleRequest(batch, context)
+    }
+
+    error.getMessage should include("Failed to process 1 message(s)")
+    api.tokenRequests shouldBe 1
+    api.tokenProviderBuilds shouldBe 1
+    api.apiRequests should have size 10
+    api.emails should have size 1
+    api.publishedEvents should have size 1
+  }
+
   it should "acknowledge a callout without cancelling or emailing when no invoice subscriptions are active" in {
     val api = new Api
     api.subscriptionStatus = "Cancelled"
@@ -301,7 +374,7 @@ class ZuoraCalloutOAuthTest extends AnyFlatSpec with Matchers with EitherValues 
   List(
     "cancellation reason update" -> "/v1/subscriptions/A-S001",
     "cancellation order" -> "/v1/orders",
-    "credit transfer" -> "/v1/object/credit-balance-adjustment",
+    "invoice lookup" -> "/v1/invoices/INV-000001",
   ).foreach { case (description, path) =>
     it should s"fail the callout without sending an email when the $description fails" in {
       val api = new Api
@@ -316,27 +389,131 @@ class ZuoraCalloutOAuthTest extends AnyFlatSpec with Matchers with EitherValues 
     }
   }
 
-  it should "fail without sending an email when reading the email's invoice data fails after credit processing" in {
+  it should "still publish and balance when reading the primary email's invoice data fails" in {
     val api = new Api
     api.failEmailInvoiceRead = true
 
     api.execute().left.value.getMessage should include("Failed to process 1 message(s)")
 
-    api.apiRequests should have size 9
+    api.apiRequests should have size 10
     api.apiRequests.count(_._2 == "/v1/object/credit-balance-adjustment") shouldBe 2
     api.emails shouldBe empty
+    api.publishedEvents should have size 1
   }
 
-  it should "surface an email failure after completing credit processing without retrying the send" in {
+  it should "surface an email failure while still publishing and balancing without retrying the send" in {
     val api = new Api
     api.emailResult = GenericError("Queue unavailable")
 
     api.execute().left.value.getMessage should include("Failed to process 1 message(s)")
 
-    api.apiRequests should have size 9
+    api.apiRequests should have size 10
     api.emails should have size 1
-    api.emailRequestCounts.toList shouldBe List(9)
+    api.emailRequestCounts.toList shouldBe List(7)
     api.tokenRequests shouldBe 1
+    api.publishedEvents should have size 1
+    api.phases.toList shouldBe List("order", "email", "event", "balance", "balance")
+  }
+
+  it should "fail the record without continuing when the email service unexpectedly throws" in {
+    val api = new Api
+    api.emailThrows = true
+
+    api.execute().left.value.getMessage should include("Failed to process 1 message(s)")
+
+    api.phases.toList shouldBe List("order", "email")
+    api.emails should have size 1
+    api.publishedEvents shouldBe empty
+  }
+
+  List("A-S001", "A-S002").foreach { failedSubscription =>
+    it should s"skip all email, events and balancing when $failedSubscription fails in a multi-subscription cancellation" in {
+      val api = new Api
+      api.subscriptionNumbers = List("A-S001", "A-S002")
+      api.failedCancellations = Set(failedSubscription)
+
+      api.execute().left.value.getMessage should include("Failed to process 1 message(s)")
+
+      api.phases.toList shouldBe List("order", "order")
+      api.emails shouldBe empty
+      api.publishedEvents shouldBe empty
+      api.apiRequests.exists(_._2 == "/v1/transactions/invoices/accounts/account-1") shouldBe false
+      api.apiRequests.exists(_._2 == "/v1/object/credit-balance-adjustment") shouldBe false
+    }
+  }
+
+  it should "surface an EventBridge failure while still completing credit processing" in {
+    val api = new Api
+    api.publicationFails = true
+
+    api.execute().left.value.getMessage should include("Failed to process 1 message(s)")
+
+    api.publishedEvents should have size 1
+    api.phases.toList shouldBe List("order", "email", "event", "balance", "balance")
+    api.emails should have size 1
+  }
+
+  it should "acknowledge an already-cancelled retry without recovering a failed publication" in {
+    val api = new Api
+    api.publicationFails = true
+
+    api.execute().isLeft shouldBe true
+    api.subscriptionStatus = "Cancelled"
+
+    api.execute() shouldBe Right(())
+
+    api.publishedEvents should have size 1
+    api.emails should have size 1
+  }
+
+  it should "fail the cancellation gate on a missing order number without emailing, publishing or balancing" in {
+    val api = new Api
+    api.omitOrderNumber = true
+
+    api.execute().left.value.getMessage should include("Failed to process 1 message(s)")
+
+    api.publishedEvents shouldBe empty
+    api.emails shouldBe empty
+    api.phases.toList shouldBe List("order")
+  }
+
+  List("", "O-abc", "O-12A", "order-id").foreach { number =>
+    it should s"fail the cancellation gate on invalid order number '$number'" in {
+      val api = new Api
+      api.orderNumberOverride = Some(number)
+
+      api.execute().left.value.getMessage should include("Failed to process 1 message(s)")
+
+      api.emails shouldBe empty
+      api.publishedEvents shouldBe empty
+      api.phases.toList shouldBe List("order")
+      api.apiRequests.exists(_._2 == "/v1/invoices/INV-000001") shouldBe false
+    }
+  }
+
+  List("", "A S001", "A/S001").foreach { number =>
+    it should s"reject invalid invoice subscription '$number' before attempting cancellation" in {
+      val api = new Api
+      api.subscriptionNumbers = List(number)
+
+      api.execute().left.value.getMessage should include("Failed to process 1 message(s)")
+
+      api.apiRequests should have size 2
+      api.phases shouldBe empty
+      api.emails shouldBe empty
+      api.publishedEvents shouldBe empty
+    }
+  }
+
+  it should "surface a balancing failure after the primary email and event have been sent" in {
+    val api = new Api
+    api.failedPath = Some("/v1/object/credit-balance-adjustment")
+
+    api.execute().left.value.getMessage should include("Failed to process 1 message(s)")
+
+    api.emails should have size 1
+    api.publishedEvents should have size 1
+    api.phases.toList shouldBe List("order", "email", "event", "balance")
   }
 
   it should "continue processing records after failures and use the date of each new invocation" in {
@@ -352,7 +529,7 @@ class ZuoraCalloutOAuthTest extends AnyFlatSpec with Matchers with EitherValues 
 
     api.trustedConfigLoads shouldBe 1
     api.tokenProviderBuilds shouldBe 1
-    api.tokenRequests shouldBe 3
+    api.tokenRequests shouldBe 2
     api.orderDates.toList shouldBe List(date.plusDays(1).toString)
     api.emails should have size 1
   }

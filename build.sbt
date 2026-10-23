@@ -377,6 +377,7 @@ lazy val `zuora-auto-cancel` = lambdaProject(
   Seq(
     awsLambda,
     awsEvents,
+    awsEventBridge,
     okhttp3,
     scalatest,
     stripe,
