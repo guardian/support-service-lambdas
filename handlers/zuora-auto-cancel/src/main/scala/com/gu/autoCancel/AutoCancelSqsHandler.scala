@@ -9,8 +9,10 @@ import com.gu.util.apigateway.ApiGatewayResponse.unauthorized
 import com.gu.util.apigateway.Auth
 import com.gu.util.apigateway.Auth.TrustedApiConfig
 import com.gu.util.config.{LoadConfigModule, Stage}
-import com.gu.util.email.{EmailSender, EmailSendSteps}
+import com.gu.util.email.{EmailSendSteps, EmailSender}
 import com.gu.util.reader.Types._
+import com.gu.util.resthttp.RestRequestMaker.Requests
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
 import com.gu.util.zuora._
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
@@ -39,6 +41,7 @@ class AutoCancelSqsHandler(
     trustedConfig: => TrustedApiConfig,
     tokenProvider: => GetAccessToken,
     emailService: => EmailSender,
+    eventPublisher: => CancellationEventPublisher,
     dateProvider: Today,
     response: Request => Response,
     stage: Stage,
@@ -50,10 +53,14 @@ class AutoCancelSqsHandler(
     val records = event.getRecords.asScala.toList
     logger.info(s"Processing ${records.size} SQS message(s)")
 
+    lazy val requests = ZuoraRestRequestMaker
+      .authenticated(response, stage.value, getAccessToken)
+      .toApiGatewayOp("authenticate with Zuora")
+
     val results = records.map(record =>
       for {
         (callout, apiToken) <- parseRecord(record)
-        result <- Try(processCallout(callout, apiToken))
+        result <- Try(processCallout(callout, apiToken, requests))
         _ <- result.toTry(())
       } yield (),
     )
@@ -91,6 +98,7 @@ class AutoCancelSqsHandler(
     LoadConfigModule(RawEffects.stage, GetFromS3.fetchString).load[TrustedApiConfig].fold(throw _, identity),
     ZuoraGetAccessToken(RawEffects.stage, GetFromSecretsManager.fetchString, RawEffects.response),
     EmailSendSteps(),
+    CancellationEventPublisher(RawEffects.stage),
     TodayLive,
     Http.responseWithTimeout(120),
     RawEffects.stage,
@@ -99,36 +107,46 @@ class AutoCancelSqsHandler(
   private lazy val trustedApiConfig = trustedConfig
   private lazy val getAccessToken = tokenProvider
   private lazy val emailSender = emailService
+  private lazy val cancellationEventPublisher = eventPublisher
 
-  private def processCallout(callout: AutoCancelCallout, apiToken: String): ApiGatewayOp[Unit] = {
+  private[autoCancel] def combinedResult(results: ClientFailableOp[Unit]*): ClientFailableOp[Unit] =
+    results.find(_.isFailure).getOrElse(ClientSuccess(()))
+
+  private def processCallout(
+      callout: AutoCancelCallout,
+      apiToken: String,
+      authenticatedRequests: => ApiGatewayOp[Requests],
+  ): ApiGatewayOp[Unit] = {
     val processingDate = dateProvider.today
+    for {
+      autoCancelRequests <- check(callout, apiToken, processingDate, authenticatedRequests)
+      requests <- authenticatedRequests
+      cancellations <- AutoCancel(requests)(autoCancelRequests, callout.invoiceId, processingDate)
+        .toApiGatewayOp("AutoCancel failed")
+      emailResult = ZuoraEmailSteps(requests, emailSender).sendCancellationEmail(callout)
+      busResult = cancellationEventPublisher.publish(cancellations, callout.invoiceId)
+      balanceResult = InvoiceBalancing(requests).balance(cancellations)
+      _ <- combinedResult(emailResult, busResult, balanceResult).toApiGatewayOp("AutoCancel failed")
+    } yield ()
+  }
+
+  private def check(
+      callout: AutoCancelCallout,
+      apiToken: String,
+      processingDate: LocalDate,
+      authenticatedRequests: => ApiGatewayOp[Requests],
+  ): ApiGatewayOp[List[AutoCancel.AutoCancelRequest]] =
     for {
       _ <- Auth
         .credentialsAreValid(trustedApiConfig, Auth.RequestAuth(Some(apiToken)))
         .toApiGatewayContinueProcessing(unauthorized)
         .withLogging("authentication")
       _ <- AutoCancelInputFilter(callout).withLogging("filter on auto pay")
-      requests <- ZuoraRestRequestMaker
-        .authenticated(response, stage.value, getAccessToken)
-        .toApiGatewayOp("authenticate with Zuora")
-      emailSteps = ZuoraEmailSteps(requests, emailSender)
-
-      // Get the auto-cancel requests
+      requests <- authenticatedRequests
       autoCancelRequests <- AutoCancelDataCollectionFilter(requests)(callout, processingDate).withLogging(
         s"auto-cancellation requests for ${callout.accountId}",
       )
-
-      // Execute the cancellation
-      _ <- AutoCancel(requests)(autoCancelRequests, callout.invoiceId, processingDate)
-        .withLogging(s"auto-cancellation for ${callout.accountId}")
-
-      _ <- emailSteps
-        .sendCancellationEmail(callout)
-        .toDisjunction
-        .toApiGatewayOp("send email")
-
-    } yield ()
-  }
+    } yield autoCancelRequests
 }
 
 trait Today {
