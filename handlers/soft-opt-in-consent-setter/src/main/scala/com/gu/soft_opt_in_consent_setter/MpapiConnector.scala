@@ -4,9 +4,6 @@ import com.gu.soft_opt_in_consent_setter.models.{MpapiConfig, SoftOptInError}
 import io.circe.Decoder
 import io.circe.parser.decode
 import io.circe.generic.semiauto._
-import scalaj.http.{Http, HttpResponse}
-
-import scala.util.Try
 
 case class MobileSubscriptions(subscriptions: List[MobileSubscription])
 case class MobileSubscription(valid: Boolean, softOptInProductName: String)
@@ -18,7 +15,7 @@ object MobileSubscriptions {
 class MpapiConnector(config: MpapiConfig) {
 
   def handleQueryResp[T: Decoder](
-      response: Either[Throwable, HttpResponse[String]],
+      response: Either[Throwable, HttpResponse],
       errorDesc: String = "Decode error",
   ): Either[SoftOptInError, T] = {
     response.left
@@ -37,13 +34,7 @@ class MpapiConnector(config: MpapiConfig) {
     )
   }
 
-  def sendReq(url: String): Either[Throwable, HttpResponse[String]] = {
-    Try(
-      Http(url)
-        .header("Authorization", config.mpapiToken)
-        .method("GET")
-        .asString,
-    ).toEither
-  }
+  def sendReq(url: String): Either[Throwable, HttpResponse] =
+    HttpClient.get(url, headers = Seq("Authorization" -> config.mpapiToken))
 
 }

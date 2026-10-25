@@ -47,6 +47,9 @@
       "@modules/email/*": [
         "../../modules/email/src/*"
       ],
+      "@modules/subscription-events/*": [
+        "../../modules/subscription-events/src/*"
+      ],
       "@modules/multiple-account-api/*": [
         "../../modules/multiple-account-api/src/*"
       ]

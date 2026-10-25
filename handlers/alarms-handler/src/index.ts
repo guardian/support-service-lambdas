@@ -49,11 +49,11 @@ export const handler = SQSHandler(
 
 // runs on cold start only
 function buildServices({ config }: HandlerEnv<ConfigSchema>) {
-	return {
+	return Promise.resolve({
 		webhookUrls: config.webhookUrls,
 		getTags: buildCloudwatch(config.accounts).getTags,
 		googleChatSendMessage: new GoogleChatSendMessage(new GoogleChatClient()),
-	};
+	});
 }
 
 // runs for every record

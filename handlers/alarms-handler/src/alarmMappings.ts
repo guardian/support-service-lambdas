@@ -7,7 +7,8 @@ export type Team =
 	| 'PLATFORM'
 	| 'SRE'
 	| 'ENGINE'
-	| 'PUZZLES';
+	| 'PUZZLES'
+	| 'SRDEV';
 
 const teamToAppMappings: Record<Team, string[]> = {
 	MARTECH: [
@@ -61,9 +62,6 @@ const teamToAppMappings: Record<Team, string[]> = {
 		// zuora-finance
 		'zuora-creditor',
 
-		// zuora-config
-		'canonical-config',
-
 		// support-frontend
 		'frontend',
 		'it-test-runner',
@@ -109,7 +107,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 
 		// zuora
 		'invoicing-api',
-		'zuora-callout-apis',
+		'zuora-auto-cancel',
 		'zuora-oracle-fusion',
 		'write-off-unpaid-invoices',
 		'negative-invoices-processor',
@@ -151,6 +149,10 @@ const teamToAppMappings: Record<Team, string[]> = {
 	],
 	ENGINE: ['price-migration-engine-state-machine'],
 	PUZZLES: ['puzzles-app'],
+	SRDEV: [
+		// Zuora Config
+		'canonical-config',
+	],
 };
 
 const buildAppToTeamMappings = (

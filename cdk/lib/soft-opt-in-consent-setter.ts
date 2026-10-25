@@ -76,6 +76,16 @@ export class SoftOptInConsentSetter extends GuStack {
 				resources: ['*'],
 			}),
 			new PolicyStatement({
+				actions: ['cloudformation:ListStackResources'],
+				resources: [
+					`arn:aws:cloudformation:${this.region}:${this.account}:stack/support-${this.stage}-multiple-account-api/*`,
+				],
+			}),
+			new PolicyStatement({
+				actions: ['apigateway:GET'],
+				resources: [`arn:aws:apigateway:${this.region}::/apikeys/*`],
+			}),
+			new PolicyStatement({
 				sid: 'readDeployedArtefact',
 				actions: ['s3:GetObject'],
 				resources: ['arn:aws:s3::*:membership-dist/*'],
@@ -182,15 +192,17 @@ export class SoftOptInConsentSetter extends GuStack {
 			],
 			functionName: `soft-opt-in-consent-setter-${this.stage}`,
 			loggingFormat: LoggingFormat.TEXT,
-			runtime: Runtime.JAVA_11, // keep on 11 for now due to http PATCH issue
+			runtime: Runtime.JAVA_21,
 			handler: 'com.gu.soft_opt_in_consent_setter.Handler::handleRequest',
 			memorySize: 512,
-			timeout: Duration.seconds(900),
+			timeout: Duration.minutes(15),
 			environment: {
 				Stage: this.stage,
 				sfApiVersion: 'v46.0',
+				softOptInQueueUrl: softOptInsQueue.queueUrl,
 			},
 		});
+		softOptInsQueue.grantSendMessages(lambdaFunction);
 
 		const lambdaFunctionIAP = new GuLambdaFunction(this, 'LambdaFunctionIAP', {
 			app: 'soft-opt-in-consent-setter',
@@ -198,10 +210,10 @@ export class SoftOptInConsentSetter extends GuStack {
 			role: lambdaFunctionIAPRole,
 			functionName: `soft-opt-in-consent-setter-IAP-${this.stage}`,
 			loggingFormat: LoggingFormat.TEXT,
-			runtime: Runtime.JAVA_11, // keep on 11 for now due to http PATCH issue
+			runtime: Runtime.JAVA_21,
 			handler: 'com.gu.soft_opt_in_consent_setter.HandlerIAP::handleRequest',
 			memorySize: 512,
-			timeout: Duration.seconds(300),
+			timeout: Duration.minutes(5),
 			environment: {
 				Stage: this.stage,
 				sfApiVersion: 'v56.0',

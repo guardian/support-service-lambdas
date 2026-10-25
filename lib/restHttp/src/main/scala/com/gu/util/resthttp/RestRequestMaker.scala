@@ -154,12 +154,14 @@ object RestRequestMaker extends LazyLogging {
         req: REQ,
         path: String,
         skipCheck: IsCheckNeeded = WithCheck,
+        additionalHeaders: Map[String, String] = Map.empty,
     ): ClientFailableOp[RESP] = {
       val body = createBody[REQ](req)
-      val headersWithContentType = headers + ("Content-Type" -> "application/json") + ("accept" -> "application/json")
+      val headersWithContentType =
+        headers ++ additionalHeaders + ("Content-Type" -> "application/json") + ("accept" -> "application/json")
       for {
-        bodyAsJson <- sendRequest(buildRequest(headersWithContentType, baseUrl + path, _.post(body)), getResponse)
-          .map(Json.parse)
+        responseBody <- sendRequest(buildRequest(headersWithContentType, baseUrl + path, _.post(body)), getResponse)
+        bodyAsJson <- JsonHttp.deserialiseJsonResponse(BodyAsString(responseBody))
         _ <- if (skipCheck == WithoutCheck) ClientSuccess(()) else jsonIsSuccessful(bodyAsJson)
         respModel <- toResult[RESP](bodyAsJson)
       } yield respModel

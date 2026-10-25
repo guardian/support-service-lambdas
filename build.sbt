@@ -223,7 +223,7 @@ lazy val effects = library(
 )
   .settings(
     dependencyOverrides ++= jacksonDependencies,
-    libraryDependencies ++= Seq(okhttp3, playJson, scalatest, awsS3) ++ logging,
+    libraryDependencies ++= Seq(okhttp3, playJson, scalatest, awsS3, awsSecretsManager) ++ logging,
   )
 lazy val `effects-s3` = library(project in file("lib/effects-s3"))
   .settings(
@@ -371,8 +371,8 @@ def lambdaProject(
     )
 }
 
-lazy val `zuora-callout-apis` = lambdaProject(
-  "zuora-callout-apis",
+lazy val `zuora-auto-cancel` = lambdaProject(
+  "zuora-auto-cancel",
   "Handles auto-cancellations for membership and subscriptions",
   Seq(
     awsLambda,
@@ -382,7 +382,7 @@ lazy val `zuora-callout-apis` = lambdaProject(
     stripe,
     scalaMock,
   ),
-  Seq(zuora, `zuora-core`, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep),
+  Seq(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep),
 )
 
 lazy val `identity-backfill` = lambdaProject(
@@ -518,7 +518,7 @@ lazy val `soft-opt-in-consent-setter` = lambdaProject(
     circe,
     circeParser,
     scalatest,
-    scalajHttp,
+    okhttp3,
     awsS3,
     awsDynamo,
     simpleConfig,
@@ -527,6 +527,8 @@ lazy val `soft-opt-in-consent-setter` = lambdaProject(
     awsEvents,
     scalaMock,
     awsSecretsManager,
+    awsApiGateway,
+    awsCloudFormation,
     upickle,
   ) ++ logging,
   Seq(`effects-s3`, `effects-cloudwatch`, `salesforce-core`),

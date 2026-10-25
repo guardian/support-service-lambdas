@@ -29,6 +29,7 @@ jobs:
           - single-contribution-salesforce-writes
           - stripe-webhook-endpoints
           - soft-opt-in-consent-setter
+          - zuora-auto-cancel
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -135,57 +136,6 @@ jobs:
             cfn:
               - handlers/${{ matrix.subproject }}/cfn.yaml
 
-  zuora-callout-apis:
-    name: build (zuora-callout-apis)
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-      pull-requests: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-      - name: Setup Java
-        uses: actions/setup-java@v6.0.1
-        with:
-          distribution: 'corretto'
-          java-version: '21'
-          cache: 'sbt'
-
-      - name: Setup SBT
-        uses: sbt/setup-sbt@v1.5.11
-
-      - name: Run tests and build subproject JAR
-        run: sbt "project zuora-callout-apis" test assembly
-
-      - run: npm install --global corepack@0.31.0
-      - run: corepack enable
-        shell: bash
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: '.tool-versions'
-          cache: 'pnpm'
-      - run: pnpm install
-      - run: pnpm --filter cdk package
-
-      - name: Upload to Riff-Raff
-        uses: guardian/actions-riff-raff@v4.3.3
-        with:
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
-          roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
-          projectName: support-service-lambdas::zuora-callout-apis
-          buildNumberOffset: 7000
-          configPath: ./handlers/zuora-callout-apis/riff-raff.yaml
-          commentingEnabled: 'false'
-          contentDirectories: |
-            zuora-auto-cancel-upload:
-              - /tmp/zuora-callout-apis.jar
-            zuora-auto-cancel-cloudformation:
-              - ./cdk/cdk.out/zuora-auto-cancel-CODE.template.json
-              - ./cdk/cdk.out/zuora-auto-cancel-PROD.template.json
-            zuora-callout-apis:
-              - /tmp/zuora-callout-apis.jar
-
   # for branch protection - only passes if all builds pass
   ci-scala-all:
     name: ci-scala-all
@@ -195,10 +145,8 @@ jobs:
     needs:
       - gu-cdk-build
       - build
-      - zuora-callout-apis
     steps:
       - name: Fail unless all Scala CI jobs succeeded
         run: |
           [ "${{ needs.gu-cdk-build.result }}" = "success" ]
           [ "${{ needs.build.result }}" = "success" ]
-          [ "${{ needs.zuora-callout-apis.result }}" = "success" ]

@@ -8,6 +8,8 @@ For an acquisition, it will enable the Soft Opt-In consents associated with that
 
 For a cancellation, it will disable the Soft Opt-In consents that are associated only with the subscription being cancelled, except similar_guardian_products
 
+It also sends a cancellation message for each secondary user on the subscription. The queue consumer checks the secondary user's other active products before disabling their consents.
+
 If it is unable to update a record, it will increment the number of retries and try again later in a subsequent run. It will only attempt to update records 5 times.
 
 ## Metrics

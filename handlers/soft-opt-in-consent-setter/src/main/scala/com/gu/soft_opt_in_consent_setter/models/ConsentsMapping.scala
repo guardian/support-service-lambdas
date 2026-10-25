@@ -7,6 +7,8 @@ object ConsentsMapping {
   val subscriberPreview = "subscriber_preview"
   val guardianWeeklyNewsletter = "guardian_weekly_newsletter"
 
+  val secondaryDigitalAccessProductName = "Secondary User"
+
   private val singleAndRecurringContribution = "Contribution"
 
   /*
@@ -19,7 +21,7 @@ object ConsentsMapping {
       case "SUPPORTER_PLUS" => "Supporter Plus"
       case "TIER_THREE" => "Tier Three"
       case "DIGITAL_SUBSCRIPTION" => "Digital Pack"
-      case "SECONDARY_USER" => "Secondary User"
+      case "SECONDARY_USER" => secondaryDigitalAccessProductName
       case "PRINT_SUBSCRIPTION" if printProduct.exists(List("HOME_DELIVERY_SUNDAY", "VOUCHER_SUNDAY").contains) =>
         "Newspaper - Observer only" // don't set any consents for observer only
       case "PRINT_SUBSCRIPTION" if !printProduct.contains("GUARDIAN_WEEKLY") => "newspaper"
@@ -97,7 +99,7 @@ object ConsentsMapping {
       similarGuardianProducts,
       supporterNewsletter,
     ),
-    "Secondary User" -> Set(
+    secondaryDigitalAccessProductName -> Set(
       yourSupportOnboarding,
       supporterNewsletter,
     ),

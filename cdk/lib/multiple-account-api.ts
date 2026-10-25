@@ -1,4 +1,3 @@
-import { GuAllowPolicy } from '@guardian/cdk/lib/constructs/iam';
 import type { App } from 'aws-cdk-lib';
 import { RemovalPolicy } from 'aws-cdk-lib';
 import { CfnAlarm } from 'aws-cdk-lib/aws-cloudwatch';
@@ -19,6 +18,7 @@ import {
 	AllowZuoraOAuthSecretsPolicy,
 } from './cdk/policies';
 import { SrApiLambda } from './cdk/SrApiLambda';
+import { SrEventBusLambda } from './cdk/SrEventBusLambda';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
 
@@ -38,16 +38,8 @@ export class MultipleAccountApi extends SrStack {
 			},
 		});
 
-		lambda.addPolicies(
-			new GuAllowPolicy(this, 'AllowGetIdentityClientToken', {
-				actions: ['ssm:GetParameter'],
-				resources: [
-					`arn:aws:ssm:${this.region}:${this.account}:parameter/${this.stage}/support/multiple-account-api/identity-client-access-token`,
-				],
-			}),
-		);
-
-		lambda.addPolicies(new AllowZuoraOAuthSecretsPolicy(this));
+		const zuoraPolicy = new AllowZuoraOAuthSecretsPolicy(this);
+		lambda.addPolicies(zuoraPolicy);
 		lambda.addPolicies(new AllowS3CatalogReadPolicy(this));
 		lambda.addPolicies(new AllowSupporterProductDataQueryPolicy(this));
 		lambda.addPolicies(new AllowSupporterProductDataDeletePolicy(this));
@@ -103,6 +95,35 @@ export class MultipleAccountApi extends SrStack {
 		});
 
 		secondaryUserTable.grantFullAccess(lambda);
+
+		const cancellationsListenerLambda = new SrEventBusLambda(
+			this,
+			'CancellationsListenerLambda',
+			{
+				bus: 'cancellations-bus',
+				nameSuffix: 'cancellation',
+				lambdaOverrides: {
+					description:
+						'Sends secondary-user cancellation emails when a subscription with multiple accounts is cancelled',
+				},
+				monitoring: {
+					errorImpact:
+						'A secondary user may not receive a cancellation email when their subscription is cancelled',
+				},
+				maxReceiveCount: 3,
+			},
+		);
+
+		cancellationsListenerLambda.addPolicies(zuoraPolicy);
+		cancellationsListenerLambda.addPolicies(
+			AllowSqsSendPolicy.createWithId(
+				this,
+				'CancellationsListenerLambdaSqsSendPolicy',
+				'braze-emails',
+			),
+		);
+
+		secondaryUserTable.grantReadData(cancellationsListenerLambda);
 
 		new CfnAlarm(this, 'failedMultipleAccountsEmailTrigger', {
 			alarmActions: [

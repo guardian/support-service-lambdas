@@ -5,7 +5,7 @@ import { notice } from '../../../../snippets/notices';
 const cdkOnlyProjects = [
 	'iam-policies',
 	'salesforce-event-bus',
-	'subscription-events-bus',
+	'cancellations-bus',
 ];
 
 export default (build: BuildDefinition) => ({

@@ -27,6 +27,8 @@ object Dependencies {
   val awsEventBridge = "software.amazon.awssdk" % "eventbridge" % awsSdkVersion
   val awsS3 = "software.amazon.awssdk" % "s3" % awsSdkVersion
   val awsDynamo = "software.amazon.awssdk" % "dynamodb" % awsSdkVersion
+  val awsApiGateway = "software.amazon.awssdk" % "apigateway" % awsSdkVersion
+  val awsCloudFormation = "software.amazon.awssdk" % "cloudformation" % awsSdkVersion
 
   val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.4.0"
   val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.16.1"

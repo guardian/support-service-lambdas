@@ -1,8 +1,6 @@
 package com.gu.soft_opt_in_consent_setter
 
 import com.gu.soft_opt_in_consent_setter.models.{IdentityConfig, SoftOptInError}
-import scalaj.http.{Http, HttpResponse}
-import scala.util.Try
 
 class IdentityConnector(config: IdentityConfig) {
 
@@ -13,19 +11,18 @@ class IdentityConnector(config: IdentityConfig) {
     )
   }
 
-  def sendReq(url: String, body: String): Either[Throwable, HttpResponse[String]] = {
-    Try(
-      Http(url)
-        .header("Content-Type", "application/json")
-        .header("Authorization", s"Bearer ${config.identityToken}")
-        .postData(body)
-        .method("PATCH")
-        .asString,
-    ).toEither
-  }
+  def sendReq(url: String, body: String): Either[Throwable, HttpResponse] =
+    HttpClient.patch(
+      url,
+      body,
+      headers = Seq(
+        "Content-Type" -> "application/json",
+        "Authorization" -> s"Bearer ${config.identityToken}",
+      ),
+    )
 
   def handleConsentsResp(
-      response: Either[Throwable, HttpResponse[String]],
+      response: Either[Throwable, HttpResponse],
       errorDesc: String = "",
   ): Either[SoftOptInError, Unit] = {
     response.left
