@@ -17,6 +17,14 @@ describe('getTeam', () => {
 		expect(team).toEqual(['MARTECH']);
 	});
 
+	it.each([
+		['zuora-creditor', 'PORTFOLIO'],
+		['manage-help-content-publisher', 'PLATFORM'],
+		['zuora-retention', 'PLATFORM'],
+	])('routes %s alarms to %s', (app, expectedTeam) => {
+		expect(prodAppToTeams(app)).toEqual([expectedTeam]);
+	});
+
 	it('returns SRE if the app does not have a team owner', () => {
 		const app = 'foo';
 

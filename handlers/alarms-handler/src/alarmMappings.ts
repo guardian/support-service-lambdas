@@ -59,6 +59,9 @@ const teamToAppMappings: Record<Team, string[]> = {
 		// contributions-platform
 		'fixation',
 
+		// zuora-finance
+		'zuora-creditor',
+
 		// support-frontend
 		'frontend',
 		'it-test-runner',
@@ -100,6 +103,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'sf-contact-merge',
 		'sf-emails-to-s3-exporter',
 		'sf-gocardless-sync',
+		'manage-help-content-publisher',
 
 		// zuora
 		'invoicing-api',
@@ -117,6 +121,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'identity-backfill',
 		'identity-retention',
 		'identity-deletion-cleanup',
+		'zuora-retention', //https://github.com/guardian/zuora-retention
 		'zuora-salesforce-link-remover',
 		'scrub-non-tokenised-payment-methods',
 
