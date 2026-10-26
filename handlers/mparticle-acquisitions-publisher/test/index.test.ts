@@ -70,6 +70,42 @@ describe('mParticle acquisition handler', () => {
 		);
 	});
 
+	it('does not log consent snapshot values', async () => {
+		const snapshot = {
+			capturedAt: '2026-10-12T14:13:08.848Z',
+			consentManagerVersion: 'synthetic-version',
+			framework: 'tcfv2',
+			gpcSignal: null,
+			tcfv2: {
+				gdprApplies: true,
+				consents: { '7': true },
+				vendorConsents: { '5ed0eb688a76503f1016578f': true },
+				eventStatus: 'tcloaded',
+				addtlConsent: 'synthetic-value',
+			},
+		};
+		const logSpy = jest
+			.spyOn(logger, 'log')
+			.mockImplementation(() => undefined);
+		const send = jest.fn<ReturnType<SendBatch>, Parameters<SendBatch>>();
+		send.mockResolvedValue(undefined);
+
+		await processRecord(
+			record(
+				JSON.stringify({ detail: { ...detail, cmpConsentSnapshot: snapshot } }),
+			),
+			configuration,
+			'development',
+			send,
+		);
+
+		const logs = JSON.stringify(logSpy.mock.calls);
+		expect(logs).not.toContain(snapshot.capturedAt);
+		expect(logs).not.toContain(snapshot.consentManagerVersion);
+		expect(logs).not.toContain('synthetic-value');
+		logSpy.mockRestore();
+	});
+
 	it('returns malformed JSON and schema failures as partial batch failures', async () => {
 		const send = jest.fn<ReturnType<SendBatch>, Parameters<SendBatch>>();
 		send.mockResolvedValue(undefined);

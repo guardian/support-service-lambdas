@@ -25,6 +25,20 @@ export const mParticleEventSchema = z.object({
 
 export type MParticleEvent = z.infer<typeof mParticleEventSchema>;
 
+const mParticleConsentSchema = z
+	.object({
+		consented: z.boolean(),
+		timestamp_unixtime_ms: z.number().int().nonnegative(),
+	})
+	.passthrough();
+
+const mParticleConsentStateSchema = z
+	.object({
+		gdpr: z.record(z.string(), mParticleConsentSchema).optional(),
+		ccpa: z.record(z.string(), mParticleConsentSchema).optional(),
+	})
+	.passthrough();
+
 export const mParticleEventBatchSchema = z.object({
 	schema_version: z.number().optional(),
 	source_request_id: z.string().optional(),
@@ -36,6 +50,7 @@ export const mParticleEventBatchSchema = z.object({
 	application_info: z.record(z.string(), z.unknown()).optional(),
 	device_info: z.record(z.string(), z.unknown()).optional(),
 	context: z.record(z.string(), z.unknown()).optional(),
+	consent_state: mParticleConsentStateSchema.optional(),
 	ip: z.string().optional(),
 });
 
