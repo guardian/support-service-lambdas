@@ -453,13 +453,6 @@ lazy val `single-contribution-salesforce-writes` = lambdaProject(
   Seq(handler, testDep),
 )
 
-lazy val `zuora-retention` = lambdaProject(
-  "zuora-retention",
-  "find and mark accounts that are out of the retention period",
-  Seq(),
-  Seq(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep),
-)
-
 lazy val `zuora-rer` = lambdaProject(
   "zuora-rer",
   "Performs Right to Erasure Requests against Zuora",
@@ -540,12 +533,6 @@ lazy val `sf-emails-to-s3-exporter` = lambdaProject(
   "Runs regularly to retrieve emails from Salesforce and save as json in S3",
   Seq(circe, circeParser, scalajHttp, awsS3, awsSecretsManager, upickle),
   Seq(`effects-s3`, `effects-cloudwatch`),
-)
-
-lazy val `sf-api-user-credentials-setter` = lambdaProject(
-  "sf-api-user-credentials-setter",
-  "Set passwords for Aws API Users in SF, and then create or update an entry for the credentials in AWS secrets manager",
-  Seq(awsSecretsManager, circe, circeParser, scalajHttp, awsS3, upickle),
 )
 
 lazy val `cancellation-sf-cases-api` = lambdaProject(
