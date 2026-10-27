@@ -43,6 +43,7 @@ jobs:
         with:
           distribution: 'corretto'
           java-version: '21'
+          check-latest: true
           cache: 'sbt'
 
       - name: Setup SBT
@@ -112,6 +113,7 @@ jobs:
         with:
           distribution: 'corretto'
           java-version: '21'
+          check-latest: true
           cache: 'sbt'
 
       - name: Setup SBT

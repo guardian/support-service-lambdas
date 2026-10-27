@@ -1,0 +1,134 @@
+name: Update tool versions
+
+on:
+  schedule:
+    - cron: '23 8 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: update-tool-versions
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      UPDATE_BRANCH: automation/tool-versions
+      UPDATE_TITLE: 'chore(deps): update tool versions'
+      BASE_BRANCH: ${{ github.event.repository.default_branch }}
+    steps:
+      - name: Check pull request token
+        env:
+          TOOLCHAIN_UPDATE_TOKEN: ${{ secrets.TOOLCHAIN_UPDATE_TOKEN }}
+        run: |
+          if [[ -z "$TOOLCHAIN_UPDATE_TOKEN" ]]; then
+            echo '::error::Configure TOOLCHAIN_UPDATE_TOKEN as documented in .github/workflows/updateToolVersions.md'
+            exit 1
+          fi
+
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - uses: jdx/mise-action@v3
+        with:
+          install: false
+          cache: false
+
+      - name: Check updater
+        run: bash .github/scripts/updateToolVersions.test.sh
+
+      - name: Select latest matching tool versions
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          bash .github/scripts/updateToolVersions.sh | tee "$RUNNER_TEMP/toolchainUpdate.md"
+          git diff --check
+
+      - name: Stage updates and detect changes
+        id: updates
+        run: |
+          git add -- .nvmrc package.json mise.toml
+          if git diff --cached --quiet; then
+            echo 'update_available=false' >> "$GITHUB_OUTPUT"
+          else
+            echo 'update_available=true' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Find existing and previous toolchain pull requests
+        id: pull_requests
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pullRequest="$(gh pr list --state open --base "$BASE_BRANCH" --head "$UPDATE_BRANCH" --json number --jq '.[0].number // empty')"
+          previous="$(gh pr list --state merged --head "$UPDATE_BRANCH" --limit 1 --json url --jq '.[0].url // empty')"
+          echo "existing_number=$pullRequest" >> "$GITHUB_OUTPUT"
+          echo "previous_url=$previous" >> "$GITHUB_OUTPUT"
+
+      - name: Close obsolete toolchain pull request
+        if: steps.updates.outputs.update_available == 'false' && steps.pull_requests.outputs.existing_number != ''
+        env:
+          GH_TOKEN: ${{ secrets.TOOLCHAIN_UPDATE_TOKEN }}
+          PULL_REQUEST: ${{ steps.pull_requests.outputs.existing_number }}
+        run: gh pr close "$PULL_REQUEST" --comment 'The default branch already has the selected tool versions; no update is needed.'
+
+      - name: Compare updates with existing remote branch
+        id: branch_state
+        if: steps.updates.outputs.update_available == 'true'
+        run: |
+          remoteRef="$(git ls-remote --heads origin "refs/heads/$UPDATE_BRANCH")"
+          remoteSha="${remoteRef%%$'\t'*}"
+          tree="$(git write-tree)"
+          remoteTree=
+          if [[ -n "$remoteSha" ]]; then
+            git fetch --no-tags --depth=1 origin "$remoteSha"
+            remoteTree="$(git rev-parse "$remoteSha^{tree}")"
+          fi
+
+          if [[ "$tree" != "$remoteTree" ]]; then
+            echo 'needs_push=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'needs_push=false' >> "$GITHUB_OUTPUT"
+          fi
+          echo "remote_sha=$remoteSha" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push toolchain updates
+        if: steps.branch_state.outputs.needs_push == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.TOOLCHAIN_UPDATE_TOKEN }}
+          REMOTE_SHA: ${{ steps.branch_state.outputs.remote_sha }}
+        run: |
+          git -c user.name='update-tool-versions automation' \
+              -c user.email='update-tool-versions@automation.invalid' \
+              commit -m "$UPDATE_TITLE"
+          gh auth setup-git
+          git push --force-with-lease="refs/heads/$UPDATE_BRANCH:$REMOTE_SHA" origin "HEAD:refs/heads/$UPDATE_BRANCH"
+
+      - name: Prepare pull request description
+        if: steps.updates.outputs.update_available == 'true' && (steps.branch_state.outputs.needs_push == 'true' || steps.pull_requests.outputs.existing_number == '')
+        env:
+          PREVIOUS_PR_URL: ${{ steps.pull_requests.outputs.previous_url }}
+        run: |
+          {
+            printf '\nUpdates the five pinned tools; sbt is unchanged. Policy and testing: https://github.com/%s/blob/main/.github/workflows/updateToolVersions.md\n' "$GITHUB_REPOSITORY"
+            if [[ -n "$PREVIOUS_PR_URL" ]]; then
+              printf '\nPrevious toolchain update: %s\n' "$PREVIOUS_PR_URL"
+            fi
+          } >> "$RUNNER_TEMP/toolchainUpdate.md"
+
+      - name: Open or refresh toolchain pull request
+        if: steps.updates.outputs.update_available == 'true' && (steps.branch_state.outputs.needs_push == 'true' || steps.pull_requests.outputs.existing_number == '')
+        env:
+          GH_TOKEN: ${{ secrets.TOOLCHAIN_UPDATE_TOKEN }}
+          PULL_REQUEST: ${{ steps.pull_requests.outputs.existing_number }}
+        run: |
+          if [[ -n "$PULL_REQUEST" ]]; then
+            gh pr edit "$PULL_REQUEST" --title "$UPDATE_TITLE" --body-file "$RUNNER_TEMP/toolchainUpdate.md"
+          else
+            gh pr create --base "$BASE_BRANCH" --head "$UPDATE_BRANCH" --title "$UPDATE_TITLE" --body-file "$RUNNER_TEMP/toolchainUpdate.md"
+          fi

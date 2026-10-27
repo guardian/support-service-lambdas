@@ -97,6 +97,9 @@ build, so the Node dependencies are ready once the container has finished settin
 inside the container and follow the main [README](../README.md) for the Node.js and Scala development
 workflows (building, testing, linting, etc.).
 
+For toolchain version policies and updater setup, see
+[Automated tool updates](../.github/workflows/updateToolVersions.md).
+
 ## Troubleshooting
 
 If the container fails to build or set up correctly, the setup output is logged inside the container at
