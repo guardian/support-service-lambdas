@@ -24,6 +24,7 @@ From the repository root, run offline tests (requires Bash, jq, GNU coreutils, a
 
 ```bash
 bash .github/scripts/updateToolVersions.test.sh
+bash .github/scripts/publishToolVersions.test.sh
 ```
 
 To discover real releases and update local pinned versions without creating a PR:
@@ -59,6 +60,10 @@ updates use `updateMiseTool`; release discovery uses [`mise latest`](https://mis
 Run the tests and ShellCheck after script changes, and actionlint after workflow changes.
 
 Publication uses Git and the official [`gh` CLI](https://cli.github.com/manual/).
+Its logic lives in [publishToolVersions.sh](../scripts/publishToolVersions.sh), with clearly headed log
+sections and [offline tests](../scripts/publishToolVersions.test.sh) using local Git repositories
+and a mocked `gh`. Version discovery and the Markdown job summary remain separate workflow steps;
+the publication step receives the PAT.
 An obsolete PR is closed when its target branch already has the selected versions.
 
 ## How to rotate the token
