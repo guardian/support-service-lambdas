@@ -1,7 +1,7 @@
 import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
-import { type App, Duration } from 'aws-cdk-lib';
+import { type App, Duration, Fn } from 'aws-cdk-lib';
 import {
 	ComparisonOperator,
 	TreatMissingData,
@@ -13,7 +13,10 @@ import {
 	Rule,
 	RuleTargetInput,
 } from 'aws-cdk-lib/aws-events';
-import { SqsQueue } from 'aws-cdk-lib/aws-events-targets';
+import {
+	EventBus as EventBusTarget,
+	SqsQueue,
+} from 'aws-cdk-lib/aws-events-targets';
 import { CfnQueuePolicy, Queue } from 'aws-cdk-lib/aws-sqs';
 
 export class SalesforceEventBus extends GuStack {
@@ -80,6 +83,32 @@ export class SalesforceEventBus extends GuStack {
 					 *			InputTemplate: '{"contactId":<detail-payload-Contact_ID__c>}'
 					 */
 				}),
+			}),
+		);
+
+		const cancellationsBus = EventBus.fromEventBusArn(
+			this,
+			'CancellationsBus',
+			Fn.importValue(`cancellations-bus-${this.stage}-arn`),
+		);
+
+		const subscriptionCancellationRule = new Rule(
+			this,
+			'SfBusToCancellationsBus',
+			{
+				description:
+					'Forward SF Subscription Cancellation platform events from the SF bus to the cancellations-bus',
+				eventPattern: {
+					source: Match.prefix('aws.partner/salesforce.com'),
+					detailType: ['Subscription_Cancellation__e'],
+				},
+				eventBus: salesforceBus,
+			},
+		);
+
+		subscriptionCancellationRule.addTarget(
+			new EventBusTarget(cancellationsBus, {
+				deadLetterQueue: deadLetterQueue,
 			}),
 		);
 
