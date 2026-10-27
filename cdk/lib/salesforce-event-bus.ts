@@ -13,10 +13,9 @@ import {
 	Rule,
 	RuleTargetInput,
 } from 'aws-cdk-lib/aws-events';
-import {
-	EventBus as EventBusTarget,
-	SqsQueue,
-} from 'aws-cdk-lib/aws-events-targets';
+import { SqsQueue } from 'aws-cdk-lib/aws-events-targets';
+import { Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+import { CfnPipe } from 'aws-cdk-lib/aws-pipes';
 import { CfnQueuePolicy, Queue } from 'aws-cdk-lib/aws-sqs';
 
 export class SalesforceEventBus extends GuStack {
@@ -106,23 +105,39 @@ export class SalesforceEventBus extends GuStack {
 			},
 		);
 
-		const cancellationsBusTarget = new EventBusTarget(cancellationsBus, {
-			deadLetterQueue: deadLetterQueue,
+		// EventBridge doesn't allow input transformers on event bus targets, so the rule
+		// sends to a queue and a pipe translates the message onto the cancellations-bus
+		const cancellationQueue = new Queue(this, 'SubscriptionCancellationQueue', {
+			queueName: `${app}-subscription-cancellation-${this.stage}`,
+			deadLetterQueue: { queue: deadLetterQueue, maxReceiveCount: 3 },
 		});
 
-		subscriptionCancellationRule.addTarget({
-			bind: (rule, id) => ({
-				...cancellationsBusTarget.bind(rule, id),
-				input: RuleTargetInput.fromObject({
-					subscriptionNumber: EventField.fromPath(
-						'$.detail.payload.Subscription_Number__c',
-					),
-					orderNumber: EventField.fromPath('$.detail.payload.Order_Number__c'),
-					allowUserNotifications: EventField.fromPath(
-						'$.detail.payload.Send_Notifications__c',
-					),
-				}),
-			}),
+		subscriptionCancellationRule.addTarget(
+			new SqsQueue(cancellationQueue, { deadLetterQueue }),
+		);
+
+		const pipeRole = new Role(this, 'SubscriptionCancellationPipeRole', {
+			assumedBy: new ServicePrincipal('pipes.amazonaws.com'),
+		});
+		cancellationQueue.grantConsumeMessages(pipeRole);
+		cancellationsBus.grantPutEventsTo(pipeRole);
+
+		new CfnPipe(this, 'SubscriptionCancellationPipe', {
+			name: `${app}-subscription-cancellation-${this.stage}`,
+			description:
+				'Translate SF Subscription_Cancellation__e events into Cancellation events on the cancellations-bus',
+			roleArn: pipeRole.roleArn,
+			source: cancellationQueue.queueArn,
+			sourceParameters: { sqsQueueParameters: { batchSize: 1 } },
+			target: cancellationsBus.eventBusArn,
+			targetParameters: {
+				eventBridgeEventBusParameters: {
+					detailType: 'Cancellation',
+					source: `salesforce:subscription-cancellation-${this.stage}`,
+				},
+				// booleans must be unquoted to stay booleans in the output
+				inputTemplate: `{"subscriptionNumber":"<$.body.detail.payload.Subscription_Number__c>","orderNumber":"<$.body.detail.payload.Order_Number__c>","allowUserNotifications":<$.body.detail.payload.Send_Notifications__c>}`,
+			},
 		});
 
 		new CfnQueuePolicy(this, 'SalesforceOutboundQueuePolicy', {

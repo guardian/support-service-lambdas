@@ -17,6 +17,7 @@ export const subscriptionEventSources = [
 	'lambda:cancellation-sf-cases-api',
 	'lambda:move-product', // s+ cancellation lambda is in product-move-api
 	'ec2:members-data-api',
+	'salesforce:subscription-cancellation', // forwarded by the salesforce-event-bus stack's pipe
 ] as const;
 
 export const subscriptionEventSourceSchema = z.enum(subscriptionEventSources);
