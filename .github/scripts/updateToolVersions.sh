@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# This script locally updates the tool dependency versions in the files
+# to the latest available version in the given major release line.
+
 fail() {
   printf 'Toolchain update failed: %s\n' "$*" >&2
   exit 1

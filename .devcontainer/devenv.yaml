@@ -43,7 +43,6 @@ postCreateCommand:
   - cmd: 'mise install'
     logLine: 'mise_install'
     workingDirectory: '.'
-  # may now be redundant because mise reads package.json directly.
   # pnpm is pinned via package.json's "packageManager" field, but it's provided by
   # corepack, which mise's shim mode has no version for (interactive shells and the
   # IntelliJ test runner then fail with "No version is set for shim: pnpm" /
@@ -70,7 +69,6 @@ postCreateCommand:
   - cmd: 'mise exec -- node --version'
     logLine: 'node_version'
     workingDirectory: '.'
-  # Corepack may be redundant as mise manages pnpm directly.
   - cmd: 'mise exec -- corepack enable'
     logLine: 'corepack_enable'
     workingDirectory: '.'

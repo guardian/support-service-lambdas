@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# This script looks for unstaged changes to the dependency files and makes sure
+# they are in a github PR
+
 : "${BASE_BRANCH:?}"
 : "${UPDATE_BRANCH:?}"
 : "${UPDATE_TITLE:?}"
