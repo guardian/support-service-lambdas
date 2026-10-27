@@ -1,78 +1,89 @@
 # Automated tool updates
 
-[Update tool versions](update-tool-versions.yml) runs weekly and can also be started manually with
-GitHub Actions. It opens or refreshes one PR for Node.js, pnpm, Corretto Java, AWS CLI, and Guardian
-devenv. The updater preserves each tool's current major version and rejects prereleases and
-downgrades. Guardian devenv uses timestamped releases rather than semantic versions.
-The sbt launcher stays at `latest`; project sbt versions in `project/build.properties` are unchanged.
+[Update tool versions](update-tool-versions.yml) checks weekly for newer Node.js, pnpm, Corretto Java,
+AWS CLI, and Guardian devenv releases and raises a PR with updates. Dependabot
+can't currently update these pinned toolchain versions: see
+[mise support](https://github.com/dependabot/dependabot-core/issues/12320) and
+[packageManager support](https://github.com/dependabot/dependabot-core/issues/4830).
 
-pnpm is pinned in [`package.json`](../../package.json), and the other four tools in
-[`mise.toml`](../../mise.toml). Both Node.js CI setup steps read the pin directly from `mise.toml`.
-Java's exact pin is for local development only: Scala CI,
-Scala Steward CI, and dependency-graph submission use `setup-java` with Corretto 21 and
-`check-latest: true` to select the newest available build on each run. This avoids installing mise
-or development-only tools in build jobs. CI can therefore use a newer Java patch than local development.
-mise automatically installs missing required versions and does not fall back to system executables.
-Already-running JVMs and IDE backends still need restarting after a Java update.
+Updates stay within each tool's current major version. Major upgrades are manual: change the pinned
+version and any corresponding runtime/CI settings together.
 
-## Setup
+## About the generated PRs
 
-Before enabling the workflow, configure the repository secret `TOOLCHAIN_UPDATE_TOKEN` with a
-personal access token (from your account or a bot account) authorized to write repository contents
-and pull requests. Unlike PRs created
-using `GITHUB_TOKEN`, PRs opened with this token trigger normal CI. The updater never merges its PR.
-See [GitHub's workflow-triggering rules](https://docs.github.com/en/actions/how-tos/writing-workflows/choosing-when-your-workflow-runs/triggering-a-workflow#triggering-a-workflow-from-a-workflow)
-and [fine-grained personal access token permissions](https://docs.github.com/en/rest/authentication/permissions-required-for-fine-grained-personal-access-tokens).
+Updates reject major version updates, prereleases and downgrades.
 
-The workflow uses Git and GitHub's official [`gh` CLI](https://cli.github.com/manual/) to maintain
-an update branch and its PR. Scheduled runs target the default branch and use `automation/tool-versions`.
-Manual runs target the selected branch; non-default targets use `automation/tool-versions-for/<target-branch>`
-so they cannot overwrite the normal update branch. Runs targeting different branches have separate
-concurrency groups. Identical file trees do not create another commit.
-An existing PR's description is refreshed only when new changes are pushed; an existing branch
-without an open PR can still have a new PR created.
-Branch updates use an explicit force-push lease to reject concurrent changes, and an existing PR is
-closed if the target branch already contains the selected versions.
+Once people pull the changes locally, mise will install and use new versions on next use.
 
-Commits use `update-tool-versions automation` as both author and committer, with the non-deliverable
-placeholder email `update-tool-versions@automation.invalid`; no mailbox needs provisioning.
-The PR and push are attributed to the account owning the token.
+CI Java is currently separate: `setup-java` selects latest Corretto 21 with `check-latest: true`,
+so it may be newer than the pinned version.
 
-## Testing against a branch
+## How to test the script and workflow
 
-Push a branch containing the workflow and older exact tool pins. In Actions, select **Update tool
-versions**, choose **Run workflow**, and select that branch under **Use workflow from**. Alternatively:
-
-```bash
-gh workflow run update-tool-versions.yml --ref my-toolchain-test
-```
-
-The workflow checks out that branch and opens its update PR against it, not against the default
-branch. Repeated runs reuse the branch-specific update PR. Tags are rejected.
-
-GitHub requires the workflow to exist on the default branch before it can receive manual dispatches.
-A new workflow present only on a feature branch cannot be manually dispatched yet; first register
-the workflow on the default branch, or use a temporary branch-specific push trigger for an initial
-pre-merge test. See [manually running a workflow](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow).
-
-## Local testing
-
-To test locally without network access (requires Bash, jq, GNU coreutils, and mise), run from the
-repository root:
+From the repository root, run offline tests (requires Bash, jq, GNU coreutils, and mise):
 
 ```bash
 bash .github/scripts/updateToolVersions.test.sh
 ```
 
-To resolve real releases and update local files without opening a PR:
+To discover real releases and update local pinned versions without creating a PR:
 
 ```bash
 bash .github/scripts/updateToolVersions.sh
 ```
 
-Release discovery uses [`mise latest`](https://mise.jdx.dev/cli/latest.html); it does not install the
-candidate tools. After pulling a merged update, mise shims select the new pins on the next invocation.
+For an end-to-end test, push a branch with old pinned versions and select it under **Actions > Update
+tool versions > Run workflow > Use workflow from**, or run:
 
-The script updates `package.json`, then the tools in `mise.toml`. A failure stops the script
-and fails the workflow before any commit, push, or PR publication. When running locally, earlier
-updates can remain in the working tree if a later tool fails.
+```bash
+gh workflow run update-tool-versions.yml --ref my-branch
+```
+
+A PR will be created on branch `automation/tool-versions-for/<target-branch>`, separate from normal
+updates on `automation/tool-versions`.
+
+To help with testing, every run refreshes the PR title and description, even if the selected
+versions have not changed.
+
+Before merging be sure to restore current
+versions, and restore any temporarily disabled CI triggers before review.
+
+## How to maintain the updater
+
+pnpm's source of truth is `packageManager` in [`package.json`](../../package.json); the other pinned versions
+live in [`mise.toml`](../../mise.toml). Both Node.js CI setup steps read `mise.toml` directly.
+
+Edit [updateToolVersions.sh](../scripts/updateToolVersions.sh) to add a tool or change its release
+policy, and extend [its offline tests](../scripts/updateToolVersions.test.sh). Shared mise-tool
+updates use `updateMiseTool`; release discovery uses [`mise latest`](https://mise.jdx.dev/cli/latest.html).
+Run the tests and ShellCheck after script changes, and actionlint after workflow changes.
+
+Publication uses Git and the official [`gh` CLI](https://cli.github.com/manual/).
+An obsolete PR is closed when its target branch already has the selected versions.
+
+## How to rotate the token
+
+This isn't a proper bot (yet), it currently uses a personal access token. The original token expires
+after one year, then the workflow will start failing silently.
+
+The `TOOLCHAIN_UPDATE_TOKEN` Actions secret holds the token scoped to this repository
+with **Contents: Read and write** and **Pull requests: Read and write**.
+
+Create a replacement with the same permissions and
+replace the secret under **Settings > Secrets and variables > Actions**. Verify it using an
+end-to-end branch test that creates or updates a PR, then revoke the old token. A no-change run
+does not exercise the token's push permissions.
+
+Do not replace the PAT with `GITHUB_TOKEN`: its PRs generally do not trigger subsequent CI.
+See [token permissions](https://docs.github.com/en/rest/authentication/permissions-required-for-fine-grained-personal-access-tokens)
+and [workflow-triggering rules](https://docs.github.com/en/actions/how-tos/writing-workflows/choosing-when-your-workflow-runs/triggering-a-workflow#triggering-a-workflow-from-a-workflow).
+
+## Troubleshoot a missing or failed update
+
+Check **Actions > Update tool versions** for a recent successful weekly run. Its summary distinguishes
+no updates, an existing update branch, newly pushed updates, and a closed obsolete PR. No new PR alone
+does not mean the updater has stopped working.
+
+**There is no team alert or watchdog configured.** Failures appear as red workflow runs; personal
+notifications depend on GitHub settings. If scheduled runs stop altogether, there may be no failed
+run to notice. Someone must check the run history periodically.
