@@ -14,6 +14,10 @@ git add -- package.json mise.toml
 updateAvailable=true
 if git diff --cached --quiet; then
   updateAvailable=false
+  printf 'No tool updates are needed for %s.\n' "$BASE_BRANCH"
+else
+  printf 'Tool updates are available for %s:\n' "$BASE_BRANCH"
+  git diff --cached --stat
 fi
 
 printf '\n=== Find existing and previous toolchain pull requests ===\n'
@@ -21,12 +25,15 @@ pullRequests="$(gh pr list --state open --base "$BASE_BRANCH" --head "$UPDATE_BR
 pullRequest="$(jq -r '.[0].number // empty' <<< "$pullRequests")"
 url="$(jq -r '.[0].url // empty' <<< "$pullRequests")"
 previous="$(gh pr list --state merged --base "$BASE_BRANCH" --head "$UPDATE_BRANCH" --limit 1 --json url --jq '.[0].url // empty')"
+printf 'Existing open PR: %s\n' "${url:-none}"
+printf 'Previous merged PR: %s\n' "${previous:-none}"
 
 needsPush=false
 if [[ "$updateAvailable" == false ]]; then
   if [[ -n "$pullRequest" ]]; then
     printf '\n=== Close obsolete toolchain pull request ===\n'
     gh pr close "$pullRequest" --comment 'The target branch already has the selected tool versions; no update is needed.'
+    printf 'Closed obsolete PR: %s\n' "$url"
   fi
 else
   printf '\n=== Compare updates with existing remote branch ===\n'
@@ -35,11 +42,17 @@ else
   tree="$(git write-tree)"
   remoteTree=
   if [[ -n "$remoteSha" ]]; then
+    printf 'Found branch %s at %s.\n' "$UPDATE_BRANCH" "$remoteSha"
     git fetch --no-tags --depth=1 origin "$remoteSha"
     remoteTree="$(git rev-parse "$remoteSha^{tree}")"
+  else
+    printf 'Branch %s does not exist yet.\n' "$UPDATE_BRANCH"
   fi
   if [[ "$tree" != "$remoteTree" ]]; then
     needsPush=true
+    printf 'Selected updates differ from the remote branch; a commit and push are needed.\n'
+  else
+    printf 'The remote branch already contains the selected updates; no commit or push is needed.\n'
   fi
 
   if [[ "$needsPush" == true ]]; then
@@ -49,6 +62,7 @@ else
         commit -m "$UPDATE_TITLE"
     gh auth setup-git
     git push --force-with-lease="refs/heads/$UPDATE_BRANCH:$remoteSha" origin "HEAD:refs/heads/$UPDATE_BRANCH"
+    printf 'Pushed commit %s to %s.\n' "$(git rev-parse --short HEAD)" "$UPDATE_BRANCH"
   fi
 
   printf '\n=== Prepare pull request description ===\n'
@@ -60,12 +74,15 @@ else
       printf '\nPrevious toolchain update: %s\n' "$previous"
     fi
   } > "$RUNNER_TEMP/toolchainUpdate.md"
+  printf 'Prepared description with the version table, documentation link, and any previous PR link.\n'
 
   printf '\n=== Open or refresh toolchain pull request ===\n'
   if [[ -n "$pullRequest" ]]; then
     gh pr edit "$pullRequest" --title "$UPDATE_TITLE" --body-file "$RUNNER_TEMP/toolchainUpdate.md"
+    printf 'Refreshed PR: %s\n' "$url"
   else
     url="$(gh pr create --base "$BASE_BRANCH" --head "$UPDATE_BRANCH" --title "$UPDATE_TITLE" --body-file "$RUNNER_TEMP/toolchainUpdate.md" --label maintenance)"
+    printf 'Created PR against %s: %s\n' "$BASE_BRANCH" "$url"
   fi
 fi
 
