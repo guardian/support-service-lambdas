@@ -18,9 +18,11 @@ trait CancellationEventPublisher {
       cancellations: List[AutoCancel.CancelledSubscription],
       calloutInvoiceId: String,
   ): ClientFailableOp[Unit] =
-    AutoCancel.attemptAll(cancellations) { cancelled =>
-      publish(cancelled.request.subToCancel, cancelled.response.orderNumber, calloutInvoiceId)
-    }
+    AutoCancel
+      .attemptAll(cancellations) { cancelled =>
+        publish(cancelled.request.subToCancel, cancelled.response.orderNumber, calloutInvoiceId)
+      }
+      .map(_ => ())
 
   def publish(
       subscription: SubscriptionNumber,

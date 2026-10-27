@@ -38,26 +38,24 @@ object AutoCancel extends Logging {
       requests: List[AutoCancelRequest],
       calloutInvoiceId: String,
       orderDate: LocalDate,
-  ): ClientFailableOp[List[CancelledSubscription]] = {
-    val results = requests.map { request =>
+  ): ClientFailableOp[List[CancelledSubscription]] =
+    attemptAll(requests) { request =>
       executeCancel(cancellation, cancellationReason)(request, calloutInvoiceId, orderDate)
         .map(CancelledSubscription(request, _))
     }
-    for {
-      _ <- attemptAll(results)(identity)
-    } yield results.collect { case ClientSuccess(cancelled) => cancelled }
-  }
 
   private[autoCancel] def attemptAll[A, B](
       items: Seq[A],
-  )(execute: A => ClientFailableOp[B]): ClientFailableOp[Unit] =
-    items.foldLeft[ClientFailableOp[Unit]](ClientSuccess(())) { (firstResult, item) =>
-      val currentResult = execute(item)
-      firstResult match {
-        case failure: ClientFailure => failure
-        case ClientSuccess(_) => currentResult.map(_ => ())
+  )(execute: A => ClientFailableOp[B]): ClientFailableOp[List[B]] =
+    items
+      .foldLeft[ClientFailableOp[List[B]]](ClientSuccess(Nil)) { (firstResult, item) =>
+        val currentResult = execute(item)
+        firstResult match {
+          case failure: ClientFailure => failure
+          case ClientSuccess(values) => currentResult.map(_ :: values)
+        }
       }
-    }
+      .map(_.reverse)
 
   /*
    * This process applies at the subscription level.  It will potentially run multiple times per invoice.
@@ -104,7 +102,7 @@ object AutoCancel extends Logging {
               creditApplication.applyCreditBalance(invoice.id, amount, comment)
           }
       }
-    }
+    }.map(_ => ())
   }
 
   case class UnbalancedInvoices(negativeInvoice: ItemisedInvoice, unpaidInvoices: Seq[ItemisedInvoice])

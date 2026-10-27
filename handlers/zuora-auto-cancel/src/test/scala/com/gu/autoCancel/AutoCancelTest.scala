@@ -32,18 +32,18 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
     AutoCancel.attemptAll(List.empty[Int]) { item =>
       attempted += item
       ClientSuccess(item.toString)
-    } shouldBe ClientSuccess(())
+    } shouldBe ClientSuccess(List.empty[String])
 
     attempted shouldBe empty
   }
 
-  it should "attempt each item once in order and discard successful result values" in {
+  it should "attempt each item once and return successful values in input order" in {
     val attempted = ListBuffer.empty[Int]
 
     AutoCancel.attemptAll(List(3, 1, 2)) { item =>
       attempted += item
       ClientSuccess(item.toString)
-    } shouldBe ClientSuccess(())
+    } shouldBe ClientSuccess(List("3", "1", "2"))
 
     attempted.toList shouldBe List(3, 1, 2)
   }

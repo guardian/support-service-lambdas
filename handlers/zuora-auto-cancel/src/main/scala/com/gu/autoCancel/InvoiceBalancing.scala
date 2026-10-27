@@ -29,7 +29,7 @@ class ZuoraInvoiceBalancing(
     attemptAll(cancellations) { cancelled =>
       balanceInvoices(cancelled.request, cancelled.response)
         .withLogging(s"balance ${cancelled.request.subToCancel.value}, invoice ${cancelled.response.invoiceId}")
-    }
+    }.map(_ => ())
 
   private def balanceInvoices(
       request: AutoCancelRequest,
