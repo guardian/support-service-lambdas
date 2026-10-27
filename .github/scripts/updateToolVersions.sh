@@ -25,7 +25,7 @@ printUpdate() {
       local version="${3#corretto-}"
       url="https://github.com/corretto/corretto-${version%%.*}/releases/tag/$version"
       ;;
-    'AWS CLI') url="https://github.com/aws/aws-cli/tree/$3" ;;
+    'AWS CLI') url="https://github.com/aws/aws-cli/blob/$3/CHANGELOG.rst" ;;
     'Guardian devenv') url="https://github.com/guardian/devenv/releases/tag/$3" ;;
     *) fail "No release link configured for $1" ;;
   esac
