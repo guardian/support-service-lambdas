@@ -1,6 +1,9 @@
 name: Update tool versions
 
 on:
+  push:
+    branches:
+      - 'jd/bump-pnpm-version'
   schedule:
     - cron: '23 8 * * 1'
   workflow_dispatch:
