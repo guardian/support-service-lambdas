@@ -13,6 +13,7 @@ export function buildDiagnosticLinks(
 		  }
 		| undefined,
 	stateChangeTime: Date,
+	logsFilterPattern?: string,
 ): Array<{ link: string; linkText: string }> {
 	const diagnosticUrlTemplates = DiagnosticLinks
 		? DiagnosticLinks.split(' ').map((link) => ({
@@ -27,6 +28,7 @@ export function buildDiagnosticLinks(
 				`/aws/lambda/${diagnosticUrlTemplate.value}`,
 				trigger,
 				stateChangeTime,
+				logsFilterPattern,
 			);
 			return [
 				{
@@ -45,6 +47,13 @@ export function buildDiagnosticLinks(
 	});
 }
 
+// AWS console deep links escape reserved characters using `$` instead of `%`.
+// Arbitrary content (e.g. a log filter pattern) must first be percent-encoded
+// and then have its `%` characters re-escaped as `$25`.
+function encodeForConsoleDeepLink(value: string): string {
+	return encodeURIComponent(value).replaceAll('%', '$25');
+}
+
 function getCloudwatchLogsLink(
 	logGroupName: string,
 	Trigger:
@@ -54,6 +63,7 @@ function getCloudwatchLogsLink(
 		  }
 		| undefined,
 	StateChangeTime: Date,
+	filterPattern?: string,
 ): string {
 	const assumedTimeForCompositeAlarms = 300;
 	// API gateway metrics within a one minute period sometimes seem to be assigned to the next minute datapoint
@@ -72,12 +82,17 @@ function getCloudwatchLogsLink(
 
 	const cloudwatchLogsBaseUrl =
 		'https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/';
+	const encodedFilterPattern = filterPattern
+		? encodeForConsoleDeepLink(filterPattern)
+		: '';
 	const logLink =
 		cloudwatchLogsBaseUrl +
 		logGroupName.replaceAll('/', '$252F') +
 		'/log-events$3Fstart$3D' +
 		alarmStartTimeMillis +
-		'$26filterPattern$3D$26end$3D' +
+		'$26filterPattern$3D' +
+		encodedFilterPattern +
+		'$26end$3D' +
 		alarmEndTimeMillis;
 
 	return logLink;

@@ -8,6 +8,7 @@ export const buildStuckInAlarmMessage = (
 	alarms: Array<{
 		alarm: MetricAlarm;
 		diagnosticLinks: string | undefined;
+		logsFilterPattern: string | undefined;
 	}>,
 	now: dayjs.Dayjs,
 ) => {
@@ -17,8 +18,12 @@ export const buildStuckInAlarmMessage = (
 				(a.alarm.StateTransitionedTimestamp?.getTime() ?? 0) -
 				(b.alarm.StateTransitionedTimestamp?.getTime() ?? 0),
 		)
-		.map(({ alarm, diagnosticLinks }) => {
-			const links = getDiagnosticLinks(diagnosticLinks, alarm);
+		.map(({ alarm, diagnosticLinks, logsFilterPattern }) => {
+			const links = getDiagnosticLinks(
+				diagnosticLinks,
+				logsFilterPattern,
+				alarm,
+			);
 
 			const alarmName = getIfDefined(alarm.AlarmName, 'missing alarm name');
 			const alarmUrl = buildAlarmUrl(alarmName);
@@ -56,6 +61,7 @@ export const buildStuckInAlarmMessage = (
 
 function getDiagnosticLinks(
 	DiagnosticLinks: string | undefined,
+	logsFilterPattern: string | undefined,
 	alarm: MetricAlarm,
 ) {
 	const { Period, EvaluationPeriods } = alarm;
@@ -65,5 +71,10 @@ function getDiagnosticLinks(
 		alarm.StateTransitionedTimestamp,
 		'no transition timestamp',
 	);
-	return buildDiagnosticLinks(DiagnosticLinks, trigger, stateChangeTime);
+	return buildDiagnosticLinks(
+		DiagnosticLinks,
+		trigger,
+		stateChangeTime,
+		logsFilterPattern,
+	);
 }

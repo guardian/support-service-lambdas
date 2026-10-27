@@ -18,9 +18,17 @@ export const buildCloudWatchAlarmMessage = async (
 	}: CloudWatchAlarmMessage,
 	getTags: (alarmArn: string, awsAccountId: string) => Promise<Tags>,
 ) => {
-	const { App, DiagnosticLinks } = await getTags(AlarmArn, AWSAccountId);
+	const { App, DiagnosticLinks, LogsFilterPattern } = await getTags(
+		AlarmArn,
+		AWSAccountId,
+	);
 
-	const links = buildDiagnosticLinks(DiagnosticLinks, Trigger, StateChangeTime);
+	const links = buildDiagnosticLinks(
+		DiagnosticLinks,
+		Trigger,
+		StateChangeTime,
+		LogsFilterPattern,
+	);
 	const alarmName = getIfDefined(AlarmName, 'missing alarm name');
 	const alarmUrl = buildAlarmUrl(alarmName);
 

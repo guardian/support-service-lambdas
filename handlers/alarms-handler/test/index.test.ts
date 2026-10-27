@@ -95,6 +95,31 @@ describe('Handler', () => {
 		expect(result?.body).toEqual(expectedText);
 	});
 
+	it('should include a filterPattern in the logs link when LogsFilterPattern tag is set', async () => {
+		getTags.mockResolvedValueOnce({
+			App: 'mock-app',
+			DiagnosticLinks: 'lambda:mock-app-CODE',
+			LogsFilterPattern: 'statusCode: 500',
+		});
+
+		const result = await getChatMessages(
+			fullCloudWatchAlarmEvent,
+			buildAlarmMappings({ SRE: ['mock-app'] }),
+			getTags,
+			mockWebhookUrls,
+		);
+
+		expect(getTags).toHaveBeenCalledWith(
+			'arn:aws:cloudwatch:eu-west-1:1234:alarm:DISCOUNT-API-CODE Discount-api 5XX response',
+			'1234',
+		);
+		const expectedText = buildExpectedAlarmMessage([
+			'<a href="https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fmock-app-CODE/log-events$3Fstart$3D1728458220000$26filterPattern$3DstatusCode$253A$2520500$26end$3D1728458580000">Logs for mock-app-CODE between 07:17 and 07:23</a>',
+		]);
+		expect(result?.webhookUrls).toEqual([mockWebhookUrls.SRE]);
+		expect(result?.body).toEqual(expectedText);
+	});
+
 	it('should not insert if the DiagnosticUrls are empty', async () => {
 		getTags.mockResolvedValueOnce({ App: 'mock-app' });
 

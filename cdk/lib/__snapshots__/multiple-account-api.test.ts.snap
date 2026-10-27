@@ -2111,6 +2111,10 @@ DLQ: https://",
             "Value": "guardian/support-service-lambdas",
           },
           {
+            "Key": "LogsFilterPattern",
+            "Value": "statusCode: 500",
+          },
+          {
             "Key": "Stack",
             "Value": "support",
           },
