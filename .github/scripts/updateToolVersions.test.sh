@@ -50,7 +50,13 @@ runUpdater() {
 }
 
 fixture "$tempDir/success"
-runUpdater "$tempDir/success"
+runUpdater "$tempDir/success" > "$tempDir/versions.md" 2> "$tempDir/update.log"
+[[ "$(wc -l < "$tempDir/versions.md")" -eq 7 ]]
+[[ "$(grep -c '^|' "$tempDir/versions.md")" -eq 7 ]]
+grep -Fx '=== package.json: pnpm ===' "$tempDir/update.log"
+grep -Fx '=== mise.toml: Node.js ===' "$tempDir/update.log"
+grep -F 'Looking up latest matching release: node@22 (current: 22.22.0).' "$tempDir/update.log"
+grep -F 'Updated Node.js from 22.22.0 to 22.23.4.' "$tempDir/update.log"
 grep -Fx 'node = "22.23.4"' "$tempDir/success/mise.toml"
 [[ ! -e "$tempDir/success/.nvmrc" ]]
 [[ "$(jq -r .packageManager "$tempDir/success/package.json")" == pnpm@10.34.9 ]]
@@ -64,7 +70,9 @@ for workflow in "$tempDir/success/.github/workflows/"*; do
   grep -Fx '      check-latest: true' "$workflow"
 done
 cp -R "$tempDir/success" "$tempDir/before"
-runUpdater "$tempDir/success"
+runUpdater "$tempDir/success" > "$tempDir/unchangedVersions.md" 2> "$tempDir/unchanged.log"
+grep -F 'pnpm is already up to date at 10.34.9; no version change needed.' "$tempDir/unchanged.log"
+grep -F 'Node.js is already up to date at 22.23.4; no version change needed.' "$tempDir/unchanged.log"
 diff -r "$tempDir/before" "$tempDir/success"
 
 fixture "$tempDir/failedDiscovery"

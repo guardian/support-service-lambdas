@@ -8,6 +8,7 @@ fail() {
 
 latest() {
   local request="$1" pattern="$2" current="$3" version
+  printf 'Looking up latest matching release: %s (current: %s).\n' "$request" "$current" >&2
   version="$(mise latest "$request")" || fail "Could not resolve $request"
   [[ "$version" =~ $pattern ]] || fail "Unexpected version for $request: $version"
   [[ "$(printf '%s\n%s\n' "$current" "$version" | sort -V | tail -n 1)" == "$version" ]] ||
@@ -16,11 +17,17 @@ latest() {
 }
 
 printUpdate() {
+  if [[ "$2" == "$3" ]]; then
+    printf '%s is already up to date at %s; no version change needed.\n' "$1" "$3" >&2
+  else
+    printf 'Updated %s from %s to %s.\n' "$1" "$2" "$3" >&2
+  fi
   printf '| %s | %s | %s |\n' "$1" "$2" "$3"
 }
 
 updatePackageJson() {
   local packageManager current major version
+  printf '\n=== package.json: pnpm ===\n' >&2
   packageManager="$(jq -er '.packageManager | strings' package.json)"
   [[ "$packageManager" =~ ^pnpm@([0-9]+)\.[0-9]+\.[0-9]+(\+sha[0-9]+\.[a-fA-F0-9]+)?$ ]] ||
     fail 'packageManager must pin pnpm to an exact version'
@@ -38,6 +45,7 @@ updatePackageJson() {
 updateMiseTool() {
   local tool="$1" label="$2" policy="$3" pattern="$4"
   local key="tools.\"$tool\"" current request releaseLine version
+  printf '\n=== mise.toml: %s ===\n' "$label" >&2
   current="$(mise config get --file mise.toml "$key")"
   [[ "$current" =~ $pattern ]] || fail "Unexpected $label pin: $current"
 
