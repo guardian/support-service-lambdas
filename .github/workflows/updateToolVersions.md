@@ -42,6 +42,8 @@ gh workflow run update-tool-versions.yml --ref my-branch
 
 A PR will be created on branch `automation/tool-versions-for/<target-branch>`, separate from normal
 updates on `automation/tool-versions`.
+PRs targeting a non-default branch have a `[TEST: <target-branch>]` title prefix and a prominent
+description notice identifying the target and default branches.
 
 To help with testing, every run refreshes the PR title and description, even if the selected
 versions have not changed.
