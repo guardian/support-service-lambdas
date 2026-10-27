@@ -20,6 +20,13 @@ root of the repo:
 $ mise install
 ```
 
+Also enable [Corepack](https://github.com/nodejs/corepack) for compatibility with the existing
+setup (from the root of the repo):
+
+```
+$ corepack enable
+```
+
 Then install dependencies (again, from the root of the repo):
 
 ```

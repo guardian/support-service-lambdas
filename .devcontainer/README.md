@@ -105,7 +105,7 @@ For toolchain version policies and updater setup, see
 If the container fails to build or set up correctly, the setup output is logged inside the container at
 `/var/log/post-create.log`, which is a good starting point for debugging.
 
-### `mise install` fails during `postCreateCommand`
+### `mise install` / `mise use` fails during `postCreateCommand`
 
 The container is cloned from whichever branch you pointed your IDE's clone action at when creating it. If that
 branch doesn't have the `mise`/devcontainer tooling changes yet (e.g. you created the container from `main` before
