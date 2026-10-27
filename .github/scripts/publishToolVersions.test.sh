@@ -95,9 +95,28 @@ runPublisher recreate 22.23.4 ''
 grep -Fx 'needs_push=false' "$tempDir/recreate.outputs"
 grep -F 'pr create' "$tempDir/recreate.log"
 
+(
+  cd "$tempDir/seed"
+  printf 'Updated publication script or documentation\n' > unrelated.txt
+  printf '{"description":"Unrelated package metadata change"}\n' > package.json
+  git add unrelated.txt package.json
+  git -c user.name=Fixture -c user.email=fixture@example.com commit --quiet -m 'Unrelated base branch change'
+  git push --quiet origin main
+)
+runPublisher baseChanged 22.23.4 42
+grep -Fx 'needs_push=false' "$tempDir/baseChanged.outputs"
+grep -F 'pr edit 42' "$tempDir/baseChanged.log"
+[[ "$(git --git-dir="$tempDir/origin.git" rev-parse automation/tool-versions)" == "$branchSha" ]]
+if grep -Fq 'auth setup-git' "$tempDir/baseChanged.log"; then
+  printf 'Unrelated base branch changes must not trigger a push\n' >&2
+  exit 1
+fi
+
 runPublisher update 22.24.0 42
 grep -Fx 'needs_push=true' "$tempDir/update.outputs"
 [[ "$(git --git-dir="$tempDir/origin.git" rev-parse automation/tool-versions)" != "$branchSha" ]]
+[[ "$(git --git-dir="$tempDir/origin.git" show automation/tool-versions:unrelated.txt)" == 'Updated publication script or documentation' ]]
+[[ "$(git --git-dir="$tempDir/origin.git" show automation/tool-versions:package.json)" == '{"description":"Unrelated package metadata change"}' ]]
 
 runPublisher obsolete '' 42
 grep -F 'pr close 42' "$tempDir/obsolete.log"

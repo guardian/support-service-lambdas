@@ -37,19 +37,20 @@ if [[ "$updateAvailable" == false ]]; then
   fi
 else
   printf '\n=== Compare updates with existing remote branch ===\n'
+  mapfile -d '' -t stagedFiles < <(git diff --cached --name-only -z)
   remoteRef="$(git ls-remote --heads origin "refs/heads/$UPDATE_BRANCH")"
   remoteSha="${remoteRef%%$'\t'*}"
-  tree="$(git write-tree)"
-  remoteTree=
+  needsPush=true
   if [[ -n "$remoteSha" ]]; then
     printf 'Found branch %s at %s.\n' "$UPDATE_BRANCH" "$remoteSha"
     git fetch --no-tags --depth=1 origin "$remoteSha"
-    remoteTree="$(git rev-parse "$remoteSha^{tree}")"
+    if git diff --cached --quiet "$remoteSha" -- "${stagedFiles[@]}"; then
+      needsPush=false
+    fi
   else
     printf 'Branch %s does not exist yet.\n' "$UPDATE_BRANCH"
   fi
-  if [[ "$tree" != "$remoteTree" ]]; then
-    needsPush=true
+  if [[ "$needsPush" == true ]]; then
     printf 'Selected updates differ from the remote branch; a commit and push are needed.\n'
   else
     printf 'The remote branch already contains the selected updates; no commit or push is needed.\n'
