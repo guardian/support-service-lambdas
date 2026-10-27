@@ -106,11 +106,24 @@ export class SalesforceEventBus extends GuStack {
 			},
 		);
 
-		subscriptionCancellationRule.addTarget(
-			new EventBusTarget(cancellationsBus, {
-				deadLetterQueue: deadLetterQueue,
+		const cancellationsBusTarget = new EventBusTarget(cancellationsBus, {
+			deadLetterQueue: deadLetterQueue,
+		});
+
+		subscriptionCancellationRule.addTarget({
+			bind: (rule, id) => ({
+				...cancellationsBusTarget.bind(rule, id),
+				input: RuleTargetInput.fromObject({
+					subscriptionNumber: EventField.fromPath(
+						'$.detail.payload.Subscription_Number__c',
+					),
+					orderNumber: EventField.fromPath('$.detail.payload.Order_Number__c'),
+					allowUserNotifications: EventField.fromPath(
+						'$.detail.payload.Send_Notifications__c',
+					),
+				}),
 			}),
-		);
+		});
 
 		new CfnQueuePolicy(this, 'SalesforceOutboundQueuePolicy', {
 			policyDocument: {

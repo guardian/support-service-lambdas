@@ -214,6 +214,14 @@ DLQ: https://",
               },
             },
             "Id": "Target0",
+            "InputTransformer": {
+              "InputPathsMap": {
+                "detail-payload-Order_Number__c": "$.detail.payload.Order_Number__c",
+                "detail-payload-Send_Notifications__c": "$.detail.payload.Send_Notifications__c",
+                "detail-payload-Subscription_Number__c": "$.detail.payload.Subscription_Number__c",
+              },
+              "InputTemplate": "{"subscriptionNumber":<detail-payload-Subscription_Number__c>,"orderNumber":<detail-payload-Order_Number__c>,"allowUserNotifications":<detail-payload-Send_Notifications__c>}",
+            },
             "RoleArn": {
               "Fn::GetAtt": [
                 "SfBusToCancellationsBusEventsRole813F3E42",
@@ -662,6 +670,14 @@ DLQ: https://",
               },
             },
             "Id": "Target0",
+            "InputTransformer": {
+              "InputPathsMap": {
+                "detail-payload-Order_Number__c": "$.detail.payload.Order_Number__c",
+                "detail-payload-Send_Notifications__c": "$.detail.payload.Send_Notifications__c",
+                "detail-payload-Subscription_Number__c": "$.detail.payload.Subscription_Number__c",
+              },
+              "InputTemplate": "{"subscriptionNumber":<detail-payload-Subscription_Number__c>,"orderNumber":<detail-payload-Order_Number__c>,"allowUserNotifications":<detail-payload-Send_Notifications__c>}",
+            },
             "RoleArn": {
               "Fn::GetAtt": [
                 "SfBusToCancellationsBusEventsRole813F3E42",
