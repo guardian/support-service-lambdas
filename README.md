@@ -13,14 +13,11 @@ There should be one in each project and anywhere else you think it would help.
 
 ## Getting Started - Typescript
 
-Install [Node.js](https://nodejs.org). The Node version is required is encoded in the `.nvmrc` file at the root of the repo.
-We recommend using a Node version manager such as [fnm](https://github.com/Schniz/fnm).
-
-Once Node is installed and you're using the correct version, install the correct package manager (currently [pnpm](https://pnpm.io/))
-with [corepack](https://github.com/nodejs/corepack) (from the root of the repo):
+Install [mise](https://mise.jdx.dev/getting-started.html), then install the project tools from the
+root of the repo:
 
 ```
-$ corepack enable
+$ mise install
 ```
 
 Then install dependencies (again, from the root of the repo):
@@ -126,7 +123,7 @@ run `sbt dependencyTree`
 exports, types and dependencies**, plus dependencies that are used but not declared. It
 is a useful way to keep the lambdas and shared modules lean.
 
-Run it from the root of the repo (using the Node version in `.nvmrc`):
+Run it from the root of the repo (using the Node version in `mise.toml`):
 
 ```shell
 pnpm knip

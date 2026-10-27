@@ -15,45 +15,57 @@ latest() {
   printf '%s' "$version"
 }
 
-nodeCurrent="$(tr -d '\r\n' < .nvmrc)"
-[[ "$nodeCurrent" =~ ^v?([0-9]+)\.[0-9]+\.[0-9]+$ ]] || fail '.nvmrc must contain an exact version'
-nodeMajor="${BASH_REMATCH[1]}"
-packageManager="$(jq -er '.packageManager | strings' package.json)"
-[[ "$packageManager" =~ ^pnpm@([0-9]+)\.[0-9]+\.[0-9]+(\+sha[0-9]+\.[a-fA-F0-9]+)?$ ]] ||
-  fail 'packageManager must pin pnpm to an exact version'
-pnpmMajor="${BASH_REMATCH[1]}"
-pnpmCurrent="${packageManager#pnpm@}"
-pnpmCurrent="${pnpmCurrent%%+*}"
-javaCurrent="$(mise config get --file mise.toml tools.java)"
-[[ "$javaCurrent" =~ ^corretto-([0-9]+)(\.[0-9]+){4}$ ]] || fail 'Java must pin an exact Corretto build'
-javaMajor="${BASH_REMATCH[1]}"
-awsCurrent="$(mise config get --file mise.toml 'tools."aqua:aws/aws-cli"')"
-[[ "$awsCurrent" =~ ^([0-9]+)\.[0-9]+\.[0-9]+$ ]] || fail 'AWS CLI must contain an exact version'
-awsMajor="${BASH_REMATCH[1]}"
-devenvCurrent="$(mise config get --file mise.toml 'tools."github:guardian/devenv"')"
-[[ "$devenvCurrent" =~ ^[0-9]{8}-[0-9]{6}$ ]] || fail 'Unexpected Guardian devenv version format'
+printUpdate() {
+  printf '| %s | %s | %s |\n' "$1" "$2" "$3"
+}
 
-nodeVersion="$(latest "node@$nodeMajor" "^$nodeMajor\\.[0-9]+\\.[0-9]+$" "${nodeCurrent#v}")"
-pnpmVersion="$(latest "pnpm@$pnpmMajor" "^$pnpmMajor\\.[0-9]+\\.[0-9]+$" "$pnpmCurrent")"
-javaVersion="$(latest "java@corretto-$javaMajor" "^corretto-$javaMajor(\\.[0-9]+){4}$" "$javaCurrent")"
-awsVersion="$(latest "aqua:aws/aws-cli@$awsMajor" "^$awsMajor\\.[0-9]+\\.[0-9]+$" "$awsCurrent")"
-devenvVersion="$(latest github:guardian/devenv '^[0-9]{8}-[0-9]{6}$' "$devenvCurrent")"
+updatePackageJson() {
+  local packageManager current major version
+  packageManager="$(jq -er '.packageManager | strings' package.json)"
+  [[ "$packageManager" =~ ^pnpm@([0-9]+)\.[0-9]+\.[0-9]+(\+sha[0-9]+\.[a-fA-F0-9]+)?$ ]] ||
+    fail 'packageManager must pin pnpm to an exact version'
+  major="${BASH_REMATCH[1]}"
+  current="${packageManager#pnpm@}"
+  current="${current%%+*}"
+  version="$(latest "pnpm@$major" "^$major\\.[0-9]+\\.[0-9]+$" "$current")"
+  if [[ "$version" != "$current" ]]; then
+    jq --tab --arg version "pnpm@$version" '.packageManager = $version' package.json > "$tempDir/package.json"
+    cat "$tempDir/package.json" > package.json
+  fi
+  printUpdate pnpm "$current" "$version"
+}
+
+updateMiseTool() {
+  local tool="$1" label="$2" policy="$3" pattern="$4"
+  local key="tools.\"$tool\"" current request releaseLine version
+  current="$(mise config get --file mise.toml "$key")"
+  [[ "$current" =~ $pattern ]] || fail "Unexpected $label pin: $current"
+
+  case "$policy" in
+    current-major)
+      releaseLine="${current%%.*}"
+      request="$tool@$releaseLine"
+      ;;
+    timestamp)
+      request="$tool"
+      ;;
+    *) fail "Unknown update policy for $tool: $policy" ;;
+  esac
+
+  version="$(latest "$request" "$pattern" "$current")"
+  if [[ "$policy" == current-major && "$version" != "$releaseLine".* ]]; then
+    fail "$request returned a version outside the current release line: $version"
+  fi
+  mise config set --file mise.toml --type string "$key" "$version"
+  printUpdate "$label" "$current" "$version"
+}
 
 tempDir="$(mktemp -d)"
 trap 'rm -r -- "$tempDir"' EXIT
 
-if [[ "$pnpmVersion" != "$pnpmCurrent" ]]; then
-  jq --tab --arg version "pnpm@$pnpmVersion" '.packageManager = $version' package.json > "$tempDir/package.json"
-  cat "$tempDir/package.json" > package.json
-fi
-printf 'v%s\n' "$nodeVersion" > .nvmrc
-mise config set --file mise.toml --type string tools.java "$javaVersion"
-mise config set --file mise.toml --type string 'tools."aqua:aws/aws-cli"' "$awsVersion"
-mise config set --file mise.toml --type string 'tools."github:guardian/devenv"' "$devenvVersion"
-
 printf '| Tool | Previous | Selected |\n| --- | --- | --- |\n'
-printf '| Node.js | %s | %s |\n' "$nodeCurrent" "$nodeVersion"
-printf '| pnpm | %s | %s |\n' "$pnpmCurrent" "$pnpmVersion"
-printf '| Corretto | %s | %s |\n' "$javaCurrent" "$javaVersion"
-printf '| AWS CLI | %s | %s |\n' "$awsCurrent" "$awsVersion"
-printf '| Guardian devenv | %s | %s |\n' "$devenvCurrent" "$devenvVersion"
+updatePackageJson
+updateMiseTool node Node.js current-major '^[0-9]+\.[0-9]+\.[0-9]+$'
+updateMiseTool java Corretto current-major '^corretto-[0-9]+(\.[0-9]+){4}$'
+updateMiseTool aqua:aws/aws-cli 'AWS CLI' current-major '^[0-9]+\.[0-9]+\.[0-9]+$'
+updateMiseTool github:guardian/devenv 'Guardian devenv' timestamp '^[0-9]{8}-[0-9]{6}$'

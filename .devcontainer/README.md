@@ -33,8 +33,8 @@ into a container volume** — so there is no bind mount of your working tree.
    git clone git@github.com:guardian/support-service-lambdas.git
    cd support-service-lambdas
    ```
-2. Install the project tooling from [`mise.toml`](../mise.toml), Node.js from
-   [`.nvmrc`](../.nvmrc), and pnpm from [`package.json`](../package.json) with `mise`:
+2. Install the project tooling from [`mise.toml`](../mise.toml) and pnpm from
+   [`package.json`](../package.json) with `mise`:
    ```bash
    mise install
    ```
@@ -121,7 +121,7 @@ whose `PATH` is only the system default (`/usr/local/sbin:/usr/local/bin:...`). 
 
 To fix this the container's `postCreateCommand` (see `devenv.yaml`) symlinks `mise` and its tool shims into
 `/usr/local/bin`, which *is* on the default `PATH`. This makes `node`, `java`, `npm` etc. discoverable by the IDE; the
-shims resolve tool versions from [`mise.toml`](../mise.toml), [`.nvmrc`](../.nvmrc), and
+shims resolve tool versions from [`mise.toml`](../mise.toml) and
 [`package.json`](../package.json) at runtime. If you still see
 the warning after a rebuild, reopen the project (or restart the IDE) so IntelliJ re-detects the Node interpreter from
 `PATH`.
