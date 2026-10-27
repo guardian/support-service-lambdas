@@ -1,0 +1,8 @@
+[tools]
+"github:guardian/devenv" = "20260930-111347"
+java = "corretto-21"
+"aqua:aws/aws-cli" = "2"
+sbt = "latest"
+
+[settings]
+idiomatic_version_file_enable_tools = ["node", "pnpm"]

@@ -33,8 +33,8 @@ into a container volume** — so there is no bind mount of your working tree.
    git clone git@github.com:guardian/support-service-lambdas.git
    cd support-service-lambdas
    ```
-2. Install the pinned host tooling (`devenv`, plus `java`/`node` from
-   [`.tool-versions`](../.tool-versions)) with `mise`:
+2. Install the project tooling from [`mise.toml`](../mise.toml), Node.js from
+   [`.nvmrc`](../.nvmrc), and pnpm from [`package.json`](../package.json) with `mise`:
    ```bash
    mise install
    ```
@@ -102,7 +102,7 @@ workflows (building, testing, linting, etc.).
 If the container fails to build or set up correctly, the setup output is logged inside the container at
 `/var/log/post-create.log`, which is a good starting point for debugging.
 
-### `mise install` / `mise use` fails during `postCreateCommand`
+### `mise install` fails during `postCreateCommand`
 
 The container is cloned from whichever branch you pointed your IDE's clone action at when creating it. If that
 branch doesn't have the `mise`/devcontainer tooling changes yet (e.g. you created the container from `main` before
@@ -118,7 +118,8 @@ whose `PATH` is only the system default (`/usr/local/sbin:/usr/local/bin:...`). 
 
 To fix this the container's `postCreateCommand` (see `devenv.yaml`) symlinks `mise` and its tool shims into
 `/usr/local/bin`, which *is* on the default `PATH`. This makes `node`, `java`, `npm` etc. discoverable by the IDE; the
-shims resolve the correct versions from the project's [`.tool-versions`](../.tool-versions) at runtime. If you still see
+shims resolve tool versions from [`mise.toml`](../mise.toml), [`.nvmrc`](../.nvmrc), and
+[`package.json`](../package.json) at runtime. If you still see
 the warning after a rebuild, reopen the project (or restart the IDE) so IntelliJ re-detects the Node interpreter from
 `PATH`.
 
@@ -132,7 +133,7 @@ or any other config settings. Then run:
 devenv generate
 ``` 
 to regenerate the `shared/` and `user/` `devcontainer.json` files. (`devenv` is installed on the host by
-`mise` — see [`.tool-versions`](../.tool-versions) — so `devenv generate` works directly once `mise install`
+`mise` — see [`mise.toml`](../mise.toml) — so `devenv generate` works directly once `mise install`
 has run and `mise` is activated in your shell.)
 
 ### `shared/devcontainer.json` and `user/devcontainer.json`

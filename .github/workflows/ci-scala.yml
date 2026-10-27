@@ -55,7 +55,7 @@ jobs:
         shell: bash
       - uses: actions/setup-node@v7
         with:
-          node-version-file: '.tool-versions'
+          node-version-file: '.nvmrc'
           cache: 'pnpm'
       - run: pnpm install
       - run: pnpm --filter cdk package
