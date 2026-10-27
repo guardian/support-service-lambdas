@@ -92,3 +92,11 @@ does not mean the updater has stopped working.
 **There is no team alert or watchdog configured.** Failures appear as red workflow runs; personal
 notifications depend on GitHub settings. If scheduled runs stop altogether, there may be no failed
 run to notice. Someone must check the run history periodically.
+
+## Future work
+
+- Use a proper bot rather than a time limited access token.
+- Release cooldown support
+- notifications on failures
+- Work out if global pnpm registration and Corepack
+  provisioning are still needed.
