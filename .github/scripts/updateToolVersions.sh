@@ -17,12 +17,24 @@ latest() {
 }
 
 printUpdate() {
+  local url
+  case "$1" in
+    pnpm) url="https://github.com/pnpm/pnpm/releases/tag/v$3" ;;
+    Node.js) url="https://nodejs.org/en/blog/release/v$3" ;;
+    Corretto)
+      local version="${3#corretto-}"
+      url="https://github.com/corretto/corretto-${version%%.*}/releases/tag/$version"
+      ;;
+    'AWS CLI') url="https://github.com/aws/aws-cli/tree/$3" ;;
+    'Guardian devenv') url="https://github.com/guardian/devenv/releases/tag/$3" ;;
+    *) fail "No release link configured for $1" ;;
+  esac
   if [[ "$2" == "$3" ]]; then
     printf '%s is already up to date at %s; no version change needed.\n' "$1" "$3" >&2
   else
     printf 'Updated %s from %s to %s.\n' "$1" "$2" "$3" >&2
   fi
-  printf '| %s | %s | %s |\n' "$1" "$2" "$3"
+  printf '| %s | %s | [%s](%s) |\n' "$1" "$2" "$3" "$url"
 }
 
 updatePackageJson() {
@@ -71,7 +83,7 @@ updateMiseTool() {
 tempDir="$(mktemp -d)"
 trap 'rm -r -- "$tempDir"' EXIT
 
-printf '| Tool | Previous | Selected |\n| --- | --- | --- |\n'
+printf '| Tool | Current | Update |\n| --- | --- | --- |\n'
 updatePackageJson
 updateMiseTool node Node.js current-major '^[0-9]+\.[0-9]+\.[0-9]+$'
 updateMiseTool java Corretto current-major '^corretto-[0-9]+(\.[0-9]+){4}$'
