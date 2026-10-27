@@ -1,44 +1,161 @@
 {
   "NOTICE": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/root/.github/workflows/handlerNames.managed.json.ts",
-  "subproject": [
-    "alarms-handler",
-    "braze-acquisition-events-sync",
-    "cancellations-bus",
-    "contributions-only-countries-api",
-    "discount-api",
-    "discount-expiry-notifier",
-    "generate-product-catalog",
-    "iam-policies",
-    "identity-deletion-cleanup",
-    "imovo-voucher-api",
-    "metric-push-api",
-    "mobile-purchases-to-supporter-product-data",
-    "mparticle-acquisitions-publisher",
-    "mparticle-api",
-    "multiple-account-api",
-    "negative-invoices-processor",
-    "new-subscription-api",
-    "newsletter-acquisition",
-    "observer-benefits-api",
-    "observer-data-export",
-    "payment-failure-comms-exit-api",
-    "press-reader-entitlements",
-    "product-switch-api",
-    "promotions-api",
-    "promotions-lambdas",
-    "sales-tax-api",
-    "salesforce-disaster-recovery",
-    "salesforce-disaster-recovery-health-check",
-    "salesforce-event-bus",
-    "scrub-non-tokenised-payment-methods",
-    "send-test-data-to-mparticle",
-    "stripe-disputes",
-    "supporter-product-data-lambdas",
-    "ticket-tailor-webhook",
-    "update-supporter-plus-amount",
-    "user-benefits",
-    "user-subscriptions-api",
-    "write-off-unpaid-invoices",
-    "zuora-salesforce-link-remover"
+  "include": [
+    {
+      "subproject": "alarms-handler",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "braze-acquisition-events-sync",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "cancellations-bus",
+      "hasTsSource": false
+    },
+    {
+      "subproject": "contributions-only-countries-api",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "discount-api",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "discount-expiry-notifier",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "generate-product-catalog",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "iam-policies",
+      "hasTsSource": false
+    },
+    {
+      "subproject": "identity-deletion-cleanup",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "imovo-voucher-api",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "metric-push-api",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "mobile-purchases-to-supporter-product-data",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "mparticle-acquisitions-publisher",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "mparticle-api",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "multiple-account-api",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "negative-invoices-processor",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "new-subscription-api",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "newsletter-acquisition",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "observer-benefits-api",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "observer-data-export",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "payment-failure-comms-exit-api",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "press-reader-entitlements",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "product-switch-api",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "promotions-api",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "promotions-lambdas",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "sales-tax-api",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "salesforce-disaster-recovery",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "salesforce-disaster-recovery-health-check",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "salesforce-event-bus",
+      "hasTsSource": false
+    },
+    {
+      "subproject": "scrub-non-tokenised-payment-methods",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "send-test-data-to-mparticle",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "stripe-disputes",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "supporter-product-data-lambdas",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "ticket-tailor-webhook",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "update-supporter-plus-amount",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "user-benefits",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "user-subscriptions-api",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "write-off-unpaid-invoices",
+      "hasTsSource": true
+    },
+    {
+      "subproject": "zuora-salesforce-link-remover",
+      "hasTsSource": true
+    }
   ]
 }
