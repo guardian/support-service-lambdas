@@ -3,7 +3,10 @@ import { Duration } from 'aws-cdk-lib';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { ApiGatewayToSqs } from './cdk/ApiGatewayToSqs';
-import { AllowZuoraOAuthSecretsPolicy } from './cdk/policies';
+import {
+	AllowBusPutEventsPolicy,
+	AllowZuoraOAuthSecretsPolicy,
+} from './cdk/policies';
 import { SrSqsLambda } from './cdk/SrSqsLambda';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
@@ -39,6 +42,7 @@ export class ZuoraAutoCancel extends SrStack {
 		// IAM Policies
 		lambda.addPolicies(
 			new AllowZuoraOAuthSecretsPolicy(this),
+			new AllowBusPutEventsPolicy(this, 'cancellations-bus'),
 			new Policy(this, 'ReadPrivateCredentials', {
 				statements: [
 					new PolicyStatement({

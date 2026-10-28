@@ -1,6 +1,5 @@
 package com.gu.autoCancel
 
-import com.gu.util.TypeConvert._
 import com.gu.util.Logging
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.RestRequestMaker.Requests
@@ -12,7 +11,9 @@ import java.time.LocalDate
 
 object AutoCancel extends Logging {
 
-  case class CancellationResponse(invoiceId: String)
+  case class CancellationResponse(invoiceId: String, orderNumber: OrderNumber)
+
+  case class CancelledSubscription(request: AutoCancelRequest, response: CancellationResponse)
 
   case class AutoCancelRequest(
       accountId: String,
@@ -24,44 +25,37 @@ object AutoCancel extends Logging {
       autoCancelRequests: List[AutoCancelRequest],
       calloutInvoiceId: String,
       orderDate: LocalDate,
-  ): ApiGatewayOp[Unit] =
+  ): ClientFailableOp[List[CancelledSubscription]] =
     apply(
       new ZuoraOrderCancellation(requests),
-      new ZuoraGetInvoiceTransactions(requests),
-      new TransferToCreditBalance(requests),
-      new ApplyCreditBalance(requests),
       new ZuoraUpdateCancellationReason(requests),
     )(autoCancelRequests, calloutInvoiceId, orderDate)
 
   def apply(
       cancellation: SubscriptionCancellation,
-      invoiceTransactions: GetInvoiceTransactions,
-      creditTransfer: CreditBalanceTransfer,
-      creditApplication: CreditBalanceApplication,
       cancellationReason: CancellationReasonUpdater,
   )(
       requests: List[AutoCancelRequest],
       calloutInvoiceId: String,
       orderDate: LocalDate,
-  ): ApiGatewayOp[Unit] =
-    attemptAll(requests)(request =>
-      executeCancel(cancellation, invoiceTransactions, creditTransfer, creditApplication, cancellationReason)(
-        request,
-        calloutInvoiceId,
-        orderDate,
-      ),
-    ).toApiGatewayOp("AutoCancel failed")
+  ): ClientFailableOp[List[CancelledSubscription]] =
+    attemptAll(requests) { request =>
+      executeCancel(cancellation, cancellationReason)(request, calloutInvoiceId, orderDate)
+        .map(CancelledSubscription(request, _))
+    }
 
   private[autoCancel] def attemptAll[A, B](
       items: Seq[A],
-  )(execute: A => ClientFailableOp[B]): ClientFailableOp[Unit] =
-    items.foldLeft[ClientFailableOp[Unit]](ClientSuccess(())) { (firstResult, item) =>
-      val currentResult = execute(item)
-      firstResult match {
-        case failure: ClientFailure => failure
-        case ClientSuccess(_) => currentResult.map(_ => ())
+  )(execute: A => ClientFailableOp[B]): ClientFailableOp[List[B]] =
+    items
+      .foldLeft[ClientFailableOp[List[B]]](ClientSuccess(Nil)) { (firstResult, item) =>
+        val currentResult = execute(item)
+        firstResult match {
+          case failure: ClientFailure => failure
+          case ClientSuccess(values) => currentResult.map(_ :: values)
+        }
       }
-    }
+      .map(_.reverse)
 
   /*
    * This process applies at the subscription level.  It will potentially run multiple times per invoice.
@@ -73,15 +67,12 @@ object AutoCancel extends Logging {
    */
   private def executeCancel(
       cancellation: SubscriptionCancellation,
-      invoiceTransactions: GetInvoiceTransactions,
-      creditTransfer: CreditBalanceTransfer,
-      creditApplication: CreditBalanceApplication,
       cancellationReason: CancellationReasonUpdater,
   )(
       request: AutoCancelRequest,
       calloutInvoiceId: String,
       orderDate: LocalDate,
-  ): ClientFailableOp[Unit] = {
+  ): ClientFailableOp[CancellationResponse] = {
     val AutoCancelRequest(accountId, subToCancel, _) = request
     logger.info(
       s"Attempting to perform auto-cancellation on account: $accountId for subscription: ${subToCancel.value}",
@@ -91,25 +82,10 @@ object AutoCancel extends Logging {
       cancellationResponse <- cancellation
         .cancel(request, calloutInvoiceId, orderDate)
         .withLogging("cancelSubscription")
-      invoiceTransactionSummary <- invoiceTransactions.getInvoiceTransactions(accountId)
-      unbalancedInvoices <- UnbalancedInvoices.fromSummary(
-        accountId,
-        invoiceTransactionSummary,
-        cancellationResponse.invoiceId,
-      )
-      creditTransferAmount = -unbalancedInvoices.negativeInvoice.balance
-      _ <- creditTransfer
-        .transferToCreditBalance(cancellationResponse.invoiceId, creditTransferAmount, "Auto-cancellation")
-        .withLogging("transferToCreditBalance")
-      _ <- applyCreditBalances(creditApplication.applyCreditBalance)(
-        subToCancel,
-        unbalancedInvoices.unpaidInvoices,
-        "Auto-cancellation",
-      ).withLogging("applyCreditBalance")
-    } yield ()
+    } yield cancellationResponse
   }
 
-  private[autoCancel] def applyCreditBalances(applyCreditBalance: (String, Double, String) => ClientFailableOp[Unit])(
+  private[autoCancel] def applyCreditBalances(creditApplication: CreditBalanceApplication)(
       subToCancel: SubscriptionNumber,
       invoices: Seq[ItemisedInvoice],
       comment: String,
@@ -117,16 +93,16 @@ object AutoCancel extends Logging {
     attemptAll(invoices) { invoice =>
       invoice.invoiceItems.length match {
         case 0 => GenericError(s"Invoice ${invoice.id} has no items")
-        case 1 => applyCreditBalance(invoice.id, invoice.balance, comment)
+        case 1 => creditApplication.applyCreditBalance(invoice.id, invoice.balance, comment)
         case _ =>
           invoice.invoiceItems.filter(_.subscriptionName == subToCancel.value) match {
             case Nil => GenericError(s"Invoice ${invoice.id} isn't for subscription $subToCancel")
             case items =>
               val amount = items.map(item => item.chargeAmount + item.taxAmount).sum
-              applyCreditBalance(invoice.id, amount, comment)
+              creditApplication.applyCreditBalance(invoice.id, amount, comment)
           }
       }
-    }
+    }.map(_ => ())
   }
 
   case class UnbalancedInvoices(negativeInvoice: ItemisedInvoice, unpaidInvoices: Seq[ItemisedInvoice])

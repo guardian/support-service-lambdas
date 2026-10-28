@@ -15,7 +15,7 @@ import okhttp3.{MediaType, Protocol, Request, Response, ResponseBody}
 import okio.Buffer
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsNull, JsNumber, JsString, JsValue, Json}
 
 import java.time.LocalDate
 
@@ -112,6 +112,33 @@ class ZuoraOperationsTest extends AnyFlatSpec with Matchers {
       .getSubscriptionsOnInvoice("invoice-1")
       .map(_.toSet) shouldBe ClientSuccess(Set(SubscriptionNumber("A-S001"), SubscriptionNumber("A-S002")))
     operation.calls shouldBe 1
+  }
+
+  List[JsValue](JsString(""), JsString(" "), JsString("A S001"), JsString("A/S001"), JsNull, JsNumber(123)).foreach {
+    number =>
+      it should s"reject invoice subscription name $number while reading the response" in {
+        val operation = new HttpOperation(
+          "GET",
+          "invoices/invoice-1/items",
+          success ++ Json.obj("invoiceItems" -> Json.arr(Json.obj("subscriptionName" -> number))),
+        )
+
+        new ZuoraGetSubsNamesOnInvoice(operation.requests)
+          .getSubscriptionsOnInvoice("invoice-1")
+          .isFailure shouldBe true
+
+        operation.calls shouldBe 1
+      }
+  }
+
+  it should "reject an invoice item without a subscription name rather than ignoring it" in {
+    val operation = new HttpOperation(
+      "GET",
+      "invoices/invoice-1/items",
+      success ++ Json.obj("invoiceItems" -> Json.arr(Json.obj())),
+    )
+
+    new ZuoraGetSubsNamesOnInvoice(operation.requests).getSubscriptionsOnInvoice("invoice-1").isFailure shouldBe true
   }
 
   "Zuora invoice operations" should "request and parse itemised invoice transactions" in {
