@@ -125,7 +125,7 @@ export class SalesforceEventBus extends GuStack {
 		new CfnPipe(this, 'SubscriptionCancellationPipe', {
 			name: `${app}-subscription-cancellation-${this.stage}`,
 			description:
-				'Translate SF Subscription_Cancellation__e events into Cancellation events on the cancellations-bus',
+				'Translate SF Subscription_Cancellation__e events into Cancellation events for the cancellations-bus',
 			roleArn: pipeRole.roleArn,
 			source: cancellationQueue.queueArn,
 			sourceParameters: { sqsQueueParameters: { batchSize: 1 } },
