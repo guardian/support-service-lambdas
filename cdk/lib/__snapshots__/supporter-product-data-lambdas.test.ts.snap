@@ -3560,7 +3560,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
           },
         ],
         "ProvisionedThroughput": {
-          "ReadCapacityUnits": 20,
+          "ReadCapacityUnits": 70,
           "WriteCapacityUnits": 5,
         },
         "SSESpecification": {

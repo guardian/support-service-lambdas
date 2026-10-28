@@ -106,7 +106,7 @@ export class SupporterProductDataLambdas extends SrStack {
 				...(isProd
 					? {
 							billingMode: BillingMode.PROVISIONED,
-							readCapacity: 20,
+							readCapacity: 70,
 							writeCapacity: 5,
 						}
 					: { billingMode: BillingMode.PAY_PER_REQUEST }),
