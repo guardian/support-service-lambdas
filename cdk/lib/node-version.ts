@@ -1,4 +1,4 @@
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 
-// If you change this version make sure you update the version in the .nvmrc file as well
+// If you change this major version, also update tools.node in mise.toml.
 export const nodeVersion = Runtime.NODEJS_22_X;
