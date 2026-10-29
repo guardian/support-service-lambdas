@@ -171,8 +171,7 @@ Resources:
                   - dynamodb:PutItem
                   - dynamodb:UpdateItem
                 Resource:
-                  - Fn::ImportValue:
-                      Fn::Sub: supporter-product-data-tables-${Stage}-SupporterProductDataTable
+                  - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/SupporterProductData-${Stage}
         - PolicyName: ProductMoveApiLambdaRolePolicy4
           PolicyDocument:
             Statement:
