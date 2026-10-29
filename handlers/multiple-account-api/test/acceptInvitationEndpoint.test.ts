@@ -1,6 +1,7 @@
 import type { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import type { SecondaryUserRecord } from '@modules/multiple-account/secondaryUserRepository';
 import type { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { acceptInvitationEndpoint } from '../src/acceptInvitationEndpoint';
 import type {
 	InvitationRecord,
@@ -69,6 +70,7 @@ const makeSecondaryUserRepository = (
 const dynamoClient = {} as DynamoDBClient;
 
 describe('acceptInvitationEndpoint', () => {
+	const zuoraClient = {} as unknown as ZuoraClient;
 	it('returns 410 when the invitation has already been soft-accepted (acceptedDate is set)', async () => {
 		const { repository: invitationRepository, mockGet } =
 			makeInvitationRepository(
@@ -82,6 +84,7 @@ describe('acceptInvitationEndpoint', () => {
 			invitationRepository,
 			secondaryUserRepository,
 			dynamoClient,
+			zuoraClient,
 			secondaryIdentityId,
 			invitationCode,
 		);
@@ -104,6 +107,7 @@ describe('acceptInvitationEndpoint', () => {
 			invitationRepository,
 			secondaryUserRepository,
 			dynamoClient,
+			zuoraClient,
 			secondaryIdentityId,
 			invitationCode,
 		);
@@ -124,6 +128,7 @@ describe('acceptInvitationEndpoint', () => {
 			invitationRepository,
 			secondaryUserRepository,
 			dynamoClient,
+			zuoraClient,
 			secondaryIdentityId,
 			invitationCode,
 		);
@@ -142,6 +147,7 @@ describe('acceptInvitationEndpoint', () => {
 			invitationRepository,
 			secondaryUserRepository,
 			dynamoClient,
+			zuoraClient,
 			secondaryIdentityId,
 			invitationCode,
 		);
