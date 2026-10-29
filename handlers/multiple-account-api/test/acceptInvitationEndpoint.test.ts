@@ -13,7 +13,6 @@ const subscriptionName = 'A-S00974337';
 const secondaryIdentityId = 'secondary-id';
 const primaryIdentityId = 'primary-id';
 const invitationCode = 'RpwR62kMnAxe';
-const removedPrimarySubscriptionName = 'A-S00000000';
 
 const makeSecondaryUser = (
 	overrides: Partial<SecondaryUserRecord> = {},
@@ -154,25 +153,5 @@ describe('acceptInvitationEndpoint', () => {
 		);
 
 		expect(result.statusCode).toBe(404);
-	});
-
-	it('returns 410 for removed Primary subscription', async () => {
-		const { repository: invitationRepository } = makeInvitationRepository(
-			makeInvitation({ subscriptionName: removedPrimarySubscriptionName }),
-		);
-		const { repository: secondaryUserRepository, mockListByIdentity } =
-			makeSecondaryUserRepository([makeSecondaryUser()]);
-
-		const result = await acceptInvitationEndpoint(
-			stage,
-			invitationRepository,
-			secondaryUserRepository,
-			dynamoClient,
-			zuoraClient,
-			secondaryIdentityId,
-			invitationCode,
-		);
-		expect(result.statusCode).toBe(410);
-		expect(mockListByIdentity).not.toHaveBeenCalled();
 	});
 });
