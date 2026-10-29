@@ -10,8 +10,14 @@ const cdkOnlyProjects = [
 
 export default (build: BuildDefinition) => ({
 	NOTICE: notice(__filename),
-	subproject: [
-		...build.handlers.map((def) => def.name),
-		...cdkOnlyProjects,
-	].sort(),
+	include: [
+		...build.handlers.map((def) => ({
+			subproject: def.name,
+			hasTsSource: true,
+		})),
+		...cdkOnlyProjects.map((name) => ({
+			subproject: name,
+			hasTsSource: false,
+		})),
+	].sort((a, b) => a.subproject.localeCompare(b.subproject)),
 });

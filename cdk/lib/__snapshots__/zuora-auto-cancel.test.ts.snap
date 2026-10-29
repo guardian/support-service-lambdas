@@ -220,6 +220,29 @@ exports[`The zuora-auto-cancel stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
+    "Eventbusputeventsaccess4B583352": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "events:PutEvents",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "cancellations-bus-CODE-arn",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "Eventbusputeventsaccess4B583352",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "LambdaD247545B": {
       "DependsOn": [
         "LambdaServiceRoleDefaultPolicyDAE46E21",
@@ -1306,6 +1329,29 @@ DLQ: https://",
         ],
       },
       "Type": "AWS::ApiGateway::DomainName",
+    },
+    "Eventbusputeventsaccess4B583352": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "events:PutEvents",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "cancellations-bus-PROD-arn",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "Eventbusputeventsaccess4B583352",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
     "LambdaD247545B": {
       "DependsOn": [

@@ -43,6 +43,7 @@ jobs:
         with:
           distribution: 'corretto'
           java-version: '21'
+          check-latest: true
           cache: 'sbt'
 
       - name: Setup SBT
@@ -55,7 +56,7 @@ jobs:
         shell: bash
       - uses: actions/setup-node@v7
         with:
-          node-version-file: '.tool-versions'
+          node-version-file: 'mise.toml'
           cache: 'pnpm'
       - run: pnpm install
       - run: pnpm --filter cdk package
@@ -93,7 +94,6 @@ jobs:
           - identity-backfill
           - identity-retention
           - product-move-api
-          - sf-api-user-credentials-setter
           - sf-contact-merge
           - sf-datalake-export
           - sf-gocardless-sync
@@ -113,6 +113,7 @@ jobs:
         with:
           distribution: 'corretto'
           java-version: '21'
+          check-latest: true
           cache: 'sbt'
 
       - name: Setup SBT

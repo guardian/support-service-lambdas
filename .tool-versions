@@ -1,5 +1,0 @@
-github:guardian/devenv 20260930-111347
-java corretto-21.0.7.6.1
-node 22
-aqua:aws/aws-cli 2
-sbt latest

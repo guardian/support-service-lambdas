@@ -17,6 +17,7 @@ jobs:
         with:
           distribution: corretto
           java-version: 21
+          check-latest: true
       - name: Install sbt
         id: sbt
         uses: sbt/setup-sbt@6158cb0903b8ceeae04f830055f3155e1b6a5ad7 # v1.5.11

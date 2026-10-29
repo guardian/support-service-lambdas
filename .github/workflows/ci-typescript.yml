@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v7
       - id: read-matrix
         run: |
-          echo "subprojects=$(jq -c '.subproject' .github/workflows/handlerNames.managed.json)" >> "$GITHUB_OUTPUT"
+          echo "subprojects=$(jq -c '.include' .github/workflows/handlerNames.managed.json)" >> "$GITHUB_OUTPUT"
 
   gu-cdk-build:
     needs:
@@ -31,7 +31,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        subproject: ${{ fromJson(needs.load-matrix.outputs.subprojects) }}
+        include: ${{ fromJson(needs.load-matrix.outputs.subprojects) }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -44,7 +44,7 @@ jobs:
         shell: bash
       - uses: actions/setup-node@v7
         with:
-          node-version-file: '.tool-versions'
+          node-version-file: 'mise.toml'
           cache: 'pnpm'
       - run: pnpm install
       - run: pnpm --filter "./buildcheck" type-check
@@ -53,11 +53,15 @@ jobs:
       - run: pnpm --filter "./buildcheck" snapshot:assert 'ROOT|modules|handlers/${{ matrix.subproject }}'
       - run: pnpm --filter cdk package ${{ matrix.subproject }}
       - run: pnpm --filter ${{ matrix.subproject }}... type-check
+        if: matrix.hasTsSource
       - run: pnpm --filter ${{ matrix.subproject }}... lint
+        if: matrix.hasTsSource
 
       - run: pnpm --filter cdk check-formatting
       - run: pnpm --filter ${{ matrix.subproject }}... check-formatting
+        if: matrix.hasTsSource
       - run: pnpm --filter ${{ matrix.subproject }}... test
+        if: matrix.hasTsSource
       - run: pnpm --filter ${{ matrix.subproject }} packageQuick
 
       - name: Build Riff-Raff content directories
