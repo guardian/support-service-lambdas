@@ -1,5 +1,5 @@
 [tools]
-node = "22.23.4"
+node = "22.22.0"
 "github:guardian/devenv" = "20260930-111347"
 java = "corretto-21.0.13.0.10"
 "aqua:aws/aws-cli" = "2.38.6"
