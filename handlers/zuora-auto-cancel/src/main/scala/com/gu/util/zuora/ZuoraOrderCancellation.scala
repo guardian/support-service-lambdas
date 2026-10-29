@@ -28,18 +28,23 @@ class ZuoraOrderCancellation(requests: Requests) extends SubscriptionCancellatio
     for {
       result <- requests.post[JsValue, OrderResult](
         orderBody(request, orderDate),
-        "orders?returnIds=true",
+        "orders",
         additionalHeaders = Map("Idempotency-Key" -> idempotencyKey(request, calloutInvoiceId)),
       )
       _ <-
         if (result.status.contains("Completed")) ClientSuccess(())
         else GenericError(s"Zuora cancellation order did not complete: ${result.status.getOrElse("missing status")}")
-      invoiceId <- singleInvoiceId(result.invoiceIds).toClientFailableOp
-    } yield CancellationResponse(invoiceId)
+      invoiceNumber <- singleInvoiceNumber(result.invoiceNumbers).toClientFailableOp
+      invoiceId <- ZuoraGetInvoice(requests)(invoiceNumber)
+    } yield CancellationResponse(invoiceId, result.orderNumber)
 }
 
 object ZuoraOrderCancellation {
-  private case class OrderResult(status: Option[String], invoiceIds: Option[List[String]])
+  private case class OrderResult(
+      status: Option[String],
+      invoiceNumbers: Option[List[String]],
+      orderNumber: OrderNumber,
+  )
   private implicit val orderResultReads: Reads[OrderResult] = Json.reads[OrderResult]
 
   private def orderBody(request: AutoCancelRequest, orderDate: LocalDate): JsValue =
@@ -66,13 +71,13 @@ object ZuoraOrderCancellation {
       "processingOptions" -> Json.obj("runBilling" -> true, "collectPayment" -> false),
     )
 
-  private def singleInvoiceId(invoiceIds: Option[List[String]]): Either[GenericError, String] =
-    invoiceIds match {
-      case Some(invoiceId :: Nil) if invoiceId.trim.nonEmpty => Right(invoiceId)
+  private def singleInvoiceNumber(invoiceNumbers: Option[List[String]]): Either[GenericError, String] =
+    invoiceNumbers match {
+      case Some(invoiceNumber :: Nil) if invoiceNumber.trim.nonEmpty => Right(invoiceNumber)
       case Some(Nil) => Left(GenericError("Zuora completed the cancellation order without generating an invoice"))
-      case Some(_ :: Nil) => Left(GenericError("Zuora completed the cancellation order with an empty invoice ID"))
+      case Some(_ :: Nil) => Left(GenericError("Zuora completed the cancellation order with an empty invoice number"))
       case Some(_) => Left(GenericError("Zuora generated more than one invoice for a single subscription cancellation"))
-      case None => Left(GenericError("Zuora completed the cancellation order without returning invoice IDs"))
+      case None => Left(GenericError("Zuora completed the cancellation order without returning invoice numbers"))
     }
 
   private def idempotencyKey(request: AutoCancelRequest, calloutInvoiceId: String): String =
