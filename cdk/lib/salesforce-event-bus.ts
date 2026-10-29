@@ -32,10 +32,14 @@ export class SalesforceEventBus extends GuStack {
 			busId,
 		);
 
-		const deadLetterQueue = new Queue(this, `dead-letters-${app}-queue`, {
-			queueName: `${app}-dead-letters-${this.stage}`,
-			retentionPeriod: Duration.days(14),
-		});
+		const eventbridgeRuleDeadLetterQueue = new Queue(
+			this,
+			`dead-letters-${app}-queue`,
+			{
+				queueName: `${app}-dead-letters-${this.stage}`,
+				retentionPeriod: Duration.days(14),
+			},
+		);
 
 		new GuAlarm(this, 'DeadLetterQueueAlarm', {
 			app: app,
@@ -44,8 +48,9 @@ export class SalesforceEventBus extends GuStack {
 				`There is one or more event in the ${app} dead letter queue (DLQ). ` +
 				`Check the attributes of the failed message(s) for details of the error and ` +
 				'check that the rule corresponding to the failed message is correctly configured.\n' +
-				`DLQ: https://${this.region}.console.aws.amazon.com/sqs/v2/home?region=${this.region}#/queues/https%3A%2F%2Fsqs.${this.region}.amazonaws.com%2F${this.account}%2F${deadLetterQueue.queueName}`,
-			metric: deadLetterQueue.metricApproximateNumberOfMessagesVisible(),
+				`DLQ: https://${this.region}.console.aws.amazon.com/sqs/v2/home?region=${this.region}#/queues/https%3A%2F%2Fsqs.${this.region}.amazonaws.com%2F${this.account}%2F${eventbridgeRuleDeadLetterQueue.queueName}`,
+			metric:
+				eventbridgeRuleDeadLetterQueue.metricApproximateNumberOfMessagesVisible(),
 			threshold: 1,
 			evaluationPeriods: 1,
 			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
@@ -72,7 +77,7 @@ export class SalesforceEventBus extends GuStack {
 
 		contactUpdateToSqsRule.addTarget(
 			new SqsQueue(sfOutboundMessageQueue, {
-				deadLetterQueue: deadLetterQueue,
+				deadLetterQueue: eventbridgeRuleDeadLetterQueue,
 				message: RuleTargetInput.fromObject({
 					contactId: EventField.fromPath('$.detail.payload.Contact_ID__c'),
 					/*   The Input Transformer in the CloudFormation template becomes:
@@ -142,7 +147,9 @@ export class SalesforceEventBus extends GuStack {
 		});
 
 		subscriptionCancellationRule.addTarget(
-			new SqsQueue(cancellationQueue, { deadLetterQueue }),
+			new SqsQueue(cancellationQueue, {
+				deadLetterQueue: eventbridgeRuleDeadLetterQueue,
+			}),
 		);
 
 		const pipeRole = new Role(this, 'SubscriptionCancellationPipeRole', {
