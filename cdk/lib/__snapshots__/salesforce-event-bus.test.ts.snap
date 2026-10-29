@@ -295,7 +295,7 @@ DLQ: https://",
     },
     "SubscriptionCancellationPipe": {
       "Properties": {
-        "Description": "Translate SF Subscription_Cancellation__e events into Cancellation events on the cancellations-bus",
+        "Description": "Translate SF Subscription_Cancellation__e events into Cancellation events for the cancellations-bus",
         "Name": "salesforce-event-bus-subscription-cancellation-CODE",
         "RoleArn": {
           "Fn::GetAtt": [
@@ -326,7 +326,7 @@ DLQ: https://",
         "TargetParameters": {
           "EventBridgeEventBusParameters": {
             "DetailType": "Cancellation",
-            "Source": "salesforce:subscription-cancellation-CODE",
+            "Source": "eventbridge:salesforce-event-bus-CODE",
           },
           "InputTemplate": "{"subscriptionNumber":"<$.body.detail.payload.Subscription_Number__c>","orderNumber":"<$.body.detail.payload.Order_Number__c>","allowUserNotifications":<$.body.detail.payload.Send_Notifications__c>}",
         },
@@ -873,7 +873,7 @@ DLQ: https://",
     },
     "SubscriptionCancellationPipe": {
       "Properties": {
-        "Description": "Translate SF Subscription_Cancellation__e events into Cancellation events on the cancellations-bus",
+        "Description": "Translate SF Subscription_Cancellation__e events into Cancellation events for the cancellations-bus",
         "Name": "salesforce-event-bus-subscription-cancellation-PROD",
         "RoleArn": {
           "Fn::GetAtt": [
@@ -904,7 +904,7 @@ DLQ: https://",
         "TargetParameters": {
           "EventBridgeEventBusParameters": {
             "DetailType": "Cancellation",
-            "Source": "salesforce:subscription-cancellation-PROD",
+            "Source": "eventbridge:salesforce-event-bus-PROD",
           },
           "InputTemplate": "{"subscriptionNumber":"<$.body.detail.payload.Subscription_Number__c>","orderNumber":"<$.body.detail.payload.Order_Number__c>","allowUserNotifications":<$.body.detail.payload.Send_Notifications__c>}",
         },

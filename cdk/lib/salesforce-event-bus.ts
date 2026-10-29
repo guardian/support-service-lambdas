@@ -133,7 +133,7 @@ export class SalesforceEventBus extends GuStack {
 			targetParameters: {
 				eventBridgeEventBusParameters: {
 					detailType: 'Cancellation',
-					source: `salesforce:subscription-cancellation-${this.stage}`,
+					source: `eventbridge:salesforce-event-bus-${this.stage}`,
 				},
 				// booleans must be unquoted to stay booleans in the output
 				inputTemplate: `{"subscriptionNumber":"<$.body.detail.payload.Subscription_Number__c>","orderNumber":"<$.body.detail.payload.Order_Number__c>","allowUserNotifications":<$.body.detail.payload.Send_Notifications__c>}`,
