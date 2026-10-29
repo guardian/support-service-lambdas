@@ -1,0 +1,12 @@
+[tools]
+node = "22.23.4"
+"github:guardian/devenv" = "20260930-111347"
+java = "corretto-21.0.13.0.10"
+"aqua:aws/aws-cli" = "2.38.6"
+sbt = "latest"
+
+[settings]
+idiomatic_version_file_enable_tools = ["pnpm"]
+auto_install = true
+not_found_auto_install = true
+not_found_system_fallback = false
