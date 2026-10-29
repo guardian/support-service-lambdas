@@ -112,6 +112,12 @@ export class SupporterProductDataLambdas extends SrStack {
 					: { billingMode: BillingMode.PAY_PER_REQUEST }),
 			},
 		);
+
+		this.overrideLogicalId(supporterProductDataTable, {
+			logicalId: isProd ? 'ProdTable' : 'CodeTable',
+			reason: 'Keep resource name consistent with the original cfn template.',
+		});
+
 		Tags.of(supporterProductDataTable).add('devx-backup-enabled', 'true');
 
 		if (isProd) {

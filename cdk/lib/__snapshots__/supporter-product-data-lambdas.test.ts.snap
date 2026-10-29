@@ -286,6 +286,68 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "CodeTable": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "identityId",
+            "AttributeType": "S",
+          },
+          {
+            "AttributeName": "subscriptionName",
+            "AttributeType": "S",
+          },
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "KeySchema": [
+          {
+            "AttributeName": "identityId",
+            "KeyType": "HASH",
+          },
+          {
+            "AttributeName": "subscriptionName",
+            "KeyType": "RANGE",
+          },
+        ],
+        "SSESpecification": {
+          "SSEEnabled": true,
+        },
+        "TableName": "SupporterProductData-CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "supporter-product-data-lambdas",
+          },
+          {
+            "Key": "devx-backup-enabled",
+            "Value": "true",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "TimeToLiveSpecification": {
+          "AttributeName": "expiryDate",
+          "Enabled": true,
+        },
+      },
+      "Type": "AWS::DynamoDB::Table",
+      "UpdateReplacePolicy": "Retain",
+    },
     "ExecutionFailureAlarm65D8EF83": {
       "Properties": {
         "ActionsEnabled": false,
@@ -989,7 +1051,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
               "Effect": "Allow",
               "Resource": {
                 "Fn::GetAtt": [
-                  "SupporterProductDataTable21EBD5EF",
+                  "CodeTable",
                   "Arn",
                 ],
               },
@@ -1682,68 +1744,6 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
-    },
-    "SupporterProductDataTable21EBD5EF": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "AttributeDefinitions": [
-          {
-            "AttributeName": "identityId",
-            "AttributeType": "S",
-          },
-          {
-            "AttributeName": "subscriptionName",
-            "AttributeType": "S",
-          },
-        ],
-        "BillingMode": "PAY_PER_REQUEST",
-        "KeySchema": [
-          {
-            "AttributeName": "identityId",
-            "KeyType": "HASH",
-          },
-          {
-            "AttributeName": "subscriptionName",
-            "KeyType": "RANGE",
-          },
-        ],
-        "SSESpecification": {
-          "SSEEnabled": true,
-        },
-        "TableName": "SupporterProductData-CODE",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "supporter-product-data-lambdas",
-          },
-          {
-            "Key": "devx-backup-enabled",
-            "Value": "true",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "TimeToLiveSpecification": {
-          "AttributeName": "expiryDate",
-          "Enabled": true,
-        },
-      },
-      "Type": "AWS::DynamoDB::Table",
-      "UpdateReplacePolicy": "Retain",
     },
     "UnprocessedRecordAlarm406379E1": {
       "Properties": {
@@ -2842,7 +2842,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
               "Effect": "Allow",
               "Resource": {
                 "Fn::GetAtt": [
-                  "SupporterProductDataTable21EBD5EF",
+                  "ProdTable",
                   "Arn",
                 ],
               },
@@ -2959,6 +2959,71 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
         ],
       },
       "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "ProdTable": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "identityId",
+            "AttributeType": "S",
+          },
+          {
+            "AttributeName": "subscriptionName",
+            "AttributeType": "S",
+          },
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "identityId",
+            "KeyType": "HASH",
+          },
+          {
+            "AttributeName": "subscriptionName",
+            "KeyType": "RANGE",
+          },
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": 70,
+          "WriteCapacityUnits": 5,
+        },
+        "SSESpecification": {
+          "SSEEnabled": true,
+        },
+        "TableName": "SupporterProductData-PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "supporter-product-data-lambdas",
+          },
+          {
+            "Key": "devx-backup-enabled",
+            "Value": "true",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "TimeToLiveSpecification": {
+          "AttributeName": "expiryDate",
+          "Enabled": true,
+        },
+      },
+      "Type": "AWS::DynamoDB::Table",
+      "UpdateReplacePolicy": "Retain",
     },
     "QueryZuoraLambdaA1DF3AA8": {
       "DependsOn": [
@@ -3536,71 +3601,6 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SupporterProductDataTable21EBD5EF": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "AttributeDefinitions": [
-          {
-            "AttributeName": "identityId",
-            "AttributeType": "S",
-          },
-          {
-            "AttributeName": "subscriptionName",
-            "AttributeType": "S",
-          },
-        ],
-        "KeySchema": [
-          {
-            "AttributeName": "identityId",
-            "KeyType": "HASH",
-          },
-          {
-            "AttributeName": "subscriptionName",
-            "KeyType": "RANGE",
-          },
-        ],
-        "ProvisionedThroughput": {
-          "ReadCapacityUnits": 70,
-          "WriteCapacityUnits": 5,
-        },
-        "SSESpecification": {
-          "SSEEnabled": true,
-        },
-        "TableName": "SupporterProductData-PROD",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "supporter-product-data-lambdas",
-          },
-          {
-            "Key": "devx-backup-enabled",
-            "Value": "true",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "TimeToLiveSpecification": {
-          "AttributeName": "expiryDate",
-          "Enabled": true,
-        },
-      },
-      "Type": "AWS::DynamoDB::Table",
-      "UpdateReplacePolicy": "Retain",
-    },
     "SupporterProductDataTableWriteScalingTarget8ACEB1B1": {
       "Properties": {
         "MaxCapacity": 500,
@@ -3611,7 +3611,7 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
             [
               "table/",
               {
-                "Ref": "SupporterProductDataTable21EBD5EF",
+                "Ref": "ProdTable",
               },
             ],
           ],
