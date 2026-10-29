@@ -107,9 +107,38 @@ export class SalesforceEventBus extends GuStack {
 
 		// EventBridge doesn't allow input transformers on event bus targets, so the rule
 		// sends to a queue and a pipe translates the message onto the cancellations-bus
+		const cancellationDeadLetterQueue = new Queue(
+			this,
+			'SubscriptionCancellationDeadLetterQueue',
+			{
+				queueName: `${app}-subscription-cancellation-dead-letters-${this.stage}`,
+				retentionPeriod: Duration.days(14),
+			},
+		);
+
+		new GuAlarm(this, 'SubscriptionCancellationDeadLetterQueueAlarm', {
+			app: app,
+			alarmName: `A subscription cancellation event for ${this.stage} ${app} was not processed`,
+			alarmDescription:
+				`There is one or more message in the ${app} subscription cancellation dead letter queue (DLQ). ` +
+				'Check the pipe SubscriptionCancellationPipe for errors translating or forwarding the message to the cancellations-bus.\n' +
+				`DLQ: https://${this.region}.console.aws.amazon.com/sqs/v2/home?region=${this.region}#/queues/https%3A%2F%2Fsqs.${this.region}.amazonaws.com%2F${this.account}%2F${cancellationDeadLetterQueue.queueName}`,
+			metric:
+				cancellationDeadLetterQueue.metricApproximateNumberOfMessagesVisible(),
+			threshold: 1,
+			evaluationPeriods: 1,
+			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+			treatMissingData: TreatMissingData.IGNORE,
+			snsTopicName: `alarms-handler-topic-${this.stage}`,
+			actionsEnabled: this.stage === 'PROD',
+		});
+
 		const cancellationQueue = new Queue(this, 'SubscriptionCancellationQueue', {
 			queueName: `${app}-subscription-cancellation-${this.stage}`,
-			deadLetterQueue: { queue: deadLetterQueue, maxReceiveCount: 3 },
+			deadLetterQueue: {
+				queue: cancellationDeadLetterQueue,
+				maxReceiveCount: 3,
+			},
 		});
 
 		subscriptionCancellationRule.addTarget(
