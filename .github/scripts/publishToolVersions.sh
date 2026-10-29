@@ -48,6 +48,7 @@ else
   printf '\n=== Compare updates with existing remote branch ===\n'
   mapfile -d '' -t stagedFiles < <(git diff --cached --name-only -z)
   remoteRef="$(git ls-remote --heads origin "refs/heads/$UPDATE_BRANCH")"
+  # if it doesn't exist we get back an empty SHA which makes the force-with-lease push specifically require that the remote branch does not exist.
   remoteSha="${remoteRef%%$'\t'*}"
   needsPush=true
   if [[ -n "$remoteSha" ]]; then
