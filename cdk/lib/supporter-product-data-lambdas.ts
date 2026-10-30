@@ -1,6 +1,6 @@
 import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { App } from 'aws-cdk-lib';
-import { Duration } from 'aws-cdk-lib';
+import { Duration, RemovalPolicy, Tags } from 'aws-cdk-lib';
 import {
 	ComparisonOperator,
 	MathExpression,
@@ -8,6 +8,12 @@ import {
 	TreatMissingData,
 	Unit,
 } from 'aws-cdk-lib/aws-cloudwatch';
+import {
+	AttributeType,
+	BillingMode,
+	Table,
+	TableEncryption,
+} from 'aws-cdk-lib/aws-dynamodb';
 import { Rule, RuleTargetInput, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
@@ -85,12 +91,49 @@ export class SupporterProductDataLambdas extends SrStack {
 			],
 		});
 
+		// Migrated from dynamo-tables.yaml (stack supporter-product-data-tables-${stage})
+		const isProd = this.stage === 'PROD';
+		const supporterProductDataTable = new Table(
+			this,
+			'SupporterProductDataTable',
+			{
+				tableName: `SupporterProductData-${this.stage}`,
+				partitionKey: { name: 'identityId', type: AttributeType.STRING },
+				sortKey: { name: 'subscriptionName', type: AttributeType.STRING },
+				timeToLiveAttribute: 'expiryDate',
+				encryption: TableEncryption.AWS_MANAGED,
+				removalPolicy: RemovalPolicy.RETAIN,
+				...(isProd
+					? {
+							billingMode: BillingMode.PROVISIONED,
+							readCapacity: 70,
+							writeCapacity: 5,
+						}
+					: { billingMode: BillingMode.PAY_PER_REQUEST }),
+			},
+		);
+
+		this.overrideLogicalId(supporterProductDataTable, {
+			logicalId: isProd ? 'ProdTable' : 'CodeTable',
+			reason: 'Keep resource name consistent with the original cfn template.',
+		});
+
+		Tags.of(supporterProductDataTable).add('devx-backup-enabled', 'true');
+
+		if (isProd) {
+			supporterProductDataTable
+				.autoScaleWriteCapacity({ minCapacity: 5, maxCapacity: 500 })
+				.scaleOnUtilization({
+					targetUtilizationPercent: 50,
+					scaleInCooldown: Duration.seconds(30),
+					scaleOutCooldown: Duration.seconds(60),
+				});
+		}
+
 		const dynamoWritePolicy = new PolicyStatement({
 			effect: Effect.ALLOW,
 			actions: ['dynamodb:UpdateItem', 'dynamodb:PutItem', 'dynamodb:GetItem'],
-			resources: [
-				`arn:aws:dynamodb:${this.region}:${this.account}:table/SupporterProductData-${this.stage}`,
-			],
+			resources: [supporterProductDataTable.tableArn],
 		});
 
 		const zuoraOAuthPolicy = new AllowZuoraOAuthSecretsPolicy(this);
