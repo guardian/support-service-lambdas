@@ -6,6 +6,7 @@ java = "corretto-21.0.13.0.10"
 sbt = "latest"
 
 [settings]
+minimum_release_age = "3d"
 idiomatic_version_file_enable_tools = ["pnpm"]
 auto_install = true
 not_found_auto_install = true

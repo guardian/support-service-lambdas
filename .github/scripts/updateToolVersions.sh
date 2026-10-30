@@ -22,10 +22,11 @@ latest() {
 printUpdate() {
   if [[ "$2" == "$3" ]]; then
     printf '%s is already up to date at %s; no version change needed.\n' "$1" "$3" >&2
+    printf -- '- %s: %s\n' "$1" "$3" >> "$tempDir/unchanged.md"
   else
     printf 'Updated %s from %s to %s.\n' "$1" "$2" "$3" >&2
+    printf '| %s | %s | [%s](%s) |\n' "$1" "$2" "$3" "$4"
   fi
-  printf '| %s | %s | [%s](%s) |\n' "$1" "$2" "$3" "$4"
 }
 
 updatePackageJson() {
@@ -88,3 +89,8 @@ updateMiseTool aqua:aws/aws-cli 'AWS CLI' current-major '^[0-9]+\.[0-9]+\.[0-9]+
   'https://github.com/aws/aws-cli/blob/{version}/CHANGELOG.rst'
 updateMiseTool github:guardian/devenv 'Guardian devenv' timestamp '^[0-9]{8}-[0-9]{6}$' \
   'https://github.com/guardian/devenv/releases/tag/{version}'
+
+if [[ -f "$tempDir/unchanged.md" ]]; then
+  printf '\nChecked but unchanged:\n\n'
+  cat "$tempDir/unchanged.md"
+fi
