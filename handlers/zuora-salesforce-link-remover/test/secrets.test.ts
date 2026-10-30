@@ -1,28 +1,21 @@
-import { getSalesforceSecretNames } from '../src/salesforceSecretNames';
+import { getSalesforceConnectedAppSecretName } from '../src/salesforceSecretNames';
 
-describe('getSalesforceSecretNames', () => {
+describe('getSalesforceConnectedAppSecretName', () => {
 	beforeEach(() => {
 		jest.resetAllMocks();
 		console.error = jest.fn();
 	});
 
-	test('should get CODE Salesforce secret names', () => {
-		const actual = getSalesforceSecretNames('CODE');
-		const expected = {
-			apiUserSecretName: 'DEV/Salesforce/User/integrationapiuser',
-			connectedAppSecretName: 'DEV/Salesforce/ConnectedApp/AwsConnectorSandbox',
-		};
+	test('should get the CODE Salesforce connected app secret name', () => {
+		const actual = getSalesforceConnectedAppSecretName('CODE');
+		const expected = 'CODE/Salesforce/ConnectedApp/BillingAccountRemover';
 
 		expect(actual).toEqual(expected);
 	});
 
-	test('should get PROD Salesforce secret names', () => {
-		const actual = getSalesforceSecretNames('PROD');
-		const expected = {
-			apiUserSecretName: 'PROD/Salesforce/User/BillingAccountRemoverAPIUser',
-			connectedAppSecretName:
-				'PROD/Salesforce/ConnectedApp/BillingAccountRemover',
-		};
+	test('should get the PROD Salesforce connected app secret name', () => {
+		const actual = getSalesforceConnectedAppSecretName('PROD');
+		const expected = 'PROD/Salesforce/ConnectedApp/BillingAccountRemover';
 
 		expect(actual).toEqual(expected);
 	});

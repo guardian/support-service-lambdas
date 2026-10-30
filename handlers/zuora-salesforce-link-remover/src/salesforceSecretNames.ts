@@ -1,24 +1,10 @@
-import type { SecretNames } from '@modules/salesforce/secrets';
 import type { Stage } from '@modules/stage';
 
-export function getSalesforceSecretNames(stage: Stage): SecretNames {
+export function getSalesforceConnectedAppSecretName(stage: Stage): string {
 	switch (stage) {
 		case 'CODE':
-			return {
-				apiUserSecretName: 'DEV/Salesforce/User/integrationapiuser',
-				connectedAppSecretName:
-					'DEV/Salesforce/ConnectedApp/AwsConnectorSandbox',
-			};
+			return 'CODE/Salesforce/ConnectedApp/BillingAccountRemover';
 		case 'PROD':
-			return {
-				apiUserSecretName: 'PROD/Salesforce/User/BillingAccountRemoverAPIUser',
-				connectedAppSecretName:
-					'PROD/Salesforce/ConnectedApp/BillingAccountRemover',
-			};
-		default:
-			return {
-				apiUserSecretName: '',
-				connectedAppSecretName: '',
-			};
+			return 'PROD/Salesforce/ConnectedApp/BillingAccountRemover';
 	}
 }
