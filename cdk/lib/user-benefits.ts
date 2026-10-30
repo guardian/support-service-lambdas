@@ -1,6 +1,6 @@
 import { GuApiGatewayWithLambdaByPath } from '@guardian/cdk';
 import type { App } from 'aws-cdk-lib';
-import { Duration, Fn } from 'aws-cdk-lib';
+import { Duration } from 'aws-cdk-lib';
 import { UsagePlan } from 'aws-cdk-lib/aws-apigateway';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { allowedOriginsForStage } from '../../handlers/user-benefits/src/cors';
@@ -18,9 +18,7 @@ export class UserBenefits extends SrStack {
 		const supporterProductDataTablePolicy = new PolicyStatement({
 			actions: ['dynamodb:Query'],
 			resources: [
-				Fn.importValue(
-					`supporter-product-data-tables-${this.stage}-SupporterProductDataTable`,
-				),
+				`arn:aws:dynamodb:${this.region}:${this.account}:table/SupporterProductData-${this.stage}`,
 			],
 		});
 

@@ -1,0 +1,92 @@
+# Proposes toolchain version updates weekly or on manual dispatch.
+# See updateToolVersions.md for usage, testing, and token maintenance.
+name: Update tool versions
+
+on:
+  schedule:
+    - cron: '23 8 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: update-tool-versions-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      UPDATE_BRANCH: ${{ github.ref_name == github.event.repository.default_branch && 'automation/tool-versions' || format('automation/tool-versions-for/{0}', github.ref_name) }}
+      UPDATE_TITLE: 'chore(deps): update tool versions'
+      BASE_BRANCH: ${{ github.ref_name }}
+      DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+    steps:
+      - name: Reject tag-based runs
+        if: github.ref_type != 'branch'
+        run: |
+          echo '::error::Select a branch, not a tag, when running the toolchain updater.'
+          exit 1
+
+      - name: Check pull request token
+        env:
+          TOOLCHAIN_UPDATE_TOKEN: ${{ secrets.TOOLCHAIN_UPDATE_TOKEN }}
+        run: |
+          if [[ -z "$TOOLCHAIN_UPDATE_TOKEN" ]]; then
+            echo '::error::Configure TOOLCHAIN_UPDATE_TOKEN as documented in .github/workflows/updateToolVersions.md'
+            exit 1
+          fi
+
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.BASE_BRANCH }}
+          persist-credentials: false
+
+      - uses: jdx/mise-action@v3
+        with:
+          install: false
+          cache: false
+
+      - name: Check updater
+        run: |
+          bash .github/scripts/updateToolVersions.test.sh
+          bash .github/scripts/publishToolVersions.test.sh
+
+      - name: Select latest matching tool versions
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          bash .github/scripts/updateToolVersions.sh | tee "$RUNNER_TEMP/toolchainVersions.md"
+          git diff --check
+
+      - name: Publish toolchain updates
+        id: publication
+        env:
+          GH_TOKEN: ${{ secrets.TOOLCHAIN_UPDATE_TOKEN }}
+        run: bash .github/scripts/publishToolVersions.sh
+
+      - name: Summarise toolchain update
+        env:
+          UPDATE_AVAILABLE: ${{ steps.publication.outputs.update_available }}
+          NEEDS_PUSH: ${{ steps.publication.outputs.needs_push }}
+          PR_URL: ${{ steps.publication.outputs.url }}
+        run: |
+          {
+            printf '## Toolchain update\n\n'
+            printf 'Target branch: **%s**\n\n' "$BASE_BRANCH"
+            if [[ "$UPDATE_AVAILABLE" != true ]]; then
+              printf 'No tool updates are needed.\n\n'
+              if [[ -n "$PR_URL" ]]; then
+                printf '[Closed obsolete update PR](%s)\n\n' "$PR_URL"
+              fi
+            elif [[ "$NEEDS_PUSH" == true ]]; then
+              printf 'New toolchain changes were committed and pushed.\n\n'
+              printf '[View update PR](%s)\n\n' "$PR_URL"
+            else
+              printf 'The update branch already contains the selected versions; no new commit was needed.\n\n'
+              printf '[View update PR](%s)\n\n' "$PR_URL"
+            fi
+            cat "$RUNNER_TEMP/toolchainVersions.md"
+          } >> "$GITHUB_STEP_SUMMARY"
