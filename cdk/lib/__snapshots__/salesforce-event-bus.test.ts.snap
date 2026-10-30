@@ -5,6 +5,7 @@ exports[`The SalesforceEventBus stack matches the snapshot 1`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuAlarm",
+      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -167,6 +168,61 @@ DLQ: https://",
       },
       "Type": "AWS::SQS::QueuePolicy",
     },
+    "SfBusToCancellationsBus949E00F8": {
+      "Properties": {
+        "Description": "Forward SF Subscription Cancellation platform events from the SF bus to the cancellations-bus",
+        "EventBusName": "aws.partner/salesforce.com/00D9E0000004jvhUAA/0YLUD00000008Ll4AI",
+        "EventPattern": {
+          "detail-type": [
+            "Subscription_Cancellation__e",
+          ],
+          "source": [
+            {
+              "prefix": "aws.partner/salesforce.com",
+            },
+          ],
+        },
+        "State": "ENABLED",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "SubscriptionCancellationQueue94038BE9",
+                "Arn",
+              ],
+            },
+            "DeadLetterConfig": {
+              "Arn": {
+                "Fn::GetAtt": [
+                  "deadletterssalesforceeventbusqueue29BFA779",
+                  "Arn",
+                ],
+              },
+            },
+            "Id": "Target0",
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
     "SfBusToContactUpdateQueue75131C06": {
       "Properties": {
         "Description": "Send an SF Contact Update event from the SF bus to the salesforce-outbound-messages-[STAGE] SQS queue for consumption by membership-workflow",
@@ -238,6 +294,317 @@ DLQ: https://",
       },
       "Type": "AWS::Events::Rule",
     },
+    "SubscriptionCancellationDeadLetterQueueAlarm89402753": {
+      "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-CODE",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "There is one or more message in the salesforce-event-bus subscription cancellation dead letter queue (DLQ). Check the pipe SubscriptionCancellationPipe for errors translating or forwarding the message to the cancellations-bus.
+DLQ: https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/sqs/v2/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#/queues/https%3A%2F%2Fsqs.",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".amazonaws.com%2F",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              "%2F",
+              {
+                "Fn::GetAtt": [
+                  "SubscriptionCancellationDeadLetterQueueB8CBF706",
+                  "QueueName",
+                ],
+              },
+            ],
+          ],
+        },
+        "AlarmName": "A subscription cancellation event for CODE salesforce-event-bus was not processed",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::GetAtt": [
+                "SubscriptionCancellationDeadLetterQueueB8CBF706",
+                "QueueName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Period": 300,
+        "Statistic": "Maximum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "ignore",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "SubscriptionCancellationDeadLetterQueueB8CBF706": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "salesforce-event-bus-subscription-cancellation-dead-letters-CODE",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "SubscriptionCancellationPipe": {
+      "Properties": {
+        "Description": "Translate SF Subscription_Cancellation__e events into Cancellation events for the cancellations-bus",
+        "Name": "salesforce-event-bus-subscription-cancellation-CODE",
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "SubscriptionCancellationPipeRole328BA799",
+            "Arn",
+          ],
+        },
+        "Source": {
+          "Fn::GetAtt": [
+            "SubscriptionCancellationQueue94038BE9",
+            "Arn",
+          ],
+        },
+        "SourceParameters": {
+          "SqsQueueParameters": {
+            "BatchSize": 1,
+          },
+        },
+        "Tags": {
+          "Stack": "membership",
+          "Stage": "CODE",
+          "gu:cdk:version": "TEST",
+          "gu:repo": "guardian/support-service-lambdas",
+        },
+        "Target": {
+          "Fn::ImportValue": "cancellations-bus-CODE-arn",
+        },
+        "TargetParameters": {
+          "EventBridgeEventBusParameters": {
+            "DetailType": "Cancellation",
+            "Source": "eventbridge:salesforce-event-bus-CODE",
+          },
+          "InputTemplate": "{"subscriptionNumber":"<$.body.detail.payload.Subscription_Number__c>","orderNumber":"<$.body.detail.payload.Order_Number__c>","allowUserNotifications":<$.body.detail.payload.Send_Notifications__c>}",
+        },
+      },
+      "Type": "AWS::Pipes::Pipe",
+    },
+    "SubscriptionCancellationPipeRole328BA799": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "pipes.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "SubscriptionCancellationPipeRoleDefaultPolicy2A890515": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SubscriptionCancellationQueue94038BE9",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": "events:PutEvents",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "cancellations-bus-CODE-arn",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SubscriptionCancellationPipeRoleDefaultPolicy2A890515",
+        "Roles": [
+          {
+            "Ref": "SubscriptionCancellationPipeRole328BA799",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "SubscriptionCancellationQueue94038BE9": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "QueueName": "salesforce-event-bus-subscription-cancellation-CODE",
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "SubscriptionCancellationDeadLetterQueueB8CBF706",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 3,
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "SubscriptionCancellationQueuePolicyCDB08BED": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "SfBusToCancellationsBus949E00F8",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SubscriptionCancellationQueue94038BE9",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "SubscriptionCancellationQueue94038BE9",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
     "deadletterssalesforceeventbusqueue29BFA779": {
       "DeletionPolicy": "Delete",
       "Properties": {
@@ -293,6 +660,30 @@ DLQ: https://",
               },
               "Sid": "AllowEventRulesalesforceeventbusCODESfBusToContactUpdateQueueFE76F3CE",
             },
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "SfBusToCancellationsBus949E00F8",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "deadletterssalesforceeventbusqueue29BFA779",
+                  "Arn",
+                ],
+              },
+              "Sid": "AllowEventRulesalesforceeventbusCODESfBusToCancellationsBusD8C0BCAF",
+            },
           ],
           "Version": "2012-10-17",
         },
@@ -312,6 +703,7 @@ exports[`The SalesforceEventBus stack matches the snapshot 2`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
+      "GuAlarm",
       "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
@@ -475,6 +867,61 @@ DLQ: https://",
       },
       "Type": "AWS::SQS::QueuePolicy",
     },
+    "SfBusToCancellationsBus949E00F8": {
+      "Properties": {
+        "Description": "Forward SF Subscription Cancellation platform events from the SF bus to the cancellations-bus",
+        "EventBusName": "aws.partner/salesforce.com/00D20000000nq5gEAA/0YLQv00000000zJOAQ",
+        "EventPattern": {
+          "detail-type": [
+            "Subscription_Cancellation__e",
+          ],
+          "source": [
+            {
+              "prefix": "aws.partner/salesforce.com",
+            },
+          ],
+        },
+        "State": "ENABLED",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "SubscriptionCancellationQueue94038BE9",
+                "Arn",
+              ],
+            },
+            "DeadLetterConfig": {
+              "Arn": {
+                "Fn::GetAtt": [
+                  "deadletterssalesforceeventbusqueue29BFA779",
+                  "Arn",
+                ],
+              },
+            },
+            "Id": "Target0",
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
     "SfBusToContactUpdateQueue75131C06": {
       "Properties": {
         "Description": "Send an SF Contact Update event from the SF bus to the salesforce-outbound-messages-[STAGE] SQS queue for consumption by membership-workflow",
@@ -546,6 +993,317 @@ DLQ: https://",
       },
       "Type": "AWS::Events::Rule",
     },
+    "SubscriptionCancellationDeadLetterQueueAlarm89402753": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "There is one or more message in the salesforce-event-bus subscription cancellation dead letter queue (DLQ). Check the pipe SubscriptionCancellationPipe for errors translating or forwarding the message to the cancellations-bus.
+DLQ: https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/sqs/v2/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#/queues/https%3A%2F%2Fsqs.",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".amazonaws.com%2F",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              "%2F",
+              {
+                "Fn::GetAtt": [
+                  "SubscriptionCancellationDeadLetterQueueB8CBF706",
+                  "QueueName",
+                ],
+              },
+            ],
+          ],
+        },
+        "AlarmName": "A subscription cancellation event for PROD salesforce-event-bus was not processed",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::GetAtt": [
+                "SubscriptionCancellationDeadLetterQueueB8CBF706",
+                "QueueName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Period": 300,
+        "Statistic": "Maximum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "ignore",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "SubscriptionCancellationDeadLetterQueueB8CBF706": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "salesforce-event-bus-subscription-cancellation-dead-letters-PROD",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "SubscriptionCancellationPipe": {
+      "Properties": {
+        "Description": "Translate SF Subscription_Cancellation__e events into Cancellation events for the cancellations-bus",
+        "Name": "salesforce-event-bus-subscription-cancellation-PROD",
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "SubscriptionCancellationPipeRole328BA799",
+            "Arn",
+          ],
+        },
+        "Source": {
+          "Fn::GetAtt": [
+            "SubscriptionCancellationQueue94038BE9",
+            "Arn",
+          ],
+        },
+        "SourceParameters": {
+          "SqsQueueParameters": {
+            "BatchSize": 1,
+          },
+        },
+        "Tags": {
+          "Stack": "membership",
+          "Stage": "PROD",
+          "gu:cdk:version": "TEST",
+          "gu:repo": "guardian/support-service-lambdas",
+        },
+        "Target": {
+          "Fn::ImportValue": "cancellations-bus-PROD-arn",
+        },
+        "TargetParameters": {
+          "EventBridgeEventBusParameters": {
+            "DetailType": "Cancellation",
+            "Source": "eventbridge:salesforce-event-bus-PROD",
+          },
+          "InputTemplate": "{"subscriptionNumber":"<$.body.detail.payload.Subscription_Number__c>","orderNumber":"<$.body.detail.payload.Order_Number__c>","allowUserNotifications":<$.body.detail.payload.Send_Notifications__c>}",
+        },
+      },
+      "Type": "AWS::Pipes::Pipe",
+    },
+    "SubscriptionCancellationPipeRole328BA799": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "pipes.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "SubscriptionCancellationPipeRoleDefaultPolicy2A890515": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SubscriptionCancellationQueue94038BE9",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": "events:PutEvents",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "cancellations-bus-PROD-arn",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SubscriptionCancellationPipeRoleDefaultPolicy2A890515",
+        "Roles": [
+          {
+            "Ref": "SubscriptionCancellationPipeRole328BA799",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "SubscriptionCancellationQueue94038BE9": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "QueueName": "salesforce-event-bus-subscription-cancellation-PROD",
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "SubscriptionCancellationDeadLetterQueueB8CBF706",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 3,
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "SubscriptionCancellationQueuePolicyCDB08BED": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "SfBusToCancellationsBus949E00F8",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SubscriptionCancellationQueue94038BE9",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "SubscriptionCancellationQueue94038BE9",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
     "deadletterssalesforceeventbusqueue29BFA779": {
       "DeletionPolicy": "Delete",
       "Properties": {
@@ -600,6 +1358,30 @@ DLQ: https://",
                 ],
               },
               "Sid": "AllowEventRulesalesforceeventbusPRODSfBusToContactUpdateQueueC08A5AB1",
+            },
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "SfBusToCancellationsBus949E00F8",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "deadletterssalesforceeventbusqueue29BFA779",
+                  "Arn",
+                ],
+              },
+              "Sid": "AllowEventRulesalesforceeventbusPRODSfBusToCancellationsBus9D958B57",
             },
           ],
           "Version": "2012-10-17",
