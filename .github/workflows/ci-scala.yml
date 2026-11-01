@@ -47,7 +47,7 @@ jobs:
           cache: 'sbt'
 
       - name: Setup SBT
-        uses: sbt/setup-sbt@v1.5.11
+        uses: sbt/setup-sbt@v1.5.12
 
       - name: Run tests and build subproject JAR
         run: sbt "project ${{ matrix.subproject }}" test assembly
@@ -117,7 +117,7 @@ jobs:
           cache: 'sbt'
 
       - name: Setup SBT
-        uses: sbt/setup-sbt@v1.5.11
+        uses: sbt/setup-sbt@v1.5.12
 
       - name: run tests and Build jar
         run: sbt "project ${{ matrix.subproject }}" test assembly
