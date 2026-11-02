@@ -36,7 +36,6 @@ import {
 	AllowZuoraOAuthSecretsPolicy,
 } from './cdk/policies';
 import { SrLambda } from './cdk/SrLambda';
-import { SrLambdaErrorAlarm } from './cdk/SrLambdaErrorAlarm';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
 
@@ -335,11 +334,6 @@ export class SupporterProductDataLambdas extends SrStack {
 			snsTopicName: `alarms-handler-topic-${stage}`,
 			actionsEnabled: stage == 'PROD',
 			app,
-		});
-
-		new SrLambdaErrorAlarm(this, 'ProcessItemLambdaErrorsAlarm', {
-			lambdaFunctionName: processItem.functionName,
-			errorImpact: 'Supporter product data may not be up to date in DynamoDB',
 		});
 	}
 }
