@@ -62,7 +62,7 @@ jobs:
       - run: pnpm --filter cdk package
 
       - name: Upload to Riff-Raff
-        uses: guardian/actions-riff-raff@v4.3.3
+        uses: guardian/actions-riff-raff@v4.3.7
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
@@ -123,7 +123,7 @@ jobs:
         run: sbt "project ${{ matrix.subproject }}" test assembly
 
       - name: Upload to Riff-Raff
-        uses: guardian/actions-riff-raff@v4.3.3
+        uses: guardian/actions-riff-raff@v4.3.7
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
