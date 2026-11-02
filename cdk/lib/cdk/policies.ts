@@ -86,9 +86,7 @@ export class AllowSupporterProductDataQueryPolicy extends GuAllowPolicy {
 		super(scope, 'SupporterProductDataTable query access', {
 			actions: ['dynamodb:Query', 'dynamodb:GetItem'],
 			resources: [
-				Fn.importValue(
-					`supporter-product-data-tables-${scope.stage}-SupporterProductDataTable`,
-				),
+				`arn:aws:dynamodb:${scope.region}:${scope.account}:table/SupporterProductData-${scope.stage}`,
 			],
 		});
 	}
@@ -99,9 +97,7 @@ export class AllowSupporterProductDataDeletePolicy extends GuAllowPolicy {
 		super(scope, 'SupporterProductDataTable delete access', {
 			actions: ['dynamodb:DeleteItem'],
 			resources: [
-				Fn.importValue(
-					`supporter-product-data-tables-${scope.stage}-SupporterProductDataTable`,
-				),
+				`arn:aws:dynamodb:${scope.region}:${scope.account}:table/SupporterProductData-${scope.stage}`,
 			],
 		});
 	}

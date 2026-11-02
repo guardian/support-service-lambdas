@@ -1731,7 +1731,20 @@ exports[`The Multiple account api stack matches the snapshot 1`] = `
               "Action": "dynamodb:DeleteItem",
               "Effect": "Allow",
               "Resource": {
-                "Fn::ImportValue": "supporter-product-data-tables-CODE-SupporterProductDataTable",
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:dynamodb:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":table/SupporterProductData-CODE",
+                  ],
+                ],
               },
             },
           ],
@@ -1757,7 +1770,20 @@ exports[`The Multiple account api stack matches the snapshot 1`] = `
               ],
               "Effect": "Allow",
               "Resource": {
-                "Fn::ImportValue": "supporter-product-data-tables-CODE-SupporterProductDataTable",
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:dynamodb:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":table/SupporterProductData-CODE",
+                  ],
+                ],
               },
             },
           ],
@@ -3811,7 +3837,20 @@ DLQ: https://",
               "Action": "dynamodb:DeleteItem",
               "Effect": "Allow",
               "Resource": {
-                "Fn::ImportValue": "supporter-product-data-tables-PROD-SupporterProductDataTable",
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:dynamodb:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":table/SupporterProductData-PROD",
+                  ],
+                ],
               },
             },
           ],
@@ -3837,7 +3876,20 @@ DLQ: https://",
               ],
               "Effect": "Allow",
               "Resource": {
-                "Fn::ImportValue": "supporter-product-data-tables-PROD-SupporterProductDataTable",
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:dynamodb:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":table/SupporterProductData-PROD",
+                  ],
+                ],
               },
             },
           ],

@@ -42,6 +42,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'holiday-stop-api',
 		'holiday-stop-processor',
 		'soft-opt-in-consent-setter',
+		'manage-frontend',
 		'mobile-purchases-soft-opt-in-acquisitions',
 		'mobile-purchases-soft-opt-in-acquisitions-dlq-processor',
 		'payment-failure-comms',
