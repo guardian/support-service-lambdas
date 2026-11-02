@@ -14,6 +14,10 @@ export type ProcessItemDependencies = {
 		subscriptionName: string,
 	) => Promise<MinimalZuoraSubscription>;
 	writePrimaryItem: (item: SupporterRatePlanItem) => Promise<void>;
+	updateInvitationTTL: (
+		primarySubscriptionName: string,
+		newTTL: number,
+	) => Promise<void>;
 	getSecondaryUsers: (
 		subscriptionName: string,
 	) => Promise<SecondaryUserRecord[]>;
@@ -48,6 +52,11 @@ export const processItem = async (
 	);
 
 	await dependencies.writePrimaryItem(itemWithContribution);
+
+	await dependencies.updateInvitationTTL(
+		itemWithContribution.subscriptionName,
+		expiryTTLFromTermEndDate(itemWithContribution.termEndDate),
+	);
 
 	const secondaryUsers = await dependencies.getSecondaryUsers(
 		item.subscriptionName,

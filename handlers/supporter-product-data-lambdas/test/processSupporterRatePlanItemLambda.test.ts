@@ -19,6 +19,7 @@ const noSecondaryUsers = jest.fn(() =>
 );
 const writeSecondaryItem = jest.fn(() => Promise.resolve());
 const updateSecondaryUserTTL = jest.fn(() => Promise.resolve());
+const updateInvitationTTL = jest.fn(() => Promise.resolve());
 
 describe('processSupporterRatePlanItemLambda', () => {
 	beforeEach(() => {
@@ -34,12 +35,14 @@ describe('processSupporterRatePlanItemLambda', () => {
 			getSubscription: () =>
 				Promise.resolve({ subscriptionNumber: 'sub-number', ratePlans: [] }),
 			writePrimaryItem: writeItem,
+			updateInvitationTTL,
 			getSecondaryUsers: noSecondaryUsers,
 			writeSecondaryItem: writeSecondaryItem,
 			updateSecondaryUserTTL: updateSecondaryUserTTL,
 		});
 
 		expect(writeItem).not.toHaveBeenCalled();
+		expect(updateInvitationTTL).not.toHaveBeenCalled();
 		expect(noSecondaryUsers).not.toHaveBeenCalled();
 		expect(writeSecondaryItem).not.toHaveBeenCalled();
 		expect(updateSecondaryUserTTL).not.toHaveBeenCalled();
@@ -65,6 +68,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 						],
 					}),
 				writePrimaryItem: writeItem,
+				updateInvitationTTL,
 				getSecondaryUsers: noSecondaryUsers,
 				writeSecondaryItem: writeSecondaryItem,
 				updateSecondaryUserTTL: updateSecondaryUserTTL,
@@ -88,6 +92,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 			getSubscription: () =>
 				Promise.resolve({ subscriptionNumber: 'sub-number', ratePlans: [] }),
 			writePrimaryItem: writeItem,
+			updateInvitationTTL,
 			getSecondaryUsers: noSecondaryUsers,
 			writeSecondaryItem: writeSecondaryItem,
 			updateSecondaryUserTTL: updateSecondaryUserTTL,
@@ -95,6 +100,10 @@ describe('processSupporterRatePlanItemLambda', () => {
 
 		expect(writeItem).toHaveBeenCalled();
 		expect(noSecondaryUsers).toHaveBeenCalledWith('sub-1');
+		expect(updateInvitationTTL).toHaveBeenCalledWith(
+			'sub-1',
+			expiryTTLFromTermEndDate(dayjs(termEndDate)),
+		);
 		expect(writeSecondaryItem).not.toHaveBeenCalled();
 		expect(updateSecondaryUserTTL).not.toHaveBeenCalled();
 	});
@@ -127,6 +136,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 			getSubscription: () =>
 				Promise.resolve({ subscriptionNumber: 'sub-number', ratePlans: [] }),
 			writePrimaryItem: writeItem,
+			updateInvitationTTL,
 			getSecondaryUsers,
 			writeSecondaryItem: writeSecondaryItem,
 			updateSecondaryUserTTL: updateSecondaryUserTTL,
