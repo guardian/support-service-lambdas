@@ -25,6 +25,21 @@ const batch: MParticleEventBatch = {
 			},
 		},
 	],
+	consent_state: {
+		gdpr: {
+			paid_media_conversion_measurement_google: {
+				consented: false,
+				timestamp_unixtime_ms: 1,
+			},
+		},
+		ccpa: {
+			data_sale_opt_out: {
+				consented: true,
+				timestamp_unixtime_ms: 2,
+				document: 'privacy-choice-v1',
+			},
+		},
+	},
 };
 
 const mockFetch = (response: Response) =>
