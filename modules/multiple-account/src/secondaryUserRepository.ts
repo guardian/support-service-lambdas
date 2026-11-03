@@ -253,11 +253,15 @@ export class SecondaryUserRepository {
 		subscriptionName: string,
 		newTTL: number,
 	): Promise<void> {
-		const secondaryUsers = await this.listBySubscription(subscriptionName);
-		logger.log(`Updating TTL for ${secondaryUsers.length} invites`, {
+		logger.log(`updateSubscriptionTTLs`, {
 			subscriptionName,
 			newTTL,
 		});
+		const secondaryUsers = await this.listBySubscription(subscriptionName);
+		logger.log(
+			'updateSubscriptionTTLs.secondaryUsers length->',
+			secondaryUsers.length,
+		);
 		if (secondaryUsers.length === 0) {
 			return;
 		}
