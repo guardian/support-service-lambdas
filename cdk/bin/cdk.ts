@@ -43,6 +43,7 @@ import { SalesforceDisasterRecovery } from '../lib/salesforce-disaster-recovery'
 import { SalesforceDisasterRecoveryHealthCheck } from '../lib/salesforce-disaster-recovery-health-check';
 import { SalesforceEventBus } from '../lib/salesforce-event-bus';
 import { ScrubNonTokenisedPaymentMethods } from '../lib/scrub-non-tokenised-payment-methods';
+import { SecurityGroupsUpdater } from '../lib/security-groups-updater';
 import { SendTestDataToMparticle } from '../lib/send-test-data-to-mparticle';
 import { SfEmailsToS3Exporter } from '../lib/sf-emails-to-s3-exporter';
 import { SfMoveSubscriptionsApi } from '../lib/sf-move-subscriptions-api';
@@ -190,6 +191,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	PromotionsApi,
 	PaymentFailureCommsExitApi,
 	CancellationsBus,
+	SecurityGroupsUpdater,
 	// MARKER new-lambda: cdk-bin
 ];
 
