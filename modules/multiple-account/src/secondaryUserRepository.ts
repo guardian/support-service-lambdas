@@ -258,10 +258,11 @@ export class SecondaryUserRepository {
 			newTTL,
 		});
 		const secondaryUsers = await this.listBySubscription(subscriptionName);
-		logger.log(
-			'updateSubscriptionTTLs.secondaryUsers length->',
-			secondaryUsers.length,
-		);
+		logger.log('updateSubscriptionTTLs + secondaryUsers len', {
+			subscriptionName,
+			newTTL,
+			len: secondaryUsers.length,
+		});
 		if (secondaryUsers.length === 0) {
 			return;
 		}
