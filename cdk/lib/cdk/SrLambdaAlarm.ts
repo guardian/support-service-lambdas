@@ -22,6 +22,11 @@ export interface SrLambdaAlarmProps extends Omit<
 	 * use if you don't want the alarms to go to alarms-handler
 	 */
 	snsTopicName?: string;
+	/**
+	 * if set, the generated log link(s) will filter the logs for this text,
+	 * e.g. 'statusCode: 500'
+	 */
+	logsFilterPattern?: string;
 }
 
 export class SrLambdaAlarm extends GuAlarm {
@@ -40,6 +45,9 @@ export class SrLambdaAlarm extends GuAlarm {
 				.map((lambdaFunctionName) => `lambda:${lambdaFunctionName}`)
 				.join(' ');
 			Tags.of(this).add('DiagnosticLinks', diagnosticLinksValue);
+		}
+		if (props.logsFilterPattern) {
+			Tags.of(this).add('LogsFilterPattern', props.logsFilterPattern);
 		}
 	}
 }

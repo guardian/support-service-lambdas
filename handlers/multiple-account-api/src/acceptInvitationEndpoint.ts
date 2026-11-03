@@ -27,6 +27,12 @@ export const acceptInvitationEndpoint = async (
 	invitationCode: string,
 ) => {
 	try {
+		// TODO:delete comment - temporary sentinel to manually trigger a 500 in
+		// CODE so we can verify the alarm's log filter link works. Remove before merging.
+		if (invitationCode === 'TRIGGER-TEST-500') {
+			throw new Error('Deliberate test error to trigger a 500 response');
+		}
+
 		const invitation = await invitationRepository.get(invitationCode);
 
 		// Invitations are soft-accepted, so they may still exist with an
