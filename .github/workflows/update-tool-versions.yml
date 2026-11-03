@@ -44,7 +44,7 @@ jobs:
           ref: ${{ env.BASE_BRANCH }}
           persist-credentials: false
 
-      - uses: jdx/mise-action@v3
+      - uses: jdx/mise-action@v4
         with:
           install: false
           cache: false
