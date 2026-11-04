@@ -20,7 +20,6 @@ const noSecondaryUsers = jest.fn(() =>
 const writeSecondaryItem = jest.fn(() => Promise.resolve());
 const updatePrimaryInvitationTTL = jest.fn(() => Promise.resolve());
 const updateSecondaryUserTTL = jest.fn(() => Promise.resolve());
-const updateInvitationTTL = jest.fn(() => Promise.resolve());
 
 describe('processSupporterRatePlanItemLambda', () => {
 	beforeEach(() => {
@@ -43,7 +42,6 @@ describe('processSupporterRatePlanItemLambda', () => {
 		});
 
 		expect(writeItem).not.toHaveBeenCalled();
-		expect(updateInvitationTTL).not.toHaveBeenCalled();
 		expect(noSecondaryUsers).not.toHaveBeenCalled();
 		expect(writeSecondaryItem).not.toHaveBeenCalled();
 		expect(updateSecondaryUserTTL).not.toHaveBeenCalled();
@@ -101,7 +99,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 
 		expect(writeItem).toHaveBeenCalled();
 		expect(noSecondaryUsers).toHaveBeenCalledWith('sub-1');
-		expect(updateInvitationTTL).toHaveBeenCalledWith(
+		expect(updatePrimaryInvitationTTL).toHaveBeenCalledWith(
 			'sub-1',
 			expiryTTLFromTermEndDate(dayjs(termEndDate)),
 		);
