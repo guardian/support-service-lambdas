@@ -45,13 +45,6 @@ The AWS EC2 calls and the Fastly HTTP call are mocked in unit tests
 (`aws-sdk-client-mock` and `fetch-mock` respectively); the ingress-rule diffing logic
 itself is tested as a pure function with no mocking required.
 
-To run against CODE:
-
-- `runManual/runHandlerDEV.ts` runs the handler locally against the CODE SSM config,
-  using your local AWS credentials (membership/janus) - this calls the real Fastly and
-  EC2 APIs, so make sure the CODE config only references CODE/test security groups.
-- `runManual/invokeCODE.ts` invokes the already-deployed CODE lambda directly.
-
 ## External documentation
 
 - Fastly public IP list API: https://developer.fastly.com/reference/api/utils/public-ip-list/
