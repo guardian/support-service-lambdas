@@ -12,6 +12,10 @@ It runs every 60 minutes:
 3. authorizes any new ranges and revokes any ranges that are no longer in Fastly's list
 4. tags the security group with an `Updated` timestamp
 
+If Fastly's list can't be fetched or parsed, or contains no valid IPv4 cidrs, the lambda
+throws before touching any security group - it never treats "no ranges" as "revoke
+everything". See `src/fastly.ts`.
+
 This is a TypeScript/CDK port of the Scala/CloudFormation
 [`security-groups-update`](https://github.com/guardian/platform/tree/main/security-groups-update)
 lambda in `guardian/platform`. Unlike that lambda, which took a single security group id

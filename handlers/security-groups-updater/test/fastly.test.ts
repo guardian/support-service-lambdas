@@ -45,3 +45,19 @@ test('throws if the request is not successful', async () => {
 		'Failed to fetch Fastly IP ranges: 500 oops',
 	);
 });
+
+test('throws if there are no valid IPv4 cidrs, rather than returning an empty list', async () => {
+	fetchMock.mock(
+		fastlyUrl,
+		new Response(
+			JSON.stringify({
+				addresses: [],
+				ipv6_addresses: ['2a04:4e40::/32'],
+			}),
+		),
+	);
+
+	await expect(getFastlyIpv4Ranges()).rejects.toThrow(
+		'Fastly IP list response contained no valid IPv4 cidrs',
+	);
+});

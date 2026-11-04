@@ -31,5 +31,19 @@ export async function getFastlyIpv4Ranges(): Promise<string[]> {
 	}
 
 	const { addresses } = FastlyIpListSchema.parse(JSON.parse(body));
-	return addresses.filter((address) => ipv4CidrPattern.test(address));
+	const validCidrs = addresses.filter((address) =>
+		ipv4CidrPattern.test(address),
+	);
+
+	// Fail loudly rather than revoking every ingress rule on managed security
+	// groups: an empty result here (e.g. Fastly returning a malformed or
+	// unexpectedly empty list) would otherwise look like "Fastly now has zero
+	// IP ranges" to the diffing logic, locking out all traffic.
+	if (validCidrs.length === 0) {
+		throw new Error(
+			`Fastly IP list response contained no valid IPv4 cidrs: ${body}`,
+		);
+	}
+
+	return validCidrs;
 }
