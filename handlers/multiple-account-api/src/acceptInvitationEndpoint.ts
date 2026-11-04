@@ -77,18 +77,11 @@ export const acceptInvitationEndpoint = async (
 		);
 
 		if (!supporterRatePlan) {
-			console.log(
-				`*** Supporter Rate Plan missing for Primary Zuora Subscription ${subscriptionName}`,
-			);
 			const zuoraSubscription = await getSubscription(
 				zuoraClient,
 				subscriptionName,
 			);
-
 			if (zuoraSubscription.status === 'Cancelled') {
-				console.log(
-					`*** Primary Zuora Subscription ${subscriptionName} has been Cancelled`,
-				);
 				return gone(`Primary subscription ${subscriptionName} cancelled`);
 			}
 		}

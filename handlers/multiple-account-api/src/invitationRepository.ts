@@ -93,9 +93,6 @@ export class InvitationRepository {
 	}
 
 	async list(subscriptionName: string): Promise<InvitationRecord[]> {
-		logger.log(
-			`invitationRepository.list: Querying invitations for primary subscription ${subscriptionName} tableName ${this.tableName}`,
-		);
 		const result = await this.client.send(
 			new QueryCommand({
 				TableName: this.tableName,
@@ -201,10 +198,6 @@ export class InvitationRepository {
 		subscriptionName: string,
 		newTTL: number,
 	): Promise<void> {
-		logger.log(`invitationRepository.updateSubscriptionTTLs: Params`, {
-			subscriptionName,
-			newTTL,
-		});
 		const invitations = await this.list(subscriptionName);
 		logger.log(
 			'invitationRepository.updateSubscriptionTTLs: Invitations Count',
