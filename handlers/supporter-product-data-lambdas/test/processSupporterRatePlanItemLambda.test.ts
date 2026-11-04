@@ -36,7 +36,6 @@ describe('processSupporterRatePlanItemLambda', () => {
 			getSubscription: () =>
 				Promise.resolve({ subscriptionNumber: 'sub-number', ratePlans: [] }),
 			writePrimaryItem: writeItem,
-			updateInvitationTTL,
 			getSecondaryUsers: noSecondaryUsers,
 			writeSecondaryItem: writeSecondaryItem,
 			updatePrimaryInvitationTTL: updatePrimaryInvitationTTL,
@@ -70,7 +69,6 @@ describe('processSupporterRatePlanItemLambda', () => {
 						],
 					}),
 				writePrimaryItem: writeItem,
-				updateInvitationTTL,
 				getSecondaryUsers: noSecondaryUsers,
 				writeSecondaryItem: writeSecondaryItem,
 				updatePrimaryInvitationTTL: updatePrimaryInvitationTTL,
@@ -95,7 +93,6 @@ describe('processSupporterRatePlanItemLambda', () => {
 			getSubscription: () =>
 				Promise.resolve({ subscriptionNumber: 'sub-number', ratePlans: [] }),
 			writePrimaryItem: writeItem,
-			updateInvitationTTL,
 			getSecondaryUsers: noSecondaryUsers,
 			writeSecondaryItem: writeSecondaryItem,
 			updatePrimaryInvitationTTL: updatePrimaryInvitationTTL,
@@ -140,7 +137,6 @@ describe('processSupporterRatePlanItemLambda', () => {
 			getSubscription: () =>
 				Promise.resolve({ subscriptionNumber: 'sub-number', ratePlans: [] }),
 			writePrimaryItem: writeItem,
-			updateInvitationTTL,
 			getSecondaryUsers,
 			writeSecondaryItem: writeSecondaryItem,
 			updatePrimaryInvitationTTL: updatePrimaryInvitationTTL,

@@ -219,10 +219,8 @@ export class InvitationRepository {
 		}
 
 		await Promise.all(
-			invitations.map(
-				(invitation) =>
-					this.updateTTL(subscriptionName, invitation.invitationCode, newTTL),
-				//this.softDelete(subscriptionName, invitation.invitationCode, 'primary')
+			invitations.map((invitation) =>
+				this.updateTTL(subscriptionName, invitation.invitationCode, newTTL),
 			),
 		);
 	}

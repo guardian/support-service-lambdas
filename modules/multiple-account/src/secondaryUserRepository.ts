@@ -249,34 +249,6 @@ export class SecondaryUserRepository {
 		);
 	}
 
-	async updateSubscriptionTTLs(
-		subscriptionName: string,
-		newTTL: number,
-	): Promise<void> {
-		logger.log(`secondaryUserRepository.updateSubscriptionTTLs: Params`, {
-			subscriptionName,
-			newTTL,
-		});
-		const secondaryUsers = await this.listBySubscription(subscriptionName);
-		logger.log('secondaryUserRepository.updateSubscriptionTTLs: Users Count', {
-			subscriptionName,
-			newTTL,
-			len: secondaryUsers.length,
-		});
-		if (secondaryUsers.length === 0) {
-			return;
-		}
-		await Promise.all(
-			secondaryUsers.map((secondaryUser) =>
-				this.updateTTL(
-					subscriptionName,
-					secondaryUser.secondaryIdentityId,
-					newTTL,
-				),
-			),
-		);
-	}
-
 	getPutTransaction(record: SecondaryUserRecord): TransactWriteItem {
 		return {
 			Put: {

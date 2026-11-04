@@ -42,9 +42,6 @@ const buildDependencies = async (): Promise<ProcessItemDependencies> => {
 		],
 		getSubscription: (subscriptionName) =>
 			subscriptionService.getSubscription(subscriptionName),
-		updateInvitationTTL: secondaryUserRepository.updateSubscriptionTTLs.bind(
-			secondaryUserRepository,
-		),
 		writePrimaryItem: (item) => dynamoService.writeItem(item),
 		getSecondaryUsers: (subscriptionName) =>
 			secondaryUserRepository.listActiveBySubscription(subscriptionName),
