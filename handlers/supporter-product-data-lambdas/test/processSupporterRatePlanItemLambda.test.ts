@@ -18,6 +18,7 @@ const noSecondaryUsers = jest.fn(() =>
 	Promise.resolve([] as SecondaryUserRecord[]),
 );
 const writeSecondaryItem = jest.fn(() => Promise.resolve());
+const updatePrimaryInvitationTTL = jest.fn(() => Promise.resolve());
 const updateSecondaryUserTTL = jest.fn(() => Promise.resolve());
 const updateInvitationTTL = jest.fn(() => Promise.resolve());
 
@@ -38,6 +39,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 			updateInvitationTTL,
 			getSecondaryUsers: noSecondaryUsers,
 			writeSecondaryItem: writeSecondaryItem,
+			updatePrimaryInvitationTTL: updatePrimaryInvitationTTL,
 			updateSecondaryUserTTL: updateSecondaryUserTTL,
 		});
 
@@ -71,6 +73,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 				updateInvitationTTL,
 				getSecondaryUsers: noSecondaryUsers,
 				writeSecondaryItem: writeSecondaryItem,
+				updatePrimaryInvitationTTL: updatePrimaryInvitationTTL,
 				updateSecondaryUserTTL: updateSecondaryUserTTL,
 			},
 		);
@@ -95,6 +98,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 			updateInvitationTTL,
 			getSecondaryUsers: noSecondaryUsers,
 			writeSecondaryItem: writeSecondaryItem,
+			updatePrimaryInvitationTTL: updatePrimaryInvitationTTL,
 			updateSecondaryUserTTL: updateSecondaryUserTTL,
 		});
 
@@ -139,6 +143,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 			updateInvitationTTL,
 			getSecondaryUsers,
 			writeSecondaryItem: writeSecondaryItem,
+			updatePrimaryInvitationTTL: updatePrimaryInvitationTTL,
 			updateSecondaryUserTTL: updateSecondaryUserTTL,
 		});
 
