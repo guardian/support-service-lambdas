@@ -217,9 +217,12 @@ export class InvitationRepository {
 		if (invitations.length === 0) {
 			return;
 		}
+
 		await Promise.all(
-			invitations.map((invitation) =>
-				this.updateTTL(subscriptionName, invitation.invitationCode, newTTL),
+			invitations.map(
+				(invitation) =>
+					this.updateTTL(subscriptionName, invitation.invitationCode, newTTL),
+				//this.softDelete(subscriptionName, invitation.invitationCode, 'primary')
 			),
 		);
 	}
