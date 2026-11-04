@@ -18,6 +18,7 @@ import { Rule, RuleTargetInput, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
+import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import {
 	Choice,
@@ -82,13 +83,28 @@ export class SupporterProductDataLambdas extends SrStack {
 				`arn:aws:ssm:${this.region}:${this.account}:parameter/supporter-product-data/${this.stage}/*`,
 			],
 		});
+
+		const dataExportBucket = new Bucket(this, 'SupporterProductExportBucket', {
+			bucketName: `supporter-product-data-export-${this.stage.toLowerCase()}`,
+			lifecycleRules: [
+				{
+					id: 'DeleteAllOldFiles',
+					expiration: Duration.days(14),
+					abortIncompleteMultipartUploadAfter: Duration.days(1),
+				},
+			],
+			removalPolicy: RemovalPolicy.RETAIN,
+		});
+		this.overrideLogicalId(dataExportBucket, {
+			logicalId: 'SupporterProductExportBucket',
+			reason: 'Keep resource name consistent with the original cfn template.',
+		});
+
 		// Read/write the supporter-product-data-export S3 bucket (used by fetchResults and addToQueue)
 		const s3DataExportBucketPolicy = new PolicyStatement({
 			effect: Effect.ALLOW,
 			actions: ['s3:PutObject', 's3:GetObject'],
-			resources: [
-				`arn:aws:s3:::supporter-product-data-export-${this.stage.toLowerCase()}/*`,
-			],
+			resources: [dataExportBucket.arnForObjects('*')],
 		});
 
 		// Migrated from dynamo-tables.yaml (stack supporter-product-data-tables-${stage})
