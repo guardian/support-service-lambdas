@@ -10,6 +10,7 @@ import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import dayjs from 'dayjs';
 import { z } from 'zod';
 import { getMaybeSingleOrThrow } from '@modules/arrayFunctions';
+import { logger } from '@modules/logger/logger';
 import {
 	type CancelledBy,
 	cancelledBySchema,
@@ -92,6 +93,9 @@ export class InvitationRepository {
 	}
 
 	async list(subscriptionName: string): Promise<InvitationRecord[]> {
+		logger.log(
+			`invitationRepository.list: Querying invitations for primary subscription ${subscriptionName} tableName ${this.tableName}`,
+		);
 		const result = await this.client.send(
 			new QueryCommand({
 				TableName: this.tableName,
@@ -197,7 +201,19 @@ export class InvitationRepository {
 		subscriptionName: string,
 		newTTL: number,
 	): Promise<void> {
+		logger.log(`invitationRepository.updateSubscriptionTTLs: Params`, {
+			subscriptionName,
+			newTTL,
+		});
 		const invitations = await this.list(subscriptionName);
+		logger.log(
+			'invitationRepository.updateSubscriptionTTLs: Invitations Count',
+			{
+				subscriptionName,
+				newTTL,
+				len: invitations.length,
+			},
+		);
 		if (invitations.length === 0) {
 			return;
 		}

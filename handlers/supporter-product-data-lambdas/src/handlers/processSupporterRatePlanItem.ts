@@ -25,6 +25,10 @@ export type ProcessItemDependencies = {
 		primaryItem: SupporterRatePlanItem,
 		secondaryUser: SecondaryUserRecord,
 	) => Promise<void>;
+	updatePrimaryInvitationTTL: (
+		subscriptionName: string,
+		newTTL: number,
+	) => Promise<void>;
 	updateSecondaryUserTTL: (
 		primarySubscriptionName: string,
 		secondaryIdentityId: string,
@@ -54,6 +58,11 @@ export const processItem = async (
 	await dependencies.writePrimaryItem(itemWithContribution);
 
 	await dependencies.updateInvitationTTL(
+		itemWithContribution.subscriptionName,
+		expiryTTLFromTermEndDate(itemWithContribution.termEndDate),
+	);
+
+	await dependencies.updatePrimaryInvitationTTL(
 		itemWithContribution.subscriptionName,
 		expiryTTLFromTermEndDate(itemWithContribution.termEndDate),
 	);

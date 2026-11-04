@@ -151,7 +151,7 @@ export class SecondaryUserRepository {
 		subscriptionName: string,
 	): Promise<SecondaryUserRecord[]> {
 		logger.log(
-			`Querying secondary users for primary subscription ${subscriptionName} tableName ${this.tableName}`,
+			`secondaryUserRepository.list: Querying secondary users for primary subscription ${subscriptionName} tableName ${this.tableName}`,
 		);
 		const result = await this.client.send(
 			new QueryCommand({
@@ -253,12 +253,12 @@ export class SecondaryUserRepository {
 		subscriptionName: string,
 		newTTL: number,
 	): Promise<void> {
-		logger.log(`updateSubscriptionTTLs`, {
+		logger.log(`secondaryUserRepository.updateSubscriptionTTLs: Params`, {
 			subscriptionName,
 			newTTL,
 		});
 		const secondaryUsers = await this.listBySubscription(subscriptionName);
-		logger.log('updateSubscriptionTTLs + secondaryUsers len', {
+		logger.log('secondaryUserRepository.updateSubscriptionTTLs: Users Count', {
 			subscriptionName,
 			newTTL,
 			len: secondaryUsers.length,

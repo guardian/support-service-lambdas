@@ -7,6 +7,7 @@ import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { stageFromEnvironment } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
+import { InvitationRepository } from '../../../multiple-account-api/src/invitationRepository';
 import { DynamoService } from '../services/dynamoService';
 import {
 	getExcludedProductRatePlanIds,
@@ -25,6 +26,7 @@ const buildDependencies = async (): Promise<ProcessItemDependencies> => {
 	const subscriptionService = new ZuoraSubscriptionService(zuoraClient);
 	const dynamoService = new DynamoService(stage);
 	const secondaryUserRepository = SecondaryUserRepository.create(stage);
+	const invitationRepository = InvitationRepository.create(stage);
 
 	const zuoraCatalog = await getZuoraCatalogFromS3(stage);
 	const productCatalog = await getProductCatalogFromApi(stage);
@@ -55,6 +57,8 @@ const buildDependencies = async (): Promise<ProcessItemDependencies> => {
 				dayjs(secondaryUser.acceptedDate),
 			);
 		},
+		updatePrimaryInvitationTTL:
+			invitationRepository.updateSubscriptionTTLs.bind(invitationRepository),
 		updateSecondaryUserTTL: secondaryUserRepository.updateTTL.bind(
 			secondaryUserRepository,
 		),
