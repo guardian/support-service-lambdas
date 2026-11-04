@@ -1,12 +1,22 @@
 import type { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import type { SecondaryUserRecord } from '@modules/multiple-account/secondaryUserRepository';
 import type { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
+import { getSupporterRatePlan } from '@modules/supporter-product-data/supporterProductData';
+import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { acceptInvitationEndpoint } from '../src/acceptInvitationEndpoint';
 import type {
 	InvitationRecord,
 	InvitationRepository,
 } from '../src/invitationRepository';
+
+jest.mock('@modules/supporter-product-data/supporterProductData', () => ({
+	getSupporterRatePlan: jest.fn(),
+}));
+
+jest.mock('@modules/zuora/subscription', () => ({
+	getSubscription: jest.fn(),
+}));
 
 const stage = 'CODE';
 const subscriptionName = 'A-S00974337';
@@ -115,6 +125,37 @@ describe('acceptInvitationEndpoint', () => {
 		expect(result.statusCode).toBe(410);
 		expect(mockGet).toHaveBeenCalledWith(invitationCode);
 		expect(mockListByIdentity).toHaveBeenCalledWith(secondaryIdentityId);
+	});
+
+	it('returns 410 when the primary subscription has been cancelled', async () => {
+		const { repository: invitationRepository } =
+			makeInvitationRepository(makeInvitation());
+		const { repository: secondaryUserRepository } = makeSecondaryUserRepository(
+			[],
+		);
+
+		// mocks empty supporter rate plan and cancelled Zuora subscription status
+		jest.mocked(getSupporterRatePlan).mockResolvedValue(undefined);
+		jest.mocked(getSubscription).mockResolvedValue({
+			status: 'Cancelled',
+		});
+
+		const result = await acceptInvitationEndpoint(
+			stage,
+			invitationRepository,
+			secondaryUserRepository,
+			dynamoClient,
+			zuoraClient,
+			secondaryIdentityId,
+			invitationCode,
+		);
+
+		expect(result.statusCode).toBe(410);
+		expect(result.body).toBe(
+			JSON.stringify({
+				message: `Primary subscription ${subscriptionName} cancelled`,
+			}),
+		);
 	});
 
 	it('returns 404 when the invitation is not found and there is no matching secondary user record', async () => {
