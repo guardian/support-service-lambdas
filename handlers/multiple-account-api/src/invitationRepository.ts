@@ -172,4 +172,39 @@ export class InvitationRepository {
 			},
 		};
 	}
+
+	async updateTTL(
+		subscriptionName: string,
+		invitationCode: string,
+		expiryDate: number,
+	): Promise<void> {
+		await this.client.send(
+			new UpdateItemCommand({
+				TableName: this.tableName,
+				Key: {
+					subscriptionName: { S: subscriptionName },
+					invitationCode: { S: invitationCode },
+				},
+				UpdateExpression: 'SET expiryDate = :expiryDate',
+				ExpressionAttributeValues: {
+					':expiryDate': { N: expiryDate.toString() },
+				},
+			}),
+		);
+	}
+
+	async updateSubscriptionTTLs(
+		subscriptionName: string,
+		newTTL: number,
+	): Promise<void> {
+		const invitations = await this.list(subscriptionName);
+		if (invitations.length === 0) {
+			return;
+		}
+		await Promise.all(
+			invitations.map((invitation) =>
+				this.updateTTL(subscriptionName, invitation.invitationCode, newTTL),
+			),
+		);
+	}
 }
