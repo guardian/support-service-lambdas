@@ -40,62 +40,7 @@ export class IamPolicies extends SrStack {
 					'braze-emails',
 					'supporter-product-data',
 				]),
-				new AllowSecurityGroupsUpdaterPolicy(this),
-				new AllowEc2SecurityGroupDescribePolicy(),
-				new AllowEc2SecurityGroupMutatePolicy(),
 			],
-		});
-	}
-}
-
-/*
-needed to run handlers/security-groups-updater/runManual locally against CODE
-*/
-class AllowSecurityGroupsUpdaterPolicy extends PolicyStatement {
-	constructor(scope: GuStack) {
-		super({
-			actions: ['lambda:InvokeFunction'],
-			resources: [
-				`arn:aws:lambda:${scope.region}:${scope.account}:function:security-groups-updater-CODE`,
-			],
-		});
-	}
-}
-
-/*
-security group ids are configured via SSM at runtime, so these can't be
-scoped to specific security group ARNs. ec2:DescribeSecurityGroups doesn't
-support resource-level permissions at all, so it must stay unrestricted -
-this is fine as it's read-only.
-*/
-class AllowEc2SecurityGroupDescribePolicy extends PolicyStatement {
-	constructor() {
-		super({
-			actions: ['ec2:DescribeSecurityGroups'],
-			resources: ['*'],
-		});
-	}
-}
-
-/*
-the mutating actions below also can't be scoped to specific security group
-ARNs, but GuStack tags every resource it creates with a Stage tag, so we
-restrict these to CODE-tagged security groups only. This stops local credentials
-(e.g. for running handlers/security-groups-updater's runManual scripts
-against CODE) from being able to modify PROD security groups.
-*/
-class AllowEc2SecurityGroupMutatePolicy extends PolicyStatement {
-	constructor() {
-		super({
-			actions: [
-				'ec2:AuthorizeSecurityGroupIngress',
-				'ec2:RevokeSecurityGroupIngress',
-				'ec2:CreateTags',
-			],
-			resources: ['*'],
-			conditions: {
-				StringEquals: { 'aws:ResourceTag/Stage': 'CODE' },
-			},
 		});
 	}
 }
