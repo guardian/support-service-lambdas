@@ -32,8 +32,7 @@ security group that also needs other ingress rules.
 The list of security group ids to manage is stored (comma-separated) in SSM at
 `/<stage>/support/security-groups-updater/securityGroupIds`, per the standard
 [`appConfig`](../../modules/aws/src/appConfig.ts) convention. This isn't secret
-information, but it's kept in SSM (rather than hardcoded) so the list can be updated by
-ops without a code deploy.
+information, but it's kept in SSM (rather than hardcoded) so the list can be updated without a code deploy.
 
 ## Testing
 
