@@ -248,7 +248,20 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
                 "s3:GetObject",
               ],
               "Effect": "Allow",
-              "Resource": "arn:aws:s3:::supporter-product-data-export-code/*",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "SupporterProductExportBucket",
+                        "Arn",
+                      ],
+                    },
+                    "/*",
+                  ],
+                ],
+              },
             },
             {
               "Action": [
@@ -658,7 +671,20 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
                 "s3:GetObject",
               ],
               "Effect": "Allow",
-              "Resource": "arn:aws:s3:::supporter-product-data-export-code/*",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "SupporterProductExportBucket",
+                        "Arn",
+                      ],
+                    },
+                    "/*",
+                  ],
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
@@ -1745,6 +1771,52 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "SupporterProductExportBucket": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "BucketName": "supporter-product-data-export-code",
+        "LifecycleConfiguration": {
+          "Rules": [
+            {
+              "AbortIncompleteMultipartUpload": {
+                "DaysAfterInitiation": 1,
+              },
+              "ExpirationInDays": 14,
+              "Id": "DeleteAllOldFiles",
+              "Status": "Enabled",
+            },
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "supporter-product-data",
+          },
+          {
+            "Key": "gu:build-tool",
+            "Value": "guardian/actions-riff-raff",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-frontend",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
+    },
     "UnprocessedRecordAlarm406379E1": {
       "Properties": {
         "ActionsEnabled": false,
@@ -2101,7 +2173,20 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
                 "s3:GetObject",
               ],
               "Effect": "Allow",
-              "Resource": "arn:aws:s3:::supporter-product-data-export-prod/*",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "SupporterProductExportBucket",
+                        "Arn",
+                      ],
+                    },
+                    "/*",
+                  ],
+                ],
+              },
             },
             {
               "Action": [
@@ -2449,7 +2534,20 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
                 "s3:GetObject",
               ],
               "Effect": "Allow",
-              "Resource": "arn:aws:s3:::supporter-product-data-export-prod/*",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "SupporterProductExportBucket",
+                        "Arn",
+                      ],
+                    },
+                    "/*",
+                  ],
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
@@ -3654,6 +3752,52 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
         },
       },
       "Type": "AWS::ApplicationAutoScaling::ScalingPolicy",
+    },
+    "SupporterProductExportBucket": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "BucketName": "supporter-product-data-export-prod",
+        "LifecycleConfiguration": {
+          "Rules": [
+            {
+              "AbortIncompleteMultipartUpload": {
+                "DaysAfterInitiation": 1,
+              },
+              "ExpirationInDays": 14,
+              "Id": "DeleteAllOldFiles",
+              "Status": "Enabled",
+            },
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "supporter-product-data",
+          },
+          {
+            "Key": "gu:build-tool",
+            "Value": "guardian/actions-riff-raff",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-frontend",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
     },
     "UnprocessedRecordAlarm406379E1": {
       "Properties": {
