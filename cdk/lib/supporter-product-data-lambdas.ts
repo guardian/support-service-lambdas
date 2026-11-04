@@ -30,8 +30,8 @@ import {
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import {
-	// AllowInvitationTableQueryPolicy,
-	// AllowInvitationTableUpdatePolicy,
+	AllowInvitationTableQueryPolicy,
+	AllowInvitationTableUpdatePolicy,
 	AllowS3CatalogReadPolicy,
 	AllowSecondaryUserTableQueryPolicy,
 	AllowSecondaryUserTableUpdatePolicy,
@@ -198,8 +198,8 @@ export class SupporterProductDataLambdas extends SrStack {
 		processItem.addToRolePolicy(dynamoWritePolicy);
 		processItem.addPolicies(new AllowSecondaryUserTableQueryPolicy(this));
 		processItem.addPolicies(new AllowSecondaryUserTableUpdatePolicy(this));
-		// processItem.addPolicies(new AllowInvitationTableQueryPolicy(this));
-		// processItem.addPolicies(new AllowInvitationTableUpdatePolicy(this));
+		processItem.addPolicies(new AllowInvitationTableQueryPolicy(this));
+		processItem.addPolicies(new AllowInvitationTableUpdatePolicy(this));
 		processItem.addPolicies(zuoraOAuthPolicy);
 
 		queue.grantSendMessages(addToQueue);
