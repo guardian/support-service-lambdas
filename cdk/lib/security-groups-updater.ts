@@ -1,12 +1,8 @@
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
-import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
-import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
+import { Schedule } from 'aws-cdk-lib/aws-events';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import {
-	cloudFormationStackNamesForStage,
-	securityGroupIdsForStage,
-} from '../../handlers/security-groups-updater/src/securityGroupIds';
+import { securityGroupIdsForStage } from '../../handlers/security-groups-updater/src/securityGroupIds';
 import { SrScheduledLambda } from './cdk/SrScheduledLambda';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
@@ -62,33 +58,5 @@ export class SecurityGroupsUpdater extends SrStack {
 				resources: securityGroupArns,
 			}),
 		);
-
-		// in addition to the hourly schedule, trigger this lambda as soon as a
-		// managed site's stack finishes deploying - its own CloudFormation
-		// template re-asserts a public ingress rule on every deploy (e.g. a
-		// GuEc2App with a public ALB listener), so without this the security
-		// group would sit open to the world until the next scheduled run.
-		// see https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-successfully-create-stack-eventbridge.html
-		const cloudFormationStackNames = cloudFormationStackNamesForStage(stage);
-		if (cloudFormationStackNames.length > 0) {
-			new Rule(this, 'DeployTriggerRule', {
-				description:
-					'Triggers security-groups-updater as soon as a managed site finishes deploying',
-				eventPattern: {
-					source: ['aws.cloudformation'],
-					detailType: ['CloudFormation Stack Status Change'],
-					detail: {
-						'stack-id': cloudFormationStackNames.map((name) => ({
-							prefix: `arn:aws:cloudformation:${this.region}:${this.account}:stack/${name}/`,
-						})),
-						'status-details': {
-							status: ['CREATE_COMPLETE', 'UPDATE_COMPLETE'],
-						},
-					},
-				},
-				targets: [new LambdaFunction(lambda)],
-				enabled: true,
-			});
-		}
 	}
 }
