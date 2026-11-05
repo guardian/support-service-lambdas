@@ -2,34 +2,50 @@ import type { Stage } from '@modules/stage';
 
 /**
  * The security groups this lambda is allowed to manage, hardcoded here
- * so the CDK stack can scope the lambda's IAM permissions down to exactly
- * these security groups
+ * so the CDK can scope the lambda's IAM permissions down to exactly
+ * these security groups.
+ * We need the stack name so that the lambda can be triggered whenever the target
+ * CloudFormation stack is deployed as the default security will be reinstated at 
+ * that point.
  */
-type ManagedSite = {
-	name: string;
-	securityGroupIds: Partial<Record<Stage, string>>;
+type ManagedStack = {
+	// The physical CloudFormation stack name
+	cloudFormationStackName: string;
+	stage: Stage;
+	securityGroupId: string;
 };
 
-// Add sites to manage here, either CODE or PROD stages can be omitted.
-const managedSites: ManagedSite[] = [
+// Add stacks to manage here.
+const managedStacks: ManagedStack[] = [
 	{
-		name: 'support-frontend',
-		securityGroupIds: {
-			CODE: 'sg-00319d7c826a34db0',
-			PROD: 'sg-089d1a001c21018c3',
-		},
+		cloudFormationStackName: 'support-CODE-frontend',
+		stage: 'CODE',
+		securityGroupId: 'sg-00319d7c826a34db0',
+	},
+	{
+		cloudFormationStackName: 'support-PROD-frontend',
+		stage: 'PROD',
+		securityGroupId: 'sg-089d1a001c21018c3',
 	},
 ];
 
 export type ManagedSecurityGroup = { name: string; id: string };
 
 export function securityGroupsForStage(stage: Stage): ManagedSecurityGroup[] {
-	return managedSites.flatMap(({ name, securityGroupIds }) => {
-		const id = securityGroupIds[stage];
-		return id ? [{ name, id }] : [];
-	});
+	return managedStacks
+		.filter((managedStack) => managedStack.stage === stage)
+		.map((managedStack) => ({
+			name: managedStack.cloudFormationStackName,
+			id: managedStack.securityGroupId,
+		}));
 }
 
 export function securityGroupIdsForStage(stage: Stage): string[] {
 	return securityGroupsForStage(stage).map((securityGroup) => securityGroup.id);
+}
+
+export function cloudFormationStackNamesForStage(stage: Stage): string[] {
+	return managedStacks
+		.filter((managedStack) => managedStack.stage === stage)
+		.map((managedStack) => managedStack.cloudFormationStackName);
 }

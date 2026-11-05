@@ -16,6 +16,101 @@ exports[`The SecurityGroupsUpdater stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
+    "DeployTriggerRuleAF4DD855": {
+      "Properties": {
+        "Description": "Triggers security-groups-updater as soon as a managed site finishes deploying",
+        "EventPattern": {
+          "detail": {
+            "stack-id": [
+              {
+                "prefix": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:cloudformation:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":stack/Frontend-CODE/",
+                    ],
+                  ],
+                },
+              },
+            ],
+            "status-details": {
+              "status": [
+                "CREATE_COMPLETE",
+                "UPDATE_COMPLETE",
+              ],
+            },
+          },
+          "detail-type": [
+            "CloudFormation Stack Status Change",
+          ],
+          "source": [
+            "aws.cloudformation",
+          ],
+        },
+        "State": "ENABLED",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "security-groups-updater",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "LambdaD247545B",
+                "Arn",
+              ],
+            },
+            "Id": "Target0",
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "DeployTriggerRuleAllowEventRulesecuritygroupsupdaterCODELambdaE00C728C8A492307": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "DeployTriggerRuleAF4DD855",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
     "LambdaD247545B": {
       "DependsOn": [
         "LambdaServiceRoleDefaultPolicyDAE46E21",
@@ -338,6 +433,101 @@ exports[`The SecurityGroupsUpdater stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
+    "DeployTriggerRuleAF4DD855": {
+      "Properties": {
+        "Description": "Triggers security-groups-updater as soon as a managed site finishes deploying",
+        "EventPattern": {
+          "detail": {
+            "stack-id": [
+              {
+                "prefix": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:cloudformation:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":stack/Frontend-PROD/",
+                    ],
+                  ],
+                },
+              },
+            ],
+            "status-details": {
+              "status": [
+                "CREATE_COMPLETE",
+                "UPDATE_COMPLETE",
+              ],
+            },
+          },
+          "detail-type": [
+            "CloudFormation Stack Status Change",
+          ],
+          "source": [
+            "aws.cloudformation",
+          ],
+        },
+        "State": "ENABLED",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "security-groups-updater",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "LambdaD247545B",
+                "Arn",
+              ],
+            },
+            "Id": "Target0",
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "DeployTriggerRuleAllowEventRulesecuritygroupsupdaterPRODLambda1485CDDCCCF73C69": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "DeployTriggerRuleAF4DD855",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
     "LambdaD247545B": {
       "DependsOn": [
         "LambdaServiceRoleDefaultPolicyDAE46E21",
