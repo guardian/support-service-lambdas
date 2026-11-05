@@ -35,7 +35,7 @@ exports[`The SecurityGroupsUpdater stack matches the snapshot 1`] = `
                       {
                         "Ref": "AWS::AccountId",
                       },
-                      ":stack/Frontend-CODE/",
+                      ":stack/support-CODE-frontend/",
                     ],
                   ],
                 },
@@ -452,7 +452,7 @@ exports[`The SecurityGroupsUpdater stack matches the snapshot 2`] = `
                       {
                         "Ref": "AWS::AccountId",
                       },
-                      ":stack/Frontend-PROD/",
+                      ":stack/support-PROD-frontend/",
                     ],
                   ],
                 },
