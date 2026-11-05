@@ -198,7 +198,7 @@ export class InvitationRepository {
 		subscriptionName: string,
 		newTTL: number,
 	): Promise<void> {
-		const invitations = await this.list(subscriptionName);
+		const invitations = await this.listActive(subscriptionName);
 		logger.log(
 			'invitationRepository.updateSubscriptionTTLs: Invitations Count',
 			{
