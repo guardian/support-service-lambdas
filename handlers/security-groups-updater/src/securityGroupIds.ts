@@ -10,7 +10,7 @@ type ManagedSite = {
 	securityGroupIds: Partial<Record<Stage, string>>;
 };
 
- // Add sites to manage here, either CODE or PROD stages can be omitted.
+// Add sites to manage here, either CODE or PROD stages can be omitted.
 const managedSites: ManagedSite[] = [
 	{
 		name: 'support-frontend',
