@@ -99,10 +99,6 @@ describe('processSupporterRatePlanItemLambda', () => {
 
 		expect(writeItem).toHaveBeenCalled();
 		expect(noSecondaryUsers).toHaveBeenCalledWith('sub-1');
-		expect(updatePrimaryInvitationTTL).toHaveBeenCalledWith(
-			'sub-1',
-			expiryTTLFromTermEndDate(dayjs(termEndDate)),
-		);
 		expect(writeSecondaryItem).not.toHaveBeenCalled();
 		expect(updateSecondaryUserTTL).not.toHaveBeenCalled();
 	});
@@ -160,6 +156,28 @@ describe('processSupporterRatePlanItemLambda', () => {
 		expect(updateSecondaryUserTTL).toHaveBeenCalledWith(
 			expect.stringContaining('sub-1'),
 			expect.stringContaining('secondary-id-2'),
+			expiryTTLFromTermEndDate(dayjs(termEndDate)),
+		);
+	});
+
+	test('update invitation TTLs for primary subscription', async () => {
+		const writeItem = jest.fn(() => Promise.resolve());
+		const updateSubscriptionTTLs = jest.fn(() => Promise.resolve());
+
+		await processItem(item, {
+			isExcludedRatePlanItem: () => false,
+			contributionIds: [],
+			getSubscription: () =>
+				Promise.resolve({ subscriptionNumber: 'sub-number', ratePlans: [] }),
+			writePrimaryItem: writeItem,
+			getSecondaryUsers: noSecondaryUsers,
+			writeSecondaryItem,
+			updatePrimaryInvitationTTL: updateSubscriptionTTLs,
+			updateSecondaryUserTTL,
+		});
+
+		expect(updateSubscriptionTTLs).toHaveBeenCalledWith(
+			item.subscriptionName,
 			expiryTTLFromTermEndDate(dayjs(termEndDate)),
 		);
 	});
