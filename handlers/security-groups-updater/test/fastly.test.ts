@@ -22,7 +22,7 @@ beforeEach(() => {
 	fetchMock.restore();
 });
 
-test('returns only valid IPv4 cidrs from the addresses field', async () => {
+test('returns the valid IPv4 cidrs from the addresses field', async () => {
 	fetchMock.mock(
 		fastlyUrl,
 		new Response(
@@ -38,39 +38,30 @@ test('returns only valid IPv4 cidrs from the addresses field', async () => {
 	expect(result).toEqual(manyValidCidrs);
 });
 
-test('filters out malformed entries', async () => {
+test('throws if there is a malformed entry, rather than silently dropping it', async () => {
 	fetchMock.mock(
 		fastlyUrl,
 		new Response(
 			JSON.stringify({
-				addresses: [...manyValidCidrs, 'not-a-cidr', '10.0.0.1'],
+				addresses: [...manyValidCidrs, 'not-a-cidr'],
 			}),
 		),
 	);
 
-	const result = await getFastlyIpv4Ranges();
-
-	expect(result).toEqual(manyValidCidrs);
+	await expect(getFastlyIpv4Ranges()).rejects.toThrow('Invalid IPv4 range');
 });
 
-test('filters out cidrs with out-of-range octets or prefix lengths', async () => {
+test('throws if there is a cidr with an out-of-range octet or prefix length', async () => {
 	fetchMock.mock(
 		fastlyUrl,
 		new Response(
 			JSON.stringify({
-				addresses: [
-					...manyValidCidrs,
-					'999.101.0.0/16',
-					'151.101.0.0/33',
-					'151.101.0.0/24/8',
-				],
+				addresses: [...manyValidCidrs, '999.101.0.0/16'],
 			}),
 		),
 	);
 
-	const result = await getFastlyIpv4Ranges();
-
-	expect(result).toEqual(manyValidCidrs);
+	await expect(getFastlyIpv4Ranges()).rejects.toThrow('Invalid IPv4 range');
 });
 
 test('throws if the request is not successful', async () => {

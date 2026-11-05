@@ -5,7 +5,7 @@ import type { Stage } from '@modules/stage';
  * so the CDK can scope the lambda's IAM permissions down to exactly
  * these security groups.
  * We need the stack name so that the lambda can be triggered whenever the target
- * CloudFormation stack is deployed as the default security will be reinstated at 
+ * CloudFormation stack is deployed as the default security will be reinstated at
  * that point.
  */
 type ManagedStack = {

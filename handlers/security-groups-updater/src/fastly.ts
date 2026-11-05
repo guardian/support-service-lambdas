@@ -1,4 +1,3 @@
-import { isIPv4 } from 'node:net';
 import { z } from 'zod';
 import { logger } from '@modules/logger/logger';
 
@@ -11,23 +10,14 @@ const minExpectedCidrs = 10;
 
 // Fastly also returns `ipv6_addresses`, but the security groups this lambda
 // manages only have IPv4 ingress rules, so we only look at `addresses`.
+//
+// Any entry that isn't a valid IPv4 cidr fails this parse and throws,
+// rather than being silently filtered out - a malformed entry in Fastly's
+// response is itself worth investigating, and this reuses the lambda's
+// existing error alarm rather than requiring a separate log-based alarm.
 const FastlyIpListSchema = z.object({
-	addresses: z.array(z.string()),
+	addresses: z.array(z.cidrv4()),
 });
-
-function isValidIpv4Cidr(value: string): boolean {
-	const [address, prefix, ...rest] = value.split('/');
-	if (address === undefined || prefix === undefined || rest.length > 0) {
-		return false;
-	}
-	const prefixLength = Number(prefix);
-	return (
-		isIPv4(address) &&
-		Number.isInteger(prefixLength) &&
-		prefixLength >= 0 &&
-		prefixLength <= 32
-	);
-}
 
 /**
  * Fetches Fastly's current list of public IPv4 ranges.
@@ -49,18 +39,16 @@ export async function getFastlyIpv4Ranges(): Promise<string[]> {
 	}
 
 	const { addresses } = FastlyIpListSchema.parse(JSON.parse(body));
-	const validCidrs = addresses.filter((address) => isValidIpv4Cidr(address));
 
 	// Fail loudly rather than revoking ingress rules based on a
-	// malformed/truncated response (e.g. Fastly returning an empty or
-	// partial list) - this would otherwise look like a legitimate shrink in
-	// Fastly's range count to the diffing logic, locking out some or all
-	// traffic.
-	if (validCidrs.length < minExpectedCidrs) {
+	// truncated response (e.g. Fastly returning an empty or partial list) -
+	// this would otherwise look like a legitimate shrink in Fastly's range
+	// count to the diffing logic, locking out some or all traffic.
+	if (addresses.length < minExpectedCidrs) {
 		throw new Error(
-			`Fastly IP list response contained too few valid IPv4 cidrs (${validCidrs.length}, expected at least ${minExpectedCidrs}): ${body}`,
+			`Fastly IP list response contained too few valid IPv4 cidrs (${addresses.length}, expected at least ${minExpectedCidrs}): ${body}`,
 		);
 	}
 
-	return validCidrs;
+	return addresses;
 }
