@@ -37,17 +37,6 @@ review, and it lets the CDK stack (`cdk/lib/security-groups-updater.ts`) scope t
 lambda's IAM permissions to exactly these security groups, rather than allowing it to
 mutate any security group in the account.
 
-## Deploy trigger
-
-There is no AWS event that triggers this lambda directly. Although the load balancer
-security groups it manages are also referenced by their respective site's own
-CloudFormation stack (e.g. a `GuEc2App` with a public ALB listener has `open: true`,
-which CDK implements as a managed `0.0.0.0/0` ingress rule), CloudFormation only
-re-applies a resource's properties when they change between template versions - it
-doesn't continuously reconcile live AWS state back to the template. So in practice,
-deploying a managed site does not reset the ingress rules this lambda maintains; the
-hourly schedule alone keeps them in sync.
-
 ## Testing
 
 ```bash

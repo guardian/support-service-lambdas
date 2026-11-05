@@ -6,8 +6,8 @@ import type { Stage } from '@modules/stage';
  * these security groups.
  */
 type ManagedStack = {
-	// The physical CloudFormation stack name, used as a log-friendly name
-	cloudFormationStackName: string;
+	// A human-readable name for this entry
+	name: string;
 	stage: Stage;
 	securityGroupId: string;
 };
@@ -15,12 +15,12 @@ type ManagedStack = {
 // Add stacks to manage here.
 const managedStacks: ManagedStack[] = [
 	{
-		cloudFormationStackName: 'support-CODE-frontend',
+		name: 'support-frontend',
 		stage: 'CODE',
 		securityGroupId: 'sg-00319d7c826a34db0',
 	},
 	{
-		cloudFormationStackName: 'support-PROD-frontend',
+		name: 'support-frontend',
 		stage: 'PROD',
 		securityGroupId: 'sg-089d1a001c21018c3',
 	},
@@ -32,7 +32,7 @@ export function securityGroupsForStage(stage: Stage): ManagedSecurityGroup[] {
 	return managedStacks
 		.filter((managedStack) => managedStack.stage === stage)
 		.map((managedStack) => ({
-			name: managedStack.cloudFormationStackName,
+			name: managedStack.name + ' ' + managedStack.stage,
 			id: managedStack.securityGroupId,
 		}));
 }

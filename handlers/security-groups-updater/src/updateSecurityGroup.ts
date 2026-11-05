@@ -12,12 +12,10 @@ export const managedPorts = [443];
 
 export async function updateSecurityGroup(
 	securityGroupId: string,
-	securityGroupName: string,
+	name: string,
 	fastlyCidrs: string[],
 ): Promise<void> {
-	logger.log(
-		`updating security group ${securityGroupId} (${securityGroupName})`,
-	);
+	logger.log(`updating security group ${securityGroupId} (${name})`);
 
 	const currentPermissions = await ec2.getIngressPermissions(securityGroupId);
 	const desiredPermissions = buildDesiredIpPermissions(
@@ -36,6 +34,6 @@ export async function updateSecurityGroup(
 	});
 
 	logger.log(
-		`security group ${securityGroupId} (${securityGroupName}) updated: authorized ${toAuthorize.length} permission(s), revoked ${toRevoke.length} permission(s)`,
+		`security group ${securityGroupId} (${name}) updated: authorized ${toAuthorize.length} permission(s), revoked ${toRevoke.length} permission(s)`,
 	);
 }
