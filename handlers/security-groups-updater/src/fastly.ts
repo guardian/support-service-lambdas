@@ -1,3 +1,4 @@
+import { isIPv4 } from 'node:net';
 import { z } from 'zod';
 import { logger } from '@modules/logger/logger';
 
@@ -9,7 +10,19 @@ const FastlyIpListSchema = z.object({
 	addresses: z.array(z.string()),
 });
 
-const ipv4CidrPattern = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d{1,2}$/;
+function isValidIpv4Cidr(value: string): boolean {
+	const [address, prefix, ...rest] = value.split('/');
+	if (address === undefined || prefix === undefined || rest.length > 0) {
+		return false;
+	}
+	const prefixLength = Number(prefix);
+	return (
+		isIPv4(address) &&
+		Number.isInteger(prefixLength) &&
+		prefixLength >= 0 &&
+		prefixLength <= 32
+	);
+}
 
 /**
  * Fetches Fastly's current list of public IPv4 ranges.
@@ -31,9 +44,7 @@ export async function getFastlyIpv4Ranges(): Promise<string[]> {
 	}
 
 	const { addresses } = FastlyIpListSchema.parse(JSON.parse(body));
-	const validCidrs = addresses.filter((address) =>
-		ipv4CidrPattern.test(address),
-	);
+	const validCidrs = addresses.filter((address) => isValidIpv4Cidr(address));
 
 	// Fail loudly rather than revoking every ingress rule on managed security
 	// groups: an empty result here (e.g. Fastly returning a malformed or

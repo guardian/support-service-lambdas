@@ -38,6 +38,26 @@ test('filters out malformed entries', async () => {
 	expect(result).toEqual(['151.101.0.0/16']);
 });
 
+test('filters out cidrs with out-of-range octets or prefix lengths', async () => {
+	fetchMock.mock(
+		fastlyUrl,
+		new Response(
+			JSON.stringify({
+				addresses: [
+					'151.101.0.0/16',
+					'999.101.0.0/16',
+					'151.101.0.0/33',
+					'151.101.0.0/24/8',
+				],
+			}),
+		),
+	);
+
+	const result = await getFastlyIpv4Ranges();
+
+	expect(result).toEqual(['151.101.0.0/16']);
+});
+
 test('throws if the request is not successful', async () => {
 	fetchMock.mock(fastlyUrl, new Response('oops', { status: 500 }));
 
