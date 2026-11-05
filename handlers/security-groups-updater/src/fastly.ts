@@ -4,6 +4,11 @@ import { logger } from '@modules/logger/logger';
 
 const fastlyPublicIpListUrl = 'https://api.fastly.com/public-ip-list';
 
+// Fastly's IPv4 list currently has ~21 ranges. This is a sanity floor, well
+// below that, to catch a badly truncated/partial response (which wouldn't
+// otherwise look like an error).
+const minExpectedCidrs = 10;
+
 // Fastly also returns `ipv6_addresses`, but the security groups this lambda
 // manages only have IPv4 ingress rules, so we only look at `addresses`.
 const FastlyIpListSchema = z.object({
@@ -46,13 +51,14 @@ export async function getFastlyIpv4Ranges(): Promise<string[]> {
 	const { addresses } = FastlyIpListSchema.parse(JSON.parse(body));
 	const validCidrs = addresses.filter((address) => isValidIpv4Cidr(address));
 
-	// Fail loudly rather than revoking every ingress rule on managed security
-	// groups: an empty result here (e.g. Fastly returning a malformed or
-	// unexpectedly empty list) would otherwise look like "Fastly now has zero
-	// IP ranges" to the diffing logic, locking out all traffic.
-	if (validCidrs.length === 0) {
+	// Fail loudly rather than revoking ingress rules based on a
+	// malformed/truncated response (e.g. Fastly returning an empty or
+	// partial list) - this would otherwise look like a legitimate shrink in
+	// Fastly's range count to the diffing logic, locking out some or all
+	// traffic.
+	if (validCidrs.length < minExpectedCidrs) {
 		throw new Error(
-			`Fastly IP list response contained no valid IPv4 cidrs: ${body}`,
+			`Fastly IP list response contained too few valid IPv4 cidrs (${validCidrs.length}, expected at least ${minExpectedCidrs}): ${body}`,
 		);
 	}
 
