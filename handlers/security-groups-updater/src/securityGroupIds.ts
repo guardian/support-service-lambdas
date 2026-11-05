@@ -4,14 +4,13 @@ import type { Stage } from '@modules/stage';
  * The security groups this lambda is allowed to manage, hardcoded here
  * so the CDK stack can scope the lambda's IAM permissions down to exactly
  * these security groups
- *
- * Grouped by site, either CODE or PROD can be omitted.
  */
 type ManagedSite = {
 	name: string;
 	securityGroupIds: Partial<Record<Stage, string>>;
 };
 
+ // Add sites to manage here, either CODE or PROD stages can be omitted.
 const managedSites: ManagedSite[] = [
 	{
 		name: 'support-frontend',
