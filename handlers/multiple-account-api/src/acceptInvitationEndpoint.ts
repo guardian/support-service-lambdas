@@ -72,7 +72,7 @@ export const acceptInvitationEndpoint = async (
 
 		const supporterRatePlan = await getSupporterRatePlan(
 			stage,
-			secondaryIdentityId,
+			primaryIdentityId,
 			subscriptionName,
 		);
 
