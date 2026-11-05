@@ -18,7 +18,7 @@ test('authorizes new Fastly cidrs and revokes stale ones on port 443', async () 
 		},
 	]);
 
-	await updateSecurityGroup('sg-123', ['151.101.0.0/16']);
+	await updateSecurityGroup('sg-123', 'my-lb', ['151.101.0.0/16']);
 
 	expect(mockEc2.getIngressPermissions).toHaveBeenCalledWith('sg-123');
 	expect(mockEc2.authorizeIngress).toHaveBeenCalledWith('sg-123', [
@@ -55,7 +55,7 @@ test('does not authorize or revoke anything when nothing has changed', async () 
 		},
 	]);
 
-	await updateSecurityGroup('sg-123', ['151.101.0.0/16']);
+	await updateSecurityGroup('sg-123', 'my-lb', ['151.101.0.0/16']);
 
 	expect(mockEc2.authorizeIngress).toHaveBeenCalledWith('sg-123', []);
 	expect(mockEc2.revokeIngress).toHaveBeenCalledWith('sg-123', []);

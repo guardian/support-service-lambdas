@@ -29,10 +29,11 @@ security group that also needs other ingress rules.
 
 ## Configuration
 
-The list of security group ids to manage is stored (comma-separated) in SSM at
-`/<stage>/support/security-groups-updater/securityGroupIds`, per the standard
-[`appConfig`](../../modules/aws/src/appConfig.ts) convention. This isn't secret
-information, but it's kept in SSM (rather than hardcoded) so the list can be updated without a code deploy.
+The list of security group ids to manage is hardcoded per stage in `src/securityGroupIds.ts`
+This is deliberate: it's security-sensitive configuration, so changing it should go through code
+review, and it lets the CDK stack (`cdk/lib/security-groups-updater.ts`) scope the
+lambda's IAM permissions to exactly these security groups, rather than allowing it to
+mutate any security group in the account.
 
 ## Testing
 

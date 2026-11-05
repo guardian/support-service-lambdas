@@ -1,26 +1,22 @@
 import { logger } from '@modules/logger/logger';
-import type { HandlerEnv } from '@modules/routing/lambdaHandler';
-import { LambdaHandler } from '@modules/routing/lambdaHandler';
-import { ConfigSchema } from './configSchema';
+import { stageFromEnvironment } from '@modules/stage';
 import { getFastlyIpv4Ranges } from './fastly';
+import { securityGroupsForStage } from './securityGroupIds';
 import { updateSecurityGroup } from './updateSecurityGroup';
 
 // called by AWS
-export const handler = LambdaHandler(ConfigSchema, handlerWithStage);
+export async function handler(): Promise<void> {
+	const securityGroups = securityGroupsForStage(stageFromEnvironment());
 
-export async function handlerWithStage(
-	_event: unknown,
-	{ config }: HandlerEnv<ConfigSchema>,
-): Promise<void> {
 	logger.log(
-		`updating ${config.securityGroupIds.length} security group(s) to allow Fastly IPs only`,
+		`updating ${securityGroups.length} security group(s) to allow Fastly IPs only`,
 	);
 
 	const fastlyCidrs = await getFastlyIpv4Ranges();
 
 	await Promise.all(
-		config.securityGroupIds.map((securityGroupId) =>
-			updateSecurityGroup(securityGroupId, fastlyCidrs),
+		securityGroups.map(({ id, name }) =>
+			updateSecurityGroup(id, name, fastlyCidrs),
 		),
 	);
 }
