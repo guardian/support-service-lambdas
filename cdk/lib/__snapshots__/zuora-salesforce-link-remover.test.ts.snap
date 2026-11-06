@@ -19,6 +19,45 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
+    "GetSalesforceconnectedappsecret81469280": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:CODE/Salesforce/ConnectedApp/BillingAccountRemover-*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "GetSalesforceconnectedappsecret81469280",
+        "Roles": [
+          {
+            "Ref": "getbillingaccountslambdaServiceRoleD8FEBB2C",
+          },
+          {
+            "Ref": "updatesfbillingaccountslambdaServiceRole3FA2036F",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "ScheduleStateMachineRule91756851": {
       "Properties": {
         "ScheduleExpression": "cron(0 0 1 1 ? *)",
@@ -435,76 +474,6 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "secretsmanager:GetSecretValue",
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:aws:secretsmanager:",
-                      {
-                        "Ref": "AWS::Region",
-                      },
-                      ":",
-                      {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":secret:DEV/Salesforce/ConnectedApp/AwsConnectorSandbox-oO8Phf",
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:aws:secretsmanager:",
-                      {
-                        "Ref": "AWS::Region",
-                      },
-                      ":",
-                      {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":secret:DEV/Salesforce/User/integrationapiuser-rvxxrG",
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:aws:secretsmanager:",
-                      {
-                        "Ref": "AWS::Region",
-                      },
-                      ":",
-                      {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":secret:PROD/Salesforce/ConnectedApp/BillingAccountRemover-WUdrKa",
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:aws:secretsmanager:",
-                      {
-                        "Ref": "AWS::Region",
-                      },
-                      ":",
-                      {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":secret:PROD/Salesforce/User/BillingAccountRemoverAPIUser-UJ1SwZ",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
               "Action": "cloudwatch:PutMetricData",
               "Effect": "Allow",
               "Resource": "*",
@@ -723,76 +692,6 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
       "Properties": {
         "PolicyDocument": {
           "Statement": [
-            {
-              "Action": "secretsmanager:GetSecretValue",
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:aws:secretsmanager:",
-                      {
-                        "Ref": "AWS::Region",
-                      },
-                      ":",
-                      {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":secret:DEV/Salesforce/ConnectedApp/AwsConnectorSandbox-oO8Phf",
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:aws:secretsmanager:",
-                      {
-                        "Ref": "AWS::Region",
-                      },
-                      ":",
-                      {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":secret:DEV/Salesforce/User/integrationapiuser-rvxxrG",
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:aws:secretsmanager:",
-                      {
-                        "Ref": "AWS::Region",
-                      },
-                      ":",
-                      {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":secret:PROD/Salesforce/ConnectedApp/BillingAccountRemover-WUdrKa",
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:aws:secretsmanager:",
-                      {
-                        "Ref": "AWS::Region",
-                      },
-                      ":",
-                      {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":secret:PROD/Salesforce/User/BillingAccountRemoverAPIUser-UJ1SwZ",
-                    ],
-                  ],
-                },
-              ],
-            },
             {
               "Action": "cloudwatch:PutMetricData",
               "Effect": "Allow",
@@ -1437,6 +1336,45 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
+    "GetSalesforceconnectedappsecret81469280": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:PROD/Salesforce/ConnectedApp/BillingAccountRemover-*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "GetSalesforceconnectedappsecret81469280",
+        "Roles": [
+          {
+            "Ref": "getbillingaccountslambdaServiceRoleD8FEBB2C",
+          },
+          {
+            "Ref": "updatesfbillingaccountslambdaServiceRole3FA2036F",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "ScheduleStateMachineRule91756851": {
       "Properties": {
         "ScheduleExpression": "cron(0 * * * ? *)",
@@ -1853,76 +1791,6 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "secretsmanager:GetSecretValue",
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:aws:secretsmanager:",
-                      {
-                        "Ref": "AWS::Region",
-                      },
-                      ":",
-                      {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":secret:DEV/Salesforce/ConnectedApp/AwsConnectorSandbox-oO8Phf",
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:aws:secretsmanager:",
-                      {
-                        "Ref": "AWS::Region",
-                      },
-                      ":",
-                      {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":secret:DEV/Salesforce/User/integrationapiuser-rvxxrG",
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:aws:secretsmanager:",
-                      {
-                        "Ref": "AWS::Region",
-                      },
-                      ":",
-                      {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":secret:PROD/Salesforce/ConnectedApp/BillingAccountRemover-WUdrKa",
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:aws:secretsmanager:",
-                      {
-                        "Ref": "AWS::Region",
-                      },
-                      ":",
-                      {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":secret:PROD/Salesforce/User/BillingAccountRemoverAPIUser-UJ1SwZ",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
               "Action": "cloudwatch:PutMetricData",
               "Effect": "Allow",
               "Resource": "*",
@@ -2141,76 +2009,6 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
       "Properties": {
         "PolicyDocument": {
           "Statement": [
-            {
-              "Action": "secretsmanager:GetSecretValue",
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:aws:secretsmanager:",
-                      {
-                        "Ref": "AWS::Region",
-                      },
-                      ":",
-                      {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":secret:DEV/Salesforce/ConnectedApp/AwsConnectorSandbox-oO8Phf",
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:aws:secretsmanager:",
-                      {
-                        "Ref": "AWS::Region",
-                      },
-                      ":",
-                      {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":secret:DEV/Salesforce/User/integrationapiuser-rvxxrG",
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:aws:secretsmanager:",
-                      {
-                        "Ref": "AWS::Region",
-                      },
-                      ":",
-                      {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":secret:PROD/Salesforce/ConnectedApp/BillingAccountRemover-WUdrKa",
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:aws:secretsmanager:",
-                      {
-                        "Ref": "AWS::Region",
-                      },
-                      ":",
-                      {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":secret:PROD/Salesforce/User/BillingAccountRemoverAPIUser-UJ1SwZ",
-                    ],
-                  ],
-                },
-              ],
-            },
             {
               "Action": "cloudwatch:PutMetricData",
               "Effect": "Allow",
