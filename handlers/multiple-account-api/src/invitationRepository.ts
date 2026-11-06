@@ -186,6 +186,8 @@ export class InvitationRepository {
 					subscriptionName: { S: subscriptionName },
 					invitationCode: { S: invitationCode },
 				},
+				ConditionExpression:
+					'attribute_exists(subscriptionName) AND attribute_not_exists(acceptedDate) AND attribute_not_exists(cancelledBy)',
 				UpdateExpression: 'SET expiryDate = :expiryDate',
 				ExpressionAttributeValues: {
 					':expiryDate': { N: expiryDate.toString() },
