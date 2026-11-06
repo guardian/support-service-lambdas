@@ -179,21 +179,31 @@ export class InvitationRepository {
 		invitationCode: string,
 		expiryDate: number,
 	): Promise<void> {
-		await this.client.send(
-			new UpdateItemCommand({
-				TableName: this.tableName,
-				Key: {
-					subscriptionName: { S: subscriptionName },
-					invitationCode: { S: invitationCode },
-				},
-				ConditionExpression:
-					'attribute_exists(subscriptionName) AND attribute_not_exists(acceptedDate) AND attribute_not_exists(cancelledBy)',
-				UpdateExpression: 'SET expiryDate = :expiryDate',
-				ExpressionAttributeValues: {
-					':expiryDate': { N: expiryDate.toString() },
-				},
-			}),
-		);
+		await this.client
+			.send(
+				new UpdateItemCommand({
+					TableName: this.tableName,
+					Key: {
+						subscriptionName: { S: subscriptionName },
+						invitationCode: { S: invitationCode },
+					},
+					ConditionExpression:
+						'attribute_exists(subscriptionName) AND attribute_not_exists(acceptedDate) AND attribute_not_exists(cancelledBy)',
+					UpdateExpression: 'SET expiryDate = :expiryDate',
+					ExpressionAttributeValues: {
+						':expiryDate': { N: expiryDate.toString() },
+					},
+				}),
+			)
+			.catch((error: unknown) => {
+				if (
+					error instanceof Error &&
+					error.name === 'ConditionalCheckFailedException'
+				) {
+					return; // Handles if a subscription has been deleted or accepted/cancelled
+				}
+				throw error;
+			});
 	}
 
 	async updateSubscriptionTTLs(
