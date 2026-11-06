@@ -122,6 +122,10 @@
       "hasTsSource": true
     },
     {
+      "subproject": "security-groups-updater",
+      "hasTsSource": true
+    },
+    {
       "subproject": "send-test-data-to-mparticle",
       "hasTsSource": true
     },

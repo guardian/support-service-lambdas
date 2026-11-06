@@ -1004,11 +1004,27 @@ const paymentFailureCommsExitApi: HandlerDefinition = {
 	},
 };
 
+const securityGroupsUpdater: HandlerDefinition = {
+	name: 'security-groups-updater',
+	dependencies: {
+		...dep['@aws-sdk/client-ec2'],
+		...dep.zod,
+		...dep.dayjs,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+		...devDeps['aws-sdk-client-mock'],
+		...devDeps['fetch-mock'],
+	},
+	moduleDependencies: [moduleLogger, moduleRouting],
+};
+
 // MARKER new-lambda: buildcheck-const
 
 export const build: BuildDefinition = {
 	handlers: [
 		alarmsHandler,
+		securityGroupsUpdater,
 		discountApi,
 		discountExpiryNotifier,
 		generateProductCatalog,
