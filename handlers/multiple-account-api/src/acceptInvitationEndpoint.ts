@@ -70,24 +70,16 @@ export const acceptInvitationEndpoint = async (
 		const { subscriptionName, secondaryIdentityId, primaryIdentityId } =
 			invitation;
 
-		const supporterRatePlan = await getSupporterRatePlan(
-			stage,
-			primaryIdentityId,
+		const zuoraSubscription = await getSubscription(
+			zuoraClient,
 			subscriptionName,
 		);
-
-		if (!supporterRatePlan) {
-			const zuoraSubscription = await getSubscription(
-				zuoraClient,
-				subscriptionName,
-			);
-			if (zuoraSubscription.status === 'Cancelled') {
-				return gone(`Primary subscription ${subscriptionName} cancelled`);
-			}
+		if (zuoraSubscription.status === 'Cancelled') {
+			return gone(`Primary subscription ${subscriptionName} cancelled`);
 		}
 
 		const parentSupporterProductDataRecord = getIfDefined(
-			supporterRatePlan,
+			await getSupporterRatePlan(stage, primaryIdentityId, subscriptionName),
 			`Supporter rate plan record not found for ${subscriptionName} and identity ${primaryIdentityId}`,
 		);
 		const today = dayjs();
