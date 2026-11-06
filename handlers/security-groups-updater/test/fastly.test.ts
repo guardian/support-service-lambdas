@@ -3,8 +3,8 @@ import { getFastlyIpv4Ranges } from '../src/fastly';
 
 const fastlyUrl = 'https://api.fastly.com/public-ip-list';
 
-// 10 valid CIDRs - enough to clear the minExpectedCidrs sanity floor in
-// fastly.ts for tests that aren't specifically exercising that floor.
+// 10 valid CIDRs - enough to clear the minExpectedCidrs minimum in
+// fastly.ts for tests that aren't specifically exercising that minimum.
 const manyValidCidrs = [
 	'23.235.32.0/20',
 	'43.249.72.0/22',
@@ -88,7 +88,7 @@ test('throws if there are no valid IPv4 cidrs, rather than returning an empty li
 	);
 });
 
-test('throws if there are fewer valid IPv4 cidrs than the sanity floor, rather than applying a partial list', async () => {
+test('throws if there are fewer valid IPv4 cidrs than the minimum expected number, rather than applying a partial list', async () => {
 	fetchMock.mock(
 		fastlyUrl,
 		new Response(

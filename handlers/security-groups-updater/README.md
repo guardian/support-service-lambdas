@@ -13,10 +13,10 @@ It runs every 60 minutes:
 4. tags the security group with an `Updated` timestamp
 
 If Fastly's list can't be fetched or parsed, contains a malformed/invalid IPv4 cidr, or
-has fewer valid cidrs than a sanity floor (currently 10, well below Fastly's real count
-of ~21), the lambda throws before touching any security group - it never silently drops
-a malformed entry or treats "no ranges"/"a suspiciously short list" as a legitimate
-update. See `src/fastly.ts`.
+has fewer valid cidrs than a minimum expected number (currently 10, well below Fastly's
+real count of ~21), the lambda throws before touching any security group - it never
+silently drops a malformed entry or treats "no ranges"/"a suspiciously short list" as a
+legitimate update. See `src/fastly.ts`.
 
 This is a TypeScript/CDK port of the Scala/CloudFormation
 [`security-groups-update`](https://github.com/guardian/platform/tree/main/security-groups-update)

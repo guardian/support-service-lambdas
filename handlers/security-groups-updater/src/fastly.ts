@@ -3,9 +3,9 @@ import { logger } from '@modules/logger/logger';
 
 const fastlyPublicIpListUrl = 'https://api.fastly.com/public-ip-list';
 
-// Fastly's IPv4 list currently has ~21 ranges. This is a sanity floor, well
-// below that, to catch a badly truncated/partial response (which wouldn't
-// otherwise look like an error).
+// Fastly's IPv4 list currently has ~21 ranges. This is a minimum expected
+// number, well below that, to catch a badly truncated/partial response
+// (which wouldn't otherwise look like an error).
 const minExpectedCidrs = 10;
 
 // Fastly also returns `ipv6_addresses`, but the security groups this lambda
