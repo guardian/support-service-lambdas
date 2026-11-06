@@ -14,6 +14,8 @@ import {
 } from '@modules/routing/apiGatewayResponses';
 import type { Stage } from '@modules/stage';
 import { getSupporterRatePlan } from '@modules/supporter-product-data/supporterProductData';
+import { getSubscription } from '@modules/zuora/subscription';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { InvitationRepository } from './invitationRepository';
 import { sendInvitationRedeemedEmail } from './multipleAccountEmails';
 import { sendSoftOptInAcquisitionEvent } from './softOptinConsents';
@@ -23,6 +25,7 @@ export const acceptInvitationEndpoint = async (
 	invitationRepository: InvitationRepository,
 	secondaryUserRepository: SecondaryUserRepository,
 	dynamoClient: DynamoDBClient,
+	zuoraClient: ZuoraClient,
 	signedInUserId: string,
 	invitationCode: string,
 ) => {
@@ -66,6 +69,14 @@ export const acceptInvitationEndpoint = async (
 
 		const { subscriptionName, secondaryIdentityId, primaryIdentityId } =
 			invitation;
+
+		const zuoraSubscription = await getSubscription(
+			zuoraClient,
+			subscriptionName,
+		);
+		if (zuoraSubscription.status === 'Cancelled') {
+			return gone(`Primary subscription ${subscriptionName} cancelled`);
+		}
 
 		const parentSupporterProductDataRecord = getIfDefined(
 			await getSupporterRatePlan(stage, primaryIdentityId, subscriptionName),
