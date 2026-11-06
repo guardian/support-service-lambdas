@@ -82,11 +82,11 @@ else
     if [[ "$BASE_BRANCH" != "$DEFAULT_BRANCH" ]]; then
       printf '> **Test run:** This PR targets **%s**, not the default branch **%s**.\n\n' "$BASE_BRANCH" "$DEFAULT_BRANCH"
     fi
+    if [[ -n "$previous" ]]; then
+      printf 'Previous toolchain update: %s\n\n' "$previous"
+    fi
     printf '## Summary of changes\n\n'
     cat "$RUNNER_TEMP/toolchainVersions.md"
-    if [[ -n "$previous" ]]; then
-      printf '\nPrevious toolchain update: %s\n' "$previous"
-    fi
   } > "$RUNNER_TEMP/toolchainUpdate.md"
   printf 'Prepared description with the version table, documentation link, and any previous PR link.\n'
 

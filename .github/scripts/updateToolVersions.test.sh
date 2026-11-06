@@ -36,6 +36,7 @@ java = "corretto-21.0.12.0.10"
 sbt = "latest"
 
 [settings]
+minimum_release_age = "3d"
 idiomatic_version_file_enable_tools = ["pnpm"]
 TOML
   printf '{\n\t"name": "fixture",\n\t"packageManager": "pnpm@10.33.0"\n}\n' > "$1/package.json"
@@ -71,15 +72,44 @@ grep -Fx 'java = "corretto-21.0.13.0.10"' "$tempDir/success/mise.toml"
 grep -Fx '"aqua:aws/aws-cli" = "2.38.5"' "$tempDir/success/mise.toml"
 grep -Fx '"github:guardian/devenv" = "20260930-111347"' "$tempDir/success/mise.toml"
 grep -Fx 'sbt = "latest"' "$tempDir/success/mise.toml"
+[[ "$(command mise config get --file "$tempDir/success/mise.toml" settings.minimum_release_age)" == 3d ]]
 for workflow in "$tempDir/success/.github/workflows/"*; do
   grep -Fx "      java-version: '21'" "$workflow"
   grep -Fx '      check-latest: true' "$workflow"
 done
 cp -R "$tempDir/success" "$tempDir/before"
 runUpdater "$tempDir/success" > "$tempDir/unchangedVersions.md" 2> "$tempDir/unchanged.log"
+cat > "$tempDir/expectedUnchanged.md" <<'MARKDOWN'
+| Tool | Current | Update |
+| --- | --- | --- |
+
+Checked but unchanged:
+
+- pnpm: 10.34.9
+- Node.js: 22.23.4
+- Corretto: corretto-21.0.13.0.10
+- AWS CLI: 2.38.5
+- Guardian devenv: 20260930-111347
+MARKDOWN
+diff -u "$tempDir/expectedUnchanged.md" "$tempDir/unchangedVersions.md"
 grep -F 'pnpm is already up to date at 10.34.9; no version change needed.' "$tempDir/unchanged.log"
 grep -F 'Node.js is already up to date at 22.23.4; no version change needed.' "$tempDir/unchanged.log"
 diff -r "$tempDir/before" "$tempDir/success"
+
+LATEST_NODE=22.24.0 runUpdater "$tempDir/success" > "$tempDir/mixedVersions.md"
+cat > "$tempDir/expectedMixed.md" <<'MARKDOWN'
+| Tool | Current | Update |
+| --- | --- | --- |
+| Node.js | 22.23.4 | [22.24.0](https://nodejs.org/en/blog/release/v22.24.0) |
+
+Checked but unchanged:
+
+- pnpm: 10.34.9
+- Corretto: corretto-21.0.13.0.10
+- AWS CLI: 2.38.5
+- Guardian devenv: 20260930-111347
+MARKDOWN
+diff -u "$tempDir/expectedMixed.md" "$tempDir/mixedVersions.md"
 
 fixture "$tempDir/failedDiscovery"
 if FAIL_AWS=true runUpdater "$tempDir/failedDiscovery"; then

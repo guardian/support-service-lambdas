@@ -13,6 +13,14 @@ version and any corresponding runtime/CI settings together.
 
 Updates reject major version updates, prereleases and downgrades.
 
+The repository's mise settings set
+[`minimum_release_age = "3d"`](https://mise.jdx.dev/configuration/settings.html#minimum_release_age), so release discovery skips
+versions less than three days old where the backend provides release dates. Exact pins are
+not filtered by this setting.
+
+The generated table contains only tools whose versions changed. Tools checked without a
+version change are listed as bullet points below the table.
+
 Once people pull the changes locally, mise will install and use new versions on next use.
 
 CI Java is currently separate: `setup-java` selects latest Corretto 21 with `check-latest: true`,
@@ -98,7 +106,6 @@ run to notice. Someone must check the run history periodically.
 ## Future work
 
 - Use a proper bot rather than a time limited access token.
-- Release cooldown support
 - notifications on failures
 - Work out if global pnpm registration and Corepack
   provisioning are still needed.
