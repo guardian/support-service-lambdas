@@ -1358,6 +1358,36 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "SupporterProductDataDeadLetterQueue": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "QueueName": "dead-letters-supporter-product-data-CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "supporter-product-data-lambdas",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Retain",
+    },
     "SupporterProductDataSchedule71480586": {
       "Properties": {
         "ScheduleExpression": "cron(0 9 ? * MON-FRI *)",
@@ -3183,6 +3213,36 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "SupporterProductDataDeadLetterQueue": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "QueueName": "dead-letters-supporter-product-data-PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "supporter-product-data-lambdas",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Retain",
     },
     "SupporterProductDataSchedule71480586": {
       "Properties": {

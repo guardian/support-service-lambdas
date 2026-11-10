@@ -60,14 +60,16 @@ export class SupporterProductDataLambdas extends SrStack {
 			queueArn: `arn:aws:sqs:${this.region}:${this.account}:${queueName}`,
 			queueName,
 		});
-		const dlq = Queue.fromQueueAttributes(
-			this,
-			'SupporterProductDataDeadLetterQueue',
-			{
-				queueArn: `arn:aws:sqs:${this.region}:${this.account}:${dlqName}`,
-				queueName: dlqName,
-			},
-		);
+
+		const dlq = new Queue(this, 'SupporterProductDataDeadLetterQueue', {
+			queueName: dlqName,
+			removalPolicy: RemovalPolicy.RETAIN,
+		});
+		this.overrideLogicalId(dlq, {
+			logicalId: 'SupporterProductDataDeadLetterQueue',
+			reason: 'Keep resource name consistent with the original cfn template.',
+		});
+
 		const processItemMaxConcurrency = stage === 'PROD' ? 50 : 30;
 
 		// Non-standard SSM path used by ConfigService — not covered by the GuCDK auto-policy (which uses /${stage}/${stack}/${app})
@@ -337,9 +339,13 @@ export class SupporterProductDataLambdas extends SrStack {
 		new GuAlarm(this, 'UnprocessedRecordAlarm', {
 			alarmName: `There was a failure processing a supporter record in the ProcessSupporterRatePlanItemLambda lambda in ${this.stage}`,
 			alarmDescription:
-				`Check the ${dlq.queueName} SQS dead-letter queue for details of the record which failed, ` +
+				`Check the ${dlqName} SQS dead-letter queue for details of the record which failed, ` +
 				`and the ProcessSupporterRatePlanItemLambda CloudWatch logs for what went wrong.`,
-			metric: dlq.metric('ApproximateNumberOfMessagesVisible').with({
+			// Literal queue name (not dlq.queueName) so the alarm is unchanged by the CloudFormation import
+			metric: new Metric({
+				namespace: 'AWS/SQS',
+				metricName: 'ApproximateNumberOfMessagesVisible',
+				dimensionsMap: { QueueName: dlqName },
 				statistic: 'Average',
 				period: Duration.minutes(1),
 			}),
