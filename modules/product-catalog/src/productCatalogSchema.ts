@@ -1781,7 +1781,7 @@ export const productCatalogSchema = z.object({
 				termType: termTypeSchema,
 			}),
 			HeadlineAnnual: z.object({
-				billingPeriod: z.literal('Month'),
+				billingPeriod: z.literal('Annual'),
 				charges: z.object({
 					Contribution: z.object({
 						id: z.string(),
@@ -1815,7 +1815,7 @@ export const productCatalogSchema = z.object({
 				termType: termTypeSchema,
 			}),
 			MastheadAnnual: z.object({
-				billingPeriod: z.literal('Month'),
+				billingPeriod: z.literal('Annual'),
 				charges: z.object({
 					Contribution: z.object({
 						id: z.string(),
