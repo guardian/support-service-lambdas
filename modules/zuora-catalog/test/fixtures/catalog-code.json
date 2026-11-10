@@ -12647,11 +12647,11 @@
               "productDiscountApplyDetails": [
                 {
                   "appliedProductRatePlanId": "8ad097b48ff26452019001cebac92376",
-                  "appliedProductRatePlanChargeId": "8ad097b48ff26452019001d46f8824e2"
+                  "appliedProductRatePlanChargeId": "8ad097b48ff26452019001d78ee325d1"
                 },
                 {
                   "appliedProductRatePlanId": "8ad097b48ff26452019001cebac92376",
-                  "appliedProductRatePlanChargeId": "8ad097b48ff26452019001d78ee325d1"
+                  "appliedProductRatePlanChargeId": "8ad097b48ff26452019001d46f8824e2"
                 }
               ],
               "endDateCondition": "Fixed_Period",
@@ -41621,7 +41621,7 @@
               "specificListPriceBase": null,
               "billingTiming": "IN_ADVANCE",
               "ratingGroup": null,
-              "billingPeriod": "Month",
+              "billingPeriod": "Annual",
               "billingPeriodAlignment": "AlignToCharge",
               "specificBillingPeriod": null,
               "smoothingModel": null,
@@ -41843,87 +41843,6 @@
           "externallyManagedPlanIds": [],
           "productRatePlanCharges": [
             {
-              "id": "11e510aa12a24044beed13467861eeaa",
-              "name": "Patrons Headline Contribution - Annual",
-              "type": "Recurring",
-              "model": "FlatFee",
-              "uom": null,
-              "pricingSummary": [
-                "GBP4463",
-                "USD5802"
-              ],
-              "pricing": [
-                {
-                  "currency": "GBP",
-                  "price": 4463,
-                  "tiers": null,
-                  "includedUnits": 0,
-                  "overagePrice": null,
-                  "discountPercentage": null,
-                  "discountAmount": null
-                },
-                {
-                  "currency": "USD",
-                  "price": 5802,
-                  "tiers": null,
-                  "includedUnits": 0,
-                  "overagePrice": null,
-                  "discountPercentage": null,
-                  "discountAmount": null
-                }
-              ],
-              "defaultQuantity": null,
-              "applyDiscountTo": null,
-              "discountLevel": null,
-              "discountClass": null,
-              "applyToBillingPeriodPartially": false,
-              "productDiscountApplyDetails": [],
-              "endDateCondition": "Subscription_End",
-              "upToPeriods": null,
-              "upToPeriodsType": null,
-              "billingDay": "ChargeTriggerDay",
-              "listPriceBase": "Per_Billing_Period",
-              "specificListPriceBase": null,
-              "billingTiming": "IN_ADVANCE",
-              "ratingGroup": null,
-              "billingPeriod": "Month",
-              "billingPeriodAlignment": "AlignToCharge",
-              "specificBillingPeriod": null,
-              "smoothingModel": null,
-              "numberOfPeriods": null,
-              "overageCalculationOption": null,
-              "overageUnusedUnitsCreditOption": null,
-              "unusedIncludedUnitPrice": null,
-              "usageRecordRatingOption": null,
-              "priceChangeOption": null,
-              "priceIncreasePercentage": null,
-              "useTenantDefaultForPriceChange": true,
-              "taxable": true,
-              "taxCode": "Contribution",
-              "taxMode": "TaxInclusive",
-              "prorationOption": null,
-              "ProductCode__c": "P1033",
-              "ProductType__c": "Patron",
-              "triggerEvent": "CustomerAcceptance",
-              "description": "",
-              "revRecCode": null,
-              "revRecTriggerCondition": null,
-              "revenueRecognitionRuleName": "Recognize upon invoicing",
-              "useDiscountSpecificAccountingCode": null,
-              "financeInformation": {
-                "deferredRevenueAccountingCode": "Patrons Masthead - Contribution",
-                "deferredRevenueAccountingCodeType": "SalesRevenue",
-                "recognizedRevenueAccountingCode": "Patrons Masthead - Contribution",
-                "recognizedRevenueAccountingCodeType": "SalesRevenue",
-                "accountsReceivableAccountingCode": "Accounts Receivable",
-                "accountsReceivableAccountingCodeType": "AccountsReceivable"
-              },
-              "deliverySchedule": null,
-              "reflectDiscountInNetAmount": false,
-              "isStackedDiscount": false,
-              "productRatePlanChargeNumber": "PRPC-00000509"
-            },
-            {
               "id": "eda1abb638584dd68d7523949bc080cb",
               "name": "Patrons Masthead Benefits - Annual",
               "type": "Recurring",
@@ -41967,7 +41886,7 @@
               "specificListPriceBase": null,
               "billingTiming": "IN_ADVANCE",
               "ratingGroup": null,
-              "billingPeriod": "Month",
+              "billingPeriod": "Annual",
               "billingPeriodAlignment": "AlignToCharge",
               "specificBillingPeriod": null,
               "smoothingModel": null,
@@ -42003,42 +41922,21 @@
               "reflectDiscountInNetAmount": false,
               "isStackedDiscount": false,
               "productRatePlanChargeNumber": "PRPC-00000508"
-            }
-          ],
-          "productRatePlanNumber": "PRP-00000308"
-        },
-        {
-          "id": "6a36545502eb403296d4d8baa835a4bb",
-          "status": "Active",
-          "name": "Patrons Masthead - monthly",
-          "description": "",
-          "effectiveStartDate": "2026-10-01",
-          "effectiveEndDate": "2099-01-01",
-          "TermType__c": "TERMED",
-          "FrontendId__c": null,
-          "Saving__c": null,
-          "DefaultTerm__c": "12",
-          "RatePlanType__c": "Base",
-          "PromotionCode__c": null,
-          "TrialPeriodDays__c": null,
-          "AnalysisCode__c": "A101",
-          "externalIdSourceSystem": "",
-          "externallyManagedPlanIds": [],
-          "productRatePlanCharges": [
+            },
             {
-              "id": "4298030e0cae41e98176a33da84f0b44",
-              "name": "Patrons Headline Contribution - Monthly",
+              "id": "869e9b751c344940b05f717f402d2ea7",
+              "name": "Patrons Masthead Contribution - Annual",
               "type": "Recurring",
               "model": "FlatFee",
               "uom": null,
               "pricingSummary": [
-                "GBP372",
-                "USD483"
+                "GBP4463",
+                "USD5802"
               ],
               "pricing": [
                 {
                   "currency": "GBP",
-                  "price": 372,
+                  "price": 4463,
                   "tiers": null,
                   "includedUnits": 0,
                   "overagePrice": null,
@@ -42047,7 +41945,7 @@
                 },
                 {
                   "currency": "USD",
-                  "price": 483,
+                  "price": 5802,
                   "tiers": null,
                   "includedUnits": 0,
                   "overagePrice": null,
@@ -42069,7 +41967,7 @@
               "specificListPriceBase": null,
               "billingTiming": "IN_ADVANCE",
               "ratingGroup": null,
-              "billingPeriod": "Month",
+              "billingPeriod": "Annual",
               "billingPeriodAlignment": "AlignToCharge",
               "specificBillingPeriod": null,
               "smoothingModel": null,
@@ -42104,8 +42002,29 @@
               "deliverySchedule": null,
               "reflectDiscountInNetAmount": false,
               "isStackedDiscount": false,
-              "productRatePlanChargeNumber": "PRPC-00000511"
-            },
+              "productRatePlanChargeNumber": "PRPC-00000521"
+            }
+          ],
+          "productRatePlanNumber": "PRP-00000308"
+        },
+        {
+          "id": "6a36545502eb403296d4d8baa835a4bb",
+          "status": "Active",
+          "name": "Patrons Masthead - monthly",
+          "description": "",
+          "effectiveStartDate": "2026-10-01",
+          "effectiveEndDate": "2099-01-01",
+          "TermType__c": "TERMED",
+          "FrontendId__c": null,
+          "Saving__c": null,
+          "DefaultTerm__c": "12",
+          "RatePlanType__c": "Base",
+          "PromotionCode__c": null,
+          "TrialPeriodDays__c": null,
+          "AnalysisCode__c": "A101",
+          "externalIdSourceSystem": "",
+          "externallyManagedPlanIds": [],
+          "productRatePlanCharges": [
             {
               "id": "4ab5d27fe98e468da3470609451c77c3",
               "name": "Patrons Masthead Benefits - Monthly",
@@ -42186,6 +42105,87 @@
               "reflectDiscountInNetAmount": false,
               "isStackedDiscount": false,
               "productRatePlanChargeNumber": "PRPC-00000510"
+            },
+            {
+              "id": "f7da34b0b2ca490388cc09f6e022b69a",
+              "name": "Patrons Masthead Contribution - Monthly",
+              "type": "Recurring",
+              "model": "FlatFee",
+              "uom": null,
+              "pricingSummary": [
+                "GBP372",
+                "USD483"
+              ],
+              "pricing": [
+                {
+                  "currency": "GBP",
+                  "price": 372,
+                  "tiers": null,
+                  "includedUnits": 0,
+                  "overagePrice": null,
+                  "discountPercentage": null,
+                  "discountAmount": null
+                },
+                {
+                  "currency": "USD",
+                  "price": 483,
+                  "tiers": null,
+                  "includedUnits": 0,
+                  "overagePrice": null,
+                  "discountPercentage": null,
+                  "discountAmount": null
+                }
+              ],
+              "defaultQuantity": null,
+              "applyDiscountTo": null,
+              "discountLevel": null,
+              "discountClass": null,
+              "applyToBillingPeriodPartially": false,
+              "productDiscountApplyDetails": [],
+              "endDateCondition": "Subscription_End",
+              "upToPeriods": null,
+              "upToPeriodsType": null,
+              "billingDay": "ChargeTriggerDay",
+              "listPriceBase": "Per_Billing_Period",
+              "specificListPriceBase": null,
+              "billingTiming": "IN_ADVANCE",
+              "ratingGroup": null,
+              "billingPeriod": "Month",
+              "billingPeriodAlignment": "AlignToCharge",
+              "specificBillingPeriod": null,
+              "smoothingModel": null,
+              "numberOfPeriods": null,
+              "overageCalculationOption": null,
+              "overageUnusedUnitsCreditOption": null,
+              "unusedIncludedUnitPrice": null,
+              "usageRecordRatingOption": null,
+              "priceChangeOption": null,
+              "priceIncreasePercentage": null,
+              "useTenantDefaultForPriceChange": true,
+              "taxable": true,
+              "taxCode": "Contribution",
+              "taxMode": "TaxInclusive",
+              "prorationOption": null,
+              "ProductCode__c": "P1033",
+              "ProductType__c": "Patron",
+              "triggerEvent": "CustomerAcceptance",
+              "description": "",
+              "revRecCode": null,
+              "revRecTriggerCondition": null,
+              "revenueRecognitionRuleName": "Recognize upon invoicing",
+              "useDiscountSpecificAccountingCode": null,
+              "financeInformation": {
+                "deferredRevenueAccountingCode": "Patrons Masthead - Contribution",
+                "deferredRevenueAccountingCodeType": "SalesRevenue",
+                "recognizedRevenueAccountingCode": "Patrons Masthead - Contribution",
+                "recognizedRevenueAccountingCodeType": "SalesRevenue",
+                "accountsReceivableAccountingCode": "Accounts Receivable",
+                "accountsReceivableAccountingCodeType": "AccountsReceivable"
+              },
+              "deliverySchedule": null,
+              "reflectDiscountInNetAmount": false,
+              "isStackedDiscount": false,
+              "productRatePlanChargeNumber": "PRPC-00000520"
             }
           ],
           "productRatePlanNumber": "PRP-00000309"
