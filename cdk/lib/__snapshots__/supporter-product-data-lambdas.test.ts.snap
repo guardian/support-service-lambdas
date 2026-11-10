@@ -271,9 +271,19 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
               ],
               "Effect": "Allow",
               "Resource": {
-                "Fn::GetAtt": [
-                  "SupporterProductDataQueue",
-                  "Arn",
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sqs:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":supporter-product-data-CODE",
+                  ],
                 ],
               },
             },
@@ -1074,6 +1084,30 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
             },
             {
               "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sqs:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":supporter-product-data-CODE",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
                 "sqs:ReceiveMessage",
                 "sqs:ChangeMessageVisibility",
                 "sqs:GetQueueUrl",
@@ -1082,23 +1116,19 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
               ],
               "Effect": "Allow",
               "Resource": {
-                "Fn::GetAtt": [
-                  "SupporterProductDataQueue",
-                  "Arn",
-                ],
-              },
-            },
-            {
-              "Action": [
-                "sqs:SendMessage",
-                "sqs:GetQueueAttributes",
-                "sqs:GetQueueUrl",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "SupporterProductDataQueue",
-                  "Arn",
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sqs:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":supporter-product-data-CODE",
+                  ],
                 ],
               },
             },
@@ -1118,9 +1148,19 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
       "Properties": {
         "BatchSize": 10,
         "EventSourceArn": {
-          "Fn::GetAtt": [
-            "SupporterProductDataQueue",
-            "Arn",
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:sqs:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":supporter-product-data-CODE",
+            ],
           ],
         },
         "FunctionName": {
@@ -1442,46 +1482,6 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
             "Value": "CODE",
           },
         ],
-      },
-      "Type": "AWS::SQS::Queue",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "SupporterProductDataQueue": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "QueueName": "supporter-product-data-CODE",
-        "RedrivePolicy": {
-          "deadLetterTargetArn": {
-            "Fn::GetAtt": [
-              "SupporterProductDataDeadLetterQueue",
-              "Arn",
-            ],
-          },
-          "maxReceiveCount": 10,
-        },
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "supporter-product-data-lambdas",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "VisibilityTimeout": 3000,
       },
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Retain",
@@ -2222,9 +2222,19 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
               ],
               "Effect": "Allow",
               "Resource": {
-                "Fn::GetAtt": [
-                  "SupporterProductDataQueue",
-                  "Arn",
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sqs:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":supporter-product-data-PROD",
+                  ],
                 ],
               },
             },
@@ -2963,6 +2973,30 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
             },
             {
               "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sqs:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":supporter-product-data-PROD",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
                 "sqs:ReceiveMessage",
                 "sqs:ChangeMessageVisibility",
                 "sqs:GetQueueUrl",
@@ -2971,23 +3005,19 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
               ],
               "Effect": "Allow",
               "Resource": {
-                "Fn::GetAtt": [
-                  "SupporterProductDataQueue",
-                  "Arn",
-                ],
-              },
-            },
-            {
-              "Action": [
-                "sqs:SendMessage",
-                "sqs:GetQueueAttributes",
-                "sqs:GetQueueUrl",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "SupporterProductDataQueue",
-                  "Arn",
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sqs:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":supporter-product-data-PROD",
+                  ],
                 ],
               },
             },
@@ -3003,13 +3033,23 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "ProcessSupporterRatePlanItemLambdaSqsEventSourcesupporterproductdatalambdasCODESupporterProductDataQueueCEB31B0C32A1DDCC": {
+    "ProcessSupporterRatePlanItemLambdaSqsEventSourcesupporterproductdatalambdasPRODSupporterProductDataQueueEDA9DA3E9B915495": {
       "Properties": {
         "BatchSize": 10,
         "EventSourceArn": {
-          "Fn::GetAtt": [
-            "SupporterProductDataQueue",
-            "Arn",
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:sqs:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":supporter-product-data-PROD",
+            ],
           ],
         },
         "FunctionName": {
@@ -3396,46 +3436,6 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
             "Value": "PROD",
           },
         ],
-      },
-      "Type": "AWS::SQS::Queue",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "SupporterProductDataQueue": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "QueueName": "supporter-product-data-PROD",
-        "RedrivePolicy": {
-          "deadLetterTargetArn": {
-            "Fn::GetAtt": [
-              "SupporterProductDataDeadLetterQueue",
-              "Arn",
-            ],
-          },
-          "maxReceiveCount": 10,
-        },
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "supporter-product-data-lambdas",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "VisibilityTimeout": 3000,
       },
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Retain",
