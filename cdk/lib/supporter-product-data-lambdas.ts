@@ -17,7 +17,6 @@ import {
 import { Rule, RuleTargetInput, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { CfnEventSourceMapping } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
@@ -67,7 +66,7 @@ export class SupporterProductDataLambdas extends SrStack {
 			reason: 'Keep resource name consistent with the original cfn template.',
 		});
 
-		const queue = new Queue(this, 'SupporterProductDataQueueResource', {
+		const queue = new Queue(this, 'SupporterProductDataQueue', {
 			queueName,
 			visibilityTimeout: Duration.seconds(3000),
 			deadLetterQueue: { queue: dlq, maxReceiveCount: 10 },
@@ -236,17 +235,6 @@ export class SupporterProductDataLambdas extends SrStack {
 		});
 
 		processItem.addEventSource(queueEventSource);
-		const mapping = processItem.node
-			.findAll()
-			.find(
-				(c): c is CfnEventSourceMapping => c instanceof CfnEventSourceMapping,
-			)!;
-		// Keep the mapping's original logical ID so CloudFormation updates it instead of replacing it
-		// This will need to be replaced by the env logical resource.
-		mapping.overrideLogicalId(
-			'ProcessSupporterRatePlanItemLambdaSqsEventSourcesupporterproductdatalambdasCODESupporterProductDataQueueCEB31B0C32A1DDCC',
-		);
-
 		queue.grantSendMessages(addToQueue);
 		queue.grantSendMessages(processItem); // The process item lambda calls itself for subscriptions with secondary users
 		queue.grantConsumeMessages(processItem);
