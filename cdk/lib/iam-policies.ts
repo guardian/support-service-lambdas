@@ -26,7 +26,11 @@ export class IamPolicies extends SrStack {
 				new AllowS3GetPolicy('membership-private', ['DEV/*', 'CODE/*']),
 				new AllowCodeParameterStoreReadPolicy(this),
 				new AllowCodeSecretsManagerReadPolicy(this),
-				new AllowS3GetPolicy('gu-zuora-catalog', [`PROD/Zuora-CODE/*`]),
+				// Needed by zuora-catalog / update-catalog-fixtures
+				new AllowS3GetPolicy('gu-zuora-catalog', [
+					'PROD/Zuora-CODE/catalog.json',
+					'PROD/Zuora-PROD/catalog.json',
+				]),
 				getSupportAdminConsoleBucketPolicy(),
 				new AllowDynamoTableFullAccessPolicy(this),
 				...getManageFrontendPolicies(this.region, this.account),
