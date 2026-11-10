@@ -210,7 +210,10 @@ exports[`The IamPolicies stack matches the snapshot 1`] = `
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-CODE/*",
+              "Resource": [
+                "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-CODE/catalog.json",
+                "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-PROD/catalog.json",
+              ],
             },
             {
               "Action": "s3:GetObject",
@@ -713,7 +716,10 @@ exports[`The IamPolicies stack matches the snapshot 2`] = `
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-CODE/*",
+              "Resource": [
+                "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-CODE/catalog.json",
+                "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-PROD/catalog.json",
+              ],
             },
             {
               "Action": "s3:GetObject",

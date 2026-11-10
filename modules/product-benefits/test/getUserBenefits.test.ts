@@ -4,6 +4,7 @@ import {
 	supporterPlusBenefits,
 } from '@modules/product-benefits/productBenefit';
 import {
+	getUserBenefits,
 	getUserBenefitsFromUserProducts,
 	getValidUserProducts,
 } from '@modules/product-benefits/userBenefits';
@@ -111,5 +112,69 @@ test('getUserBenefitsFromUserProducts returns distinct benefits', () => {
 test('getUserBenefitsFromUserProducts returns the union of two benefit sets', () => {
 	expect(
 		getUserBenefitsFromUserProducts(['GuardianAdLite', 'SupporterMembership']),
-	).toEqual(['allowRejectAll', 'liveApp', 'feastApp', 'hideSupportMessaging']);
+	).toEqual([
+		'allowRejectAll',
+		'liveApp',
+		'feastApp',
+		'hideSupportMessaging',
+		'puzzlePremium',
+	]);
+});
+
+describe('Premium Puzzles eligibility', () => {
+	test.each([
+		'SupporterPlus',
+		'DigitalSubscription',
+		'TierThree',
+		'HomeDelivery',
+		'NationalDelivery',
+		'NewspaperVoucher',
+		'SubscriptionCard',
+		'GuardianWeeklyDomestic',
+		'GuardianWeeklyRestOfWorld',
+		'GuardianWeeklyZoneA',
+		'GuardianWeeklyZoneB',
+		'GuardianWeeklyZoneC',
+		'SupporterMembership',
+		'PartnerMembership',
+		'PatronMembership',
+		'GuardianPatron',
+	] as const)('grants puzzlePremium to %s', (product) => {
+		expect(getUserBenefitsFromUserProducts([product])).toContain(
+			'puzzlePremium',
+		);
+	});
+
+	test.each([
+		'InAppPurchase',
+		'GuardianAdLite',
+		'Contribution',
+		'OneTimeContribution',
+	] as const)('does not grant puzzlePremium to %s alone', (product) => {
+		expect(getUserBenefitsFromUserProducts([product])).not.toContain(
+			'puzzlePremium',
+		);
+	});
+
+	test('grants puzzlePremium once when an IAP user also has eligible subscriptions', () => {
+		const benefits = getUserBenefitsFromUserProducts([
+			'InAppPurchase',
+			'SupporterPlus',
+			'SupporterMembership',
+		]);
+		expect(benefits.filter((benefit) => benefit === 'puzzlePremium')).toEqual([
+			'puzzlePremium',
+		]);
+	});
+
+	test.each(['staff@theguardian.com', 'staff@guardian.co.uk'])(
+		'grants puzzlePremium to staff with email %s',
+		async (email) => {
+			const benefits = await getUserBenefits('CODE', codeCatalogHelper, {
+				identityId: 'staff-identity-id',
+				email,
+			});
+			expect(benefits).toContain('puzzlePremium');
+		},
+	);
 });

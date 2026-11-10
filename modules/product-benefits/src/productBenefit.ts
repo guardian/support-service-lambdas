@@ -14,6 +14,7 @@ export const supporterPlusBenefits: ProductBenefit[] = [
 	'feastApp',
 	'hideSupportMessaging',
 	'allowRejectAll',
+	'puzzlePremium',
 ];
 export const digitalSubscriptionBenefits = supporterPlusBenefits.concat([
 	'newspaperEdition',
@@ -34,8 +35,18 @@ export const productBenefitMapping: Record<
 	NationalDelivery: digitalSubscriptionBenefits,
 	NewspaperVoucher: digitalSubscriptionBenefits,
 	SubscriptionCard: digitalSubscriptionBenefits,
-	SupporterMembership: ['liveApp', 'feastApp', 'hideSupportMessaging'],
-	PartnerMembership: ['liveApp', 'feastApp', 'hideSupportMessaging'],
+	SupporterMembership: [
+		'liveApp',
+		'feastApp',
+		'hideSupportMessaging',
+		'puzzlePremium',
+	],
+	PartnerMembership: [
+		'liveApp',
+		'feastApp',
+		'hideSupportMessaging',
+		'puzzlePremium',
+	],
 	PatronMembership: digitalSubscriptionBenefits,
 	GuardianPatron: digitalSubscriptionBenefits,
 	GuardianWeeklyDomestic: digitalSubscriptionBenefits,

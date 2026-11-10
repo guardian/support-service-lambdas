@@ -11,6 +11,7 @@ export const productBenefitListSchema = z.enum([
 	'allowRejectAll',
 	'liveEvents',
 	'multipleAccounts',
+	'puzzlePremium',
 ]);
 
 export type ProductBenefit = z.infer<typeof productBenefitListSchema>;

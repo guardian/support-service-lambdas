@@ -18,6 +18,7 @@ import { Rule, RuleTargetInput, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
+import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import {
 	Choice,
@@ -57,18 +58,27 @@ export class SupporterProductDataLambdas extends SrStack {
 		// under full management of this stack.
 		const queueName = `supporter-product-data-${this.stage}`;
 		const dlqName = `dead-letters-supporter-product-data-${this.stage}`;
-		const queue = Queue.fromQueueAttributes(this, 'SupporterProductDataQueue', {
-			queueArn: `arn:aws:sqs:${this.region}:${this.account}:${queueName}`,
-			queueName,
+
+		const dlq = new Queue(this, 'SupporterProductDataDeadLetterQueue', {
+			queueName: dlqName,
+			removalPolicy: RemovalPolicy.RETAIN,
 		});
-		const dlq = Queue.fromQueueAttributes(
-			this,
-			'SupporterProductDataDeadLetterQueue',
-			{
-				queueArn: `arn:aws:sqs:${this.region}:${this.account}:${dlqName}`,
-				queueName: dlqName,
-			},
-		);
+		this.overrideLogicalId(dlq, {
+			logicalId: 'SupporterProductDataDeadLetterQueue',
+			reason: 'Keep resource name consistent with the original cfn template.',
+		});
+
+		const queue = new Queue(this, 'SupporterProductDataQueue', {
+			queueName,
+			visibilityTimeout: Duration.seconds(3000),
+			deadLetterQueue: { queue: dlq, maxReceiveCount: 10 },
+			removalPolicy: RemovalPolicy.RETAIN,
+		});
+		this.overrideLogicalId(queue, {
+			logicalId: 'SupporterProductDataQueue',
+			reason: 'Keep resource name consistent with the original cfn template.',
+		});
+
 		const processItemMaxConcurrency = stage === 'PROD' ? 50 : 30;
 
 		// Non-standard SSM path used by ConfigService — not covered by the GuCDK auto-policy (which uses /${stage}/${stack}/${app})
@@ -83,13 +93,28 @@ export class SupporterProductDataLambdas extends SrStack {
 				`arn:aws:ssm:${this.region}:${this.account}:parameter/supporter-product-data/${this.stage}/*`,
 			],
 		});
+
+		const dataExportBucket = new Bucket(this, 'SupporterProductExportBucket', {
+			bucketName: `supporter-product-data-export-${this.stage.toLowerCase()}`,
+			lifecycleRules: [
+				{
+					id: 'DeleteAllOldFiles',
+					expiration: Duration.days(14),
+					abortIncompleteMultipartUploadAfter: Duration.days(1),
+				},
+			],
+			removalPolicy: RemovalPolicy.RETAIN,
+		});
+		this.overrideLogicalId(dataExportBucket, {
+			logicalId: 'SupporterProductExportBucket',
+			reason: 'Keep resource name consistent with the original cfn template.',
+		});
+
 		// Read/write the supporter-product-data-export S3 bucket (used by fetchResults and addToQueue)
 		const s3DataExportBucketPolicy = new PolicyStatement({
 			effect: Effect.ALLOW,
 			actions: ['s3:PutObject', 's3:GetObject'],
-			resources: [
-				`arn:aws:s3:::supporter-product-data-export-${this.stage.toLowerCase()}/*`,
-			],
+			resources: [dataExportBucket.arnForObjects('*')],
 		});
 
 		// Migrated from dynamo-tables.yaml (stack supporter-product-data-tables-${stage})
@@ -202,21 +227,21 @@ export class SupporterProductDataLambdas extends SrStack {
 		processItem.addPolicies(new AllowInvitationTableUpdatePolicy(this));
 		processItem.addPolicies(zuoraOAuthPolicy);
 
+		const queueEventSource = new SqsEventSource(queue, {
+			batchSize: 10,
+			maxBatchingWindow: Duration.seconds(5),
+			// Limit the number of concurrent Lambda invocations consuming from the
+			// queue to avoid hitting the account-level Lambda concurrency limit
+			// when there are hundreds of thousands of records to process.
+			// At batchSize 10 and maxConcurrency 50 this gives a throughput of
+			// 500 items/invocation-cycle whilst leaving headroom for other lambdas.
+			maxConcurrency: processItemMaxConcurrency,
+		});
+
+		processItem.addEventSource(queueEventSource);
 		queue.grantSendMessages(addToQueue);
 		queue.grantSendMessages(processItem); // The process item lambda calls itself for subscriptions with secondary users
 		queue.grantConsumeMessages(processItem);
-		processItem.addEventSource(
-			new SqsEventSource(queue, {
-				batchSize: 10,
-				maxBatchingWindow: Duration.seconds(5),
-				// Limit the number of concurrent Lambda invocations consuming from the
-				// queue to avoid hitting the account-level Lambda concurrency limit
-				// when there are hundreds of thousands of records to process.
-				// At batchSize 10 and maxConcurrency 50 this gives a throughput of
-				// 500 items/invocation-cycle whilst leaving headroom for other lambdas.
-				maxConcurrency: processItemMaxConcurrency,
-			}),
-		);
 
 		const addToQueueAgainTask = new LambdaInvoke(this, 'AddToQueueAgainTask', {
 			lambdaFunction: addToQueue,
@@ -325,9 +350,13 @@ export class SupporterProductDataLambdas extends SrStack {
 		new GuAlarm(this, 'UnprocessedRecordAlarm', {
 			alarmName: `There was a failure processing a supporter record in the ProcessSupporterRatePlanItemLambda lambda in ${this.stage}`,
 			alarmDescription:
-				`Check the ${dlq.queueName} SQS dead-letter queue for details of the record which failed, ` +
+				`Check the ${dlqName} SQS dead-letter queue for details of the record which failed, ` +
 				`and the ProcessSupporterRatePlanItemLambda CloudWatch logs for what went wrong.`,
-			metric: dlq.metric('ApproximateNumberOfMessagesVisible').with({
+			// Literal queue name (not dlq.queueName) so the alarm is unchanged by the CloudFormation import
+			metric: new Metric({
+				namespace: 'AWS/SQS',
+				metricName: 'ApproximateNumberOfMessagesVisible',
+				dimensionsMap: { QueueName: dlqName },
 				statistic: 'Average',
 				period: Duration.minutes(1),
 			}),
