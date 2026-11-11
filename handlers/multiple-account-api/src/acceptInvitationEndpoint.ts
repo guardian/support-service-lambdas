@@ -4,7 +4,6 @@ import dayjs from 'dayjs';
 import { createSecondarySubscription } from '@modules/multiple-account/secondarySubscription';
 import type { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
 import { expiryTTLFromTermEndDate } from '@modules/multiple-account/secondaryUserRepository';
-import { getIfDefined } from '@modules/nullAndUndefined';
 import {
 	badRequest,
 	buildErrorResponse,
@@ -70,18 +69,24 @@ export const acceptInvitationEndpoint = async (
 		const { subscriptionName, secondaryIdentityId, primaryIdentityId } =
 			invitation;
 
-		const zuoraSubscription = await getSubscription(
-			zuoraClient,
+		const parentSupporterProductDataRecord = await getSupporterRatePlan(
+			stage,
+			primaryIdentityId,
 			subscriptionName,
 		);
-		if (zuoraSubscription.status === 'Cancelled') {
-			return gone(`Primary subscription ${subscriptionName} cancelled`);
+		if (!parentSupporterProductDataRecord) {
+			const zuoraSubscription = await getSubscription(
+				zuoraClient,
+				subscriptionName,
+			);
+			if (zuoraSubscription.status === 'Cancelled') {
+				return gone(`Primary subscription ${subscriptionName} cancelled`);
+			}
+			throw new ReferenceError(
+				`Supporter rate plan record not found for ${subscriptionName} and identity ${primaryIdentityId}`,
+			);
 		}
 
-		const parentSupporterProductDataRecord = getIfDefined(
-			await getSupporterRatePlan(stage, primaryIdentityId, subscriptionName),
-			`Supporter rate plan record not found for ${subscriptionName} and identity ${primaryIdentityId}`,
-		);
 		const today = dayjs();
 
 		const secondaryUserRecord = {
