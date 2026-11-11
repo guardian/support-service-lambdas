@@ -211,18 +211,13 @@ export class InvitationRepository {
 		newTTL: number,
 	): Promise<void> {
 		const invitations = await this.listActive(subscriptionName);
-		logger.log(
-			'invitationRepository.updateSubscriptionTTLs: Invitations Count',
-			{
-				subscriptionName,
-				newTTL,
-				len: invitations.length,
-			},
-		);
-		if (invitations.length === 0) {
+		const inviteCount = invitations.length;
+		if (inviteCount === 0) {
 			return;
 		}
-
+		logger.log(
+			`Updating ${inviteCount} invitation TTL${inviteCount > 1 ? 's' : ''} for primary subscription ${subscriptionName}`,
+		);
 		await Promise.all(
 			invitations.map((invitation) =>
 				this.updateTTL(subscriptionName, invitation.invitationCode, newTTL),
