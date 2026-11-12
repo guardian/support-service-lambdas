@@ -21,6 +21,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
     override val baseUrl: String = "https://rest.test.eu.zuora.com/v1"
   }
   private val accessToken = AccessToken("access-token")
+  private val idempotencyKey = "credit-processor-idempotency-key"
   private val request = CreateOrderRequest(
     orderDate = LocalDate.parse("2026-08-11"),
     existingAccount = ExistingAccount.Number("A000001"),
@@ -31,7 +32,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
   "createOrderAsynchronously" should "submit the order and wait until both the job and order complete" in {
     val clock = new AtomicLong(0)
     val jobReads = new AtomicInteger(0)
-    val requests = ListBuffer.empty[(Method, String, Option[String])]
+    val requests = ListBuffer.empty[(Method, String, Option[String], Option[String])]
     val backend = SttpBackendStub.synchronous.whenRequestMatchesPartial {
       case submittedRequest: Request[_, _] if submittedRequest.method == Method.POST =>
         submittedRequest.options.readTimeout shouldBe 2.minutes
@@ -52,9 +53,14 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
 
     result shouldBe Right(AsyncOrderResult(OrderStatus.Completed))
     requests.toList shouldBe List(
-      (Method.POST, "https://rest.test.eu.zuora.com/v1/async/orders", Some("Bearer access-token")),
-      (Method.GET, "https://rest.test.eu.zuora.com/v1/async-jobs/job-1", Some("Bearer access-token")),
-      (Method.GET, "https://rest.test.eu.zuora.com/v1/async-jobs/job-1", Some("Bearer access-token")),
+      (
+        Method.POST,
+        "https://rest.test.eu.zuora.com/v1/async/orders",
+        Some("Bearer access-token"),
+        Some(idempotencyKey),
+      ),
+      (Method.GET, "https://rest.test.eu.zuora.com/v1/async-jobs/job-1", Some("Bearer access-token"), None),
+      (Method.GET, "https://rest.test.eu.zuora.com/v1/async-jobs/job-1", Some("Bearer access-token"), None),
     )
   }
 
@@ -101,8 +107,10 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
   it should "retry when the job report confirms locking contention" in {
     val clock = new AtomicLong(0)
     val submissions = new AtomicInteger(0)
+    val idempotencyKeys = ListBuffer.empty[String]
     val backend = SttpBackendStub.synchronous.whenRequestMatchesPartial {
       case submittedRequest: Request[_, _] if submittedRequest.method == Method.POST =>
+        idempotencyKeys += submittedRequest.headers.find(_.name.equalsIgnoreCase("Idempotency-Key")).get.value
         val attempt = submissions.incrementAndGet()
         Response.ok(s"""{"jobId":"job-$attempt","success":true}""")
       case statusRequest: Request[_, _] if statusRequest.method == Method.GET && submissions.get() == 1 =>
@@ -117,6 +125,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
 
     result shouldBe Right(AsyncOrderResult(OrderStatus.Completed))
     submissions.get() shouldBe 2
+    idempotencyKeys.toList shouldBe List(idempotencyKey, s"$idempotencyKey-2")
     clock.get() shouldBe 1.minute.toNanos
   }
 
@@ -368,6 +377,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
       monotonicNanos = () => clock.get(),
       maximumOrderDuration = maxOrderDuration,
       maximumOrderAttemptDuration = maxOrderAttemptDuration,
+      idempotencyKey = idempotencyKey,
     )(request)
 
   private def waitFor(report: AsyncJobReport): Either[ZuoraOrders.OrderFailure, AsyncOrderResult] =
@@ -379,7 +389,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
       monotonicNanos = () => 0,
     )
 
-  private def requestDetails(request: Request[_, _]): (Method, String, Option[String]) = {
+  private def requestDetails(request: Request[_, _]): (Method, String, Option[String], Option[String]) = {
     val body = request.body match {
       case StringBody(bodyValue, _, _) => Some(bodyValue)
       case _ => None
@@ -389,6 +399,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
       request.method,
       request.uri.toString,
       request.headers.find(_.name.equalsIgnoreCase("Authorization")).map(_.value),
+      request.headers.find(_.name.equalsIgnoreCase("Idempotency-Key")).map(_.value),
     )
   }
 }
