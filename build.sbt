@@ -284,7 +284,7 @@ lazy val `google-bigquery` = library(
 
 lazy val `zuora-baton` = library(
   project in file("lib/zuora-baton"),
-  Seq(zuora, `config-core`),
+  Seq(zuora, `config-core`, testDep),
 )
   .settings(
     libraryDependencies ++= Seq(playJson),
@@ -483,6 +483,7 @@ lazy val `zuora-sar` = lambdaProject(
     `effects-lambda`,
   ),
 )
+  .settings(Test / unmanagedSourceDirectories += baseDirectory.value / "src/local")
 
 lazy val `dev-env-cleaner` = lambdaProject(
   "dev-env-cleaner",

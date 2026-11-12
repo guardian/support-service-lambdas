@@ -4,8 +4,7 @@ import com.gu.zuora.rer.circeCodecs._
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.util.config.LoadConfigModule
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestRequestMaker}
-import com.gu.zuora.baton.BatonZuoraRestConfig
-import com.gu.zuora.baton.BatonZuoraRestConfig.toZuoraRestConfig
+import com.gu.zuora.baton.{BatonZuoraOAuth, BatonZuoraRestConfig}
 import com.gu.zuora.rer.BatonModels.{PerformRerRequest, RerInitiateRequest, RerRequest, RerStatusRequest}
 import io.circe.syntax._
 
@@ -44,7 +43,8 @@ object ZuoraRerLocalRun extends App {
     for {
       zuoraRerConfig <- loadConfig.load[ZuoraRerConfig]
       zuoraRestConfig <- loadConfig.load[BatonZuoraRestConfig]
-      requests = ZuoraRestRequestMaker(RawEffects.response, toZuoraRestConfig(zuoraRestConfig))
+      accessToken <- BatonZuoraOAuth.getAccessToken(zuoraRestConfig, RawEffects.stage, RawEffects.response)
+      requests = ZuoraRestRequestMaker.oauth(RawEffects.response, zuoraRestConfig.baseUrl, accessToken)
       zuoraQuerier = ZuoraQuery(requests)
       zuoraHelper = ZuoraRerService(requests, zuoraQuerier)
     } yield {
