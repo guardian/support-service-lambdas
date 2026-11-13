@@ -79,6 +79,7 @@ beforeEach(async () => {
 		invitationRepository,
 		secondaryUserRepository,
 		dynamoClient,
+		zuoraClient,
 		secondaryIdentityId,
 		invitationCode,
 	);

@@ -688,6 +688,78 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "MultipleAccountInvitationTablequeryaccess1D91A67C": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "dynamodb:Query",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:dynamodb:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":table/multiple-account-invitation-CODE",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "MultipleAccountInvitationTablequeryaccess1D91A67C",
+        "Roles": [
+          {
+            "Ref": "ProcessSupporterRatePlanItemLambdaServiceRole75C90F89",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "MultipleAccountInvitationTableupdateaccessB088BC82": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "dynamodb:UpdateItem",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:dynamodb:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":table/multiple-account-invitation-CODE",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "MultipleAccountInvitationTableupdateaccessB088BC82",
+        "Roles": [
+          {
+            "Ref": "ProcessSupporterRatePlanItemLambdaServiceRole75C90F89",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "MultipleAccountSecondaryUserTablequeryaccess22F01189": {
       "Properties": {
         "PolicyDocument": {
@@ -2474,6 +2546,78 @@ exports[`The supporter-product-data-lambdas stack matches the snapshot 2`] = `
         "Roles": [
           {
             "Ref": "FetchResultsLambdaServiceRole5D2CDE27",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "MultipleAccountInvitationTablequeryaccess1D91A67C": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "dynamodb:Query",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:dynamodb:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":table/multiple-account-invitation-PROD",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "MultipleAccountInvitationTablequeryaccess1D91A67C",
+        "Roles": [
+          {
+            "Ref": "ProcessSupporterRatePlanItemLambdaServiceRole75C90F89",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "MultipleAccountInvitationTableupdateaccessB088BC82": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "dynamodb:UpdateItem",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:dynamodb:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":table/multiple-account-invitation-PROD",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "MultipleAccountInvitationTableupdateaccessB088BC82",
+        "Roles": [
+          {
+            "Ref": "ProcessSupporterRatePlanItemLambdaServiceRole75C90F89",
           },
         ],
       },
