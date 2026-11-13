@@ -1,8 +1,57 @@
+import { execFileSync } from 'child_process';
 import * as fs from 'fs';
+import * as path from 'path';
 
 export interface ParsedArgs {
 	mode: 'generate' | 'clean';
 	repoRoot: string;
+}
+
+function assertSupportedCheckout(repoRoot: string): void {
+	if (!path.isAbsolute(repoRoot)) {
+		throw new Error(`Repository root must be an absolute path: ${repoRoot}`);
+	}
+
+	if (!fs.existsSync(repoRoot) || !fs.statSync(repoRoot).isDirectory()) {
+		throw new Error(
+			`Repository root must be an existing directory: ${repoRoot}`,
+		);
+	}
+
+	const git = (...args: string[]) => {
+		try {
+			return execFileSync('git', ['-C', repoRoot, ...args], {
+				encoding: 'utf8',
+				stdio: ['ignore', 'pipe', 'pipe'],
+			}).trim();
+		} catch (error) {
+			throw new Error(
+				`Unable to inspect Git checkout at ${repoRoot} using git ${args.join(' ')}: ${
+					error instanceof Error ? error.message : String(error)
+				}`,
+			);
+		}
+	};
+
+	const checkoutRoot = git('rev-parse', '--show-toplevel');
+	if (fs.realpathSync(repoRoot) !== fs.realpathSync(checkoutRoot)) {
+		throw new Error(
+			`Repository root must be the Git working-tree root: ${checkoutRoot}. Received: ${repoRoot}`,
+		);
+	}
+
+	const hasSupportedRemote = git('remote', '-v')
+		.split('\n')
+		.some((remote) =>
+			(remote.split(/\s+/)[1] ?? '').includes(
+				'guardian/support-service-lambdas',
+			),
+		);
+	if (!hasSupportedRemote) {
+		throw new Error(
+			`Git checkout at ${repoRoot} must have a remote containing guardian/support-service-lambdas.`,
+		);
+	}
 }
 
 export function parseArguments(argv: string[]): ParsedArgs {
@@ -30,15 +79,7 @@ export function parseArguments(argv: string[]): ParsedArgs {
 	}
 
 	const repoRoot = args[1];
-	const isSupportedRepoPath =
-		repoRoot.startsWith('/') &&
-		(repoRoot.endsWith('support-service-lambdas') ||
-			// This allows the path validation for bare repositories
-			/support-service-lambdas\.git\/[^/]+$/.test(repoRoot));
-
-	if (!fs.existsSync(repoRoot) || !isSupportedRepoPath) {
-		throw new Error(`Invalid repository root: ${repoRoot}`);
-	}
+	assertSupportedCheckout(repoRoot);
 
 	return {
 		// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo use zod above
