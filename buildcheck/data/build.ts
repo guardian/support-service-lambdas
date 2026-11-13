@@ -13,6 +13,7 @@ export interface HandlerDefinition extends ModuleDefinition {
 	functionNames?: string[];
 	entryPoints?: string[];
 	extraStages?: Array<'CSBX'>;
+	allowedStages?: Array<'CODE' | 'PROD' | 'CSBX'>;
 }
 
 export interface ModuleDefinition {
@@ -43,6 +44,7 @@ const moduleAws: ModuleDefinition = {
 	name: 'aws',
 	dependencies: {
 		...dep['@aws-sdk/client-cloudwatch'],
+		...dep['@aws-sdk/client-eventbridge'],
 		...dep['@aws-sdk/client-lambda'],
 		...dep['@aws-sdk/client-s3'],
 		...dep['@aws-sdk/client-sqs'],
@@ -153,6 +155,17 @@ const moduleRouting: ModuleDefinition = {
 	moduleDependencies: [moduleAws, moduleLogger, moduleZuora],
 };
 
+const moduleSubscriptionEvents: ModuleDefinition = {
+	name: 'subscription-events',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
+	moduleDependencies: [moduleAws, moduleLogger, moduleRouting, moduleZuora],
+};
+
 const moduleBigquery: ModuleDefinition = {
 	name: 'bigquery',
 	dependencies: {
@@ -212,6 +225,14 @@ const moduleIdentity: ModuleDefinition = {
 		...devDeps['@types/aws-lambda'],
 	},
 	moduleDependencies: [moduleAws, moduleZuora],
+};
+
+const moduleMparticle: ModuleDefinition = {
+	name: 'mparticle',
+	dependencies: {
+		...dep.zod,
+	},
+	moduleDependencies: [moduleLogger, moduleZuora],
 };
 
 const moduleSupporterProductData: ModuleDefinition = {
@@ -422,6 +443,29 @@ const mobilePurchasesToSupporterProductData: HandlerDefinition = {
 	],
 };
 
+const sendTestDataToMparticle: HandlerDefinition = {
+	name: 'send-test-data-to-mparticle',
+	allowedStages: ['CODE'],
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
+	moduleDependencies: [moduleAws, moduleMparticle],
+};
+
+const mparticleAcquisitionsPublisher: HandlerDefinition = {
+	name: 'mparticle-acquisitions-publisher',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
+	moduleDependencies: [moduleAws, moduleMparticle],
+};
+
 const mparticleApi: HandlerDefinition = {
 	name: 'mparticle-api',
 	functionNames: [
@@ -443,7 +487,23 @@ const mparticleApi: HandlerDefinition = {
 		...dep['@aws-sdk/client-s3'],
 		...devDeps['tsx'],
 	},
-	moduleDependencies: [moduleAws, moduleRouting],
+	moduleDependencies: [moduleAws, moduleRouting, moduleMparticle],
+};
+
+const identityDeletionCleanup: HandlerDefinition = {
+	name: 'identity-deletion-cleanup',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
+	moduleDependencies: [
+		moduleLogger,
+		moduleRouting,
+		moduleSalesforce,
+		moduleZuora,
+	],
 };
 
 const negativeInvoicesProcessor: HandlerDefinition = {
@@ -752,6 +812,11 @@ const multipleAccountApi: HandlerDefinition = {
 		...openApiScripts,
 		package: `pnpm type-check && pnpm lint && pnpm openapi:lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr multiple-account-api.zip ./*.js.map ./*.js`,
 	},
+	entryPoints: ['src/index.ts', 'src/indexCancellation.ts'],
+	functionNames: [
+		'multiple-account-api-',
+		'multiple-account-api-cancellation-',
+	],
 	moduleDependencies: [
 		moduleMultipleAccount,
 		moduleRouting,
@@ -760,6 +825,8 @@ const multipleAccountApi: HandlerDefinition = {
 		moduleProductBenefits,
 		moduleGuardianSubscription,
 		moduleEmail,
+		moduleAws,
+		moduleSubscriptionEvents,
 	],
 };
 
@@ -937,18 +1004,36 @@ const paymentFailureCommsExitApi: HandlerDefinition = {
 	},
 };
 
+const securityGroupsUpdater: HandlerDefinition = {
+	name: 'security-groups-updater',
+	dependencies: {
+		...dep['@aws-sdk/client-ec2'],
+		...dep.zod,
+		...dep.dayjs,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+		...devDeps['aws-sdk-client-mock'],
+		...devDeps['fetch-mock'],
+	},
+	moduleDependencies: [moduleLogger, moduleRouting],
+};
+
 // MARKER new-lambda: buildcheck-const
 
 export const build: BuildDefinition = {
 	handlers: [
 		alarmsHandler,
+		securityGroupsUpdater,
 		discountApi,
 		discountExpiryNotifier,
 		generateProductCatalog,
 		imovoVoucherApi,
 		metricPushApi,
 		mobilePurchasesToSupporterProductData,
+		mparticleAcquisitionsPublisher,
 		mparticleApi,
+		identityDeletionCleanup,
 		negativeInvoicesProcessor,
 		newsletterAcquisition,
 		observerDataExport,
@@ -974,6 +1059,7 @@ export const build: BuildDefinition = {
 		scrubNonTokenisedPaymentMethods,
 		promotionsApi,
 		paymentFailureCommsExitApi,
+		sendTestDataToMparticle,
 		// MARKER new-lambda: buildcheck-reference
 	],
 
@@ -985,6 +1071,7 @@ export const build: BuildDefinition = {
 		moduleIdentity,
 		moduleInternationalisation,
 		moduleLogger,
+		moduleMparticle,
 		moduleMultipleAccount,
 		moduleProductBenefits,
 		moduleProductCatalog,
@@ -992,6 +1079,7 @@ export const build: BuildDefinition = {
 		moduleRouting,
 		moduleSalesforce,
 		moduleSecretsManager,
+		moduleSubscriptionEvents,
 		moduleSupporterProductData,
 		moduleSyncSupporterProductData,
 		moduleTestUsers,

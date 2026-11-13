@@ -1,13 +1,13 @@
 import { z } from 'zod';
+import type {
+	DataSubjectAPI,
+	MParticleClient,
+} from '@modules/mparticle/mparticleHttpClient';
 import type { DataSubjectRequestState } from '../../../apis/dataSubjectRequests/getStatus';
 import {
 	DataSubjectRequestStatus,
 	getStatusOfDataSubjectRequest,
 } from '../../../apis/dataSubjectRequests/getStatus';
-import type {
-	DataSubjectAPI,
-	MParticleClient,
-} from '../../../services/mparticleClient';
 import { InitiationReferenceSchema } from '../initiationReference';
 import {
 	BatonRerEventRequestBaseSchema,

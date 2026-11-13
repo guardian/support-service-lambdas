@@ -28,7 +28,7 @@ case class AsyncJobReport(
     result: Option[AsyncOrderResult],
 )
 
-case class AsyncOrderResult(status: OrderStatus, invoiceNumbers: Option[List[String]] = None)
+case class AsyncOrderResult(status: OrderStatus)
 
 sealed trait AsyncJobStatus {
   def value: String

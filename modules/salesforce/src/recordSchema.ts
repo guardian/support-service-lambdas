@@ -16,6 +16,7 @@ export const SalesforceQueryResponseSchema = <T extends z.ZodTypeAny>(
 	z.object({
 		totalSize: z.number(),
 		done: z.boolean(),
+		nextRecordsUrl: z.string().optional(),
 		records: z.array(schema),
 	});
 

@@ -47,6 +47,7 @@ const services: Services = {
 		PLATFORM: testWebhook,
 		ENGINE: testWebhook,
 		PUZZLES: testWebhook,
+		SRDEV: testWebhook,
 	},
 	googleChatSendMessage: new GoogleChatSendMessage(new GoogleChatClient()),
 };

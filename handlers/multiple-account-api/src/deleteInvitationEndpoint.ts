@@ -6,8 +6,8 @@ import {
 	notFound,
 } from '@modules/routing/apiGatewayResponses';
 import type { Stage } from '@modules/stage';
-import { sendDeclineInvitationEmail } from './emails/declineInvitationEmail';
 import { type InvitationRepository } from './invitationRepository';
+import { sendDeclineInvitationEmail } from './multipleAccountEmails';
 
 export const deleteInvitationEndpoint = async (
 	invitationRepository: InvitationRepository,

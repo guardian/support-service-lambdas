@@ -1,0 +1,24 @@
+# MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/riff-raff.yaml.ts
+stacks:
+  - support
+regions:
+  - eu-west-1
+allowedStages:
+  - CODE
+deployments:
+  send-test-data-to-mparticle-cloudformation:
+    type: cloud-formation
+    app: send-test-data-to-mparticle
+    parameters:
+      templateStagePaths:
+        CODE: send-test-data-to-mparticle-CODE.template.json
+  send-test-data-to-mparticle:
+    type: aws-lambda
+    parameters:
+      fileName: send-test-data-to-mparticle.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+        - send-test-data-to-mparticle-
+    dependencies:
+      - send-test-data-to-mparticle-cloudformation

@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v7
       - id: read-matrix
         run: |
-          echo "subprojects=$(jq -c '.subproject' .github/workflows/handlerNames.managed.json)" >> "$GITHUB_OUTPUT"
+          echo "subprojects=$(jq -c '.include' .github/workflows/handlerNames.managed.json)" >> "$GITHUB_OUTPUT"
 
   gu-cdk-build:
     needs:
@@ -31,7 +31,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        subproject: ${{ fromJson(needs.load-matrix.outputs.subprojects) }}
+        include: ${{ fromJson(needs.load-matrix.outputs.subprojects) }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -44,7 +44,7 @@ jobs:
         shell: bash
       - uses: actions/setup-node@v7
         with:
-          node-version-file: '.tool-versions'
+          node-version-file: 'mise.toml'
           cache: 'pnpm'
       - run: pnpm install
       - run: pnpm --filter "./buildcheck" type-check
@@ -53,15 +53,44 @@ jobs:
       - run: pnpm --filter "./buildcheck" snapshot:assert 'ROOT|modules|handlers/${{ matrix.subproject }}'
       - run: pnpm --filter cdk package ${{ matrix.subproject }}
       - run: pnpm --filter ${{ matrix.subproject }}... type-check
+        if: matrix.hasTsSource
       - run: pnpm --filter ${{ matrix.subproject }}... lint
+        if: matrix.hasTsSource
 
       - run: pnpm --filter cdk check-formatting
       - run: pnpm --filter ${{ matrix.subproject }}... check-formatting
+        if: matrix.hasTsSource
       - run: pnpm --filter ${{ matrix.subproject }}... test
+        if: matrix.hasTsSource
       - run: pnpm --filter ${{ matrix.subproject }} packageQuick
 
+      - name: Build Riff-Raff content directories
+        id: riff_raff_content
+        env:
+          SUBPROJECT: ${{ matrix.subproject }}
+        shell: bash
+        run: |
+          shopt -s nullglob
+          templates=(cdk/cdk.out/"${SUBPROJECT}"-*.template.json)
+
+          if [ "${#templates[@]}" -eq 0 ]; then
+            echo "No CloudFormation templates found for ${SUBPROJECT}" >&2
+            exit 1
+          fi
+
+          {
+            echo 'contentDirectories<<EOF'
+            echo "${SUBPROJECT}-cloudformation:"
+            for template in "${templates[@]}"; do
+              echo "  - ./${template}"
+            done
+            echo "${SUBPROJECT}:"
+            echo "  - ./handlers/${SUBPROJECT}/target/${SUBPROJECT}.zip"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
       - name: Upload to Riff-Raff
-        uses: guardian/actions-riff-raff@v4.3.3
+        uses: guardian/actions-riff-raff@v4.3.7
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
@@ -69,12 +98,7 @@ jobs:
           buildNumberOffset: 7000
           configPath: ./handlers/${{ matrix.subproject }}/riff-raff.yaml
           commentingEnabled: 'false'
-          contentDirectories: |
-            ${{ matrix.subproject }}-cloudformation:
-              - ./cdk/cdk.out/${{ matrix.subproject }}-CODE.template.json
-              - ./cdk/cdk.out/${{ matrix.subproject }}-PROD.template.json
-            ${{ matrix.subproject }}:
-              - ./handlers/${{ matrix.subproject }}/target/${{ matrix.subproject }}.zip
+          contentDirectories: ${{ steps.riff_raff_content.outputs.contentDirectories }}
 
   # for branch protection - only passes if all builds pass
   ci-typescript-all:
@@ -88,4 +112,3 @@ jobs:
       - name: Fail unless all matrix jobs succeeded
         run: |
           [ "${{ needs.gu-cdk-build.result }}" = "success" ]
-

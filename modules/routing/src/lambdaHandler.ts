@@ -6,12 +6,20 @@ import { Lazy } from '@modules/lazy';
 import { getCallerInfo } from '@modules/logger/getCallerInfo';
 import { logger } from '@modules/logger/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
+import type { Stage } from '@modules/stage';
+import { stageFromEnvironment } from '@modules/stage';
 
 export type HandlerEnv<ConfigType> = {
 	now: () => dayjs.Dayjs;
-	stage: string;
+	stage: Stage;
 	config: ConfigType;
 };
+
+function summariseServices(services: unknown): unknown {
+	return typeof services === 'object' && services !== null
+		? Object.keys(services)
+		: services;
+}
 
 /**
  * This is a similar wrapper to the Router, it handles loading config on
@@ -39,12 +47,10 @@ export function LambdaHandler<ConfigType, E>(
 	return LambdaHandlerWithServices(
 		configSchema,
 		handlerWithEntryExitLogging,
-		(servicesAndConfig) => servicesAndConfig,
+		(servicesAndConfig) => Promise.resolve(servicesAndConfig),
 		callerInfo,
 	);
 }
-
-type GuEnv = { stage: string; stack: string; app: string };
 
 /**
  * This is a similar wrapper to the Router only it handles loading config and
@@ -54,34 +60,28 @@ type GuEnv = { stage: string; stack: string; app: string };
  *
  * @param configSchema schema for the SSM config for this lambda
  * @param handler
- * @param buildServices build anything you want to be created on cold start only, it will be passed into your handler
+ * @param buildServices build anything you want to be created on cold start only, it will be passed into your handler.
+ *   May be async (e.g. to await a client that reads secrets) - it is fully
+ *   awaited before the handler runs, and a rejection is treated the same as
+ *   any other cold-start failure (retried on the next invocation).
  * @constructor
  */
 export function LambdaHandlerWithServices<ConfigType, Services, E>(
 	configSchema: z.ZodType<ConfigType>,
 	handler: (event: E, services: Services) => Promise<void>,
-	buildServices: (handlerProps: HandlerEnv<ConfigType>) => Services,
+	buildServices: (handlerProps: HandlerEnv<ConfigType>) => Promise<Services>,
 	callerInfo: string,
 ) {
 	// only expect env vars on a cold start, don't load if this file is referenced in tests
-	const lazyEnv = new Lazy<GuEnv>(() => {
-		const stage = getEnv('STAGE');
-		const stack = getEnv('STACK');
-		const app = getEnv('APP');
-		return Promise.resolve({ stage, stack, app });
-	}, 'load config from SSM');
-
-	const handlerProps: Lazy<Services> = lazyEnv.then(
+	const handlerProps: Lazy<Services> = new Lazy(
 		logger.wrapFn(
-			async ({ stage, stack, app }: GuEnv) => {
-				const config = await loadConfig(stage, stack, app, configSchema);
-				const handlerProps = { now: () => dayjs(), stage, config };
-				return buildServices(handlerProps);
-			},
+			async () => buildServices(await loadHandlerEnv(configSchema)),
 			'lambdaColdStart',
 			callerInfo,
 			(args) => ({ logOnEntryOnly: args }),
+			summariseServices,
 		),
+		'load config from SSM',
 	);
 
 	const handlerWithContextClearance = logger.withContext(
@@ -93,6 +93,27 @@ export function LambdaHandlerWithServices<ConfigType, Services, E>(
 	return async (event: E) => {
 		return await handlerWithContextClearance(event, await handlerProps.get());
 	};
+}
+
+/**
+ * Reads the standard `STAGE`/`STACK`/`APP` env vars (set for every lambda by
+ * `GuLambdaFunction`) and loads this lambda's SSM config, in the standard
+ * `loadConfig`/`appConfig.ts` path convention.
+ *
+ * Used internally by `LambdaHandlerWithServices` on cold start, but also
+ * exported for Router-based lambdas (which don't go through that wrapper) to
+ * call directly.
+ *
+ * @param configSchema schema for the SSM config for this lambda
+ */
+export async function loadHandlerEnv<ConfigType>(
+	configSchema: z.ZodType<ConfigType>,
+): Promise<HandlerEnv<ConfigType>> {
+	const stage = stageFromEnvironment();
+	const stack = getEnv('STACK');
+	const app = getEnv('APP');
+	const config = await loadConfig(stage, stack, app, configSchema);
+	return { now: () => dayjs(), stage, config };
 }
 
 /**

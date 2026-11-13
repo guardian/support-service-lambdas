@@ -1,10 +1,11 @@
 import { logger } from '@modules/logger/logger';
-import type { BrazeClient } from '../../services/brazeClient';
-import { deleteBrazeUser } from '../../services/brazeClient';
+import type { MParticleEnvironment } from '@modules/mparticle/events';
 import type {
 	BulkDeletionAPI,
 	MParticleClient,
-} from '../../services/mparticleClient';
+} from '@modules/mparticle/mparticleHttpClient';
+import type { BrazeClient } from '../../services/brazeClient';
+import { deleteBrazeUser } from '../../services/brazeClient';
 import { deleteMParticleUser } from '../../services/mparticleDeletion';
 import type { DeletionResult } from '../../types/deletionMessage';
 
@@ -32,7 +33,7 @@ export async function processUserDeletion(
 	brazeId: string | undefined,
 	mParticleClient: MParticleClient<BulkDeletionAPI>,
 	brazeClient: BrazeClient | undefined,
-	mParticleEnvironment: 'production' | 'development' = 'production',
+	mParticleEnvironment: MParticleEnvironment = 'production',
 ): Promise<void> {
 	logger.log(`Processing deletion for user ${identityId}`);
 

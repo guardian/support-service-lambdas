@@ -7,7 +7,8 @@ export type Team =
 	| 'PLATFORM'
 	| 'SRE'
 	| 'ENGINE'
-	| 'PUZZLES';
+	| 'PUZZLES'
+	| 'SRDEV';
 
 const teamToAppMappings: Record<Team, string[]> = {
 	MARTECH: [
@@ -29,6 +30,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'bandit',
 		'apps-metering-events',
 		'publishing-alarm-stack-cdk',
+		'mparticle-acquisitions-publisher',
 	],
 	LIFECYCLE: [
 		'cancellation-sf-cases-api',
@@ -40,6 +42,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'holiday-stop-api',
 		'holiday-stop-processor',
 		'soft-opt-in-consent-setter',
+		'manage-frontend',
 		'mobile-purchases-soft-opt-in-acquisitions',
 		'mobile-purchases-soft-opt-in-acquisitions-dlq-processor',
 		'payment-failure-comms',
@@ -56,12 +59,6 @@ const teamToAppMappings: Record<Team, string[]> = {
 	PORTFOLIO: [
 		// contributions-platform
 		'fixation',
-
-		// zuora-finance
-		'zuora-creditor',
-
-		// zuora-config
-		'canonical-config',
 
 		// support-frontend
 		'frontend',
@@ -104,11 +101,9 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'sf-contact-merge',
 		'sf-emails-to-s3-exporter',
 		'sf-gocardless-sync',
-		'manage-help-content-publisher',
-
 		// zuora
 		'invoicing-api',
-		'zuora-callout-apis',
+		'zuora-auto-cancel',
 		'zuora-oracle-fusion',
 		'write-off-unpaid-invoices',
 		'negative-invoices-processor',
@@ -121,6 +116,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		// data retention
 		'identity-backfill',
 		'identity-retention',
+		'identity-deletion-cleanup',
 		'zuora-retention', //https://github.com/guardian/zuora-retention
 		'zuora-salesforce-link-remover',
 		'scrub-non-tokenised-payment-methods',
@@ -149,6 +145,10 @@ const teamToAppMappings: Record<Team, string[]> = {
 	],
 	ENGINE: ['price-migration-engine-state-machine'],
 	PUZZLES: ['puzzles-app'],
+	SRDEV: [
+		// Zuora Config
+		'canonical-config',
+	],
 };
 
 const buildAppToTeamMappings = (

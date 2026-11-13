@@ -1,0 +1,26 @@
+# MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/riff-raff.yaml.ts
+stacks:
+  - support
+regions:
+  - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  identity-deletion-cleanup-cloudformation:
+    type: cloud-formation
+    app: identity-deletion-cleanup
+    parameters:
+      templateStagePaths:
+        CODE: identity-deletion-cleanup-CODE.template.json
+        PROD: identity-deletion-cleanup-PROD.template.json
+  identity-deletion-cleanup:
+    type: aws-lambda
+    parameters:
+      fileName: identity-deletion-cleanup.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+        - identity-deletion-cleanup-
+    dependencies:
+      - identity-deletion-cleanup-cloudformation

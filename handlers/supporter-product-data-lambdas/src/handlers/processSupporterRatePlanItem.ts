@@ -1,7 +1,7 @@
 import type { SQSRecord } from 'aws-lambda';
 import { logger } from '@modules/logger/logger';
 import type { SecondaryUserRecord } from '@modules/multiple-account/secondaryUserRepository';
-import { secondaryUserTTLFromPrimarySubscriptionTTL } from '@modules/multiple-account/secondaryUserRepository';
+import { expiryTTLFromTermEndDate } from '@modules/multiple-account/secondaryUserRepository';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import { supporterRatePlanItemSchema } from '@modules/supporter-product-data/supporterProductData';
 import { addContributionAmountIfNeeded } from '../services/contributions';
@@ -65,9 +65,7 @@ export const processItem = async (
 				await dependencies.updateSecondaryUserTTL(
 					itemWithContribution.subscriptionName,
 					secondaryUser.secondaryIdentityId,
-					secondaryUserTTLFromPrimarySubscriptionTTL(
-						itemWithContribution.termEndDate,
-					),
+					expiryTTLFromTermEndDate(itemWithContribution.termEndDate),
 				);
 			}),
 		);

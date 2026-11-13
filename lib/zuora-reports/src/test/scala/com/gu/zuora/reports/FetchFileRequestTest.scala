@@ -17,7 +17,7 @@ class FetchFileRequestTest extends AsyncFlatSpec {
   it should "deserialise successfully with no already fetched files in request  " in {
     val fetcFileRequest = Json.parse(
       """{
-      |  "name": "zuora-retention",
+      |  "name": "test-report",
       |  "jobId": "someJobId",
       |  "status": "completed",
       |  "batches": [
@@ -41,7 +41,7 @@ class FetchFileRequestTest extends AsyncFlatSpec {
   it should "deserialise successfully with already fetched files in request  " in {
     val fetcFileRequest = Json.parse(
       """{
-        |  "name": "zuora-retention",
+        |  "name": "test-report",
         |  "jobId": "someJobId",
         |  "status": "completed",
         |  "batches": [

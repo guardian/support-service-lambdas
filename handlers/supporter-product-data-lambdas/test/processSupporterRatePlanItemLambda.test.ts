@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import type { SecondaryUserRecord } from '@modules/multiple-account/secondaryUserRepository';
-import { secondaryUserTTLFromPrimarySubscriptionTTL } from '@modules/multiple-account/secondaryUserRepository';
+import { expiryTTLFromTermEndDate } from '@modules/multiple-account/secondaryUserRepository';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import { processItem } from '../src/handlers/processSupporterRatePlanItem';
 
@@ -146,12 +146,12 @@ describe('processSupporterRatePlanItemLambda', () => {
 		expect(updateSecondaryUserTTL).toHaveBeenCalledWith(
 			expect.stringContaining('sub-1'),
 			expect.stringContaining('secondary-id-1'),
-			secondaryUserTTLFromPrimarySubscriptionTTL(dayjs(termEndDate)),
+			expiryTTLFromTermEndDate(dayjs(termEndDate)),
 		);
 		expect(updateSecondaryUserTTL).toHaveBeenCalledWith(
 			expect.stringContaining('sub-1'),
 			expect.stringContaining('secondary-id-2'),
-			secondaryUserTTLFromPrimarySubscriptionTTL(dayjs(termEndDate)),
+			expiryTTLFromTermEndDate(dayjs(termEndDate)),
 		);
 	});
 });

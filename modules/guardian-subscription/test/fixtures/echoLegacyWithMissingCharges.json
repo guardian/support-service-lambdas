@@ -1,0 +1,45 @@
+{
+  "id": "6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f6f",
+  "accountNumber": "A00445566",
+  "subscriptionNumber": "A-S00445566",
+  "status": "Active",
+  "contractEffectiveDate": "2017-12-22T00:00:00.000Z",
+  "serviceActivationDate": "2017-12-22T00:00:00.000Z",
+  "customerAcceptanceDate": "2018-01-05T00:00:00.000Z",
+  "subscriptionStartDate": "2017-12-22T00:00:00.000Z",
+  "subscriptionEndDate": "2027-01-05T00:00:00.000Z",
+  "lastBookingDate": "2026-08-19T00:00:00.000Z",
+  "termStartDate": "2026-01-05T00:00:00.000Z",
+  "termEndDate": "2027-01-05T00:00:00.000Z",
+  "ratePlans": [
+    {
+      "id": "7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a",
+      "lastChangeType": "Add",
+      "productId": "2c92a0ff55a0e4940155dfa589da2591",
+      "productName": "Newspaper Delivery",
+      "productRatePlanId": "2c92a0ff56fe33f001572334561765c1",
+      "ratePlanName": "Echo-Legacy",
+      "ratePlanCharges": [
+        {
+          "id": "8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b",
+          "productRatePlanChargeId": "2c92a0ff56fe33f001572334573865f8",
+          "number": "C-02020202",
+          "name": "Monday",
+          "type": "Recurring",
+          "model": "FlatFee",
+          "currency": "GBP",
+          "effectiveStartDate": "2019-01-19T00:00:00.000Z",
+          "effectiveEndDate": "2027-01-05T00:00:00.000Z",
+          "billingPeriod": "Month",
+          "processedThroughDate": "2026-07-19T00:00:00.000Z",
+          "chargedThroughDate": "2026-08-19T00:00:00.000Z",
+          "upToPeriodsType": null,
+          "upToPeriods": null,
+          "price": 5.5,
+          "discountPercentage": null,
+          "billingPeriodAlignment": "AlignToCharge"
+        }
+      ]
+    }
+  ]
+}

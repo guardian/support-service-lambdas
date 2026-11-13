@@ -13,11 +13,11 @@ import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { deleteSecondaryUserEndpoint } from '../src/deleteSecondaryUserEndpoint';
-import { sendAccessRemovedEmail } from '../src/emails/accessRemovedEmail';
+import { sendAccessRemovedEmail } from '../src/multipleAccountEmails';
 import {
 	sendLeaveSubscriptionEmailToPrimary,
 	sendLeaveSubscriptionEmailToSecondary,
-} from '../src/emails/leaveSubcriptionEmail';
+} from '../src/multipleAccountEmails';
 import { makeAccount, makeSubscription } from './helpers';
 
 jest.mock('@modules/zuora/subscription', () => ({
@@ -32,13 +32,14 @@ jest.mock('@modules/identity/idapi', () => ({
 	getUserByIdentityId: jest.fn(),
 }));
 
-jest.mock('../src/emails/accessRemovedEmail', () => ({
+jest.mock('../src/multipleAccountEmails', () => ({
 	sendAccessRemovedEmail: jest.fn(),
-}));
-
-jest.mock('../src/emails/leaveSubcriptionEmail', () => ({
 	sendLeaveSubscriptionEmailToSecondary: jest.fn(),
 	sendLeaveSubscriptionEmailToPrimary: jest.fn(),
+}));
+
+jest.mock('../src/softOptinConsents', () => ({
+	sendSoftOptInCancelEvent: jest.fn(),
 }));
 
 const stage = 'CODE';
@@ -213,6 +214,44 @@ describe('deleteSecondaryUserEndpoint', () => {
 				primaryUserEmail: primaryEmail,
 				primaryUserIdentityId: primaryIdentityId,
 			});
+		});
+
+		it('returns a successful status even if fetching the secondary user from idapi fails', async () => {
+			jest
+				.mocked(getUserByIdentityId)
+				.mockRejectedValue(new Error('Failed to fetch user'));
+
+			const result = await deleteSecondaryUserEndpoint(
+				stage,
+				repository,
+				client,
+				zuoraClient,
+				identityClient,
+				subscriptionName,
+				secondaryIdentityId,
+				secondaryIdentityId,
+			);
+
+			expect(result.statusCode).toBe(204);
+		});
+
+		it('returns a successful status even if fetching the account from Zuora fails', async () => {
+			jest
+				.mocked(getAccount)
+				.mockRejectedValue(new Error('Failed to fetch account'));
+
+			const result = await deleteSecondaryUserEndpoint(
+				stage,
+				repository,
+				client,
+				zuoraClient,
+				identityClient,
+				subscriptionName,
+				secondaryIdentityId,
+				secondaryIdentityId,
+			);
+
+			expect(result.statusCode).toBe(204);
 		});
 	});
 

@@ -9,7 +9,7 @@ import type { SrMonitoring } from './SrLambdaAlarm';
 import { SrLambdaAlarm } from './SrLambdaAlarm';
 import type { SrStack } from './SrStack';
 
-type SrSqsLambdaProps = SrLambdaProps & {
+export type SrSqsLambdaProps = SrLambdaProps & {
 	/**
 	 * Optional name insert for the queue, defaults to the lambda's namePrefix, if any.
 	 *
@@ -37,6 +37,11 @@ type SrSqsLambdaProps = SrLambdaProps & {
 	 * @default Duration.seconds(30)
 	 */
 	readonly visibilityTimeout?: Duration;
+	/**
+	 * Limits the number of concurrent instances of the lambda that the SQS
+	 * event source can invoke.
+	 */
+	readonly maxConcurrency?: number;
 	/**
 	 * legacy IDs, to avoid having to drop and recreate an existing stack
 	 */
@@ -86,7 +91,12 @@ export class SrSqsLambda extends SrLambda implements Construct {
 			visibilityTimeout: props.visibilityTimeout,
 		});
 
-		super.addEventSource(new SqsEventSource(this.inputQueue, { batchSize: 1 }));
+		super.addEventSource(
+			new SqsEventSource(this.inputQueue, {
+				batchSize: 1,
+				maxConcurrency: props.maxConcurrency,
+			}),
+		);
 
 		if (scope.stage === 'PROD' && !props.monitoring.noMonitoring) {
 			new SrLambdaAlarm(scope, 'Alarm', {

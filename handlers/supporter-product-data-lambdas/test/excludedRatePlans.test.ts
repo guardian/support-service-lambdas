@@ -16,5 +16,5 @@ test('getExcludedProductRatePlanIds returns correct rate plan IDs', () => {
 	expect(excludedProductRatePlanIds).not.toContain(
 		'8a1288599c2f45d4019c33de05fd6804', // GW + Digital Annual Domestic
 	);
-	expect(excludedProductRatePlanIds.length).toBe(93);
+	expect(excludedProductRatePlanIds.length).toBe(102);
 });

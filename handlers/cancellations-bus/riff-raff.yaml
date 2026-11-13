@@ -1,0 +1,15 @@
+stacks:
+  - support
+regions:
+  - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  cancellations-bus-cloudformation:
+    type: cloud-formation
+    app: cancellations-bus
+    parameters:
+      templateStagePaths:
+        CODE: cancellations-bus-CODE.template.json
+        PROD: cancellations-bus-PROD.template.json

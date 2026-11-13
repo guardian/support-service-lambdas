@@ -315,7 +315,20 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
               ],
               "Effect": "Allow",
               "Resource": {
-                "Fn::ImportValue": "supporter-product-data-tables-CODE-SupporterProductDataTable",
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:dynamodb:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":table/SupporterProductData-CODE",
+                  ],
+                ],
               },
             },
           ],
@@ -1364,7 +1377,20 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
               ],
               "Effect": "Allow",
               "Resource": {
-                "Fn::ImportValue": "supporter-product-data-tables-PROD-SupporterProductDataTable",
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:dynamodb:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":table/SupporterProductData-PROD",
+                  ],
+                ],
               },
             },
           ],

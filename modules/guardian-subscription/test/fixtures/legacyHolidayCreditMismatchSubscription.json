@@ -1,0 +1,74 @@
+{
+  "id": "1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a",
+  "accountNumber": "A00112233",
+  "subscriptionNumber": "A-S00112233",
+  "status": "Active",
+  "contractEffectiveDate": "2017-12-22T00:00:00.000Z",
+  "serviceActivationDate": "2017-12-22T00:00:00.000Z",
+  "customerAcceptanceDate": "2018-01-05T00:00:00.000Z",
+  "subscriptionStartDate": "2017-12-22T00:00:00.000Z",
+  "subscriptionEndDate": "2027-01-05T00:00:00.000Z",
+  "lastBookingDate": "2026-08-19T00:00:00.000Z",
+  "termStartDate": "2026-01-05T00:00:00.000Z",
+  "termEndDate": "2027-01-05T00:00:00.000Z",
+  "ratePlans": [
+    {
+      "id": "2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b",
+      "lastChangeType": "Add",
+      "productId": "2c92a0ff5345f9200153559c6d2a3385",
+      "productName": "Discounts",
+      "productRatePlanId": "2c92a0fc5b42d2c9015b6259f7f40040",
+      "ratePlanName": "Guardian Weekly Holiday Credit",
+      "ratePlanCharges": [
+        {
+          "id": "3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c",
+          "productRatePlanChargeId": "2c92a0ff5b42e3ad015b627c142f072a",
+          "number": "C-01010101",
+          "name": "Holiday Credit",
+          "type": "Usage",
+          "model": "FlatFee",
+          "currency": "GBP",
+          "effectiveStartDate": "2019-01-19T00:00:00.000Z",
+          "effectiveEndDate": "2019-04-19T00:00:00.000Z",
+          "billingPeriod": "Quarter",
+          "processedThroughDate": "2019-04-19T00:00:00.000Z",
+          "chargedThroughDate": "2019-04-19T00:00:00.000Z",
+          "upToPeriodsType": "Billing_Periods",
+          "upToPeriods": 1,
+          "price": -12.5,
+          "discountPercentage": null,
+          "billingPeriodAlignment": "AlignToCharge"
+        }
+      ]
+    },
+    {
+      "id": "4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d",
+      "lastChangeType": "Add",
+      "productId": "2c92a0ff6619bf8901661aa3247c4b1d",
+      "productName": "Guardian Weekly - Domestic",
+      "productRatePlanId": "2c92a0fe6619b4b301661aa494392ee2",
+      "ratePlanName": "GW Oct 18 - Quarterly - Domestic",
+      "ratePlanCharges": [
+        {
+          "id": "5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e",
+          "productRatePlanChargeId": "2c92a0fe6619b4b601661aa8b74e623f",
+          "number": "C-01010102",
+          "name": "GW Oct 18 - Quarterly - Domestic",
+          "type": "Recurring",
+          "model": "FlatFee",
+          "currency": "GBP",
+          "effectiveStartDate": "2025-10-05T00:00:00.000Z",
+          "effectiveEndDate": "2027-01-05T00:00:00.000Z",
+          "billingPeriod": "Quarter",
+          "processedThroughDate": "2026-07-05T00:00:00.000Z",
+          "chargedThroughDate": "2026-10-05T00:00:00.000Z",
+          "upToPeriodsType": null,
+          "upToPeriods": null,
+          "price": 49.5,
+          "discountPercentage": null,
+          "billingPeriodAlignment": "AlignToCharge"
+        }
+      ]
+    }
+  ]
+}

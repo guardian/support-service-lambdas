@@ -324,6 +324,30 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
+			AnnualPlusLegacy: z.object({
+				billingPeriod: z.literal('Annual'),
+				charges: z.object({
+					DigitalPack: z.object({
+						id: z.string(),
+					}),
+					GuardianWeekly: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({
+					AUD: z.number(),
+					CAD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					NZD: z.number(),
+					USD: z.number(),
+				}),
+				savingVsRetail: z.number().nullable(),
+				taxMode: z.enum(['TaxExclusive', 'TaxInclusive']).nullable(),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
 			Discount: z.object({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
@@ -360,6 +384,30 @@ export const productCatalogSchema = z.object({
 				termType: termTypeSchema,
 			}),
 			MonthlyPlus: z.object({
+				billingPeriod: z.literal('Month'),
+				charges: z.object({
+					DigitalPack: z.object({
+						id: z.string(),
+					}),
+					GuardianWeekly: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({
+					AUD: z.number(),
+					CAD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					NZD: z.number(),
+					USD: z.number(),
+				}),
+				savingVsRetail: z.number().nullable(),
+				taxMode: z.enum(['TaxExclusive', 'TaxInclusive']).nullable(),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
+			MonthlyPlusLegacy: z.object({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					DigitalPack: z.object({
@@ -426,6 +474,30 @@ export const productCatalogSchema = z.object({
 				termType: termTypeSchema,
 			}),
 			QuarterlyPlus: z.object({
+				billingPeriod: z.literal('Quarter'),
+				charges: z.object({
+					DigitalPack: z.object({
+						id: z.string(),
+					}),
+					GuardianWeekly: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({
+					AUD: z.number(),
+					CAD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					NZD: z.number(),
+					USD: z.number(),
+				}),
+				savingVsRetail: z.number().nullable(),
+				taxMode: z.enum(['TaxExclusive', 'TaxInclusive']).nullable(),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
+			QuarterlyPlusLegacy: z.object({
 				billingPeriod: z.literal('Quarter'),
 				charges: z.object({
 					DigitalPack: z.object({
@@ -509,6 +581,23 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
+			AnnualPlusLegacy: z.object({
+				billingPeriod: z.literal('Annual'),
+				charges: z.object({
+					DigitalPack: z.object({
+						id: z.string(),
+					}),
+					GuardianWeekly: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({ GBP: z.number(), USD: z.number() }),
+				savingVsRetail: z.number().nullable(),
+				taxMode: z.enum(['TaxExclusive', 'TaxInclusive']).nullable(),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
 			Discount: z.object({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
@@ -554,6 +643,23 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
+			MonthlyPlusLegacy: z.object({
+				billingPeriod: z.literal('Month'),
+				charges: z.object({
+					DigitalPack: z.object({
+						id: z.string(),
+					}),
+					GuardianWeekly: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({ GBP: z.number(), USD: z.number() }),
+				savingVsRetail: z.number().nullable(),
+				taxMode: z.enum(['TaxExclusive', 'TaxInclusive']).nullable(),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
 			OneYearGift: z.object({
 				billingPeriod: z.literal('Annual'),
 				charges: z.object({
@@ -583,6 +689,23 @@ export const productCatalogSchema = z.object({
 				termType: termTypeSchema,
 			}),
 			QuarterlyPlus: z.object({
+				billingPeriod: z.literal('Quarter'),
+				charges: z.object({
+					DigitalPack: z.object({
+						id: z.string(),
+					}),
+					GuardianWeekly: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({ GBP: z.number(), USD: z.number() }),
+				savingVsRetail: z.number().nullable(),
+				taxMode: z.enum(['TaxExclusive', 'TaxInclusive']).nullable(),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
+			QuarterlyPlusLegacy: z.object({
 				billingPeriod: z.literal('Quarter'),
 				charges: z.object({
 					DigitalPack: z.object({
@@ -1597,6 +1720,52 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
+			BylineAnnual: z.object({
+				billingPeriod: z.literal('Annual'),
+				charges: z.object({
+					Contribution: z.object({
+						id: z.string(),
+					}),
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({
+					AUD: z.number(),
+					CAD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					USD: z.number(),
+				}),
+				savingVsRetail: z.number().nullable(),
+				taxMode: z.enum(['TaxExclusive', 'TaxInclusive']).nullable(),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
+			BylineMonthly: z.object({
+				billingPeriod: z.literal('Month'),
+				charges: z.object({
+					Contribution: z.object({
+						id: z.string(),
+					}),
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({
+					AUD: z.number(),
+					CAD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					USD: z.number(),
+				}),
+				savingVsRetail: z.number().nullable(),
+				taxMode: z.enum(['TaxExclusive', 'TaxInclusive']).nullable(),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
 			Discount: z.object({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
@@ -1606,6 +1775,74 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({}),
+				savingVsRetail: z.number().nullable(),
+				taxMode: z.enum(['TaxExclusive', 'TaxInclusive']).nullable(),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
+			HeadlineAnnual: z.object({
+				billingPeriod: z.literal('Annual'),
+				charges: z.object({
+					Contribution: z.object({
+						id: z.string(),
+					}),
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				savingVsRetail: z.number().nullable(),
+				taxMode: z.enum(['TaxExclusive', 'TaxInclusive']).nullable(),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
+			HeadlineMonthly: z.object({
+				billingPeriod: z.literal('Month'),
+				charges: z.object({
+					Contribution: z.object({
+						id: z.string(),
+					}),
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				savingVsRetail: z.number().nullable(),
+				taxMode: z.enum(['TaxExclusive', 'TaxInclusive']).nullable(),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
+			MastheadAnnual: z.object({
+				billingPeriod: z.literal('Annual'),
+				charges: z.object({
+					Contribution: z.object({
+						id: z.string(),
+					}),
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({ GBP: z.number(), USD: z.number() }),
+				savingVsRetail: z.number().nullable(),
+				taxMode: z.enum(['TaxExclusive', 'TaxInclusive']).nullable(),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
+			MastheadMonthly: z.object({
+				billingPeriod: z.literal('Month'),
+				charges: z.object({
+					Contribution: z.object({
+						id: z.string(),
+					}),
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({ GBP: z.number(), USD: z.number() }),
 				savingVsRetail: z.number().nullable(),
 				taxMode: z.enum(['TaxExclusive', 'TaxInclusive']).nullable(),
 				termLengthInMonths: z.number(),

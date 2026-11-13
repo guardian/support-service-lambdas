@@ -171,8 +171,7 @@ Resources:
                   - dynamodb:PutItem
                   - dynamodb:UpdateItem
                 Resource:
-                  - Fn::ImportValue:
-                      Fn::Sub: supporter-product-data-tables-${Stage}-SupporterProductDataTable
+                  - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/SupporterProductData-${Stage}
         - PolicyName: ProductMoveApiLambdaRolePolicy4
           PolicyDocument:
             Statement:
@@ -185,6 +184,15 @@ Resources:
                   - arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/InvoicingApi-JBxYpW
                   - arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Zuora/User/ZuoraApiUser-zmOGho
                   - arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Zuora/User/ZuoraApiUser-oq5ISm
+        - PolicyName: ProductMoveApiLambdaRolePolicy5
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - events:PutEvents
+                Resource:
+                  - Fn::ImportValue:
+                      Fn::Sub: cancellations-bus-${Stage}-arn
       Tags:
         - Key: lambda:createdBy
           Value: SAM
