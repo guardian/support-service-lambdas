@@ -1,28 +1,69 @@
 package com.gu.soft_opt_in_consent_setter
 
-import com.gu.soft_opt_in_consent_setter.models.EnhancedSub
+import com.gu.soft_opt_in_consent_setter.models.{ConsentsMapping, EnhancedSub, SFAssociatedSubRecord}
 import com.gu.soft_opt_in_consent_setter.testData.SFSubscriptionTestData._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
 class EnhancedSubTests extends AnyFlatSpec with should.Matchers {
 
-  // EnhancedSub.apply tests
-  "EnhancedSub.apply" should "set the identityId correctly" in {
-    EnhancedSub(subRecord, Seq()).identityId shouldBe identityId
+  // EnhancedSub.fromSF tests
+  "EnhancedSub.fromSF" should "set the identityId correctly" in {
+    EnhancedSub.fromSF(subRecord, Seq(), Set.empty).identityId shouldBe identityId
   }
 
-  "EnhancedSub.apply" should "set the cancelledSub correctly" in {
-    EnhancedSub(subRecord, Seq()).sub shouldBe subRecord
-  }
-
-  "EnhancedSub.apply" should "set the associatedActiveNonGiftSubs correctly when one exists" in {
-    EnhancedSub(subRecord, associatedSubsWithOverlap).associatedActiveNonGiftSubs shouldBe Seq(
-      overlappingAssociatedSub,
+  "EnhancedSub.fromSF" should "set the productNames correctly when an associated sub exists for the same identity" in {
+    EnhancedSub.fromSF(subRecord, associatedSubsWithOverlap, Set.empty).productNames shouldBe Set(
+      overlappingAssociatedSub.Product__c,
     )
   }
 
-  "EnhancedSub.apply" should "set the associatedActiveNonGiftSubs correctly when one does not exist" in {
-    EnhancedSub(subRecord, associatedSubsWithoutOverlap).associatedActiveNonGiftSubs shouldBe Seq()
+  "EnhancedSub.fromSF" should "set the productNames correctly when no associated sub exists for the same identity" in {
+    EnhancedSub.fromSF(subRecord, associatedSubsWithoutOverlap, Set.empty).productNames shouldBe Set()
+  }
+
+  "EnhancedSub.fromSF" should "not add secondary access when the only active secondary subscription is the one being processed" in {
+    EnhancedSub
+      .fromSF(subRecord, Seq(), Set(subRecord.Name))
+      .productNames shouldBe Set()
+  }
+
+  "EnhancedSub.fromSF" should "add 'Secondary User' when there is active secondary access to another subscription" in {
+    EnhancedSub
+      .fromSF(subRecord, Seq(), Set(subRecord.Name, "A-S999999"))
+      .productNames shouldBe Set(ConsentsMapping.secondaryDigitalAccessProductName)
+  }
+
+  // EnhancedSub.fromSQS tests
+  "EnhancedSub.fromSQS" should "set the identityId correctly" in {
+    EnhancedSub.fromSQS(identityId, Seq(), Seq(), Set.empty, subId).identityId shouldBe identityId
+  }
+
+  "EnhancedSub.fromSQS" should "combine the active SF product names with the IAP product names" in {
+    EnhancedSub
+      .fromSQS(
+        identityId,
+        Seq(SFAssociatedSubRecord("Contributor", identityId)),
+        Seq("InAppPurchase"),
+        Set.empty,
+        subId,
+      )
+      .productNames shouldBe Set("Contributor", "InAppPurchase")
+  }
+
+  "EnhancedSub.fromSQS" should "return an empty set when there are no active SF or IAP products" in {
+    EnhancedSub.fromSQS(identityId, Seq(), Seq(), Set.empty, subId).productNames shouldBe Set()
+  }
+
+  "EnhancedSub.fromSQS" should "not add secondary access when the only active secondary subscription is the one being processed" in {
+    EnhancedSub
+      .fromSQS(identityId, Seq(), Seq(), Set(subId), subId)
+      .productNames shouldBe Set()
+  }
+
+  "EnhancedSub.fromSQS" should "add 'Secondary User' when there is active secondary access to another subscription" in {
+    EnhancedSub
+      .fromSQS(identityId, Seq(), Seq(), Set(subId, "A-S999999"), subId)
+      .productNames shouldBe Set(ConsentsMapping.secondaryDigitalAccessProductName)
   }
 }

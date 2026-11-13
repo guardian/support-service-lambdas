@@ -10,13 +10,13 @@ import dayjs from 'dayjs';
 import { getAwsConfig } from '@modules/aws/config';
 import type { Stage } from '@modules/stage';
 import { deleteInvitationEndpoint } from '../src/deleteInvitationEndpoint';
-import { sendDeclineInvitationEmail } from '../src/emails/declineInvitationEmail';
 import {
 	type InvitationRecord,
 	InvitationRepository,
 } from '../src/invitationRepository';
+import { sendDeclineInvitationEmail } from '../src/multipleAccountEmails';
 
-jest.mock('../src/emails/declineInvitationEmail', () => ({
+jest.mock('../src/multipleAccountEmails', () => ({
 	sendDeclineInvitationEmail: jest.fn(),
 }));
 

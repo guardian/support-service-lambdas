@@ -1,6 +1,6 @@
 package com.gu.productmove.zuora
 
-import com.gu.productmove.zuora.model.{AccountNumber, SubscriptionName}
+import com.gu.productmove.zuora.model.{AccountNumber, OrderNumber, SubscriptionName}
 import com.gu.productmove.zuora.rest.{ZuoraClient, ZuoraRestBody}
 import sttp.client3.{basicRequest, UriContext}
 import zio.json.*
@@ -15,7 +15,7 @@ trait ZuoraCancel {
       subscriptionName: SubscriptionName,
       cancellationEffectiveDate: LocalDate,
       orderDate: LocalDate,
-  ): Task[Unit]
+  ): Task[OrderNumber]
 }
 
 object ZuoraCancelLive {
@@ -28,7 +28,7 @@ private class ZuoraCancelLive(zuoraClient: ZuoraClient) extends ZuoraCancel {
       subscriptionName: SubscriptionName,
       cancellationEffectiveDate: LocalDate,
       orderDate: LocalDate,
-  ): Task[Unit] = {
+  ): Task[OrderNumber] = {
     val request = CancellationOrderRequest.forSubscription(
       accountNumber,
       subscriptionName,
@@ -41,14 +41,14 @@ private class ZuoraCancelLive(zuoraClient: ZuoraClient) extends ZuoraCancel {
   private def createOrder(
       request: CancellationOrderRequest,
       subscriptionName: SubscriptionName,
-  ): Task[Unit] =
+  ): Task[OrderNumber] =
     for {
       result <- submit(request)
       _ <- result.status match {
         case OrderStatus.Completed => ZIO.log(s"Cancellation order completed for ${subscriptionName.value}")
         case status => ZIO.fail(new Throwable(s"Cancellation order completed with status ${status.value}"))
       }
-    } yield ()
+    } yield result.orderNumber
 
   /** https://developer.zuora.com/v1-api-reference/api/orders/post_order */
   private def submit(request: CancellationOrderRequest): Task[OrderResult] =
@@ -134,7 +134,7 @@ object CancellationPolicy {
 
 case class ProcessingOptions(runBilling: Boolean, collectPayment: Boolean) derives JsonEncoder
 
-case class OrderResult(status: OrderStatus) derives JsonDecoder
+case class OrderResult(status: OrderStatus, orderNumber: OrderNumber) derives JsonDecoder
 
 enum OrderStatus(val value: String) {
   case Draft extends OrderStatus("Draft")

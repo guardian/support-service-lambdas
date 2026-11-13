@@ -3,7 +3,7 @@ import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import dayjs from 'dayjs';
 import { createSecondarySubscription } from '@modules/multiple-account/secondarySubscription';
 import type { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
-import { secondaryUserTTLFromPrimarySubscriptionTTL } from '@modules/multiple-account/secondaryUserRepository';
+import { expiryTTLFromTermEndDate } from '@modules/multiple-account/secondaryUserRepository';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import {
 	badRequest,
@@ -14,8 +14,9 @@ import {
 } from '@modules/routing/apiGatewayResponses';
 import type { Stage } from '@modules/stage';
 import { getSupporterRatePlan } from '@modules/supporter-product-data/supporterProductData';
-import { sendInvitationRedeemedEmail } from './emails/acceptInvitationEmail';
 import type { InvitationRepository } from './invitationRepository';
+import { sendInvitationRedeemedEmail } from './multipleAccountEmails';
+import { sendSoftOptInAcquisitionEvent } from './softOptinConsents';
 
 export const acceptInvitationEndpoint = async (
 	stage: Stage,
@@ -77,7 +78,7 @@ export const acceptInvitationEndpoint = async (
 			secondaryIdentityId,
 			primaryIdentityId,
 			acceptedDate: today.toISOString(),
-			expiryDate: secondaryUserTTLFromPrimarySubscriptionTTL(
+			expiryDate: expiryTTLFromTermEndDate(
 				parentSupporterProductDataRecord.termEndDate,
 			),
 			invitationCode,
@@ -111,13 +112,21 @@ export const acceptInvitationEndpoint = async (
 			today,
 		);
 
-		await sendInvitationRedeemedEmail(stage, {
-			primaryUserIdentityId: primaryIdentityId,
-			primaryUserFirstName: invitation.primaryUserFirstName,
-			primaryUserEmail: invitation.primaryUserEmail,
-			secondaryUserEmail: invitation.secondaryUserEmail,
-			secondaryUserIdentityId: invitation.secondaryIdentityId,
-		});
+		await Promise.all([
+			sendInvitationRedeemedEmail(stage, {
+				primaryUserIdentityId: primaryIdentityId,
+				primaryUserFirstName: invitation.primaryUserFirstName,
+				primaryUserEmail: invitation.primaryUserEmail,
+				secondaryUserEmail: invitation.secondaryUserEmail,
+				secondaryUserIdentityId: invitation.secondaryIdentityId,
+			}),
+
+			sendSoftOptInAcquisitionEvent(
+				stage,
+				secondaryIdentityId,
+				subscriptionName,
+			),
+		]);
 
 		return ok({
 			identityId: secondaryIdentityId,

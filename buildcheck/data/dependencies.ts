@@ -32,9 +32,11 @@ export const dep = separateDepRecords({
 		'client-sfn',
 		'client-sns',
 		'client-lambda',
+		'client-eventbridge',
 		'credential-provider-node',
 		'lib-storage',
 		'client-cloudwatch-logs',
+		'client-ec2',
 	]),
 });
 

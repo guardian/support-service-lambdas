@@ -1,6 +1,6 @@
 package com.gu.productmove.zuora
 
-import com.gu.productmove.zuora.model.{AccountNumber, SubscriptionName}
+import com.gu.productmove.zuora.model.{AccountNumber, OrderNumber, SubscriptionName}
 import com.gu.productmove.zuora.rest.ZuoraClient
 import sttp.client3.Request
 import zio.*
@@ -16,7 +16,7 @@ object ZuoraCancelSpec extends ZIOSpecDefault {
         for {
           client <- SequencedZuoraClient.make(
             List(
-              Right("""{"success":true,"status":"Completed"}"""),
+              Right("""{"success":true,"status":"Completed","orderNumber":"O-00000001"}"""),
             ),
           )
           _ <- cancel(client)
@@ -31,7 +31,7 @@ object ZuoraCancelSpec extends ZIOSpecDefault {
         for {
           client <- SequencedZuoraClient.make(
             List(
-              Right("""{"success":true,"status":"Pending"}"""),
+              Right("""{"success":true,"status":"Pending","orderNumber":"O-00000001"}"""),
             ),
           )
           result <- cancel(client).either
@@ -47,7 +47,7 @@ object ZuoraCancelSpec extends ZIOSpecDefault {
       },
     )
 
-  private def cancel(client: ZuoraClient): Task[Unit] =
+  private def cancel(client: ZuoraClient): Task[OrderNumber] =
     ZIO
       .serviceWithZIO[ZuoraCancel](
         _.cancel(

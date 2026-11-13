@@ -50,7 +50,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
 
     val result = createOrder(backend, clock)(request)
 
-    result shouldBe Right(AsyncOrderResult(OrderStatus.Completed, Some(List("INV-000001"))))
+    result shouldBe Right(AsyncOrderResult(OrderStatus.Completed))
     requests.toList shouldBe List(
       (Method.POST, "https://rest.test.eu.zuora.com/v1/async/orders", Some("Bearer access-token")),
       (Method.GET, "https://rest.test.eu.zuora.com/v1/async-jobs/job-1", Some("Bearer access-token")),

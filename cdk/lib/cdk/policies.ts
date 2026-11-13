@@ -4,7 +4,7 @@ import {
 	GuGetS3ObjectsPolicy,
 } from '@guardian/cdk/lib/constructs/iam';
 import { Fn } from 'aws-cdk-lib';
-import type { Policy } from 'aws-cdk-lib/aws-iam';
+import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 
 export class AllowGetSecretValuePolicy extends GuAllowPolicy {
 	constructor(scope: GuStack, id: string, key: string) {
@@ -20,7 +20,8 @@ export class AllowGetSecretValuePolicy extends GuAllowPolicy {
 export type SrQueueName =
 	| `braze-emails`
 	| 'supporter-product-data'
-	| 'product-switch-salesforce-tracking';
+	| 'product-switch-salesforce-tracking'
+	| 'soft-opt-in-consent-setter-queue';
 
 export class AllowSqsSendPolicy extends GuAllowPolicy {
 	static createWithId = (
@@ -85,9 +86,7 @@ export class AllowSupporterProductDataQueryPolicy extends GuAllowPolicy {
 		super(scope, 'SupporterProductDataTable query access', {
 			actions: ['dynamodb:Query', 'dynamodb:GetItem'],
 			resources: [
-				Fn.importValue(
-					`supporter-product-data-tables-${scope.stage}-SupporterProductDataTable`,
-				),
+				`arn:aws:dynamodb:${scope.region}:${scope.account}:table/SupporterProductData-${scope.stage}`,
 			],
 		});
 	}
@@ -98,21 +97,21 @@ export class AllowSupporterProductDataDeletePolicy extends GuAllowPolicy {
 		super(scope, 'SupporterProductDataTable delete access', {
 			actions: ['dynamodb:DeleteItem'],
 			resources: [
-				Fn.importValue(
-					`supporter-product-data-tables-${scope.stage}-SupporterProductDataTable`,
-				),
+				`arn:aws:dynamodb:${scope.region}:${scope.account}:table/SupporterProductData-${scope.stage}`,
 			],
 		});
 	}
 }
 
-export class AllowPutSubscriptionEventPolicy extends GuAllowPolicy {
-	constructor(scope: GuStack) {
-		super(scope, 'Subscription events bus put access', {
+export type SrBusName = 'cancellations-bus';
+
+export class AllowBusPutEventsPolicy extends GuAllowPolicy {
+	constructor(scope: GuStack, bus: SrBusName) {
+		super(scope, 'Event bus put events access', {
 			actions: ['events:PutEvents'],
-			resources: [
-				`arn:aws:events:${scope.region}:${scope.account}:event-bus/subscription-events-${scope.stage}`,
-			],
+			// using importValue lets you see dependencies in the console
+			// https://eu-west-1.console.aws.amazon.com/cloudformation/home?region=eu-west-1#/exports/cancellations-bus-CODE-arn
+			resources: [Fn.importValue(`${bus}-${scope.stage}-arn`)],
 		});
 	}
 }
@@ -151,6 +150,25 @@ export class AllowPromoCodeTableQueryPolicy extends GuAllowPolicy {
 			],
 			resources: [
 				`arn:aws:dynamodb:*:*:table/support-admin-console-promos-${scope.stage}`,
+			],
+		});
+	}
+}
+
+export class AllowPutMetricPolicy extends Policy {
+	constructor(scope: GuStack, metricNamespace: string) {
+		super(scope, 'Put Metric Policy', {
+			statements: [
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					actions: ['cloudwatch:PutMetricData'],
+					resources: ['*'],
+					conditions: {
+						StringEquals: {
+							'cloudwatch:namespace': metricNamespace,
+						},
+					},
+				}),
 			],
 		});
 	}

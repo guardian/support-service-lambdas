@@ -18,6 +18,7 @@ import {
 	StateMachine,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
+import { AllowGetSecretValuePolicy } from './cdk/policies';
 import { SrLambdaAlarm } from './cdk/SrLambdaAlarm';
 import { nodeVersion } from './node-version';
 
@@ -26,6 +27,11 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 		super(scope, id, props);
 
 		const appName = 'zuora-salesforce-link-remover';
+		const getSalesforceSecret = new AllowGetSecretValuePolicy(
+			this,
+			'Get Salesforce connected app secret',
+			'Salesforce/ConnectedApp/BillingAccountRemover-*',
+		);
 
 		const allowPutMetric = new PolicyStatement({
 			effect: Effect.ALLOW,
@@ -44,18 +50,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 				handler: 'getBillingAccounts.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
-				initialPolicy: [
-					new PolicyStatement({
-						actions: ['secretsmanager:GetSecretValue'],
-						resources: [
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:DEV/Salesforce/ConnectedApp/AwsConnectorSandbox-oO8Phf`,
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:DEV/Salesforce/User/integrationapiuser-rvxxrG`,
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:PROD/Salesforce/ConnectedApp/BillingAccountRemover-WUdrKa`,
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:PROD/Salesforce/User/BillingAccountRemoverAPIUser-UJ1SwZ`,
-						],
-					}),
-					allowPutMetric,
-				],
+				initialPolicy: [allowPutMetric],
 			},
 		);
 
@@ -94,20 +89,12 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 				handler: 'updateSfBillingAccounts.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
-				initialPolicy: [
-					new PolicyStatement({
-						actions: ['secretsmanager:GetSecretValue'],
-						resources: [
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:DEV/Salesforce/ConnectedApp/AwsConnectorSandbox-oO8Phf`,
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:DEV/Salesforce/User/integrationapiuser-rvxxrG`,
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:PROD/Salesforce/ConnectedApp/BillingAccountRemover-WUdrKa`,
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:PROD/Salesforce/User/BillingAccountRemoverAPIUser-UJ1SwZ`,
-						],
-					}),
-					allowPutMetric,
-				],
+				initialPolicy: [allowPutMetric],
 			},
 		);
+
+		getSalesforceSecret.attachToRole(getSalesforceBillingAccountsLambda.role!);
+		getSalesforceSecret.attachToRole(updateSfBillingAccountsLambda.role!);
 
 		const getSalesforceBillingAccountsFromLambdaTask = new LambdaInvoke(
 			this,

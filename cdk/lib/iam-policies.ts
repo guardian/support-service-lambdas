@@ -26,7 +26,11 @@ export class IamPolicies extends SrStack {
 				new AllowS3GetPolicy('membership-private', ['DEV/*', 'CODE/*']),
 				new AllowCodeParameterStoreReadPolicy(this),
 				new AllowCodeSecretsManagerReadPolicy(this),
-				new AllowS3GetPolicy('gu-zuora-catalog', [`PROD/Zuora-CODE/*`]),
+				// Needed by zuora-catalog / update-catalog-fixtures
+				new AllowS3GetPolicy('gu-zuora-catalog', [
+					'PROD/Zuora-CODE/catalog.json',
+					'PROD/Zuora-PROD/catalog.json',
+				]),
 				getSupportAdminConsoleBucketPolicy(),
 				new AllowDynamoTableFullAccessPolicy(this),
 				...getManageFrontendPolicies(this.region, this.account),
@@ -78,6 +82,11 @@ class AllowCodeParameterStoreReadPolicy extends PolicyStatement {
 				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/DEV/*`,
 				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/CODE/*`,
 				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/support/frontend/DEV`,
+				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/support/frontend/DEV/*`,
+				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/admin-console/CODE`,
+				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/admin-console/CODE/*`,
+				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/membership/support-dotcom-components/CODE`,
+				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/membership/support-dotcom-components/CODE/*`,
 			],
 		});
 	}

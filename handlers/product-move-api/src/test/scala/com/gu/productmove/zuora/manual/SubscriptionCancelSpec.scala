@@ -28,6 +28,7 @@ object SubscriptionCancelSpec extends ZIOAppDefault {
       sqs <- ZIO.service[SQS]
       stage <- ZIO.service[Stage]
       zuoraSetCancellationReason <- ZIO.service[ZuoraSetCancellationReason]
+      subscriptionEventService <- ZIO.service[SubscriptionEventService]
       res <- new SubscriptionCancelEndpointSteps(
         getSubscription,
         getAccount,
@@ -37,6 +38,7 @@ object SubscriptionCancelSpec extends ZIOAppDefault {
         stage,
         zuoraSetCancellationReason,
         LocalDate.now(),
+        subscriptionEventService,
       )
         .subscriptionCancel(
           SubscriptionName("A-S00499867"),
@@ -50,6 +52,7 @@ object SubscriptionCancelSpec extends ZIOAppDefault {
         GetSubscriptionToCancelLive.layer,
         ZuoraCancelLive.layer,
         SQSLive.layer,
+        SubscriptionEventServiceLive.layer,
         ZuoraSetCancellationReasonLive.layer,
         GuStageLive.layer,
         ZuoraGetLive.layer,

@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import type { BatonS3Writer } from '../services/batonS3Writer';
 import type {
 	DataSubjectAPI,
 	EventsAPI,
 	MParticleClient,
-} from '../services/mparticleClient';
+} from '@modules/mparticle/mparticleHttpClient';
+import type { BatonS3Writer } from '../services/batonS3Writer';
 import {
 	BatonSarEventInitiateRequestSchema,
 	BatonSarEventInitiateResponseSchema,

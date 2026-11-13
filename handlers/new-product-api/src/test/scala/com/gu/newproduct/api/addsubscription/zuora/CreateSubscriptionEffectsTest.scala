@@ -54,7 +54,7 @@ class CreateSubscriptionEffectsTest extends AnyFlatSpec with Matchers {
         ),
       )
       post: RequestsPost[WireCreateOrderRequest, WireOrderResponse] =
-        zuoraDeps.post[WireCreateOrderRequest, WireOrderResponse]
+        zuoraDeps.post[WireCreateOrderRequest, WireOrderResponse](_, _, _)
       res <- CreateSubscription(post, currentDate)(request).toDisjunction
     } yield res
     withClue(actual) {
@@ -91,7 +91,7 @@ class CreateSubscriptionEffectsTest extends AnyFlatSpec with Matchers {
         ),
       )
       post: RequestsPost[WireCreateOrderRequest, WireOrderResponse] =
-        zuoraDeps.post[WireCreateOrderRequest, WireOrderResponse]
+        zuoraDeps.post[WireCreateOrderRequest, WireOrderResponse](_, _, _)
       res <- CreateSubscription(post, currentDate)(request).toDisjunction
     } yield res
     withClue(actual) {

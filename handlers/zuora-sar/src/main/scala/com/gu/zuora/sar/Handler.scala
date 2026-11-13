@@ -7,8 +7,7 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.LoadConfigModule
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestRequestMaker}
-import com.gu.zuora.baton.BatonZuoraRestConfig
-import com.gu.zuora.baton.BatonZuoraRestConfig._
+import com.gu.zuora.baton.{BatonZuoraOAuth, BatonZuoraRestConfig}
 import com.gu.zuora.reports.aqua.ZuoraAquaRequestMaker
 import io.circe.parser.decode
 import io.circe.syntax._
@@ -62,9 +61,9 @@ object Handler {
     for {
       zuoraSarConfig <- loadConfig.load[ZuoraSarConfig]
       batonZuoraRestConfig <- loadConfig.load[BatonZuoraRestConfig]
-      zuoraRestConfig = toZuoraRestConfig(batonZuoraRestConfig)
-      requests = ZuoraRestRequestMaker(response, zuoraRestConfig)
-      downloadRequests = ZuoraAquaRequestMaker(downloadResponse, zuoraRestConfig)
+      accessToken <- BatonZuoraOAuth.getAccessToken(batonZuoraRestConfig, RawEffects.stage, response)
+      requests = ZuoraRestRequestMaker.oauth(response, batonZuoraRestConfig.baseUrl, accessToken)
+      downloadRequests = ZuoraAquaRequestMaker.oauth(downloadResponse, batonZuoraRestConfig.baseUrl, accessToken)
       zuoraQuerier = ZuoraQuery(requests)
       zuoraHelper = ZuoraSarService(requests, downloadRequests, zuoraQuerier)
     } yield {

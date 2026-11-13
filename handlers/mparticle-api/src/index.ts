@@ -6,6 +6,16 @@ import type {
 	SQSRecord,
 } from 'aws-lambda';
 import { logger } from '@modules/logger/logger';
+import type { MParticleEnvironment } from '@modules/mparticle/events';
+import type {
+	BulkDeletionAPI,
+	MParticleClient as MParticleClientType,
+} from '@modules/mparticle/mparticleHttpClient';
+import {
+	createBulkDeletionClient,
+	createDataSubjectClient,
+	createEventsApiClient,
+} from '@modules/mparticle/mparticleHttpClient';
 import { internalServerError } from '@modules/routing/apiGatewayResponses';
 import { processUserDeletion } from './apis/dataSubjectRequests/deleteUser';
 import type { BatonEventRequest, BatonEventResponse } from './routers/baton';
@@ -15,11 +25,6 @@ import { BatonS3WriterImpl } from './services/batonS3Writer';
 import { BrazeClient } from './services/brazeClient';
 import type { AppConfig } from './services/config';
 import { getAppConfig, getEnv } from './services/config';
-import type {
-	BulkDeletionAPI,
-	MParticleClient as MParticleClientType,
-} from './services/mparticleClient';
-import { MParticleClient } from './services/mparticleClient';
 import {
 	DeletionRequestBodySchema,
 	SnsMessageSchema,
@@ -120,7 +125,7 @@ async function processSQSRecord(
 	record: SQSRecord,
 	mParticleClient: MParticleClientType<BulkDeletionAPI>,
 	brazeClient: BrazeClient | undefined,
-	mParticleEnvironment: 'production' | 'development',
+	mParticleEnvironment: MParticleEnvironment,
 ): Promise<void> {
 	logger.log(`Processing message ${record.messageId}`);
 
@@ -160,16 +165,15 @@ async function services() {
 	logger.log('Starting lambda');
 	const stage = getEnv('STAGE');
 	const config: AppConfig = await getAppConfig();
-	const mParticleEnvironment: 'production' | 'development' =
+	const mParticleEnvironment: MParticleEnvironment =
 		stage === 'PROD' ? 'production' : 'development';
 	return {
-		mParticleDataSubjectClient:
-			MParticleClient.createMParticleDataSubjectClient(config.workspace),
-		mParticleBulkDeletionClient: MParticleClient.createBulkDeletionClient(
+		mParticleDataSubjectClient: createDataSubjectClient(config.workspace),
+		mParticleBulkDeletionClient: createBulkDeletionClient(
 			config.workspace,
 			config.pod,
 		),
-		mParticleEventsAPIClient: MParticleClient.createEventsApiClient(
+		mParticleEventsAPIClient: createEventsApiClient(
 			config.inputPlatform,
 			config.pod,
 		),

@@ -66,7 +66,7 @@ object ReportsManualEffectsTest extends App {
         List(Batch("2c92c08663f7f01701641749196b2a76", "manualTest/SomeTest2")),
         false,
       )
-      upload = S3ReportUpload("zuora-retention-code", RawEffects.s3Write) _
+      upload = S3ReportUpload("test-bucket", RawEffects.s3Write) _
       res <- FetchFile(upload, zuoraRequests.getDownloadStream)(request).toDisjunction
     } yield {
       res

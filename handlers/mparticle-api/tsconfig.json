@@ -29,6 +29,9 @@
       "@modules/promotions/*": [
         "../../modules/promotions/src/*"
       ],
+      "@modules/mparticle/*": [
+        "../../modules/mparticle/src/*"
+      ],
       "@modules/mparticle-api/*": [
         "../../modules/mparticle-api/src/*"
       ]

@@ -118,4 +118,52 @@ class RestRequestMakerTest extends AsyncFlatSpec {
     actual should be(ClientSuccess(basicInfo))
   }
 
+  "POST request headers" should "preserve authentication and keep additional headers local to each request" in {
+    val observedKeys = scala.collection.mutable.ListBuffer.empty[Option[String]]
+    val requests = new RestRequestMaker.Requests(
+      Map("Authorization" -> "Bearer test-token"),
+      "https://www.test.com/",
+      request => {
+        request.header("Authorization") shouldBe "Bearer test-token"
+        request.header("Content-Type") shouldBe "application/json"
+        observedKeys += Option(request.header("Idempotency-Key"))
+        constructTestResponse(200, validZuoraNoOtherFields)
+      },
+      _ => ClientSuccess(()),
+    )
+
+    requests.post[JsValue, Unit](
+      dummyJson,
+      "orders",
+      additionalHeaders = Map("Idempotency-Key" -> "first"),
+    ) shouldBe ClientSuccess(())
+    requests.post[JsValue, Unit](
+      dummyJson,
+      "orders",
+      additionalHeaders = Map("Idempotency-Key" -> "second"),
+    ) shouldBe ClientSuccess(())
+    requests.post[JsValue, Unit](dummyJson, "orders") shouldBe ClientSuccess(())
+    observedKeys.toList shouldBe List(Some("first"), Some("second"), None)
+  }
+
+  it should "surface malformed JSON as a client failure rather than throw" in {
+    val requests = new RestRequestMaker.Requests(
+      Map.empty,
+      "https://www.test.com/",
+      request =>
+        new Response.Builder()
+          .request(request)
+          .protocol(Protocol.HTTP_1_1)
+          .code(200)
+          .message("OK")
+          .body(ResponseBody.create("not-json", MediaType.parse("application/json")))
+          .build(),
+      _ => fail("The success check must not run for malformed JSON"),
+    )
+
+    assert(
+      requests.post[JsValue, Unit](dummyJson, "orders", additionalHeaders = Map("Idempotency-Key" -> "key")).isFailure,
+    )
+  }
+
 }

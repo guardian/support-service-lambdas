@@ -1,7 +1,7 @@
 import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
-import { type App, Duration } from 'aws-cdk-lib';
+import { type App, Duration, Fn } from 'aws-cdk-lib';
 import {
 	ComparisonOperator,
 	TreatMissingData,
@@ -14,6 +14,8 @@ import {
 	RuleTargetInput,
 } from 'aws-cdk-lib/aws-events';
 import { SqsQueue } from 'aws-cdk-lib/aws-events-targets';
+import { Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+import { CfnPipe } from 'aws-cdk-lib/aws-pipes';
 import { CfnQueuePolicy, Queue } from 'aws-cdk-lib/aws-sqs';
 
 export class SalesforceEventBus extends GuStack {
@@ -30,10 +32,14 @@ export class SalesforceEventBus extends GuStack {
 			busId,
 		);
 
-		const deadLetterQueue = new Queue(this, `dead-letters-${app}-queue`, {
-			queueName: `${app}-dead-letters-${this.stage}`,
-			retentionPeriod: Duration.days(14),
-		});
+		const eventbridgeRuleDeadLetterQueue = new Queue(
+			this,
+			`dead-letters-${app}-queue`,
+			{
+				queueName: `${app}-dead-letters-${this.stage}`,
+				retentionPeriod: Duration.days(14),
+			},
+		);
 
 		new GuAlarm(this, 'DeadLetterQueueAlarm', {
 			app: app,
@@ -42,8 +48,9 @@ export class SalesforceEventBus extends GuStack {
 				`There is one or more event in the ${app} dead letter queue (DLQ). ` +
 				`Check the attributes of the failed message(s) for details of the error and ` +
 				'check that the rule corresponding to the failed message is correctly configured.\n' +
-				`DLQ: https://${this.region}.console.aws.amazon.com/sqs/v2/home?region=${this.region}#/queues/https%3A%2F%2Fsqs.${this.region}.amazonaws.com%2F${this.account}%2F${deadLetterQueue.queueName}`,
-			metric: deadLetterQueue.metricApproximateNumberOfMessagesVisible(),
+				`DLQ: https://${this.region}.console.aws.amazon.com/sqs/v2/home?region=${this.region}#/queues/https%3A%2F%2Fsqs.${this.region}.amazonaws.com%2F${this.account}%2F${eventbridgeRuleDeadLetterQueue.queueName}`,
+			metric:
+				eventbridgeRuleDeadLetterQueue.metricApproximateNumberOfMessagesVisible(),
 			threshold: 1,
 			evaluationPeriods: 1,
 			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
@@ -70,7 +77,7 @@ export class SalesforceEventBus extends GuStack {
 
 		contactUpdateToSqsRule.addTarget(
 			new SqsQueue(sfOutboundMessageQueue, {
-				deadLetterQueue: deadLetterQueue,
+				deadLetterQueue: eventbridgeRuleDeadLetterQueue,
 				message: RuleTargetInput.fromObject({
 					contactId: EventField.fromPath('$.detail.payload.Contact_ID__c'),
 					/*   The Input Transformer in the CloudFormation template becomes:
@@ -82,6 +89,92 @@ export class SalesforceEventBus extends GuStack {
 				}),
 			}),
 		);
+
+		const cancellationsBus = EventBus.fromEventBusArn(
+			this,
+			'CancellationsBus',
+			Fn.importValue(`cancellations-bus-${this.stage}-arn`),
+		);
+
+		const subscriptionCancellationRule = new Rule(
+			this,
+			'SfBusToCancellationsBus',
+			{
+				description:
+					'Forward SF Subscription Cancellation platform events from the SF bus to the cancellations-bus',
+				eventPattern: {
+					source: Match.prefix('aws.partner/salesforce.com'),
+					detailType: ['Subscription_Cancellation__e'],
+				},
+				eventBus: salesforceBus,
+			},
+		);
+
+		// EventBridge doesn't allow input transformers on event bus targets, so the rule
+		// sends to a queue and a pipe translates the message onto the cancellations-bus
+		const cancellationDeadLetterQueue = new Queue(
+			this,
+			'SubscriptionCancellationDeadLetterQueue',
+			{
+				queueName: `${app}-subscription-cancellation-dead-letters-${this.stage}`,
+				retentionPeriod: Duration.days(14),
+			},
+		);
+
+		new GuAlarm(this, 'SubscriptionCancellationDeadLetterQueueAlarm', {
+			app: app,
+			alarmName: `A subscription cancellation event for ${this.stage} ${app} was not processed`,
+			alarmDescription:
+				`There is one or more message in the ${app} subscription cancellation dead letter queue (DLQ). ` +
+				'Check the pipe SubscriptionCancellationPipe for errors translating or forwarding the message to the cancellations-bus.\n' +
+				`DLQ: https://${this.region}.console.aws.amazon.com/sqs/v2/home?region=${this.region}#/queues/https%3A%2F%2Fsqs.${this.region}.amazonaws.com%2F${this.account}%2F${cancellationDeadLetterQueue.queueName}`,
+			metric:
+				cancellationDeadLetterQueue.metricApproximateNumberOfMessagesVisible(),
+			threshold: 1,
+			evaluationPeriods: 1,
+			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+			treatMissingData: TreatMissingData.IGNORE,
+			snsTopicName: `alarms-handler-topic-${this.stage}`,
+			actionsEnabled: this.stage === 'PROD',
+		});
+
+		const cancellationQueue = new Queue(this, 'SubscriptionCancellationQueue', {
+			queueName: `${app}-subscription-cancellation-${this.stage}`,
+			deadLetterQueue: {
+				queue: cancellationDeadLetterQueue,
+				maxReceiveCount: 3,
+			},
+		});
+
+		subscriptionCancellationRule.addTarget(
+			new SqsQueue(cancellationQueue, {
+				deadLetterQueue: eventbridgeRuleDeadLetterQueue,
+			}),
+		);
+
+		const pipeRole = new Role(this, 'SubscriptionCancellationPipeRole', {
+			assumedBy: new ServicePrincipal('pipes.amazonaws.com'),
+		});
+		cancellationQueue.grantConsumeMessages(pipeRole);
+		cancellationsBus.grantPutEventsTo(pipeRole);
+
+		new CfnPipe(this, 'SubscriptionCancellationPipe', {
+			name: `${app}-subscription-cancellation-${this.stage}`,
+			description:
+				'Translate SF Subscription_Cancellation__e events into Cancellation events for the cancellations-bus',
+			roleArn: pipeRole.roleArn,
+			source: cancellationQueue.queueArn,
+			sourceParameters: { sqsQueueParameters: { batchSize: 1 } },
+			target: cancellationsBus.eventBusArn,
+			targetParameters: {
+				eventBridgeEventBusParameters: {
+					detailType: 'Cancellation',
+					source: `eventbridge:salesforce-event-bus-${this.stage}`,
+				},
+				// booleans must be unquoted to stay booleans in the output
+				inputTemplate: `{"subscriptionNumber":"<$.body.detail.payload.Subscription_Number__c>","orderNumber":"<$.body.detail.payload.Order_Number__c>","allowUserNotifications":<$.body.detail.payload.Send_Notifications__c>}`,
+			},
+		});
 
 		new CfnQueuePolicy(this, 'SalesforceOutboundQueuePolicy', {
 			policyDocument: {

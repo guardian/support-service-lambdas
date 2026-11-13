@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import type { InitiationReference } from '../../routers/baton/initiationReference';
-import { InitiationReferenceSchema } from '../../routers/baton/initiationReference';
 import type {
 	DataSubjectAPI,
 	MParticleClient,
-} from '../../services/mparticleClient';
+} from '@modules/mparticle/mparticleHttpClient';
+import type { InitiationReference } from '../../routers/baton/initiationReference';
+import { InitiationReferenceSchema } from '../../routers/baton/initiationReference';
 import { getStatusOfDataSubjectRequestByUserId } from './getStatusByUserId';
 
 /**

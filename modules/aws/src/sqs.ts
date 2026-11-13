@@ -10,6 +10,7 @@ import {
 } from '@aws-sdk/client-sqs';
 import { awsConfig } from '@modules/aws/config';
 import { logger } from '@modules/logger/logger';
+import { wrapAwsClient } from '@modules/logger/wrapAwsClient';
 
 export class SqsSendError extends Error {
 	constructor(cause: unknown) {
@@ -18,7 +19,7 @@ export class SqsSendError extends Error {
 	}
 }
 
-const defaultClient = new SQSClient(awsConfig);
+const defaultClient = wrapAwsClient(new SQSClient(awsConfig));
 
 export const sendMessageToQueue = async ({
 	queueName,

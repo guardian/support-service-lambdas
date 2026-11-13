@@ -2,7 +2,7 @@ import { z } from 'zod';
 import type {
 	DataSubjectAPI,
 	MParticleClient,
-} from '../../services/mparticleClient';
+} from '@modules/mparticle/mparticleHttpClient';
 import type { DataSubjectRequestState } from './getStatus';
 import {
 	getRequestsResponseSchema,

@@ -13,9 +13,6 @@ import com.typesafe.scalalogging.LazyLogging
 import io.circe.Decoder
 import io.circe.generic.semiauto._
 import io.circe.parser.decode
-import scalaj.http.{Http, HttpOptions, HttpRequest, HttpResponse}
-
-import scala.util.Try
 
 class SalesforceConnector(sfAuthDetails: SalesforceAuth, sfApiVersion: String) extends LazyLogging {
 
@@ -49,33 +46,29 @@ class SalesforceConnector(sfAuthDetails: SalesforceAuth, sfApiVersion: String) e
     result
   }
 
-  private def sfHttp(url: String): HttpRequest = {
-    Http(url)
-      .option(HttpOptions.readTimeout(60000))
-      .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
-      .header("Content-Type", "application/json")
-  }
+  private def sfHeaders = Seq(
+    "Authorization" -> s"Bearer ${sfAuthDetails.access_token}",
+    "Content-Type" -> "application/json",
+  )
 
-  def sendQueryReq(query: String): Either[Throwable, HttpResponse[String]] = {
-    Try(
-      sfHttp(url = s"${sfAuthDetails.instance_url}/services/data/$sfApiVersion/query/")
-        .param("q", query)
-        .method("GET")
-        .asString,
-    ).toEither
-  }
+  def sendQueryReq(query: String): Either[Throwable, HttpResponse] =
+    HttpClient.get(
+      url = s"${sfAuthDetails.instance_url}/services/data/$sfApiVersion/query/",
+      headers = sfHeaders,
+      queryParameters = Seq("q" -> query),
+      timeoutProfile = HttpClient.SalesforceTimeout,
+    )
 
-  def sendCompositeUpdateReq(body: String): Either[Throwable, HttpResponse[String]] = {
-    Try(
-      sfHttp(url = s"${sfAuthDetails.instance_url}/services/data/$sfApiVersion/composite/sobjects")
-        .postData(body)
-        .method("PATCH")
-        .asString,
-    ).toEither
-  }
+  def sendCompositeUpdateReq(body: String): Either[Throwable, HttpResponse] =
+    HttpClient.patch(
+      url = s"${sfAuthDetails.instance_url}/services/data/$sfApiVersion/composite/sobjects",
+      body,
+      headers = sfHeaders,
+      timeoutProfile = HttpClient.SalesforceTimeout,
+    )
 
   def handleQueryResp[T: Decoder](
-      response: Either[Throwable, HttpResponse[String]],
+      response: Either[Throwable, HttpResponse],
       errorDesc: String = "Decode error",
   ): Either[SoftOptInError, T] = {
     response.left
@@ -88,7 +81,7 @@ class SalesforceConnector(sfAuthDetails: SalesforceAuth, sfApiVersion: String) e
   }
 
   def handleCompositeUpdateResp(
-      response: Either[Throwable, HttpResponse[String]],
+      response: Either[Throwable, HttpResponse],
       putMetric: (String, Double) => Unit,
   ): Either[SoftOptInError, Unit] = {
     response.left
@@ -128,23 +121,19 @@ object SalesforceConnector {
     )
   }
 
-  def sendAuthReq(sfConfig: SFAuthConfig): Either[Throwable, HttpResponse[String]] = {
-    Try(
-      Http(s"${sfConfig.url}/services/oauth2/token")
-        .postForm(
-          Seq(
-            "grant_type" -> "password",
-            "client_id" -> sfConfig.client_id,
-            "client_secret" -> sfConfig.client_secret,
-            "username" -> sfConfig.username,
-            "password" -> s"${sfConfig.password}${sfConfig.token}",
-          ),
-        )
-        .asString,
-    ).toEither
-  }
+  def sendAuthReq(sfConfig: SFAuthConfig): Either[Throwable, HttpResponse] =
+    HttpClient.postForm(
+      s"${sfConfig.url}/services/oauth2/token",
+      Seq(
+        "grant_type" -> "password",
+        "client_id" -> sfConfig.client_id,
+        "client_secret" -> sfConfig.client_secret,
+        "username" -> sfConfig.username,
+        "password" -> s"${sfConfig.password}${sfConfig.token}",
+      ),
+    )
 
-  def handleAuthResp(response: Either[Throwable, HttpResponse[String]]): Either[SoftOptInError, SalesforceAuth] = {
+  def handleAuthResp(response: Either[Throwable, HttpResponse]): Either[SoftOptInError, SalesforceAuth] = {
     response.left
       .map(i => SoftOptInError(s"SalesforceConnector: Salesforce authentication failed: $i", i))
       .flatMap { result =>

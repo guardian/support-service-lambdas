@@ -91,63 +91,30 @@ export class DeliveryProblemCreditProcessor extends SrStack {
 			});
 		}
 
-		const resourcesKeepingExistingLogicalIds: Array<{
-			construct: IConstruct;
-			forcedLogicalId: string;
-			reason: string;
-		}> = [
-			{
-				construct: lambda,
-				forcedLogicalId: 'DeliveryProblemCreditProcessor',
-				reason:
-					'Keep resource names consistent with the original cfn template.',
-			},
-			{
-				construct: lambda.node.findChild('EventInvokeConfig'),
-				forcedLogicalId: 'DeliveryProblemCreditProcessorLambdaInvokeConfig',
-				reason:
-					'Keep resource names consistent with the original cfn template.',
-			},
-			{
-				construct: lambda.node.findChild('ServiceRole'),
-				forcedLogicalId: 'DeliveryProblemCreditProcessorRole',
-				reason:
-					'Keep resource names consistent with the original cfn template.',
-			},
-			{
-				construct: lambda.node
-					.findChild('ServiceRole')
-					.node.findChild('DefaultPolicy'),
-				forcedLogicalId: 'DeliveryProblemCreditProcessorPolicy',
-				reason:
-					'Keep resource names consistent with the original cfn template.',
-			},
+		const forcedLogicalIds: Record<string, IConstruct> = {
+			DeliveryProblemCreditProcessor: lambda,
+			DeliveryProblemCreditProcessorLambdaInvokeConfig:
+				lambda.node.findChild('EventInvokeConfig'),
+			DeliveryProblemCreditProcessorRole: lambda.node.findChild('ServiceRole'),
+			DeliveryProblemCreditProcessorPolicy: lambda.node
+				.findChild('ServiceRole')
+				.node.findChild('DefaultPolicy'),
 			...(failureAlarm
-				? [
-						{
-							construct: failureAlarm,
-							forcedLogicalId: 'DeliveryProblemCreditProcessorFailureAlarm',
-							reason:
-								'Keep resource names consistent with the original cfn template.',
-						},
-						{
-							construct: lambda.node.findChild('Rule0'),
-							forcedLogicalId: 'DeliveryProblemCreditProcessorScheduleRule',
-							reason:
-								'Keep resource names consistent with the original cfn template.',
-						},
-					]
-				: []),
-		];
+				? {
+						DeliveryProblemCreditProcessorFailureAlarm: failureAlarm,
+						DeliveryProblemCreditProcessorScheduleRule:
+							lambda.node.findChild('Rule0'),
+					}
+				: {}),
+		};
 
-		resourcesKeepingExistingLogicalIds.forEach(
-			({ construct, forcedLogicalId, reason }) => {
-				this.overrideLogicalId(construct, {
-					logicalId: forcedLogicalId,
-					reason,
-				});
-			},
-		);
+		Object.entries(forcedLogicalIds).forEach(([logicalId, construct]) => {
+			this.overrideLogicalId(construct, {
+				logicalId,
+				reason:
+					'Keep resource names consistent with the original cfn template.',
+			});
+		});
 
 		lambda.node.findAll().forEach((child) => {
 			if (child instanceof CfnPermission) {

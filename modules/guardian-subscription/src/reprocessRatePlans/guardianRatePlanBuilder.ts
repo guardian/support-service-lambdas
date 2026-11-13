@@ -255,13 +255,22 @@ export function indexAndJoinGuardianRatePlanCharges<P extends ProductKey>(
 	const { productRatePlanCharges, ratePlanCharges, ...rest } = ratePlan;
 	const zuoraSubscriptionRatePlanCharges: IndexedZuoraSubscriptionRatePlanCharges =
 		indexChargeList(ratePlanCharges);
-	return {
-		...rest,
-		ratePlanCharges: buildGuardianRatePlanCharges<P>(
-			productRatePlanCharges,
-			zuoraSubscriptionRatePlanCharges,
-		),
-	};
+	try {
+		return {
+			...rest,
+			ratePlanCharges: buildGuardianRatePlanCharges<P>(
+				productRatePlanCharges,
+				zuoraSubscriptionRatePlanCharges,
+			),
+		};
+	} catch (err) {
+		throw new Error(
+			`Failed to join charges for rate plan "${ratePlan.ratePlanName}" (id: ${ratePlan.id}) — ` +
+				`product "${ratePlan.product.customerFacingName}" (product key: ${ratePlan.productKey}), ` +
+				`product rate plan key: ${ratePlan.productRatePlanKey}`,
+			{ cause: err },
+		);
+	}
 }
 
 function buildGuardianRatePlanCharges<P extends ProductKey>(
@@ -272,6 +281,14 @@ function buildGuardianRatePlanCharges<P extends ProductKey>(
 		objectJoinBijective(
 			productRatePlanCharges,
 			zuoraSubscriptionRatePlanCharges,
+			{
+				describeL: (charge, id) => `${charge.name} (${id})`,
+				describeR: (charge, id) => `${charge.name} (${id})`,
+				labels: {
+					left: 'product rate plan charges',
+					right: 'rate plan charges',
+				},
+			},
 		),
 		([zuoraProductRatePlanCharge, subCharge]: [
 			ZuoraProductRatePlanCharge,

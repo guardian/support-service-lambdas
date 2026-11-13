@@ -17,6 +17,10 @@ describe('getTeam', () => {
 		expect(team).toEqual(['MARTECH']);
 	});
 
+	it('routes zuora-retention alarms to PLATFORM', () => {
+		expect(prodAppToTeams('zuora-retention')).toEqual(['PLATFORM']);
+	});
+
 	it('returns SRE if the app does not have a team owner', () => {
 		const app = 'foo';
 

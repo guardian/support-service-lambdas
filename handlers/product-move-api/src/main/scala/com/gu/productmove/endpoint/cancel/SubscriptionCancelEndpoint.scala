@@ -15,6 +15,8 @@ import com.gu.productmove.{
   SQSLive,
   SecretsLive,
   SttpClientLive,
+  SubscriptionEventService,
+  SubscriptionEventServiceLive,
 }
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointTypes.*
@@ -142,6 +144,7 @@ object SubscriptionCancelEndpoint {
     sqs <- ZIO.service[SQS]
     stage <- ZIO.service[Stage]
     zuoraSetCancellationReason <- ZIO.service[ZuoraSetCancellationReason]
+    subscriptionEventService <- ZIO.service[SubscriptionEventService]
     res <- new SubscriptionCancelEndpointSteps(
       getSubscription,
       getAccount,
@@ -151,6 +154,7 @@ object SubscriptionCancelEndpoint {
       stage,
       zuoraSetCancellationReason,
       today(),
+      subscriptionEventService,
     ).subscriptionCancel(SubscriptionName(subscriptionName), postData, identityId)
       .tapEither(result => ZIO.log(s"OUTPUT: $subscriptionName: " + result))
   } yield Right(res))
@@ -166,6 +170,7 @@ object SubscriptionCancelEndpoint {
       ZuoraSetCancellationReasonLive.layer,
       GetAccountLive.layer,
       SQSLive.layer,
+      SubscriptionEventServiceLive.layer,
       SecretsLive.layer,
     )
 }

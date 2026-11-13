@@ -223,7 +223,7 @@ lazy val effects = library(
 )
   .settings(
     dependencyOverrides ++= jacksonDependencies,
-    libraryDependencies ++= Seq(okhttp3, playJson, scalatest, awsS3) ++ logging,
+    libraryDependencies ++= Seq(okhttp3, playJson, scalatest, awsS3, awsSecretsManager) ++ logging,
   )
 lazy val `effects-s3` = library(project in file("lib/effects-s3"))
   .settings(
@@ -284,7 +284,7 @@ lazy val `google-bigquery` = library(
 
 lazy val `zuora-baton` = library(
   project in file("lib/zuora-baton"),
-  Seq(zuora, `config-core`),
+  Seq(zuora, `config-core`, testDep),
 )
   .settings(
     libraryDependencies ++= Seq(playJson),
@@ -371,18 +371,19 @@ def lambdaProject(
     )
 }
 
-lazy val `zuora-callout-apis` = lambdaProject(
-  "zuora-callout-apis",
+lazy val `zuora-auto-cancel` = lambdaProject(
+  "zuora-auto-cancel",
   "Handles auto-cancellations for membership and subscriptions",
   Seq(
     awsLambda,
     awsEvents,
+    awsEventBridge,
     okhttp3,
     scalatest,
     stripe,
     scalaMock,
   ),
-  Seq(zuora, `zuora-core`, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep),
+  Seq(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep),
 )
 
 lazy val `identity-backfill` = lambdaProject(
@@ -452,13 +453,6 @@ lazy val `single-contribution-salesforce-writes` = lambdaProject(
   Seq(handler, testDep),
 )
 
-lazy val `zuora-retention` = lambdaProject(
-  "zuora-retention",
-  "find and mark accounts that are out of the retention period",
-  Seq(),
-  Seq(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep),
-)
-
 lazy val `zuora-rer` = lambdaProject(
   "zuora-rer",
   "Performs Right to Erasure Requests against Zuora",
@@ -489,6 +483,7 @@ lazy val `zuora-sar` = lambdaProject(
     `effects-lambda`,
   ),
 )
+  .settings(Test / unmanagedSourceDirectories += baseDirectory.value / "src/local")
 
 lazy val `dev-env-cleaner` = lambdaProject(
   "dev-env-cleaner",
@@ -518,7 +513,7 @@ lazy val `soft-opt-in-consent-setter` = lambdaProject(
     circe,
     circeParser,
     scalatest,
-    scalajHttp,
+    okhttp3,
     awsS3,
     awsDynamo,
     simpleConfig,
@@ -527,6 +522,8 @@ lazy val `soft-opt-in-consent-setter` = lambdaProject(
     awsEvents,
     scalaMock,
     awsSecretsManager,
+    awsApiGateway,
+    awsCloudFormation,
     upickle,
   ) ++ logging,
   Seq(`effects-s3`, `effects-cloudwatch`, `salesforce-core`),
@@ -537,12 +534,6 @@ lazy val `sf-emails-to-s3-exporter` = lambdaProject(
   "Runs regularly to retrieve emails from Salesforce and save as json in S3",
   Seq(circe, circeParser, scalajHttp, awsS3, awsSecretsManager, upickle),
   Seq(`effects-s3`, `effects-cloudwatch`),
-)
-
-lazy val `sf-api-user-credentials-setter` = lambdaProject(
-  "sf-api-user-credentials-setter",
-  "Set passwords for Aws API Users in SF, and then create or update an entry for the credentials in AWS secrets manager",
-  Seq(awsSecretsManager, circe, circeParser, scalajHttp, awsS3, upickle),
 )
 
 lazy val `cancellation-sf-cases-api` = lambdaProject(
@@ -639,6 +630,7 @@ lazy val `product-move-api` = lambdaProject(
     ),
     awsS3,
     awsSQS,
+    awsEventBridge,
     scalatest,
     "com.softwaremill.sttp.client3" %% "zio-json" % sttpVersion,
     "dev.zio" %% "zio-logging-slf4j" % "2.5.2",

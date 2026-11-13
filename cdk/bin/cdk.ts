@@ -4,6 +4,7 @@ import { AlarmsHandler } from '../lib/alarms-handler';
 import { BatchEmailSender } from '../lib/batch-email-sender';
 import { BrazeAcquisitionEventsSync } from '../lib/braze-acquisition-events-sync';
 import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
+import { CancellationsBus } from '../lib/cancellations-bus';
 import type { SrStageNames } from '../lib/cdk/SrStack';
 import { stages } from '../lib/cdk/SrStack';
 import {
@@ -18,9 +19,11 @@ import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
 import { HolidayStopProcessor } from '../lib/holiday-stop-processor';
 import { IamPolicies } from '../lib/iam-policies';
+import { IdentityDeletionCleanup } from '../lib/identity-deletion-cleanup';
 import { ImovoVoucherApi } from '../lib/imovo-voucher-api';
 import { MetricPushApi } from '../lib/metric-push-api';
 import { MobilePurchasesToSupporterProductData } from '../lib/mobile-purchases-to-supporter-product-data';
+import { MparticleAcquisitionsPublisher } from '../lib/mparticle-acquisitions-publisher';
 import { MParticleApi } from '../lib/mparticle-api';
 import { MultipleAccountApi } from '../lib/multiple-account-api';
 import { NegativeInvoicesProcessor } from '../lib/negative-invoices-processor';
@@ -40,6 +43,8 @@ import { SalesforceDisasterRecovery } from '../lib/salesforce-disaster-recovery'
 import { SalesforceDisasterRecoveryHealthCheck } from '../lib/salesforce-disaster-recovery-health-check';
 import { SalesforceEventBus } from '../lib/salesforce-event-bus';
 import { ScrubNonTokenisedPaymentMethods } from '../lib/scrub-non-tokenised-payment-methods';
+import { SecurityGroupsUpdater } from '../lib/security-groups-updater';
+import { SendTestDataToMparticle } from '../lib/send-test-data-to-mparticle';
 import { SfEmailsToS3Exporter } from '../lib/sf-emails-to-s3-exporter';
 import { SfMoveSubscriptionsApi } from '../lib/sf-move-subscriptions-api';
 import {
@@ -50,7 +55,6 @@ import { SoftOptInConsentSetter } from '../lib/soft-opt-in-consent-setter';
 import { StripeDisputes } from '../lib/stripe-disputes';
 import type { StripeWebhookEndpointsProps } from '../lib/stripe-webhook-endpoints';
 import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
-import { SubscriptionEventsBus } from '../lib/subscription-events-bus';
 import { SupporterProductDataLambdas } from '../lib/supporter-product-data-lambdas';
 import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
 import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
@@ -151,12 +155,15 @@ new PromotionsLambdas(app, 'PROD', {
 	newPromoStreamLabel: '2026-01-05T11:50:46.239',
 });
 
+new SendTestDataToMparticle(app, 'CODE');
+
 const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	ImovoVoucherApi,
 	DiscountApi,
 	ProductSwitchApi,
 	UpdateSupporterPlusAmount,
 	MParticleApi,
+	IdentityDeletionCleanup,
 	MetricPushApi,
 	PressReaderEntitlements,
 	UserBenefits,
@@ -174,6 +181,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	SalesTaxApi,
 	SupporterProductDataLambdas,
 	BrazeAcquisitionEventsSync,
+	MparticleAcquisitionsPublisher,
 	SfMoveSubscriptionsApi,
 	SfEmailsToS3Exporter,
 	DeliveryProblemCreditProcessor,
@@ -182,7 +190,8 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	ScrubNonTokenisedPaymentMethods,
 	PromotionsApi,
 	PaymentFailureCommsExitApi,
-	SubscriptionEventsBus,
+	CancellationsBus,
+	SecurityGroupsUpdater,
 	// MARKER new-lambda: cdk-bin
 ];
 

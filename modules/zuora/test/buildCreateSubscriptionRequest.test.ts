@@ -87,7 +87,7 @@ const supporterPlusInput: CreateSubscriptionInputFields<CreditCardReferenceTrans
 		productPurchase: {
 			product: 'SupporterPlus',
 			ratePlan: 'Monthly',
-			amount: 12,
+			amount: 15,
 		},
 	};
 const guardianWeeklyGiftInput: CreateSubscriptionInputFields<CreditCardReferenceTransaction> =

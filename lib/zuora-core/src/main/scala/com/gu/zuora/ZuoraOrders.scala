@@ -40,31 +40,6 @@ object ZuoraOrders extends LazyLogging {
       config: ZuoraConfig,
       accessToken: AccessToken,
       backend: SttpBackend[Identity, Any],
-  )(
-      request: CreateOrderRequest,
-  ): ZuoraApiResponse[AsyncOrderResult] =
-    createOrderAsynchronously(config, accessToken, backend, MaximumOrderDuration)(request)
-
-  def createOrderAsynchronously(
-      config: ZuoraConfig,
-      accessToken: AccessToken,
-      backend: SttpBackend[Identity, Any],
-      maximumOrderDuration: FiniteDuration,
-  )(
-      request: CreateOrderRequest,
-  ): ZuoraApiResponse[AsyncOrderResult] =
-    createOrderAsynchronously(
-      config,
-      accessToken,
-      backend,
-      maximumOrderDuration,
-      MaximumOrderAttemptDuration,
-    )(request)
-
-  def createOrderAsynchronously(
-      config: ZuoraConfig,
-      accessToken: AccessToken,
-      backend: SttpBackend[Identity, Any],
       maximumOrderDuration: FiniteDuration,
       maximumOrderAttemptDuration: FiniteDuration,
   )(

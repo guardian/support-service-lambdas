@@ -13,6 +13,10 @@ import {
 } from '@aws-sdk/client-s3';
 import { awsConfig } from '@modules/aws/config';
 import { getFileFromS3 } from '@modules/aws/s3';
+import type {
+	DataSubjectAPI,
+	MParticleClient,
+} from '@modules/mparticle/mparticleHttpClient';
 import type { GetRequestsResponse } from '../../src/apis/dataSubjectRequests/getStatus';
 import { handleSarStatus } from '../../src/routers/baton/access/handleStatus';
 import type {
@@ -21,10 +25,6 @@ import type {
 } from '../../src/routers/baton/initiationReference';
 import type { BatonS3Writer } from '../../src/services/batonS3Writer';
 import { BatonS3WriterImpl } from '../../src/services/batonS3Writer';
-import type {
-	DataSubjectAPI,
-	MParticleClient,
-} from '../../src/services/mparticleClient';
 
 const s3Client = new S3Client(awsConfig);
 
