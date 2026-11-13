@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import type { CountryCode } from '@modules/internationalisation/country';
+import { countryGroups } from '@modules/internationalisation/countryGroup';
 import {
 	countryCodeSchema,
 	supportRegionSchema,
@@ -54,6 +56,46 @@ export const promoSchema = z.object({
 
 export type Promo = z.infer<typeof promoSchema>;
 
+const promoCountryGroups = {
+	ukm: ['GB'],
+	ukos: countryGroups.GBPCountries.countries.filter(
+		(country) => country !== 'GB',
+	),
+	us: countryGroups.UnitedStates.countries,
+	ca: countryGroups.Canada.countries,
+	au: countryGroups.AUDCountries.countries,
+	nz: countryGroups.NZDCountries.countries,
+	eu: countryGroups.EURCountries.countries,
+	int: countryGroups.International.countries,
+} satisfies Record<string, CountryCode[]>;
+const promoCountryGroupSchema = z.custom<keyof typeof promoCountryGroups>(
+	(id) => typeof id === 'string' && Object.hasOwn(promoCountryGroups, id),
+);
+
+export const promoItemSchema = promoSchema.extend({
+	appliesTo: appliesToSchema
+		.extend({
+			countries: optionalDropNulls(z.array(countryCodeSchema)),
+			countryGroups: optionalDropNulls(z.array(promoCountryGroupSchema)),
+		})
+		.refine(
+			({ countries, countryGroups }) =>
+				countries !== undefined || countryGroups !== undefined,
+			{ message: 'A promotion must define countries or country groups' },
+		)
+		.transform(
+			({ countries = [], countryGroups = [], productRatePlanIds }) => ({
+				productRatePlanIds,
+				countries: [
+					...new Set([
+						...countries,
+						...countryGroups.flatMap((id) => promoCountryGroups[id]),
+					]),
+				],
+			}),
+		),
+});
+
 /**
  * The catalog rate plans a promotion applies to, resolved from the raw
  * `productRatePlanIds` stored in Dynamo so that promotions can be searched by
@@ -72,5 +114,6 @@ export type PromoWithCatalogInformation = z.infer<
 export const appliedPromotionSchema = z.object({
 	promoCode: z.string(),
 	supportRegionId: supportRegionSchema,
+	countryCode: countryCodeSchema.optional(),
 });
 export type AppliedPromotion = z.infer<typeof appliedPromotionSchema>;
