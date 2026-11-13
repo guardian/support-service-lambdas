@@ -10,11 +10,11 @@ class ProcessorTest extends AnyFlatSpec with Matchers {
   private val subscriptionNumber = "A-S000001"
   private val creditDate = LocalDate.parse("2026-10-01")
 
-  "creditIdempotencyKey" should "return the same key for repeated attempts of a credit" in {
+  "creditIdempotencyKey" should "generate a stable key from the subscription, rate plan and credit date" in {
     val update = creditUpdate("holiday-credit-rate-plan", creditDate)
 
     Processor.creditIdempotencyKey(subscriptionNumber, update) shouldBe
-      Processor.creditIdempotencyKey(subscriptionNumber, update)
+      "credit-processor-20dd2a1f-be7f-3670-ba3f-90c93e950426"
   }
 
   it should "distinguish credits for different dates" in {
@@ -32,7 +32,7 @@ class ProcessorTest extends AnyFlatSpec with Matchers {
       Processor.creditIdempotencyKey("A-S000002", update)
   }
 
-  it should "distinguish holiday-stop and delivery-problem credits for the same date" in {
+  it should "distinguish credits with different rate plans for the same date" in {
     val holidayStop = creditUpdate("holiday-credit-rate-plan", creditDate)
     val deliveryProblem = creditUpdate("delivery-credit-rate-plan", creditDate)
 
