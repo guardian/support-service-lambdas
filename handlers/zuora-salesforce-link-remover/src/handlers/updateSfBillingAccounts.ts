@@ -8,7 +8,7 @@ import type {
 } from '@modules/salesforce/updateRecords';
 import { doCompositeCallout } from '@modules/salesforce/updateRecords';
 import { stageFromEnvironment } from '@modules/stage';
-import { getSalesforceSecretNames } from '../salesforceSecretNames';
+import { getSalesforceConnectedAppSecretName } from '../salesforceSecretNames';
 import type { BillingAccountRecord } from './getBillingAccounts';
 import { BillingAccountRecordSchema } from './getBillingAccounts';
 
@@ -29,8 +29,8 @@ export const handler: Handler<
 		const billingAccountsToUpdate: BillingAccountRecord[] = parseResponse.data;
 
 		const stage = stageFromEnvironment();
-		const sfClient = await SfClient.createWithPasswordFlow(
-			getSalesforceSecretNames(stage),
+		const sfClient = await SfClient.createWithClientCredentials(
+			getSalesforceConnectedAppSecretName(stage),
 		);
 
 		const sfUpdateResponse = await updateSfBillingAccounts(
