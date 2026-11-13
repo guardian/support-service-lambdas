@@ -239,7 +239,10 @@ object Processor {
     }
   }
 
-  private[gu] def creditIdempotencyKey(subscriptionNumber: String, update: SubscriptionUpdate): String = {
+  private[creditprocessor] def creditIdempotencyKey(
+      subscriptionNumber: String,
+      update: SubscriptionUpdate,
+  ): String = {
     val productAddition = update.productAddition
     val creditDate = productAddition.chargeOverride.HolidayStart__c
     val operation = s"$subscriptionNumber:${productAddition.productRatePlanId}:$creditDate"
