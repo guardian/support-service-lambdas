@@ -42,6 +42,7 @@ object ZuoraOrders extends LazyLogging {
       backend: SttpBackend[Identity, Any],
       maximumOrderDuration: FiniteDuration,
       maximumOrderAttemptDuration: FiniteDuration,
+      idempotencyKey: String,
   )(
       request: CreateOrderRequest,
   ): ZuoraApiResponse[AsyncOrderResult] =
@@ -53,6 +54,7 @@ object ZuoraOrders extends LazyLogging {
       monotonicNanos = () => System.nanoTime(),
       maximumOrderDuration = maximumOrderDuration,
       maximumOrderAttemptDuration = maximumOrderAttemptDuration,
+      idempotencyKey = idempotencyKey,
     )(request)
 
   private[zuora] def createOrderAsynchronously(
@@ -63,6 +65,7 @@ object ZuoraOrders extends LazyLogging {
       monotonicNanos: () => Long,
       maximumOrderDuration: FiniteDuration,
       maximumOrderAttemptDuration: FiniteDuration,
+      idempotencyKey: String,
   )(
       request: CreateOrderRequest,
   ): ZuoraApiResponse[AsyncOrderResult] = {
@@ -73,11 +76,14 @@ object ZuoraOrders extends LazyLogging {
 
     @tailrec
     def attempt(attemptsRemaining: Int): Either[OrderFailure, AsyncOrderResult] = {
+      val attemptNumber = MaxOrderAttempts - attemptsRemaining + 1
+      val attemptIdempotencyKey =
+        if (attemptNumber == 1) idempotencyKey else s"$idempotencyKey-$attemptNumber"
       val attemptDeadlineNanos = math.min(orderDeadlineNanos, monotonicNanos() + maximumOrderAttemptDuration.toNanos)
       val result = for {
         readTimeout <- remainingReadTimeout(attemptDeadlineNanos, monotonicNanos)
           .toRight(PermanentOrderFailure("Timed out before submitting the Zuora order"))
-        jobId <- submitOrder(config, accessToken, backend, readTimeout)(request).left
+        jobId <- submitOrder(config, accessToken, backend, readTimeout, attemptIdempotencyKey)(request).left
           .map(failure => PermanentOrderFailure(failure.reason))
         _ = logger.info(s"Submitted Zuora order job $jobId")
         result <- waitForCompletion(
@@ -113,12 +119,14 @@ object ZuoraOrders extends LazyLogging {
       accessToken: AccessToken,
       backend: SttpBackend[Identity, Any],
       readTimeout: FiniteDuration,
+      idempotencyKey: String,
   )(
       request: CreateOrderRequest,
   ): ZuoraApiResponse[String] =
     basicRequest
       .post(uri"${config.baseUrl}/async/orders")
       .header("Authorization", s"Bearer ${accessToken.access_token}")
+      .header("Idempotency-Key", idempotencyKey)
       .readTimeout(readTimeout)
       .body(request)
       .response(asJson[AsyncJobSubmission])
