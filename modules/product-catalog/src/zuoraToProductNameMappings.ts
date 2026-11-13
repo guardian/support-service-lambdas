@@ -38,6 +38,7 @@ export const activeProducts = [
 	'NationalDelivery',
 	'SubscriptionCard',
 	'Contribution',
+	'PatronMembership',
 ];
 
 export const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
