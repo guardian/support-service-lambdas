@@ -18,6 +18,7 @@ const noSecondaryUsers = jest.fn(() =>
 	Promise.resolve([] as SecondaryUserRecord[]),
 );
 const writeSecondaryItem = jest.fn(() => Promise.resolve());
+const updatePrimaryInvitationTTL = jest.fn(() => Promise.resolve());
 const updateSecondaryUserTTL = jest.fn(() => Promise.resolve());
 
 describe('processSupporterRatePlanItemLambda', () => {
@@ -36,6 +37,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 			writePrimaryItem: writeItem,
 			getSecondaryUsers: noSecondaryUsers,
 			writeSecondaryItem: writeSecondaryItem,
+			updatePrimaryInvitationTTL: updatePrimaryInvitationTTL,
 			updateSecondaryUserTTL: updateSecondaryUserTTL,
 		});
 
@@ -67,6 +69,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 				writePrimaryItem: writeItem,
 				getSecondaryUsers: noSecondaryUsers,
 				writeSecondaryItem: writeSecondaryItem,
+				updatePrimaryInvitationTTL: updatePrimaryInvitationTTL,
 				updateSecondaryUserTTL: updateSecondaryUserTTL,
 			},
 		);
@@ -90,6 +93,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 			writePrimaryItem: writeItem,
 			getSecondaryUsers: noSecondaryUsers,
 			writeSecondaryItem: writeSecondaryItem,
+			updatePrimaryInvitationTTL: updatePrimaryInvitationTTL,
 			updateSecondaryUserTTL: updateSecondaryUserTTL,
 		});
 
@@ -129,6 +133,7 @@ describe('processSupporterRatePlanItemLambda', () => {
 			writePrimaryItem: writeItem,
 			getSecondaryUsers,
 			writeSecondaryItem: writeSecondaryItem,
+			updatePrimaryInvitationTTL: updatePrimaryInvitationTTL,
 			updateSecondaryUserTTL: updateSecondaryUserTTL,
 		});
 
@@ -151,6 +156,28 @@ describe('processSupporterRatePlanItemLambda', () => {
 		expect(updateSecondaryUserTTL).toHaveBeenCalledWith(
 			expect.stringContaining('sub-1'),
 			expect.stringContaining('secondary-id-2'),
+			expiryTTLFromTermEndDate(dayjs(termEndDate)),
+		);
+	});
+
+	test('update invitation TTLs for primary subscription', async () => {
+		const writeItem = jest.fn(() => Promise.resolve());
+		const updateSubscriptionTTLs = jest.fn(() => Promise.resolve());
+
+		await processItem(item, {
+			isExcludedRatePlanItem: () => false,
+			contributionIds: [],
+			getSubscription: () =>
+				Promise.resolve({ subscriptionNumber: 'sub-number', ratePlans: [] }),
+			writePrimaryItem: writeItem,
+			getSecondaryUsers: noSecondaryUsers,
+			writeSecondaryItem,
+			updatePrimaryInvitationTTL: updateSubscriptionTTLs,
+			updateSecondaryUserTTL,
+		});
+
+		expect(updateSubscriptionTTLs).toHaveBeenCalledWith(
+			item.subscriptionName,
 			expiryTTLFromTermEndDate(dayjs(termEndDate)),
 		);
 	});
