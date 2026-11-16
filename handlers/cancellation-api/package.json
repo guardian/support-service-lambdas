@@ -1,0 +1,34 @@
+{
+  "name": "cancellation-api",
+  "scripts": {
+    "test": "jest --group=-integration",
+    "it-test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --group=integration",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
+    "check-formatting": "prettier --check \"**/*.ts\"",
+    "fix-formatting": "prettier --write \"**/*.ts\"",
+    "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/index.ts --sourcemap --source-root=/support-service-lambdas/handlers/cancellation-api/target/",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm packageQuick",
+    "packageQuick": "pnpm build && cd target && zip -qr cancellation-api.zip ./*.js.map ./*.js",
+    "cdk:test": "pnpm --filter cdk test cancellation-api",
+    "cdk:test-update": "pnpm --filter cdk test-update cancellation-api",
+    "update-lambda": "../../update-lambda.sh \"cancellation-api\"",
+    "update-stack": "../../update-stack.sh \"cancellation-api\"",
+    "local": "tsx runLocal/server.ts"
+  },
+  "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
+  "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
+  "dependencies": {
+    "zod": "catalog:",
+    "hono": "^4.13.18",
+    "@hono/aws-lambda": "^1.0.1",
+    "@hono/zod-openapi": "^1.6.3",
+    "logger": "workspace:*",
+    "routing": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.147",
+    "@hono/node-server": "^2.1.8",
+    "tsx": "^4.21.0"
+  }
+}

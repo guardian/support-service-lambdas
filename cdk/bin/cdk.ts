@@ -3,6 +3,7 @@ import { App } from 'aws-cdk-lib';
 import { AlarmsHandler } from '../lib/alarms-handler';
 import { BatchEmailSender } from '../lib/batch-email-sender';
 import { BrazeAcquisitionEventsSync } from '../lib/braze-acquisition-events-sync';
+import { CancellationApi } from '../lib/cancellation-api';
 import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
 import { CancellationsBus } from '../lib/cancellations-bus';
 import type { SrStageNames } from '../lib/cdk/SrStack';
@@ -192,6 +193,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	PaymentFailureCommsExitApi,
 	CancellationsBus,
 	SecurityGroupsUpdater,
+	CancellationApi,
 	// MARKER new-lambda: cdk-bin
 ];
 

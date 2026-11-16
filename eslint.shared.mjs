@@ -41,3 +41,22 @@ export const importOrderConfig = {
 		],
 	},
 };
+
+export const srRouteConfig = {
+	ignores: ['**/modules/routing/src/srApi.ts'],
+	rules: {
+		'no-restricted-imports': [
+			'error',
+			{
+				paths: [
+					{
+						name: '@hono/zod-openapi',
+						importNames: ['defineOpenAPIRoute'],
+						message:
+							'Use defineSrRoute from @modules/routing/srApi and explicitly provide logContext (or undefined).',
+					},
+				],
+			},
+		],
+	},
+};

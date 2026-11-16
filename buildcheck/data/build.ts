@@ -148,6 +148,8 @@ const moduleRouting: ModuleDefinition = {
 	dependencies: {
 		...dep['zod'],
 		...dep['dayjs'],
+		...dep.hono,
+		...dep['@hono/zod-openapi'],
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
@@ -1019,6 +1021,25 @@ const securityGroupsUpdater: HandlerDefinition = {
 	moduleDependencies: [moduleLogger, moduleRouting],
 };
 
+const cancellationApi: HandlerDefinition = {
+	name: 'cancellation-api',
+	dependencies: {
+		...dep.zod,
+		...dep.hono,
+		...dep['@hono/aws-lambda'],
+		...dep['@hono/zod-openapi'],
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+		...devDeps['@hono/node-server'],
+		...devDeps.tsx,
+	},
+	moduleDependencies: [moduleLogger, moduleRouting],
+	extraScripts: {
+		local: 'tsx runLocal/server.ts',
+	},
+};
+
 // MARKER new-lambda: buildcheck-const
 
 export const build: BuildDefinition = {
@@ -1060,6 +1081,7 @@ export const build: BuildDefinition = {
 		promotionsApi,
 		paymentFailureCommsExitApi,
 		sendTestDataToMparticle,
+		cancellationApi,
 		// MARKER new-lambda: buildcheck-reference
 	],
 

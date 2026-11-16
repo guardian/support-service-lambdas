@@ -1,10 +1,11 @@
 import guardian from '@guardian/eslint-config';
-import { importOrderConfig } from './eslint.shared.mjs';
+import { importOrderConfig, srRouteConfig } from './eslint.shared.mjs';
 
 export default [
 	...guardian.configs.recommended,
 	...guardian.configs.jest,
 	importOrderConfig,
+	srRouteConfig,
 	{
 		rules: {
 			'@typescript-eslint/consistent-type-assertions': [
