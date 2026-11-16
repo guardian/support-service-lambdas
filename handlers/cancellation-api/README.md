@@ -19,29 +19,7 @@ The refund rules are carried over unchanged. In practice only Supporter Plus is 
 
 ## Cancellation API
 
-TODO: being built in [#3946](https://github.com/guardian/support-service-lambdas/pull/3946) (WIP). The OpenAPI spec is generated from the zod route schemas.
-
-| Operation | Method and path | Request body |
-|---|---|---|
-| Preview | `POST /subscriptions/{subscriptionNumber}/preview-cancellation` | `{}` |
-| Cancel | `POST /subscriptions/{subscriptionNumber}/cancel` | `{ "reason"?: string }` |
-| Generated OpenAPI (public) | `GET /openapi.json` | |
-| Interactive docs (public) | `GET /docs` | |
-
-- **Auth:** operations need an API Gateway key and an `x-identity-id` header, supplied by manage-frontend.
-- **Response:** either `{ "type": "hard", "willRefund": boolean }` or `{ "type": "soft", "accessEndDate": "YYYY-MM-DD" }`.
-- **URLs:** CODE https://cancellation-api-code.support.guardianapis.com, PROD https://cancellation-api.support.guardianapis.com
-
-For each cancellation request it:
-
-1. Validates the request.
-2. Decides refund eligibility.
-3. Cancels the subscription via the Zuora Orders API:
-   - when a refund is due, backdated to `LastPlanAddedDate__c`
-   - otherwise, at the end of the current billing period
-4. Sends the confirmation email and a `Cancellation` event to EventBridge.
-5. Starts the refund workflow when a refund is due, **or** when the subscription is paid by Direct Debit and its latest
-   positive invoice hasn't settled yet. It uses the same settlement rule as the workflow.
+TODO
 
 ## Refund workflow
 
@@ -60,6 +38,48 @@ confirmation email or event.
 Each Lambda checks Zuora for completion before acting, so any step can safely be re-run and no datastore is needed.
 See the issue below for the state diagram and the detailed rules.
 
+### Flow Diagram
+```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 15, "rankSpacing": 20, "padding": 4}, "themeVariables": {"fontSize": "11px"}}}%%
+flowchart TD
+    start(["Start"]) --> due{"Refund due?"}
+    due -->|"yes"| gen["GenerateAndPostInvoice"]
+    gen --> calc["CalculateRefund"]
+    calc --> zero{"Zero amount?"}
+    zero -->|"yes"| balance["BalanceNegativeInvoice"]
+    zero -->|"no"| check["CheckPaymentSettlement"]
+    due -->|"no"| check
+    check --> status{"Payment?"}
+    status -->|"Pending"| days{"Under 14 days?"}
+    days -->|"yes"| wait["Wait 24h"]
+    wait --> check
+    days -->|"no"| fail(["Fail and alarm"])
+    status -->|"Settled"| sdue{"Refund due?"}
+    sdue -->|"yes"| refund["CreateRefund"]
+    sdue -->|"no"| done(["Succeed"])
+    refund --> adjust["AdjustPaidInvoice"]
+    status -->|"Failed"| fdue{"Refund due?"}
+    fdue -->|"yes"| adjust
+    fdue -->|"no"| backdate["BackdateCancellation"]
+    backdate --> regen["RegenerateInvoice"]
+    regen --> recalc["CalculateCredit"]
+    recalc --> adjust
+    adjust --> balance
+    balance --> failed{"Payment failed?"}
+    failed -->|"yes"| email["SendPaymentFailedEmail"]
+    failed -->|"no"| done
+    email --> done
+
+    classDef task fill:#0d47a1,stroke:#002171,color:#ffffff,font-weight:bold
+    classDef terminal fill:#1b5e20,stroke:#003300,color:#ffffff,font-weight:bold
+    classDef failure fill:#b71c1c,stroke:#7f0000,color:#ffffff,font-weight:bold
+    classDef decision fill:#e65100,stroke:#ac1900,color:#ffffff,font-weight:bold
+    class gen,calc,check,refund,adjust,balance,wait,backdate,regen,recalc,email task
+    class start,done terminal
+    class fail failure
+    class due,zero,status,days,sdue,fdue,failed decision
+```
+
 ## Alarms
 
 Alarms go to Lifecycle via alarms-handler.
@@ -70,32 +90,6 @@ Alarms go to Lifecycle via alarms-handler.
 | Refund workflow could not be started | `StartExecution` fails | TODO |
 | Refund workflow failed | an execution fails, times out or is aborted: a customer not refunded, or a failed DD not acted on | TODO |
 
-## Layout
-
-```
-src/
-  index.ts                  TODO: cancellation API entry point ([#3946](https://github.com/guardian/support-service-lambdas/pull/3946))
-  endpoints/                TODO: one file per API route, plus the shared request/response contract ([#3946](https://github.com/guardian/support-service-lambdas/pull/3946))
-  refund/
-    refundWorkflowInput.ts  zod schema for the workflow input, used by the cancellation API to start an execution
-    handlers/*.ts           one entry point per workflow Lambda
-test/
-cdk: ../../cdk/lib/cancellation-api.ts
-```
-
-The workflow input must stay backward compatible: only add optional fields, because executions can still be running for
-up to 14 days after a deploy.
-
-## How to test
-
-```bash
-pnpm --filter cancellation-api test
-pnpm --filter cdk test cancellation-api
-```
-
-TODO: run the API locally with `pnpm --filter cancellation-api local` and open http://localhost:8787/docs ([#3946](https://github.com/guardian/support-service-lambdas/pull/3946)).
-
-TODO: integration tests and CODE end-to-end scenarios.
 
 ## References
 
