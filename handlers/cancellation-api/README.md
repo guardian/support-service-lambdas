@@ -1,6 +1,6 @@
 # cancellation-api
 
-Cancels subscriptions and refunds the customer when a refund is due, in line with the DMCC Act cooling-off and refund rules.
+Cancels subscriptions and refunds the customer when a refund is due. Our cooling-off and refund rules are based on the DMCC Act, but can be more generous.
 It has two parts:
 
 1. **Cancellation API**: an API Gateway Lambda that cancels a subscription on request.
@@ -26,17 +26,17 @@ TODO
 The workflow assumes the subscription is already cancelled. It never re-checks refund eligibility and never sends the
 confirmation email or event.
 
-1. If a refund is due: generate and post the cancellation (negative) invoice and calculate the refund.
-2. Wait for the payment to settle, checking daily for up to 14 days. If it still hasn't settled, the execution fails
-   and raises an alarm.
-3. Once settled: refund the customer if a refund is due, then balance the invoices.
-4. If a Direct Debit fails to settle:
-   - when no refund is due, backdate the cancellation to the start of the unpaid period, so the customer doesn't get
-     that period free
-   - in all cases, balance the invoices and send `cancelled-payment-email`
+1. If a refund is due: post the cancellation (negative) invoice and calculate the refund, which is the total of the
+   invoice being refunded (charges plus tax).
+2. Find the latest payment on that invoice (or, if no refund is due, on the latest positive invoice).
+3. If it's a pending Direct Debit, wait for it to settle, checking daily; after 14 days, fail and alarm.
+4. If it succeeded: refund if due, then balance the invoices.
+5. If a Direct Debit fails to settle, backdate the cancellation to the start of the unpaid period (never later), balance
+   the invoices, and send `cancelled-payment-email` if it was backdated.
 
-Each Lambda checks Zuora for completion before acting, so any step can safely be re-run and no datastore is needed.
-See the issue below for the state diagram and the detailed rules.
+Every step is safe to re-run: each Lambda checks Zuora for its own completed work first. Zuora idempotency keys aren't
+used because they expire after 24 hours and cache failures.
+See the issue below for the detailed rules.
 
 ### Flow Diagram
 ```mermaid
@@ -50,22 +50,20 @@ flowchart TD
     zero -->|"no"| check["CheckPaymentSettlement"]
     due -->|"no"| check
     check --> status{"Payment?"}
-    status -->|"Pending"| days{"Under 14 days?"}
+    status -->|"DD Pending"| days{"Under 14 days?"}
     days -->|"yes"| wait["Wait 24h"]
     wait --> check
     days -->|"no"| fail(["Fail and alarm"])
-    status -->|"Settled"| sdue{"Refund due?"}
+    status -->|"(Success AND NOT DD) OR (DD AND Settled)"| sdue{"Refund due?"}
     sdue -->|"yes"| refund["CreateRefund"]
     sdue -->|"no"| done(["Succeed"])
     refund --> adjust["AdjustPaidInvoice"]
-    status -->|"Failed"| fdue{"Refund due?"}
-    fdue -->|"yes"| adjust
-    fdue -->|"no"| backdate["BackdateCancellation"]
+    status -->|"FailedToSettle"| backdate["BackdateCancellation"]
     backdate --> regen["RegenerateInvoice"]
     regen --> recalc["CalculateCredit"]
     recalc --> adjust
     adjust --> balance
-    balance --> failed{"Payment failed?"}
+    balance --> failed{"Backdated?"}
     failed -->|"yes"| email["SendPaymentFailedEmail"]
     failed -->|"no"| done
     email --> done
@@ -77,7 +75,7 @@ flowchart TD
     class gen,calc,check,refund,adjust,balance,wait,backdate,regen,recalc,email task
     class start,done terminal
     class fail failure
-    class due,zero,status,days,sdue,fdue,failed decision
+    class due,zero,status,days,sdue,failed decision
 ```
 
 ## Alarms
@@ -86,8 +84,7 @@ Alarms go to Lifecycle via alarms-handler.
 
 | Alarm | Raised when | Status |
 |---|---|---|
-| Cancellation API errors | TODO | TODO |
-| Refund workflow could not be started | `StartExecution` fails | TODO |
+| Cancellation API errors | the API returns a 5xx, including when the refund workflow can't be started (`StartExecution` fails) | TODO |
 | Refund workflow failed | an execution fails, times out or is aborted: a customer not refunded, or a failed DD not acted on | TODO |
 
 

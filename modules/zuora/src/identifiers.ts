@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 /**
- * Branded identifiers for Zuora's `subscriptionNumber`/`orderNumber` fields.
+ * Branded identifiers for Zuora's `subscriptionNumber`/`orderNumber`/`accountNumber` fields.
  *
  * Not all subscription/order numbers start with a fixed prefix (e.g. `A-S`/`O-`),
  * so the only constraint enforced is "alphanumeric, optionally with hyphens, no
@@ -15,6 +15,7 @@ export type SubscriptionNumber = string & {
 	readonly __brand: 'SubscriptionNumber';
 };
 export type OrderNumber = string & { readonly __brand: 'OrderNumber' };
+export type AccountNumber = string & { readonly __brand: 'AccountNumber' };
 
 const zuoraNumberSchema = <T extends string & { readonly __brand: string }>() =>
 	z
@@ -25,3 +26,4 @@ const zuoraNumberSchema = <T extends string & { readonly __brand: string }>() =>
 
 export const subscriptionNumberSchema = zuoraNumberSchema<SubscriptionNumber>();
 export const orderNumberSchema = zuoraNumberSchema<OrderNumber>();
+export const accountNumberSchema = zuoraNumberSchema<AccountNumber>();
