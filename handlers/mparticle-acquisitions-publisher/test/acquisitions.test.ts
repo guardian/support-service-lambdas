@@ -124,18 +124,6 @@ describe('buildMParticleBatch', () => {
 				http_header_user_agent: 'test-user-agent',
 			},
 			ip: '192.0.2.1',
-			consent_state: {
-				gdpr: {
-					paid_media_conversion_measurement_google: {
-						consented: false,
-						timestamp_unixtime_ms: Date.parse(acquisition.eventTimeStamp),
-					},
-					paid_media_conversion_measurement_meta: {
-						consented: false,
-						timestamp_unixtime_ms: Date.parse(acquisition.eventTimeStamp),
-					},
-				},
-			},
 		});
 		expect(event.data).toMatchObject({
 			event_name: 'purchase',
@@ -282,8 +270,8 @@ describe('buildMParticleBatch', () => {
 	});
 
 	it.each(consentSnapshots)(
-		'preserves the full %s snapshot and creates its consent state',
-		(framework, snapshot) => {
+		'preserves the full %s snapshot',
+		(_framework, snapshot) => {
 			const parsedAcquisition = acquisitionEventSchema.parse({
 				detail: { ...acquisition, cmpConsentSnapshot: snapshot },
 			}).detail;
@@ -291,21 +279,9 @@ describe('buildMParticleBatch', () => {
 			const event = batch.events[0];
 			const snapshotAttribute =
 				event.data.custom_attributes.cmp_consent_snapshot;
-			const expectedConsent = framework === 'TCFv2';
-
 			expect(typeof snapshotAttribute).toBe('string');
 			expect(JSON.parse(snapshotAttribute as string)).toEqual(snapshot);
-			expect(event.data).not.toHaveProperty('consent_state');
-			expect(batch.consent_state?.gdpr).toEqual({
-				paid_media_conversion_measurement_google: {
-					consented: expectedConsent,
-					timestamp_unixtime_ms: Date.parse(snapshot.capturedAt),
-				},
-				paid_media_conversion_measurement_meta: {
-					consented: expectedConsent,
-					timestamp_unixtime_ms: Date.parse(snapshot.capturedAt),
-				},
-			});
+			expect(batch).not.toHaveProperty('consent_state');
 			expect(event.data.custom_attributes.similar_products_consent).toBe(true);
 			expect(event.data.custom_flags).toMatchObject({
 				'GoogleEnhancedConversions.Gclid': 'google-click-id',
@@ -315,192 +291,7 @@ describe('buildMParticleBatch', () => {
 		},
 	);
 
-	it('grants Google and Meta independently from purpose 7 and each vendor choice', () => {
-		const googleOnly = buildMParticleBatch(
-			{
-				...acquisition,
-				cmpConsentSnapshot: {
-					...tcfv2Snapshot,
-					tcfv2: {
-						...tcfv2Snapshot.tcfv2,
-						vendorConsents: { [googleRemarketingVendorId]: true },
-					},
-				},
-			},
-			configuration,
-		).consent_state?.gdpr;
-		const metaOnly = buildMParticleBatch(
-			{
-				...acquisition,
-				cmpConsentSnapshot: {
-					...tcfv2Snapshot,
-					tcfv2: {
-						...tcfv2Snapshot.tcfv2,
-						vendorConsents: { [metaVendorId]: true },
-					},
-				},
-			},
-			configuration,
-		).consent_state?.gdpr;
-
-		expect(
-			googleOnly?.paid_media_conversion_measurement_google?.consented,
-		).toBe(true);
-		expect(googleOnly?.paid_media_conversion_measurement_meta?.consented).toBe(
-			false,
-		);
-		expect(metaOnly?.paid_media_conversion_measurement_google?.consented).toBe(
-			false,
-		);
-		expect(metaOnly?.paid_media_conversion_measurement_meta?.consented).toBe(
-			true,
-		);
-	});
-
-	it.each([
-		['purpose 2 only', { '2': true }],
-		['purpose 3 only', { '3': true }],
-		['purpose 4 only', { '4': true }],
-		['purpose 7 missing', { '2': true, '3': true, '4': true }],
-		['purpose 7 false', { '2': true, '3': true, '4': true, '7': false }],
-		['purpose 7 null', { '2': true, '3': true, '4': true, '7': null }],
-	])('does not grant measurement from %s', (_label, consents) => {
-		const parsedAcquisition = acquisitionEventSchema.parse({
-			detail: {
-				...acquisition,
-				cmpConsentSnapshot: {
-					...tcfv2Snapshot,
-					tcfv2: {
-						...tcfv2Snapshot.tcfv2,
-						consents: consents as Record<string, boolean>,
-					},
-				},
-			},
-		}).detail;
-		const state = buildMParticleBatch(parsedAcquisition, configuration)
-			.consent_state?.gdpr;
-
-		expect(state?.paid_media_conversion_measurement_google?.consented).toBe(
-			false,
-		);
-		expect(state?.paid_media_conversion_measurement_meta?.consented).toBe(
-			false,
-		);
-	});
-
-	it.each([
-		[
-			'GDPR applicability missing',
-			{
-				...tcfv2Snapshot,
-				tcfv2: {
-					consents: tcfv2Snapshot.tcfv2.consents,
-					vendorConsents: tcfv2Snapshot.tcfv2.vendorConsents,
-					eventStatus: tcfv2Snapshot.tcfv2.eventStatus,
-					addtlConsent: tcfv2Snapshot.tcfv2.addtlConsent,
-				},
-			},
-			Date.parse(acquisition.eventTimeStamp),
-		],
-		[
-			'vendor consent null',
-			{
-				...tcfv2Snapshot,
-				tcfv2: {
-					...tcfv2Snapshot.tcfv2,
-					vendorConsents: { [googleRemarketingVendorId]: null },
-				},
-			},
-			Date.parse(acquisition.eventTimeStamp),
-		],
-		[
-			'vendor denied',
-			{
-				...tcfv2Snapshot,
-				tcfv2: {
-					...tcfv2Snapshot.tcfv2,
-					vendorConsents: {
-						[googleRemarketingVendorId]: false,
-						[metaVendorId]: false,
-					},
-				},
-			},
-			Date.parse(tcfv2Snapshot.capturedAt),
-		],
-		[
-			'GDPR not applicable',
-			{
-				...tcfv2Snapshot,
-				tcfv2: { ...tcfv2Snapshot.tcfv2, gdprApplies: false },
-			},
-			Date.parse(tcfv2Snapshot.capturedAt),
-		],
-		[
-			'capture time invalid',
-			{ ...tcfv2Snapshot, capturedAt: 'not-a-timestamp' },
-			Date.parse(acquisition.eventTimeStamp),
-		],
-	])('fails closed when %s', (_label, snapshot, expectedTimestamp) => {
-		const batch = buildMParticleBatch(
-			acquisitionEventSchema.parse({
-				detail: { ...acquisition, cmpConsentSnapshot: snapshot },
-			}).detail,
-			configuration,
-		);
-		expect(batch.consent_state?.gdpr).toEqual({
-			paid_media_conversion_measurement_google: {
-				consented: false,
-				timestamp_unixtime_ms: expectedTimestamp,
-			},
-			paid_media_conversion_measurement_meta: {
-				consented: false,
-				timestamp_unixtime_ms: expectedTimestamp,
-			},
-		});
-	});
-
-	it.each([
-		[
-			'USNAT with doNotSell false and no GPC signal',
-			{
-				capturedAt: '2026-10-12T14:13:08.848Z',
-				consentManagerVersion: '1.0.0',
-				framework: 'usnat',
-				gpcSignal: null,
-				usnat: { doNotSell: false, signalStatus: 'ready' },
-			},
-		],
-		[
-			'AUS with personalised advertising true',
-			{
-				capturedAt: '2026-10-12T14:13:08.848Z',
-				consentManagerVersion: '1.0.0',
-				framework: 'aus',
-				gpcSignal: false,
-				aus: { personalisedAdvertising: true, signalStatus: 'ready' },
-			},
-		],
-	])('does not infer GDPR measurement from %s', (_label, snapshot) => {
-		const batch = buildMParticleBatch(
-			acquisitionEventSchema.parse({
-				detail: { ...acquisition, cmpConsentSnapshot: snapshot },
-			}).detail,
-			configuration,
-		);
-
-		expect(batch.consent_state?.gdpr).toEqual({
-			paid_media_conversion_measurement_google: {
-				consented: false,
-				timestamp_unixtime_ms: Date.parse(snapshot.capturedAt),
-			},
-			paid_media_conversion_measurement_meta: {
-				consented: false,
-				timestamp_unixtime_ms: Date.parse(snapshot.capturedAt),
-			},
-		});
-	});
-
-	it('keeps explicit null consent unknown and accepts older events without it', () => {
+	it('keeps explicit null snapshots and accepts older events without one', () => {
 		const withNullSnapshot = acquisitionEventSchema.parse({
 			detail: { ...acquisition, cmpConsentSnapshot: null },
 		}).detail;
@@ -522,22 +313,12 @@ describe('buildMParticleBatch', () => {
 		expect(olderEvent.data.custom_attributes).not.toHaveProperty(
 			'cmp_consent_snapshot',
 		);
-		expect(olderBatch.consent_state?.gdpr).toMatchObject({
-			paid_media_conversion_measurement_google: {
-				consented: false,
-				timestamp_unixtime_ms: Date.parse(acquisition.eventTimeStamp),
-			},
-			paid_media_conversion_measurement_meta: {
-				consented: false,
-				timestamp_unixtime_ms: Date.parse(acquisition.eventTimeStamp),
-			},
-		});
 		expect(olderEvent.data.custom_attributes.similar_products_consent).toBe(
 			true,
 		);
 	});
 
-	it('converts an unreadable snapshot to unknown without rejecting the acquisition', () => {
+	it('preserves an unreadable snapshot as null without rejecting the acquisition', () => {
 		const parsedAcquisition = acquisitionEventSchema.parse({
 			detail: {
 				...acquisition,
@@ -549,10 +330,6 @@ describe('buildMParticleBatch', () => {
 
 		expect(event.data.custom_attributes.cmp_consent_snapshot).toBe('null');
 		expect(event.data.custom_attributes.similar_products_consent).toBe(true);
-		expect(
-			batch.consent_state?.gdpr?.paid_media_conversion_measurement_google
-				?.consented,
-		).toBe(false);
 	});
 
 	it('omits commerce amounts when the source event has no amount', () => {
