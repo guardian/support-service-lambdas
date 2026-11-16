@@ -6,9 +6,7 @@ import switchedSub from './fixtures/switchedSubInvoiceItems.json';
 import taxedSub from './fixtures/taxedSubInvoiceItems.json';
 import taxedSwitchedSub from './fixtures/taxedSwitchedSubInvoiceItems.json';
 
-// Fixtures are from product-move-api's MockGetInvoicesZuoraClient.scala
 describe('calculateRefundAmount', () => {
-	// cases ported from product-move-api's GetRefundAmountSpec.scala
 	it('refunds the paid invoice for a regular cancelled sub', () => {
 		expect(calculateRefundAmount(standardSub.records)).toEqual({
 			refundAmount: 20,
@@ -33,7 +31,6 @@ describe('calculateRefundAmount', () => {
 		});
 	});
 
-	// further cases using other fixtures from the same Scala file
 	it('includes tax across several charges', () => {
 		expect(calculateRefundAmount(taxedSub.records)).toEqual({
 			refundAmount: 12,

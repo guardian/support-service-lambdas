@@ -1,6 +1,4 @@
 /**
- * The refund rule ported from product-move-api's GetRefundInvoiceDetails.scala.
- *
  * After a refundable cancellation, the subscription's latest invoice is the negative (cancellation)
  * invoice, and the refund is the total (charges plus tax) of the invoice before it.
  * It is kept separate so later refund rules can replace it.
@@ -22,7 +20,7 @@ export type RefundAmount = {
 
 type InvoiceGroup = {
 	invoiceId: string;
-	// as in the Scala, an invoice is dated by its first item's ChargeDate
+	// an invoice is dated by its first item's ChargeDate
 	chargeDate: number;
 	items: RefundInvoiceItem[];
 };
