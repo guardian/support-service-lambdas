@@ -3,13 +3,13 @@ import { executeSalesforceQuery } from '@modules/salesforce/query';
 import { RecordSchema } from '@modules/salesforce/recordSchema';
 import { SfClient } from '@modules/salesforce/sfClient';
 import { stageFromEnvironment } from '@modules/stage';
-import { getSalesforceSecretNames } from '../salesforceSecretNames';
+import { getSalesforceConnectedAppSecretName } from '../salesforceSecretNames';
 
 export async function handler() {
 	try {
 		const stage = stageFromEnvironment();
-		const sfClient = await SfClient.createWithPasswordFlow(
-			getSalesforceSecretNames(stage),
+		const sfClient = await SfClient.createWithClientCredentials(
+			getSalesforceConnectedAppSecretName(stage),
 		);
 
 		const limit = 200;

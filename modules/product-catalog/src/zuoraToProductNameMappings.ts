@@ -138,6 +138,12 @@ export const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
 	'Non Founder Patron Membership - Annual': 'Annual',
 	'Patron - annual': 'V1DeprecatedAnnual',
 	'Patron - monthly': 'V1DeprecatedMonthly',
+	'Patrons Byline - monthly': 'BylineMonthly',
+	'Patrons Byline - annual': 'BylineAnnual',
+	'Patrons Headline - monthly': 'HeadlineMonthly',
+	'Patrons Headline - annual': 'HeadlineAnnual',
+	'Patrons Masthead - monthly': 'MastheadMonthly',
+	'Patrons Masthead - annual': 'MastheadAnnual',
 	// Discount
 	Percentage: 'Discount',
 } as const;
@@ -215,6 +221,18 @@ export const zuoraCatalogToProductRatePlanChargeKey: Record<string, string> = {
 	'Patron Membership - Annual': 'Subscription',
 	'Non Founder Patron Membership - Annual': 'Subscription',
 	'Non Founder Patron Membership - Monthly': 'Subscription',
+	'Patrons Masthead Contribution - Monthly': 'Contribution',
+	'Patrons Masthead Benefits - Monthly': 'Subscription',
+	'Patrons Masthead Contribution - Annual': 'Contribution',
+	'Patrons Masthead Benefits - Annual': 'Subscription',
+	'Patrons Headline Contribution - Monthly': 'Contribution',
+	'Patrons Headline Benefits - Monthly': 'Subscription',
+	'Patrons Headline Contribution - Annual': 'Contribution',
+	'Patrons Headline Benefits - Annual': 'Subscription',
+	'Patrons Byline Contribution - Monthly': 'Contribution',
+	'Patrons Byline Benefits - Monthly': 'Subscription',
+	'Patrons Byline Contribution - Annual': 'Contribution',
+	'Patrons Byline Benefits - Annual': 'Subscription',
 	Percentage: 'Percentage',
 } as const;
 export const getZuoraProductKey = (product: string): ProductKey => {

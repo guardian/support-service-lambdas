@@ -4,7 +4,8 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import circeCodecs._
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.util.config.LoadConfigModule
-import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
+import com.gu.util.zuora.{ZuoraQuery, ZuoraRestRequestMaker}
+import com.gu.zuora.baton.{BatonZuoraOAuth, BatonZuoraRestConfig}
 import com.gu.zuora.reports.aqua.ZuoraAquaRequestMaker
 import com.gu.zuora.sar.BatonModels.{PerformSarRequest, SarRequest, SarStatusRequest}
 import io.circe.syntax._
@@ -31,14 +32,18 @@ object ZuoraSarLocalRun extends App {
   }
 
   private def runTestPerformZuoraSar(request: SarRequest): Unit = {
-    val loadZuoraSarConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
-    val loadZuoraRestConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
+    val loadConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
     val streams = requestStreams(request)
     for {
-      zuoraSarConfig <- loadZuoraSarConfig[ZuoraSarConfig]
-      zuoraRestConfig <- loadZuoraRestConfig[ZuoraRestConfig]
-      requests = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
-      downloadRequests = ZuoraAquaRequestMaker(RawEffects.downloadResponse, zuoraRestConfig)
+      zuoraSarConfig <- loadConfig.load[ZuoraSarConfig]
+      zuoraRestConfig <- loadConfig.load[BatonZuoraRestConfig]
+      accessToken <- BatonZuoraOAuth.getAccessToken(zuoraRestConfig, RawEffects.stage, RawEffects.response)
+      requests = ZuoraRestRequestMaker.oauth(RawEffects.response, zuoraRestConfig.baseUrl, accessToken)
+      downloadRequests = ZuoraAquaRequestMaker.oauth(
+        RawEffects.downloadResponse,
+        zuoraRestConfig.baseUrl,
+        accessToken,
+      )
       zuoraQuerier = ZuoraQuery(requests)
       zuoraHelper = ZuoraSarService(requests, downloadRequests, zuoraQuerier)
     } yield {

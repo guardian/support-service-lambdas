@@ -19,6 +19,17 @@ object ZuoraAquaRequestMaker extends LazyLogging {
 
   implicit val reads = Json.reads[ZuoraAquaResponse]
 
+  def oauth(response: Request => Response, baseUrl: String, accessToken: String): RestRequestMaker.Requests =
+    new RestRequestMaker.Requests(
+      headers = Map(
+        "Authorization" -> s"Bearer $accessToken",
+        "Accept-Encoding" -> "identity",
+      ),
+      baseUrl = baseUrl.stripSuffix("/") + "/",
+      getResponse = response,
+      jsonIsSuccessful = zuoraIsSuccessful,
+    )
+
   def apply(response: Request => Response, config: ZuoraRestConfig): RestRequestMaker.Requests = {
     val credentials = s"${config.username}:${config.password}"
     val encodedCredentials = Base64.getEncoder.encodeToString(credentials.getBytes("UTF-8"))
