@@ -186,6 +186,18 @@ importers:
         specifier: ^8.10.147
         version: 8.10.161
 
+  handlers/cancellation-api:
+    dependencies:
+      logger:
+        specifier: workspace:*
+        version: link:../../modules/logger
+      zod:
+        specifier: 'catalog:'
+        version: 4.4.3
+      zuora:
+        specifier: workspace:*
+        version: link:../../modules/zuora
+
   handlers/cancellations-bus: {}
 
   handlers/contributions-only-countries-api:
