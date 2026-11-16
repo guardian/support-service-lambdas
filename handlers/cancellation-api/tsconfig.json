@@ -29,6 +29,9 @@
       "@modules/promotions/*": [
         "../../modules/promotions/src/*"
       ],
+      "@modules/identity/*": [
+        "../../modules/identity/src/*"
+      ],
       "@modules/cancellation-api/*": [
         "../../modules/cancellation-api/src/*"
       ]

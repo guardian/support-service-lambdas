@@ -38,13 +38,23 @@ describe('Cancellation API', () => {
 	});
 
 	it.each([
-		['/subscriptions/not-a-subscription/cancel', headers, '{}'],
+		['/subscriptions/invalid%20subscription/cancel', headers, '{}'],
 		[
 			`${subscriptionPath}/cancel`,
 			{ 'Content-Type': 'application/json' },
 			'{}',
 		],
 		[`${subscriptionPath}/cancel`, { ...headers, 'x-identity-id': ' ' }, '{}'],
+		[
+			`${subscriptionPath}/cancel`,
+			{ ...headers, 'x-identity-id': 'abc123' },
+			'{}',
+		],
+		[
+			`${subscriptionPath}/cancel`,
+			{ ...headers, 'x-identity-id': '123-456' },
+			'{}',
+		],
 		[`${subscriptionPath}/cancel`, headers, '{"reason":""}'],
 		[`${subscriptionPath}/cancel`, headers, '{"reason":123}'],
 		[
@@ -63,6 +73,23 @@ describe('Cancellation API', () => {
 		});
 		expect(response.status).toBe(400);
 	});
+
+	it.each(['12345678', 'GA1234', 'A-S12345678'])(
+		'accepts subscription number %s on both endpoints',
+		async (subscriptionNumber) => {
+			for (const action of ['preview-cancellation', 'cancel']) {
+				const response = await app.request(
+					`/subscriptions/${subscriptionNumber}/${action}`,
+					{ method: 'POST', headers, body: '{}' },
+				);
+				expect(response.status).toBe(200);
+				expect(await response.json()).toEqual({
+					type: 'hard',
+					willRefund: false,
+				});
+			}
+		},
+	);
 
 	it.each([
 		{ 'x-identity-id': '123456789' },

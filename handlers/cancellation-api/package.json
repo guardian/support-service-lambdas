@@ -24,7 +24,9 @@
     "@hono/aws-lambda": "^1.0.1",
     "@hono/zod-openapi": "^1.6.3",
     "logger": "workspace:*",
-    "routing": "workspace:*"
+    "routing": "workspace:*",
+    "identity": "workspace:*",
+    "zuora": "workspace:*"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147",

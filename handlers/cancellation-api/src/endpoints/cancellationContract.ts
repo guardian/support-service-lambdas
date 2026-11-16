@@ -1,19 +1,18 @@
 import { z } from '@hono/zod-openapi';
+import { identityIdSchema } from '@modules/identity/identityId';
 import { apiGatewayResponses } from '@modules/routing/apiGatewayErrorResponses';
 import { apiErrorResponses } from '@modules/routing/srApi';
+import { subscriptionNumberSchema } from '@modules/zuora/identifiers';
 
 export const subscriptionPathSchema = z.object({
-	subscriptionNumber: z
-		.string()
-		.regex(/^A-S\d+$/)
-		.openapi({
-			param: { name: 'subscriptionNumber', in: 'path' },
-			example: 'A-S12345678',
-		}),
+	subscriptionNumber: subscriptionNumberSchema.openapi({
+		param: { name: 'subscriptionNumber', in: 'path' },
+		example: 'A-S12345678',
+	}),
 });
 
 export const identityHeadersSchema = z.object({
-	'x-identity-id': z.string().trim().min(1).openapi({
+	'x-identity-id': identityIdSchema.openapi({
 		description:
 			'Identity ID supplied by the authenticated manage-frontend service layer.',
 		example: '123456789',

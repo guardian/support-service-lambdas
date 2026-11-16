@@ -1034,7 +1034,12 @@ const cancellationApi: HandlerDefinition = {
 		...devDeps['@hono/node-server'],
 		...devDeps.tsx,
 	},
-	moduleDependencies: [moduleLogger, moduleRouting],
+	moduleDependencies: [
+		moduleLogger,
+		moduleRouting,
+		moduleIdentity,
+		moduleZuora,
+	],
 	extraScripts: {
 		local: 'tsx runLocal/server.ts',
 	},

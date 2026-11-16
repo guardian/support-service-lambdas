@@ -197,6 +197,9 @@ importers:
       hono:
         specifier: ^4.13.18
         version: 4.13.18
+      identity:
+        specifier: workspace:*
+        version: link:../../modules/identity
       logger:
         specifier: workspace:*
         version: link:../../modules/logger
@@ -206,6 +209,9 @@ importers:
       zod:
         specifier: 'catalog:'
         version: 4.4.3
+      zuora:
+        specifier: workspace:*
+        version: link:../../modules/zuora
     devDependencies:
       '@hono/node-server':
         specifier: ^2.1.8
