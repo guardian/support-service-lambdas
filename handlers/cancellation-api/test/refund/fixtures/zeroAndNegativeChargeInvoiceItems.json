@@ -1,0 +1,43 @@
+{
+	"records": [
+		{
+			"ChargeDate": "2023-11-13T16:21:28.000+00:00",
+			"TaxAmount": 0,
+			"SubscriptionNumber": "A-S00721653",
+			"ProductName": "Supporter Plus",
+			"ServiceEndDate": "2024-11-12",
+			"ServiceStartDate": "2023-11-13",
+			"ChargeName": "Contribution",
+			"Id": "8ad093788bc82157018bc97ce7557025",
+			"InvoiceId": "8ad093788bc82157018bc97ce7457024",
+			"ChargeAmount": 0,
+			"ChargeNumber": "C-01242101"
+		},
+		{
+			"ChargeDate": "2023-11-13T16:21:28.000+00:00",
+			"TaxAmount": 0,
+			"SubscriptionNumber": "A-S00721653",
+			"ProductName": "Contributor",
+			"ServiceEndDate": "2024-11-12",
+			"ServiceStartDate": "2023-11-13",
+			"ChargeName": "Contribution",
+			"Id": "8ad093788bc82157018bc97ce7557026",
+			"InvoiceId": "8ad093788bc82157018bc97ce7457024",
+			"ChargeAmount": -50,
+			"ChargeNumber": "C-01242008"
+		},
+		{
+			"ChargeDate": "2023-11-13T16:21:28.000+00:00",
+			"TaxAmount": 0,
+			"SubscriptionNumber": "A-S00721653",
+			"ProductName": "Supporter Plus",
+			"ServiceEndDate": "2024-11-12",
+			"ServiceStartDate": "2023-11-13",
+			"ChargeName": "Subscription",
+			"Id": "8ad093788bc82157018bc97ce7557027",
+			"InvoiceId": "8ad093788bc82157018bc97ce7457024",
+			"ChargeAmount": 120,
+			"ChargeNumber": "C-01242100"
+		}
+	]
+}
