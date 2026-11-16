@@ -83,7 +83,6 @@ export class SingleContributionSalesforceWrites extends GuStack {
 		const getSecretValuePolicyStatement = new PolicyStatement({
 			effect: Effect.ALLOW,
 			resources: [
-				`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${props.stage}/Salesforce/User/SingleContributionSalesforceWrites-*`,
 				`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${props.stage}/Salesforce/ConnectedApp/SingleContributionSalesforceWrites-*`,
 			],
 			actions: ['secretsmanager:GetSecretValue'],
