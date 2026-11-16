@@ -1,7 +1,6 @@
 /**
  * After a refundable cancellation, the subscription's latest invoice is the negative (cancellation)
  * invoice, and the refund is the total (charges plus tax) of the invoice before it.
- * It is kept separate so later refund rules can replace it.
  */
 
 export type RefundInvoiceItem = {
