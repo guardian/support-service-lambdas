@@ -1,6 +1,5 @@
 /**
- * After a refundable cancellation, the subscription's latest invoice is the negative (cancellation)
- * invoice, and the refund is the total (charges plus tax) of the invoice before it.
+ * The refund is the total (charges plus tax) of the invoice before the negative (cancellation) invoice.
  */
 
 export type RefundInvoiceItem = {
@@ -13,7 +12,6 @@ export type RefundInvoiceItem = {
 
 export type RefundAmount = {
 	refundAmount: number;
-	negativeInvoiceId: string;
 	paidInvoiceId: string;
 };
 
@@ -26,21 +24,32 @@ type InvoiceGroup = {
 
 const toPence = (amount: number) => Math.round(amount * 100);
 
-export function calculateRefundAmount(
-	invoiceItems: RefundInvoiceItem[],
-): RefundAmount {
-	const invoices = groupByInvoice(invoiceItems).sort(
-		(a, b) => b.chargeDate - a.chargeDate,
+export function calculateRefundAmount({
+	negativeInvoiceId,
+	invoiceItems,
+}: {
+	negativeInvoiceId: string;
+	invoiceItems: RefundInvoiceItem[];
+}): RefundAmount {
+	const invoices = groupByInvoice(invoiceItems);
+	const negativeInvoice = invoices.find(
+		(invoice) => invoice.invoiceId === negativeInvoiceId,
 	);
-	const [negativeInvoice, paidInvoice] = invoices;
-	if (negativeInvoice === undefined || paidInvoice === undefined) {
+	if (negativeInvoice === undefined) {
 		throw new Error(
-			`Found ${invoices.length} invoice(s), but at least 2 are needed to find the cancellation invoice and the invoice to refund: ${JSON.stringify(invoiceItems)}`,
+			`Negative invoice ${negativeInvoiceId} is not in the subscription's invoice items`,
 		);
 	}
-	if (negativeInvoice.chargeDate === paidInvoice.chargeDate) {
+	const [paidInvoice] = invoices
+		.filter(
+			(invoice) =>
+				invoice !== negativeInvoice &&
+				invoice.chargeDate <= negativeInvoice.chargeDate,
+		)
+		.sort((a, b) => b.chargeDate - a.chargeDate);
+	if (paidInvoice === undefined) {
 		throw new Error(
-			`Can't tell which invoice is the cancellation invoice, because ${negativeInvoice.invoiceId} and ${paidInvoice.invoiceId} have the same charge date`,
+			`No invoice to refund before negative invoice ${negativeInvoiceId}`,
 		);
 	}
 
@@ -52,7 +61,6 @@ export function calculateRefundAmount(
 
 	return {
 		refundAmount: refundPence / 100,
-		negativeInvoiceId: negativeInvoice.invoiceId,
 		paidInvoiceId: paidInvoice.invoiceId,
 	};
 }
