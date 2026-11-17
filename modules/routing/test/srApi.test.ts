@@ -1,7 +1,8 @@
-import { createRoute, z } from '@hono/zod-openapi';
+import { createRoute, defineOpenAPIRoute, z } from '@hono/zod-openapi';
 import { ValidationError } from '@modules/errors';
 import { logger } from '@modules/logger/logger';
 import { createSrApi } from '../src/srApi';
+import { withJsonHandler } from '../src/withJsonHandler';
 
 const info = { title: 'Test API', description: 'Test API', version: '1.0.0' };
 const successResponses = {
@@ -30,17 +31,18 @@ describe('SR API conventions', () => {
 			.spyOn(process.stdout, 'write')
 			.mockImplementation(() => true);
 		const app = createSrApi(info, [
-			{
+			defineOpenAPIRoute({
 				route: createRoute({
 					method: 'get',
 					path: '/health',
 					responses: successResponses,
 				}),
-				handler: async () => {
+				handler: async (c) => {
 					logger.mutableAddContext('request-reference');
-					return Promise.resolve({ ok: true });
+					c.header('x-example', 'preserved');
+					return Promise.resolve(c.json({ ok: true }, 200));
 				},
-			},
+			}),
 		]);
 		const response = await app.request('/health', {
 			headers: {
@@ -49,6 +51,7 @@ describe('SR API conventions', () => {
 			},
 		});
 		expect(response.status).toBe(200);
+		expect(response.headers.get('x-example')).toBe('preserved');
 		const logs = output.mock.calls
 			.map(([chunk]) =>
 				typeof chunk === 'string' ? chunk : Buffer.from(chunk).toString('utf8'),
@@ -63,6 +66,28 @@ describe('SR API conventions', () => {
 		expect(logger.getMessage('test', 'after request')).toBe(
 			'[test] after request',
 		);
+	});
+
+	it('passes undefined for undeclared request parts', async () => {
+		const app = createSrApi(info, [
+			defineOpenAPIRoute({
+				route: createRoute({
+					method: 'get',
+					path: '/empty',
+					responses: successResponses,
+				}),
+				handler: withJsonHandler(async ({ params, headers, body }) => {
+					const parts: undefined[] = [params, headers, body];
+					expect(parts).toEqual([undefined, undefined, undefined]);
+					return Promise.resolve({ ok: true });
+				}),
+			}),
+		]);
+
+		const response = await app.request('/empty');
+
+		expect(response.status).toBe(200);
+		expect(await response.json()).toEqual({ ok: true });
 	});
 
 	it('passes transformed inputs to async handlers and applies the response schema', async () => {
@@ -95,7 +120,7 @@ describe('SR API conventions', () => {
 								itemId: z.number(),
 								label: z.string(),
 								length: z.number().transform((value) => value * 2),
-								confirmed: z.boolean().default(true),
+								confirmed: z.boolean().default(true).optional(),
 							}),
 						},
 					},
@@ -103,15 +128,16 @@ describe('SR API conventions', () => {
 			},
 		});
 		const app = createSrApi(info, [
-			{
+			defineOpenAPIRoute({
 				route,
-				handler: async ({ params, headers, body }) =>
-					Promise.resolve({
+				handler: withJsonHandler(async ({ params, headers, body }) => {
+					return Promise.resolve({
 						itemId: params.itemId,
 						label: headers['x-label'],
 						length: body.reference,
-					}),
-			},
+					});
+				}),
+			}),
 		]);
 		const response = await app.request('/items/0012', {
 			method: 'POST',
@@ -140,13 +166,13 @@ describe('SR API conventions', () => {
 			errorContext = logger.getMessage('test', 'failed');
 		});
 		const app = createSrApi(info, [
-			{
+			defineOpenAPIRoute({
 				route,
-				handler: async () => {
+				handler: async (c) => {
 					logger.mutableAddContext('item-reference');
-					return Promise.resolve(result);
+					return Promise.resolve(c.json(result, 200));
 				},
-			},
+			}),
 		]);
 		const response = await app.request('/result');
 		expect(response.status).toBe(500);
@@ -162,7 +188,7 @@ describe('SR API conventions', () => {
 
 	it('treats exceptions from async response validation as server errors', async () => {
 		const app = createSrApi(info, [
-			{
+			defineOpenAPIRoute({
 				route: createRoute({
 					method: 'get',
 					path: '/invalid-response',
@@ -184,8 +210,8 @@ describe('SR API conventions', () => {
 						},
 					},
 				}),
-				handler: async () => Promise.resolve({ ok: true }),
-			},
+				handler: async (c) => Promise.resolve(c.json({ ok: true }, 200)),
+			}),
 		]);
 
 		const response = await app.request('/invalid-response');
@@ -211,13 +237,14 @@ describe('SR API conventions', () => {
 				responses: successResponses,
 			});
 			const app = createSrApi(info, [
-				{
+				defineOpenAPIRoute({
 					route,
 					handler: async () => {
 						logger.mutableAddContext('failed-item');
-						return Promise.reject(error);
+						await Promise.resolve();
+						throw error;
 					},
-				},
+				}),
 			]);
 			const response = await app.request('/failure');
 			expect(response.status).toBe(status);

@@ -1,5 +1,5 @@
 import { OpenAPIHono, type RouteConfig, z } from '@hono/zod-openapi';
-import type { Context, Env, Next } from 'hono';
+import type { Context, Next } from 'hono';
 import { html } from 'hono/html';
 import { HTTPException } from 'hono/http-exception';
 import { ValidationError } from '@modules/errors';
@@ -50,18 +50,7 @@ export const apiErrorResponses = {
 	},
 };
 
-/**
- * each route can take the input, and return a 200 response of the declated type
- */
 type JsonRoute = RouteConfig & {
-	request?: {
-		params?: z.ZodType;
-		headers?: z.ZodType;
-		body?: {
-			required: true;
-			content: { 'application/json': { schema: z.ZodType } };
-		};
-	};
 	responses: {
 		200: {
 			content: {
@@ -72,77 +61,16 @@ type JsonRoute = RouteConfig & {
 };
 
 /**
- * helper extracts the type of a specific parameter/header
- */
-type ParsedPart<Request, Key extends PropertyKey> =
-	Request extends Record<Key, infer Schema extends z.ZodType>
-		? z.output<Schema>
-		: undefined;
-
-/**
- * Builds the handler's typed params, headers and body,
- * including transformations applied by the request schemas.
- */
-export type SrRequest<R extends RouteConfig> = {
-	params: ParsedPart<R['request'], 'params'>;
-	headers: ParsedPart<R['request'], 'headers'>;
-	body: R['request'] extends {
-		body: {
-			content: {
-				'application/json': { schema: infer Schema extends z.ZodType };
-			};
-		};
-	}
-		? z.output<Schema>
-		: undefined;
-};
-
-/**
- * Defines what the handler may return. Uses the response
- * schema's input type so handlers can omit fields supplied by schema defaults.
- */
-type RouteResponse<R extends JsonRoute> = z.input<
-	R['responses'][200]['content']['application/json']['schema']
->;
-
-/**
- * Connects a route's schemas to its handler's arguments
- * and asynchronous return value.
- */
-type SrEndpoint<R extends JsonRoute, Result extends RouteResponse<R>> = {
-	route: R;
-	handler: (request: SrRequest<NoInfer<R>>) => Promise<Result>;
-};
-
-/**
- * Common internal shape for registering differently typed
- * endpoints. The public createSrApi signature performs the stricter checks.
- */
-type RegisteredEndpoint = {
-	route: JsonRoute;
-	handler(
-		this: void,
-		request: { params: unknown; headers: unknown; body: unknown },
-	): Promise<unknown>;
-};
-
-/**
  * create an api in your lambda and get all the standard openapi and error functionality
  *
  * @param info useful information for the lambda's open API/swagger page
  * @param routes endpoint definitions to register
  */
 export function createSrApi<
-	const Routes extends readonly JsonRoute[],
-	const Results extends { [K in keyof Routes]: RouteResponse<Routes[K]> },
->(
-	info: ApiInfo,
-	routes: { [K in keyof Routes]: SrEndpoint<Routes[K], Results[K]> },
-): OpenAPIHono;
-export function createSrApi(
-	info: ApiInfo,
-	routes: readonly RegisteredEndpoint[],
-) {
+	const Routes extends ReadonlyArray<
+		Parameters<OpenAPIHono['openapiRoutes']>[0][number] & { route: JsonRoute }
+	>,
+>(info: ApiInfo, routes: Routes) {
 	const callerInfo = getCallerInfo();
 
 	/*
@@ -267,33 +195,44 @@ export function createSrApi(
 	);
 
 	return app.openapiRoutes(
-		routes.map(({ route, handler }) => ({
-			route,
-			handler: async (
-				c: Context<
-					Env,
-					string,
-					{ out: { param: unknown; header: unknown; json: unknown } }
-				>,
-			) => {
-				const result = await handler({
-					params: c.req.valid('param'),
-					headers: c.req.valid('header'),
-					body: c.req.valid('json'),
-				});
-				try {
-					const response =
-						await route.responses[200].content[
-							'application/json'
-						].schema.parseAsync(result);
-					return c.json(response, 200);
-				} catch (cause) {
-					throw new HTTPException(500, {
-						message: 'Invalid API response',
-						cause,
-					});
-				}
-			},
-		})),
+		routes.map((endpoint) => {
+			const middleware = endpoint.route.middleware;
+			const schema =
+				endpoint.route.responses[200].content['application/json'].schema;
+			return {
+				...endpoint,
+				route: {
+					...endpoint.route,
+					middleware: [
+						async (c: Context, next: Next) => {
+							await next();
+							if (c.res.status !== 200) {
+								return;
+							}
+							try {
+								const response = await schema.parseAsync(
+									await c.res.clone().json(),
+								);
+								const headers = new Headers(c.res.headers);
+								headers.delete('content-length');
+								headers.delete('etag');
+								headers.set('content-type', 'application/json');
+								c.res = c.json(response, { status: 200, headers });
+							} catch (cause) {
+								throw new HTTPException(500, {
+									message: 'Invalid API response',
+									cause,
+								});
+							}
+						},
+						...(Array.isArray(middleware)
+							? middleware
+							: middleware
+								? [middleware]
+								: []),
+					],
+				},
+			};
+		}),
 	);
 }
