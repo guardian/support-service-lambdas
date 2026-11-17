@@ -655,15 +655,15 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "LambdaRestApiDeployment953190895337f11c0a7cace680ab9601dcba6673": {
+    "LambdaRestApiDeployment95319089606f703f0e342561a20e5e98447f9f1b": {
       "DependsOn": [
         "LambdaRestApiproxyANY486C4D1F",
         "LambdaRestApiproxy22103CFD",
         "LambdaRestApiANYC3C9D364",
-        "LambdaRestApidocsproxyGET8307FF33",
-        "LambdaRestApidocsproxy1FCFEAB7",
-        "LambdaRestApidocsGETA804B809",
-        "LambdaRestApidocsB662848C",
+        "LambdaRestApiexplorerproxyGET6B3C3EF0",
+        "LambdaRestApiexplorerproxyF0E4BDBC",
+        "LambdaRestApiexplorerGET0FD947E2",
+        "LambdaRestApiexplorer29DEFF5D",
         "LambdaRestApiopenapijsonproxyGET992734B5",
         "LambdaRestApiopenapijsonproxy47A1F813",
         "LambdaRestApiopenapijsonGETA1FE48FD",
@@ -686,7 +686,7 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "LambdaRestApiDeployment953190895337f11c0a7cace680ab9601dcba6673",
+          "Ref": "LambdaRestApiDeployment95319089606f703f0e342561a20e5e98447f9f1b",
         },
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",
@@ -773,7 +773,7 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::UsagePlanKey",
     },
-    "LambdaRestApidocsB662848C": {
+    "LambdaRestApiexplorer29DEFF5D": {
       "Properties": {
         "ParentId": {
           "Fn::GetAtt": [
@@ -781,14 +781,14 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
             "RootResourceId",
           ],
         },
-        "PathPart": "docs",
+        "PathPart": "explorer",
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",
         },
       },
       "Type": "AWS::ApiGateway::Resource",
     },
-    "LambdaRestApidocsGETA804B809": {
+    "LambdaRestApiexplorerGET0FD947E2": {
       "Properties": {
         "ApiKeyRequired": false,
         "AuthorizationType": "NONE",
@@ -821,7 +821,7 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
           },
         },
         "ResourceId": {
-          "Ref": "LambdaRestApidocsB662848C",
+          "Ref": "LambdaRestApiexplorer29DEFF5D",
         },
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",
@@ -829,7 +829,7 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::Method",
     },
-    "LambdaRestApidocsGETApiPermissionTestcancellationapiCODELambdaRestApi0DED9311GETdocs9D528BA4": {
+    "LambdaRestApiexplorerGETApiPermissionTestcancellationapiCODELambdaRestApi0DED9311GETexplorer499FA18F": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -859,14 +859,14 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
               {
                 "Ref": "LambdaRestApi687C4D83",
               },
-              "/test-invoke-stage/GET/docs",
+              "/test-invoke-stage/GET/explorer",
             ],
           ],
         },
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "LambdaRestApidocsGETApiPermissioncancellationapiCODELambdaRestApi0DED9311GETdocsDA2920CC": {
+    "LambdaRestApiexplorerGETApiPermissioncancellationapiCODELambdaRestApi0DED9311GETexplorerDDC26583": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -900,17 +900,17 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
               {
                 "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
               },
-              "/GET/docs",
+              "/GET/explorer",
             ],
           ],
         },
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "LambdaRestApidocsproxy1FCFEAB7": {
+    "LambdaRestApiexplorerproxyF0E4BDBC": {
       "Properties": {
         "ParentId": {
-          "Ref": "LambdaRestApidocsB662848C",
+          "Ref": "LambdaRestApiexplorer29DEFF5D",
         },
         "PathPart": "{proxy+}",
         "RestApiId": {
@@ -919,7 +919,7 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::Resource",
     },
-    "LambdaRestApidocsproxyGET8307FF33": {
+    "LambdaRestApiexplorerproxyGET6B3C3EF0": {
       "Properties": {
         "ApiKeyRequired": false,
         "AuthorizationType": "NONE",
@@ -952,7 +952,7 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
           },
         },
         "ResourceId": {
-          "Ref": "LambdaRestApidocsproxy1FCFEAB7",
+          "Ref": "LambdaRestApiexplorerproxyF0E4BDBC",
         },
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",
@@ -960,7 +960,7 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::Method",
     },
-    "LambdaRestApidocsproxyGETApiPermissionTestcancellationapiCODELambdaRestApi0DED9311GETdocsproxy405D1DC7": {
+    "LambdaRestApiexplorerproxyGETApiPermissionTestcancellationapiCODELambdaRestApi0DED9311GETexplorerproxy71EB929A": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -990,14 +990,14 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
               {
                 "Ref": "LambdaRestApi687C4D83",
               },
-              "/test-invoke-stage/GET/docs/*",
+              "/test-invoke-stage/GET/explorer/*",
             ],
           ],
         },
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "LambdaRestApidocsproxyGETApiPermissioncancellationapiCODELambdaRestApi0DED9311GETdocsproxyD3E4B2C4": {
+    "LambdaRestApiexplorerproxyGETApiPermissioncancellationapiCODELambdaRestApi0DED9311GETexplorerproxyAA5A1BB7": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -1031,7 +1031,7 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
               {
                 "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
               },
-              "/GET/docs/*",
+              "/GET/explorer/*",
             ],
           ],
         },
@@ -2325,15 +2325,15 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "LambdaRestApiDeployment953190892555503d10513fbef220465f2a97ce7e": {
+    "LambdaRestApiDeployment9531908975dcbf1d29a41e2fd69094785cc6b755": {
       "DependsOn": [
         "LambdaRestApiproxyANY486C4D1F",
         "LambdaRestApiproxy22103CFD",
         "LambdaRestApiANYC3C9D364",
-        "LambdaRestApidocsproxyGET8307FF33",
-        "LambdaRestApidocsproxy1FCFEAB7",
-        "LambdaRestApidocsGETA804B809",
-        "LambdaRestApidocsB662848C",
+        "LambdaRestApiexplorerproxyGET6B3C3EF0",
+        "LambdaRestApiexplorerproxyF0E4BDBC",
+        "LambdaRestApiexplorerGET0FD947E2",
+        "LambdaRestApiexplorer29DEFF5D",
         "LambdaRestApiopenapijsonproxyGET992734B5",
         "LambdaRestApiopenapijsonproxy47A1F813",
         "LambdaRestApiopenapijsonGETA1FE48FD",
@@ -2356,7 +2356,7 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "LambdaRestApiDeployment953190892555503d10513fbef220465f2a97ce7e",
+          "Ref": "LambdaRestApiDeployment9531908975dcbf1d29a41e2fd69094785cc6b755",
         },
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",
@@ -2443,7 +2443,7 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::UsagePlanKey",
     },
-    "LambdaRestApidocsB662848C": {
+    "LambdaRestApiexplorer29DEFF5D": {
       "Properties": {
         "ParentId": {
           "Fn::GetAtt": [
@@ -2451,14 +2451,14 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
             "RootResourceId",
           ],
         },
-        "PathPart": "docs",
+        "PathPart": "explorer",
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",
         },
       },
       "Type": "AWS::ApiGateway::Resource",
     },
-    "LambdaRestApidocsGETA804B809": {
+    "LambdaRestApiexplorerGET0FD947E2": {
       "Properties": {
         "ApiKeyRequired": false,
         "AuthorizationType": "NONE",
@@ -2491,7 +2491,7 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
           },
         },
         "ResourceId": {
-          "Ref": "LambdaRestApidocsB662848C",
+          "Ref": "LambdaRestApiexplorer29DEFF5D",
         },
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",
@@ -2499,7 +2499,7 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::Method",
     },
-    "LambdaRestApidocsGETApiPermissionTestcancellationapiPRODLambdaRestApiF0E35FF7GETdocsE5B81359": {
+    "LambdaRestApiexplorerGETApiPermissionTestcancellationapiPRODLambdaRestApiF0E35FF7GETexplorerF9EB5F4F": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -2529,14 +2529,14 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
               {
                 "Ref": "LambdaRestApi687C4D83",
               },
-              "/test-invoke-stage/GET/docs",
+              "/test-invoke-stage/GET/explorer",
             ],
           ],
         },
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "LambdaRestApidocsGETApiPermissioncancellationapiPRODLambdaRestApiF0E35FF7GETdocs9B8D463B": {
+    "LambdaRestApiexplorerGETApiPermissioncancellationapiPRODLambdaRestApiF0E35FF7GETexplorer1087D7D4": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -2570,17 +2570,17 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
               {
                 "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
               },
-              "/GET/docs",
+              "/GET/explorer",
             ],
           ],
         },
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "LambdaRestApidocsproxy1FCFEAB7": {
+    "LambdaRestApiexplorerproxyF0E4BDBC": {
       "Properties": {
         "ParentId": {
-          "Ref": "LambdaRestApidocsB662848C",
+          "Ref": "LambdaRestApiexplorer29DEFF5D",
         },
         "PathPart": "{proxy+}",
         "RestApiId": {
@@ -2589,7 +2589,7 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::Resource",
     },
-    "LambdaRestApidocsproxyGET8307FF33": {
+    "LambdaRestApiexplorerproxyGET6B3C3EF0": {
       "Properties": {
         "ApiKeyRequired": false,
         "AuthorizationType": "NONE",
@@ -2622,7 +2622,7 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
           },
         },
         "ResourceId": {
-          "Ref": "LambdaRestApidocsproxy1FCFEAB7",
+          "Ref": "LambdaRestApiexplorerproxyF0E4BDBC",
         },
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",
@@ -2630,7 +2630,7 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::Method",
     },
-    "LambdaRestApidocsproxyGETApiPermissionTestcancellationapiPRODLambdaRestApiF0E35FF7GETdocsproxy26A928A7": {
+    "LambdaRestApiexplorerproxyGETApiPermissionTestcancellationapiPRODLambdaRestApiF0E35FF7GETexplorerproxyA311DB01": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -2660,14 +2660,14 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
               {
                 "Ref": "LambdaRestApi687C4D83",
               },
-              "/test-invoke-stage/GET/docs/*",
+              "/test-invoke-stage/GET/explorer/*",
             ],
           ],
         },
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "LambdaRestApidocsproxyGETApiPermissioncancellationapiPRODLambdaRestApiF0E35FF7GETdocsproxyB8701963": {
+    "LambdaRestApiexplorerproxyGETApiPermissioncancellationapiPRODLambdaRestApiF0E35FF7GETexplorerproxyB3B2DFD8": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -2701,7 +2701,7 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
               {
                 "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
               },
-              "/GET/docs/*",
+              "/GET/explorer/*",
             ],
           ],
         },

@@ -1,9 +1,4 @@
-import {
-	OpenAPIHono,
-	type OpenAPIRoute,
-	type RouteConfig,
-	z,
-} from '@hono/zod-openapi';
+import { OpenAPIHono, type RouteConfig, z } from '@hono/zod-openapi';
 import type { Context, Env, Next } from 'hono';
 import { html } from 'hono/html';
 import { HTTPException } from 'hono/http-exception';
@@ -78,7 +73,7 @@ type ParsedPart<Request, Key extends PropertyKey> =
 		? z.output<Schema>
 		: undefined;
 
-type RouteRequest<R extends RouteConfig> = {
+export type SrRequest<R extends RouteConfig> = {
 	params: ParsedPart<R['request'], 'params'>;
 	headers: ParsedPart<R['request'], 'headers'>;
 	body: R['request'] extends {
@@ -96,49 +91,18 @@ type RouteResponse<R extends JsonRoute> = z.input<
 	R['responses'][200]['content']['application/json']['schema']
 >;
 
-type RouteValidation<R extends RouteConfig> = {
-	out: {
-		param: RouteRequest<R>['params'];
-		header: RouteRequest<R>['headers'];
-		json: RouteRequest<R>['body'];
-	};
+type SrEndpoint<R extends JsonRoute, Result extends RouteResponse<R>> = {
+	route: R;
+	handler: (request: SrRequest<NoInfer<R>>) => Result | Promise<Result>;
 };
 
-/*
- * JSON endpoints receive validated data, not framework context, and return the
- * input to their mandatory 200 response schema. Parse that result before sending
- * it so response defaults/transforms apply and invalid output becomes a 500.
- */
-export function defineSrRoute<
-	R extends JsonRoute,
-	const Result extends RouteResponse<R>,
->(
-	definition: Omit<OpenAPIRoute<R>, 'handler'> & {
-		logContext: ((request: RouteRequest<NoInfer<R>>) => string) | undefined;
-		handler: (request: RouteRequest<NoInfer<R>>) => Result | Promise<Result>;
-	},
-) {
-	const { logContext, ...endpoint } = definition;
-	return {
-		...endpoint,
-		handler: async (c: Context<Env, string, RouteValidation<R>>) => {
-			const request: RouteRequest<R> = {
-				params: c.req.valid('param'),
-				headers: c.req.valid('header'),
-				body: c.req.valid('json'),
-			};
-			if (logContext !== undefined) {
-				logger.mutableAddContext(logContext(request));
-			}
-			const result = await endpoint.handler(request);
-			const response =
-				await endpoint.route.responses[200].content[
-					'application/json'
-				].schema.parseAsync(result);
-			return c.json(response, 200);
-		},
-	};
-}
+type RegisteredEndpoint = {
+	route: JsonRoute;
+	handler(
+		this: void,
+		request: { params: unknown; headers: unknown; body: unknown },
+	): unknown;
+};
 
 /**
  * create an api in your lambda and get all the standard openapi and error functionality
@@ -147,9 +111,18 @@ export function defineSrRoute<
  * @param routes endpoint definitions to register
  */
 export function createSrApi<
-	const Routes extends Parameters<OpenAPIHono['openapiRoutes']>[0],
->(info: ApiInfo, routes: Routes) {
+	const Routes extends readonly JsonRoute[],
+	const Results extends { [K in keyof Routes]: RouteResponse<Routes[K]> },
+>(
+	info: ApiInfo,
+	routes: { [K in keyof Routes]: SrEndpoint<Routes[K], Results[K]> },
+): OpenAPIHono;
+export function createSrApi(
+	info: ApiInfo,
+	routes: readonly RegisteredEndpoint[],
+) {
 	const callerInfo = getCallerInfo();
+
 	/*
 	 * Log and return schema-validation failures.
 	 * https://github.com/honojs/middleware/tree/main/packages/zod-openapi#a-dry-approach-to-handling-validation-errors
@@ -165,11 +138,7 @@ export function createSrApi<
 	});
 
 	/*
-	 * Reuse standard function entry/exit formatting and request context cleanup.
-	 * Project only the method/path and response status, not the Hono context or
-	 * credential headers. Hono catches exceptions inside next(), so onError below
-	 * remains responsible for logging unexpected failures once.
-	 * https://hono.dev/docs/guides/middleware#execution-order
+	 * add standard logging and context clearance to all routes
 	 */
 	app.use(
 		'*',
@@ -192,10 +161,7 @@ export function createSrApi<
 	);
 
 	/*
-	 * Hono has default error handling, so this is optional. Our override maps
-	 * repository ValidationError to 400, preserves framework client statuses
-	 * (including malformed JSON/media-type errors), and logs unexpected failures
-	 * while returning a generic JSON 500 without internals.
+	 * map ValidationError to 400, log 500 errors without returning the detail
 	 * https://hono.dev/docs/api/hono#error-handling
 	 * https://hono.dev/docs/api/exception
 	 */
@@ -211,15 +177,15 @@ export function createSrApi<
 		logger.error('API request failed', error);
 		return c.json({ message: 'Internal server error' }, 500);
 	});
+
 	/*
-	 * Optional JSON consistency only: Hono already returns 404 for unknown routes.
-	 * Omit this if its default text response is acceptable.
+	 * more consistent 404 error response
 	 * https://hono.dev/docs/api/hono#not-found
 	 */
 	app.notFound((c) => c.json({ message: 'Not Found' }, 404));
 
 	/*
-	 * Required for endpoint security references/Scalar key entry in our docs, NOT
+	 * Required for endpoint security references/Scalar key entry in the explorer, NOT
 	 * runtime authentication. API Gateway enforces the key. OpenAPI Hono documents
 	 * this component-registration pattern.
 	 * https://github.com/honojs/middleware/tree/main/packages/zod-openapi#how-to-setup-authorization
@@ -232,9 +198,7 @@ export function createSrApi<
 	});
 
 	/*
-	 * Required to serve our generated OpenAPI 3.1 document. The explicit relative
-	 * server URL is our deployment choice: the OpenAPI default "/" would lose a
-	 * raw API Gateway stage prefix during "try me" calls.
+	 * Endpoint for the generated OpenAPI 3.1 document.
 	 * https://github.com/honojs/middleware/tree/main/packages/zod-openapi#openapi-v31
 	 * https://spec.openapis.org/oas/v3.1.0#server-object
 	 */
@@ -245,24 +209,14 @@ export function createSrApi<
 			{ url: '.', description: 'This server, including any API Gateway stage' },
 		],
 	});
+
 	/*
-	 * Optional trailing-slash convenience. Hono uses strict paths by default;
-	 * redirecting also keeps "./openapi.json" relative to the correct directory
-	 * instead of resolving to "/docs/openapi.json".
-	 * https://hono.dev/docs/api/hono#strict-mode
-	 */
-	app.get('/docs/', (c) => c.redirect('../docs'));
-	/*
-	 * Required for the requested interactive UI, not for API routing. This follows
-	 * Scalar's HTML integration and Hono's html helper. Pinning the browser bundle
-	 * is our reproducibility choice; disabling the proxy, credential persistence
-	 * and telemetry is our configuration, not a requirement from Scalar.
-	 * Requests must go directly to our authenticated API.
+	 * endpoint for the interactive "try me" UI.
 	 * https://scalar.com/products/api-references/getting-started
 	 * https://scalar.com/products/api-references/configuration
 	 * https://hono.dev/docs/helpers/html
 	 */
-	app.get('/docs', (c) =>
+	app.get('/explorer', (c) =>
 		c.html(
 			html`<!doctype html>
 				<html lang="en">
@@ -290,10 +244,34 @@ export function createSrApi<
 		),
 	);
 
-	/*
-	 * Register the supplied route array with Hono's native type inference and
-	 * return the configured app for Lambda/local adapters.
-	 * https://hono.dev/docs/getting-started/aws-lambda
-	 */
-	return app.openapiRoutes(routes);
+	return app.openapiRoutes(
+		routes.map(({ route, handler }) => ({
+			route,
+			handler: async (
+				c: Context<
+					Env,
+					string,
+					{ out: { param: unknown; header: unknown; json: unknown } }
+				>,
+			) => {
+				const result = await handler({
+					params: c.req.valid('param'),
+					headers: c.req.valid('header'),
+					body: c.req.valid('json'),
+				});
+				try {
+					const response =
+						await route.responses[200].content[
+							'application/json'
+						].schema.parseAsync(result);
+					return c.json(response, 200);
+				} catch (cause) {
+					throw new HTTPException(500, {
+						message: 'Invalid API response',
+						cause,
+					});
+				}
+			},
+		})),
+	);
 }

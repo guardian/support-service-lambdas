@@ -1,5 +1,4 @@
 import { createRoute, z } from '@hono/zod-openapi';
-import { defineSrRoute } from '@modules/routing/srApi';
 import {
 	cancellationResponses,
 	exampleResponse,
@@ -7,7 +6,7 @@ import {
 	subscriptionPathSchema,
 } from './cancellationContract';
 
-export const cancelEndpoint = defineSrRoute({
+export const cancelEndpoint = {
 	route: createRoute({
 		method: 'post',
 		path: '/subscriptions/{subscriptionNumber}/cancel',
@@ -32,6 +31,5 @@ export const cancelEndpoint = defineSrRoute({
 		},
 		responses: cancellationResponses,
 	}),
-	logContext: ({ params }) => params.subscriptionNumber,
 	handler: () => exampleResponse,
-});
+};

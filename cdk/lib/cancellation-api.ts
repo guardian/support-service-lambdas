@@ -23,7 +23,7 @@ export class CancellationApi extends SrStack {
 				burstLimit: 10,
 			},
 		});
-		lambda.addPublicPath('docs');
+		lambda.addPublicPath('explorer');
 		lambda.addPublicPath('openapi.json');
 
 		// Refund workflow Lambdas, see https://github.com/guardian/support-service-lambdas/issues/3942

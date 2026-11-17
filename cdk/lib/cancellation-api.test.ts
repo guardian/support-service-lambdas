@@ -13,11 +13,14 @@ describe('The Cancellation api stack', () => {
 	});
 
 	it.each(['CODE', 'PROD'] as const)(
-		'keeps operations protected and documentation public in %s',
+		'keeps operations protected and the explorer and OpenAPI public in %s',
 		(stage) => {
 			const template = Template.fromStack(
 				new CancellationApi(new App(), stage),
 			);
+			template.hasResourceProperties('AWS::ApiGateway::Resource', {
+				PathPart: 'explorer',
+			});
 			template.hasResourceProperties('AWS::ApiGateway::Method', {
 				HttpMethod: 'ANY',
 				ApiKeyRequired: true,

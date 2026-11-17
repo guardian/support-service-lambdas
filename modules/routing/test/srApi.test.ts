@@ -2,7 +2,7 @@ import { createRoute, z } from '@hono/zod-openapi';
 import { HTTPException } from 'hono/http-exception';
 import { ValidationError } from '@modules/errors';
 import { logger } from '@modules/logger/logger';
-import { createSrApi, defineSrRoute } from '../src/srApi';
+import { createSrApi } from '../src/srApi';
 
 const info = { title: 'Test API', description: 'Test API', version: '1.0.0' };
 
@@ -33,9 +33,9 @@ describe('SR API conventions', () => {
 		});
 	});
 
-	it('serves public interactive docs with direct requests and no stored credentials or telemetry', async () => {
+	it('serves the public explorer with direct requests and no stored credentials or telemetry', async () => {
 		const app = createSrApi(info, []);
-		const response = await app.request('/docs');
+		const response = await app.request('/explorer');
 		expect(response.status).toBe(200);
 		const body = await response.text();
 		expect(body).toContain('Scalar.createApiReference');
@@ -54,30 +54,25 @@ describe('SR API conventions', () => {
 		'rejects %s before calling the handler',
 		async (_name, headers, body, status) => {
 			const handler = jest.fn(() => ({ ok: true }));
-			const app = createSrApi(info, [
-				defineSrRoute({
-					route: createRoute({
-						method: 'post',
-						path: '/items',
-						request: {
-							body: {
-								required: true,
-								content: { 'application/json': { schema: z.strictObject({}) } },
-							},
+			const route = createRoute({
+				method: 'post',
+				path: '/items',
+				request: {
+					body: {
+						required: true,
+						content: { 'application/json': { schema: z.strictObject({}) } },
+					},
+				},
+				responses: {
+					200: {
+						description: 'Success',
+						content: {
+							'application/json': { schema: z.object({ ok: z.boolean() }) },
 						},
-						responses: {
-							200: {
-								description: 'Success',
-								content: {
-									'application/json': { schema: z.object({ ok: z.boolean() }) },
-								},
-							},
-						},
-					}),
-					logContext: undefined,
-					handler,
-				}),
-			]);
+					},
+				},
+			});
+			const app = createSrApi(info, [{ route, handler }]);
 			const response = await app.request('/items', {
 				method: 'POST',
 				headers,
@@ -114,36 +109,49 @@ describe('SR API conventions', () => {
 		expect(logs).not.toContain('private-token');
 	});
 
-	it('passes parsed Zod parameters to the handler and logging context, then clears it', async () => {
+	it('passes parsed parameters to ordinary handlers and clears their logging context', async () => {
 		const addContext = jest.spyOn(logger, 'mutableAddContext');
-		const app = createSrApi(info, [
-			defineSrRoute({
-				route: createRoute({
-					method: 'get',
-					path: '/items/{itemId}',
-					request: {
-						params: z.object({ itemId: z.coerce.number().int().positive() }),
-					},
-					responses: {
-						200: {
-							description: 'Parsed item',
-							content: {
-								'application/json': {
-									schema: z.object({ itemId: z.number() }),
-								},
-							},
+		const output = jest
+			.spyOn(process.stdout, 'write')
+			.mockImplementation(() => true);
+		const route = createRoute({
+			method: 'get',
+			path: '/items/{itemId}',
+			request: {
+				params: z.object({ itemId: z.coerce.number().int().positive() }),
+			},
+			responses: {
+				200: {
+					description: 'Parsed item',
+					content: {
+						'application/json': {
+							schema: z.object({ itemId: z.number() }),
 						},
 					},
-				}),
-				logContext: ({ params }) => String(params.itemId),
-				handler: ({ params }) => params,
-			}),
+				},
+			},
+		});
+		const app = createSrApi(info, [
+			{
+				route,
+				handler: ({ params }) => {
+					logger.mutableAddContext(String(params.itemId));
+					return params;
+				},
+			},
 		]);
 
 		const response = await app.request('/items/0012');
 		expect(response.status).toBe(200);
 		expect(await response.json()).toEqual({ itemId: 12 });
 		expect(addContext).toHaveBeenCalledWith('12');
+		expect(
+			output.mock.calls.some(
+				([chunk]) =>
+					typeof chunk === 'string' &&
+					/^12 .*TRACE httpRequest EXIT/.test(chunk),
+			),
+		).toBe(true);
 		expect(logger.getMessage('test', 'after request')).toBe(
 			'[test] after request',
 		);
@@ -154,38 +162,41 @@ describe('SR API conventions', () => {
 		expect(addContext).not.toHaveBeenCalled();
 	});
 
-	it('allows an endpoint to select context from the parsed body after all validation', async () => {
+	it('passes the parsed body to the handler only after all validation', async () => {
 		const addContext = jest.spyOn(logger, 'mutableAddContext');
+		const route = createRoute({
+			method: 'post',
+			path: '/items/{itemId}',
+			request: {
+				params: z.object({ itemId: z.string() }),
+				body: {
+					required: true,
+					content: {
+						'application/json': {
+							schema: z.object({ reference: z.string().trim().min(1) }),
+						},
+					},
+				},
+			},
+			responses: {
+				200: {
+					description: 'Success',
+					content: {
+						'application/json': {
+							schema: z.strictObject({ ok: z.boolean() }),
+						},
+					},
+				},
+			},
+		});
 		const app = createSrApi(info, [
-			defineSrRoute({
-				route: createRoute({
-					method: 'post',
-					path: '/items/{itemId}',
-					request: {
-						params: z.object({ itemId: z.string() }),
-						body: {
-							required: true,
-							content: {
-								'application/json': {
-									schema: z.object({ reference: z.string().trim().min(1) }),
-								},
-							},
-						},
-					},
-					responses: {
-						200: {
-							description: 'Success',
-							content: {
-								'application/json': {
-									schema: z.strictObject({ ok: z.boolean() }),
-								},
-							},
-						},
-					},
-				}),
-				logContext: ({ body }) => body.reference,
-				handler: () => ({ ok: true }),
-			}),
+			{
+				route,
+				handler: ({ body }) => {
+					logger.mutableAddContext(body.reference);
+					return { ok: true };
+				},
+			},
 		]);
 		const response = await app.request('/items/not-the-context', {
 			method: 'POST',
@@ -205,81 +216,76 @@ describe('SR API conventions', () => {
 		expect(addContext).not.toHaveBeenCalled();
 	});
 
-	it('does not infer context when an endpoint explicitly disables the extractor', async () => {
+	it('does not add logging context implicitly', async () => {
 		const addContext = jest.spyOn(logger, 'mutableAddContext');
-		const app = createSrApi(info, [
-			defineSrRoute({
-				route: createRoute({
-					method: 'get',
-					path: '/items/{itemId}',
-					request: { params: z.object({ itemId: z.string() }) },
-					responses: {
-						200: {
-							description: 'Success',
-							content: {
-								'application/json': {
-									schema: z.strictObject({ ok: z.boolean() }),
-								},
-							},
+		const route = createRoute({
+			method: 'get',
+			path: '/items/{itemId}',
+			request: { params: z.object({ itemId: z.string() }) },
+			responses: {
+				200: {
+					description: 'Success',
+					content: {
+						'application/json': {
+							schema: z.strictObject({ ok: z.boolean() }),
 						},
 					},
-				}),
-				logContext: undefined,
-				handler: () => ({ ok: true }),
-			}),
-		]);
+				},
+			},
+		});
+		const app = createSrApi(info, [{ route, handler: () => ({ ok: true }) }]);
 		const response = await app.request('/items/A-S12345678');
 		expect(response.status).toBe(200);
 		expect(addContext).not.toHaveBeenCalled();
 	});
 
 	it('passes transformed inputs to async handlers and applies the response schema', async () => {
+		const route = createRoute({
+			method: 'post',
+			path: '/items/{itemId}',
+			request: {
+				params: z.object({ itemId: z.coerce.number().int() }),
+				headers: z.object({ 'x-label': z.string().trim() }),
+				body: {
+					required: true,
+					content: {
+						'application/json': {
+							schema: z.object({
+								reference: z
+									.string()
+									.trim()
+									.transform((value) => value.length),
+							}),
+						},
+					},
+				},
+			},
+			responses: {
+				200: {
+					description: 'Parsed result',
+					content: {
+						'application/json': {
+							schema: z.strictObject({
+								itemId: z.number(),
+								label: z.string(),
+								length: z.number().transform((value) => value * 2),
+								confirmed: z.boolean().default(true),
+							}),
+						},
+					},
+				},
+			},
+		});
 		const app = createSrApi(info, [
-			defineSrRoute({
-				route: createRoute({
-					method: 'post',
-					path: '/items/{itemId}',
-					request: {
-						params: z.object({ itemId: z.coerce.number().int() }),
-						headers: z.object({ 'x-label': z.string().trim() }),
-						body: {
-							required: true,
-							content: {
-								'application/json': {
-									schema: z.object({
-										reference: z
-											.string()
-											.trim()
-											.transform((value) => value.length),
-									}),
-								},
-							},
-						},
-					},
-					responses: {
-						200: {
-							description: 'Parsed result',
-							content: {
-								'application/json': {
-									schema: z.strictObject({
-										itemId: z.number(),
-										label: z.string(),
-										length: z.number(),
-										confirmed: z.boolean().default(true),
-									}),
-								},
-							},
-						},
-					},
-				}),
-				logContext: undefined,
+			{
+				route,
 				handler: async ({ params, headers, body }) =>
 					Promise.resolve({
 						itemId: params.itemId,
 						label: headers['x-label'],
 						length: body.reference,
 					}),
-			}),
+			},
 		]);
 		const response = await app.request('/items/0012', {
 			method: 'POST',
@@ -290,7 +296,7 @@ describe('SR API conventions', () => {
 		expect(await response.json()).toEqual({
 			itemId: 12,
 			label: 'label',
-			length: 3,
+			length: 6,
 			confirmed: true,
 		});
 	});
@@ -300,25 +306,32 @@ describe('SR API conventions', () => {
 		async (mutation) => {
 			const result = { ok: true };
 			Object.assign(result, mutation);
-			const app = createSrApi(info, [
-				defineSrRoute({
-					route: createRoute({
-						method: 'get',
-						path: '/result',
-						responses: {
-							200: {
-								description: 'Validated result',
-								content: {
-									'application/json': {
-										schema: z.strictObject({ ok: z.boolean() }),
-									},
-								},
+			const route = createRoute({
+				method: 'get',
+				path: '/result',
+				responses: {
+					200: {
+						description: 'Validated result',
+						content: {
+							'application/json': {
+								schema: z.strictObject({ ok: z.boolean() }),
 							},
 						},
-					}),
-					logContext: undefined,
-					handler: () => result,
-				}),
+					},
+				},
+			});
+			let errorContext = '';
+			errorLog.mockImplementation(() => {
+				errorContext = logger.getMessage('test', 'failed');
+			});
+			const app = createSrApi(info, [
+				{
+					route,
+					handler: () => {
+						logger.mutableAddContext('item-reference');
+						return result;
+					},
+				},
 			]);
 			const response = await app.request('/result');
 			expect(response.status).toBe(500);
@@ -326,8 +339,51 @@ describe('SR API conventions', () => {
 				message: 'Internal server error',
 			});
 			expect(errorLog).toHaveBeenCalledTimes(1);
+			expect(errorContext).toBe('item-reference [test] failed');
+			expect(logger.getMessage('test', 'after request')).toBe(
+				'[test] after request',
+			);
 		},
 	);
+
+	it('treats exceptions from async response validation as server errors', async () => {
+		const app = createSrApi(info, [
+			{
+				route: createRoute({
+					method: 'get',
+					path: '/invalid-response',
+					responses: {
+						200: {
+							description: 'Validated result',
+							content: {
+								'application/json': {
+									schema: z
+										.object({ ok: z.boolean() })
+										.superRefine(async () => {
+											await Promise.resolve();
+											throw new ValidationError(
+												'Private response validation failure',
+											);
+										}),
+								},
+							},
+						},
+					},
+				}),
+				handler: () => ({ ok: true }),
+			},
+		]);
+
+		const response = await app.request('/invalid-response');
+
+		expect(response.status).toBe(500);
+		expect(await response.json()).toEqual({ message: 'Internal server error' });
+		expect(errorLog).toHaveBeenCalledTimes(1);
+		expect(errorLog).toHaveBeenCalledWith(
+			'API request failed',
+			expect.objectContaining({ status: 500, message: 'Invalid API response' }),
+		);
+	});
 
 	it.each([
 		[new ValidationError('Unsupported product'), 400, 'Unsupported product'],
@@ -340,13 +396,33 @@ describe('SR API conventions', () => {
 	])(
 		'maps errors without leaking unexpected details',
 		async (error, status, message) => {
-			const app = createSrApi(info, []);
-			app.get('/failure', () => {
-				throw error;
+			const route = createRoute({
+				method: 'get',
+				path: '/failure',
+				responses: {
+					200: {
+						description: 'Success',
+						content: {
+							'application/json': { schema: z.object({ ok: z.boolean() }) },
+						},
+					},
+				},
 			});
+			const app = createSrApi(info, [
+				{
+					route,
+					handler: () => {
+						logger.mutableAddContext('failed-item');
+						throw error;
+					},
+				},
+			]);
 			const response = await app.request('/failure');
 			expect(response.status).toBe(status);
 			expect(await response.json()).toEqual({ message });
+			expect(logger.getMessage('test', 'after request')).toBe(
+				'[test] after request',
+			);
 			if (status === 500) {
 				expect(errorLog).toHaveBeenCalledWith('API request failed', error);
 				expect(errorLog).toHaveBeenCalledTimes(1);
