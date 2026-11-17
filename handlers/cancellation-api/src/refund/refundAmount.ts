@@ -1,3 +1,5 @@
+import { fromPence, toPence } from './money';
+
 /**
  * The refund is the total (charges plus tax) of the invoice before the negative (cancellation) invoice.
  */
@@ -21,8 +23,6 @@ type InvoiceGroup = {
 	chargeDate: number;
 	items: RefundInvoiceItem[];
 };
-
-const toPence = (amount: number) => Math.round(amount * 100);
 
 export function calculateRefundAmount({
 	negativeInvoiceId,
@@ -60,7 +60,7 @@ export function calculateRefundAmount({
 	);
 
 	return {
-		refundAmount: refundPence / 100,
+		refundAmount: fromPence(refundPence),
 		paidInvoiceId: paidInvoice.invoiceId,
 	};
 }
