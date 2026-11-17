@@ -109,14 +109,6 @@ object Salesforce extends Logging {
 
 object SalesforceCredentials extends Logging {
 
-  case class GetAccessTokenRequestData(
-      grant_type: String,
-      client_id: String,
-      client_secret: String,
-      username: String,
-      password: String,
-  )
-
   case class GetAccessTokenResponseData(
       access_token: String,
       instance_url: String,
@@ -126,17 +118,11 @@ object SalesforceCredentials extends Logging {
       signature: String,
   )
 
-  case class SalesforceUser(
-      username: String,
-      password: String,
-  )
-
   case class SalesforceConnectedApp(
       client_id: String,
       client_secret: String,
   )
 
-  implicit val salesforceUserDecoder: Decoder[SalesforceUser] = deriveDecoder[SalesforceUser]
   implicit val salesforceConnectedAppDecoder: Decoder[SalesforceConnectedApp] = deriveDecoder[SalesforceConnectedApp]
   implicit val getAccessTokenResponseDataDecoder: Decoder[GetAccessTokenResponseData] =
     deriveDecoder[GetAccessTokenResponseData]
@@ -149,45 +135,29 @@ object SalesforceCredentials extends Logging {
     } yield response.access_token
   }
 
-  private def getAuthCredentials(stage: String): Either[HandlerError, GetAccessTokenRequestData] = {
-    for {
-      user <- SecretsManager.getSecretValue[SalesforceUser](
-        s"${stage}/Salesforce/User/SingleContributionSalesforceWrites",
-      )
-      connectedApp <- SecretsManager.getSecretValue[SalesforceConnectedApp](
-        s"${stage}/Salesforce/ConnectedApp/SingleContributionSalesforceWrites",
-      )
-    } yield GetAccessTokenRequestData(
-      grant_type = "password",
-      client_id = connectedApp.client_id,
-      client_secret = connectedApp.client_secret,
-      username = user.username,
-      password = user.password,
+  private def getAuthCredentials(stage: String): Either[HandlerError, SalesforceConnectedApp] = {
+    SecretsManager.getSecretValue[SalesforceConnectedApp](
+      s"${stage}/Salesforce/ConnectedApp/SingleContributionSalesforceWrites",
     )
   }
 
-  private def getEndpoint(stage: String): String = {
-    stage match {
-      case "PROD" => "https://login.salesforce.com/services/oauth2/token"
-      case _ => "https://test.salesforce.com/services/oauth2/token"
-    }
-  }
+  private[services] def getEndpoint(stage: String): String =
+    s"${Salesforce.getServiceUrl(stage)}/services/oauth2/token"
+
+  private[services] def getPostForm(authCredentials: SalesforceConnectedApp): Seq[(String, String)] =
+    Seq(
+      "grant_type" -> "client_credentials",
+      "client_id" -> authCredentials.client_id,
+      "client_secret" -> authCredentials.client_secret,
+    )
 
   private def makeHttpRequest(
       endpoint: String,
-      authCredentials: GetAccessTokenRequestData,
+      authCredentials: SalesforceConnectedApp,
   ): Either[HandlerError, GetAccessTokenResponseData] = {
-    val postForm = Seq(
-      "grant_type" -> "password",
-      "client_id" -> authCredentials.client_id,
-      "client_secret" -> authCredentials.client_secret,
-      "username" -> authCredentials.username,
-      "password" -> authCredentials.password,
-    )
-
     Try {
       Http(endpoint)
-        .postForm(postForm)
+        .postForm(getPostForm(authCredentials))
         .asString
     } match {
       case Success(httpResponse) if httpResponse.is2xx => {
