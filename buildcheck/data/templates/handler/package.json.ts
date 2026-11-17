@@ -21,7 +21,7 @@ export default (pkg: HandlerDefinition) => {
 		packageQuick: [
 			'pnpm build',
 			'cd target',
-			`zip -qr ${pkg.name}.zip ./*.js.map ./*.js`,
+			`zip -qr ${pkg.name}.zip . -i '*.js' '*.js.map'`,
 		].join(' && '),
 		'cdk:test': 'pnpm --filter cdk test ' + pkg.name,
 		'cdk:test-update': 'pnpm --filter cdk test-update ' + pkg.name,

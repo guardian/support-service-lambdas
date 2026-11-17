@@ -9,7 +9,7 @@
     "fix-formatting": "prettier --write \"**/*.ts\"",
     "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/refund/handlers/*.ts --sourcemap --source-root=/support-service-lambdas/handlers/cancellation-api/target/",
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm packageQuick",
-    "packageQuick": "pnpm build && cd target && zip -qr cancellation-api.zip ./*.js.map ./*.js",
+    "packageQuick": "pnpm build && cd target && zip -qr cancellation-api.zip . -i '*.js' '*.js.map'",
     "cdk:test": "pnpm --filter cdk test cancellation-api",
     "cdk:test-update": "pnpm --filter cdk test-update cancellation-api",
     "update-lambda": "../../update-lambda.sh \"cancellation-api\" cancellation-api-calculate-refund-",

@@ -9,7 +9,7 @@
     "fix-formatting": "prettier --write \"**/*.ts\"",
     "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/index.ts --sourcemap --source-root=/support-service-lambdas/handlers/mparticle-acquisitions-publisher/target/",
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm packageQuick",
-    "packageQuick": "pnpm build && cd target && zip -qr mparticle-acquisitions-publisher.zip ./*.js.map ./*.js",
+    "packageQuick": "pnpm build && cd target && zip -qr mparticle-acquisitions-publisher.zip . -i '*.js' '*.js.map'",
     "cdk:test": "pnpm --filter cdk test mparticle-acquisitions-publisher",
     "cdk:test-update": "pnpm --filter cdk test-update mparticle-acquisitions-publisher",
     "update-lambda": "../../update-lambda.sh \"mparticle-acquisitions-publisher\"",
