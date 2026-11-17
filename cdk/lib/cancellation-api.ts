@@ -25,6 +25,7 @@ export class CancellationApi extends SrStack {
 		});
 		lambda.addPublicPath('docs');
 		lambda.addPublicPath('openapi.json');
+
 		// Refund workflow Lambdas, see https://github.com/guardian/support-service-lambdas/issues/3942
 		// Zuora billing calls can take ~60s, so allow plenty of headroom
 		const refundLambdaTimeout = Duration.minutes(2);
