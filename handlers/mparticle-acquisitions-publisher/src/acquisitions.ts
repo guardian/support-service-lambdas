@@ -107,6 +107,7 @@ function transactionIdentifier(
 ): string {
 	return (
 		firstNonEmpty(
+			acquisition.clientTransactionId,
 			acquisition.paymentId,
 			acquisition.contributionId,
 			acquisition.paypalTransactionId,
@@ -210,6 +211,7 @@ function customAttributes(
 		);
 	}
 	add('paypal_transaction_id', acquisition.paypalTransactionId);
+	add('client_transaction_id', acquisition.clientTransactionId);
 
 	return attributes;
 }
