@@ -8,7 +8,7 @@ export default (pkg: HandlerDefinition) => {
 
 	const handlerScripts = {
 		build:
-			'esbuild --bundle --platform=node --target=node22 --outdir=target/ ' +
+			`esbuild --bundle --platform=node --target=node22 --outdir=target/ --outbase=${pkg.outbase ?? 'src'} ` +
 			entryPoints +
 			` --sourcemap --source-root=/support-service-lambdas/handlers/${pkg.name}/target/`,
 		package: [
@@ -21,7 +21,7 @@ export default (pkg: HandlerDefinition) => {
 		packageQuick: [
 			'pnpm build',
 			'cd target',
-			`zip -qr ${pkg.name}.zip ./*.js.map ./*.js`,
+			`zip -qr ${pkg.name}.zip . -i '*.js' '*.js.map'`,
 		].join(' && '),
 		'cdk:test': 'pnpm --filter cdk test ' + pkg.name,
 		'cdk:test-update': 'pnpm --filter cdk test-update ' + pkg.name,

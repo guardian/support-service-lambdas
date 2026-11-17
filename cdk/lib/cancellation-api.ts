@@ -17,7 +17,7 @@ export class CancellationApi extends SrStack {
 			lambdaOverrides: {
 				description:
 					'Refund workflow step: calculates the refund (or credit) for a cancelled subscription',
-				handler: 'calculateRefund.handler',
+				handler: 'refund/handlers/calculateRefund.handler',
 				timeout: refundLambdaTimeout,
 			},
 		});
