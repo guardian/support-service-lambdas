@@ -9,7 +9,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sttp.client3.testing.SttpBackendStub
 import sttp.client3.{Identity, Request, Response, SttpBackend, StringBody}
-import sttp.model.Method
+import sttp.model.{Method, StatusCode}
 
 import java.time.LocalDate
 import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
@@ -91,17 +91,43 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
     submissions.get() shouldBe 1
   }
 
-  it should "fail when Zuora rejects the submission" in {
+  it should "retry when Zuora rejects the submission" in {
+    val clock = new AtomicLong(0)
     val submissions = new AtomicInteger(0)
-    val backend = SttpBackendStub.synchronous.whenRequestMatchesPartial { case _ =>
+    val idempotencyKeys = ListBuffer.empty[String]
+    val backend = SttpBackendStub.synchronous.whenRequestMatchesPartial { case submittedRequest: Request[_, _] =>
       submissions.incrementAndGet()
+      idempotencyKeys += submittedRequest.headers.find(_.name.equalsIgnoreCase("Idempotency-Key")).get.value
       Response.ok("""{"success":false}""")
     }
 
-    val result = createOrder(backend, new AtomicLong(0))(request)
+    val result = createOrder(backend, clock)(request)
 
     result.left.value.reason shouldBe "Zuora did not accept the order"
-    submissions.get() shouldBe 1
+    submissions.get() shouldBe 5
+    idempotencyKeys.toList shouldBe
+      List(idempotencyKey, s"$idempotencyKey-2", s"$idempotencyKey-3", s"$idempotencyKey-4", s"$idempotencyKey-5")
+    clock.get() shouldBe 4.minutes.toNanos
+  }
+
+  it should "retry an HTTP failure with a new idempotency key" in {
+    val clock = new AtomicLong(0)
+    val submissions = new AtomicInteger(0)
+    val idempotencyKeys = ListBuffer.empty[String]
+    val backend = SttpBackendStub.synchronous.whenRequestMatchesPartial {
+      case submittedRequest: Request[_, _] if submittedRequest.method == Method.POST =>
+        idempotencyKeys += submittedRequest.headers.find(_.name.equalsIgnoreCase("Idempotency-Key")).get.value
+        if (submissions.getAndIncrement() == 0) Response("temporary failure", StatusCode.InternalServerError)
+        else Response.ok("""{"jobId":"job-2","success":true}""")
+      case statusRequest: Request[_, _] if statusRequest.method == Method.GET =>
+        Response.ok("""{"status":"Completed","errors":null,"result":{"status":"Completed"}}""")
+    }
+
+    val result = createOrder(backend, clock)(request)
+
+    result shouldBe Right(AsyncOrderResult(OrderStatus.Completed))
+    idempotencyKeys.toList shouldBe List(idempotencyKey, s"$idempotencyKey-2")
+    clock.get() shouldBe 1.minute.toNanos
   }
 
   it should "retry when the job report confirms locking contention" in {
@@ -129,7 +155,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
     clock.get() shouldBe 1.minute.toNanos
   }
 
-  it should "stop after two locking contention failures" in {
+  it should "stop after five confirmed failures" in {
     val clock = new AtomicLong(0)
     val submissions = new AtomicInteger(0)
     val backend = SttpBackendStub.synchronous.whenRequestMatchesPartial {
@@ -145,25 +171,32 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
     val result = createOrder(backend, clock)(request)
 
     result.left.value.reason shouldBe
-      "Zuora order job job-2 failed: [40000050]: Operation failed due to a lock competition, please retry later."
-    submissions.get() shouldBe 2
-    clock.get() shouldBe 1.minute.toNanos
+      "Zuora order job job-5 failed: [40000050]: Operation failed due to a lock competition, please retry later."
+    submissions.get() shouldBe 5
+    clock.get() shouldBe 4.minutes.toNanos
   }
 
-  it should "not retry other job failures" in {
+  it should "retry other confirmed job failures" in {
+    val clock = new AtomicLong(0)
     val submissions = new AtomicInteger(0)
+    val idempotencyKeys = ListBuffer.empty[String]
     val backend = SttpBackendStub.synchronous.whenRequestMatchesPartial {
       case submittedRequest: Request[_, _] if submittedRequest.method == Method.POST =>
+        idempotencyKeys += submittedRequest.headers.find(_.name.equalsIgnoreCase("Idempotency-Key")).get.value
         submissions.incrementAndGet()
-        Response.ok("""{"jobId":"job-1","success":true}""")
-      case statusRequest: Request[_, _] if statusRequest.method == Method.GET =>
+        Response.ok(s"""{"jobId":"job-${submissions.get()}","success":true}""")
+      case statusRequest: Request[_, _] if statusRequest.method == Method.GET && submissions.get() == 1 =>
         Response.ok("""{"status":"Failed","errors":"The order could not be applied","result":null}""")
+      case statusRequest: Request[_, _] if statusRequest.method == Method.GET =>
+        Response.ok("""{"status":"Completed","errors":null,"result":{"status":"Completed"}}""")
     }
 
-    val result = createOrder(backend, new AtomicLong(0))(request)
+    val result = createOrder(backend, clock)(request)
 
-    result.left.value.reason shouldBe "Zuora order job job-1 failed: The order could not be applied"
-    submissions.get() shouldBe 1
+    result shouldBe Right(AsyncOrderResult(OrderStatus.Completed))
+    submissions.get() shouldBe 2
+    idempotencyKeys.toList shouldBe List(idempotencyKey, s"$idempotencyKey-2")
+    clock.get() shouldBe 1.minute.toNanos
   }
 
   it should "retry an ambiguous job status response without resubmitting" in {

@@ -9,9 +9,7 @@ import com.gu.zuora.{AccessToken, HolidayStopProcessorZuoraConfig, Zuora, ZuoraO
 import org.slf4j.LoggerFactory
 import sttp.client3.{Identity, SttpBackend}
 
-import java.nio.charset.StandardCharsets.UTF_8
 import java.time.LocalDate
-import java.util.UUID
 import scala.collection.parallel.CollectionConverters.ImmutableSeqIsParallelizable
 import scala.collection.parallel.ForkJoinTaskSupport
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
@@ -245,8 +243,7 @@ object Processor {
   ): String = {
     val productAddition = update.productAddition
     val creditDate = productAddition.chargeOverride.HolidayStart__c
-    val operation = s"$subscriptionNumber:${productAddition.productRatePlanId}:$creditDate"
-    s"credit-processor-${UUID.nameUUIDFromBytes(operation.getBytes(UTF_8))}"
+    s"credit-processor:$subscriptionNumber:${productAddition.productRatePlanId}:$creditDate"
   }
 
   // FIXME: Temporary test in production to validate migration to https://github.com/guardian/invoicing-api/pull/20

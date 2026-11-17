@@ -14,7 +14,7 @@ class ProcessorTest extends AnyFlatSpec with Matchers {
     val update = creditUpdate("holiday-credit-rate-plan", creditDate)
 
     Processor.creditIdempotencyKey(subscriptionNumber, update) shouldBe
-      "credit-processor-20dd2a1f-be7f-3670-ba3f-90c93e950426"
+      "credit-processor:A-S000001:holiday-credit-rate-plan:2026-10-01"
   }
 
   it should "distinguish credits for different dates" in {
