@@ -1023,6 +1023,8 @@ const securityGroupsUpdater: HandlerDefinition = {
 
 const cancellationApi: HandlerDefinition = {
 	name: 'cancellation-api',
+	functionNames: ['cancellation-api-', 'cancellation-api-calculate-refund-'],
+	entryPoints: ['src/index.ts', 'src/refund/handlers/*.ts'],
 	dependencies: {
 		...dep.zod,
 		...dep.hono,

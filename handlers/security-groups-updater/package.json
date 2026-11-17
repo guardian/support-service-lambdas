@@ -9,7 +9,7 @@
     "fix-formatting": "prettier --write \"**/*.ts\"",
     "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/index.ts --sourcemap --source-root=/support-service-lambdas/handlers/security-groups-updater/target/",
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm packageQuick",
-    "packageQuick": "pnpm build && cd target && zip -qr security-groups-updater.zip ./*.js.map ./*.js",
+    "packageQuick": "pnpm build && cd target && zip -qr security-groups-updater.zip . -i '*.js' '*.js.map'",
     "cdk:test": "pnpm --filter cdk test security-groups-updater",
     "cdk:test-update": "pnpm --filter cdk test-update security-groups-updater",
     "update-lambda": "../../update-lambda.sh \"security-groups-updater\"",

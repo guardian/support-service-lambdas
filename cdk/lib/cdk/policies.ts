@@ -138,6 +138,28 @@ export class AllowSecondaryUserTableUpdatePolicy extends GuAllowPolicy {
 	}
 }
 
+export class AllowInvitationTableQueryPolicy extends GuAllowPolicy {
+	constructor(scope: GuStack) {
+		super(scope, 'MultipleAccountInvitationTable query access', {
+			actions: ['dynamodb:Query'],
+			resources: [
+				`arn:aws:dynamodb:${scope.region}:${scope.account}:table/multiple-account-invitation-${scope.stage}`,
+			],
+		});
+	}
+}
+
+export class AllowInvitationTableUpdatePolicy extends GuAllowPolicy {
+	constructor(scope: GuStack) {
+		super(scope, 'MultipleAccountInvitationTable update access', {
+			actions: ['dynamodb:UpdateItem'],
+			resources: [
+				`arn:aws:dynamodb:${scope.region}:${scope.account}:table/multiple-account-invitation-${scope.stage}`,
+			],
+		});
+	}
+}
+
 export class AllowPromoCodeTableQueryPolicy extends GuAllowPolicy {
 	constructor(scope: GuStack) {
 		super(scope, 'Promo code table query access', {

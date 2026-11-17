@@ -10,6 +10,7 @@ import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import dayjs from 'dayjs';
 import { z } from 'zod';
 import { getMaybeSingleOrThrow } from '@modules/arrayFunctions';
+import { logger } from '@modules/logger/logger';
 import {
 	type CancelledBy,
 	cancelledBySchema,
@@ -171,5 +172,56 @@ export class InvitationRepository {
 				},
 			},
 		};
+	}
+
+	async updateTTL(
+		subscriptionName: string,
+		invitationCode: string,
+		expiryDate: number,
+	): Promise<void> {
+		await this.client
+			.send(
+				new UpdateItemCommand({
+					TableName: this.tableName,
+					Key: {
+						subscriptionName: { S: subscriptionName },
+						invitationCode: { S: invitationCode },
+					},
+					ConditionExpression:
+						'attribute_exists(subscriptionName) AND attribute_not_exists(acceptedDate) AND attribute_not_exists(cancelledBy)',
+					UpdateExpression: 'SET expiryDate = :expiryDate',
+					ExpressionAttributeValues: {
+						':expiryDate': { N: expiryDate.toString() },
+					},
+				}),
+			)
+			.catch((error: unknown) => {
+				if (
+					error instanceof Error &&
+					error.name === 'ConditionalCheckFailedException'
+				) {
+					return; // Handles if a subscription has been deleted or accepted/cancelled
+				}
+				throw error;
+			});
+	}
+
+	async updateSubscriptionTTLs(
+		subscriptionName: string,
+		newTTL: number,
+	): Promise<void> {
+		const invitations = await this.listActive(subscriptionName);
+		const inviteCount = invitations.length;
+		if (inviteCount === 0) {
+			return;
+		}
+		logger.log(
+			`Updating ${inviteCount} invitation TTL${inviteCount > 1 ? 's' : ''} for primary subscription ${subscriptionName}`,
+		);
+		await Promise.all(
+			invitations.map((invitation) =>
+				this.updateTTL(subscriptionName, invitation.invitationCode, newTTL),
+			),
+		);
 	}
 }

@@ -22,5 +22,6 @@ deployments:
       prefixStack: false
       functionNames:
         - cancellation-api-
+        - cancellation-api-calculate-refund-
     dependencies:
       - cancellation-api-cloudformation

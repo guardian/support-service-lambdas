@@ -13,6 +13,23 @@ describe('The Cancellation api stack', () => {
 	});
 
 	it.each(['CODE', 'PROD'] as const)(
+		'uses the bundled entry points for both Lambdas in %s',
+		(stage) => {
+			const template = Template.fromStack(
+				new CancellationApi(new App(), stage),
+			);
+			template.hasResourceProperties('AWS::Lambda::Function', {
+				FunctionName: `cancellation-api-${stage}`,
+				Handler: 'index.handler',
+			});
+			template.hasResourceProperties('AWS::Lambda::Function', {
+				FunctionName: `cancellation-api-calculate-refund-${stage}`,
+				Handler: 'refund/handlers/calculateRefund.handler',
+			});
+		},
+	);
+
+	it.each(['CODE', 'PROD'] as const)(
 		'keeps operations protected and documentation public in %s',
 		(stage) => {
 			const template = Template.fromStack(

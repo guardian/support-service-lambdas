@@ -4,7 +4,6 @@ import dayjs from 'dayjs';
 import { createSecondarySubscription } from '@modules/multiple-account/secondarySubscription';
 import type { SecondaryUserRepository } from '@modules/multiple-account/secondaryUserRepository';
 import { expiryTTLFromTermEndDate } from '@modules/multiple-account/secondaryUserRepository';
-import { getIfDefined } from '@modules/nullAndUndefined';
 import {
 	badRequest,
 	buildErrorResponse,
@@ -14,6 +13,8 @@ import {
 } from '@modules/routing/apiGatewayResponses';
 import type { Stage } from '@modules/stage';
 import { getSupporterRatePlan } from '@modules/supporter-product-data/supporterProductData';
+import { getSubscription } from '@modules/zuora/subscription';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { InvitationRepository } from './invitationRepository';
 import { sendInvitationRedeemedEmail } from './multipleAccountEmails';
 import { sendSoftOptInAcquisitionEvent } from './softOptinConsents';
@@ -23,6 +24,7 @@ export const acceptInvitationEndpoint = async (
 	invitationRepository: InvitationRepository,
 	secondaryUserRepository: SecondaryUserRepository,
 	dynamoClient: DynamoDBClient,
+	zuoraClient: ZuoraClient,
 	signedInUserId: string,
 	invitationCode: string,
 ) => {
@@ -67,10 +69,24 @@ export const acceptInvitationEndpoint = async (
 		const { subscriptionName, secondaryIdentityId, primaryIdentityId } =
 			invitation;
 
-		const parentSupporterProductDataRecord = getIfDefined(
-			await getSupporterRatePlan(stage, primaryIdentityId, subscriptionName),
-			`Supporter rate plan record not found for ${subscriptionName} and identity ${primaryIdentityId}`,
+		const parentSupporterProductDataRecord = await getSupporterRatePlan(
+			stage,
+			primaryIdentityId,
+			subscriptionName,
 		);
+		if (!parentSupporterProductDataRecord) {
+			const zuoraSubscription = await getSubscription(
+				zuoraClient,
+				subscriptionName,
+			);
+			if (zuoraSubscription.status === 'Cancelled') {
+				return gone(`Primary subscription ${subscriptionName} cancelled`);
+			}
+			throw new ReferenceError(
+				`Supporter rate plan record not found for ${subscriptionName} and identity ${primaryIdentityId}`,
+			);
+		}
+
 		const today = dayjs();
 
 		const secondaryUserRecord = {

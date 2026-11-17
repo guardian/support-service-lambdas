@@ -9,7 +9,7 @@
     "fix-formatting": "prettier --write \"**/*.ts\"",
     "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ src/handlers/*.ts --sourcemap --source-root=/support-service-lambdas/handlers/scrub-non-tokenised-payment-methods/target/",
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm packageQuick",
-    "packageQuick": "pnpm build && cd target && zip -qr scrub-non-tokenised-payment-methods.zip ./*.js.map ./*.js",
+    "packageQuick": "pnpm build && cd target && zip -qr scrub-non-tokenised-payment-methods.zip . -i '*.js' '*.js.map'",
     "cdk:test": "pnpm --filter cdk test scrub-non-tokenised-payment-methods",
     "cdk:test-update": "pnpm --filter cdk test-update scrub-non-tokenised-payment-methods",
     "update-lambda": "../../update-lambda.sh \"scrub-non-tokenised-payment-methods\" scrub-non-tokenised-payment-methods-get- scrub-non-tokenised-payment-methods-scrub- scrub-non-tokenised-payment-methods-check-",
