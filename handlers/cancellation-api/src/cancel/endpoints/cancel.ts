@@ -1,10 +1,20 @@
 import { createRoute, z } from '@hono/zod-openapi';
+import { logger } from '@modules/logger/logger';
+import type { SrRequest } from '@modules/routing/srApi';
 import {
+	type CancellationResponse,
 	cancellationResponses,
 	exampleResponse,
 	identityHeadersSchema,
 	subscriptionPathSchema,
 } from './cancellationContract';
+
+export function cancelHandler(
+	request: SrRequest<typeof cancelEndpoint.route>,
+): Promise<CancellationResponse> {
+	logger.log('cancel endpoint', request.body);
+	return Promise.resolve(exampleResponse);
+}
 
 export const cancelEndpoint = {
 	route: createRoute({
@@ -31,5 +41,5 @@ export const cancelEndpoint = {
 		},
 		responses: cancellationResponses,
 	}),
-	handler: () => exampleResponse,
+	handler: cancelHandler,
 };

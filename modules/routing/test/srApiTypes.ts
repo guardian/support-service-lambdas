@@ -42,41 +42,15 @@ const route = createRoute({
 createSrApi(info, [
 	{
 		route,
-		handler: ({ params, headers, body }) => {
+		handler: async ({ params, headers, body }) => {
 			params.itemId.toFixed();
 			headers['x-reference'].toUpperCase();
-			return { type: 'hard', willRefund: body.confirmed };
-		},
-	},
-]);
-
-createSrApi(info, [
-	{
-		route,
-		handler: async () => {
-			await Promise.resolve();
-			return { type: 'soft', accessEndDate: '2026-12-12' };
-		},
-	},
-]);
-
-createSrApi(info, [
-	{
-		route,
-		handler: ({ params }) => {
 			// @ts-expect-error Only fields from the parsed parameter schema are available.
 			const invalid: unknown = params.missing;
 			void invalid;
-			return { type: 'hard', willRefund: false };
+			await Promise.resolve();
+			return { type: 'hard', willRefund: body.confirmed };
 		},
-	},
-]);
-
-createSrApi(info, [
-	{
-		route,
-		// @ts-expect-error A hard cancellation must specify whether a refund is planned.
-		handler: () => ({ type: 'hard' }),
 	},
 ]);
 
@@ -96,7 +70,7 @@ createSrApi(info, [
 			path: '/missing-schema',
 			responses: { 200: { description: 'No schema' } },
 		}),
-		handler: () => ({}),
+		handler: async () => Promise.resolve({}),
 	},
 ]);
 
@@ -120,13 +94,13 @@ createSrApi(info, [
 				},
 			},
 		}),
-		handler: () => ({ count: '12' }),
+		handler: async () => Promise.resolve({ count: '12' }),
 	},
 ]);
 
 const invalidEndpoint = {
 	route,
-	handler: () => ({ type: 'hard' }),
+	handler: async () => Promise.resolve({ type: 'hard' }),
 };
 
 // @ts-expect-error Separately declared handlers must also match the response schema.

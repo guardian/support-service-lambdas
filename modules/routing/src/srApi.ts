@@ -50,6 +50,9 @@ export const apiErrorResponses = {
 	},
 };
 
+/**
+ * each route can take the input, and return a 200 response of the declated type
+ */
 type JsonRoute = RouteConfig & {
 	request?: {
 		params?: z.ZodType;
@@ -68,11 +71,18 @@ type JsonRoute = RouteConfig & {
 	};
 };
 
+/**
+ * helper extracts the type of a specific parameter/header
+ */
 type ParsedPart<Request, Key extends PropertyKey> =
 	Request extends Record<Key, infer Schema extends z.ZodType>
 		? z.output<Schema>
 		: undefined;
 
+/**
+ * Builds the handler's typed params, headers and body,
+ * including transformations applied by the request schemas.
+ */
 export type SrRequest<R extends RouteConfig> = {
 	params: ParsedPart<R['request'], 'params'>;
 	headers: ParsedPart<R['request'], 'headers'>;
@@ -87,21 +97,33 @@ export type SrRequest<R extends RouteConfig> = {
 		: undefined;
 };
 
+/**
+ * Defines what the handler may return. Uses the response
+ * schema's input type so handlers can omit fields supplied by schema defaults.
+ */
 type RouteResponse<R extends JsonRoute> = z.input<
 	R['responses'][200]['content']['application/json']['schema']
 >;
 
+/**
+ * Connects a route's schemas to its handler's arguments
+ * and asynchronous return value.
+ */
 type SrEndpoint<R extends JsonRoute, Result extends RouteResponse<R>> = {
 	route: R;
-	handler: (request: SrRequest<NoInfer<R>>) => Result | Promise<Result>;
+	handler: (request: SrRequest<NoInfer<R>>) => Promise<Result>;
 };
 
+/**
+ * Common internal shape for registering differently typed
+ * endpoints. The public createSrApi signature performs the stricter checks.
+ */
 type RegisteredEndpoint = {
 	route: JsonRoute;
 	handler(
 		this: void,
 		request: { params: unknown; headers: unknown; body: unknown },
-	): unknown;
+	): Promise<unknown>;
 };
 
 /**

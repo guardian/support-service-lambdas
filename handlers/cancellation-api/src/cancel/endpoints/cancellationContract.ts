@@ -32,6 +32,8 @@ export const cancellationResponseSchema = z
 	])
 	.openapi('CancellationResponse');
 
+export type CancellationResponse = z.input<typeof cancellationResponseSchema>;
+
 export const exampleResponse = { type: 'hard', willRefund: false } as const;
 export const cancellationResponses = {
 	200: {

@@ -1,10 +1,20 @@
 import { createRoute, z } from '@hono/zod-openapi';
+import { logger } from '@modules/logger/logger';
+import type { SrRequest } from '@modules/routing/srApi';
 import {
+	type CancellationResponse,
 	cancellationResponses,
 	exampleResponse,
 	identityHeadersSchema,
 	subscriptionPathSchema,
 } from './cancellationContract';
+
+export function previewHandler(
+	request: SrRequest<typeof previewEndpoint.route>,
+): Promise<CancellationResponse> {
+	logger.log('Preview endpoint', request.body);
+	return Promise.resolve(exampleResponse);
+}
 
 export const previewEndpoint = {
 	route: createRoute({
@@ -25,5 +35,5 @@ export const previewEndpoint = {
 		},
 		responses: cancellationResponses,
 	}),
-	handler: () => exampleResponse,
+	handler: previewHandler,
 };
