@@ -18,6 +18,76 @@ describe('SR API conventions', () => {
 		jest.restoreAllMocks();
 	});
 
+	it('serves generated OpenAPI without authentication', async () => {
+		const app = createSrApi(info, []);
+		const response = await app.request('/openapi.json');
+		expect(response.status).toBe(200);
+		expect(await response.json()).toMatchObject({
+			openapi: '3.1.0',
+			info,
+			components: {
+				securitySchemes: {
+					apiKey: { type: 'apiKey', in: 'header', name: 'x-api-key' },
+				},
+			},
+		});
+	});
+
+	it('serves public interactive docs with direct requests and no stored credentials or telemetry', async () => {
+		const app = createSrApi(info, []);
+		const response = await app.request('/docs');
+		expect(response.status).toBe(200);
+		const body = await response.text();
+		expect(body).toContain('Scalar.createApiReference');
+		expect(body).toContain("url: './openapi.json'");
+		expect(body).toContain("proxyUrl: ''");
+		expect(body).toContain('persistAuth: false');
+		expect(body).toContain('telemetry: false');
+	});
+
+	it.each([
+		['malformed JSON', { 'Content-Type': 'application/json' }, 'not json', 400],
+		['empty JSON body', { 'Content-Type': 'application/json' }, '', 400],
+		['missing content type', {}, '{}', 415],
+		['unsupported content type', { 'Content-Type': 'text/plain' }, '{}', 415],
+	])(
+		'rejects %s before calling the handler',
+		async (_name, headers, body, status) => {
+			const handler = jest.fn(() => ({ ok: true }));
+			const app = createSrApi(info, [
+				defineSrRoute({
+					route: createRoute({
+						method: 'post',
+						path: '/items',
+						request: {
+							body: {
+								required: true,
+								content: { 'application/json': { schema: z.strictObject({}) } },
+							},
+						},
+						responses: {
+							200: {
+								description: 'Success',
+								content: {
+									'application/json': { schema: z.object({ ok: z.boolean() }) },
+								},
+							},
+						},
+					}),
+					logContext: undefined,
+					handler,
+				}),
+			]);
+			const response = await app.request('/items', {
+				method: 'POST',
+				headers,
+				body,
+			});
+			expect(response.status).toBe(status);
+			expect(handler).not.toHaveBeenCalled();
+		},
+	);
+
 	it('uses standard request traces without logging credential headers', async () => {
 		const output = jest
 			.spyOn(process.stdout, 'write')

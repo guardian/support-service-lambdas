@@ -12,4 +12,5 @@ export const app = createSrApi(
 	[previewEndpoint, cancelEndpoint],
 );
 
+// main entry point from AWS lambda
 export const handler = handle(app);
