@@ -8,7 +8,7 @@ export default (pkg: HandlerDefinition) => {
 
 	const handlerScripts = {
 		build:
-			'esbuild --bundle --platform=node --target=node22 --outdir=target/ ' +
+			`esbuild --bundle --platform=node --target=node22 --outdir=target/ --outbase=${pkg.outbase ?? 'src'} ` +
 			entryPoints +
 			` --sourcemap --source-root=/support-service-lambdas/handlers/${pkg.name}/target/`,
 		package: [

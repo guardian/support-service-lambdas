@@ -38,7 +38,7 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
           },
         },
         "FunctionName": "cancellation-api-calculate-refund-CODE",
-        "Handler": "calculateRefund.handler",
+        "Handler": "refund/handlers/calculateRefund.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
         },
@@ -271,7 +271,7 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
           },
         },
         "FunctionName": "cancellation-api-calculate-refund-PROD",
-        "Handler": "calculateRefund.handler",
+        "Handler": "refund/handlers/calculateRefund.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
         },
