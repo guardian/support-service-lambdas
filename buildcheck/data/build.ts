@@ -12,6 +12,8 @@ export interface HandlerDefinition extends ModuleDefinition {
 	stack?: 'support' | 'membership';
 	functionNames?: string[];
 	entryPoints?: string[];
+	/** @deprecated Legacy layouts only; use the default src base and full CDK handler paths for new Lambdas. */
+	outbase?: string;
 	extraStages?: Array<'CSBX'>;
 	allowedStages?: Array<'CODE' | 'PROD' | 'CSBX'>;
 }
@@ -370,6 +372,7 @@ const discountExpiryNotifier: HandlerDefinition = {
 		'discount-expiry-notifier-alarm-on-failures-',
 	],
 	entryPoints: ['src/handlers/*.ts'],
+	outbase: 'src/handlers',
 	dependencies: {
 		...dep['@aws-sdk/client-s3'],
 		...dep['@google-cloud/bigquery'],
@@ -520,6 +523,7 @@ const negativeInvoicesProcessor: HandlerDefinition = {
 		'negative-invoices-processor-detect-failures-',
 	],
 	entryPoints: ['src/handlers/*.ts'],
+	outbase: 'src/handlers',
 	dependencies: {
 		...dep['@google-cloud/bigquery'],
 		...deprecatedDeps['aws-sdk'],
@@ -538,6 +542,7 @@ const observerDataExport: HandlerDefinition = {
 	name: 'observer-data-export',
 	functionNames: ['encrypt-and-upload-observer-data-'],
 	entryPoints: ['src/handlers/*.ts'],
+	outbase: 'src/handlers',
 	dependencies: {
 		...devDeps['@types/aws-lambda'],
 	},
@@ -599,6 +604,7 @@ const promotionsLambdas: HandlerDefinition = {
 		'promotions-lambdas-salesforce-export-',
 	],
 	entryPoints: ['src/handlers/*.ts'],
+	outbase: 'src/handlers',
 	dependencies: {
 		...dep['@aws-sdk/util-dynamodb'],
 		...dep['@aws-sdk/client-dynamodb'],
@@ -623,6 +629,7 @@ const salesforceDisasterRecovery: HandlerDefinition = {
 		'update-zuora-accounts-',
 	],
 	entryPoints: ['src/handlers/*.ts'],
+	outbase: 'src/handlers',
 	extraStages: ['CSBX'],
 	dependencies: {
 		...dep['@aws-sdk/client-s3'],
@@ -641,6 +648,7 @@ const salesforceDisasterRecoveryHealthCheck: HandlerDefinition = {
 	stack: 'membership',
 	functionNames: ['salesforce-disaster-recovery-health-check-'],
 	entryPoints: ['src/handlers/*.ts'],
+	outbase: 'src/handlers',
 	dependencies: {
 		...dep['@aws-sdk/client-sfn'],
 		...dep['@aws-sdk/client-sns'],
@@ -729,6 +737,7 @@ const writeOffUnpaidInvoices: HandlerDefinition = {
 	name: 'write-off-unpaid-invoices',
 	functionNames: ['get-unpaid-invoices-', 'write-off-invoices-'],
 	entryPoints: ['src/handlers/*.ts'],
+	outbase: 'src/handlers',
 	dependencies: {
 		...dep['@aws-sdk/client-secrets-manager'],
 		...dep.dayjs,
@@ -744,6 +753,7 @@ const scrubNonTokenisedPaymentMethods: HandlerDefinition = {
 		'scrub-non-tokenised-payment-methods-check-',
 	],
 	entryPoints: ['src/handlers/*.ts'],
+	outbase: 'src/handlers',
 	moduleDependencies: [moduleAws, moduleBigquery, moduleZuora],
 };
 
@@ -756,6 +766,7 @@ const zuoraSalesforceLinkRemover: HandlerDefinition = {
 		'zuora-salesforce-link-remover-update-sf-billing-accounts-',
 	],
 	entryPoints: ['src/handlers/*.ts'],
+	outbase: 'src/handlers',
 	dependencies: {
 		...dep['@aws-sdk/client-secrets-manager'],
 		...dep.zod,
@@ -918,6 +929,7 @@ const supporterProductDataLambdas: HandlerDefinition = {
 		'supporterProductData-ProcessItem-',
 	],
 	entryPoints: ['src/handlers/*.ts'],
+	outbase: 'src/handlers',
 	dependencies: {
 		...dep['@aws-sdk/client-cloudwatch'],
 		...dep['@aws-sdk/client-dynamodb'],
