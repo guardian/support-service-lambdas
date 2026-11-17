@@ -65,12 +65,13 @@ type JsonRoute = RouteConfig & {
  *
  * @param info useful information for the lambda's open API/swagger page
  * @param routes endpoint definitions to register
+ * @param stage defaults to process.env.STAGE; explorer credentials persist only in CODE
  */
 export function createSrApi<
 	const Routes extends ReadonlyArray<
 		Parameters<OpenAPIHono['openapiRoutes']>[0][number] & { route: JsonRoute }
 	>,
->(info: ApiInfo, routes: Routes) {
+>(info: ApiInfo, routes: Routes, stage = process.env.STAGE) {
 	const callerInfo = getCallerInfo();
 
 	/*
@@ -185,7 +186,7 @@ export function createSrApi<
 							Scalar.createApiReference('#app', {
 								url: './openapi.json',
 								proxyUrl: '',
-								persistAuth: false,
+								persistAuth: ${JSON.stringify(stage === 'CODE')},
 								telemetry: false,
 							});
 						</script>

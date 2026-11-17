@@ -3,6 +3,7 @@
 ## Overview
 
 This handler contains
+
 1. a Subscription cancellation API inside `src/cancel/`, and
 2. a state machine for refunding in `src/refund`
 
@@ -14,16 +15,20 @@ implemented. Both POST endpoints currently return the fixed
 cancellation, emails and events are not implemented; do not connect real
 customer journeys yet.
 
-| Operation | Path |
-| --- | --- |
-| Preview | `/subscriptions/{subscriptionNumber}/preview-cancellation` |
-| Execute | `/subscriptions/{subscriptionNumber}/cancel` |
-| Generated OpenAPI | `/openapi.json` |
-| Interactive API explorer | `/explorer` |
+| Operation                | Path                                                       |
+| ------------------------ | ---------------------------------------------------------- |
+| Preview                  | `/subscriptions/{subscriptionNumber}/preview-cancellation` |
+| Execute                  | `/subscriptions/{subscriptionNumber}/cancel`               |
+| Generated OpenAPI        | `/openapi.json`                                            |
+| Interactive API explorer | `/explorer`                                                |
 
 The explorer and OpenAPI contract are public. API Gateway validates API keys for
 operations; the app validates the identity header and request shape.
 Local operation requests need `x-identity-id` but no API Gateway key.
+
+The CODE explorer remembers authentication in browser local storage. Persistence
+is disabled in PROD and when the stage is unspecified. Stored credentials are
+not encrypted; this does not persist request parameter values.
 
 ### Local development and testing
 
@@ -49,6 +54,27 @@ use the same origin, including when accessed through an API Gateway stage URL.
 OpenAPI and the interactive explorer are generated from the schemas; there is no
 separate YAML contract to maintain.
 
+### Built-in explorer
+
+Run the local server above and open [localhost:8787/explorer](http://localhost:8787/explorer),
+or open the [deployed CODE explorer](https://cancellation-api-code.support.guardianapis.com/explorer).
+For CODE, enter its API Gateway key in the authentication control; local requests
+do not need a key.
+
+### Hoppscotch Desktop
+
+1. Install and open [Hoppscotch Desktop](https://docs.hoppscotch.io/documentation/clients/desktop/overview).
+2. Use **Collections > Import > OpenAPI** to
+   [import](https://docs.hoppscotch.io/documentation/features/importer) the
+   [CODE contract](https://cancellation-api-code.support.guardianapis.com/openapi.json).
+3. Create and select a CODE environment with `baseUrl` set to
+   `https://cancellation-api-code.support.guardianapis.com` and a **secret** `apiKey`
+   variable. Set imported request URLs to use `<<baseUrl>>` explicitly: our
+   specification declares a relative server URL. For local requests, use
+   `http://localhost:8787` and omit API-key authentication.
+4. For CODE, configure API-key authentication as header `x-api-key` with value `<<apiKey>>`.
+   Go ahead and create and save requests as you wish.
+
 ## 2. Refund workflow
 
 In progress: `calculateRefund` is a placeholder that validates its input and
@@ -73,6 +99,7 @@ used because they expire after 24 hours and cache failures.
 See the issue below for the detailed rules.
 
 ### Flow Diagram
+
 ```mermaid
 %%{init: {"flowchart": {"nodeSpacing": 15, "rankSpacing": 20, "padding": 4}, "themeVariables": {"fontSize": "11px"}}}%%
 flowchart TD
@@ -116,11 +143,10 @@ flowchart TD
 
 Alarms go to Lifecycle via alarms-handler.
 
-| Alarm | Raised when | Status |
-|---|---|---|
+| Alarm                   | Raised when                                                                                         | Status                                                             |
+| ----------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
 | Cancellation API errors | the API returns a 5xx, including when the refund workflow can't be started (`StartExecution` fails) | API Gateway 5xx alarm configured; workflow startup not implemented |
-| Refund workflow failed | an execution fails, times out or is aborted: a customer not refunded, or a failed DD not acted on | TODO |
-
+| Refund workflow failed  | an execution fails, times out or is aborted: a customer not refunded, or a failed DD not acted on   | TODO                                                               |
 
 ## References
 

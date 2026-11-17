@@ -26,6 +26,30 @@ describe('SR API conventions', () => {
 		jest.restoreAllMocks();
 	});
 
+	it.each([
+		{ stage: 'CODE', persistAuth: true },
+		{ stage: 'PROD', persistAuth: false },
+		{ stage: undefined, persistAuth: false },
+	])(
+		'defaults to STAGE and persists explorer authentication only in CODE ($stage)',
+		async ({ stage, persistAuth }) => {
+			jest.replaceProperty(process, 'env', { ...process.env, STAGE: stage });
+			const app = createSrApi(info, []);
+			const response = await app.request('/explorer');
+
+			expect(response.status).toBe(200);
+			expect(await response.text()).toContain(`persistAuth: ${persistAuth},`);
+		},
+	);
+
+	it('allows an explicit stage to override STAGE', async () => {
+		jest.replaceProperty(process, 'env', { ...process.env, STAGE: 'CODE' });
+		const app = createSrApi(info, [], 'PROD');
+		const response = await app.request('/explorer');
+
+		expect(await response.text()).toContain('persistAuth: false,');
+	});
+
 	it('keeps request context through exit logging, excludes credentials and clears context afterwards', async () => {
 		const output = jest
 			.spyOn(process.stdout, 'write')
