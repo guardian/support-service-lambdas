@@ -1019,6 +1019,16 @@ const securityGroupsUpdater: HandlerDefinition = {
 	moduleDependencies: [moduleLogger, moduleRouting],
 };
 
+const cancellationApi: HandlerDefinition = {
+	name: 'cancellation-api',
+	functionNames: ['cancellation-api-calculate-refund-'],
+	entryPoints: ['src/refund/handlers/*.ts'],
+	dependencies: {
+		...dep.zod,
+	},
+	moduleDependencies: [moduleLogger, moduleZuora],
+};
+
 // MARKER new-lambda: buildcheck-const
 
 export const build: BuildDefinition = {
@@ -1060,6 +1070,7 @@ export const build: BuildDefinition = {
 		promotionsApi,
 		paymentFailureCommsExitApi,
 		sendTestDataToMparticle,
+		cancellationApi,
 		// MARKER new-lambda: buildcheck-reference
 	],
 

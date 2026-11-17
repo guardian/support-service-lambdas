@@ -1,0 +1,25 @@
+import type { App } from 'aws-cdk-lib';
+import { Duration } from 'aws-cdk-lib';
+import { SrLambda } from './cdk/SrLambda';
+import type { SrStageNames } from './cdk/SrStack';
+import { SrStack } from './cdk/SrStack';
+
+export class CancellationApi extends SrStack {
+	constructor(scope: App, stage: SrStageNames) {
+		super(scope, { stage, app: 'cancellation-api' });
+
+		// Refund workflow Lambdas, see https://github.com/guardian/support-service-lambdas/issues/3942
+		// Zuora billing calls can take ~60s, so allow plenty of headroom
+		const refundLambdaTimeout = Duration.minutes(2);
+
+		new SrLambda(this, 'CalculateRefundLambda', {
+			nameSuffix: 'calculate-refund',
+			lambdaOverrides: {
+				description:
+					'Refund workflow step: calculates the refund (or credit) for a cancelled subscription',
+				handler: 'calculateRefund.handler',
+				timeout: refundLambdaTimeout,
+			},
+		});
+	}
+}

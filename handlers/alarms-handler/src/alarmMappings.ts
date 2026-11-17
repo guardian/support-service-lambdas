@@ -33,6 +33,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'mparticle-acquisitions-publisher',
 	],
 	LIFECYCLE: [
+		'cancellation-api',
 		'cancellation-sf-cases-api',
 		'comms-sqs', // membership-workflow queues
 		'contact-us-api',

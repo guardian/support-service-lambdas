@@ -94,6 +94,7 @@ test('acceptInvitationEndpoint accepts an invitation and creates a secondary use
 		invitationRepository,
 		secondaryUserRepository,
 		dynamoClient,
+		await ZuoraClient.create(stage),
 		secondaryIdentityId,
 		invitationCode,
 	);
