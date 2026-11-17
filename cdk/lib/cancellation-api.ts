@@ -12,6 +12,7 @@ export class CancellationApi extends SrStack {
 		const lambda = new SrApiLambda(this, 'Lambda', {
 			lambdaOverrides: {
 				description: 'Subscription cancellation preview and execute API',
+				handler: 'cancel/index.handler',
 			},
 			monitoring: {
 				errorImpact:

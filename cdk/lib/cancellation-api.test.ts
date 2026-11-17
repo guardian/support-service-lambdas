@@ -20,7 +20,7 @@ describe('The Cancellation api stack', () => {
 			);
 			template.hasResourceProperties('AWS::Lambda::Function', {
 				FunctionName: `cancellation-api-${stage}`,
-				Handler: 'index.handler',
+				Handler: 'cancel/index.handler',
 			});
 			template.hasResourceProperties('AWS::Lambda::Function', {
 				FunctionName: `cancellation-api-calculate-refund-${stage}`,

@@ -1,6 +1,6 @@
 import { logger } from '@modules/logger/logger';
-import { cancellationResponseSchema } from '../src/endpoints/cancellationContract';
-import { app } from '../src/index';
+import { app } from '../src/cancel';
+import { cancellationResponseSchema } from '../src/cancel/endpoints/cancellationContract';
 
 jest.mock('@hono/aws-lambda', () => ({ handle: jest.fn() }));
 

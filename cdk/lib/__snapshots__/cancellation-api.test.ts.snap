@@ -355,7 +355,7 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
           },
         },
         "FunctionName": "cancellation-api-CODE",
-        "Handler": "index.handler",
+        "Handler": "cancel/index.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
         },
@@ -2025,7 +2025,7 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
           },
         },
         "FunctionName": "cancellation-api-PROD",
-        "Handler": "index.handler",
+        "Handler": "cancel/index.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
         },

@@ -55,8 +55,8 @@ contract to maintain. Hono's OpenAPI validators handle JSON content types and
 body validation (`415` for an unsupported media type, `400` for invalid input).
 Dependency/script changes are defined in buildcheck.
 
-`src/index.ts` creates the app, registers endpoints and exports the Lambda
-handler. Each file in `src/endpoints/` keeps a route's definition, request schema
+`src/cancel/index.ts` creates the app, registers endpoints and exports the Lambda
+handler. Each file in `src/cancel/endpoints/` keeps a route's definition, request schema
 and typed implementation together; `cancellationContract.ts` contains the
 endpoint-only shared request/response contract.
 `modules/routing/src/srApi.ts` provides shared request logging, error handling,
