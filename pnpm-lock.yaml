@@ -194,6 +194,9 @@ importers:
       '@hono/zod-openapi':
         specifier: ^1.6.3
         version: 1.6.3(hono@4.13.18)(zod@4.4.3)
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.21
       hono:
         specifier: ^4.13.18
         version: 4.13.18

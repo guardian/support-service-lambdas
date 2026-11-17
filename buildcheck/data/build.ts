@@ -1038,6 +1038,7 @@ const cancellationApi: HandlerDefinition = {
 	functionNames: ['cancellation-api-', 'cancellation-api-calculate-refund-'],
 	entryPoints: ['src/cancel/index.ts', 'src/refund/handlers/*.ts'],
 	dependencies: {
+		...dep.dayjs,
 		...dep.zod,
 		...dep.hono,
 		...dep['@hono/aws-lambda'],
