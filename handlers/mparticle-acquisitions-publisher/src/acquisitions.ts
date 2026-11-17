@@ -107,7 +107,6 @@ function transactionIdentifier(
 ): string {
 	return (
 		firstNonEmpty(
-			acquisition.clientTransactionId,
 			acquisition.paymentId,
 			acquisition.contributionId,
 			acquisition.paypalTransactionId,
