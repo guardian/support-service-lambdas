@@ -11,8 +11,10 @@ import com.gu.zuora.orders.{
 import com.gu.zuora.subscription.{ZuoraApiFailure, ZuoraApiResponse}
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
+import io.circe.parser.decode
 import sttp.client3._
 import sttp.client3.circe._
+import sttp.model.StatusCode
 
 import java.util.concurrent.locks.LockSupport
 import scala.annotation.tailrec
@@ -24,6 +26,7 @@ object ZuoraOrders extends LazyLogging {
   private val RequestReadTimeout = 2.minutes
   private val MaxOrderAttempts = 5
   private val OrderRetryDelay = 1.minute
+  private val ConcurrentIdempotencyRequestCode = "50000050"
 
   private[gu] val MaximumOrderDuration: FiniteDuration =
     MaximumOrderAttemptDuration * MaxOrderAttempts.toLong + OrderRetryDelay * (MaxOrderAttempts - 1).toLong
@@ -34,6 +37,8 @@ object ZuoraOrders extends LazyLogging {
 
   private case class ConfirmedOrderFailure(reason: String) extends OrderFailure
   private case class UnknownOrderOutcome(reason: String) extends OrderFailure
+  private case class ZuoraErrorReason(code: String)
+  private case class ZuoraErrorResponse(reasons: List[ZuoraErrorReason])
 
   def createOrderAsynchronously(
       config: ZuoraConfig,
@@ -132,6 +137,8 @@ object ZuoraOrders extends LazyLogging {
       .body
       .left
       .map {
+        case HttpError(body: String, StatusCode.Conflict) if isConcurrentIdempotencyRequest(body) =>
+          UnknownOrderOutcome("Zuora is already processing a request with this idempotency key")
         case error: HttpError[_] =>
           ConfirmedOrderFailure(s"Failed to submit Zuora order: ${error.getMessage}")
         case error =>
@@ -141,6 +148,11 @@ object ZuoraOrders extends LazyLogging {
         case AsyncJobSubmission.Accepted(jobId) => Right(jobId)
         case AsyncJobSubmission.Rejected => Left(ConfirmedOrderFailure("Zuora did not accept the order"))
       }
+
+  private def isConcurrentIdempotencyRequest(body: String): Boolean =
+    decode[ZuoraErrorResponse](body).toOption.exists(
+      _.reasons.exists(_.code == ConcurrentIdempotencyRequestCode),
+    )
 
   /** https://developer.zuora.com/v1-api-reference/api/orders/get_jobstatusandresponse */
   private def getJobReport(
