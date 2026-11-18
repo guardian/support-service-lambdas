@@ -15,7 +15,7 @@ deployments:
     type: aws-lambda
     parameters:
       fileName: sf-datalake-export.jar
-      bucket: support-service-lambdas-dist
+      bucketSsmLookup: true
       prefixStack: false
       functionNames:
       - sf-start-export-job-

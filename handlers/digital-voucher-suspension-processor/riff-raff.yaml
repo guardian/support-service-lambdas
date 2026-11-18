@@ -15,7 +15,7 @@ deployments:
   digital-voucher-suspension-processor:
     type: aws-lambda
     parameters:
-      bucket: support-service-lambdas-dist
+      bucketSsmLookup: true
       fileName: digital-voucher-suspension-processor.jar
       functionNames:
         - digital-voucher-suspension-processor-

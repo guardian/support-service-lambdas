@@ -16,7 +16,7 @@ deployments:
     type: aws-lambda
     parameters:
       fileName: delivery-records-api.jar
-      bucket: support-service-lambdas-dist
+      bucketSsmLookup: true
       prefixStack: false
       functionNames:
       - delivery-records-api-
