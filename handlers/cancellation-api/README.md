@@ -11,9 +11,12 @@ This handler contains
 
 **WIP:** routing, request validation, documentation and local serving are
 implemented. Both POST endpoints currently return the fixed
-`{ "type": "hard", "willRefund": false }` example. Zuora/ownership checks,
+`{ "type": "immediate", "willRefund": false }` example. Zuora/ownership checks,
 cancellation, emails and events are not implemented; do not connect real
 customer journeys yet.
+
+`immediate` means access ends today (entitlement updates usually propagate within
+a day); `scheduled` includes the future `accessEndDate`.
 
 | Operation                | Path                                                       |
 | ------------------------ | ---------------------------------------------------------- |

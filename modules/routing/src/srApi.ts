@@ -32,21 +32,7 @@ const errorResponseSchema = z
  */
 export const apiErrorResponses = {
 	400: {
-		description:
-			'[hono] Request schema validation failed or JSON was malformed. Explicit application validation errors may also return 400.',
-		content: { 'application/json': { schema: errorResponseSchema } },
-	},
-	404: {
-		description: '[modules/routing] No matching route was found.',
-		content: { 'application/json': { schema: errorResponseSchema } },
-	},
-	415: {
-		description: '[hono] Unsupported request content type.',
-		content: { 'application/json': { schema: errorResponseSchema } },
-	},
-	500: {
-		description:
-			'[modules/routing] An unexpected failure was caught and logged.',
+		description: 'Invalid request or operation rejected by a business rule.',
 		content: { 'application/json': { schema: errorResponseSchema } },
 	},
 };

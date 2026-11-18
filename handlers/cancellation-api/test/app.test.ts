@@ -31,7 +31,7 @@ describe('Cancellation API', () => {
 
 		expect(response.status).toBe(200);
 		expect(await response.json()).toEqual({
-			type: 'hard',
+			type: 'immediate',
 			willRefund: false,
 		});
 	});

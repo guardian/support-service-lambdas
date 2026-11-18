@@ -1,6 +1,5 @@
 import { z } from '@hono/zod-openapi';
 import { identityIdSchema } from '@modules/identity/identityId';
-import { apiGatewayResponses } from '@modules/routing/apiGatewayErrorResponses';
 import { apiErrorResponses } from '@modules/routing/srApi';
 import { subscriptionNumberSchema } from '@modules/zuora/identifiers';
 
@@ -22,11 +21,11 @@ export const identityHeadersSchema = z.object({
 export const cancellationResponseSchema = z
 	.discriminatedUnion('type', [
 		z.strictObject({
-			type: z.literal('hard'),
+			type: z.literal('immediate'),
 			willRefund: z.boolean(),
 		}),
 		z.strictObject({
-			type: z.literal('soft'),
+			type: z.literal('scheduled'),
 			accessEndDate: z.iso.date(),
 		}),
 	])
@@ -34,7 +33,10 @@ export const cancellationResponseSchema = z
 
 export type CancellationResponse = z.input<typeof cancellationResponseSchema>;
 
-export const exampleResponse = { type: 'hard', willRefund: false } as const;
+export const exampleResponse = {
+	type: 'immediate',
+	willRefund: false,
+} as const;
 export const cancellationResponses = {
 	200: {
 		description: 'Cancellation timing and whether a refund is planned.',
@@ -46,5 +48,4 @@ export const cancellationResponses = {
 		},
 	},
 	...apiErrorResponses,
-	...apiGatewayResponses,
 };
