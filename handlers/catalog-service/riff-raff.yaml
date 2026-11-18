@@ -16,7 +16,7 @@ deployments:
     type: aws-lambda
     parameters:
       fileName: catalog-service.jar
-      bucket: subscriptions-dist
+      bucketSsmLookup: true
       prefixStack: false
       functionNames:
       - catalog-service-zuora-code-

@@ -17,7 +17,7 @@ deployments:
     type: aws-lambda
     parameters:
       fileName: identity-backfill.jar
-      bucket: support-service-lambdas-dist
+      bucketSsmLookup: true
       prefixStack: false
       functionNames:
       - identity-backfill-
