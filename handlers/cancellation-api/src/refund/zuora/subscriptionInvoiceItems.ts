@@ -27,7 +27,7 @@ export async function getSubscriptionInvoiceItems(
 		invoiceItemQueryResponseSchema,
 	);
 	if (!done) {
-		// a ZOQL query returns up to 2000 records per page; no subscription should have that many
+		// a ZOQL query returns up to 2000 records per page, throw if there are more invoice items than that
 		throw new Error(
 			`Too many invoice items for subscription ${subscriptionNumber}`,
 		);
