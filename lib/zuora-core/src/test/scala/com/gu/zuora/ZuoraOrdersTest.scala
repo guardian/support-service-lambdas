@@ -130,6 +130,28 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
     clock.get() shouldBe 1.minute.toNanos
   }
 
+  it should "not resubmit when Zuora is already processing the idempotency key" in {
+    val clock = new AtomicLong(0)
+    val submissions = new AtomicInteger(0)
+    val idempotencyKeys = ListBuffer.empty[String]
+    val backend = SttpBackendStub.synchronous.whenRequestMatchesPartial {
+      case submittedRequest: Request[_, _] if submittedRequest.method == Method.POST =>
+        submissions.incrementAndGet()
+        idempotencyKeys += submittedRequest.headers.find(_.name.equalsIgnoreCase("Idempotency-Key")).get.value
+        Response(
+          """{"success":false,"reasons":[{"message":"Concurrent request with the same Idempotency-Key.","code":"50000050"}]}""",
+          StatusCode.Conflict,
+        )
+    }
+
+    val result = createOrder(backend, clock)(request)
+
+    result.left.value.reason shouldBe "Zuora is already processing a request with this idempotency key"
+    submissions.get() shouldBe 1
+    idempotencyKeys.toList shouldBe List(idempotencyKey)
+    clock.get() shouldBe 0
+  }
+
   it should "retry when the job report confirms locking contention" in {
     val clock = new AtomicLong(0)
     val submissions = new AtomicInteger(0)
