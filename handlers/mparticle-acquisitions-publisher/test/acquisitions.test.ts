@@ -1,4 +1,7 @@
-import type { AcquisitionProduct } from '../src/acquisitionEvent';
+import {
+	acquisitionEventSchema,
+	type AcquisitionProduct,
+} from '../src/acquisitionEvent';
 import {
 	buildMParticleBatch,
 	type MParticleMappingConfiguration,
@@ -7,6 +10,9 @@ import {
 const configuration: MParticleMappingConfiguration = {
 	googleEnhancedConversionsConversionActionId: '123456789',
 };
+
+const googleRemarketingVendorId = '5ed0eb688a76503f1016578f';
+const metaVendorId = '5e7e1298b8e05c54a85c52d2';
 
 const acquisition: AcquisitionProduct = {
 	eventTimeStamp: '2026-09-15T10:20:30.123Z',
@@ -50,6 +56,51 @@ const acquisition: AcquisitionProduct = {
 	similarProductsConsent: true,
 	paypalTransactionId: null,
 };
+
+const tcfv2Snapshot = {
+	capturedAt: '2026-10-12T14:13:08.848Z',
+	consentManagerVersion: '1.0.0',
+	framework: 'tcfv2',
+	gpcSignal: null,
+	tcfv2: {
+		gdprApplies: true,
+		consents: { '1': true, '2': false, '3': false, '4': false, '7': true },
+		vendorConsents: {
+			[googleRemarketingVendorId]: true,
+			[metaVendorId]: true,
+		},
+		eventStatus: 'tcloaded',
+		addtlConsent: '2~~dv.',
+	},
+	usnat: null,
+	aus: null,
+} satisfies NonNullable<AcquisitionProduct['cmpConsentSnapshot']>;
+
+const consentSnapshots: Array<
+	[string, NonNullable<AcquisitionProduct['cmpConsentSnapshot']>]
+> = [
+	['TCFv2', tcfv2Snapshot],
+	[
+		'USNAT',
+		{
+			capturedAt: '2026-10-12T14:13:08.848Z',
+			consentManagerVersion: '1.0.0',
+			framework: 'usnat',
+			gpcSignal: true,
+			usnat: { doNotSell: true, signalStatus: 'ready' },
+		},
+	],
+	[
+		'AUS',
+		{
+			capturedAt: '2026-10-12T14:13:08.848Z',
+			consentManagerVersion: '1.0.0',
+			framework: 'aus',
+			gpcSignal: false,
+			aus: { personalisedAdvertising: true, signalStatus: 'ready' },
+		},
+	],
+];
 
 describe('buildMParticleBatch', () => {
 	it('maps a complete acquisition into a purchase event', () => {
@@ -138,6 +189,9 @@ describe('buildMParticleBatch', () => {
 			email: 'reader@example.com',
 			similar_products_consent: true,
 		});
+		expect(event.data.custom_attributes).not.toHaveProperty(
+			'cmp_consent_snapshot',
+		);
 		expect(event.data.custom_attributes).not.toHaveProperty('print_options');
 		expect(event.data.custom_attributes).not.toHaveProperty(
 			'paypal_transaction_id',
@@ -215,6 +269,69 @@ describe('buildMParticleBatch', () => {
 		);
 	});
 
+	it.each(consentSnapshots)(
+		'preserves the full %s snapshot',
+		(_framework, snapshot) => {
+			const parsedAcquisition = acquisitionEventSchema.parse({
+				detail: { ...acquisition, cmpConsentSnapshot: snapshot },
+			}).detail;
+			const batch = buildMParticleBatch(parsedAcquisition, configuration);
+			const event = batch.events[0];
+			const snapshotAttribute =
+				event.data.custom_attributes.cmp_consent_snapshot;
+			expect(typeof snapshotAttribute).toBe('string');
+			expect(JSON.parse(snapshotAttribute as string)).toEqual(snapshot);
+			expect(batch).not.toHaveProperty('consent_state');
+			expect(event.data.custom_attributes.similar_products_consent).toBe(true);
+			expect(event.data.custom_flags).toMatchObject({
+				'GoogleEnhancedConversions.Gclid': 'google-click-id',
+				'Facebook.BrowserId': 'fb.1.1234567890.browser-id',
+				'Facebook.ClickId': 'fb.1.1789467630123.facebook-click-id',
+			});
+		},
+	);
+
+	it('keeps explicit null snapshots and accepts older events without one', () => {
+		const withNullSnapshot = acquisitionEventSchema.parse({
+			detail: { ...acquisition, cmpConsentSnapshot: null },
+		}).detail;
+		const withMissingSnapshot = acquisitionEventSchema.parse({
+			detail: acquisition,
+		}).detail;
+		const nullSnapshotBatch = buildMParticleBatch(
+			withNullSnapshot,
+			configuration,
+		);
+		const olderBatch = buildMParticleBatch(withMissingSnapshot, configuration);
+		const nullSnapshotEvent = nullSnapshotBatch.events[0];
+		const olderEvent = olderBatch.events[0];
+
+		expect(nullSnapshotEvent.data.custom_attributes).toHaveProperty(
+			'cmp_consent_snapshot',
+			'null',
+		);
+		expect(olderEvent.data.custom_attributes).not.toHaveProperty(
+			'cmp_consent_snapshot',
+		);
+		expect(olderEvent.data.custom_attributes.similar_products_consent).toBe(
+			true,
+		);
+	});
+
+	it('preserves an unreadable snapshot as null without rejecting the acquisition', () => {
+		const parsedAcquisition = acquisitionEventSchema.parse({
+			detail: {
+				...acquisition,
+				cmpConsentSnapshot: { framework: 'unknown' },
+			},
+		}).detail;
+		const batch = buildMParticleBatch(parsedAcquisition, configuration);
+		const event = batch.events[0];
+
+		expect(event.data.custom_attributes.cmp_consent_snapshot).toBe('null');
+		expect(event.data.custom_attributes.similar_products_consent).toBe(true);
+	});
+
 	it('omits commerce amounts when the source event has no amount', () => {
 		const event = buildMParticleBatch(
 			{ ...acquisition, amount: null },
@@ -234,10 +351,20 @@ describe('buildMParticleBatch', () => {
 		};
 		const first = buildMParticleBatch(withoutIds, configuration);
 		const second = buildMParticleBatch(withoutIds, configuration);
+		const tcfv2Snapshot = consentSnapshots[0]?.[1];
+		if (!tcfv2Snapshot) {
+			throw new Error('TCFv2 consent snapshot fixture is missing');
+		}
 
 		expect(first.source_request_id).toBe(second.source_request_id);
 		expect(first.source_request_id).toHaveLength(64);
 		expect(first.events[0].data.product_action.transaction_id).toBe('A-S123');
+		expect(
+			buildMParticleBatch(
+				{ ...withoutIds, cmpConsentSnapshot: tcfv2Snapshot },
+				configuration,
+			).source_request_id,
+		).toBe(first.source_request_id);
 	});
 
 	it('rejects an invalid event timestamp while mapping', () => {

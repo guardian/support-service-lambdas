@@ -42,6 +42,10 @@ The publisher's mParticle configuration is isolated from the existing `mparticle
 
 Populate the publisher-specific CODE and PROD values before enabling the corresponding deployment. Never commit or log the credentials.
 
+## CMP consent snapshot
+
+The publisher includes the complete CMP snapshot as the `cmp_consent_snapshot` purchase custom attribute. It includes vendor choices and can reach Meta as custom event data if that connection forwards the attribute. Exclude this attribute from the Meta mapping if the full snapshot should not be sent there.
+
 ## Infrastructure
 
 Infrastructure is defined in `cdk/lib/mparticle-acquisitions-publisher.ts` and registered for both stages in `cdk/bin/cdk.ts`.
