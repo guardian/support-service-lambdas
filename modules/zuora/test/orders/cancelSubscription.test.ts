@@ -49,6 +49,17 @@ describe('buildCancellationOrderRequest', () => {
 			},
 		});
 	});
+
+	it('sets the cancellation reasons on the subscription', () => {
+		const cancellationReasons = {
+			UserCancellationReason__c: 'mma_other',
+			CancellationReason__c: 'Customer',
+		};
+		expect(
+			buildCancellationOrderRequest({ ...input, cancellationReasons })
+				.subscriptions[0]?.customFields,
+		).toEqual(cancellationReasons);
+	});
 });
 
 describe('zeroOrOneInvoiceNumber', () => {
