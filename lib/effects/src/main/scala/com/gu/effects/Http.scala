@@ -1,9 +1,12 @@
 package com.gu.effects
 
 import com.gu.util.Logging
-import okhttp3.{OkHttpClient, Request, Response}
+import okhttp3.{OkHttpClient, Request, RequestBody, Response}
+import okio.Buffer
 
+import java.nio.charset.StandardCharsets.UTF_8
 import java.util.concurrent.TimeUnit
+import scala.jdk.CollectionConverters.IterableHasAsScala
 
 object Http extends Logging {
 
@@ -15,16 +18,25 @@ object Http extends Logging {
       .readTimeout(timeout, TimeUnit.SECONDS)
       .build()
 
+    def bodySummary(requestBody: RequestBody) = {
+      val buffer = new Buffer()
+      requestBody.writeTo(buffer)
+      val body = buffer.readString(UTF_8)
+      summariseBody(body)
+    }
+
     { request: Request =>
-      logger.info(requestSummary(request))
+      val maybeBodySummary = Option(request.body).map(bodySummary)
+      logger.info(
+        s"HTTP request: ${request.method} ${request.url}" + maybeBodySummary
+          .map(summary => s", body:  $summary")
+          .getOrElse(""),
+      )
       val response = restClient.newCall(request).execute
       logger.info(s"HTTP response: ${response.code}")
       response
     }
   }
-
-  private[effects] def requestSummary(request: Request): String =
-    s"HTTP request: ${request.method} ${request.url}"
 
   def summariseBody(body: String): String =
     (body.length, body.take(500) + (if (body.length > 500) "..." else "")).toString
