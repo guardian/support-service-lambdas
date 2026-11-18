@@ -1,3 +1,4 @@
+import { maxBy, sum } from '@modules/arrayFunctions';
 import { fromPence, toPence } from './money';
 
 /**
@@ -40,23 +41,23 @@ export function calculateRefundAmount({
 			`Negative invoice ${negativeInvoiceId} is not in the subscription's invoice items`,
 		);
 	}
-	const [paidInvoice] = invoices
-		.filter(
+	const paidInvoice = maxBy(
+		invoices.filter(
 			(invoice) =>
 				invoice !== negativeInvoice &&
 				invoice.chargeDate <= negativeInvoice.chargeDate,
-		)
-		.sort((a, b) => b.chargeDate - a.chargeDate);
+		),
+		({ chargeDate }) => chargeDate,
+	);
 	if (paidInvoice === undefined) {
 		throw new Error(
 			`No invoice to refund before negative invoice ${negativeInvoiceId}`,
 		);
 	}
 
-	const refundPence = paidInvoice.items.reduce(
-		(total, item) =>
-			total + toPence(item.ChargeAmount) + toPence(item.TaxAmount),
-		0,
+	const refundPence = sum(
+		paidInvoice.items,
+		(item) => toPence(item.ChargeAmount) + toPence(item.TaxAmount),
 	);
 
 	return {

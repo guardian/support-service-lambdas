@@ -4,6 +4,7 @@ import {
 	groupMap,
 	intersection,
 	mapValues,
+	maxBy,
 	partition,
 	partitionByType,
 	sortBy,
@@ -21,6 +22,19 @@ test('sortBy should sort by the relevant field', () => {
 		{ l: 1, d: 102 },
 		{ l: 3, d: 103 },
 	]);
+});
+
+test('maxBy should return the first item with the highest value', () => {
+	const data = [
+		{ l: 1, d: 102 },
+		{ l: 2, d: 103 },
+		{ l: 3, d: 103 },
+	];
+	expect(maxBy(data, (item) => item.d)).toEqual({ l: 2, d: 103 });
+});
+
+test('maxBy should return undefined for an empty array', () => {
+	expect(maxBy([], () => 0)).toBeUndefined();
 });
 
 test('groupBy should group correctly', () => {
