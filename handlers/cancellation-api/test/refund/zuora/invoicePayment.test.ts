@@ -1,0 +1,59 @@
+import { doQuery } from '@modules/zuora/query';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { getLatestInvoicePayment } from '../../../src/refund/zuora/invoicePayment';
+
+jest.mock('@modules/zuora/query');
+
+const get = jest.fn();
+const zuoraClient = { get } as unknown as ZuoraClient;
+
+describe('getLatestInvoicePayment', () => {
+	beforeEach(() => {
+		jest.resetAllMocks();
+	});
+
+	it('returns the most recently applied payment with its payment method type', async () => {
+		jest.mocked(doQuery).mockResolvedValue({
+			done: true,
+			records: [
+				{ PaymentId: 'failed', CreatedDate: '2026-11-01T10:00:00.000+00:00' },
+				{ PaymentId: 'retry', CreatedDate: '2026-11-05T10:00:00.000+00:00' },
+				{ PaymentId: 'older', CreatedDate: '2026-10-01T10:00:00.000+00:00' },
+			],
+		});
+		get.mockImplementation((path: string) =>
+			Promise.resolve(
+				path === '/v1/object/payment/retry'
+					? {
+							Id: 'retry',
+							Amount: 12,
+							Status: 'Processed',
+							GatewayState: 'Submitted',
+							PaymentMethodId: 'pm-1',
+						}
+					: { Type: 'BankTransfer' },
+			),
+		);
+
+		expect(await getLatestInvoicePayment(zuoraClient, 'invoice-1')).toEqual({
+			id: 'retry',
+			amount: 12,
+			status: 'Processed',
+			gatewayState: 'Submitted',
+			paymentMethodType: 'BankTransfer',
+		});
+		expect(get).toHaveBeenCalledWith(
+			'/v1/object/payment-method/pm-1',
+			expect.anything(),
+		);
+	});
+
+	it('returns undefined if the invoice has no payments', async () => {
+		jest.mocked(doQuery).mockResolvedValue({ done: true, records: [] });
+
+		expect(
+			await getLatestInvoicePayment(zuoraClient, 'invoice-1'),
+		).toBeUndefined();
+		expect(get).not.toHaveBeenCalled();
+	});
+});
