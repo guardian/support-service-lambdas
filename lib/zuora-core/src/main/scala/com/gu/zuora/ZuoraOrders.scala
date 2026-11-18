@@ -192,6 +192,18 @@ object ZuoraOrders extends LazyLogging {
             case Right(AsyncJobReport(AsyncJobStatus.Completed, _, Some(result)))
                 if result.status == OrderStatus.Completed =>
               Right(result)
+            case Right(
+                  AsyncJobReport(
+                    AsyncJobStatus.Completed,
+                    _,
+                    Some(result @ AsyncOrderResult(OrderStatus.Failed | OrderStatus.Cancelled)),
+                  ),
+                ) =>
+              Left(
+                ConfirmedOrderFailure(
+                  s"Zuora order job $jobId completed with order status ${result.status.value}",
+                ),
+              )
             case Right(AsyncJobReport(AsyncJobStatus.Completed, _, result)) =>
               val orderStatus = result.map(_.status.value).getOrElse("missing")
               Left(UnknownOrderOutcome(s"Zuora order job $jobId completed with order status $orderStatus"))

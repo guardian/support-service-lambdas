@@ -199,6 +199,49 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
     clock.get() shouldBe 1.minute.toNanos
   }
 
+  it should "retry completed jobs with failed or cancelled orders using a new idempotency key" in {
+    List(OrderStatus.Failed, OrderStatus.Cancelled).foreach { failedOrderStatus =>
+      val clock = new AtomicLong(0)
+      val submissions = new AtomicInteger(0)
+      val idempotencyKeys = ListBuffer.empty[String]
+      val backend = SttpBackendStub.synchronous.whenRequestMatchesPartial {
+        case submittedRequest: Request[_, _] if submittedRequest.method == Method.POST =>
+          idempotencyKeys += submittedRequest.headers.find(_.name.equalsIgnoreCase("Idempotency-Key")).get.value
+          submissions.incrementAndGet()
+          Response.ok(s"""{"jobId":"job-${submissions.get()}","success":true}""")
+        case statusRequest: Request[_, _] if statusRequest.method == Method.GET && submissions.get() == 1 =>
+          Response.ok(
+            s"""{"status":"Completed","errors":null,"result":{"status":"${failedOrderStatus.value}"}}""",
+          )
+        case statusRequest: Request[_, _] if statusRequest.method == Method.GET =>
+          Response.ok("""{"status":"Completed","errors":null,"result":{"status":"Completed"}}""")
+      }
+
+      val result = createOrder(backend, clock)(request)
+
+      result shouldBe Right(AsyncOrderResult(OrderStatus.Completed))
+      submissions.get() shouldBe 2
+      idempotencyKeys.toList shouldBe List(idempotencyKey, s"$idempotencyKey-2")
+      clock.get() shouldBe 1.minute.toNanos
+    }
+  }
+
+  it should "not resubmit when a completed job has a non-terminal order status" in {
+    val submissions = new AtomicInteger(0)
+    val backend = SttpBackendStub.synchronous.whenRequestMatchesPartial {
+      case submittedRequest: Request[_, _] if submittedRequest.method == Method.POST =>
+        submissions.incrementAndGet()
+        Response.ok("""{"jobId":"job-1","success":true}""")
+      case statusRequest: Request[_, _] if statusRequest.method == Method.GET =>
+        Response.ok("""{"status":"Completed","errors":null,"result":{"status":"Pending"}}""")
+    }
+
+    val result = createOrder(backend, new AtomicLong(0))(request)
+
+    result.left.value.reason shouldBe "Zuora order job job-1 completed with order status Pending"
+    submissions.get() shouldBe 1
+  }
+
   it should "retry an ambiguous job status response without resubmitting" in {
     val submissions = new AtomicInteger(0)
     val jobReads = new AtomicInteger(0)
