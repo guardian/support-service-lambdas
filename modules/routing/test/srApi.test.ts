@@ -26,6 +26,48 @@ describe('SR API conventions', () => {
 		jest.restoreAllMocks();
 	});
 
+	it('includes the failing field and Zod validation message in request errors', async () => {
+		const app = createSrApi(info, [
+			defineOpenAPIRoute({
+				route: createRoute({
+					method: 'post',
+					path: '/items',
+					request: {
+						body: {
+							required: true,
+							content: {
+								'application/json': {
+									schema: z.object({
+										reason: z.string().min(1, 'Reason must not be empty'),
+									}),
+								},
+							},
+						},
+					},
+					responses: successResponses,
+				}),
+				handler: async (c) => Promise.resolve(c.json({ ok: true }, 200)),
+			}),
+		]);
+
+		const response = await app.request('/items', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ reason: '' }),
+		});
+
+		expect(response.status).toBe(400);
+		const errorResponse: unknown = await response.json();
+		expect(errorResponse).toHaveProperty(
+			'message',
+			expect.stringContaining('reason'),
+		);
+		expect(errorResponse).toHaveProperty(
+			'message',
+			expect.stringContaining('Reason must not be empty'),
+		);
+	});
+
 	it.each([
 		{ stage: 'CODE', persistAuth: true },
 		{ stage: 'PROD', persistAuth: false },

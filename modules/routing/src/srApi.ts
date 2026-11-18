@@ -82,7 +82,7 @@ export function createSrApi<
 		defaultHook: (result, c) => {
 			if (!result.success) {
 				logger.log('Invalid API request', result.error.issues);
-				return c.json({ message: 'Invalid request body' }, 400);
+				return c.json({ message: z.prettifyError(result.error) }, 400);
 			}
 			return undefined;
 		},
