@@ -5,6 +5,7 @@ import { HTTPException } from 'hono/http-exception';
 import { ValidationError } from '@modules/errors';
 import { getCallerInfo } from '@modules/logger/getCallerInfo';
 import { logger } from '@modules/logger/logger';
+import { createHttpLogging } from './httpLogging';
 
 /**
  * standard openapi info object
@@ -89,27 +90,9 @@ export function createSrApi<
 	});
 
 	/*
-	 * add standard logging and context clearance to all routes
+	 * Create standard logging and context cleanup for API endpoints.
 	 */
-	app.use(
-		'*',
-		logger.withContext(
-			logger.wrapFn(
-				async (c: Context, next: Next) => {
-					await next();
-					return c.res;
-				},
-				'httpRequest',
-				callerInfo,
-				([c]) => ({
-					logOnEntryAndExit: `${c.req.method} ${c.req.path}`,
-				}),
-				(response) => ({ statusCode: response.status }),
-			),
-			undefined,
-			true,
-		),
-	);
+	const apiMiddleware = createHttpLogging(callerInfo);
 
 	/*
 	 * map ValidationError to 400, log 500 errors without returning the detail
@@ -205,6 +188,7 @@ export function createSrApi<
 				route: {
 					...endpoint.route,
 					middleware: [
+						apiMiddleware,
 						async (c: Context, next: Next) => {
 							await next();
 							if (c.res.status !== 200) {
