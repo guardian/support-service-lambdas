@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   gu-cdk-build:
-    name: ci ${{ matrix.subproject }}
+    name: ${{ matrix.subproject }}
     strategy:
       fail-fast: false
       matrix:
@@ -78,7 +78,7 @@ jobs:
             ${{ matrix.subproject }}:
               - /tmp/${{ matrix.subproject }}.jar
   build:
-    name: ci ${{ matrix.subproject }}
+    name: ${{ matrix.subproject }}
     strategy:
       fail-fast: false
       matrix:

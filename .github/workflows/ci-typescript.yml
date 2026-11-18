@@ -26,7 +26,7 @@ jobs:
           echo "subprojects=$(jq -c '.include' .github/workflows/handlerNames.managed.json)" >> "$GITHUB_OUTPUT"
 
   gu-cdk-build:
-    name: ci ${{ matrix.subproject }}
+    name: ${{ matrix.subproject }}
     needs:
       - load-matrix
     strategy:
