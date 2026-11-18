@@ -36,7 +36,7 @@ const createRefundResponseSchema = z.object({
 });
 
 /**
- * Refunds a payment to the payment method it was taken from. 
+ * Refunds a payment to the payment method it was taken from.
  * The comment identifies the refund, so a re-run of the lambda
  * can find it with getRefundsByComment.
  */
