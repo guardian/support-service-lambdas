@@ -1,3 +1,4 @@
+import { sum } from '@modules/arrayFunctions';
 import type {
 	InvoiceItem,
 	InvoiceItemAdjustmentSourceType,
@@ -34,7 +35,7 @@ export function zeroInvoiceAdjustments({
 		),
 	]);
 
-	const totalPence = adjustments.reduce((sum, { pence }) => sum + pence, 0);
+	const totalPence = sum(adjustments, ({ pence }) => pence);
 	if (totalPence !== toPence(expectedTotal)) {
 		throw new Error(
 			`Invoice items have ${fromPence(totalPence)} available to credit, expected ${expectedTotal}`,
