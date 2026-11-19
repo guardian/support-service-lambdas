@@ -2,6 +2,7 @@ import { subscriptionNumberSchema } from '@modules/zuora/identifiers';
 import { getInvoice } from '@modules/zuora/invoice';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { checkPaymentSettlement } from '../../../src/refund/handlers/checkPaymentSettlement';
+import { subscriptionInvoiceItemSchema } from '../../../src/refund/subscriptionInvoiceItem';
 import { getLatestInvoicePayment } from '../../../src/refund/zuora/invoicePayment';
 import { getSubscriptionInvoiceItems } from '../../../src/refund/zuora/subscriptionInvoiceItems';
 
@@ -44,13 +45,13 @@ describe('checkPaymentSettlement', () => {
 
 	it('checks the latest positive invoice when no refund is due', async () => {
 		jest.mocked(getSubscriptionInvoiceItems).mockResolvedValue([
-			{
+			subscriptionInvoiceItemSchema.parse({
 				Id: 'item-1',
 				InvoiceId: 'current',
 				ChargeDate: '2026-11-01T00:00:00.000Z',
 				ChargeAmount: 10,
 				TaxAmount: 2,
-			},
+			}),
 		]);
 
 		expect(

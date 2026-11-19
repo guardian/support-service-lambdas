@@ -2,14 +2,16 @@ import {
 	getLatestNegativeInvoiceId,
 	getLatestPositiveInvoiceId,
 } from '../../src/refund/latestInvoice';
+import { subscriptionInvoiceItemSchema } from '../../src/refund/subscriptionInvoiceItem';
 
-const item = (InvoiceId: string, ChargeDate: string, ChargeAmount: number) => ({
-	Id: `${InvoiceId}-item`,
-	InvoiceId,
-	ChargeDate,
-	ChargeAmount,
-	TaxAmount: 0,
-});
+const item = (InvoiceId: string, ChargeDate: string, ChargeAmount: number) =>
+	subscriptionInvoiceItemSchema.parse({
+		Id: `${InvoiceId}-item`,
+		InvoiceId,
+		ChargeDate,
+		ChargeAmount,
+		TaxAmount: 0,
+	});
 
 describe('getLatestPositiveInvoiceId', () => {
 	it('ignores later invoices that are not positive', () => {

@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import { subscriptionNumberSchema } from '@modules/zuora/identifiers';
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { subscriptionInvoiceItemSchema } from '../../../src/refund/subscriptionInvoiceItem';
 import {
 	generateInvoice,
 	getInvoiceStatus,
@@ -22,13 +23,14 @@ const input = {
 	today,
 };
 
-const invoiceItem = (InvoiceId: string, ChargeAmount: number) => ({
-	Id: `${InvoiceId}-item`,
-	InvoiceId,
-	ChargeDate: '2026-11-18T10:00:00.000+00:00',
-	ChargeAmount,
-	TaxAmount: 0,
-});
+const invoiceItem = (InvoiceId: string, ChargeAmount: number) =>
+	subscriptionInvoiceItemSchema.parse({
+		Id: `${InvoiceId}-item`,
+		InvoiceId,
+		ChargeDate: '2026-11-18T10:00:00.000+00:00',
+		ChargeAmount,
+		TaxAmount: 0,
+	});
 
 describe('generateAndPostNegativeInvoice', () => {
 	beforeEach(() => {
