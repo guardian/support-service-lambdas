@@ -23,6 +23,7 @@
     "dayjs": "^1.11.13",
     "hono": "^4.13.18",
     "@hono/zod-openapi": "^1.6.3",
+    "email": "workspace:*",
     "logger": "workspace:*",
     "routing": "workspace:*",
     "identity": "workspace:*",
