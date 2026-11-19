@@ -5,6 +5,7 @@ import type {
 	InvoiceItemAdjustmentType,
 } from '@modules/zuora/types';
 import { fromPence, toPence } from './money';
+import { PermanentError } from './permanentError';
 
 /**
  * Builds the invoice item adjustments that bring an invoice's balance to zero, e.g. the paid invoice after
@@ -37,7 +38,7 @@ export function zeroInvoiceAdjustments({
 
 	const totalPence = sum(adjustments, ({ pence }) => pence);
 	if (totalPence !== toPence(expectedTotal)) {
-		throw new Error(
+		throw new PermanentError(
 			`Invoice items have ${fromPence(totalPence)} available to credit, expected ${expectedTotal}`,
 		);
 	}
