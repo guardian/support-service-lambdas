@@ -1,4 +1,5 @@
 import type { Dayjs } from 'dayjs';
+import { PermanentError } from './permanentError';
 
 /**
  * After a Direct Debit fails, the subscription must be cancelled from the start of the unpaid period, so it is
@@ -29,7 +30,7 @@ export function planBackdate({
 		return { action: 'recancel', backdated: true };
 	}
 	if (subscriptionStatus !== 'Cancelled' || cancellationDate === undefined) {
-		throw new Error(
+		throw new PermanentError(
 			`Unexpected subscription status ${subscriptionStatus} with cancellation order ${cancellationOrderExists ? 'present' : 'deleted'}`,
 		);
 	}
@@ -41,7 +42,7 @@ export function planBackdate({
 	if (cancellationDate.isSame(unpaidPeriodStart, 'day')) {
 		return { action: 'none', backdated: true };
 	}
-	throw new Error(
+	throw new PermanentError(
 		`Cancellation order is deleted but the subscription is cancelled on ${cancellationDate.format('YYYY-MM-DD')}, not the unpaid period start ${unpaidPeriodStart.format('YYYY-MM-DD')}`,
 	);
 }
