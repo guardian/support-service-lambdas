@@ -8,12 +8,43 @@ import { logger } from '@modules/logger/logger';
 import type { Handler, RequestContext } from '@modules/routing/router';
 import type { Stage } from '@modules/stage';
 import { getAccount } from '@modules/zuora/account';
-import { getSubscription } from '@modules/zuora/subscription';
+import {
+	type ChargeDetail,
+	getSubscription,
+} from '@modules/zuora/subscription';
 import type {
 	ZuoraAccount,
 	ZuoraSubscription,
 } from '@modules/zuora/types/objects';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
+
+export type SubscriptionAndAccount = {
+	subscription: ZuoraSubscription;
+	account: ZuoraAccount;
+};
+
+export function withSubscription<
+	Request extends { headers: { 'x-identity-id'?: string } },
+	Result,
+>(
+	zuoraClient: ZuoraClient,
+	handler: (
+		request: Request,
+		context: SubscriptionAndAccount,
+	) => Promise<Result>,
+	extractSubscriptionNumber: (request: Request) => string,
+	chargeDetail: ChargeDetail,
+): (request: Request) => Promise<Result> {
+	return async (request) => {
+		const context = await loadMmaSubscription(
+			zuoraClient,
+			extractSubscriptionNumber(request),
+			request.headers,
+			chargeDetail,
+		);
+		return handler(request, context);
+	};
+}
 
 export function assertIdentityIdMatches(
 	account: ZuoraAccount,
@@ -30,6 +61,25 @@ export function assertIdentityIdMatches(
 		);
 	}
 	logger.log(`Subscription is owned by identity user ${identityIdFromRequest}`);
+}
+
+export async function loadMmaSubscription(
+	zuoraClient: ZuoraClient,
+	subscriptionNumber: string,
+	headers: APIGatewayProxyEventHeaders,
+	chargeDetail?: ChargeDetail,
+) {
+	logger.mutableAddContext(subscriptionNumber);
+	logger.log('Getting the subscription and account details from Zuora');
+	const subscription = await getSubscription(
+		zuoraClient,
+		subscriptionNumber,
+		undefined,
+		chargeDetail,
+	);
+	const account = await getAccount(zuoraClient, subscription.accountNumber);
+	assertIdentityIdMatches(account, headers);
+	return { subscription, account };
 }
 
 export const withMMAIdentityCheck =
@@ -52,15 +102,12 @@ export const withMMAIdentityCheck =
 		context?: RequestContext,
 	): Promise<APIGatewayProxyResult> => {
 		const zuoraClient = await ZuoraClient.create(stage);
-		logger.log('Getting the subscription and account details from Zuora');
-
 		const subscriptionNumber = extractSubscriptionNumber({ path, body });
-		const subscription = await getSubscription(zuoraClient, subscriptionNumber);
-
-		const account = await getAccount(zuoraClient, subscription.accountNumber);
-
-		logger.mutableAddContext(subscriptionNumber);
-		assertIdentityIdMatches(account, event.headers);
+		const { subscription, account } = await loadMmaSubscription(
+			zuoraClient,
+			subscriptionNumber,
+			event.headers,
+		);
 		return await handler(
 			body,
 			zuoraClient,

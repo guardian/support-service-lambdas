@@ -1,3 +1,4 @@
+import { handle } from '@hono/aws-lambda';
 import { OpenAPIHono, type RouteConfig, z } from '@hono/zod-openapi';
 import type { Context, Next } from 'hono';
 import { html } from 'hono/html';
@@ -6,6 +7,8 @@ import { ValidationError } from '@modules/errors';
 import { getCallerInfo } from '@modules/logger/getCallerInfo';
 import { logger } from '@modules/logger/logger';
 import { createHttpLogging } from './httpLogging';
+import type { HandlerEnv } from './lambdaHandler';
+import { LambdaHandlerWithServices } from './lambdaHandler';
 
 /**
  * standard openapi info object
@@ -47,18 +50,48 @@ type JsonRoute = RouteConfig & {
 	};
 };
 
+type ApiRoutes = ReadonlyArray<
+	Parameters<OpenAPIHono['openapiRoutes']>[0][number] & { route: JsonRoute }
+>;
+
+export type ApiDefinition<Services> = {
+	info: ApiInfo;
+	routes: (services: Services) => ApiRoutes;
+};
+
+type HttpHandler = ReturnType<typeof handle>;
+
+export function ApiGatewayHandler<Config, Services>(
+	configSchema: z.ZodType<Config>,
+	definition: ApiDefinition<Services>,
+	buildServices: (env: HandlerEnv<Config>) => Promise<Services>,
+) {
+	return LambdaHandlerWithServices(
+		configSchema,
+		(
+			event: Parameters<HttpHandler>[0],
+			services: Services,
+			context?: Parameters<HttpHandler>[1],
+		) => handle(createSrApi(definition, services))(event, context),
+		buildServices,
+		getCallerInfo(),
+	);
+}
+
 /**
  * create an api in your lambda and get all the standard openapi and error functionality
  *
- * @param info useful information for the lambda's open API/swagger page
- * @param routes endpoint definitions to register
+ * @param definition API metadata and service-dependent endpoint definitions
+ * @param services resolved services supplied to the route factory
  * @param stage defaults to process.env.STAGE; explorer credentials persist only in CODE
  */
-export function createSrApi<
-	const Routes extends ReadonlyArray<
-		Parameters<OpenAPIHono['openapiRoutes']>[0][number] & { route: JsonRoute }
-	>,
->(info: ApiInfo, routes: Routes, stage = process.env.STAGE) {
+export function createSrApi<Services>(
+	definition: ApiDefinition<Services>,
+	services: Services,
+	stage = process.env.STAGE,
+) {
+	const { info } = definition;
+	const routes = definition.routes(services);
 	const callerInfo = getCallerInfo();
 
 	/*
@@ -76,7 +109,7 @@ export function createSrApi<
 	});
 
 	/*
-	 * Create standard logging and context cleanup for API endpoints.
+	 * Create standard request/response logging for API endpoints.
 	 */
 	const apiMiddleware = createHttpLogging(callerInfo);
 

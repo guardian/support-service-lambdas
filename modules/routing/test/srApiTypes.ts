@@ -1,5 +1,9 @@
 import { createRoute, defineOpenAPIRoute, z } from '@hono/zod-openapi';
-import { createSrApi } from '../src/srApi';
+import {
+	type ApiDefinition,
+	ApiGatewayHandler,
+	createSrApi,
+} from '../src/apiGatewayHandler';
 import { type JsonRequest, withJsonHandler } from '../src/withJsonHandler';
 
 const info = { title: 'Type checks', version: '1.0.0' };
@@ -59,7 +63,22 @@ const endpoint = defineOpenAPIRoute({
 	handler: withJsonHandler(handler),
 });
 
-createSrApi(info, [endpoint]);
+createSrApi({ info, routes: () => [endpoint] }, undefined);
+
+const api: ApiDefinition<{ label: string }> = {
+	info,
+	routes: (services) => {
+		services.label.toUpperCase();
+		// @ts-expect-error Only declared services are available to the route factory.
+		const invalid: unknown = services.missing;
+		void invalid;
+		return [endpoint];
+	},
+};
+
+ApiGatewayHandler(z.object({ label: z.string() }), api, async ({ config }) =>
+	Promise.resolve({ label: config.label }),
+);
 
 defineOpenAPIRoute({
 	route,
@@ -97,5 +116,21 @@ const emptyRequest: JsonRequest<typeof missingSchemaEndpoint.route> = {
 };
 void emptyRequest;
 
-// @ts-expect-error Shared response validation requires a JSON 200 Zod schema.
-createSrApi(info, [missingSchemaEndpoint]);
+createSrApi(
+	{
+		info,
+		// @ts-expect-error Shared response validation requires a JSON 200 Zod schema.
+		routes: () => [missingSchemaEndpoint],
+	},
+	undefined,
+);
+
+ApiGatewayHandler(
+	z.void(),
+	{
+		info,
+		// @ts-expect-error The API Gateway wrapper must also require a JSON 200 Zod schema.
+		routes: () => [missingSchemaEndpoint],
+	},
+	async () => Promise.resolve({}),
+);

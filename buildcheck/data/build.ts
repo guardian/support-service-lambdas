@@ -151,10 +151,12 @@ const moduleRouting: ModuleDefinition = {
 		...dep['zod'],
 		...dep['dayjs'],
 		...dep.hono,
+		...dep['@hono/aws-lambda'],
 		...dep['@hono/zod-openapi'],
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
+		...devDeps['@hono/node-server'],
 	},
 	moduleDependencies: [moduleAws, moduleLogger, moduleZuora],
 };
@@ -1039,13 +1041,12 @@ const cancellationApi: HandlerDefinition = {
 	entryPoints: ['src/cancel/index.ts', 'src/refund/handlers/*.ts'],
 	dependencies: {
 		...dep.zod,
+		...dep.dayjs,
 		...dep.hono,
-		...dep['@hono/aws-lambda'],
 		...dep['@hono/zod-openapi'],
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
-		...devDeps['@hono/node-server'],
 		...devDeps.tsx,
 	},
 	moduleDependencies: [
@@ -1053,6 +1054,9 @@ const cancellationApi: HandlerDefinition = {
 		moduleRouting,
 		moduleIdentity,
 		moduleZuora,
+		moduleGuardianSubscription,
+		moduleProductCatalog,
+		moduleZuoraCatalog,
 	],
 	extraScripts: {
 		local: 'tsx runLocal/server.ts',
