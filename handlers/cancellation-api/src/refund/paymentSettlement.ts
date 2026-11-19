@@ -1,3 +1,4 @@
+import { PermanentError } from './permanentError';
 /**
  * Decides whether the payment for an invoice has settled, so the workflow knows whether to refund, keep waiting,
  * or treat it as failed.
@@ -42,7 +43,7 @@ export function getPaymentSettlementStatus({
 				? getDirectDebitSettlementStatus(gatewayState)
 				: 'Settled';
 		default:
-			throw new Error(`Unexpected payment status ${status}`);
+			throw new PermanentError(`Unexpected payment status ${status}`);
 	}
 }
 
@@ -57,7 +58,7 @@ function getDirectDebitSettlementStatus(
 		case 'FailedToSettle':
 			return 'Failed';
 		default:
-			throw new Error(
+			throw new PermanentError(
 				`Unexpected gateway state ${gatewayState} for a processed Direct Debit payment`,
 			);
 	}
