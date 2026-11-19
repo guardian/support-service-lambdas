@@ -33,6 +33,7 @@ export function getSwitchInformation(
 		subscriptionInformation.previousAmount,
 		subscriptionInformation.includesContribution,
 		productCatalogHelper,
+		input.discountSwitchEnabled,
 	);
 
 	return {
