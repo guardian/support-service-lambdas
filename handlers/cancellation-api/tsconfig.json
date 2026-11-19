@@ -5,17 +5,14 @@
       "@modules/*": [
         "../../modules/*"
       ],
-      "@modules/logger/*": [
-        "../../modules/logger/src/*"
-      ],
-      "@modules/routing/*": [
-        "../../modules/routing/src/*"
+      "@modules/email/*": [
+        "../../modules/email/src/*"
       ],
       "@modules/aws/*": [
         "../../modules/aws/src/*"
       ],
-      "@modules/zuora/*": [
-        "../../modules/zuora/src/*"
+      "@modules/logger/*": [
+        "../../modules/logger/src/*"
       ],
       "@modules/internationalisation/*": [
         "../../modules/internationalisation/src/*"
@@ -25,6 +22,12 @@
       ],
       "@modules/zuora-catalog/*": [
         "../../modules/zuora-catalog/src/*"
+      ],
+      "@modules/routing/*": [
+        "../../modules/routing/src/*"
+      ],
+      "@modules/zuora/*": [
+        "../../modules/zuora/src/*"
       ],
       "@modules/promotions/*": [
         "../../modules/promotions/src/*"

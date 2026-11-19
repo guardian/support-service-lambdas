@@ -1050,6 +1050,7 @@ const cancellationApi: HandlerDefinition = {
 		...devDeps.tsx,
 	},
 	moduleDependencies: [
+		moduleEmail,
 		moduleLogger,
 		moduleRouting,
 		moduleIdentity,
