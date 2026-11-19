@@ -6,6 +6,7 @@ import type {
 	PaymentFailedEmailData,
 	PaymentFailedInvoiceItem,
 } from '../paymentFailedEmail';
+import { PermanentError } from '../permanentError';
 
 const queryResponseSchema = <T extends z.ZodTypeAny>(recordSchema: T) =>
 	z.object({ records: z.array(recordSchema).default([]) });
@@ -22,7 +23,9 @@ async function queryOne<T>(
 	);
 	const [record] = records;
 	if (records.length !== 1 || record === undefined) {
-		throw new Error(`Expected one record, got ${records.length}: ${query}`);
+		throw new PermanentError(
+			`Expected one record, got ${records.length}: ${query}`,
+		);
 	}
 	return record;
 }

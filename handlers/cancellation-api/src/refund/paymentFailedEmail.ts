@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import { sortBy } from '@modules/arrayFunctions';
 import type { EmailMessageWithUserId } from '@modules/email/email';
 import { buildEmailMessage, DataExtensionNames } from '@modules/email/email';
+import { PermanentError } from './permanentError';
 
 export type PaymentFailedInvoiceItem = {
 	ProductName: string;
@@ -45,17 +46,17 @@ export function buildPaymentFailedEmail({
 	invoiceItems,
 }: PaymentFailedEmailData): EmailMessageWithUserId {
 	if (!emailAddress) {
-		throw new Error('The account has no email address');
+		throw new PermanentError('The account has no email address');
 	}
 	if (!sfContactId) {
-		throw new Error('The account has no Salesforce contact');
+		throw new PermanentError('The account has no Salesforce contact');
 	}
 	const charge = sortBy(
 		invoiceItems.filter(({ ChargeAmount }) => ChargeAmount > 0),
 		({ ServiceStartDate }) => ServiceStartDate,
 	)[0];
 	if (charge === undefined) {
-		throw new Error(`Invoice ${unpaidInvoiceId} has no charges`);
+		throw new PermanentError(`Invoice ${unpaidInvoiceId} has no charges`);
 	}
 	const { cardExpiryMonth, cardExpiryYear } = paymentMethod ?? {};
 
