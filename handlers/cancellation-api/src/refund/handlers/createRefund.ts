@@ -1,8 +1,12 @@
 import { z } from 'zod';
 import { logger } from '@modules/logger/logger';
 import { stageFromEnvironment } from '@modules/stage';
-import { subscriptionNumberSchema } from '@modules/zuora/identifiers';
+import {
+	orderNumberSchema,
+	subscriptionNumberSchema,
+} from '@modules/zuora/identifiers';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { getRefundKey } from '../refundKey';
 import {
 	createRefund as createZuoraRefund,
 	getRefund,
@@ -11,12 +15,10 @@ import {
 
 const createRefundInputSchema = z.object({
 	subscriptionNumber: subscriptionNumberSchema,
-	refundKey: z.string().min(1),
+	cancellationOrderNumber: orderNumberSchema,
 	paymentId: z.string().min(1),
 	refundAmount: z.number().positive(),
 });
-
-type CreateRefundInput = z.infer<typeof createRefundInputSchema>;
 
 export type CreateRefundOutput = {
 	refundId: string;
@@ -27,7 +29,11 @@ export const handler = async (event: unknown): Promise<CreateRefundOutput> => {
 	logger.resetContext();
 	logger.mutableAddContext(input.subscriptionNumber);
 	const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
-	return createRefund(zuoraClient, input);
+	return createRefund(zuoraClient, {
+		refundKey: getRefundKey(input),
+		paymentId: input.paymentId,
+		refundAmount: input.refundAmount,
+	});
 };
 
 /**
@@ -36,7 +42,11 @@ export const handler = async (event: unknown): Promise<CreateRefundOutput> => {
  */
 export async function createRefund(
 	zuoraClient: ZuoraClient,
-	{ refundKey, paymentId, refundAmount }: CreateRefundInput,
+	{
+		refundKey,
+		paymentId,
+		refundAmount,
+	}: { refundKey: string; paymentId: string; refundAmount: number },
 ): Promise<CreateRefundOutput> {
 	const existingRefunds = await getRefundsByComment(zuoraClient, refundKey);
 	if (existingRefunds.length > 1) {
