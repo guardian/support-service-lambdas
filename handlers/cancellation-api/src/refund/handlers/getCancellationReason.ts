@@ -20,12 +20,14 @@ type GetCancellationReasonInput = z.infer<
  */
 export const handler = async (
 	event: unknown,
-): Promise<CancellationReasonCustomFields> => {
+): Promise<{ cancellationReasons: CancellationReasonCustomFields }> => {
 	const input = getCancellationReasonInputSchema.parse(event);
 	logger.resetContext();
 	logger.mutableAddContext(input.subscriptionNumber);
 	const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
-	return getCancellationReason(zuoraClient, input);
+	return {
+		cancellationReasons: await getCancellationReason(zuoraClient, input),
+	};
 };
 
 export async function getCancellationReason(
