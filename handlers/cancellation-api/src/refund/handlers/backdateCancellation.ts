@@ -20,16 +20,18 @@ const backdateCancellationInputSchema = z.object({
 	subscriptionNumber: subscriptionNumberSchema,
 	accountNumber: z.string().min(1),
 	cancellationOrderNumber: z.string().min(1),
-	unpaidInvoiceId: z.string().min(1),
+	// the invoice whose payment failed
+	invoiceId: z.string().min(1),
 	cancellationReasons: z.object({
 		UserCancellationReason__c: z.string().optional(),
 		CancellationReason__c: z.string().optional(),
 	}),
 });
 
-type BackdateCancellationInput = z.infer<
-	typeof backdateCancellationInputSchema
->;
+type BackdateCancellationInput = Omit<
+	z.infer<typeof backdateCancellationInputSchema>,
+	'invoiceId'
+> & { unpaidInvoiceId: string };
 
 export type BackdateCancellationOutput = {
 	backdated: boolean;
@@ -37,14 +39,23 @@ export type BackdateCancellationOutput = {
 	creditInvoiceId: string;
 };
 
+/**
+ * Returns the credit invoice as negativeInvoiceId, as it takes the cancellation invoice's place in the rest of the
+ * workflow.
+ */
 export const handler = async (
 	event: unknown,
-): Promise<BackdateCancellationOutput> => {
-	const input = backdateCancellationInputSchema.parse(event);
+): Promise<{ backdated: boolean; negativeInvoiceId: string }> => {
+	const { invoiceId, ...input } = backdateCancellationInputSchema.parse(event);
 	logger.resetContext();
 	logger.mutableAddContext(input.subscriptionNumber);
 	const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
-	return backdateCancellation(zuoraClient, input, dayjs());
+	const { backdated, creditInvoiceId } = await backdateCancellation(
+		zuoraClient,
+		{ ...input, unpaidInvoiceId: invoiceId },
+		dayjs(),
+	);
+	return { backdated, negativeInvoiceId: creditInvoiceId };
 };
 
 export async function backdateCancellation(
