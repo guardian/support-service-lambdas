@@ -48,6 +48,7 @@ export const productBenefitMapping: Record<
 		'puzzlePremium',
 	],
 	PatronMembership: digitalSubscriptionBenefits,
+	Patron: digitalSubscriptionBenefits,
 	GuardianPatron: digitalSubscriptionBenefits,
 	GuardianWeeklyDomestic: digitalSubscriptionBenefits,
 	GuardianWeeklyRestOfWorld: digitalSubscriptionBenefits,

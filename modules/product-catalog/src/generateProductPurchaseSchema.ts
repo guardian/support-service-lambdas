@@ -4,7 +4,7 @@ import {
 } from '@modules/product-catalog/productCatalog';
 import {
 	getProductRatePlanKey,
-	getZuoraProductKey,
+	getZuoraProductKeys,
 	isSupportedProduct,
 	isSupportedProductRatePlan,
 } from '@modules/product-catalog/zuoraToProductNameMappings';
@@ -50,12 +50,18 @@ export const generateProductPurchaseSchema = (
 ): string => {
 	const supportedZuoraProducts = catalog.products
 		.filter((product) => isSupportedProduct(product.name))
-		.sort((a, b) =>
-			getZuoraProductKey(a.name).localeCompare(getZuoraProductKey(b.name)),
-		);
+		.flatMap((product) =>
+			getZuoraProductKeys(product.name).map((productKey) => ({
+				product,
+				productKey,
+			})),
+		)
+		.sort((a, b) => a.productKey.localeCompare(b.productKey));
 
 	const zuoraProductsSchema = supportedZuoraProducts
-		.map((product) => generateProductsSchema(product))
+		.map(({ product, productKey }) =>
+			generateProductsSchema(product, productKey),
+		)
 		.join(',\n');
 
 	return `${header}
@@ -87,8 +93,10 @@ const generateProductSpecificFields = (productName: string): string => {
 	return '';
 };
 
-const generateProductsSchema = (product: CatalogProduct) => {
-	const productName = getZuoraProductKey(product.name);
+const generateProductsSchema = (
+	product: CatalogProduct,
+	productName: string,
+) => {
 	const supportedRatePlans = product.productRatePlans
 		.filter((productRatePlan) =>
 			isSupportedProductRatePlan(productRatePlan.name),

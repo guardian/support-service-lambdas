@@ -138,6 +138,7 @@ describe('Premium Puzzles eligibility', () => {
 		'SupporterMembership',
 		'PartnerMembership',
 		'PatronMembership',
+		'Patron',
 		'GuardianPatron',
 	] as const)('grants puzzlePremium to %s', (product) => {
 		expect(getUserBenefitsFromUserProducts([product])).toContain(
