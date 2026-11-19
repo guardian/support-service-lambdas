@@ -4,7 +4,7 @@ import { stageFromEnvironment } from '@modules/stage';
 import { subscriptionNumberSchema } from '@modules/zuora/identifiers';
 import { getInvoice } from '@modules/zuora/invoice';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { getLatestPositiveInvoiceId } from '../latestPositiveInvoice';
+import { getLatestPositiveInvoiceId } from '../latestInvoice';
 import type { PaymentSettlementStatus } from '../paymentSettlement';
 import { getPaymentSettlementStatus } from '../paymentSettlement';
 import { getLatestInvoicePayment } from '../zuora/invoicePayment';
