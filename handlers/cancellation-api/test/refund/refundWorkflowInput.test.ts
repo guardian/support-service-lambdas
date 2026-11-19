@@ -1,30 +1,30 @@
 import { refundWorkflowInputSchema } from '../../src/refund/refundWorkflowInput';
 
-const refundDueInput = {
+const validInput = {
 	subscriptionNumber: 'A-S00123456',
 	accountNumber: 'A00123456',
 	cancellationOrderNumber: 'O-00123456',
-	negativeInvoiceId: '8ad08872a1e91f6001a1ea1029f47a09',
+	cancellationBillingDate: '2026-11-16',
+	refundDue: true,
 };
 
-const { negativeInvoiceId: _, ...noRefundInput } = refundDueInput;
-
 describe('refundWorkflowInputSchema', () => {
-	it('parses a refund-due input', () => {
-		expect(refundWorkflowInputSchema.parse(refundDueInput)).toEqual(
-			refundDueInput,
-		);
+	it('parses a valid input', () => {
+		expect(refundWorkflowInputSchema.parse(validInput)).toEqual(validInput);
 	});
 
-	it('parses an input with no refund due, without a negative invoice', () => {
-		expect(refundWorkflowInputSchema.parse(noRefundInput)).toEqual(
-			noRefundInput,
-		);
+	it('rejects a cancellationBillingDate that is not an ISO date', () => {
+		expect(() =>
+			refundWorkflowInputSchema.parse({
+				...validInput,
+				cancellationBillingDate: '2026-11-16T10:00:00Z',
+			}),
+		).toThrow();
 	});
 
 	it('ignores unknown fields, so newer cancellation Lambdas can add optional fields', () => {
 		expect(
-			refundWorkflowInputSchema.parse({ ...refundDueInput, newField: 'x' }),
-		).toEqual(refundDueInput);
+			refundWorkflowInputSchema.parse({ ...validInput, newField: 'x' }),
+		).toEqual(validInput);
 	});
 });
