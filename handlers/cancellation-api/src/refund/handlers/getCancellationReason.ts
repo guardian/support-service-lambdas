@@ -4,7 +4,9 @@ import { stageFromEnvironment } from '@modules/stage';
 import { subscriptionNumberSchema } from '@modules/zuora/identifiers';
 import type { CancellationReasonCustomFields } from '@modules/zuora/orders/orderRequests';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { PermanentError } from '../permanentError';
 import { getSubscriptionCancellation } from '../zuora/subscriptionCancellation';
+import { parseStepInput } from './stepInput';
 
 const getCancellationReasonInputSchema = z.object({
 	subscriptionNumber: subscriptionNumberSchema,
@@ -21,7 +23,7 @@ type GetCancellationReasonInput = z.infer<
 export const handler = async (
 	event: unknown,
 ): Promise<{ cancellationReasons: CancellationReasonCustomFields }> => {
-	const input = getCancellationReasonInputSchema.parse(event);
+	const input = parseStepInput(getCancellationReasonInputSchema, event);
 	logger.resetContext();
 	logger.mutableAddContext(input.subscriptionNumber);
 	const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
@@ -38,7 +40,7 @@ export async function getCancellationReason(
 		await getSubscriptionCancellation(zuoraClient, subscriptionNumber);
 	if (status !== 'Cancelled') {
 		// an Active subscription has lost its cancellation reasons
-		throw new Error(`Subscription is ${status}, expected Cancelled`);
+		throw new PermanentError(`Subscription is ${status}, expected Cancelled`);
 	}
 	return {
 		...(UserCancellationReason__c && { UserCancellationReason__c }),

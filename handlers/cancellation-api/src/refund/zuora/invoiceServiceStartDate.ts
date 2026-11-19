@@ -5,6 +5,7 @@ import { sortBy } from '@modules/arrayFunctions';
 import type { SubscriptionNumber } from '@modules/zuora/identifiers';
 import { doQuery } from '@modules/zuora/query';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { PermanentError } from '../permanentError';
 
 const serviceStartDateQueryResponseSchema = z.object({
 	records: z.array(z.object({ ServiceStartDate: z.string() })).default([]),
@@ -28,7 +29,7 @@ export async function getInvoiceServiceStartDate(
 		({ ServiceStartDate }) => ServiceStartDate,
 	)[0];
 	if (earliest === undefined) {
-		throw new Error(
+		throw new PermanentError(
 			`Invoice ${invoiceId} has no items for subscription ${subscriptionNumber}`,
 		);
 	}
