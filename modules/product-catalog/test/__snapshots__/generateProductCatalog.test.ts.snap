@@ -1797,7 +1797,7 @@ exports[`generateProductCatalog function code Generated product catalog matches 
     },
   },
   "Patron": {
-    "active": false,
+    "active": true,
     "billingSystem": "zuora",
     "customerFacingName": "Patron",
     "isDeliveryProduct": false,
@@ -4802,7 +4802,7 @@ exports[`generateProductCatalog function prod Generated product catalog matches 
     },
   },
   "Patron": {
-    "active": false,
+    "active": true,
     "billingSystem": "zuora",
     "customerFacingName": "Patron",
     "isDeliveryProduct": false,
