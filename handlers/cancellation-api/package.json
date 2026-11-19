@@ -12,7 +12,7 @@
     "packageQuick": "pnpm build && cd target && zip -qr cancellation-api.zip . -i '*.js' '*.js.map'",
     "cdk:test": "pnpm --filter cdk test cancellation-api",
     "cdk:test-update": "pnpm --filter cdk test-update cancellation-api",
-    "update-lambda": "../../update-lambda.sh \"cancellation-api\" cancellation-api- cancellation-api-calculate-refund-",
+    "update-lambda": "../../update-lambda.sh \"cancellation-api\" cancellation-api- cancellation-api-refund-generate-cancellation-invoice- cancellation-api-refund-calculate-refund- cancellation-api-refund-check-payment-settlement- cancellation-api-refund-create-refund- cancellation-api-refund-balance-invoices- cancellation-api-refund-get-cancellation-reason- cancellation-api-refund-backdate-cancellation- cancellation-api-refund-send-payment-failed-email-",
     "update-stack": "../../update-stack.sh \"cancellation-api\"",
     "local": "tsx runLocal/server.ts"
   },

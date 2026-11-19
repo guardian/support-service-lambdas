@@ -1037,7 +1037,17 @@ const securityGroupsUpdater: HandlerDefinition = {
 
 const cancellationApi: HandlerDefinition = {
 	name: 'cancellation-api',
-	functionNames: ['cancellation-api-', 'cancellation-api-calculate-refund-'],
+	functionNames: [
+		'cancellation-api-',
+		'cancellation-api-refund-generate-cancellation-invoice-',
+		'cancellation-api-refund-calculate-refund-',
+		'cancellation-api-refund-check-payment-settlement-',
+		'cancellation-api-refund-create-refund-',
+		'cancellation-api-refund-balance-invoices-',
+		'cancellation-api-refund-get-cancellation-reason-',
+		'cancellation-api-refund-backdate-cancellation-',
+		'cancellation-api-refund-send-payment-failed-email-',
+	],
 	entryPoints: ['src/cancel/index.ts', 'src/refund/handlers/*.ts'],
 	dependencies: {
 		...dep.zod,

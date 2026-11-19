@@ -44,6 +44,432 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
+    "BackdateCancellationLambdaF9568FC2": {
+      "DependsOn": [
+        "BackdateCancellationLambdaServiceRoleDefaultPolicy946DCF05",
+        "BackdateCancellationLambdaServiceRole3432BE68",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/CODE/cancellation-api/cancellation-api.zip",
+        },
+        "Description": "Refund workflow step: backdates the cancellation to the start of the unpaid period",
+        "Environment": {
+          "Variables": {
+            "APP": "cancellation-api",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
+            "STAGE": "CODE",
+          },
+        },
+        "FunctionName": "cancellation-api-refund-backdate-cancellation-CODE",
+        "Handler": "refund/handlers/backdateCancellation.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "BackdateCancellationLambdaServiceRole3432BE68",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs22.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "BackdateCancellationLambdaServiceRole3432BE68": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "BackdateCancellationLambdaServiceRoleDefaultPolicy946DCF05": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/CODE/cancellation-api/cancellation-api.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/cancellation-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/cancellation-api/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "BackdateCancellationLambdaServiceRoleDefaultPolicy946DCF05",
+        "Roles": [
+          {
+            "Ref": "BackdateCancellationLambdaServiceRole3432BE68",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "BalanceInvoicesLambdaB82C6F3B": {
+      "DependsOn": [
+        "BalanceInvoicesLambdaServiceRoleDefaultPolicyBB164325",
+        "BalanceInvoicesLambdaServiceRoleF0F103F9",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/CODE/cancellation-api/cancellation-api.zip",
+        },
+        "Description": "Refund workflow step: brings the paid and negative invoice balances to zero",
+        "Environment": {
+          "Variables": {
+            "APP": "cancellation-api",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
+            "STAGE": "CODE",
+          },
+        },
+        "FunctionName": "cancellation-api-refund-balance-invoices-CODE",
+        "Handler": "refund/handlers/balanceInvoices.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "BalanceInvoicesLambdaServiceRoleF0F103F9",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs22.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "BalanceInvoicesLambdaServiceRoleDefaultPolicyBB164325": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/CODE/cancellation-api/cancellation-api.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/cancellation-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/cancellation-api/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "BalanceInvoicesLambdaServiceRoleDefaultPolicyBB164325",
+        "Roles": [
+          {
+            "Ref": "BalanceInvoicesLambdaServiceRoleF0F103F9",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "BalanceInvoicesLambdaServiceRoleF0F103F9": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
     "BasePathMapping": {
       "Properties": {
         "DomainName": {
@@ -79,7 +505,7 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
             "STAGE": "CODE",
           },
         },
-        "FunctionName": "cancellation-api-calculate-refund-CODE",
+        "FunctionName": "cancellation-api-refund-calculate-refund-CODE",
         "Handler": "refund/handlers/calculateRefund.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
@@ -114,7 +540,7 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
             "Value": "CODE",
           },
         ],
-        "Timeout": 120,
+        "Timeout": 300,
       },
       "Type": "AWS::Lambda::Function",
     },
@@ -271,6 +697,432 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "CheckPaymentSettlementLambda20602FE6": {
+      "DependsOn": [
+        "CheckPaymentSettlementLambdaServiceRoleDefaultPolicyDA7F132A",
+        "CheckPaymentSettlementLambdaServiceRoleF55FFD6E",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/CODE/cancellation-api/cancellation-api.zip",
+        },
+        "Description": "Refund workflow step: checks whether the payment for an invoice has settled",
+        "Environment": {
+          "Variables": {
+            "APP": "cancellation-api",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
+            "STAGE": "CODE",
+          },
+        },
+        "FunctionName": "cancellation-api-refund-check-payment-settlement-CODE",
+        "Handler": "refund/handlers/checkPaymentSettlement.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "CheckPaymentSettlementLambdaServiceRoleF55FFD6E",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs22.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "CheckPaymentSettlementLambdaServiceRoleDefaultPolicyDA7F132A": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/CODE/cancellation-api/cancellation-api.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/cancellation-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/cancellation-api/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "CheckPaymentSettlementLambdaServiceRoleDefaultPolicyDA7F132A",
+        "Roles": [
+          {
+            "Ref": "CheckPaymentSettlementLambdaServiceRoleF55FFD6E",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "CheckPaymentSettlementLambdaServiceRoleF55FFD6E": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "CreateRefundLambda8E81CB7F": {
+      "DependsOn": [
+        "CreateRefundLambdaServiceRoleDefaultPolicy7887F853",
+        "CreateRefundLambdaServiceRole4439F6AE",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/CODE/cancellation-api/cancellation-api.zip",
+        },
+        "Description": "Refund workflow step: refunds the payment",
+        "Environment": {
+          "Variables": {
+            "APP": "cancellation-api",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
+            "STAGE": "CODE",
+          },
+        },
+        "FunctionName": "cancellation-api-refund-create-refund-CODE",
+        "Handler": "refund/handlers/createRefund.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "CreateRefundLambdaServiceRole4439F6AE",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs22.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "CreateRefundLambdaServiceRole4439F6AE": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "CreateRefundLambdaServiceRoleDefaultPolicy7887F853": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/CODE/cancellation-api/cancellation-api.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/cancellation-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/cancellation-api/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "CreateRefundLambdaServiceRoleDefaultPolicy7887F853",
+        "Roles": [
+          {
+            "Ref": "CreateRefundLambdaServiceRole4439F6AE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "DNSRecord": {
       "Properties": {
         "HostedZoneId": "Z3KO35ELNWZMSX",
@@ -333,6 +1185,432 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
+    "GenerateCancellationInvoiceLambdaF69943C4": {
+      "DependsOn": [
+        "GenerateCancellationInvoiceLambdaServiceRoleDefaultPolicy9CEDF90B",
+        "GenerateCancellationInvoiceLambdaServiceRole57C70B67",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/CODE/cancellation-api/cancellation-api.zip",
+        },
+        "Description": "Refund workflow step: generates and posts the negative invoice for a cancellation",
+        "Environment": {
+          "Variables": {
+            "APP": "cancellation-api",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
+            "STAGE": "CODE",
+          },
+        },
+        "FunctionName": "cancellation-api-refund-generate-cancellation-invoice-CODE",
+        "Handler": "refund/handlers/generateCancellationInvoice.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "GenerateCancellationInvoiceLambdaServiceRole57C70B67",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs22.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "GenerateCancellationInvoiceLambdaServiceRole57C70B67": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "GenerateCancellationInvoiceLambdaServiceRoleDefaultPolicy9CEDF90B": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/CODE/cancellation-api/cancellation-api.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/cancellation-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/cancellation-api/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "GenerateCancellationInvoiceLambdaServiceRoleDefaultPolicy9CEDF90B",
+        "Roles": [
+          {
+            "Ref": "GenerateCancellationInvoiceLambdaServiceRole57C70B67",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "GetCancellationReasonLambdaBF5402CB": {
+      "DependsOn": [
+        "GetCancellationReasonLambdaServiceRoleDefaultPolicyB56AB4EF",
+        "GetCancellationReasonLambdaServiceRole14A4DEF8",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/CODE/cancellation-api/cancellation-api.zip",
+        },
+        "Description": "Refund workflow step: reads the cancellation reasons before backdating",
+        "Environment": {
+          "Variables": {
+            "APP": "cancellation-api",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
+            "STAGE": "CODE",
+          },
+        },
+        "FunctionName": "cancellation-api-refund-get-cancellation-reason-CODE",
+        "Handler": "refund/handlers/getCancellationReason.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "GetCancellationReasonLambdaServiceRole14A4DEF8",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs22.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "GetCancellationReasonLambdaServiceRole14A4DEF8": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "GetCancellationReasonLambdaServiceRoleDefaultPolicyB56AB4EF": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/CODE/cancellation-api/cancellation-api.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/cancellation-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/cancellation-api/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "GetCancellationReasonLambdaServiceRoleDefaultPolicyB56AB4EF",
+        "Roles": [
+          {
+            "Ref": "GetCancellationReasonLambdaServiceRole14A4DEF8",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "LambdaD247545B": {
       "DependsOn": [
         "LambdaServiceRoleDefaultPolicyDAE46E21",
@@ -350,6 +1628,9 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
           "Variables": {
             "APP": "cancellation-api",
             "NODE_OPTIONS": "--enable-source-maps",
+            "REFUND_STATE_MACHINE_ARN": {
+              "Ref": "RefundStateMachine935BA4E6",
+            },
             "STACK": "support",
             "STAGE": "CODE",
           },
@@ -1578,6 +2859,13 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
                 ],
               },
             },
+            {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "RefundStateMachine935BA4E6",
+              },
+            },
           ],
           "Version": "2012-10-17",
         },
@@ -1585,6 +2873,598 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
         "Roles": [
           {
             "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "RefundStateMachine935BA4E6": {
+      "DeletionPolicy": "Delete",
+      "DependsOn": [
+        "RefundStateMachineRoleDefaultPolicy9361F01B",
+        "RefundStateMachineRole5CB6882F",
+      ],
+      "Properties": {
+        "DefinitionString": {
+          "Fn::Join": [
+            "",
+            [
+              "{"StartAt":"Refund due?","States":{"Refund due?":{"Type":"Choice","Choices":[{"Condition":"{% $states.input.refundDue = true %}","Next":"GenerateCancellationInvoice"}],"Default":"CheckPaymentSettlement"},"CheckPaymentSettlement":{"Next":"Payment?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":3600,"MaxAttempts":5,"BackoffRate":2}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              {
+                "Fn::GetAtt": [
+                  "CheckPaymentSettlementLambda20602FE6",
+                  "Arn",
+                ],
+              },
+              ""},"Wait 24h":{"Type":"Wait","Seconds":86400,"Next":"CheckPaymentSettlement"},"Payment?":{"Type":"Choice","Choices":[{"Condition":"{% $states.input.status = \\"Pending\\" %}","Next":"Wait 24h"},{"Condition":"{% $states.input.status = \\"Failed\\" %}","Next":"GetCancellationReason"},{"Condition":"{% $states.input.status = \\"Settled\\" and $states.input.refundDue = true %}","Next":"CreateRefund"}],"Default":"Succeed"},"Succeed":{"Type":"Succeed"},"SendPaymentFailedEmail":{"Next":"Succeed","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":3600,"MaxAttempts":5,"BackoffRate":2}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              {
+                "Fn::GetAtt": [
+                  "SendPaymentFailedEmailLambdaA7794EF0",
+                  "Arn",
+                ],
+              },
+              ""},"Backdated?":{"Type":"Choice","Choices":[{"Condition":"{% $states.input.backdated = true %}","Next":"SendPaymentFailedEmail"}],"Default":"Succeed"},"BalanceInvoices":{"Next":"Backdated?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":3600,"MaxAttempts":5,"BackoffRate":2}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              {
+                "Fn::GetAtt": [
+                  "BalanceInvoicesLambdaB82C6F3B",
+                  "Arn",
+                ],
+              },
+              ""},"CalculateCredit":{"Next":"BalanceInvoices","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":3600,"MaxAttempts":5,"BackoffRate":2}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              {
+                "Fn::GetAtt": [
+                  "CalculateRefundLambda0081A960",
+                  "Arn",
+                ],
+              },
+              ""},"BackdateCancellation":{"Next":"CalculateCredit","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":3600,"MaxAttempts":5,"BackoffRate":2}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              {
+                "Fn::GetAtt": [
+                  "BackdateCancellationLambdaF9568FC2",
+                  "Arn",
+                ],
+              },
+              ""},"GetCancellationReason":{"Next":"BackdateCancellation","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":3600,"MaxAttempts":5,"BackoffRate":2}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              {
+                "Fn::GetAtt": [
+                  "GetCancellationReasonLambdaBF5402CB",
+                  "Arn",
+                ],
+              },
+              ""},"CreateRefund":{"Next":"BalanceInvoices","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":3600,"MaxAttempts":5,"BackoffRate":2}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              {
+                "Fn::GetAtt": [
+                  "CreateRefundLambda8E81CB7F",
+                  "Arn",
+                ],
+              },
+              ""},"Zero amount?":{"Type":"Choice","Choices":[{"Condition":"{% $states.input.refundAmount = 0 %}","Next":"BalanceInvoices"}],"Default":"CheckPaymentSettlement"},"CalculateRefund":{"Next":"Zero amount?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":3600,"MaxAttempts":5,"BackoffRate":2}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              {
+                "Fn::GetAtt": [
+                  "CalculateRefundLambda0081A960",
+                  "Arn",
+                ],
+              },
+              ""},"GenerateCancellationInvoice":{"Next":"CalculateRefund","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":3600,"MaxAttempts":5,"BackoffRate":2}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              {
+                "Fn::GetAtt": [
+                  "GenerateCancellationInvoiceLambdaF69943C4",
+                  "Arn",
+                ],
+              },
+              ""}},"TimeoutSeconds":1209600,"QueryLanguage":"JSONata"}",
+            ],
+          ],
+        },
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "RefundStateMachineRole5CB6882F",
+            "Arn",
+          ],
+        },
+        "StateMachineName": "cancellation-api-refund-CODE",
+        "StateMachineType": "STANDARD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::StepFunctions::StateMachine",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "RefundStateMachineFailureAlarmF9E892A1": {
+      "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-CODE",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "A cancellation refund workflow execution failed, so a refund, invoice balancing or failed payment backdating may be incomplete. Find the failed execution in the Step Functions console: its error says which step failed and why, or it timed out still waiting for the payment to settle.",
+        "AlarmName": "CODE: cancellation-api refund workflow execution failed",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "EvaluationPeriods": 1,
+        "Metrics": [
+          {
+            "Expression": "failed + timedOut + aborted",
+            "Id": "expr_1",
+            "ReturnData": true,
+          },
+          {
+            "Id": "failed",
+            "MetricStat": {
+              "Metric": {
+                "Dimensions": [
+                  {
+                    "Name": "StateMachineArn",
+                    "Value": {
+                      "Ref": "RefundStateMachine935BA4E6",
+                    },
+                  },
+                ],
+                "MetricName": "ExecutionsFailed",
+                "Namespace": "AWS/States",
+              },
+              "Period": 300,
+              "Stat": "Sum",
+            },
+            "ReturnData": false,
+          },
+          {
+            "Id": "timedOut",
+            "MetricStat": {
+              "Metric": {
+                "Dimensions": [
+                  {
+                    "Name": "StateMachineArn",
+                    "Value": {
+                      "Ref": "RefundStateMachine935BA4E6",
+                    },
+                  },
+                ],
+                "MetricName": "ExecutionsTimedOut",
+                "Namespace": "AWS/States",
+              },
+              "Period": 300,
+              "Stat": "Sum",
+            },
+            "ReturnData": false,
+          },
+          {
+            "Id": "aborted",
+            "MetricStat": {
+              "Metric": {
+                "Dimensions": [
+                  {
+                    "Name": "StateMachineArn",
+                    "Value": {
+                      "Ref": "RefundStateMachine935BA4E6",
+                    },
+                  },
+                ],
+                "MetricName": "ExecutionsAborted",
+                "Namespace": "AWS/States",
+              },
+              "Period": 300,
+              "Stat": "Sum",
+            },
+            "ReturnData": false,
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "GenerateCancellationInvoiceLambdaF69943C4",
+                  },
+                  " lambda:",
+                  {
+                    "Ref": "CalculateRefundLambda0081A960",
+                  },
+                  " lambda:",
+                  {
+                    "Ref": "CheckPaymentSettlementLambda20602FE6",
+                  },
+                  " lambda:",
+                  {
+                    "Ref": "CreateRefundLambda8E81CB7F",
+                  },
+                  " lambda:",
+                  {
+                    "Ref": "BalanceInvoicesLambdaB82C6F3B",
+                  },
+                  " lambda:",
+                  {
+                    "Ref": "GetCancellationReasonLambdaBF5402CB",
+                  },
+                  " lambda:",
+                  {
+                    "Ref": "BackdateCancellationLambdaF9568FC2",
+                  },
+                  " lambda:",
+                  {
+                    "Ref": "SendPaymentFailedEmailLambdaA7794EF0",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Threshold": 1,
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "RefundStateMachineRole5CB6882F": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "states.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "RefundStateMachineRoleDefaultPolicy9361F01B": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "CheckPaymentSettlementLambda20602FE6",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "CheckPaymentSettlementLambda20602FE6",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "SendPaymentFailedEmailLambdaA7794EF0",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "SendPaymentFailedEmailLambdaA7794EF0",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "BalanceInvoicesLambdaB82C6F3B",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "BalanceInvoicesLambdaB82C6F3B",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "CalculateRefundLambda0081A960",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "CalculateRefundLambda0081A960",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "BackdateCancellationLambdaF9568FC2",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "BackdateCancellationLambdaF9568FC2",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "GetCancellationReasonLambdaBF5402CB",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "GetCancellationReasonLambdaBF5402CB",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "CreateRefundLambda8E81CB7F",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "CreateRefundLambda8E81CB7F",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "GenerateCancellationInvoiceLambdaF69943C4",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "GenerateCancellationInvoiceLambdaF69943C4",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "RefundStateMachineRoleDefaultPolicy9361F01B",
+        "Roles": [
+          {
+            "Ref": "RefundStateMachineRole5CB6882F",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "RefundworkflowZuoraOAuthSecretsManagerpolicy6284A03C": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:CODE/Zuora-OAuth/SupportServiceLambdas-*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "RefundworkflowZuoraOAuthSecretsManagerpolicy6284A03C",
+        "Roles": [
+          {
+            "Ref": "GenerateCancellationInvoiceLambdaServiceRole57C70B67",
+          },
+          {
+            "Ref": "CalculateRefundLambdaServiceRoleC93025B4",
+          },
+          {
+            "Ref": "CheckPaymentSettlementLambdaServiceRoleF55FFD6E",
+          },
+          {
+            "Ref": "CreateRefundLambdaServiceRole4439F6AE",
+          },
+          {
+            "Ref": "BalanceInvoicesLambdaServiceRoleF0F103F9",
+          },
+          {
+            "Ref": "GetCancellationReasonLambdaServiceRole14A4DEF8",
+          },
+          {
+            "Ref": "BackdateCancellationLambdaServiceRole3432BE68",
+          },
+          {
+            "Ref": "SendPaymentFailedEmailLambdaServiceRole69D62E04",
           },
         ],
       },
@@ -1606,6 +3486,258 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
         "Roles": [
           {
             "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "SQSsendpolicy967EA932": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:GetQueueUrl",
+                "sqs:SendMessage",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sqs:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":braze-emails-CODE",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SQSsendpolicy967EA932",
+        "Roles": [
+          {
+            "Ref": "SendPaymentFailedEmailLambdaServiceRole69D62E04",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "SendPaymentFailedEmailLambdaA7794EF0": {
+      "DependsOn": [
+        "SendPaymentFailedEmailLambdaServiceRoleDefaultPolicyE2E618E8",
+        "SendPaymentFailedEmailLambdaServiceRole69D62E04",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/CODE/cancellation-api/cancellation-api.zip",
+        },
+        "Description": "Refund workflow step: tells the customer their subscription was cancelled after a failed payment",
+        "Environment": {
+          "Variables": {
+            "APP": "cancellation-api",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
+            "STAGE": "CODE",
+          },
+        },
+        "FunctionName": "cancellation-api-refund-send-payment-failed-email-CODE",
+        "Handler": "refund/handlers/sendPaymentFailedEmail.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "SendPaymentFailedEmailLambdaServiceRole69D62E04",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs22.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "SendPaymentFailedEmailLambdaServiceRole69D62E04": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "SendPaymentFailedEmailLambdaServiceRoleDefaultPolicyE2E618E8": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/CODE/cancellation-api/cancellation-api.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/cancellation-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/cancellation-api/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SendPaymentFailedEmailLambdaServiceRoleDefaultPolicyE2E618E8",
+        "Roles": [
+          {
+            "Ref": "SendPaymentFailedEmailLambdaServiceRole69D62E04",
           },
         ],
       },
@@ -1771,6 +3903,432 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
+    "BackdateCancellationLambdaF9568FC2": {
+      "DependsOn": [
+        "BackdateCancellationLambdaServiceRoleDefaultPolicy946DCF05",
+        "BackdateCancellationLambdaServiceRole3432BE68",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/PROD/cancellation-api/cancellation-api.zip",
+        },
+        "Description": "Refund workflow step: backdates the cancellation to the start of the unpaid period",
+        "Environment": {
+          "Variables": {
+            "APP": "cancellation-api",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
+            "STAGE": "PROD",
+          },
+        },
+        "FunctionName": "cancellation-api-refund-backdate-cancellation-PROD",
+        "Handler": "refund/handlers/backdateCancellation.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "BackdateCancellationLambdaServiceRole3432BE68",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs22.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "BackdateCancellationLambdaServiceRole3432BE68": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "BackdateCancellationLambdaServiceRoleDefaultPolicy946DCF05": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/PROD/cancellation-api/cancellation-api.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/cancellation-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/cancellation-api/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "BackdateCancellationLambdaServiceRoleDefaultPolicy946DCF05",
+        "Roles": [
+          {
+            "Ref": "BackdateCancellationLambdaServiceRole3432BE68",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "BalanceInvoicesLambdaB82C6F3B": {
+      "DependsOn": [
+        "BalanceInvoicesLambdaServiceRoleDefaultPolicyBB164325",
+        "BalanceInvoicesLambdaServiceRoleF0F103F9",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/PROD/cancellation-api/cancellation-api.zip",
+        },
+        "Description": "Refund workflow step: brings the paid and negative invoice balances to zero",
+        "Environment": {
+          "Variables": {
+            "APP": "cancellation-api",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
+            "STAGE": "PROD",
+          },
+        },
+        "FunctionName": "cancellation-api-refund-balance-invoices-PROD",
+        "Handler": "refund/handlers/balanceInvoices.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "BalanceInvoicesLambdaServiceRoleF0F103F9",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs22.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "BalanceInvoicesLambdaServiceRoleDefaultPolicyBB164325": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/PROD/cancellation-api/cancellation-api.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/cancellation-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/cancellation-api/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "BalanceInvoicesLambdaServiceRoleDefaultPolicyBB164325",
+        "Roles": [
+          {
+            "Ref": "BalanceInvoicesLambdaServiceRoleF0F103F9",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "BalanceInvoicesLambdaServiceRoleF0F103F9": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
     "BasePathMapping": {
       "Properties": {
         "DomainName": {
@@ -1806,7 +4364,7 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
             "STAGE": "PROD",
           },
         },
-        "FunctionName": "cancellation-api-calculate-refund-PROD",
+        "FunctionName": "cancellation-api-refund-calculate-refund-PROD",
         "Handler": "refund/handlers/calculateRefund.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
@@ -1841,7 +4399,7 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
             "Value": "PROD",
           },
         ],
-        "Timeout": 120,
+        "Timeout": 300,
       },
       "Type": "AWS::Lambda::Function",
     },
@@ -1998,6 +4556,432 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "CheckPaymentSettlementLambda20602FE6": {
+      "DependsOn": [
+        "CheckPaymentSettlementLambdaServiceRoleDefaultPolicyDA7F132A",
+        "CheckPaymentSettlementLambdaServiceRoleF55FFD6E",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/PROD/cancellation-api/cancellation-api.zip",
+        },
+        "Description": "Refund workflow step: checks whether the payment for an invoice has settled",
+        "Environment": {
+          "Variables": {
+            "APP": "cancellation-api",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
+            "STAGE": "PROD",
+          },
+        },
+        "FunctionName": "cancellation-api-refund-check-payment-settlement-PROD",
+        "Handler": "refund/handlers/checkPaymentSettlement.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "CheckPaymentSettlementLambdaServiceRoleF55FFD6E",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs22.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "CheckPaymentSettlementLambdaServiceRoleDefaultPolicyDA7F132A": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/PROD/cancellation-api/cancellation-api.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/cancellation-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/cancellation-api/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "CheckPaymentSettlementLambdaServiceRoleDefaultPolicyDA7F132A",
+        "Roles": [
+          {
+            "Ref": "CheckPaymentSettlementLambdaServiceRoleF55FFD6E",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "CheckPaymentSettlementLambdaServiceRoleF55FFD6E": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "CreateRefundLambda8E81CB7F": {
+      "DependsOn": [
+        "CreateRefundLambdaServiceRoleDefaultPolicy7887F853",
+        "CreateRefundLambdaServiceRole4439F6AE",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/PROD/cancellation-api/cancellation-api.zip",
+        },
+        "Description": "Refund workflow step: refunds the payment",
+        "Environment": {
+          "Variables": {
+            "APP": "cancellation-api",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
+            "STAGE": "PROD",
+          },
+        },
+        "FunctionName": "cancellation-api-refund-create-refund-PROD",
+        "Handler": "refund/handlers/createRefund.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "CreateRefundLambdaServiceRole4439F6AE",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs22.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "CreateRefundLambdaServiceRole4439F6AE": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "CreateRefundLambdaServiceRoleDefaultPolicy7887F853": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/PROD/cancellation-api/cancellation-api.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/cancellation-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/cancellation-api/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "CreateRefundLambdaServiceRoleDefaultPolicy7887F853",
+        "Roles": [
+          {
+            "Ref": "CreateRefundLambdaServiceRole4439F6AE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "DNSRecord": {
       "Properties": {
         "HostedZoneId": "Z3KO35ELNWZMSX",
@@ -2060,6 +5044,432 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
+    "GenerateCancellationInvoiceLambdaF69943C4": {
+      "DependsOn": [
+        "GenerateCancellationInvoiceLambdaServiceRoleDefaultPolicy9CEDF90B",
+        "GenerateCancellationInvoiceLambdaServiceRole57C70B67",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/PROD/cancellation-api/cancellation-api.zip",
+        },
+        "Description": "Refund workflow step: generates and posts the negative invoice for a cancellation",
+        "Environment": {
+          "Variables": {
+            "APP": "cancellation-api",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
+            "STAGE": "PROD",
+          },
+        },
+        "FunctionName": "cancellation-api-refund-generate-cancellation-invoice-PROD",
+        "Handler": "refund/handlers/generateCancellationInvoice.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "GenerateCancellationInvoiceLambdaServiceRole57C70B67",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs22.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "GenerateCancellationInvoiceLambdaServiceRole57C70B67": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "GenerateCancellationInvoiceLambdaServiceRoleDefaultPolicy9CEDF90B": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/PROD/cancellation-api/cancellation-api.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/cancellation-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/cancellation-api/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "GenerateCancellationInvoiceLambdaServiceRoleDefaultPolicy9CEDF90B",
+        "Roles": [
+          {
+            "Ref": "GenerateCancellationInvoiceLambdaServiceRole57C70B67",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "GetCancellationReasonLambdaBF5402CB": {
+      "DependsOn": [
+        "GetCancellationReasonLambdaServiceRoleDefaultPolicyB56AB4EF",
+        "GetCancellationReasonLambdaServiceRole14A4DEF8",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/PROD/cancellation-api/cancellation-api.zip",
+        },
+        "Description": "Refund workflow step: reads the cancellation reasons before backdating",
+        "Environment": {
+          "Variables": {
+            "APP": "cancellation-api",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
+            "STAGE": "PROD",
+          },
+        },
+        "FunctionName": "cancellation-api-refund-get-cancellation-reason-PROD",
+        "Handler": "refund/handlers/getCancellationReason.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "GetCancellationReasonLambdaServiceRole14A4DEF8",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs22.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "GetCancellationReasonLambdaServiceRole14A4DEF8": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "GetCancellationReasonLambdaServiceRoleDefaultPolicyB56AB4EF": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/PROD/cancellation-api/cancellation-api.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/cancellation-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/cancellation-api/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "GetCancellationReasonLambdaServiceRoleDefaultPolicyB56AB4EF",
+        "Roles": [
+          {
+            "Ref": "GetCancellationReasonLambdaServiceRole14A4DEF8",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "LambdaD247545B": {
       "DependsOn": [
         "LambdaServiceRoleDefaultPolicyDAE46E21",
@@ -2077,6 +5487,9 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
           "Variables": {
             "APP": "cancellation-api",
             "NODE_OPTIONS": "--enable-source-maps",
+            "REFUND_STATE_MACHINE_ARN": {
+              "Ref": "RefundStateMachine935BA4E6",
+            },
             "STACK": "support",
             "STAGE": "PROD",
           },
@@ -3305,6 +6718,13 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
                 ],
               },
             },
+            {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "RefundStateMachine935BA4E6",
+              },
+            },
           ],
           "Version": "2012-10-17",
         },
@@ -3312,6 +6732,598 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
         "Roles": [
           {
             "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "RefundStateMachine935BA4E6": {
+      "DeletionPolicy": "Delete",
+      "DependsOn": [
+        "RefundStateMachineRoleDefaultPolicy9361F01B",
+        "RefundStateMachineRole5CB6882F",
+      ],
+      "Properties": {
+        "DefinitionString": {
+          "Fn::Join": [
+            "",
+            [
+              "{"StartAt":"Refund due?","States":{"Refund due?":{"Type":"Choice","Choices":[{"Condition":"{% $states.input.refundDue = true %}","Next":"GenerateCancellationInvoice"}],"Default":"CheckPaymentSettlement"},"CheckPaymentSettlement":{"Next":"Payment?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":3600,"MaxAttempts":5,"BackoffRate":2}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              {
+                "Fn::GetAtt": [
+                  "CheckPaymentSettlementLambda20602FE6",
+                  "Arn",
+                ],
+              },
+              ""},"Wait 24h":{"Type":"Wait","Seconds":86400,"Next":"CheckPaymentSettlement"},"Payment?":{"Type":"Choice","Choices":[{"Condition":"{% $states.input.status = \\"Pending\\" %}","Next":"Wait 24h"},{"Condition":"{% $states.input.status = \\"Failed\\" %}","Next":"GetCancellationReason"},{"Condition":"{% $states.input.status = \\"Settled\\" and $states.input.refundDue = true %}","Next":"CreateRefund"}],"Default":"Succeed"},"Succeed":{"Type":"Succeed"},"SendPaymentFailedEmail":{"Next":"Succeed","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":3600,"MaxAttempts":5,"BackoffRate":2}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              {
+                "Fn::GetAtt": [
+                  "SendPaymentFailedEmailLambdaA7794EF0",
+                  "Arn",
+                ],
+              },
+              ""},"Backdated?":{"Type":"Choice","Choices":[{"Condition":"{% $states.input.backdated = true %}","Next":"SendPaymentFailedEmail"}],"Default":"Succeed"},"BalanceInvoices":{"Next":"Backdated?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":3600,"MaxAttempts":5,"BackoffRate":2}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              {
+                "Fn::GetAtt": [
+                  "BalanceInvoicesLambdaB82C6F3B",
+                  "Arn",
+                ],
+              },
+              ""},"CalculateCredit":{"Next":"BalanceInvoices","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":3600,"MaxAttempts":5,"BackoffRate":2}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              {
+                "Fn::GetAtt": [
+                  "CalculateRefundLambda0081A960",
+                  "Arn",
+                ],
+              },
+              ""},"BackdateCancellation":{"Next":"CalculateCredit","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":3600,"MaxAttempts":5,"BackoffRate":2}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              {
+                "Fn::GetAtt": [
+                  "BackdateCancellationLambdaF9568FC2",
+                  "Arn",
+                ],
+              },
+              ""},"GetCancellationReason":{"Next":"BackdateCancellation","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":3600,"MaxAttempts":5,"BackoffRate":2}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              {
+                "Fn::GetAtt": [
+                  "GetCancellationReasonLambdaBF5402CB",
+                  "Arn",
+                ],
+              },
+              ""},"CreateRefund":{"Next":"BalanceInvoices","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":3600,"MaxAttempts":5,"BackoffRate":2}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              {
+                "Fn::GetAtt": [
+                  "CreateRefundLambda8E81CB7F",
+                  "Arn",
+                ],
+              },
+              ""},"Zero amount?":{"Type":"Choice","Choices":[{"Condition":"{% $states.input.refundAmount = 0 %}","Next":"BalanceInvoices"}],"Default":"CheckPaymentSettlement"},"CalculateRefund":{"Next":"Zero amount?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":3600,"MaxAttempts":5,"BackoffRate":2}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              {
+                "Fn::GetAtt": [
+                  "CalculateRefundLambda0081A960",
+                  "Arn",
+                ],
+              },
+              ""},"GenerateCancellationInvoice":{"Next":"CalculateRefund","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":3600,"MaxAttempts":5,"BackoffRate":2}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              {
+                "Fn::GetAtt": [
+                  "GenerateCancellationInvoiceLambdaF69943C4",
+                  "Arn",
+                ],
+              },
+              ""}},"TimeoutSeconds":1209600,"QueryLanguage":"JSONata"}",
+            ],
+          ],
+        },
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "RefundStateMachineRole5CB6882F",
+            "Arn",
+          ],
+        },
+        "StateMachineName": "cancellation-api-refund-PROD",
+        "StateMachineType": "STANDARD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::StepFunctions::StateMachine",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "RefundStateMachineFailureAlarmF9E892A1": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "A cancellation refund workflow execution failed, so a refund, invoice balancing or failed payment backdating may be incomplete. Find the failed execution in the Step Functions console: its error says which step failed and why, or it timed out still waiting for the payment to settle.",
+        "AlarmName": "PROD: cancellation-api refund workflow execution failed",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "EvaluationPeriods": 1,
+        "Metrics": [
+          {
+            "Expression": "failed + timedOut + aborted",
+            "Id": "expr_1",
+            "ReturnData": true,
+          },
+          {
+            "Id": "failed",
+            "MetricStat": {
+              "Metric": {
+                "Dimensions": [
+                  {
+                    "Name": "StateMachineArn",
+                    "Value": {
+                      "Ref": "RefundStateMachine935BA4E6",
+                    },
+                  },
+                ],
+                "MetricName": "ExecutionsFailed",
+                "Namespace": "AWS/States",
+              },
+              "Period": 300,
+              "Stat": "Sum",
+            },
+            "ReturnData": false,
+          },
+          {
+            "Id": "timedOut",
+            "MetricStat": {
+              "Metric": {
+                "Dimensions": [
+                  {
+                    "Name": "StateMachineArn",
+                    "Value": {
+                      "Ref": "RefundStateMachine935BA4E6",
+                    },
+                  },
+                ],
+                "MetricName": "ExecutionsTimedOut",
+                "Namespace": "AWS/States",
+              },
+              "Period": 300,
+              "Stat": "Sum",
+            },
+            "ReturnData": false,
+          },
+          {
+            "Id": "aborted",
+            "MetricStat": {
+              "Metric": {
+                "Dimensions": [
+                  {
+                    "Name": "StateMachineArn",
+                    "Value": {
+                      "Ref": "RefundStateMachine935BA4E6",
+                    },
+                  },
+                ],
+                "MetricName": "ExecutionsAborted",
+                "Namespace": "AWS/States",
+              },
+              "Period": 300,
+              "Stat": "Sum",
+            },
+            "ReturnData": false,
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "GenerateCancellationInvoiceLambdaF69943C4",
+                  },
+                  " lambda:",
+                  {
+                    "Ref": "CalculateRefundLambda0081A960",
+                  },
+                  " lambda:",
+                  {
+                    "Ref": "CheckPaymentSettlementLambda20602FE6",
+                  },
+                  " lambda:",
+                  {
+                    "Ref": "CreateRefundLambda8E81CB7F",
+                  },
+                  " lambda:",
+                  {
+                    "Ref": "BalanceInvoicesLambdaB82C6F3B",
+                  },
+                  " lambda:",
+                  {
+                    "Ref": "GetCancellationReasonLambdaBF5402CB",
+                  },
+                  " lambda:",
+                  {
+                    "Ref": "BackdateCancellationLambdaF9568FC2",
+                  },
+                  " lambda:",
+                  {
+                    "Ref": "SendPaymentFailedEmailLambdaA7794EF0",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "RefundStateMachineRole5CB6882F": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "states.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "RefundStateMachineRoleDefaultPolicy9361F01B": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "CheckPaymentSettlementLambda20602FE6",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "CheckPaymentSettlementLambda20602FE6",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "SendPaymentFailedEmailLambdaA7794EF0",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "SendPaymentFailedEmailLambdaA7794EF0",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "BalanceInvoicesLambdaB82C6F3B",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "BalanceInvoicesLambdaB82C6F3B",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "CalculateRefundLambda0081A960",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "CalculateRefundLambda0081A960",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "BackdateCancellationLambdaF9568FC2",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "BackdateCancellationLambdaF9568FC2",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "GetCancellationReasonLambdaBF5402CB",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "GetCancellationReasonLambdaBF5402CB",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "CreateRefundLambda8E81CB7F",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "CreateRefundLambda8E81CB7F",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "GenerateCancellationInvoiceLambdaF69943C4",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "GenerateCancellationInvoiceLambdaF69943C4",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "RefundStateMachineRoleDefaultPolicy9361F01B",
+        "Roles": [
+          {
+            "Ref": "RefundStateMachineRole5CB6882F",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "RefundworkflowZuoraOAuthSecretsManagerpolicy6284A03C": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:PROD/Zuora-OAuth/SupportServiceLambdas-*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "RefundworkflowZuoraOAuthSecretsManagerpolicy6284A03C",
+        "Roles": [
+          {
+            "Ref": "GenerateCancellationInvoiceLambdaServiceRole57C70B67",
+          },
+          {
+            "Ref": "CalculateRefundLambdaServiceRoleC93025B4",
+          },
+          {
+            "Ref": "CheckPaymentSettlementLambdaServiceRoleF55FFD6E",
+          },
+          {
+            "Ref": "CreateRefundLambdaServiceRole4439F6AE",
+          },
+          {
+            "Ref": "BalanceInvoicesLambdaServiceRoleF0F103F9",
+          },
+          {
+            "Ref": "GetCancellationReasonLambdaServiceRole14A4DEF8",
+          },
+          {
+            "Ref": "BackdateCancellationLambdaServiceRole3432BE68",
+          },
+          {
+            "Ref": "SendPaymentFailedEmailLambdaServiceRole69D62E04",
           },
         ],
       },
@@ -3333,6 +7345,258 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
         "Roles": [
           {
             "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "SQSsendpolicy967EA932": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:GetQueueUrl",
+                "sqs:SendMessage",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sqs:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":braze-emails-PROD",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SQSsendpolicy967EA932",
+        "Roles": [
+          {
+            "Ref": "SendPaymentFailedEmailLambdaServiceRole69D62E04",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "SendPaymentFailedEmailLambdaA7794EF0": {
+      "DependsOn": [
+        "SendPaymentFailedEmailLambdaServiceRoleDefaultPolicyE2E618E8",
+        "SendPaymentFailedEmailLambdaServiceRole69D62E04",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/PROD/cancellation-api/cancellation-api.zip",
+        },
+        "Description": "Refund workflow step: tells the customer their subscription was cancelled after a failed payment",
+        "Environment": {
+          "Variables": {
+            "APP": "cancellation-api",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
+            "STAGE": "PROD",
+          },
+        },
+        "FunctionName": "cancellation-api-refund-send-payment-failed-email-PROD",
+        "Handler": "refund/handlers/sendPaymentFailedEmail.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "SendPaymentFailedEmailLambdaServiceRole69D62E04",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs22.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "SendPaymentFailedEmailLambdaServiceRole69D62E04": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "SendPaymentFailedEmailLambdaServiceRoleDefaultPolicyE2E618E8": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/PROD/cancellation-api/cancellation-api.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/cancellation-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/cancellation-api/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SendPaymentFailedEmailLambdaServiceRoleDefaultPolicyE2E618E8",
+        "Roles": [
+          {
+            "Ref": "SendPaymentFailedEmailLambdaServiceRole69D62E04",
           },
         ],
       },
