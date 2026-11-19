@@ -14,6 +14,7 @@ import { executeOrderRequest } from '@modules/zuora/orders/orderRequests';
 import { getSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { createContribution } from '../../../../../modules/zuora/test/it-helpers/createGuardianSubscription';
+import { toPence } from '../../../src/refund/money';
 import { getInvoiceStatus } from '../../../src/refund/zuora/invoiceGeneration';
 import { generateAndPostNegativeInvoice } from '../../../src/refund/zuora/negativeInvoice';
 import { getSubscriptionInvoiceItems } from '../../../src/refund/zuora/subscriptionInvoiceItems';
@@ -65,7 +66,7 @@ describe('generateAndPostNegativeInvoice', () => {
 			subscriptionNumber,
 		);
 		expect(invoiceItems.filter(({ InvoiceId }) => InvoiceId === first)).toEqual(
-			[expect.objectContaining({ ChargeAmount: -100 })],
+			[expect.objectContaining({ ChargeAmount: toPence(-100) })],
 		);
 	}, 300_000);
 });

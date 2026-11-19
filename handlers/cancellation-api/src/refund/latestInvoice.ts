@@ -1,9 +1,9 @@
 import { maxBy } from '@modules/arrayFunctions';
-import type { RefundInvoiceItem } from './refundAmount';
 import { groupByInvoice, invoiceTotalPence } from './refundAmount';
+import type { SubscriptionInvoiceItem } from './subscriptionInvoiceItem';
 
 function getLatestInvoiceId(
-	invoiceItems: RefundInvoiceItem[],
+	invoiceItems: SubscriptionInvoiceItem[],
 	sign: 'positive' | 'negative',
 ): string {
 	const predicate =
@@ -28,7 +28,7 @@ function getLatestInvoiceId(
  * paying for the current period, which a failed Direct Debit leaves unpaid.
  */
 export const getLatestPositiveInvoiceId = (
-	invoiceItems: RefundInvoiceItem[],
+	invoiceItems: SubscriptionInvoiceItem[],
 ): string => getLatestInvoiceId(invoiceItems, 'positive');
 
 /**
@@ -36,5 +36,5 @@ export const getLatestPositiveInvoiceId = (
  * whichever cancellation covers it.
  */
 export const getLatestNegativeInvoiceId = (
-	invoiceItems: RefundInvoiceItem[],
+	invoiceItems: SubscriptionInvoiceItem[],
 ): string => getLatestInvoiceId(invoiceItems, 'negative');
