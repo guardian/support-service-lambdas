@@ -7,11 +7,10 @@ import { buildCancellationOrderRequest } from '@modules/zuora/orders/cancelSubsc
 import { executeOrderRequest } from '@modules/zuora/orders/orderRequests';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { planBackdate } from '../backdate';
-import { getLatestNegativeInvoiceId } from '../latestInvoice';
 import { deleteOrder, orderExists } from '../zuora/cancellationOrder';
 import { getInvoiceServiceStartDate } from '../zuora/invoiceServiceStartDate';
+import { generateAndPostNegativeInvoice } from '../zuora/negativeInvoice';
 import { getSubscriptionCancellation } from '../zuora/subscriptionCancellation';
-import { getSubscriptionInvoiceItems } from '../zuora/subscriptionInvoiceItems';
 
 const completedOrderResponseSchema = z.object({
 	status: z.literal('Completed'),
@@ -45,7 +44,7 @@ export const handler = async (
 	logger.resetContext();
 	logger.mutableAddContext(input.subscriptionNumber);
 	const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
-	return backdateCancellation(zuoraClient, input);
+	return backdateCancellation(zuoraClient, input, dayjs());
 };
 
 export async function backdateCancellation(
@@ -57,6 +56,7 @@ export async function backdateCancellation(
 		unpaidInvoiceId,
 		cancellationReasons,
 	}: BackdateCancellationInput,
+	today: dayjs.Dayjs,
 ): Promise<BackdateCancellationOutput> {
 	const unpaidPeriodStart = await getInvoiceServiceStartDate(
 		zuoraClient,
@@ -96,16 +96,20 @@ export async function backdateCancellation(
 			buildCancellationOrderRequest({
 				accountNumber,
 				subscriptionNumber,
-				orderDate: dayjs(),
+				orderDate: today,
 				cancellationEffectiveDate: unpaidPeriodStart,
 				cancellationReasons,
+				runBilling: false,
 			}),
 			completedOrderResponseSchema,
 		);
 	}
 
-	const creditInvoiceId = getLatestNegativeInvoiceId(
-		await getSubscriptionInvoiceItems(zuoraClient, subscriptionNumber),
-	);
+	// also covers a cancellation that already covered the unpaid period, which wasn't billed
+	const creditInvoiceId = await generateAndPostNegativeInvoice(zuoraClient, {
+		subscriptionNumber,
+		targetDate: unpaidPeriodStart,
+		today,
+	});
 	return { backdated: plan.backdated, creditInvoiceId };
 }
