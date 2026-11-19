@@ -11,4 +11,27 @@ describe('The Cancellation api stack', () => {
 		expect(Template.fromStack(codeStack).toJSON()).toMatchSnapshot();
 		expect(Template.fromStack(prodStack).toJSON()).toMatchSnapshot();
 	});
+
+	it.each(['CODE', 'PROD'] as const)(
+		'keeps operations protected and the explorer and OpenAPI public in %s',
+		(stage) => {
+			const template = Template.fromStack(
+				new CancellationApi(new App(), stage),
+			);
+			template.hasResourceProperties('AWS::ApiGateway::Resource', {
+				PathPart: 'explorer',
+			});
+			template.hasResourceProperties('AWS::ApiGateway::Method', {
+				HttpMethod: 'ANY',
+				ApiKeyRequired: true,
+			});
+			expect(
+				Object.keys(
+					template.findResources('AWS::ApiGateway::Method', {
+						Properties: { HttpMethod: 'GET', ApiKeyRequired: false },
+					}),
+				),
+			).toHaveLength(4);
+		},
+	);
 });

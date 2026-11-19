@@ -9,6 +9,9 @@ export const dep = separateDepRecords({
 	// base libraries for general use
 	dayjs: '^1.11.13',
 	nanoid: '^3.3.12',
+	hono: '^4.13.18',
+	'@hono/aws-lambda': '^1.0.1',
+	'@hono/zod-openapi': '^1.6.3',
 	// parsers
 	zod: 'catalog:',
 	'csv-parse': '^5.6.0',
@@ -48,6 +51,7 @@ export const devDeps = separateDepRecords({
 	'@smithy/types': '4.12.0',
 	// dev - for running locally
 	tsx: '^4.21.0',
+	'@hono/node-server': '^2.1.8',
 	'tsconfig-paths': 'catalog:',
 	// for testing/mocking
 	'@faker-js/faker': '^9.8.0',

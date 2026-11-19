@@ -150,6 +150,8 @@ const moduleRouting: ModuleDefinition = {
 	dependencies: {
 		...dep['zod'],
 		...dep['dayjs'],
+		...dep.hono,
+		...dep['@hono/zod-openapi'],
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
@@ -1033,12 +1035,28 @@ const securityGroupsUpdater: HandlerDefinition = {
 
 const cancellationApi: HandlerDefinition = {
 	name: 'cancellation-api',
-	functionNames: ['cancellation-api-calculate-refund-'],
-	entryPoints: ['src/refund/handlers/*.ts'],
+	functionNames: ['cancellation-api-', 'cancellation-api-calculate-refund-'],
+	entryPoints: ['src/cancel/index.ts', 'src/refund/handlers/*.ts'],
 	dependencies: {
 		...dep.zod,
+		...dep.hono,
+		...dep['@hono/aws-lambda'],
+		...dep['@hono/zod-openapi'],
 	},
-	moduleDependencies: [moduleLogger, moduleZuora],
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+		...devDeps['@hono/node-server'],
+		...devDeps.tsx,
+	},
+	moduleDependencies: [
+		moduleLogger,
+		moduleRouting,
+		moduleIdentity,
+		moduleZuora,
+	],
+	extraScripts: {
+		local: 'tsx runLocal/server.ts',
+	},
 };
 
 // MARKER new-lambda: buildcheck-const

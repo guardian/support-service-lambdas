@@ -96,7 +96,9 @@ function eventIdentifier(acquisition: AcquisitionProduct): string {
 		return explicitIdentifier;
 	}
 
-	return createHash('sha256').update(JSON.stringify(acquisition)).digest('hex');
+	return createHash('sha256')
+		.update(JSON.stringify({ ...acquisition, cmpConsentSnapshot: undefined }))
+		.digest('hex');
 }
 
 function transactionIdentifier(
@@ -202,7 +204,13 @@ function customAttributes(
 	add('state', acquisition.state);
 	add('email', acquisition.email);
 	add('similar_products_consent', acquisition.similarProductsConsent);
+	if (acquisition.cmpConsentSnapshot !== undefined) {
+		attributes.cmp_consent_snapshot = JSON.stringify(
+			acquisition.cmpConsentSnapshot,
+		);
+	}
 	add('paypal_transaction_id', acquisition.paypalTransactionId);
+	add('client_transaction_id', acquisition.clientTransactionId);
 
 	return attributes;
 }

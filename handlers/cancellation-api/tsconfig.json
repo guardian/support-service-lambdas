@@ -8,11 +8,14 @@
       "@modules/logger/*": [
         "../../modules/logger/src/*"
       ],
-      "@modules/zuora/*": [
-        "../../modules/zuora/src/*"
+      "@modules/routing/*": [
+        "../../modules/routing/src/*"
       ],
       "@modules/aws/*": [
         "../../modules/aws/src/*"
+      ],
+      "@modules/zuora/*": [
+        "../../modules/zuora/src/*"
       ],
       "@modules/internationalisation/*": [
         "../../modules/internationalisation/src/*"
@@ -25,6 +28,9 @@
       ],
       "@modules/promotions/*": [
         "../../modules/promotions/src/*"
+      ],
+      "@modules/identity/*": [
+        "../../modules/identity/src/*"
       ],
       "@modules/cancellation-api/*": [
         "../../modules/cancellation-api/src/*"
