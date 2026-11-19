@@ -1,5 +1,6 @@
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { createRefund } from '../../../src/refund/handlers/createRefund';
+import { PermanentError } from '../../../src/refund/permanentError';
 import {
 	createRefund as createZuoraRefund,
 	getRefund,
@@ -56,10 +57,24 @@ describe('createRefund', () => {
 				{ id: 'refund-1', amount: 12, status: 'Processing' },
 			]);
 
-		await expect(createRefund(zuoraClient, input)).rejects.toThrow(
-			'Refund refund-1 has status Processing, expected Processed',
+		const error: unknown = await createRefund(zuoraClient, input).catch(
+			(e: unknown) => e,
 		);
+		expect(error).toEqual(new Error('Refund refund-1 is still processing'));
+		expect(error).not.toBeInstanceOf(PermanentError);
 		expect(createZuoraRefund).not.toHaveBeenCalled();
+	});
+
+	it('fails permanently if the refund has errored', async () => {
+		jest
+			.mocked(getRefundsByComment)
+			.mockResolvedValue([{ id: 'refund-1', amount: 12, status: 'Error' }]);
+
+		await expect(createRefund(zuoraClient, input)).rejects.toThrow(
+			new PermanentError(
+				'Refund refund-1 has status Error, expected Processed',
+			),
+		);
 	});
 
 	it('fails if the existing refund is for a different amount', async () => {

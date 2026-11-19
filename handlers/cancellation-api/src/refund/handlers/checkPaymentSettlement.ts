@@ -9,6 +9,7 @@ import type { PaymentSettlementStatus } from '../paymentSettlement';
 import { getPaymentSettlementStatus } from '../paymentSettlement';
 import { getLatestInvoicePayment } from '../zuora/invoicePayment';
 import { getSubscriptionInvoiceItems } from '../zuora/subscriptionInvoiceItems';
+import { parseStepInput } from './stepInput';
 
 const checkPaymentSettlementInputSchema = z.object({
 	subscriptionNumber: subscriptionNumberSchema,
@@ -29,7 +30,7 @@ export type CheckPaymentSettlementOutput = {
 export const handler = async (
 	event: unknown,
 ): Promise<CheckPaymentSettlementOutput> => {
-	const input = checkPaymentSettlementInputSchema.parse(event);
+	const input = parseStepInput(checkPaymentSettlementInputSchema, event);
 	logger.resetContext();
 	logger.mutableAddContext(input.subscriptionNumber);
 	const zuoraClient = await ZuoraClient.create(stageFromEnvironment());

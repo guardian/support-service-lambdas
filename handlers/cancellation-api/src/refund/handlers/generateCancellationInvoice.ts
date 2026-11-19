@@ -5,6 +5,7 @@ import { stageFromEnvironment } from '@modules/stage';
 import { subscriptionNumberSchema } from '@modules/zuora/identifiers';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { generateAndPostNegativeInvoice } from '../zuora/negativeInvoice';
+import { parseStepInput } from './stepInput';
 
 const generateCancellationInvoiceInputSchema = z.object({
 	subscriptionNumber: subscriptionNumberSchema,
@@ -14,8 +15,10 @@ const generateCancellationInvoiceInputSchema = z.object({
 export const handler = async (
 	event: unknown,
 ): Promise<{ negativeInvoiceId: string }> => {
-	const { subscriptionNumber, cancellationBillingDate } =
-		generateCancellationInvoiceInputSchema.parse(event);
+	const { subscriptionNumber, cancellationBillingDate } = parseStepInput(
+		generateCancellationInvoiceInputSchema,
+		event,
+	);
 	logger.resetContext();
 	logger.mutableAddContext(subscriptionNumber);
 	const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
