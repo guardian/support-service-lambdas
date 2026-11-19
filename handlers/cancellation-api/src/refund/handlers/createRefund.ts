@@ -6,12 +6,14 @@ import {
 	subscriptionNumberSchema,
 } from '@modules/zuora/identifiers';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { PermanentError } from '../permanentError';
 import { getRefundKey } from '../refundKey';
 import {
 	createRefund as createZuoraRefund,
 	getRefund,
 	getRefundsByComment,
 } from '../zuora/refund';
+import { parseStepInput } from './stepInput';
 
 const createRefundInputSchema = z.object({
 	subscriptionNumber: subscriptionNumberSchema,
@@ -25,7 +27,7 @@ export type CreateRefundOutput = {
 };
 
 export const handler = async (event: unknown): Promise<CreateRefundOutput> => {
-	const input = createRefundInputSchema.parse(event);
+	const input = parseStepInput(createRefundInputSchema, event);
 	logger.resetContext();
 	logger.mutableAddContext(input.subscriptionNumber);
 	const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
@@ -37,8 +39,8 @@ export const handler = async (event: unknown): Promise<CreateRefundOutput> => {
 };
 
 /**
- * Refunds the payment, unless a refund with this refundKey as its comment already exists. Fails unless the refund is
- * Processed, so a refund that is still processing is checked again on retry rather than created twice.
+ * Refunds the payment, unless a refund with this refundKey as its comment already exists. Fails if the refund is still
+ * Processing, so it is checked again on retry rather than created twice.
  */
 export async function createRefund(
 	zuoraClient: ZuoraClient,
@@ -50,7 +52,7 @@ export async function createRefund(
 ): Promise<CreateRefundOutput> {
 	const existingRefunds = await getRefundsByComment(zuoraClient, refundKey);
 	if (existingRefunds.length > 1) {
-		throw new Error(
+		throw new PermanentError(
 			`Found ${existingRefunds.length} refunds with comment ${refundKey}, expected at most one`,
 		);
 	}
@@ -69,12 +71,15 @@ export async function createRefund(
 
 	const refund = existingRefund ?? (await getRefund(zuoraClient, refundId));
 	if (refund.amount !== refundAmount) {
-		throw new Error(
+		throw new PermanentError(
 			`Refund ${refundId} is for ${refund.amount}, expected ${refundAmount}`,
 		);
 	}
+	if (refund.status === 'Processing') {
+		throw new Error(`Refund ${refundId} is still processing`);
+	}
 	if (refund.status !== 'Processed') {
-		throw new Error(
+		throw new PermanentError(
 			`Refund ${refundId} has status ${refund.status}, expected Processed`,
 		);
 	}

@@ -6,6 +6,7 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { RefundAmount } from '../refundAmount';
 import { calculateRefundAmount } from '../refundAmount';
 import { getSubscriptionInvoiceItems } from '../zuora/subscriptionInvoiceItems';
+import { parseStepInput } from './stepInput';
 
 const calculateRefundInputSchema = z.object({
 	subscriptionNumber: subscriptionNumberSchema,
@@ -15,7 +16,7 @@ const calculateRefundInputSchema = z.object({
 type CalculateRefundInput = z.infer<typeof calculateRefundInputSchema>;
 
 export const handler = async (event: unknown): Promise<RefundAmount> => {
-	const input = calculateRefundInputSchema.parse(event);
+	const input = parseStepInput(calculateRefundInputSchema, event);
 	logger.resetContext();
 	logger.mutableAddContext(input.subscriptionNumber);
 	const zuoraClient = await ZuoraClient.create(stageFromEnvironment());

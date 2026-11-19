@@ -9,6 +9,7 @@ import {
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getRefundKey } from '../refundKey';
 import { zeroInvoice } from '../zuora/zeroInvoice';
+import { parseStepInput } from './stepInput';
 
 const balanceInvoicesInputSchema = z.object({
 	subscriptionNumber: subscriptionNumberSchema,
@@ -25,7 +26,7 @@ const balanceInvoicesInputSchema = z.object({
 export const handler = async (
 	event: unknown,
 ): Promise<Record<string, never>> => {
-	const input = balanceInvoicesInputSchema.parse(event);
+	const input = parseStepInput(balanceInvoicesInputSchema, event);
 	logger.resetContext();
 	logger.mutableAddContext(input.subscriptionNumber);
 	const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
