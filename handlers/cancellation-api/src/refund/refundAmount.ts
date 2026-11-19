@@ -1,5 +1,6 @@
 import { groupByToMap, maxBy, sum } from '@modules/arrayFunctions';
 import { fromPence } from './money';
+import { PermanentError } from './permanentError';
 import type { SubscriptionInvoiceItem } from './subscriptionInvoiceItem';
 
 /**
@@ -30,7 +31,7 @@ export function calculateRefundAmount({
 		(invoice) => invoice.invoiceId === negativeInvoiceId,
 	);
 	if (negativeInvoice === undefined) {
-		throw new Error(
+		throw new PermanentError(
 			`Negative invoice ${negativeInvoiceId} is not in the subscription's invoice items`,
 		);
 	}
@@ -43,7 +44,7 @@ export function calculateRefundAmount({
 		({ chargeDate }) => chargeDate,
 	);
 	if (paidInvoice === undefined) {
-		throw new Error(
+		throw new PermanentError(
 			`No invoice to refund before negative invoice ${negativeInvoiceId}`,
 		);
 	}
@@ -74,7 +75,7 @@ function groupByInvoice(
 function getChargeDate(item: SubscriptionInvoiceItem): number {
 	const chargeDate = Date.parse(item.ChargeDate);
 	if (Number.isNaN(chargeDate)) {
-		throw new Error(
+		throw new PermanentError(
 			`Invalid ChargeDate ${item.ChargeDate} on invoice item ${item.Id}`,
 		);
 	}
