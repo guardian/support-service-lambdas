@@ -19,7 +19,7 @@ type SendPaymentFailedEmailInput = z.infer<
 >;
 
 /**
- * Sent only when the cancellation was backdated. A Lambda retry can send a duplicate, which is acceptable.
+ * Sent only when the cancellation was backdated.
  */
 export const handler = async (event: unknown): Promise<void> => {
 	const input = sendPaymentFailedEmailInputSchema.parse(event);
