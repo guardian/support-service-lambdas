@@ -88,6 +88,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
     val result = createOrder(backend, new AtomicLong(0))(request)
 
     result.left.value.reason should startWith("Failed to submit Zuora order:")
+    result.left.value.reason should include("sttp.client3.DeserializationException")
     submissions.get() shouldBe 1
   }
 
@@ -128,6 +129,21 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
     result shouldBe Right(AsyncOrderResult(OrderStatus.Completed))
     idempotencyKeys.toList shouldBe List(idempotencyKey, s"$idempotencyKey-2")
     clock.get() shouldBe 1.minute.toNanos
+  }
+
+  it should "include the HTTP error type when submission retries are exhausted" in {
+    val clock = new AtomicLong(0)
+    val submissions = new AtomicInteger(0)
+    val backend = SttpBackendStub.synchronous.whenRequestMatchesPartial { case _: Request[_, _] =>
+      submissions.incrementAndGet()
+      Response("temporary failure", StatusCode.InternalServerError)
+    }
+
+    val result = createOrder(backend, clock)(request)
+
+    result.left.value.reason should startWith("Failed to submit Zuora order: sttp.client3.HttpError")
+    submissions.get() shouldBe 5
+    clock.get() shouldBe 4.minutes.toNanos
   }
 
   it should "not resubmit when Zuora is already processing the idempotency key" in {
@@ -248,20 +264,26 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
     }
   }
 
-  it should "not resubmit when a completed job has a non-terminal order status" in {
+  it should "retry a completed job with a non-terminal order status using the same idempotency key later" in {
     val submissions = new AtomicInteger(0)
+    val idempotencyKeys = ListBuffer.empty[String]
     val backend = SttpBackendStub.synchronous.whenRequestMatchesPartial {
       case submittedRequest: Request[_, _] if submittedRequest.method == Method.POST =>
         submissions.incrementAndGet()
+        idempotencyKeys += submittedRequest.headers.find(_.name.equalsIgnoreCase("Idempotency-Key")).get.value
         Response.ok("""{"jobId":"job-1","success":true}""")
       case statusRequest: Request[_, _] if statusRequest.method == Method.GET =>
         Response.ok("""{"status":"Completed","errors":null,"result":{"status":"Pending"}}""")
     }
 
-    val result = createOrder(backend, new AtomicLong(0))(request)
+    val firstResult = createOrder(backend, new AtomicLong(0))(request)
+    val secondResult = createOrder(backend, new AtomicLong(0))(request)
 
-    result.left.value.reason shouldBe "Zuora order job job-1 completed with order status Pending"
-    submissions.get() shouldBe 1
+    firstResult.left.value.reason shouldBe
+      "Zuora order job job-1 completed without a successful order result: Pending"
+    secondResult shouldBe firstResult
+    submissions.get() shouldBe 2
+    idempotencyKeys.toList shouldBe List(idempotencyKey, idempotencyKey)
   }
 
   it should "retry an ambiguous job status response without resubmitting" in {
@@ -337,13 +359,15 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
       ),
     )
 
-    result.left.value.reason shouldBe "Zuora order job job-1 completed with order status Pending"
+    result.left.value.reason shouldBe
+      "Zuora order job job-1 completed without a successful order result: Pending"
   }
 
   it should "fail when the job completes without an order result" in {
     val result = waitFor(AsyncJobReport(AsyncJobStatus.Completed, None, None))
 
-    result.left.value.reason shouldBe "Zuora order job job-1 completed with order status missing"
+    result.left.value.reason shouldBe
+      "Zuora order job job-1 completed without a successful order result: missing"
   }
 
   it should "return the job error when Zuora reports a failure" in {
