@@ -8,6 +8,7 @@ import { subscriptionNumberSchema } from '@modules/zuora/identifiers';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { buildPaymentFailedEmail } from '../paymentFailedEmail';
 import { getPaymentFailedEmailData } from '../zuora/paymentFailedEmailData';
+import { parseStepInput } from './stepInput';
 
 const sendPaymentFailedEmailInputSchema = z.object({
 	subscriptionNumber: subscriptionNumberSchema,
@@ -22,8 +23,10 @@ const sendPaymentFailedEmailInputSchema = z.object({
 export const handler = async (
 	event: unknown,
 ): Promise<Record<string, never>> => {
-	const { invoiceId, ...input } =
-		sendPaymentFailedEmailInputSchema.parse(event);
+	const { invoiceId, ...input } = parseStepInput(
+		sendPaymentFailedEmailInputSchema,
+		event,
+	);
 	logger.resetContext();
 	logger.mutableAddContext(input.subscriptionNumber);
 	const stage = stageFromEnvironment();
