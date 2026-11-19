@@ -2,6 +2,7 @@ import { z } from 'zod';
 import type { SubscriptionNumber } from '@modules/zuora/identifiers';
 import { doQuery } from '@modules/zuora/query';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { PermanentError } from '../permanentError';
 import type { SubscriptionInvoiceItem } from '../subscriptionInvoiceItem';
 import { subscriptionInvoiceItemSchema } from '../subscriptionInvoiceItem';
 
@@ -21,7 +22,7 @@ export async function getSubscriptionInvoiceItems(
 	);
 	if (!done) {
 		// a ZOQL query returns up to 2000 records per page, throw if there are more invoice items than that
-		throw new Error(
+		throw new PermanentError(
 			`Too many invoice items for subscription ${subscriptionNumber}`,
 		);
 	}
