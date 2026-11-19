@@ -277,6 +277,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
 
   it should "retry a completed job without an order result using the same idempotency key later" in {
     val submissions = new AtomicInteger(0)
+    val jobReads = new AtomicInteger(0)
     val idempotencyKeys = ListBuffer.empty[String]
     val backend = SttpBackendStub.synchronous.whenRequestMatchesPartial {
       case submittedRequest: Request[_, _] if submittedRequest.method == Method.POST =>
@@ -284,15 +285,17 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
         idempotencyKeys += submittedRequest.headers.find(_.name.equalsIgnoreCase("Idempotency-Key")).get.value
         Response.ok("""{"jobId":"job-1","success":true}""")
       case statusRequest: Request[_, _] if statusRequest.method == Method.GET =>
+        jobReads.incrementAndGet()
         Response.ok("""{"status":"Completed","errors":null,"result":null}""")
     }
 
-    val firstResult = createOrder(backend, new AtomicLong(0))(request)
-    val secondResult = createOrder(backend, new AtomicLong(0))(request)
+    val firstResult = createOrder(backend, new AtomicLong(0), 4.seconds, 4.seconds)(request)
+    val secondResult = createOrder(backend, new AtomicLong(0), 4.seconds, 4.seconds)(request)
 
-    firstResult.left.value.reason shouldBe "Zuora order job job-1 completed without an order result"
+    firstResult.left.value.reason shouldBe "Timed out waiting for Zuora order job job-1"
     secondResult shouldBe firstResult
     submissions.get() shouldBe 2
+    jobReads.get() shouldBe 4
     idempotencyKeys.toList shouldBe List(idempotencyKey, idempotencyKey)
   }
 
@@ -361,37 +364,19 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
   }
 
   "waitForCompletion" should "return a completed job with a non-failed order result" in {
-    val result = waitFor(
-      AsyncJobReport(
-        status = AsyncJobStatus.Completed,
-        errors = None,
-        result = Some(AsyncOrderResult(OrderStatus.Pending)),
-      ),
-    )
+    val result = waitFor(AsyncJobReport.Completed(AsyncOrderResult(OrderStatus.Pending)))
 
     result shouldBe Right(AsyncOrderResult(OrderStatus.Pending))
   }
 
-  it should "fail when the job completes without an order result" in {
-    val result = waitFor(AsyncJobReport(AsyncJobStatus.Completed, None, None))
-
-    result.left.value.reason shouldBe "Zuora order job job-1 completed without an order result"
-  }
-
   it should "return the job error when Zuora reports a failure" in {
-    val result = waitFor(
-      AsyncJobReport(
-        status = AsyncJobStatus.Failed,
-        errors = Some("The order could not be applied"),
-        result = None,
-      ),
-    )
+    val result = waitFor(AsyncJobReport.Failed(Some("The order could not be applied")))
 
     result.left.value.reason shouldBe "Zuora order job job-1 failed: The order could not be applied"
   }
 
   it should "explain when a failed job has no error" in {
-    val result = waitFor(AsyncJobReport(AsyncJobStatus.Failed, None, None))
+    val result = waitFor(AsyncJobReport.Failed(None))
 
     result.left.value.reason shouldBe "Zuora order job job-1 failed: no reason returned"
   }
@@ -404,7 +389,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
       getReport = (_, _) => {
         reads.incrementAndGet()
         clock.addAndGet(6.seconds.toNanos)
-        Right(AsyncJobReport(AsyncJobStatus.Completed, None, Some(AsyncOrderResult(OrderStatus.Completed))))
+        Right(AsyncJobReport.Completed(AsyncOrderResult(OrderStatus.Completed)))
       },
       pause = _ => (),
       deadlineNanos = 5.seconds.toNanos,
@@ -422,7 +407,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
       jobId = "job-1",
       getReport = (_, _) =>
         if (reads.getAndIncrement() == 0) Left(ZuoraApiFailure("temporary network error"))
-        else Right(AsyncJobReport(AsyncJobStatus.Completed, None, Some(AsyncOrderResult(OrderStatus.Completed)))),
+        else Right(AsyncJobReport.Completed(AsyncOrderResult(OrderStatus.Completed))),
       pause = duration => {
         clock.addAndGet(duration.toNanos)
         ()
@@ -443,7 +428,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
       jobId = "job-1",
       getReport = (_, _) => {
         reads.incrementAndGet()
-        Right(AsyncJobReport(AsyncJobStatus.Processing, None, None))
+        Right(AsyncJobReport.Processing)
       },
       pause = duration => {
         pauses += duration
@@ -465,7 +450,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
       jobId = "job-1",
       getReport = (_, readTimeout) => {
         readTimeouts += readTimeout
-        Right(AsyncJobReport(AsyncJobStatus.Completed, None, Some(AsyncOrderResult(OrderStatus.Completed))))
+        Right(AsyncJobReport.Completed(AsyncOrderResult(OrderStatus.Completed)))
       },
       pause = _ => (),
       deadlineNanos = 5.minutes.toNanos,
@@ -480,6 +465,12 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
     val result = decode[AsyncJobReport]("""{"status":"Unknown","errors":null,"result":null}""")
 
     result.left.value.getMessage should include("Unknown Zuora async job status: Unknown")
+  }
+
+  it should "reject a completed job without an order result" in {
+    val result = decode[AsyncJobReport]("""{"status":"Completed","errors":null,"result":null}""")
+
+    result.left.value.getMessage should include("Zuora completed the async job without returning an order result")
   }
 
   it should "reject an unknown order status" in {

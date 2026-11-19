@@ -1,13 +1,6 @@
 package com.gu.zuora
 
-import com.gu.zuora.orders.{
-  AsyncJobReport,
-  AsyncJobStatus,
-  AsyncJobSubmission,
-  AsyncOrderResult,
-  CreateOrderRequest,
-  OrderStatus,
-}
+import com.gu.zuora.orders.{AsyncJobReport, AsyncJobSubmission, AsyncOrderResult, CreateOrderRequest, OrderStatus}
 import com.gu.zuora.subscription.{ZuoraApiFailure, ZuoraApiResponse}
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
@@ -202,14 +195,12 @@ object ZuoraOrders extends LazyLogging {
             case Left(failure) =>
               logger.warn(s"Could not read Zuora order job $jobId: ${failure.reason}. Retrying.")
               if (pauseForNextPoll()) poll() else timedOut
-            case Right(AsyncJobReport(AsyncJobStatus.Failed, errors, _)) =>
+            case Right(AsyncJobReport.Failed(errors)) =>
               val reason = s"Zuora order job $jobId failed: ${errors.getOrElse("no reason returned")}"
               Left(ConfirmedOrderFailure(reason))
             case Right(
-                  AsyncJobReport(
-                    AsyncJobStatus.Completed,
-                    _,
-                    Some(result @ AsyncOrderResult(OrderStatus.Failed | OrderStatus.Cancelled)),
+                  AsyncJobReport.Completed(
+                    result @ AsyncOrderResult(OrderStatus.Failed | OrderStatus.Cancelled),
                   ),
                 ) =>
               Left(
@@ -217,15 +208,9 @@ object ZuoraOrders extends LazyLogging {
                   s"Zuora order job $jobId was unsuccessful - final status ${result.status.value}",
                 ),
               )
-            case Right(AsyncJobReport(AsyncJobStatus.Completed, _, Some(result))) =>
+            case Right(AsyncJobReport.Completed(result)) =>
               Right(result)
-            case Right(AsyncJobReport(AsyncJobStatus.Completed, _, None)) =>
-              Left(
-                RetryIdempotencyKeyLater(
-                  s"Zuora order job $jobId completed without an order result",
-                ),
-              )
-            case Right(AsyncJobReport(AsyncJobStatus.Processing, _, _)) =>
+            case Right(AsyncJobReport.Processing) =>
               if (pauseForNextPoll()) poll() else timedOut
           }
       }
