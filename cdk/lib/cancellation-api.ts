@@ -143,12 +143,16 @@ export class CancellationApi extends SrStack {
 				lambdaFunction,
 				payloadResponseOnly: true,
 				outputs: '{% $merge([$states.input, $states.result]) %}',
-			}).addRetry({
-				errors: [Errors.ALL],
-				interval: Duration.hours(1),
-				maxAttempts: 5,
-				backoffRate: 2,
-			});
+			})
+				.addRetry({ errors: ['PermanentError'], maxAttempts: 0 })
+				// about a day, to ride out a Zuora or AWS outage: every step is safe to re-run
+				.addRetry({
+					errors: [Errors.ALL],
+					interval: Duration.minutes(1),
+					maxDelay: Duration.hours(1),
+					maxAttempts: 30,
+					backoffRate: 2,
+				});
 		const when = (condition: string) => Condition.jsonata(`{% ${condition} %}`);
 
 		const succeed = Succeed.jsonata(this, 'Succeed');
@@ -234,7 +238,7 @@ export class CancellationApi extends SrStack {
 			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 			alarmName: `${this.stage}: cancellation-api refund workflow execution failed`,
 			alarmDescription:
-				'A cancellation refund workflow execution failed, so a refund, invoice balancing or failed payment backdating may be incomplete. Find the failed execution in the Step Functions console: its error says which step failed and why, or it timed out still waiting for the payment to settle.',
+				'A cancellation refund workflow execution failed, so a refund, invoice balancing or failed payment backdating may be incomplete. Find the failed execution in the Step Functions console: its error says which step failed and why, or it timed out still waiting for the payment to settle. Once the cause is fixed, redrive the execution to resume from the failed step.',
 			lambdaFunctionNames,
 		});
 
