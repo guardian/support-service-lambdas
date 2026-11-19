@@ -16,7 +16,7 @@ deployments:
     type: aws-lambda
     parameters:
       fileName: identity-retention.jar
-      bucket: support-service-lambdas-dist
+      bucketSsmLookup: true
       prefixStack: false
       functionNames:
       - identity-retention-

@@ -16,7 +16,7 @@ deployments:
     type: aws-lambda
     parameters:
       fileName: digital-voucher-api.jar
-      bucket: support-service-lambdas-dist
+      bucketSsmLookup: true
       prefixStack: false
       functionNames:
       - digital-voucher-api-
