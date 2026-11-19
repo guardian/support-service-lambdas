@@ -35,8 +35,11 @@ object ZuoraOrders extends LazyLogging {
     def reason: String
   }
 
+  // The order definitely failed, so the current idempotency key is not reusable.
   private case class ConfirmedOrderFailure(reason: String) extends OrderFailure
-  private case class UnknownOrderOutcome(reason: String) extends OrderFailure
+
+  // The next Lambda run should retry the same deterministic idempotency key.
+  private case class RetryIdempotencyKeyLater(reason: String) extends OrderFailure
   private case class ZuoraErrorReason(code: String)
   private case class ZuoraErrorResponse(reasons: List[ZuoraErrorReason])
 
@@ -86,7 +89,7 @@ object ZuoraOrders extends LazyLogging {
       val attemptDeadlineNanos = math.min(orderDeadlineNanos, monotonicNanos() + maximumOrderAttemptDuration.toNanos)
       val result = for {
         readTimeout <- remainingReadTimeout(attemptDeadlineNanos, monotonicNanos)
-          .toRight(UnknownOrderOutcome("Timed out before submitting the Zuora order"))
+          .toRight(RetryIdempotencyKeyLater("Timed out before submitting the Zuora order"))
         jobId <- submitOrder(config, accessToken, backend, readTimeout, attemptIdempotencyKey)(request)
         _ = logger.info(s"Submitted Zuora order job $jobId")
         result <- waitForCompletion(
@@ -108,8 +111,8 @@ object ZuoraOrders extends LazyLogging {
             s"Retrying the Zuora order in $OrderRetryDelay after a confirmed failure: ${failure.reason}",
           )
           pause(OrderRetryDelay)
-          attempt(attemptsRemaining - 1)
-        case other => other
+          attempt(attemptsRemaining - 1) // this idempotency key is not reusable, try the next one
+        case other => other // the next Lambda run will retry with the same deterministic idempotency keys
       }
     }
 
@@ -122,14 +125,14 @@ object ZuoraOrders extends LazyLogging {
       accessToken: AccessToken,
       backend: SttpBackend[Identity, Any],
       readTimeout: FiniteDuration,
-      idempotencyKey: String,
+      attemptIdempotencyKey: String,
   )(
       request: CreateOrderRequest,
   ): Either[OrderFailure, String] =
     basicRequest
       .post(uri"${config.baseUrl}/async/orders")
       .header("Authorization", s"Bearer ${accessToken.access_token}")
-      .header("Idempotency-Key", idempotencyKey)
+      .header("Idempotency-Key", attemptIdempotencyKey)
       .readTimeout(readTimeout)
       .body(request)
       .response(asJson[AsyncJobSubmission])
@@ -138,11 +141,12 @@ object ZuoraOrders extends LazyLogging {
       .left
       .map {
         case HttpError(body: String, StatusCode.Conflict) if isConcurrentIdempotencyRequest(body) =>
-          UnknownOrderOutcome("Zuora is already processing a request with this idempotency key")
+          RetryIdempotencyKeyLater("Zuora is already processing a request with this idempotency key")
         case error: HttpError[_] =>
-          ConfirmedOrderFailure(s"Failed to submit Zuora order: ${error.getMessage}")
+          ConfirmedOrderFailure(s"Failed to submit Zuora order: ${error.toString}")
         case error =>
-          UnknownOrderOutcome(s"Failed to submit Zuora order: ${error.getMessage}")
+          logger.error("Failed to decode the Zuora order submission response", error)
+          RetryIdempotencyKeyLater(s"Failed to submit Zuora order: ${error.toString}")
       }
       .flatMap {
         case AsyncJobSubmission.Accepted(jobId) => Right(jobId)
@@ -179,7 +183,7 @@ object ZuoraOrders extends LazyLogging {
       deadlineNanos: Long,
       monotonicNanos: () => Long,
   ): Either[OrderFailure, AsyncOrderResult] = {
-    val timedOut = Left(UnknownOrderOutcome(s"Timed out waiting for Zuora order job $jobId"))
+    val timedOut = Left(RetryIdempotencyKeyLater(s"Timed out waiting for Zuora order job $jobId"))
 
     def pauseForNextPoll(): Boolean =
       remainingDuration(deadlineNanos, monotonicNanos) match {
@@ -213,12 +217,16 @@ object ZuoraOrders extends LazyLogging {
                 ) =>
               Left(
                 ConfirmedOrderFailure(
-                  s"Zuora order job $jobId completed with order status ${result.status.value}",
+                  s"Zuora order job $jobId was unsuccessful - final status ${result.status.value}",
                 ),
               )
             case Right(AsyncJobReport(AsyncJobStatus.Completed, _, result)) =>
               val orderStatus = result.map(_.status.value).getOrElse("missing")
-              Left(UnknownOrderOutcome(s"Zuora order job $jobId completed with order status $orderStatus"))
+              Left(
+                RetryIdempotencyKeyLater(
+                  s"Zuora order job $jobId completed without a successful order result: $orderStatus",
+                ),
+              )
             case Right(AsyncJobReport(AsyncJobStatus.Processing, _, _)) =>
               if (pauseForNextPoll()) poll() else timedOut
           }
