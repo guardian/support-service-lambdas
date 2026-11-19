@@ -3,6 +3,7 @@ import { maxBy } from '@modules/arrayFunctions';
 import { doQuery } from '@modules/zuora/query';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { SettlementPayment } from '../paymentSettlement';
+import { PermanentError } from '../permanentError';
 
 export type InvoicePayment = SettlementPayment & {
 	id: string;
@@ -40,7 +41,7 @@ export async function getLatestInvoicePayment(
 		invoicePaymentQueryResponseSchema,
 	);
 	if (!done) {
-		throw new Error(`Too many payments for invoice ${invoiceId}`);
+		throw new PermanentError(`Too many payments for invoice ${invoiceId}`);
 	}
 	const latest = maxBy(records, ({ CreatedDate }) => Date.parse(CreatedDate));
 	if (latest === undefined) {

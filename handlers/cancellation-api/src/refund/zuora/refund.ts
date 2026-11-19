@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { doQuery } from '@modules/zuora/query';
 import { doRefund } from '@modules/zuora/refund';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { PermanentError } from '../permanentError';
 
 export type Refund = {
 	id: string;
@@ -83,7 +84,7 @@ export async function getRefundsByComment(
 		refundQueryResponseSchema,
 	);
 	if (!done) {
-		throw new Error(`Too many refunds with comment ${comment}`);
+		throw new PermanentError(`Too many refunds with comment ${comment}`);
 	}
 	return records.map(toRefund);
 }
