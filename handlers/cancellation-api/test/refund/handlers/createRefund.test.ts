@@ -1,4 +1,3 @@
-import { subscriptionNumberSchema } from '@modules/zuora/identifiers';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { createRefund } from '../../../src/refund/handlers/createRefund';
 import {
@@ -11,7 +10,6 @@ jest.mock('../../../src/refund/zuora/refund');
 
 const zuoraClient = {} as ZuoraClient;
 const input = {
-	subscriptionNumber: subscriptionNumberSchema.parse('A-S00123456'),
 	refundKey: 'A-S00123456-O-00123456',
 	paymentId: 'payment-1',
 	refundAmount: 12,
