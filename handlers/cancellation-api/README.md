@@ -1,27 +1,90 @@
-# cancellation-api
+# Cancellation API handler
 
-Cancels subscriptions and refunds the customer when a refund is due. Our cooling-off and refund rules are based on the DMCC Act, but can be more generous.
-It has two parts:
+## Overview
 
-1. **Cancellation API**: an API Gateway Lambda that cancels a subscription on request.
-2. **Refund workflow**: a Step Functions state machine, started by the cancellation API, that handles the parts that
-   can take days: waiting for payment settlement, refunding, balancing invoices, and dealing with Direct Debits that fail to settle.
+This handler contains
 
-This replaces product-move-api's `RefundHandler` (SQS `product-switch-refund-{stage}`) and its use of invoicing-api `/refund`.
-The refund rules are carried over unchanged. In practice only Supporter Plus is refund-eligible to begin with.
+1. a Subscription cancellation API inside `src/cancel/`, and
+2. a state machine for refunding in `src/refund`
 
-## Status
+### 1. Cancellation API
 
-| Part | Status |
-|---|---|
-| Cancellation API | WIP in [#3946](https://github.com/guardian/support-service-lambdas/pull/3946): routing, validation, docs and local serving. Both endpoints return a fixed example; no Zuora calls, emails or events yet |
-| Refund workflow | In progress: `calculateRefund` is a placeholder that validates its input and then fails. Other Lambdas and the state machine are still to come |
+**WIP:** routing, request validation, documentation and local serving are
+implemented. Both POST endpoints currently return the fixed
+`{ "type": "immediate", "willRefund": false }` example. Zuora/ownership checks,
+cancellation, emails and events are not implemented; do not connect real
+customer journeys yet.
 
-## Cancellation API
+`immediate` means access ends today (entitlement updates usually propagate within
+a day); `scheduled` includes the future `accessEndDate`.
 
-TODO
+| Operation                | Path                                                       |
+| ------------------------ | ---------------------------------------------------------- |
+| Preview                  | `/subscriptions/{subscriptionNumber}/preview-cancellation` |
+| Execute                  | `/subscriptions/{subscriptionNumber}/cancel`               |
+| Generated OpenAPI        | `/openapi.json`                                            |
+| Interactive API explorer | `/explorer`                                                |
 
-## Refund workflow
+The explorer and OpenAPI contract are public. API Gateway validates API keys for
+operations; the app validates the identity header and request shape.
+Local operation requests need `x-identity-id` but no API Gateway key.
+
+The CODE explorer remembers authentication in browser local storage. Persistence
+is disabled in PROD and when the stage is unspecified. Stored credentials are
+not encrypted; this does not persist request parameter values.
+
+### Local development and testing
+
+```sh
+pnpm --filter cancellation-api local
+# Open http://localhost:8787/explorer
+
+curl -X POST http://localhost:8787/subscriptions/A-S12345678/preview-cancellation \
+  -H 'Content-Type: application/json' -H 'x-identity-id: 123456789' -d '{}'
+
+pnpm --filter cancellation-api test
+pnpm --filter cancellation-api type-check
+pnpm --filter cancellation-api fix-formatting
+pnpm --filter cancellation-api lint --fix
+pnpm --filter cancellation-api cdk:test
+```
+
+When deployed, base URLs are
+https://cancellation-api-code.support.guardianapis.com and
+https://cancellation-api.support.guardianapis.com. The explorer and API calls
+use the same origin, including when accessed through an API Gateway stage URL.
+
+OpenAPI and the interactive explorer are generated from the schemas; there is no
+separate YAML contract to maintain.
+
+### Built-in explorer
+
+Run the local server above and open [localhost:8787/explorer](http://localhost:8787/explorer),
+or open the [deployed CODE explorer](https://cancellation-api-code.support.guardianapis.com/explorer).
+For CODE, enter its API Gateway key in the authentication control; local requests
+do not need a key.
+
+### Hoppscotch Desktop
+
+1. Install and open [Hoppscotch Desktop](https://docs.hoppscotch.io/documentation/clients/desktop/overview).
+2. Use **Collections > Import > OpenAPI** to
+   [import](https://docs.hoppscotch.io/documentation/features/importer) the
+   [CODE contract](https://cancellation-api-code.support.guardianapis.com/openapi.json).
+3. Create and select a CODE environment with `baseUrl` set to
+   `https://cancellation-api-code.support.guardianapis.com` and a **secret** `apiKey`
+   variable. Set imported request URLs to use `<<baseUrl>>` explicitly: our
+   specification declares a relative server URL. For local requests, use
+   `http://localhost:8787` and omit API-key authentication.
+4. For CODE, configure API-key authentication as header `x-api-key` with value `<<apiKey>>`.
+   Go ahead and create and save requests as you wish.
+
+## 2. Refund workflow
+
+In progress: `calculateRefund` is a placeholder that validates its input and
+then fails. Other workflow Lambdas and the state machine are still to come.
+The planned workflow replaces product-move-api's `RefundHandler`
+(SQS `product-switch-refund-{stage}`) and its use of invoicing-api `/refund`.
+Refund rules are carried over unchanged; initially only S+ is refund-eligible.
 
 The workflow assumes the subscription is already cancelled. It never re-checks refund eligibility and never sends the
 confirmation email or event.
@@ -39,6 +102,7 @@ used because they expire after 24 hours and cache failures.
 See the issue below for the detailed rules.
 
 ### Flow Diagram
+
 ```mermaid
 %%{init: {"flowchart": {"nodeSpacing": 15, "rankSpacing": 20, "padding": 4}, "themeVariables": {"fontSize": "11px"}}}%%
 flowchart TD
@@ -82,11 +146,10 @@ flowchart TD
 
 Alarms go to Lifecycle via alarms-handler.
 
-| Alarm | Raised when | Status |
-|---|---|---|
-| Cancellation API errors | the API returns a 5xx, including when the refund workflow can't be started (`StartExecution` fails) | TODO |
-| Refund workflow failed | an execution fails, times out or is aborted: a customer not refunded, or a failed DD not acted on | TODO |
-
+| Alarm                   | Raised when                                                                                         | Status                                                             |
+| ----------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| Cancellation API errors | the API returns a 5xx, including when the refund workflow can't be started (`StartExecution` fails) | API Gateway 5xx alarm configured; workflow startup not implemented |
+| Refund workflow failed  | an execution fails, times out or is aborted: a customer not refunded, or a failed DD not acted on   | TODO                                                               |
 
 ## References
 
@@ -96,4 +159,7 @@ Alarms go to Lifecycle via alarms-handler.
 - [DMCC cooling off and refund tables](https://docs.google.com/spreadsheets/d/16WsRtjNOTizvmmH_LKQDocn7K5AAim2j3N6hoMAnJp0/edit?gid=0#gid=0)
 - [Zuora Orders API](https://developer.zuora.com/v1-api-reference/api/orders/)
 - [Hono Zod OpenAPI](https://hono.dev/examples/zod-openapi)
+- [Hono AWS Lambda adapter (`@hono/aws-lambda`)](https://hono.dev/docs/getting-started/aws-lambda)
+- [Scalar HTML integration](https://scalar.com/products/api-references/getting-started)
+- [Proof of concept #3610](https://github.com/guardian/support-service-lambdas/pull/3610)
 - [AWS Step Functions developer guide](https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html)

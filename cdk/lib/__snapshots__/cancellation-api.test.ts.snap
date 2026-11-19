@@ -8,6 +8,34 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
     ],
     "gu:cdk:version": "TEST",
   },
+  "Outputs": {
+    "LambdaRestApiEndpoint7EDBC694": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "LambdaRestApi687C4D83",
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region",
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+  },
   "Parameters": {
     "DistributionBucketName": {
       "Default": "/account/services/artifact.bucket",
@@ -16,6 +44,20 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
+    "BasePathMapping": {
+      "Properties": {
+        "DomainName": {
+          "Ref": "DomainName",
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+        "Stage": {
+          "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
+        },
+      },
+      "Type": "AWS::ApiGateway::BasePathMapping",
+    },
     "CalculateRefundLambda0081A960": {
       "DependsOn": [
         "CalculateRefundLambdaServiceRoleDefaultPolicy5B1B90DB",
@@ -229,6 +271,1325 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "DNSRecord": {
+      "Properties": {
+        "HostedZoneId": "Z3KO35ELNWZMSX",
+        "Name": "cancellation-api-code.support.guardianapis.com",
+        "ResourceRecords": [
+          {
+            "Fn::GetAtt": [
+              "DomainName",
+              "RegionalDomainName",
+            ],
+          },
+        ],
+        "TTL": "120",
+        "Type": "CNAME",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "DomainName": {
+      "Properties": {
+        "DomainName": "cancellation-api-code.support.guardianapis.com",
+        "EndpointConfiguration": {
+          "Types": [
+            "REGIONAL",
+          ],
+        },
+        "RegionalCertificateArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:acm:eu-west-1:",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
+            ],
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::DomainName",
+    },
+    "LambdaD247545B": {
+      "DependsOn": [
+        "LambdaServiceRoleDefaultPolicyDAE46E21",
+        "LambdaServiceRoleA8ED4D3B",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/CODE/cancellation-api/cancellation-api.zip",
+        },
+        "Description": "Subscription cancellation preview and execute API",
+        "Environment": {
+          "Variables": {
+            "APP": "cancellation-api",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
+            "STAGE": "CODE",
+          },
+        },
+        "FunctionName": "cancellation-api-CODE",
+        "Handler": "cancel/index.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaServiceRoleA8ED4D3B",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs22.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "LambdaRestApi687C4D83": {
+      "Properties": {
+        "ApiKeySourceType": "HEADER",
+        "Description": "API Gateway created by CDK",
+        "Name": "cancellation-api-CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "LambdaRestApiANYApiPermissionTestcancellationapiCODELambdaRestApi0DED9311ANYDE9E121D": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/test-invoke-stage/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiANYApiPermissioncancellationapiCODELambdaRestApi0DED9311ANY6BB63846": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/",
+              {
+                "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
+              },
+              "/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiANYC3C9D364": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "LambdaD247545B",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "LambdaRestApi687C4D83",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "LambdaRestApiAccount4E23441E": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "LambdaRestApi687C4D83",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "LambdaRestApiCloudWatchRole73082DF6",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "LambdaRestApiApiKeyB5CCCA11": {
+      "Properties": {
+        "Enabled": true,
+        "Name": "cancellation-api-key-CODE",
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "LambdaRestApi687C4D83",
+            },
+            "StageName": {
+              "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
+    },
+    "LambdaRestApiCloudWatchRole73082DF6": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "LambdaRestApiDeployment95319089606f703f0e342561a20e5e98447f9f1b": {
+      "DependsOn": [
+        "LambdaRestApiproxyANY486C4D1F",
+        "LambdaRestApiproxy22103CFD",
+        "LambdaRestApiANYC3C9D364",
+        "LambdaRestApiexplorerproxyGET6B3C3EF0",
+        "LambdaRestApiexplorerproxyF0E4BDBC",
+        "LambdaRestApiexplorerGET0FD947E2",
+        "LambdaRestApiexplorer29DEFF5D",
+        "LambdaRestApiopenapijsonproxyGET992734B5",
+        "LambdaRestApiopenapijsonproxy47A1F813",
+        "LambdaRestApiopenapijsonGETA1FE48FD",
+        "LambdaRestApiopenapijson8A58BDBC",
+      ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
+      "Properties": {
+        "Description": "API Gateway created by CDK",
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "LambdaRestApiDeploymentStageCODECCF2AEE8": {
+      "DependsOn": [
+        "LambdaRestApiAccount4E23441E",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "LambdaRestApiDeployment95319089606f703f0e342561a20e5e98447f9f1b",
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+        "StageName": "CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "LambdaRestApiUsagePlanD8F7DB8D": {
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "LambdaRestApi687C4D83",
+            },
+            "Stage": {
+              "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
+            },
+            "Throttle": {},
+          },
+        ],
+        "Description": "REST endpoints for cancellation-api",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Throttle": {
+          "BurstLimit": 10,
+          "RateLimit": 20,
+        },
+        "UsagePlanName": "cancellation-api-CODE",
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
+    },
+    "LambdaRestApiUsagePlanUsagePlanKeyResourcecancellationapiCODELambdaRestApiApiKey518E823C3018E342": {
+      "Properties": {
+        "KeyId": {
+          "Ref": "LambdaRestApiApiKeyB5CCCA11",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "LambdaRestApiUsagePlanD8F7DB8D",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
+    },
+    "LambdaRestApiexplorer29DEFF5D": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "LambdaRestApi687C4D83",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "explorer",
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "LambdaRestApiexplorerGET0FD947E2": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "LambdaD247545B",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "LambdaRestApiexplorer29DEFF5D",
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "LambdaRestApiexplorerGETApiPermissionTestcancellationapiCODELambdaRestApi0DED9311GETexplorer499FA18F": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/test-invoke-stage/GET/explorer",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiexplorerGETApiPermissioncancellationapiCODELambdaRestApi0DED9311GETexplorerDDC26583": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/",
+              {
+                "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
+              },
+              "/GET/explorer",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiexplorerproxyF0E4BDBC": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "LambdaRestApiexplorer29DEFF5D",
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "LambdaRestApiexplorerproxyGET6B3C3EF0": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "LambdaD247545B",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "LambdaRestApiexplorerproxyF0E4BDBC",
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "LambdaRestApiexplorerproxyGETApiPermissionTestcancellationapiCODELambdaRestApi0DED9311GETexplorerproxy71EB929A": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/test-invoke-stage/GET/explorer/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiexplorerproxyGETApiPermissioncancellationapiCODELambdaRestApi0DED9311GETexplorerproxyAA5A1BB7": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/",
+              {
+                "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
+              },
+              "/GET/explorer/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiopenapijson8A58BDBC": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "LambdaRestApi687C4D83",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "openapi.json",
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "LambdaRestApiopenapijsonGETA1FE48FD": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "LambdaD247545B",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "LambdaRestApiopenapijson8A58BDBC",
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "LambdaRestApiopenapijsonGETApiPermissionTestcancellationapiCODELambdaRestApi0DED9311GETopenapijson1B5F1142": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/test-invoke-stage/GET/openapi.json",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiopenapijsonGETApiPermissioncancellationapiCODELambdaRestApi0DED9311GETopenapijson9A06539F": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/",
+              {
+                "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
+              },
+              "/GET/openapi.json",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiopenapijsonproxy47A1F813": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "LambdaRestApiopenapijson8A58BDBC",
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "LambdaRestApiopenapijsonproxyGET992734B5": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "LambdaD247545B",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "LambdaRestApiopenapijsonproxy47A1F813",
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "LambdaRestApiopenapijsonproxyGETApiPermissionTestcancellationapiCODELambdaRestApi0DED9311GETopenapijsonproxy84015AE3": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/test-invoke-stage/GET/openapi.json/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiopenapijsonproxyGETApiPermissioncancellationapiCODELambdaRestApi0DED9311GETopenapijsonproxy8A6D3F24": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/",
+              {
+                "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
+              },
+              "/GET/openapi.json/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiproxy22103CFD": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "LambdaRestApi687C4D83",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "LambdaRestApiproxyANY486C4D1F": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "LambdaD247545B",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "LambdaRestApiproxy22103CFD",
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "LambdaRestApiproxyANYApiPermissionTestcancellationapiCODELambdaRestApi0DED9311ANYproxy28FCFC7F": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/test-invoke-stage/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiproxyANYApiPermissioncancellationapiCODELambdaRestApi0DED9311ANYproxy67480B78": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/",
+              {
+                "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
+              },
+              "/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaServiceRoleA8ED4D3B": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "LambdaServiceRoleDefaultPolicyDAE46E21": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/CODE/cancellation-api/cancellation-api.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/cancellation-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/cancellation-api/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "LambdaServiceRoleDefaultPolicyDAE46E21",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
   },
 }
 `;
@@ -241,6 +1602,34 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
     ],
     "gu:cdk:version": "TEST",
   },
+  "Outputs": {
+    "LambdaRestApiEndpoint7EDBC694": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "LambdaRestApi687C4D83",
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region",
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+  },
   "Parameters": {
     "DistributionBucketName": {
       "Default": "/account/services/artifact.bucket",
@@ -249,6 +1638,96 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
+    "ApiGateway5XXAlarmCDK11905206": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "cancellation-api returned a 5XX response. Search the logs below for "error" for more information. Impact: one or more users were not able to cancel their subscription online",
+        "AlarmName": "cancellation-api-PROD 5XX errors",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "ApiName",
+            "Value": "cancellation-api-PROD",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "5XXError",
+        "Namespace": "AWS/ApiGateway",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "LambdaD247545B",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "BasePathMapping": {
+      "Properties": {
+        "DomainName": {
+          "Ref": "DomainName",
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+        "Stage": {
+          "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
+        },
+      },
+      "Type": "AWS::ApiGateway::BasePathMapping",
+    },
     "CalculateRefundLambda0081A960": {
       "DependsOn": [
         "CalculateRefundLambdaServiceRoleDefaultPolicy5B1B90DB",
@@ -457,6 +1936,1325 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
         "Roles": [
           {
             "Ref": "CalculateRefundLambdaServiceRoleC93025B4",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "DNSRecord": {
+      "Properties": {
+        "HostedZoneId": "Z3KO35ELNWZMSX",
+        "Name": "cancellation-api.support.guardianapis.com",
+        "ResourceRecords": [
+          {
+            "Fn::GetAtt": [
+              "DomainName",
+              "RegionalDomainName",
+            ],
+          },
+        ],
+        "TTL": "120",
+        "Type": "CNAME",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "DomainName": {
+      "Properties": {
+        "DomainName": "cancellation-api.support.guardianapis.com",
+        "EndpointConfiguration": {
+          "Types": [
+            "REGIONAL",
+          ],
+        },
+        "RegionalCertificateArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:acm:eu-west-1:",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
+            ],
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::DomainName",
+    },
+    "LambdaD247545B": {
+      "DependsOn": [
+        "LambdaServiceRoleDefaultPolicyDAE46E21",
+        "LambdaServiceRoleA8ED4D3B",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/PROD/cancellation-api/cancellation-api.zip",
+        },
+        "Description": "Subscription cancellation preview and execute API",
+        "Environment": {
+          "Variables": {
+            "APP": "cancellation-api",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
+            "STAGE": "PROD",
+          },
+        },
+        "FunctionName": "cancellation-api-PROD",
+        "Handler": "cancel/index.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaServiceRoleA8ED4D3B",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs22.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "LambdaRestApi687C4D83": {
+      "Properties": {
+        "ApiKeySourceType": "HEADER",
+        "Description": "API Gateway created by CDK",
+        "Name": "cancellation-api-PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "LambdaRestApiANYApiPermissionTestcancellationapiPRODLambdaRestApiF0E35FF7ANY9A9C1021": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/test-invoke-stage/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiANYApiPermissioncancellationapiPRODLambdaRestApiF0E35FF7ANY8402317C": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/",
+              {
+                "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
+              },
+              "/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiANYC3C9D364": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "LambdaD247545B",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "LambdaRestApi687C4D83",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "LambdaRestApiAccount4E23441E": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "LambdaRestApi687C4D83",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "LambdaRestApiCloudWatchRole73082DF6",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "LambdaRestApiApiKeyB5CCCA11": {
+      "Properties": {
+        "Enabled": true,
+        "Name": "cancellation-api-key-PROD",
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "LambdaRestApi687C4D83",
+            },
+            "StageName": {
+              "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
+    },
+    "LambdaRestApiCloudWatchRole73082DF6": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "LambdaRestApiDeployment9531908975dcbf1d29a41e2fd69094785cc6b755": {
+      "DependsOn": [
+        "LambdaRestApiproxyANY486C4D1F",
+        "LambdaRestApiproxy22103CFD",
+        "LambdaRestApiANYC3C9D364",
+        "LambdaRestApiexplorerproxyGET6B3C3EF0",
+        "LambdaRestApiexplorerproxyF0E4BDBC",
+        "LambdaRestApiexplorerGET0FD947E2",
+        "LambdaRestApiexplorer29DEFF5D",
+        "LambdaRestApiopenapijsonproxyGET992734B5",
+        "LambdaRestApiopenapijsonproxy47A1F813",
+        "LambdaRestApiopenapijsonGETA1FE48FD",
+        "LambdaRestApiopenapijson8A58BDBC",
+      ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
+      "Properties": {
+        "Description": "API Gateway created by CDK",
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "LambdaRestApiDeploymentStagePROD95065FBD": {
+      "DependsOn": [
+        "LambdaRestApiAccount4E23441E",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "LambdaRestApiDeployment9531908975dcbf1d29a41e2fd69094785cc6b755",
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+        "StageName": "PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "LambdaRestApiUsagePlanD8F7DB8D": {
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "LambdaRestApi687C4D83",
+            },
+            "Stage": {
+              "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
+            },
+            "Throttle": {},
+          },
+        ],
+        "Description": "REST endpoints for cancellation-api",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Throttle": {
+          "BurstLimit": 10,
+          "RateLimit": 20,
+        },
+        "UsagePlanName": "cancellation-api-PROD",
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
+    },
+    "LambdaRestApiUsagePlanUsagePlanKeyResourcecancellationapiPRODLambdaRestApiApiKeyE22AD43246EEB2E4": {
+      "Properties": {
+        "KeyId": {
+          "Ref": "LambdaRestApiApiKeyB5CCCA11",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "LambdaRestApiUsagePlanD8F7DB8D",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
+    },
+    "LambdaRestApiexplorer29DEFF5D": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "LambdaRestApi687C4D83",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "explorer",
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "LambdaRestApiexplorerGET0FD947E2": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "LambdaD247545B",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "LambdaRestApiexplorer29DEFF5D",
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "LambdaRestApiexplorerGETApiPermissionTestcancellationapiPRODLambdaRestApiF0E35FF7GETexplorerF9EB5F4F": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/test-invoke-stage/GET/explorer",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiexplorerGETApiPermissioncancellationapiPRODLambdaRestApiF0E35FF7GETexplorer1087D7D4": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/",
+              {
+                "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
+              },
+              "/GET/explorer",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiexplorerproxyF0E4BDBC": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "LambdaRestApiexplorer29DEFF5D",
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "LambdaRestApiexplorerproxyGET6B3C3EF0": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "LambdaD247545B",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "LambdaRestApiexplorerproxyF0E4BDBC",
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "LambdaRestApiexplorerproxyGETApiPermissionTestcancellationapiPRODLambdaRestApiF0E35FF7GETexplorerproxyA311DB01": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/test-invoke-stage/GET/explorer/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiexplorerproxyGETApiPermissioncancellationapiPRODLambdaRestApiF0E35FF7GETexplorerproxyB3B2DFD8": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/",
+              {
+                "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
+              },
+              "/GET/explorer/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiopenapijson8A58BDBC": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "LambdaRestApi687C4D83",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "openapi.json",
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "LambdaRestApiopenapijsonGETA1FE48FD": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "LambdaD247545B",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "LambdaRestApiopenapijson8A58BDBC",
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "LambdaRestApiopenapijsonGETApiPermissionTestcancellationapiPRODLambdaRestApiF0E35FF7GETopenapijson6DA89222": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/test-invoke-stage/GET/openapi.json",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiopenapijsonGETApiPermissioncancellationapiPRODLambdaRestApiF0E35FF7GETopenapijson70B49AC2": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/",
+              {
+                "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
+              },
+              "/GET/openapi.json",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiopenapijsonproxy47A1F813": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "LambdaRestApiopenapijson8A58BDBC",
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "LambdaRestApiopenapijsonproxyGET992734B5": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "LambdaD247545B",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "LambdaRestApiopenapijsonproxy47A1F813",
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "LambdaRestApiopenapijsonproxyGETApiPermissionTestcancellationapiPRODLambdaRestApiF0E35FF7GETopenapijsonproxyA7F9DD9A": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/test-invoke-stage/GET/openapi.json/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiopenapijsonproxyGETApiPermissioncancellationapiPRODLambdaRestApiF0E35FF7GETopenapijsonproxyD939DA89": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/",
+              {
+                "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
+              },
+              "/GET/openapi.json/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiproxy22103CFD": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "LambdaRestApi687C4D83",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "LambdaRestApiproxyANY486C4D1F": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "LambdaD247545B",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "LambdaRestApiproxy22103CFD",
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "LambdaRestApiproxyANYApiPermissionTestcancellationapiPRODLambdaRestApiF0E35FF7ANYproxy0F8540F4": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/test-invoke-stage/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiproxyANYApiPermissioncancellationapiPRODLambdaRestApiF0E35FF7ANYproxyAE5CCD2E": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/",
+              {
+                "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
+              },
+              "/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaServiceRoleA8ED4D3B": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "cancellation-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "LambdaServiceRoleDefaultPolicyDAE46E21": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/PROD/cancellation-api/cancellation-api.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/cancellation-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/cancellation-api/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "LambdaServiceRoleDefaultPolicyDAE46E21",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
           },
         ],
       },

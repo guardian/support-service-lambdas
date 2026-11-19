@@ -188,15 +188,40 @@ importers:
 
   handlers/cancellation-api:
     dependencies:
+      '@hono/aws-lambda':
+        specifier: ^1.0.1
+        version: 1.0.1(hono@4.13.18)
+      '@hono/zod-openapi':
+        specifier: ^1.6.3
+        version: 1.6.3(hono@4.13.18)(zod@4.4.3)
+      hono:
+        specifier: ^4.13.18
+        version: 4.13.18
+      identity:
+        specifier: workspace:*
+        version: link:../../modules/identity
       logger:
         specifier: workspace:*
         version: link:../../modules/logger
+      routing:
+        specifier: workspace:*
+        version: link:../../modules/routing
       zod:
         specifier: 'catalog:'
         version: 4.4.3
       zuora:
         specifier: workspace:*
         version: link:../../modules/zuora
+    devDependencies:
+      '@hono/node-server':
+        specifier: ^2.1.8
+        version: 2.1.8(hono@4.13.18)
+      '@types/aws-lambda':
+        specifier: ^8.10.147
+        version: 8.10.161
+      tsx:
+        specifier: ^4.21.0
+        version: 4.22.4
 
   handlers/cancellations-bus: {}
 
@@ -1358,12 +1383,18 @@ importers:
 
   modules/routing:
     dependencies:
+      '@hono/zod-openapi':
+        specifier: ^1.6.3
+        version: 1.6.3(hono@4.13.18)(zod@4.4.3)
       aws:
         specifier: workspace:*
         version: link:../aws
       dayjs:
         specifier: ^1.11.13
         version: 1.11.21
+      hono:
+        specifier: ^4.13.18
+        version: 4.13.18
       logger:
         specifier: workspace:*
         version: link:../logger
@@ -1546,6 +1577,11 @@ packages:
   '@ampproject/remapping@2.3.0':
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
+
+  '@asteasolutions/zod-to-openapi@9.1.0':
+    resolution: {integrity: sha512-pLMeRgRYS7/vZIgAAkOe2P6+XGTifR1MT9pqDoxZ11EmcJJ+DPmdPqLN8ZZF4U8R9KHCCQCS9c2wtuE8wSrfkw==}
+    peerDependencies:
+      zod: ^4.0.0
 
   '@aws-cdk/asset-awscli-v1@2.2.263':
     resolution: {integrity: sha512-X9JvcJhYcb7PHs8R7m4zMablO5C9PGb/hYfLnxds9h/rKJu6l7MiXE/SabCibuehxPnuO/vk+sVVJiUWrccarQ==}
@@ -2582,6 +2618,31 @@ packages:
     peerDependencies:
       prettier: ^3.2.2
       tslib: ^2.6.2
+
+  '@hono/aws-lambda@1.0.1':
+    resolution: {integrity: sha512-JfP6JccWwUIvhMhUkPdVcheYK8YU81qEkEcjuHkeIju08sANJBg5sFyx3vhIlZP+n6qPh9QpF3TDen0hXy4/dw==}
+    engines: {node: '>=16.9.0'}
+    peerDependencies:
+      hono: '>=4.13.9 || ^5.0.0-0'
+
+  '@hono/node-server@2.1.8':
+    resolution: {integrity: sha512-jdf7FHh6A1lzjpHHQUgxsg2GeER2vMetnAOfeActzcoli6jamlK+NAwL6Dsr5Fl3BS3tYUQzCdtZjU8Qxv7bEA==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      hono: ^4 || ^5.0.0-0
+
+  '@hono/zod-openapi@1.6.3':
+    resolution: {integrity: sha512-VYR82Y60plu8g3pN60OUXMVKpmxh3R04Qs++3DY9vtwZ9/sA/BRY0PcRIR+Z37/3itWtM7pYwT9bKiH9JhqV6Q==}
+    engines: {node: '>=16.0.0'}
+    peerDependencies:
+      hono: '>=4.10.0'
+      zod: ^4.0.0
+
+  '@hono/zod-validator@0.9.1':
+    resolution: {integrity: sha512-iiv6w0qrIc0arfvCtUqBWsvl4fXjzaTcQcCJTTtCnkawF9HHGE+KjEl0ox3gQJ6rKZEgE3mLExlQCF72M+mNuw==}
+    peerDependencies:
+      hono: '>=4.11.2'
+      zod: ^3.25.0 || ^4.0.0
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -4791,6 +4852,10 @@ packages:
   header-case@1.0.1:
     resolution: {integrity: sha512-i0q9mkOeSuhXw6bGgiQCCBgY/jlZuV/7dZXyZ9c6LcBrqwvT8eT719E9uxE5LiZftdl+z81Ugbg/VvXV4OJOeQ==}
 
+  hono@4.13.18:
+    resolution: {integrity: sha512-H9q/E1XizaWstJxUW881dmLxEj+t/TrGGnyxINkm4+sK0qUwsMtFdo2BWI9Vs3cIS19MU6b6iCijoUoEf4f3DA==}
+    engines: {node: '>=16.9.0'}
+
   hosted-git-info@2.8.9:
     resolution: {integrity: sha512-mxIDAb9Lsm6DoOJ7xH+5+X4y1LU/4Hi50L9C5sIswK3JzULS4bwk1FvjdBgvYR4bzT4tuUQiC15FE2f5HbLvYw==}
 
@@ -5658,6 +5723,9 @@ packages:
 
   openapi-sampler@1.7.4:
     resolution: {integrity: sha512-CKS/rd5ucPCuEDbJnjGDXZTsuGWcmv53aCmQx7soZlPEONUGN4af0/dY5+THRFZraSEjeA78nlfzdFswC/N5SA==}
+
+  openapi3-ts@4.6.2:
+    resolution: {integrity: sha512-gyyil3DweqhXiEhTqtAs9wwRLfWHmetwhI4kmM5Rn0d6gtmK863Ki7qqbQnp9+Wwlqoe3B1LFWj7kMp5ctE4rQ==}
 
   optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
@@ -6690,6 +6758,11 @@ packages:
     engines: {node: '>= 14.6'}
     hasBin: true
 
+  yaml@2.9.1:
+    resolution: {integrity: sha512-3NxN8+78OdzbT7C/WjGsyfPAtJaN3FNDsWxv7Y7mcDsT/oOmgW8BpyQQFFBnvZE3j9Y2Sdz1ULFLezL7Eb2yFw==}
+    engines: {node: '>= 14.6'}
+    hasBin: true
+
   yargs-parser@20.2.9:
     resolution: {integrity: sha512-y11nGElTIV+CT3Zv9t7VKl+Q3hTQoT9a1Qzezhhl6Rp21gJ/IVTW7Z3y9EWXhuUBC2Shnf+DX0antecpAwSP8w==}
     engines: {node: '>=10'}
@@ -6723,6 +6796,11 @@ snapshots:
     dependencies:
       '@jridgewell/gen-mapping': 0.3.13
       '@jridgewell/trace-mapping': 0.3.31
+
+  '@asteasolutions/zod-to-openapi@9.1.0(zod@4.4.3)':
+    dependencies:
+      openapi3-ts: 4.6.2
+      zod: 4.4.3
 
   '@aws-cdk/asset-awscli-v1@2.2.263': {}
 
@@ -8210,6 +8288,27 @@ snapshots:
     dependencies:
       prettier: 3.8.3
       tslib: 2.8.1
+
+  '@hono/aws-lambda@1.0.1(hono@4.13.18)':
+    dependencies:
+      hono: 4.13.18
+
+  '@hono/node-server@2.1.8(hono@4.13.18)':
+    dependencies:
+      hono: 4.13.18
+
+  '@hono/zod-openapi@1.6.3(hono@4.13.18)(zod@4.4.3)':
+    dependencies:
+      '@asteasolutions/zod-to-openapi': 9.1.0(zod@4.4.3)
+      '@hono/zod-validator': 0.9.1(hono@4.13.18)(zod@4.4.3)
+      hono: 4.13.18
+      openapi3-ts: 4.6.2
+      zod: 4.4.3
+
+  '@hono/zod-validator@0.9.1(hono@4.13.18)(zod@4.4.3)':
+    dependencies:
+      hono: 4.13.18
+      zod: 4.4.3
 
   '@humanfs/core@0.19.1': {}
 
@@ -11000,6 +11099,8 @@ snapshots:
       no-case: 2.3.2
       upper-case: 1.1.3
 
+  hono@4.13.18: {}
+
   hosted-git-info@2.8.9: {}
 
   hosted-git-info@7.0.2:
@@ -12166,6 +12267,10 @@ snapshots:
       '@types/json-schema': 7.0.15
       fast-xml-parser: 5.8.0
       json-pointer: 0.6.2
+
+  openapi3-ts@4.6.2:
+    dependencies:
+      yaml: 2.9.1
 
   optionator@0.9.4:
     dependencies:
@@ -13364,6 +13469,8 @@ snapshots:
   yaml@1.10.3: {}
 
   yaml@2.9.0: {}
+
+  yaml@2.9.1: {}
 
   yargs-parser@20.2.9: {}
 

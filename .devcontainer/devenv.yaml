@@ -2,7 +2,7 @@
 # Edit this file to configure your project's devcontainer
 # and then run `devenv generate` to create the devcontainer.json files
 
-name: "support-service-lambdas"
+name: 'support-service-lambdas'
 
 # Modules: Built-in functionality
 # - mise: Install and configure mise for dev tools management (https://mise.jdx.dev/)
@@ -19,9 +19,8 @@ modules:
   - github-copilot
 
 # Optional: Ports to forward
-# forwardPorts:
-#   - 8080  # same port on host and container
-#   - "8000:9000"  # hostPort:containerPort
+forwardPorts:
+  - 8787
 
 # Optional: Mount directories from host to container
 # mounts:
@@ -51,7 +50,7 @@ postCreateCommand:
   # step below so the pnpm shim is also exposed on IntelliJ's non-login PATH. The
   # version is read from package.json (single source of truth), stripping any
   # "+sha" suffix.
-  - cmd: "mise use -g pnpm@$(mise exec -- node -p 'require(\"./package.json\").packageManager.split(\"@\")[1].split(\"+\")[0]')"
+  - cmd: 'mise use -g pnpm@$(mise exec -- node -p ''require("./package.json").packageManager.split("@")[1].split("+")[0]'')'
     logLine: 'mise_use_pnpm'
     workingDirectory: '.'
   # The IntelliJ backend (and IDE-launched processes like test runners) use a
