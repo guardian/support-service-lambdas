@@ -16,6 +16,8 @@ export type CancellationOrderInput = {
 	cancellationEffectiveDate: Dayjs;
 	// set on the cancelled subscription version by the same order
 	cancellationReasons?: CancellationReasonCustomFields;
+	// defaults to true
+	runBilling?: boolean;
 };
 
 const cancellationAction = (
@@ -52,7 +54,7 @@ export const buildCancellationOrderRequest = (
 		},
 	],
 	processingOptions: {
-		runBilling: true,
+		runBilling: input.runBilling ?? true,
 		collectPayment: false,
 	},
 });

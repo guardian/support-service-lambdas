@@ -68,6 +68,8 @@ const failedDirectDebitCancelledOn = async (
 			subscriptionNumber,
 			orderDate: today,
 			cancellationEffectiveDate: cancellationDate(today),
+			// the cancellation endpoint doesn't run billing
+			runBilling: false,
 		}),
 		z.object({ orderNumber: z.string() }),
 	);
@@ -104,10 +106,14 @@ const failedDirectDebitCancelledOn = async (
 };
 
 const backdate = async (zuoraClient: ZuoraClient, sub: TestSubscription) =>
-	backdateCancellation(zuoraClient, {
-		...sub,
-		cancellationReasons: await getCancellationReason(zuoraClient, sub),
-	});
+	backdateCancellation(
+		zuoraClient,
+		{
+			...sub,
+			cancellationReasons: await getCancellationReason(zuoraClient, sub),
+		},
+		dayjs(),
+	);
 
 const expectCancelledOnWithReasons = async (
 	zuoraClient: ZuoraClient,
@@ -160,10 +166,11 @@ describe('backdateCancellation', () => {
 				result.creditInvoiceId,
 			);
 			expect(
-				await backdateCancellation(zuoraClient, {
-					...sub,
-					cancellationReasons,
-				}),
+				await backdateCancellation(
+					zuoraClient,
+					{ ...sub, cancellationReasons },
+					dayjs(),
+				),
 			).toEqual(result);
 		},
 		testTimeoutMs,
@@ -179,10 +186,11 @@ describe('backdateCancellation', () => {
 			const reasons = await getCancellationReason(zuoraClient, sub);
 			await deleteOrder(zuoraClient, sub.cancellationOrderNumber);
 
-			const result = await backdateCancellation(zuoraClient, {
-				...sub,
-				cancellationReasons: reasons,
-			});
+			const result = await backdateCancellation(
+				zuoraClient,
+				{ ...sub, cancellationReasons: reasons },
+				dayjs(),
+			);
 
 			expect(result.backdated).toBe(true);
 			await expectCancelledOnWithReasons(zuoraClient, sub);

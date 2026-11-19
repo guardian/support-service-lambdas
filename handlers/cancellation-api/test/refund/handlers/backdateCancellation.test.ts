@@ -8,14 +8,14 @@ import {
 	orderExists,
 } from '../../../src/refund/zuora/cancellationOrder';
 import { getInvoiceServiceStartDate } from '../../../src/refund/zuora/invoiceServiceStartDate';
+import { generateAndPostNegativeInvoice } from '../../../src/refund/zuora/negativeInvoice';
 import { getSubscriptionCancellation } from '../../../src/refund/zuora/subscriptionCancellation';
-import { getSubscriptionInvoiceItems } from '../../../src/refund/zuora/subscriptionInvoiceItems';
 
 jest.mock('@modules/zuora/orders/orderRequests');
 jest.mock('../../../src/refund/zuora/cancellationOrder');
 jest.mock('../../../src/refund/zuora/invoiceServiceStartDate');
 jest.mock('../../../src/refund/zuora/subscriptionCancellation');
-jest.mock('../../../src/refund/zuora/subscriptionInvoiceItems');
+jest.mock('../../../src/refund/zuora/negativeInvoice');
 
 const zuoraClient = {} as ZuoraClient;
 const cancellationReasons = {
@@ -29,13 +29,7 @@ const input = {
 	unpaidInvoiceId: 'unpaid',
 	cancellationReasons,
 };
-const item = (InvoiceId: string, ChargeAmount: number) => ({
-	Id: `${InvoiceId}-item`,
-	InvoiceId,
-	ChargeDate: '2026-10-01T00:00:00.000Z',
-	ChargeAmount,
-	TaxAmount: 0,
-});
+const today = dayjs('2026-11-19');
 
 describe('backdateCancellation', () => {
 	beforeEach(() => {
@@ -43,9 +37,7 @@ describe('backdateCancellation', () => {
 		jest
 			.mocked(getInvoiceServiceStartDate)
 			.mockResolvedValue(dayjs('2026-10-01'));
-		jest
-			.mocked(getSubscriptionInvoiceItems)
-			.mockResolvedValue([item('unpaid', 12), item('credit', -12)]);
+		jest.mocked(generateAndPostNegativeInvoice).mockResolvedValue('credit');
 	});
 
 	it('deletes the order and re-cancels from the unpaid period start with the reasons', async () => {
@@ -55,12 +47,13 @@ describe('backdateCancellation', () => {
 			subscriptionEndDate: '2026-11-01',
 		});
 
-		expect(await backdateCancellation(zuoraClient, input)).toEqual({
+		expect(await backdateCancellation(zuoraClient, input, today)).toEqual({
 			backdated: true,
 			creditInvoiceId: 'credit',
 		});
 		expect(deleteOrder).toHaveBeenCalledWith(zuoraClient, 'O-00123456');
 		const [, request] = jest.mocked(executeOrderRequest).mock.calls[0] ?? [];
+		expect(request?.processingOptions.runBilling).toBe(false);
 		expect(request?.subscriptions[0]).toMatchObject({
 			subscriptionNumber: 'A-S00123456',
 			customFields: cancellationReasons,
@@ -78,7 +71,7 @@ describe('backdateCancellation', () => {
 			.mocked(getSubscriptionCancellation)
 			.mockResolvedValue({ status: 'Active' });
 
-		expect(await backdateCancellation(zuoraClient, input)).toEqual({
+		expect(await backdateCancellation(zuoraClient, input, today)).toEqual({
 			backdated: true,
 			creditInvoiceId: 'credit',
 		});
@@ -93,11 +86,16 @@ describe('backdateCancellation', () => {
 			subscriptionEndDate: '2026-10-01',
 		});
 
-		expect(await backdateCancellation(zuoraClient, input)).toEqual({
+		expect(await backdateCancellation(zuoraClient, input, today)).toEqual({
 			backdated: false,
 			creditInvoiceId: 'credit',
 		});
 		expect(deleteOrder).not.toHaveBeenCalled();
 		expect(executeOrderRequest).not.toHaveBeenCalled();
+		expect(generateAndPostNegativeInvoice).toHaveBeenCalledWith(zuoraClient, {
+			subscriptionNumber: 'A-S00123456',
+			targetDate: dayjs('2026-10-01'),
+			today,
+		});
 	});
 });
