@@ -102,7 +102,6 @@ export const acquisitionProductSchema = z.object({
 	similarProductsConsent: z.boolean().nullish(),
 	cmpConsentSnapshot: cmpConsentSnapshotSchema,
 	paypalTransactionId: nullableString,
-	clientTransactionId: nullableString,
 });
 
 export type AcquisitionProduct = z.infer<typeof acquisitionProductSchema>;

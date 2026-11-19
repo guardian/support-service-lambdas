@@ -210,7 +210,6 @@ function customAttributes(
 		);
 	}
 	add('paypal_transaction_id', acquisition.paypalTransactionId);
-	add('client_transaction_id', acquisition.clientTransactionId);
 
 	return attributes;
 }
