@@ -1,17 +1,10 @@
-import { maxBy, sum } from '@modules/arrayFunctions';
-import { fromPence, toPence } from './money';
+import { groupByToMap, maxBy, sum } from '@modules/arrayFunctions';
+import { fromPence } from './money';
+import type { SubscriptionInvoiceItem } from './subscriptionInvoiceItem';
 
 /**
  * The refund is the total (charges plus tax) of the invoice before the negative (cancellation) invoice.
  */
-
-export type RefundInvoiceItem = {
-	Id: string;
-	InvoiceId: string;
-	ChargeDate: string;
-	ChargeAmount: number;
-	TaxAmount: number;
-};
 
 export type RefundAmount = {
 	refundAmount: number;
@@ -22,7 +15,7 @@ type InvoiceGroup = {
 	invoiceId: string;
 	// an invoice is dated by its first item's ChargeDate
 	chargeDate: number;
-	items: RefundInvoiceItem[];
+	items: SubscriptionInvoiceItem[];
 };
 
 export function calculateRefundAmount({
@@ -30,7 +23,7 @@ export function calculateRefundAmount({
 	invoiceItems,
 }: {
 	negativeInvoiceId: string;
-	invoiceItems: RefundInvoiceItem[];
+	invoiceItems: SubscriptionInvoiceItem[];
 }): RefundAmount {
 	const invoices = groupByInvoice(invoiceItems);
 	const negativeInvoice = invoices.find(
@@ -57,7 +50,7 @@ export function calculateRefundAmount({
 
 	const refundPence = sum(
 		paidInvoice.items,
-		(item) => toPence(item.ChargeAmount) + toPence(item.TaxAmount),
+		(item) => item.ChargeAmount + item.TaxAmount,
 	);
 
 	return {
@@ -66,25 +59,24 @@ export function calculateRefundAmount({
 	};
 }
 
-function groupByInvoice(invoiceItems: RefundInvoiceItem[]): InvoiceGroup[] {
-	const groups = new Map<string, InvoiceGroup>();
-	for (const item of invoiceItems) {
-		const group = groups.get(item.InvoiceId);
-		if (group) {
-			group.items.push(item);
-		} else {
-			const chargeDate = Date.parse(item.ChargeDate);
-			if (Number.isNaN(chargeDate)) {
-				throw new Error(
-					`Invalid ChargeDate ${item.ChargeDate} on invoice item ${item.Id}`,
-				);
-			}
-			groups.set(item.InvoiceId, {
-				invoiceId: item.InvoiceId,
-				chargeDate,
-				items: [item],
-			});
-		}
+function groupByInvoice(
+	invoiceItems: SubscriptionInvoiceItem[],
+): InvoiceGroup[] {
+	return [...groupByToMap(invoiceItems, (item) => item.InvoiceId)].map(
+		([invoiceId, items]) => ({
+			invoiceId,
+			chargeDate: getChargeDate(items[0]!),
+			items,
+		}),
+	);
+}
+
+function getChargeDate(item: SubscriptionInvoiceItem): number {
+	const chargeDate = Date.parse(item.ChargeDate);
+	if (Number.isNaN(chargeDate)) {
+		throw new Error(
+			`Invalid ChargeDate ${item.ChargeDate} on invoice item ${item.Id}`,
+		);
 	}
-	return [...groups.values()];
+	return chargeDate;
 }

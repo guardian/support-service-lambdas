@@ -1,17 +1,28 @@
+import { z } from 'zod';
 import { calculateRefundAmount } from '../../src/refund/refundAmount';
-import amountChangedSub from './fixtures/amountChangedSubInvoiceItems.json';
-import discountedSub from './fixtures/discountedSubInvoiceItems.json';
-import standardSub from './fixtures/standardSubInvoiceItems.json';
-import switchedSub from './fixtures/switchedSubInvoiceItems.json';
-import taxedSub from './fixtures/taxedSubInvoiceItems.json';
-import taxedSwitchedSub from './fixtures/taxedSwitchedSubInvoiceItems.json';
+import { subscriptionInvoiceItemSchema } from '../../src/refund/subscriptionInvoiceItem';
+import amountChangedSubJson from './fixtures/amountChangedSubInvoiceItems.json';
+import discountedSubJson from './fixtures/discountedSubInvoiceItems.json';
+import standardSubJson from './fixtures/standardSubInvoiceItems.json';
+import switchedSubJson from './fixtures/switchedSubInvoiceItems.json';
+import taxedSubJson from './fixtures/taxedSubInvoiceItems.json';
+import taxedSwitchedSubJson from './fixtures/taxedSwitchedSubInvoiceItems.json';
+
+const parseItems = ({ records }: { records: unknown[] }) =>
+	z.array(subscriptionInvoiceItemSchema).parse(records);
+const amountChangedSub = parseItems(amountChangedSubJson);
+const discountedSub = parseItems(discountedSubJson);
+const standardSub = parseItems(standardSubJson);
+const switchedSub = parseItems(switchedSubJson);
+const taxedSub = parseItems(taxedSubJson);
+const taxedSwitchedSub = parseItems(taxedSwitchedSubJson);
 
 describe('calculateRefundAmount', () => {
 	it('refunds the paid invoice for a regular cancelled sub', () => {
 		expect(
 			calculateRefundAmount({
 				negativeInvoiceId: '8ad09b2186b5fdb50186b708669f2114',
-				invoiceItems: standardSub.records,
+				invoiceItems: standardSub,
 			}),
 		).toEqual({
 			refundAmount: 20,
@@ -23,7 +34,7 @@ describe('calculateRefundAmount', () => {
 		expect(
 			calculateRefundAmount({
 				negativeInvoiceId: '8ad0934e86a19cca0186a817d551251e',
-				invoiceItems: switchedSub.records,
+				invoiceItems: switchedSub,
 			}),
 		).toEqual({
 			refundAmount: 12.14,
@@ -35,7 +46,7 @@ describe('calculateRefundAmount', () => {
 		expect(
 			calculateRefundAmount({
 				negativeInvoiceId: '8ad08dc989e27bbe0189e40e61110aba',
-				invoiceItems: taxedSwitchedSub.records,
+				invoiceItems: taxedSwitchedSub,
 			}),
 		).toEqual({
 			refundAmount: 10,
@@ -47,7 +58,7 @@ describe('calculateRefundAmount', () => {
 		expect(
 			calculateRefundAmount({
 				negativeInvoiceId: '8a1289288995cad501899c3fa6b0501c',
-				invoiceItems: taxedSub.records,
+				invoiceItems: taxedSub,
 			}),
 		).toEqual({
 			refundAmount: 12,
@@ -59,7 +70,7 @@ describe('calculateRefundAmount', () => {
 		expect(
 			calculateRefundAmount({
 				negativeInvoiceId: '8ad09e2089cf509b0189cfabed210ab2',
-				invoiceItems: amountChangedSub.records,
+				invoiceItems: amountChangedSub,
 			}),
 		).toEqual({
 			refundAmount: 2.42,
@@ -71,7 +82,7 @@ describe('calculateRefundAmount', () => {
 		expect(
 			calculateRefundAmount({
 				negativeInvoiceId: '8a12867e90766628019084f204f15333',
-				invoiceItems: discountedSub.records,
+				invoiceItems: discountedSub,
 			}),
 		).toEqual({
 			refundAmount: 5,
@@ -84,18 +95,18 @@ describe('calculateRefundAmount', () => {
 		expect(
 			calculateRefundAmount({
 				negativeInvoiceId,
-				invoiceItems: [...amountChangedSub.records].reverse(),
+				invoiceItems: [...amountChangedSub].reverse(),
 			}),
 		).toEqual(
 			calculateRefundAmount({
 				negativeInvoiceId,
-				invoiceItems: amountChangedSub.records,
+				invoiceItems: amountChangedSub,
 			}),
 		);
 	});
 
 	it('ignores invoices charged after the negative invoice', () => {
-		const [paid, negative] = standardSub.records;
+		const [paid, negative] = standardSub;
 		const later = {
 			...paid!,
 			Id: 'later-item',
@@ -105,7 +116,7 @@ describe('calculateRefundAmount', () => {
 		expect(
 			calculateRefundAmount({
 				negativeInvoiceId: negative!.InvoiceId,
-				invoiceItems: [...standardSub.records, later],
+				invoiceItems: [...standardSub, later],
 			}).paidInvoiceId,
 		).toBe(paid!.InvoiceId);
 	});
@@ -114,13 +125,13 @@ describe('calculateRefundAmount', () => {
 		expect(() =>
 			calculateRefundAmount({
 				negativeInvoiceId: 'missing',
-				invoiceItems: standardSub.records,
+				invoiceItems: standardSub,
 			}),
 		).toThrow('Negative invoice missing is not in');
 	});
 
 	it('fails when there is no invoice before the negative invoice', () => {
-		const negativeOnly = standardSub.records.slice(1);
+		const negativeOnly = standardSub.slice(1);
 		expect(() =>
 			calculateRefundAmount({
 				negativeInvoiceId: negativeOnly[0]!.InvoiceId,
