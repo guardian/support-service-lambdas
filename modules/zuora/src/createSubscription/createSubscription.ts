@@ -198,6 +198,7 @@ export function getDeliveryFields(
 		case 'GuardianAdLite':
 		case 'PartnerMembership':
 		case 'PatronMembership':
+		case 'Patron':
 		case 'SupporterMembership':
 		case 'SupporterPlus':
 			return {

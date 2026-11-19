@@ -94,6 +94,7 @@ const customerFacingNameMapping: Record<ProductKey, string> = {
 	SupporterMembership: 'Supporter Membership',
 	PartnerMembership: 'Partner Membership',
 	PatronMembership: 'Patron Membership',
+	Patron: 'Patron',
 	GuardianPatron: 'Guardian Patron',
 	GuardianWeeklyDomestic: 'Guardian Weekly',
 	GuardianWeeklyRestOfWorld: 'Guardian Weekly',

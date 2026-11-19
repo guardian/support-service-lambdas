@@ -1,7 +1,7 @@
 import { arrayToObject, distinct } from '@modules/arrayFunctions';
 import { objectEntries } from '@modules/objectFunctions';
 import {
-	getZuoraProductKey,
+	getZuoraProductKeys,
 	isSupportedProduct,
 } from '@modules/product-catalog/zuoraToProductNameMappings';
 import type {
@@ -45,10 +45,12 @@ export const generateProductBillingPeriods = (catalog: ZuoraCatalog) => {
 	);
 	const zuoraBillingPeriods = arrayToObject(
 		supportedProducts.map((product) => {
-			const productName = getZuoraProductKey(product.name);
-			return {
-				[productName]: getBillingPeriodsForProduct(product.productRatePlans),
-			};
+			const billingPeriods = getBillingPeriodsForProduct(
+				product.productRatePlans,
+			);
+			return Object.fromEntries(
+				getZuoraProductKeys(product.name).map((key) => [key, billingPeriods]),
+			);
 		}),
 	);
 	const stripeBillingPeriods = arrayToObject(

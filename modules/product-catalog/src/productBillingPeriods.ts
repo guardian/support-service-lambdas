@@ -30,6 +30,7 @@ const productBillingPeriods = {
 	NewspaperVoucher: ['Month'],
 	OneTimeContribution: ['OneTime'],
 	PartnerMembership: ['Annual', 'Month'],
+	Patron: ['Annual', 'Month'],
 	PatronMembership: ['Annual', 'Month'],
 	SubscriptionCard: ['Month'],
 	SupporterMembership: ['Annual', 'Month'],
