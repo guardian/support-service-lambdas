@@ -264,7 +264,18 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
     }
   }
 
-  it should "retry a completed job with a non-terminal order status using the same idempotency key later" in {
+  it should "accept a completed job with a pending order result" in {
+    val backend = SttpBackendStub.synchronous.whenRequestMatchesPartial {
+      case submittedRequest: Request[_, _] if submittedRequest.method == Method.POST =>
+        Response.ok("""{"jobId":"job-1","success":true}""")
+      case statusRequest: Request[_, _] if statusRequest.method == Method.GET =>
+        Response.ok("""{"status":"Completed","errors":null,"result":{"status":"Pending"}}""")
+    }
+
+    createOrder(backend, new AtomicLong(0))(request) shouldBe Right(AsyncOrderResult(OrderStatus.Pending))
+  }
+
+  it should "retry a completed job without an order result using the same idempotency key later" in {
     val submissions = new AtomicInteger(0)
     val idempotencyKeys = ListBuffer.empty[String]
     val backend = SttpBackendStub.synchronous.whenRequestMatchesPartial {
@@ -273,14 +284,13 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
         idempotencyKeys += submittedRequest.headers.find(_.name.equalsIgnoreCase("Idempotency-Key")).get.value
         Response.ok("""{"jobId":"job-1","success":true}""")
       case statusRequest: Request[_, _] if statusRequest.method == Method.GET =>
-        Response.ok("""{"status":"Completed","errors":null,"result":{"status":"Pending"}}""")
+        Response.ok("""{"status":"Completed","errors":null,"result":null}""")
     }
 
     val firstResult = createOrder(backend, new AtomicLong(0))(request)
     val secondResult = createOrder(backend, new AtomicLong(0))(request)
 
-    firstResult.left.value.reason shouldBe
-      "Zuora order job job-1 completed without a successful order result: Pending"
+    firstResult.left.value.reason shouldBe "Zuora order job job-1 completed without an order result"
     secondResult shouldBe firstResult
     submissions.get() shouldBe 2
     idempotencyKeys.toList shouldBe List(idempotencyKey, idempotencyKey)
@@ -350,7 +360,7 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
     jobReads.get() shouldBe 2
   }
 
-  "waitForCompletion" should "fail when the job completes without a completed order" in {
+  "waitForCompletion" should "return a completed job with a non-failed order result" in {
     val result = waitFor(
       AsyncJobReport(
         status = AsyncJobStatus.Completed,
@@ -359,15 +369,13 @@ class ZuoraOrdersTest extends AnyFlatSpec with Matchers with EitherValues {
       ),
     )
 
-    result.left.value.reason shouldBe
-      "Zuora order job job-1 completed without a successful order result: Pending"
+    result shouldBe Right(AsyncOrderResult(OrderStatus.Pending))
   }
 
   it should "fail when the job completes without an order result" in {
     val result = waitFor(AsyncJobReport(AsyncJobStatus.Completed, None, None))
 
-    result.left.value.reason shouldBe
-      "Zuora order job job-1 completed without a successful order result: missing"
+    result.left.value.reason shouldBe "Zuora order job job-1 completed without an order result"
   }
 
   it should "return the job error when Zuora reports a failure" in {
