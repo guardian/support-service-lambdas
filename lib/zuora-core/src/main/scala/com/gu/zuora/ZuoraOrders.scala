@@ -205,9 +205,6 @@ object ZuoraOrders extends LazyLogging {
             case Right(AsyncJobReport(AsyncJobStatus.Failed, errors, _)) =>
               val reason = s"Zuora order job $jobId failed: ${errors.getOrElse("no reason returned")}"
               Left(ConfirmedOrderFailure(reason))
-            case Right(AsyncJobReport(AsyncJobStatus.Completed, _, Some(result)))
-                if result.status == OrderStatus.Completed =>
-              Right(result)
             case Right(
                   AsyncJobReport(
                     AsyncJobStatus.Completed,
@@ -220,11 +217,12 @@ object ZuoraOrders extends LazyLogging {
                   s"Zuora order job $jobId was unsuccessful - final status ${result.status.value}",
                 ),
               )
-            case Right(AsyncJobReport(AsyncJobStatus.Completed, _, result)) =>
-              val orderStatus = result.map(_.status.value).getOrElse("missing")
+            case Right(AsyncJobReport(AsyncJobStatus.Completed, _, Some(result))) =>
+              Right(result)
+            case Right(AsyncJobReport(AsyncJobStatus.Completed, _, None)) =>
               Left(
                 RetryIdempotencyKeyLater(
-                  s"Zuora order job $jobId completed without a successful order result: $orderStatus",
+                  s"Zuora order job $jobId completed without an order result",
                 ),
               )
             case Right(AsyncJobReport(AsyncJobStatus.Processing, _, _)) =>
