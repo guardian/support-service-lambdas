@@ -6,9 +6,19 @@ import { PermanentError } from '../permanentError';
 import type { SubscriptionInvoiceItem } from '../subscriptionInvoiceItem';
 import { subscriptionInvoiceItemSchema } from '../subscriptionInvoiceItem';
 
+// The toPence function in subscriptionInvoiceItemSchema throws a PermanentError on a fraction of a penny.
+// However if this occurs withing the zuoraClient it will be wrapped in a standard retryable error
+// which we don't want, so parse it with a looser schema initially and then the stricter schema afterwards.
 const invoiceItemQueryResponseSchema = z.object({
 	done: z.boolean(),
-	records: z.array(subscriptionInvoiceItemSchema).default([]),
+	records: z
+		.array(
+			subscriptionInvoiceItemSchema.extend({
+				ChargeAmount: z.number(),
+				TaxAmount: z.number(),
+			}),
+		)
+		.default([]),
 });
 
 export async function getSubscriptionInvoiceItems(
@@ -26,5 +36,5 @@ export async function getSubscriptionInvoiceItems(
 			`Too many invoice items for subscription ${subscriptionNumber}`,
 		);
 	}
-	return records;
+	return records.map((record) => subscriptionInvoiceItemSchema.parse(record));
 }
