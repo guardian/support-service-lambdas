@@ -327,7 +327,7 @@ lazy val `credit-processor` = library(
   ),
 )
   .settings(
-    libraryDependencies ++= Seq(parallelCollections) ++ logging,
+    libraryDependencies ++= Seq(parallelCollections, scalatest) ++ logging,
     dependencyOverrides ++= jacksonDependencies,
   )
 

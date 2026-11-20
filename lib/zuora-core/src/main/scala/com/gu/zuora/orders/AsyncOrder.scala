@@ -22,35 +22,42 @@ object AsyncJobSubmission {
   }
 }
 
-case class AsyncJobReport(
-    status: AsyncJobStatus,
-    errors: Option[String],
-    result: Option[AsyncOrderResult],
-)
+sealed trait AsyncJobReport
+
+object AsyncJobReport {
+  case object Processing extends AsyncJobReport
+  case class Failed(errors: Option[String]) extends AsyncJobReport
+  case class Completed(result: AsyncOrderResult) extends AsyncJobReport
+
+  implicit val decoder: Decoder[AsyncJobReport] = Decoder.instance { cursor =>
+    for {
+      status <- cursor.downField("status").as[String]
+      report <- status match {
+        case "Processing" => Right(Processing)
+        case "Failed" =>
+          cursor.downField("errors").as[Option[String]].map(Failed.apply)
+        case "Completed" =>
+          for {
+            maybeResult <- cursor.downField("result").as[Option[AsyncOrderResult]]
+            result <- maybeResult.toRight(
+              DecodingFailure(
+                "Zuora completed the async job without returning an order result",
+                cursor.history,
+              ),
+            )
+          } yield Completed(result)
+        case other =>
+          Left(DecodingFailure(s"Unknown Zuora async job status: $other", cursor.history))
+      }
+    } yield report
+  }
+}
 
 case class AsyncOrderResult(status: OrderStatus)
 
-sealed trait AsyncJobStatus {
-  def value: String
-}
-
-object AsyncJobStatus {
-  case object Processing extends AsyncJobStatus {
-    override val value: String = "Processing"
-  }
-  case object Failed extends AsyncJobStatus {
-    override val value: String = "Failed"
-  }
-  case object Completed extends AsyncJobStatus {
-    override val value: String = "Completed"
-  }
-
-  implicit val decoder: Decoder[AsyncJobStatus] = Decoder.decodeString.emap {
-    case Processing.value => Right(Processing)
-    case Failed.value => Right(Failed)
-    case Completed.value => Right(Completed)
-    case status => Left(s"Unknown Zuora async job status: $status")
-  }
+object AsyncOrderResult {
+  implicit val decoder: Decoder[AsyncOrderResult] =
+    Decoder.forProduct1("status")(AsyncOrderResult.apply)
 }
 
 sealed trait OrderStatus {
