@@ -1,3 +1,4 @@
+import { handle } from '@hono/aws-lambda';
 import { OpenAPIHono, type RouteConfig, z } from '@hono/zod-openapi';
 import type { Context, Next } from 'hono';
 import { html } from 'hono/html';
@@ -6,6 +7,9 @@ import { ValidationError } from '@modules/errors';
 import { getCallerInfo } from '@modules/logger/getCallerInfo';
 import { logger } from '@modules/logger/logger';
 import { createHttpLogging } from './httpLogging';
+import type { HandlerEnv } from './lambdaHandler';
+import { LambdaHandlerWithServices } from './lambdaHandler';
+import type { ApiEnv } from './withJsonHandler';
 
 /**
  * standard openapi info object
@@ -47,25 +51,63 @@ type JsonRoute = RouteConfig & {
 	};
 };
 
+type ApiRoutes<Services> = ReadonlyArray<{
+	route: JsonRoute;
+	handler: (
+		context: Context<ApiEnv<Services>, never, never>,
+		next: Next,
+	) => unknown;
+}>;
+
+export type ApiDefinition<Services> = {
+	info: ApiInfo;
+	routes: ApiRoutes<Services>;
+};
+
+type HttpHandler = ReturnType<typeof handle>;
+
+export function ApiGatewayHandler<Config, Services>(
+	configSchema: z.ZodType<Config>,
+	definition: ApiDefinition<Services>,
+	buildServices: (env: HandlerEnv<Config>) => Promise<Services>,
+) {
+	return LambdaHandlerWithServices(
+		configSchema,
+		(
+			event: Parameters<HttpHandler>[0],
+			httpHandler: HttpHandler,
+			context?: Parameters<HttpHandler>[1],
+		) => httpHandler(event, context),
+		async (env) => {
+			const services = await buildServices(env);
+			const app = createSrApi(definition, services);
+			return handle(app);
+		},
+		getCallerInfo(),
+	);
+}
+
 /**
  * create an api in your lambda and get all the standard openapi and error functionality
  *
- * @param info useful information for the lambda's open API/swagger page
- * @param routes endpoint definitions to register
+ * @param definition API metadata and static endpoint definitions
+ * @param services resolved services made available through request context
  * @param stage defaults to process.env.STAGE; explorer credentials persist only in CODE
  */
-export function createSrApi<
-	const Routes extends ReadonlyArray<
-		Parameters<OpenAPIHono['openapiRoutes']>[0][number] & { route: JsonRoute }
-	>,
->(info: ApiInfo, routes: Routes, stage = process.env.STAGE) {
+export function createSrApi<Services>(
+	definition: ApiDefinition<Services>,
+	services: Services,
+	stage = process.env.STAGE,
+) {
+	const { info } = definition;
+	const routes = definition.routes;
 	const callerInfo = getCallerInfo();
 
 	/*
 	 * Log and return schema-validation failures.
 	 * https://github.com/honojs/middleware/tree/main/packages/zod-openapi#a-dry-approach-to-handling-validation-errors
 	 */
-	const app = new OpenAPIHono({
+	const app = new OpenAPIHono<ApiEnv<Services>>({
 		defaultHook: (result, c) => {
 			if (!result.success) {
 				logger.log('Invalid API request', result.error.issues);
@@ -74,9 +116,13 @@ export function createSrApi<
 			return undefined;
 		},
 	});
+	app.use('*', async (c, next) => {
+		c.set('services', services);
+		await next();
+	});
 
 	/*
-	 * Create standard logging and context cleanup for API endpoints.
+	 * Create standard request/response logging for API endpoints.
 	 */
 	const apiMiddleware = createHttpLogging(callerInfo);
 

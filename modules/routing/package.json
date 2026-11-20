@@ -15,12 +15,14 @@
     "zod": "catalog:",
     "dayjs": "^1.11.13",
     "hono": "^4.13.18",
+    "@hono/aws-lambda": "^1.0.1",
     "@hono/zod-openapi": "^1.6.3",
     "aws": "workspace:*",
     "logger": "workspace:*",
     "zuora": "workspace:*"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.147"
+    "@types/aws-lambda": "^8.10.147",
+    "@hono/node-server": "^2.1.8"
   }
 }

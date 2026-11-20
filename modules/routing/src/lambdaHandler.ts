@@ -27,7 +27,7 @@ function summariseServices(services: unknown): unknown {
  *
  * This means your handler function is cleaner and also easier to unit test.
  *
- * @param configSchema schema for the SSM config for this lambda
+ * @param configSchema schema for the SSM config for this lambda; z.void() skips SSM loading
  * @param handler
  * @constructor
  */
@@ -58,7 +58,7 @@ export function LambdaHandler<ConfigType, E>(
  *
  * This means your handler function is cleaner and also easier to unit test.
  *
- * @param configSchema schema for the SSM config for this lambda
+ * @param configSchema schema for the SSM config for this lambda; z.void() skips SSM loading
  * @param handler
  * @param buildServices build anything you want to be created on cold start only, it will be passed into your handler.
  *   May be async (e.g. to await a client that reads secrets) - it is fully
@@ -66,9 +66,15 @@ export function LambdaHandler<ConfigType, E>(
  *   any other cold-start failure (retried on the next invocation).
  * @constructor
  */
-export function LambdaHandlerWithServices<ConfigType, Services, E>(
+export function LambdaHandlerWithServices<
+	ConfigType,
+	Services,
+	E,
+	Result,
+	Args extends unknown[] = [],
+>(
 	configSchema: z.ZodType<ConfigType>,
-	handler: (event: E, services: Services) => Promise<void>,
+	handler: (event: E, services: Services, ...args: Args) => Promise<Result>,
 	buildServices: (handlerProps: HandlerEnv<ConfigType>) => Promise<Services>,
 	callerInfo: string,
 ) {
@@ -90,8 +96,12 @@ export function LambdaHandlerWithServices<ConfigType, Services, E>(
 		true,
 	);
 
-	return async (event: E) => {
-		return await handlerWithContextClearance(event, await handlerProps.get());
+	return async (event: E, ...args: Args): Promise<Result> => {
+		return await handlerWithContextClearance(
+			event,
+			await handlerProps.get(),
+			...args,
+		);
 	};
 }
 
@@ -104,15 +114,16 @@ export function LambdaHandlerWithServices<ConfigType, Services, E>(
  * exported for Router-based lambdas (which don't go through that wrapper) to
  * call directly.
  *
- * @param configSchema schema for the SSM config for this lambda
+ * @param configSchema schema for the SSM config for this lambda; z.void() skips SSM loading
  */
 export async function loadHandlerEnv<ConfigType>(
 	configSchema: z.ZodType<ConfigType>,
 ): Promise<HandlerEnv<ConfigType>> {
 	const stage = stageFromEnvironment();
-	const stack = getEnv('STACK');
-	const app = getEnv('APP');
-	const config = await loadConfig(stage, stack, app, configSchema);
+	const config =
+		configSchema.type === 'void'
+			? configSchema.parse(undefined)
+			: await loadConfig(stage, getEnv('STACK'), getEnv('APP'), configSchema);
 	return { now: () => dayjs(), stage, config };
 }
 

@@ -41,6 +41,25 @@ afterEach(() => {
 });
 
 describe('LambdaHandlerWithServices', () => {
+	it('skips app-specific configuration for a void schema', async () => {
+		delete process.env.STACK;
+		delete process.env.APP;
+		const buildServices = jest.fn(() => Promise.resolve({}));
+		const lambda = LambdaHandlerWithServices(
+			z.void(),
+			() => Promise.resolve(),
+			buildServices,
+			'test caller',
+		);
+
+		await lambda({});
+
+		expect(loadConfig).not.toHaveBeenCalled();
+		expect(buildServices).toHaveBeenCalledWith(
+			expect.objectContaining({ stage: 'CODE', config: undefined }),
+		);
+	});
+
 	it('does not do any cold start work until the first invocation', () => {
 		const buildServices = jest.fn(() => Promise.resolve({}));
 		LambdaHandlerWithServices(
@@ -80,6 +99,25 @@ describe('LambdaHandlerWithServices', () => {
 			[{ id: 3 }, services],
 		]);
 		expect(handler.mock.calls[0]?.[1]).toBe(handler.mock.calls[2]?.[1]);
+	});
+
+	it('returns the handler result and forwards invocation context', async () => {
+		const result = { statusCode: 200, body: '{"ok":true}' };
+		const context = { awsRequestId: 'request-id' };
+		const services = { client: 'the client' };
+		const handler = jest.fn<
+			Promise<typeof result>,
+			[string, typeof services, typeof context]
+		>(() => Promise.resolve(result));
+		const lambda = LambdaHandlerWithServices(
+			configSchema,
+			handler,
+			() => Promise.resolve(services),
+			'test caller',
+		);
+
+		await expect(lambda('event', context)).resolves.toBe(result);
+		expect(handler).toHaveBeenCalledWith('event', services, context);
 	});
 
 	it('passes handler errors out to the lambda runtime without redoing the cold start', async () => {

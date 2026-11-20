@@ -188,12 +188,15 @@ importers:
 
   handlers/cancellation-api:
     dependencies:
-      '@hono/aws-lambda':
-        specifier: ^1.0.1
-        version: 1.0.1(hono@4.13.18)
       '@hono/zod-openapi':
         specifier: ^1.6.3
         version: 1.6.3(hono@4.13.18)(zod@4.4.3)
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.21
+      guardian-subscription:
+        specifier: workspace:*
+        version: link:../../modules/guardian-subscription
       hono:
         specifier: ^4.13.18
         version: 4.13.18
@@ -203,6 +206,9 @@ importers:
       logger:
         specifier: workspace:*
         version: link:../../modules/logger
+      product-catalog:
+        specifier: workspace:*
+        version: link:../../modules/product-catalog
       routing:
         specifier: workspace:*
         version: link:../../modules/routing
@@ -212,10 +218,10 @@ importers:
       zuora:
         specifier: workspace:*
         version: link:../../modules/zuora
+      zuora-catalog:
+        specifier: workspace:*
+        version: link:../../modules/zuora-catalog
     devDependencies:
-      '@hono/node-server':
-        specifier: ^2.1.8
-        version: 2.1.8(hono@4.13.18)
       '@types/aws-lambda':
         specifier: ^8.10.147
         version: 8.10.161
@@ -1383,6 +1389,9 @@ importers:
 
   modules/routing:
     dependencies:
+      '@hono/aws-lambda':
+        specifier: ^1.0.1
+        version: 1.0.1(hono@4.13.18)
       '@hono/zod-openapi':
         specifier: ^1.6.3
         version: 1.6.3(hono@4.13.18)(zod@4.4.3)
@@ -1405,6 +1414,9 @@ importers:
         specifier: workspace:*
         version: link:../zuora
     devDependencies:
+      '@hono/node-server':
+        specifier: ^2.1.8
+        version: 2.1.8(hono@4.13.18)
       '@types/aws-lambda':
         specifier: ^8.10.147
         version: 8.10.161

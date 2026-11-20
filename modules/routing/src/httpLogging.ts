@@ -56,35 +56,30 @@ async function bodyForLogging(message: Request | Response): Promise<unknown> {
 /*
  * Logs HTTP input before validation can reject it, then logs the final
  * response after downstream validation and error handling.
- * Keeps logger context available through the response trace and clears it afterwards.
  */
 export function createHttpLogging(callerInfo: string) {
-	return logger.withContext(
-		async (c: Context, next: Next) => {
-			const request = redact({
-				pathParameters: c.req.param(),
-				queryStringParameters: c.req.queries(),
-				headers: omitBoringHeaders(c.req.raw.headers),
-				body: await bodyForLogging(c.req.raw),
-			});
-			await logger.wrapFn(
-				async (_request: unknown, c: Context, next: Next) => {
-					await next();
-					return redact({
-						statusCode: c.res.status,
-						headers: omitBoringHeaders(c.res.headers),
-						body: await bodyForLogging(c.res),
-					});
-				},
-				'httpRequest',
-				callerInfo,
-				([request, c]) => ({
-					logOnEntryAndExit: `${c.req.method} ${c.req.path}`,
-					logOnEntryOnly: [request],
-				}),
-			)(request, c, next);
-		},
-		undefined,
-		true,
-	);
+	return async (c: Context, next: Next) => {
+		const request = redact({
+			pathParameters: c.req.param(),
+			queryStringParameters: c.req.queries(),
+			headers: omitBoringHeaders(c.req.raw.headers),
+			body: await bodyForLogging(c.req.raw),
+		});
+		await logger.wrapFn(
+			async (_request: unknown, c: Context, next: Next) => {
+				await next();
+				return redact({
+					statusCode: c.res.status,
+					headers: omitBoringHeaders(c.res.headers),
+					body: await bodyForLogging(c.res),
+				});
+			},
+			'httpRequest',
+			callerInfo,
+			([request, c]) => ({
+				logOnEntryAndExit: `${c.req.method} ${c.req.path}`,
+				logOnEntryOnly: [request],
+			}),
+		)(request, c, next);
+	};
 }
