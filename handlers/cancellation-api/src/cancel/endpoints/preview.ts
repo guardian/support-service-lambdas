@@ -66,11 +66,7 @@ export function createPreviewEndpoint(services: CancellationServices) {
 	return defineOpenAPIRoute({
 		route,
 		handler: withJsonHandler(
-			withSubscription(
-				services.zuoraClient,
-				previewHandler(services),
-				({ params }) => params.subscriptionNumber,
-			),
+			withSubscription(services.zuoraClient, previewHandler(services)),
 		),
 	});
 }

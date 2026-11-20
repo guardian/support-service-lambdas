@@ -22,7 +22,10 @@ export type SubscriptionAndAccount = {
 };
 
 export function withSubscription<
-	Request extends { headers: { 'x-identity-id'?: string } },
+	Request extends {
+		params: { subscriptionNumber: string };
+		headers: { 'x-identity-id'?: string };
+	},
 	Result,
 >(
 	zuoraClient: ZuoraClient,
@@ -30,12 +33,11 @@ export function withSubscription<
 		request: Request,
 		context: SubscriptionAndAccount,
 	) => Promise<Result>,
-	extractSubscriptionNumber: (request: Request) => string,
 ): (request: Request) => Promise<Result> {
 	return async (request) => {
 		const context = await loadMmaSubscription(
 			zuoraClient,
-			extractSubscriptionNumber(request),
+			request.params.subscriptionNumber,
 			request.headers,
 		);
 		return handler(request, context);
