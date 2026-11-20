@@ -176,6 +176,27 @@ describe('createNewSubscriptionEndpoint', () => {
 		expect(mockExecuteOrderRequest).toHaveBeenCalledTimes(0);
 	});
 
+	it('rejects a promotion for a different country in the same region', async () => {
+		const promoCode = 'OVERSEAS_OFFER';
+		mockGetPromotion.mockResolvedValue({
+			promoCode,
+			name: 'Overseas offer',
+			campaignCode: 'CAMPAIGN',
+			appliesTo: {
+				productRatePlanIds: ['8ad08cbd8586721c01858804e3275376'],
+				countries: ['JE'],
+			},
+			startTimestamp: '2024-01-01',
+			discount: { amount: 10, durationMonths: 3 },
+		});
+
+		const result = await handler(makeEvent({ ...baseRequestBody, promoCode }));
+
+		expect(result.statusCode).toBe(400);
+		expect(result.body).toContain('not valid for country GB');
+		expect(mockExecuteOrderRequest).not.toHaveBeenCalled();
+	});
+
 	it('returns 400 with error message when promotion is expired', async () => {
 		const expiredPromo = {
 			promoCode: 'EXPIRED_PROMO',

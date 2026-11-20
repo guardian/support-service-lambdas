@@ -41,6 +41,7 @@ async function fetchPromotionAndAppliedPromotionFromPromoCode(
 		appliedPromotion: {
 			promoCode,
 			supportRegionId,
+			countryCode: supportRegionCountry,
 		},
 		promotion,
 	};
