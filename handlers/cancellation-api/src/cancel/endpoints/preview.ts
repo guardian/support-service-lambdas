@@ -29,7 +29,7 @@ export function previewHandler(services: CancellationServices) {
 		const guardianSubscription =
 			services.subscriptionParser.toGuardianSubscription(subscription);
 		const currentSubscription =
-			SubscriptionFilter.activeCurrentSubscriptionFilter(
+			SubscriptionFilter.activeNonEndedSubscriptionFilter(
 				services.now(),
 			).filterSubscription(guardianSubscription);
 		const { ratePlan } =
@@ -70,7 +70,6 @@ export function createPreviewEndpoint(services: CancellationServices) {
 				services.zuoraClient,
 				previewHandler(services),
 				({ params }) => params.subscriptionNumber,
-				'current-segment',
 			),
 		),
 	});

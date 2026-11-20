@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import { z } from 'zod';
 import { ZuoraError } from '@modules/zuora/errors/zuoraError';
 import {
 	cancelSubscription,
@@ -154,45 +153,6 @@ describe('subscription', () => {
 	});
 
 	describe('getSubscription', () => {
-		it.each(['last-segment', 'current-segment'] as const)(
-			'requests %s using the default response schema',
-			async (chargeDetail) => {
-				mockZuoraClient.get = jest.fn().mockResolvedValue({});
-
-				await getSubscription(
-					mockZuoraClient,
-					'SUB-12345',
-					undefined,
-					chargeDetail,
-				);
-
-				expect(mockZuoraClient.get).toHaveBeenCalledWith(
-					'v1/subscriptions/SUB-12345',
-					zuoraSubscriptionSchema,
-					new URLSearchParams({ 'charge-detail': chargeDetail }),
-				);
-			},
-		);
-
-		it('supports charge detail with a custom response schema', async () => {
-			const schema = z.object({ id: z.string() });
-			mockZuoraClient.get = jest.fn().mockResolvedValue({ id: 'abc123' });
-
-			const result = await getSubscription(
-				mockZuoraClient,
-				'SUB-12345',
-				schema,
-				'current-segment',
-			);
-
-			expect(result).toEqual({ id: 'abc123' });
-			expect(mockZuoraClient.get).toHaveBeenCalledWith(
-				'v1/subscriptions/SUB-12345',
-				schema,
-				new URLSearchParams({ 'charge-detail': 'current-segment' }),
-			);
-		});
-
 		it('should get subscription by subscription number', async () => {
 			const mockSubscription: ZuoraSubscription = {
 				id: 'abc123',

@@ -74,7 +74,7 @@ describe('mmaIdentityCheck', () => {
 		);
 	});
 
-	it('passes raw Zuora data to the business handler using the requested charge detail', async () => {
+	it('passes the loaded Zuora subscription and account to the business handler', async () => {
 		const get = mockLookup();
 		const request = {
 			headers: { 'x-identity-id': account.basicInfo.identityId },
@@ -85,7 +85,6 @@ describe('mmaIdentityCheck', () => {
 			zuoraClient,
 			handler,
 			(parsed: typeof request) => parsed.params.subscriptionNumber,
-			'last-segment',
 		);
 
 		await expect(wrapped(request)).resolves.toBe('business result');
@@ -94,7 +93,6 @@ describe('mmaIdentityCheck', () => {
 			1,
 			`v1/subscriptions/${subscription.subscriptionNumber}`,
 			zuoraSubscriptionSchema,
-			new URLSearchParams({ 'charge-detail': 'last-segment' }),
 		);
 	});
 

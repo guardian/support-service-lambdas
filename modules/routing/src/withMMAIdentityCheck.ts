@@ -9,10 +9,7 @@ import type { Handler, RequestContext } from '@modules/routing/router';
 import type { Stage } from '@modules/stage';
 import { getAccount } from '@modules/zuora/account';
 import { ZuoraError } from '@modules/zuora/errors/zuoraError';
-import {
-	type ChargeDetail,
-	getSubscription,
-} from '@modules/zuora/subscription';
+import { getSubscription } from '@modules/zuora/subscription';
 import type {
 	ZuoraAccount,
 	ZuoraSubscription,
@@ -34,14 +31,12 @@ export function withSubscription<
 		context: SubscriptionAndAccount,
 	) => Promise<Result>,
 	extractSubscriptionNumber: (request: Request) => string,
-	chargeDetail: ChargeDetail,
 ): (request: Request) => Promise<Result> {
 	return async (request) => {
 		const context = await loadMmaSubscription(
 			zuoraClient,
 			extractSubscriptionNumber(request),
 			request.headers,
-			chargeDetail,
 		);
 		return handler(request, context);
 	};
@@ -68,15 +63,12 @@ async function loadMmaSubscription(
 	zuoraClient: ZuoraClient,
 	subscriptionNumber: string,
 	headers: APIGatewayProxyEventHeaders,
-	chargeDetail?: ChargeDetail,
 ): Promise<SubscriptionAndAccount> {
 	logger.mutableAddContext(subscriptionNumber);
 	logger.log('Getting the subscription and account details from Zuora');
 	const subscription = await getSubscription(
 		zuoraClient,
 		subscriptionNumber,
-		undefined,
-		chargeDetail,
 	).catch((error: unknown) => {
 		if (
 			error instanceof ZuoraError &&

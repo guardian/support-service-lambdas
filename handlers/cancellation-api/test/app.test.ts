@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import { GuardianSubscriptionParser } from '@modules/guardian-subscription/guardianSubscriptionParser';
 import { logger } from '@modules/logger/logger';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import { createSrApi } from '@modules/routing/apiGatewayHandler';
 import { ZuoraError } from '@modules/zuora/errors/zuoraError';
@@ -80,12 +81,82 @@ describe('Cancellation API preview', () => {
 				1,
 				'v1/subscriptions/A-S12345678',
 				zuoraSubscriptionSchema,
-				new URLSearchParams({ 'charge-detail': 'current-segment' }),
 			);
 			expect(get).toHaveBeenCalledTimes(2);
 			expect(mutate).not.toHaveBeenCalled();
 		},
 	);
+
+	it('previews an RC with a pending amount change', async () => {
+		const subscription = zuoraSubscriptionSchema.parse(subscriptionJson);
+		for (const ratePlan of subscription.ratePlans) {
+			for (const charge of ratePlan.ratePlanCharges) {
+				charge.effectiveStartDate = new Date('2024-07-10');
+				charge.price = 75;
+			}
+		}
+		jest
+			.spyOn(zuoraClient, 'get')
+			.mockResolvedValueOnce(subscription)
+			.mockResolvedValueOnce(account);
+
+		const response = await preview();
+
+		expect(response.status).toBe(200);
+		expect(await response.json()).toEqual({
+			type: 'immediate',
+			willRefund: false,
+		});
+	});
+
+	it('rejects a pending subscription card as unsupported rather than failing conversion', async () => {
+		const product = getIfDefined(
+			catalog.products.find(({ name }) => name === 'Newspaper Digital Voucher'),
+			'Subscription card product missing from catalogue fixture',
+		);
+		const plan = getIfDefined(
+			product.productRatePlans.find(({ name }) => name === 'Sixday+'),
+			'Sixday+ plan missing from catalogue fixture',
+		);
+		const subscription = zuoraSubscriptionSchema.parse(subscriptionJson);
+		const templatePlan = getIfDefined(
+			subscription.ratePlans[0],
+			'Missing template plan',
+		);
+		const templateCharge = getIfDefined(
+			templatePlan.ratePlanCharges[0],
+			'Missing template charge',
+		);
+		subscription.customerAcceptanceDate = new Date('2024-06-15');
+		subscription.ratePlans = [
+			{
+				...templatePlan,
+				productId: product.id,
+				productName: product.name,
+				productRatePlanId: plan.id,
+				ratePlanName: plan.name,
+				ratePlanCharges: plan.productRatePlanCharges.map((charge) => ({
+					...templateCharge,
+					id: charge.id,
+					productRatePlanChargeId: charge.id,
+					name: charge.name,
+					effectiveStartDate: subscription.customerAcceptanceDate,
+				})),
+			},
+		];
+		jest
+			.spyOn(zuoraClient, 'get')
+			.mockResolvedValueOnce(subscription)
+			.mockResolvedValueOnce(account);
+
+		const response = await preview();
+
+		expect(response.status).toBe(400);
+		expect(await response.json()).toEqual({
+			message:
+				'Cancellation preview is currently only supported for recurring contributions',
+		});
+	});
 
 	it.each(['missing', 'unowned'])(
 		'returns the original identity error for a %s subscription before conversion',

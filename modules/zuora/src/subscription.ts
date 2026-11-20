@@ -45,35 +45,25 @@ export const cancelSubscription = async (
 	});
 };
 
-export type ChargeDetail = 'last-segment' | 'current-segment'; // all-segments uses a different response format
-
 export async function getSubscription(
 	zuoraClient: ZuoraClient,
 	subscriptionNumber: string,
-	schema?: undefined,
-	chargeDetail?: ChargeDetail,
 ): Promise<ZuoraSubscription>;
 export async function getSubscription<T extends z.ZodType>(
 	zuoraClient: ZuoraClient,
 	subscriptionNumber: string,
 	schema: T,
-	chargeDetail?: ChargeDetail,
 ): Promise<z.infer<T>>;
 export async function getSubscription<T extends z.ZodType>(
 	zuoraClient: ZuoraClient,
 	subscriptionNumber: string,
 	schema?: T,
-	chargeDetail?: ChargeDetail,
 ): Promise<ZuoraSubscription | z.infer<T>> {
 	const path = `v1/subscriptions/${subscriptionNumber}`;
-	const responseSchema = schema ?? zuoraSubscriptionSchema;
-	const params =
-		chargeDetail === undefined
-			? undefined
-			: new URLSearchParams({ 'charge-detail': chargeDetail });
-	return params === undefined
-		? zuoraClient.get(path, responseSchema)
-		: zuoraClient.get(path, responseSchema, params);
+	if (schema === undefined) {
+		return zuoraClient.get(path, zuoraSubscriptionSchema);
+	}
+	return zuoraClient.get(path, schema);
 }
 
 export async function getSubscriptionsByAccountNumber(
