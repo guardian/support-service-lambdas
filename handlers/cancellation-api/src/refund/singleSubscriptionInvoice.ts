@@ -1,28 +1,29 @@
 import { PermanentError } from './permanentError';
-import { groupByInvoice, invoiceTotalPence } from './refundAmount';
 import type { SubscriptionInvoiceItem } from './subscriptionInvoiceItem';
 
 /**
  * Invoices are generated per account, so an account with more than one subscription can have their charges on the
- * same invoice. Zeroing such an invoice would also credit the other subscription's charges, so it is left for manual
+ * same invoice. Zeroing such an invoice would also adjust the other subscription's items, so it is left for manual
  * balancing.
  */
 export function checkInvoiceOnlyForSubscription({
 	invoiceId,
-	invoiceAmountPence,
+	invoiceItemIds,
 	subscriptionInvoiceItems,
 }: {
 	invoiceId: string;
-	invoiceAmountPence: number;
+	invoiceItemIds: string[];
 	subscriptionInvoiceItems: SubscriptionInvoiceItem[];
 }): void {
-	const invoice = groupByInvoice(subscriptionInvoiceItems).find(
-		(group) => group.invoiceId === invoiceId,
+	const subscriptionItemIds = new Set(
+		subscriptionInvoiceItems.map((item) => item.Id),
 	);
-	const subscriptionTotalPence = invoice ? invoiceTotalPence(invoice) : 0;
-	if (subscriptionTotalPence !== invoiceAmountPence) {
+	const otherItemIds = invoiceItemIds.filter(
+		(id) => !subscriptionItemIds.has(id),
+	);
+	if (otherItemIds.length > 0) {
 		throw new PermanentError(
-			`Invoice ${invoiceId} includes other subscriptions' charges (subscription total ${subscriptionTotalPence}p, invoice amount ${invoiceAmountPence}p), so it can't be balanced automatically`,
+			`Invoice ${invoiceId} has items ${otherItemIds.join(', ')} from other subscriptions, so it can't be balanced automatically`,
 		);
 	}
 }

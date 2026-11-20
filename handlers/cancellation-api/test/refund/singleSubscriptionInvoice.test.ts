@@ -2,42 +2,32 @@ import { PermanentError } from '../../src/refund/permanentError';
 import { checkInvoiceOnlyForSubscription } from '../../src/refund/singleSubscriptionInvoice';
 import { subscriptionInvoiceItemSchema } from '../../src/refund/subscriptionInvoiceItem';
 
-const item = (InvoiceId: string, ChargeAmount: number, TaxAmount = 0) =>
+const item = (Id: string) =>
 	subscriptionInvoiceItemSchema.parse({
-		Id: `${InvoiceId}-${ChargeAmount}`,
-		InvoiceId,
+		Id,
+		InvoiceId: 'inv1',
 		ChargeDate: '2026-11-20T10:00:00.000Z',
-		ChargeAmount,
-		TaxAmount,
+		ChargeAmount: 100,
+		TaxAmount: 0,
 	});
 
-const subscriptionInvoiceItems = [item('inv1', 90, 10), item('inv2', -100)];
+const subscriptionInvoiceItems = [item('item1'), item('item2')];
 
-test('passes when the subscription has every charge on the invoice', () => {
+test('passes when every invoice item belongs to the subscription', () => {
 	expect(() =>
 		checkInvoiceOnlyForSubscription({
 			invoiceId: 'inv1',
-			invoiceAmountPence: 10000,
+			invoiceItemIds: ['item1', 'item2'],
 			subscriptionInvoiceItems,
 		}),
 	).not.toThrow();
 });
 
-test('throws PermanentError when the invoice includes another subscription', () => {
+test('throws PermanentError when the invoice has items from another subscription, even if it nets to zero', () => {
 	expect(() =>
 		checkInvoiceOnlyForSubscription({
-			invoiceId: 'inv2',
-			invoiceAmountPence: 5000,
-			subscriptionInvoiceItems,
-		}),
-	).toThrow(PermanentError);
-});
-
-test('throws PermanentError when the invoice has none of the subscription charges', () => {
-	expect(() =>
-		checkInvoiceOnlyForSubscription({
-			invoiceId: 'inv3',
-			invoiceAmountPence: 15000,
+			invoiceId: 'inv1',
+			invoiceItemIds: ['item1', 'item2', 'otherCharge', 'otherCredit'],
 			subscriptionInvoiceItems,
 		}),
 	).toThrow(PermanentError);
