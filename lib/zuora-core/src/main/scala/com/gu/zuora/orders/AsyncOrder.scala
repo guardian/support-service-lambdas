@@ -30,20 +30,26 @@ object AsyncJobReport {
   case class Completed(result: AsyncOrderResult) extends AsyncJobReport
 
   implicit val decoder: Decoder[AsyncJobReport] = Decoder.instance { cursor =>
-    cursor.downField("status").as[String].flatMap {
-      case "Processing" => Right(Processing)
-      case "Failed" => cursor.downField("errors").as[Option[String]].map(Failed.apply)
-      case "Completed" =>
-        cursor
-          .downField("result")
-          .as[Option[AsyncOrderResult]]
-          .flatMap {
-            case Some(result) => Right(Completed(result))
-            case None =>
-              Left(DecodingFailure("Zuora completed the async job without returning an order result", cursor.history))
-          }
-      case status => Left(DecodingFailure(s"Unknown Zuora async job status: $status", cursor.history))
-    }
+    for {
+      status <- cursor.downField("status").as[String]
+      report <- status match {
+        case "Processing" => Right(Processing)
+        case "Failed" =>
+          cursor.downField("errors").as[Option[String]].map(Failed.apply)
+        case "Completed" =>
+          for {
+            maybeResult <- cursor.downField("result").as[Option[AsyncOrderResult]]
+            result <- maybeResult.toRight(
+              DecodingFailure(
+                "Zuora completed the async job without returning an order result",
+                cursor.history,
+              ),
+            )
+          } yield Completed(result)
+        case other =>
+          Left(DecodingFailure(s"Unknown Zuora async job status: $other", cursor.history))
+      }
+    } yield report
   }
 }
 
