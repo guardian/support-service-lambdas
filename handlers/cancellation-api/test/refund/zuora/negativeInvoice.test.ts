@@ -23,11 +23,15 @@ const input = {
 	today,
 };
 
-const invoiceItem = (InvoiceId: string, ChargeAmount: number) =>
+const invoiceItem = (
+	InvoiceId: string,
+	ChargeAmount: number,
+	ChargeDate: string,
+) =>
 	subscriptionInvoiceItemSchema.parse({
 		Id: `${InvoiceId}-item`,
 		InvoiceId,
-		ChargeDate: '2026-11-18T10:00:00.000+00:00',
+		ChargeDate,
 		ChargeAmount,
 		TaxAmount: 0,
 	});
@@ -39,8 +43,8 @@ describe('generateAndPostNegativeInvoice', () => {
 		jest
 			.mocked(getSubscriptionInvoiceItems)
 			.mockResolvedValue([
-				invoiceItem('paid', 10),
-				invoiceItem('negative', -10),
+				invoiceItem('paid', 10, '2026-11-01T10:00:00.000+00:00'),
+				invoiceItem('negative', -10, '2026-11-18T10:00:00.000+00:00'),
 			]);
 	});
 
@@ -69,13 +73,13 @@ describe('generateAndPostNegativeInvoice', () => {
 		expect(postInvoice).not.toHaveBeenCalled();
 	});
 
-	it('fails if the generated invoice is not the latest negative invoice', async () => {
+	it('fails if the generated invoice is not the latest invoice', async () => {
 		jest.mocked(generateInvoice).mockResolvedValue('paid');
 
 		await expect(
 			generateAndPostNegativeInvoice(zuoraClient, input),
 		).rejects.toThrow(
-			'Generated invoice paid is not the latest negative invoice negative',
+			'Generated invoice paid is not the latest invoice negative',
 		);
 		expect(postInvoice).not.toHaveBeenCalled();
 	});
