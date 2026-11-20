@@ -3,6 +3,7 @@ import { GuardianSubscriptionParser } from '@modules/guardian-subscription/guard
 import { logger } from '@modules/logger/logger';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import { createSrApi } from '@modules/routing/apiGatewayHandler';
+import { ZuoraError } from '@modules/zuora/errors/zuoraError';
 import {
 	zuoraAccountSchema,
 	zuoraSubscriptionSchema,
@@ -30,6 +31,11 @@ const zuoraClient = new ZuoraClient({
 const now = jest.fn(() => dayjs('2024-06-10'));
 const app = createSrApi(api, { zuoraClient, subscriptionParser, now }, 'CODE');
 const headers = { 'Content-Type': 'application/json' };
+const missingSubscription = new ZuoraError(
+	'Cannot find entity by key',
+	{ status: 200, responseBody: {}, responseHeaders: {} },
+	[{ code: '50000040', message: 'Cannot find entity by key' }],
+);
 
 function preview(identityId?: string) {
 	return app.request('/subscriptions/A-S12345678/preview-cancellation', {
@@ -81,20 +87,29 @@ describe('Cancellation API preview', () => {
 		},
 	);
 
-	it('rejects another identity before converting the subscription', async () => {
-		jest
-			.spyOn(zuoraClient, 'get')
-			.mockResolvedValueOnce(zuoraSubscriptionSchema.parse(subscriptionJson))
-			.mockResolvedValueOnce(account);
-		const convert = jest.spyOn(subscriptionParser, 'toGuardianSubscription');
-		const response = await preview('12345');
+	it.each(['missing', 'unowned'])(
+		'returns the original identity error for a %s subscription before conversion',
+		async (scenario) => {
+			const get = jest.spyOn(zuoraClient, 'get');
+			if (scenario === 'missing') {
+				get.mockRejectedValueOnce(missingSubscription);
+			} else {
+				get
+					.mockResolvedValueOnce(
+						zuoraSubscriptionSchema.parse(subscriptionJson),
+					)
+					.mockResolvedValueOnce(account);
+			}
+			const convert = jest.spyOn(subscriptionParser, 'toGuardianSubscription');
+			const response = await preview('12345');
 
-		expect(response.status).toBe(400);
-		expect(await response.json()).toEqual({
-			message: 'Subscription does not belong to identity ID 12345',
-		});
-		expect(convert).not.toHaveBeenCalled();
-	});
+			expect(response.status).toBe(400);
+			expect(await response.json()).toEqual({
+				message: 'Subscription does not belong to identity ID 12345',
+			});
+			expect(convert).not.toHaveBeenCalled();
+		},
+	);
 
 	it.each([
 		{

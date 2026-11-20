@@ -8,6 +8,7 @@ import { logger } from '@modules/logger/logger';
 import type { Handler, RequestContext } from '@modules/routing/router';
 import type { Stage } from '@modules/stage';
 import { getAccount } from '@modules/zuora/account';
+import { ZuoraError } from '@modules/zuora/errors/zuoraError';
 import {
 	type ChargeDetail,
 	getSubscription,
@@ -63,12 +64,12 @@ export function assertIdentityIdMatches(
 	logger.log(`Subscription is owned by identity user ${identityIdFromRequest}`);
 }
 
-export async function loadMmaSubscription(
+async function loadMmaSubscription(
 	zuoraClient: ZuoraClient,
 	subscriptionNumber: string,
 	headers: APIGatewayProxyEventHeaders,
 	chargeDetail?: ChargeDetail,
-) {
+): Promise<SubscriptionAndAccount> {
 	logger.mutableAddContext(subscriptionNumber);
 	logger.log('Getting the subscription and account details from Zuora');
 	const subscription = await getSubscription(
@@ -76,7 +77,19 @@ export async function loadMmaSubscription(
 		subscriptionNumber,
 		undefined,
 		chargeDetail,
-	);
+	).catch((error: unknown) => {
+		if (
+			error instanceof ZuoraError &&
+			error.zuoraErrorDetails.length > 0 &&
+			error.zuoraErrorDetails.every(({ code }) => code === '50000040')
+		) {
+			logger.log('Subscription lookup did not find a subscription', error);
+			throw new ValidationError(
+				`Subscription does not belong to identity ID ${headers['x-identity-id']}`,
+			);
+		}
+		throw error;
+	});
 	const account = await getAccount(zuoraClient, subscription.accountNumber);
 	assertIdentityIdMatches(account, headers);
 	return { subscription, account };
