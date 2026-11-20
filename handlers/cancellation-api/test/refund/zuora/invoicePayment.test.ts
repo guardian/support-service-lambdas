@@ -1,5 +1,6 @@
 import { doQuery } from '@modules/zuora/query';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { PermanentError } from '../../../src/refund/permanentError';
 import { getLatestInvoicePayment } from '../../../src/refund/zuora/invoicePayment';
 
 jest.mock('@modules/zuora/query');
@@ -54,6 +55,22 @@ describe('getLatestInvoicePayment', () => {
 		expect(
 			await getLatestInvoicePayment(zuoraClient, 'invoice-1'),
 		).toBeUndefined();
+		expect(get).not.toHaveBeenCalled();
+	});
+
+	it('fails permanently without fetching a payment if there are more payments than one page', async () => {
+		jest.mocked(doQuery).mockResolvedValue({
+			done: false,
+			records: [
+				{ PaymentId: 'older', CreatedDate: '2026-10-01T10:00:00.000+00:00' },
+			],
+		});
+
+		await expect(
+			getLatestInvoicePayment(zuoraClient, 'invoice-1'),
+		).rejects.toThrow(
+			new PermanentError('Too many payments for invoice invoice-1'),
+		);
 		expect(get).not.toHaveBeenCalled();
 	});
 });
