@@ -15,7 +15,15 @@ export async function serveApiLocally<Config, Services>(
 		const env = await loadHandlerEnv(configSchema);
 		const app = createSrApi(api, await buildServices(env), env.stage);
 		return serve(
-			{ fetch: app.fetch, hostname: '127.0.0.1', port: 8787 },
+			{
+				fetch: logger.withContext(
+					async (...args: Parameters<typeof app.fetch>) => app.fetch(...args),
+					undefined,
+					true,
+				),
+				hostname: '127.0.0.1',
+				port: 8787,
+			},
 			(info) => {
 				logger.log(`${api.info.title}: http://localhost:${info.port}/explorer`);
 			},
