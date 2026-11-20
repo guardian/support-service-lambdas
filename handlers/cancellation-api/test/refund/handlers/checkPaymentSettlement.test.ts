@@ -38,7 +38,12 @@ describe('checkPaymentSettlement', () => {
 				subscriptionNumber,
 				paidInvoiceId: 'paid',
 			}),
-		).toEqual({ invoiceId: 'paid', status: 'Pending', paymentId: 'payment-1' });
+		).toEqual({
+			invoiceId: 'paid',
+			status: 'Pending',
+			paymentId: 'payment-1',
+			paymentAmount: 12,
+		});
 		expect(getSubscriptionInvoiceItems).not.toHaveBeenCalled();
 		expect(getLatestInvoicePayment).toHaveBeenCalledWith(zuoraClient, 'paid');
 	});
@@ -60,6 +65,7 @@ describe('checkPaymentSettlement', () => {
 			invoiceId: 'current',
 			status: 'Pending',
 			paymentId: 'payment-1',
+			paymentAmount: 12,
 		});
 	});
 });
