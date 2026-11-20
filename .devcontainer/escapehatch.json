@@ -1,0 +1,4 @@
+{
+  "workspaceMount": "type=volume,source=support-service-lambdas,target=/workspace",
+  "workspaceFolder": "/workspace"
+}
