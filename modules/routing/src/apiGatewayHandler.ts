@@ -75,10 +75,14 @@ export function ApiGatewayHandler<Config, Services>(
 		configSchema,
 		(
 			event: Parameters<HttpHandler>[0],
-			services: Services,
+			httpHandler: HttpHandler,
 			context?: Parameters<HttpHandler>[1],
-		) => handle(createSrApi(definition, services))(event, context),
-		buildServices,
+		) => httpHandler(event, context),
+		async (env) => {
+			const services = await buildServices(env);
+			const app = createSrApi(definition, services);
+			return handle(app);
+		},
 		getCallerInfo(),
 	);
 }

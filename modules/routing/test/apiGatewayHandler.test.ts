@@ -1,5 +1,11 @@
 import { handle } from '@hono/aws-lambda';
-import { createRoute, defineOpenAPIRoute, z } from '@hono/zod-openapi';
+import type * as HonoZodOpenapi from '@hono/zod-openapi';
+import {
+	createRoute,
+	defineOpenAPIRoute,
+	OpenAPIHono,
+	z,
+} from '@hono/zod-openapi';
 import { loadConfig } from '@modules/aws/appConfig';
 import { logger } from '@modules/logger/logger';
 import {
@@ -12,6 +18,16 @@ import { withJsonHandler } from '../src/withJsonHandler';
 jest.mock('@hono/aws-lambda', () => ({
 	handle: jest.fn(() => mockHttpHandler),
 }));
+jest.mock('@hono/zod-openapi', () => {
+	const actual = jest.requireActual<typeof HonoZodOpenapi>('@hono/zod-openapi');
+	return {
+		...actual,
+		OpenAPIHono: jest.fn(
+			(...args: ConstructorParameters<typeof actual.OpenAPIHono>) =>
+				new actual.OpenAPIHono(...args),
+		),
+	};
+});
 jest.mock('@modules/aws/appConfig', () => ({ loadConfig: jest.fn() }));
 
 type HttpHandler = ReturnType<typeof handle>;
@@ -62,7 +78,7 @@ it('creates a test/local app with supplied services without running cold-start s
 	expect(handle).not.toHaveBeenCalled();
 });
 
-it('reuses and summarises services, forwarding responses/context and cleaning up after failure', async () => {
+it('reuses the app and adapter, forwarding responses/context and cleaning up after failure', async () => {
 	jest.replaceProperty(process, 'env', { ...process.env, STAGE: 'CODE' });
 	jest.spyOn(logger, 'error').mockImplementation(() => undefined);
 	let logs = '';
@@ -108,6 +124,8 @@ it('reuses and summarises services, forwarding responses/context and cleaning up
 	};
 
 	expect(buildServices).not.toHaveBeenCalled();
+	expect(OpenAPIHono).not.toHaveBeenCalled();
+	expect(handle).not.toHaveBeenCalled();
 	await expect(handler(event, context)).rejects.toThrow('request failed');
 	await expect(handler(event, context)).resolves.toBe(result);
 	await expect(handler(event, context)).resolves.toBe(result);
@@ -116,8 +134,10 @@ it('reuses and summarises services, forwarding responses/context and cleaning up
 	);
 
 	expect(buildServices).toHaveBeenCalledTimes(1);
+	expect(OpenAPIHono).toHaveBeenCalledTimes(1);
+	expect(handle).toHaveBeenCalledTimes(1);
+	expect(mockHttpHandler).toHaveBeenCalledTimes(3);
 	expect(mockHttpHandler).toHaveBeenLastCalledWith(event, context);
 	expect(logs).toContain('TRACE lambdaColdStart EXIT');
-	expect(logs).toContain('["value"]');
 	expect(logs).not.toContain('injected service');
 });
