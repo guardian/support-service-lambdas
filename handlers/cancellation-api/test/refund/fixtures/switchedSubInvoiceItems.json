@@ -1,0 +1,90 @@
+{
+	"size": 6,
+	"records": [
+		{
+			"ChargeDate": "2023-02-14T22:03:32.000+00:00",
+			"UnitPrice": 20,
+			"SubscriptionNumber": "A-S00492211",
+			"ProductName": "Contributor",
+			"ServiceEndDate": "2023-03-13",
+			"ServiceStartDate": "2023-02-14",
+			"ChargeName": "Contribution",
+			"Id": "8ad081c6864e90cc018651f4568e06b0",
+			"InvoiceId": "8ad081c6864e90cc018651f4568306af",
+			"ChargeAmount": 20,
+			"TaxAmount": 0,
+			"ChargeNumber": "C-00819652"
+		},
+		{
+			"ChargeDate": "2023-03-03T15:23:15.000+00:00",
+			"UnitPrice": 20,
+			"SubscriptionNumber": "A-S00492211",
+			"ProductName": "Contributor",
+			"ServiceEndDate": "2023-03-13",
+			"ServiceStartDate": "2023-03-03",
+			"ChargeName": "Contribution",
+			"Id": "8ad08d2986a18ded0186a811f7f16e02",
+			"InvoiceId": "8ad08d2986a18ded0186a811f7e56e01",
+			"ChargeAmount": -7.86,
+			"TaxAmount": 0,
+			"ChargeNumber": "C-00819652"
+		},
+		{
+			"ChargeDate": "2023-03-03T15:23:15.000+00:00",
+			"UnitPrice": 20,
+			"SubscriptionNumber": "A-S00492211",
+			"ProductName": "Supporter Plus",
+			"ServiceEndDate": "2023-04-02",
+			"ServiceStartDate": "2023-03-03",
+			"ChargeName": "Supporter Plus Monthly",
+			"Id": "8ad08d2986a18ded0186a811f7f16e03",
+			"InvoiceId": "8ad08d2986a18ded0186a811f7e56e01",
+			"ChargeAmount": 20,
+			"TaxAmount": 0,
+			"ChargeNumber": "C-00834502"
+		},
+		{
+			"ChargeDate": "2023-03-03T15:29:39.000+00:00",
+			"UnitPrice": 20,
+			"SubscriptionNumber": "A-S00492211",
+			"ProductName": "Supporter Plus",
+			"ServiceEndDate": "2023-04-02",
+			"ServiceStartDate": "2023-03-03",
+			"ChargeName": "Supporter Plus Monthly",
+			"Id": "8ad0934e86a19cca0186a817d564251f",
+			"InvoiceId": "8ad0934e86a19cca0186a817d551251e",
+			"ChargeAmount": -20,
+			"TaxAmount": 0,
+			"ChargeNumber": "C-00834502"
+		},
+		{
+			"ChargeDate": "2023-03-03T15:29:39.000+00:00",
+			"UnitPrice": 20,
+			"SubscriptionNumber": "A-S00492211",
+			"ProductName": "Contributor",
+			"ServiceEndDate": "2023-03-13",
+			"ServiceStartDate": "2023-02-14",
+			"ChargeName": "Contribution",
+			"Id": "8ad0934e86a19cca0186a817d5642520",
+			"InvoiceId": "8ad0934e86a19cca0186a817d551251e",
+			"ChargeAmount": -20,
+			"TaxAmount": 0,
+			"ChargeNumber": "C-00819652"
+		},
+		{
+			"ChargeDate": "2023-03-03T15:29:39.000+00:00",
+			"UnitPrice": 20,
+			"SubscriptionNumber": "A-S00492211",
+			"ProductName": "Contributor",
+			"ServiceEndDate": "2023-03-13",
+			"ServiceStartDate": "2023-03-03",
+			"ChargeName": "Contribution",
+			"Id": "8ad0934e86a19cca0186a817d5642521",
+			"InvoiceId": "8ad0934e86a19cca0186a817d551251e",
+			"ChargeAmount": 7.86,
+			"TaxAmount": 0,
+			"ChargeNumber": "C-00819652"
+		}
+	],
+	"done": true
+}
