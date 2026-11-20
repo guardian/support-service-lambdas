@@ -162,6 +162,7 @@ export class CancellationApi extends SrStack {
 					step('SendPaymentFailedEmail', sendPaymentFailedEmailLambda).next(
 						succeed,
 					),
+					{ comment: 'Yes' },
 				)
 				.otherwise(succeed),
 		);
@@ -177,6 +178,7 @@ export class CancellationApi extends SrStack {
 					Wait.jsonata(this, 'Wait 24h', {
 						time: WaitTime.duration(Duration.hours(24)),
 					}).next(checkPaymentSettlement),
+					{ comment: 'Pending' },
 				)
 				.when(
 					when('$states.input.status = "Failed"'),
@@ -184,12 +186,14 @@ export class CancellationApi extends SrStack {
 						.next(step('BackdateCancellation', backdateCancellationLambda))
 						.next(step('CalculateCredit', calculateRefundLambda))
 						.next(balanceInvoices),
+					{ comment: 'Failed' },
 				)
 				.when(
 					when(
 						'$states.input.status = "Settled" and $states.input.refundDue = true',
 					),
 					step('CreateRefund', createRefundLambda).next(balanceInvoices),
+					{ comment: 'Settled, refund due' },
 				)
 				.otherwise(succeed),
 		);
@@ -201,7 +205,9 @@ export class CancellationApi extends SrStack {
 			.next(step('CalculateRefund', calculateRefundLambda))
 			.next(
 				Choice.jsonata(this, 'Zero amount?')
-					.when(when('$states.input.refundAmount = 0'), balanceInvoices)
+					.when(when('$states.input.refundAmount = 0'), balanceInvoices, {
+						comment: 'Yes',
+					})
 					.otherwise(checkPaymentSettlement),
 			);
 
@@ -214,7 +220,9 @@ export class CancellationApi extends SrStack {
 			timeout: Duration.days(14),
 			definitionBody: DefinitionBody.fromChainable(
 				Choice.jsonata(this, 'Refund due?')
-					.when(when('$states.input.refundDue = true'), refundDue)
+					.when(when('$states.input.refundDue = true'), refundDue, {
+						comment: 'Yes',
+					})
 					.otherwise(checkPaymentSettlement),
 			),
 		});
