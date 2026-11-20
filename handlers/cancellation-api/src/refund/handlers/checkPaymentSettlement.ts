@@ -25,6 +25,7 @@ export type CheckPaymentSettlementOutput = {
 	invoiceId: string;
 	status: PaymentSettlementStatus;
 	paymentId?: string;
+	paymentAmount?: number;
 };
 
 export const handler = async (
@@ -58,5 +59,10 @@ export async function checkPaymentSettlement(
 		balance,
 		latestPayment,
 	});
-	return { invoiceId, status, paymentId: latestPayment?.id };
+	return {
+		invoiceId,
+		status,
+		paymentId: latestPayment?.id,
+		paymentAmount: latestPayment?.amount,
+	};
 }

@@ -6,6 +6,7 @@ import {
 	subscriptionNumberSchema,
 } from '@modules/zuora/identifiers';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { toPence } from '../money';
 import { PermanentError } from '../permanentError';
 import { getRefundKey } from '../refundKey';
 import {
@@ -18,7 +19,10 @@ import { parseStepInput } from './stepInput';
 const createRefundInputSchema = z.object({
 	subscriptionNumber: subscriptionNumberSchema,
 	cancellationOrderNumber: orderNumberSchema,
-	paymentId: z.string().min(1),
+	invoiceId: z.string().min(1),
+	// missing if the invoice was paid from credit balance
+	paymentId: z.string().min(1).optional(),
+	paymentAmount: z.number().optional(),
 	refundAmount: z.number().positive(),
 });
 
@@ -33,10 +37,38 @@ export const handler = async (event: unknown): Promise<CreateRefundOutput> => {
 	const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 	return createRefund(zuoraClient, {
 		refundKey: getRefundKey(input),
-		paymentId: input.paymentId,
+		paymentId: getRefundablePaymentId(input),
 		refundAmount: input.refundAmount,
 	});
 };
+
+/**
+ * An invoice paid wholly or partly from credit balance can't be refunded in full to the payment
+ * method, so this fails rather than asking Zuora to refund more than was paid.
+ */
+export function getRefundablePaymentId({
+	invoiceId,
+	paymentId,
+	paymentAmount,
+	refundAmount,
+}: {
+	invoiceId: string;
+	paymentId?: string;
+	paymentAmount?: number;
+	refundAmount: number;
+}): string {
+	if (paymentId === undefined || paymentAmount === undefined) {
+		throw new PermanentError(
+			`Invoice ${invoiceId} has no payment to refund, it may have been paid from credit balance`,
+		);
+	}
+	if (toPence(refundAmount) > toPence(paymentAmount)) {
+		throw new PermanentError(
+			`Refund of ${refundAmount} is more than payment ${paymentId} of ${paymentAmount} for invoice ${invoiceId}, the rest may have been paid from credit balance`,
+		);
+	}
+	return paymentId;
+}
 
 /**
  * Refunds the payment, unless a refund with this refundKey as its comment already exists. Fails if the refund is still

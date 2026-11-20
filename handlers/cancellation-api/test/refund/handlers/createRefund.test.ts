@@ -1,5 +1,8 @@
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { createRefund } from '../../../src/refund/handlers/createRefund';
+import {
+	createRefund,
+	getRefundablePaymentId,
+} from '../../../src/refund/handlers/createRefund';
 import { PermanentError } from '../../../src/refund/permanentError';
 import {
 	createRefund as createZuoraRefund,
@@ -84,6 +87,39 @@ describe('createRefund', () => {
 
 		await expect(createRefund(zuoraClient, input)).rejects.toThrow(
 			'Refund refund-1 is for 5, expected 12',
+		);
+	});
+});
+
+describe('getRefundablePaymentId', () => {
+	const refundable = {
+		invoiceId: 'invoice-1',
+		paymentId: 'payment-1',
+		paymentAmount: 12,
+		refundAmount: 12,
+	};
+
+	it('returns the payment when it covers the refund', () => {
+		expect(getRefundablePaymentId(refundable)).toBe('payment-1');
+	});
+
+	it('fails permanently if the invoice has no payment', () => {
+		expect(() =>
+			getRefundablePaymentId({ invoiceId: 'invoice-1', refundAmount: 12 }),
+		).toThrow(
+			new PermanentError(
+				'Invoice invoice-1 has no payment to refund, it may have been paid from credit balance',
+			),
+		);
+	});
+
+	it('fails permanently if the refund is more than the payment', () => {
+		expect(() =>
+			getRefundablePaymentId({ ...refundable, paymentAmount: 11.99 }),
+		).toThrow(
+			new PermanentError(
+				'Refund of 12 is more than payment payment-1 of 11.99 for invoice invoice-1, the rest may have been paid from credit balance',
+			),
 		);
 	});
 });
