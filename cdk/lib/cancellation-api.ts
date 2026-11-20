@@ -63,7 +63,6 @@ export class CancellationApi extends SrStack {
 			this,
 			'Refund workflow Zuora OAuth Secrets Manager policy',
 		);
-		const lambdaFunctionNames: string[] = [];
 
 		const refundLambda = (
 			id: string,
@@ -81,7 +80,6 @@ export class CancellationApi extends SrStack {
 				},
 			});
 			refundLambda.addPolicies(zuoraPolicy);
-			lambdaFunctionNames.push(refundLambda.functionName);
 			return refundLambda;
 		};
 
@@ -239,7 +237,8 @@ export class CancellationApi extends SrStack {
 			alarmName: `${this.stage}: cancellation-api refund workflow execution failed`,
 			alarmDescription:
 				'A cancellation refund workflow execution failed, so a refund, invoice balancing or failed payment backdating may be incomplete. Find the failed execution in the Step Functions console: its error says which step failed and why, or it timed out still waiting for the payment to settle. Once the cause is fixed, redrive the execution to resume from the failed step.',
-			lambdaFunctionNames,
+			// log links for all eight Lambdas would exceed the 256 character tag limit, and the failed execution links to the failing step's logs
+			lambdaFunctionNames: [],
 		});
 
 		return stateMachine;

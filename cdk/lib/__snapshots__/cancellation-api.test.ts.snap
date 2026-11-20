@@ -3088,48 +3088,6 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
             "Value": "cancellation-api",
           },
           {
-            "Key": "DiagnosticLinks",
-            "Value": {
-              "Fn::Join": [
-                "",
-                [
-                  "lambda:",
-                  {
-                    "Ref": "GenerateCancellationInvoiceLambdaF69943C4",
-                  },
-                  " lambda:",
-                  {
-                    "Ref": "CalculateRefundLambda0081A960",
-                  },
-                  " lambda:",
-                  {
-                    "Ref": "CheckPaymentSettlementLambda20602FE6",
-                  },
-                  " lambda:",
-                  {
-                    "Ref": "CreateRefundLambda8E81CB7F",
-                  },
-                  " lambda:",
-                  {
-                    "Ref": "BalanceInvoicesLambdaB82C6F3B",
-                  },
-                  " lambda:",
-                  {
-                    "Ref": "GetCancellationReasonLambdaBF5402CB",
-                  },
-                  " lambda:",
-                  {
-                    "Ref": "BackdateCancellationLambdaF9568FC2",
-                  },
-                  " lambda:",
-                  {
-                    "Ref": "SendPaymentFailedEmailLambdaA7794EF0",
-                  },
-                ],
-              ],
-            },
-          },
-          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -6945,48 +6903,6 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
           {
             "Key": "App",
             "Value": "cancellation-api",
-          },
-          {
-            "Key": "DiagnosticLinks",
-            "Value": {
-              "Fn::Join": [
-                "",
-                [
-                  "lambda:",
-                  {
-                    "Ref": "GenerateCancellationInvoiceLambdaF69943C4",
-                  },
-                  " lambda:",
-                  {
-                    "Ref": "CalculateRefundLambda0081A960",
-                  },
-                  " lambda:",
-                  {
-                    "Ref": "CheckPaymentSettlementLambda20602FE6",
-                  },
-                  " lambda:",
-                  {
-                    "Ref": "CreateRefundLambda8E81CB7F",
-                  },
-                  " lambda:",
-                  {
-                    "Ref": "BalanceInvoicesLambdaB82C6F3B",
-                  },
-                  " lambda:",
-                  {
-                    "Ref": "GetCancellationReasonLambdaBF5402CB",
-                  },
-                  " lambda:",
-                  {
-                    "Ref": "BackdateCancellationLambdaF9568FC2",
-                  },
-                  " lambda:",
-                  {
-                    "Ref": "SendPaymentFailedEmailLambdaA7794EF0",
-                  },
-                ],
-              ],
-            },
           },
           {
             "Key": "gu:cdk:version",
