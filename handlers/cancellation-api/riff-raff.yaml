@@ -22,6 +22,13 @@ deployments:
       prefixStack: false
       functionNames:
         - cancellation-api-
-        - cancellation-api-calculate-refund-
+        - cancellation-api-refund-generate-cancellation-invoice-
+        - cancellation-api-refund-calculate-refund-
+        - cancellation-api-refund-check-payment-settlement-
+        - cancellation-api-refund-create-refund-
+        - cancellation-api-refund-balance-invoices-
+        - cancellation-api-refund-get-cancellation-reason-
+        - cancellation-api-refund-backdate-cancellation-
+        - cancellation-api-refund-send-payment-failed-email-
     dependencies:
       - cancellation-api-cloudformation
