@@ -4,7 +4,7 @@ import { logger } from '@modules/logger/logger';
 import type { SubscriptionNumber } from '@modules/zuora/identifiers';
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { getLatestNegativeInvoiceId } from '../latestInvoice';
+import { getCancellationInvoiceId } from '../latestInvoice';
 import {
 	generateInvoice,
 	getInvoiceStatus,
@@ -13,9 +13,8 @@ import {
 import { getSubscriptionInvoiceItems } from './subscriptionInvoiceItems';
 
 /**
- * Cancellations don't run billing, so this generates and posts the negative invoice for a cancellation effective on
- * or before targetDate. A re-run has nothing left to bill, so in both cases the negative invoice is the subscription's
- * latest one.
+ * Cancellations don't run billing, so this generates and posts the negative (or £0) invoice for a cancellation effective
+ * on or before targetDate. A re-run has nothing left to bill, so in both cases it is the subscription's latest invoice.
  */
 export async function generateAndPostNegativeInvoice(
 	zuoraClient: ZuoraClient,
@@ -40,12 +39,12 @@ export async function generateAndPostNegativeInvoice(
 		invoiceDate: today,
 		targetDate,
 	});
-	const negativeInvoiceId = getLatestNegativeInvoiceId(
+	const negativeInvoiceId = getCancellationInvoiceId(
 		await getSubscriptionInvoiceItems(zuoraClient, subscriptionNumber),
 	);
 	logger.log(
 		generatedInvoiceId === undefined
-			? `Nothing to bill, using the latest negative invoice ${negativeInvoiceId}`
+			? `Nothing to bill, using the latest invoice ${negativeInvoiceId}`
 			: `Generated negative invoice ${generatedInvoiceId}`,
 	);
 	if (
@@ -53,7 +52,7 @@ export async function generateAndPostNegativeInvoice(
 		generatedInvoiceId !== negativeInvoiceId
 	) {
 		throw new Error(
-			`Generated invoice ${generatedInvoiceId} is not the latest negative invoice ${negativeInvoiceId}`,
+			`Generated invoice ${generatedInvoiceId} is not the latest invoice ${negativeInvoiceId}`,
 		);
 	}
 	if ((await getInvoiceStatus(zuoraClient, negativeInvoiceId)) === 'Draft') {
