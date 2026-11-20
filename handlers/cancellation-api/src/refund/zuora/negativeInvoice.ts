@@ -43,10 +43,11 @@ export async function generateAndPostNegativeInvoice(
 	const negativeInvoiceId = getLatestNegativeInvoiceId(
 		await getSubscriptionInvoiceItems(zuoraClient, subscriptionNumber),
 	);
-	logger.log('Generated negative invoice', {
-		generatedInvoiceId,
-		negativeInvoiceId,
-	});
+	logger.log(
+		generatedInvoiceId === undefined
+			? `Nothing to bill, using the latest negative invoice ${negativeInvoiceId}`
+			: `Generated negative invoice ${generatedInvoiceId}`,
+	);
 	if (
 		generatedInvoiceId !== undefined &&
 		generatedInvoiceId !== negativeInvoiceId

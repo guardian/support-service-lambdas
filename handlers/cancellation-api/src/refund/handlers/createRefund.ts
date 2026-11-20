@@ -58,7 +58,10 @@ export async function createRefund(
 	}
 	const [existingRefund] = existingRefunds;
 	if (existingRefund !== undefined) {
-		logger.log(`Refund ${existingRefund.id} already exists`, existingRefund);
+		logger.log(
+			`Refund ${existingRefund.id} with comment ${refundKey} already exists, so not refunding again`,
+			existingRefund,
+		);
 	}
 	const refundId =
 		existingRefund?.id ??
