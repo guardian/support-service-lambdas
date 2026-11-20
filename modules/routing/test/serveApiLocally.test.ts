@@ -9,7 +9,7 @@ jest.mock('@hono/aws-lambda', () => ({ handle: jest.fn() }));
 
 const api: ApiDefinition<{ value: string }> = {
 	info: { title: 'Local test API', version: '1.0.0' },
-	routes: () => [],
+	routes: [],
 };
 const originalExitCode = process.exitCode;
 

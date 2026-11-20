@@ -18,29 +18,28 @@ import {
 	subscriptionPathSchema,
 } from './cancellationContract';
 
-export function previewHandler(services: CancellationServices) {
-	return (
-		_request: JsonRequest<typeof route>,
-		{ subscription }: SubscriptionAndAccount,
-	): Promise<CancellationResponse> => {
-		if (subscription.status === 'Cancelled') {
-			throw new ValidationError('Subscription is already cancelled');
-		}
-		const guardianSubscription =
-			services.subscriptionParser.toGuardianSubscription(subscription);
-		const currentSubscription =
-			SubscriptionFilter.activeNonEndedSubscriptionFilter(
-				services.now(),
-			).filterSubscription(guardianSubscription);
-		const { ratePlan } =
-			getSinglePlanFlattenedSubscriptionOrThrow(currentSubscription);
-		if (ratePlan.productKey !== 'Contribution') {
-			throw new ValidationError(
-				'Cancellation preview is currently only supported for recurring contributions',
-			);
-		}
-		return Promise.resolve({ type: 'immediate', willRefund: false });
-	};
+export function previewHandler(
+	services: CancellationServices,
+	_request: JsonRequest<typeof route>,
+	{ subscription }: SubscriptionAndAccount,
+): Promise<CancellationResponse> {
+	if (subscription.status === 'Cancelled') {
+		throw new ValidationError('Subscription is already cancelled');
+	}
+	const guardianSubscription =
+		services.subscriptionParser.toGuardianSubscription(subscription);
+	const currentSubscription =
+		SubscriptionFilter.activeNonEndedSubscriptionFilter(
+			services.now(),
+		).filterSubscription(guardianSubscription);
+	const { ratePlan } =
+		getSinglePlanFlattenedSubscriptionOrThrow(currentSubscription);
+	if (ratePlan.productKey !== 'Contribution') {
+		throw new ValidationError(
+			'Cancellation preview is currently only supported for recurring contributions',
+		);
+	}
+	return Promise.resolve({ type: 'immediate', willRefund: false });
 }
 
 const route = createRoute({
@@ -62,11 +61,7 @@ const route = createRoute({
 	responses: cancellationResponses,
 });
 
-export function createPreviewEndpoint(services: CancellationServices) {
-	return defineOpenAPIRoute({
-		route,
-		handler: withJsonHandler(
-			withSubscription(services.zuoraClient, previewHandler(services)),
-		),
-	});
-}
+export const previewEndpoint = defineOpenAPIRoute({
+	route,
+	handler: withJsonHandler(withSubscription(previewHandler)),
+});

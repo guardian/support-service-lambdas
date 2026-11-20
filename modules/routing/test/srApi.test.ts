@@ -6,8 +6,8 @@ import { type ApiDefinition, createSrApi } from '../src/apiGatewayHandler';
 jest.mock('@hono/aws-lambda', () => ({ handle: jest.fn() }));
 
 const info = { title: 'Test API', description: 'Test API', version: '1.0.0' };
-function createTestApi(routes: ReturnType<ApiDefinition<void>['routes']>) {
-	return createSrApi({ info, routes: () => routes }, undefined);
+function createTestApi(routes: ApiDefinition<undefined>['routes']) {
+	return createSrApi({ info, routes }, undefined);
 }
 
 const successResponses = {

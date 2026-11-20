@@ -9,7 +9,7 @@ import type { HandlerEnv } from '@modules/routing/lambdaHandler';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
 import { cancelEndpoint } from './endpoints/cancel';
-import { createPreviewEndpoint } from './endpoints/preview';
+import { previewEndpoint } from './endpoints/preview';
 
 export const configSchema = z.void();
 
@@ -19,7 +19,7 @@ export const api: ApiDefinition<CancellationServices> = {
 		version: '0.1.0',
 		description: 'Preview and cancel subscriptions.',
 	},
-	routes: (services) => [createPreviewEndpoint(services), cancelEndpoint],
+	routes: [previewEndpoint, cancelEndpoint],
 };
 
 // main entry point from AWS lambda

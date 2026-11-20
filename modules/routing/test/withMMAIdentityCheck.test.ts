@@ -81,10 +81,15 @@ describe('mmaIdentityCheck', () => {
 			params: { subscriptionNumber: subscription.subscriptionNumber },
 		};
 		const handler = jest.fn(() => Promise.resolve('business result'));
-		const wrapped = withSubscription(zuoraClient, handler);
+		const wrapped = withSubscription(handler);
 
-		await expect(wrapped(request)).resolves.toBe('business result');
-		expect(handler).toHaveBeenCalledWith(request, { subscription, account });
+		await expect(wrapped({ zuoraClient }, request)).resolves.toBe(
+			'business result',
+		);
+		expect(handler).toHaveBeenCalledWith({ zuoraClient }, request, {
+			subscription,
+			account,
+		});
 		expect(get).toHaveBeenNthCalledWith(
 			1,
 			`v1/subscriptions/${subscription.subscriptionNumber}`,

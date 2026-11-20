@@ -7,6 +7,7 @@ import {
 	ApiGatewayHandler,
 	createSrApi,
 } from '../src/apiGatewayHandler';
+import { withJsonHandler } from '../src/withJsonHandler';
 
 jest.mock('@hono/aws-lambda', () => ({
 	handle: jest.fn(() => mockHttpHandler),
@@ -21,23 +22,23 @@ const mockHttpHandler = jest.fn<
 
 const info = { title: 'Test API', version: '1.0.0' };
 const services = { value: 'injected service' };
-const endpoint = (services: { value: string }) =>
-	defineOpenAPIRoute({
-		route: createRoute({
-			method: 'get',
-			path: '/value',
-			responses: {
-				200: {
-					description: 'Success',
-					content: {
-						'application/json': { schema: z.object({ value: z.string() }) },
-					},
+const endpoint = defineOpenAPIRoute({
+	route: createRoute({
+		method: 'get',
+		path: '/value',
+		responses: {
+			200: {
+				description: 'Success',
+				content: {
+					'application/json': { schema: z.object({ value: z.string() }) },
 				},
 			},
-		}),
-		handler: async (c) =>
-			Promise.resolve(c.json({ value: services.value }, 200)),
-	});
+		},
+	}),
+	handler: withJsonHandler(async (services: { value: string }) =>
+		Promise.resolve({ value: services.value }),
+	),
+});
 
 afterEach(() => {
 	jest.restoreAllMocks();
@@ -47,15 +48,16 @@ afterEach(() => {
 it('creates a test/local app with supplied services without running cold-start setup', async () => {
 	const definition: ApiDefinition<typeof services> = {
 		info,
-		routes: (injected) => [endpoint(injected)],
+		routes: [endpoint],
 	};
 
-	const response = await createSrApi(definition, services, 'CODE').request(
-		'/value',
-	);
-
-	expect(response.status).toBe(200);
-	expect(await response.json()).toEqual({ value: services.value });
+	for (const supplied of [services, { value: 'different app service' }]) {
+		const response = await createSrApi(definition, supplied, 'CODE').request(
+			'/value',
+		);
+		expect(response.status).toBe(200);
+		expect(await response.json()).toEqual({ value: supplied.value });
+	}
 	expect(loadConfig).not.toHaveBeenCalled();
 	expect(handle).not.toHaveBeenCalled();
 });
@@ -80,12 +82,12 @@ it('reuses and summarises services, forwarding responses/context and cleaning up
 		return Promise.resolve(result);
 	});
 	const buildServices = jest.fn(() => Promise.resolve(services));
-	const routes = jest
-		.fn(() => [endpoint(services)])
-		.mockImplementationOnce(() => {
-			throw new Error('app initialisation failed');
-		});
-	const handler = ApiGatewayHandler(z.void(), { info, routes }, buildServices);
+	mockHttpHandler.mockRejectedValueOnce(new Error('request failed'));
+	const handler = ApiGatewayHandler(
+		z.void(),
+		{ info, routes: [endpoint] },
+		buildServices,
+	);
 	const event = {
 		httpMethod: 'GET',
 		path: '/value',
@@ -106,9 +108,7 @@ it('reuses and summarises services, forwarding responses/context and cleaning up
 	};
 
 	expect(buildServices).not.toHaveBeenCalled();
-	await expect(handler(event, context)).rejects.toThrow(
-		'app initialisation failed',
-	);
+	await expect(handler(event, context)).rejects.toThrow('request failed');
 	await expect(handler(event, context)).resolves.toBe(result);
 	await expect(handler(event, context)).resolves.toBe(result);
 	expect(logger.getMessage('test', 'after request')).toBe(

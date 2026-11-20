@@ -9,6 +9,7 @@ import { logger } from '@modules/logger/logger';
 import { createHttpLogging } from './httpLogging';
 import type { HandlerEnv } from './lambdaHandler';
 import { LambdaHandlerWithServices } from './lambdaHandler';
+import type { ApiEnv } from './withJsonHandler';
 
 /**
  * standard openapi info object
@@ -50,13 +51,17 @@ type JsonRoute = RouteConfig & {
 	};
 };
 
-type ApiRoutes = ReadonlyArray<
-	Parameters<OpenAPIHono['openapiRoutes']>[0][number] & { route: JsonRoute }
->;
+type ApiRoutes<Services> = ReadonlyArray<{
+	route: JsonRoute;
+	handler: (
+		context: Context<ApiEnv<Services>, never, never>,
+		next: Next,
+	) => unknown;
+}>;
 
 export type ApiDefinition<Services> = {
 	info: ApiInfo;
-	routes: (services: Services) => ApiRoutes;
+	routes: ApiRoutes<Services>;
 };
 
 type HttpHandler = ReturnType<typeof handle>;
@@ -81,8 +86,8 @@ export function ApiGatewayHandler<Config, Services>(
 /**
  * create an api in your lambda and get all the standard openapi and error functionality
  *
- * @param definition API metadata and service-dependent endpoint definitions
- * @param services resolved services supplied to the route factory
+ * @param definition API metadata and static endpoint definitions
+ * @param services resolved services made available through request context
  * @param stage defaults to process.env.STAGE; explorer credentials persist only in CODE
  */
 export function createSrApi<Services>(
@@ -91,14 +96,14 @@ export function createSrApi<Services>(
 	stage = process.env.STAGE,
 ) {
 	const { info } = definition;
-	const routes = definition.routes(services);
+	const routes = definition.routes;
 	const callerInfo = getCallerInfo();
 
 	/*
 	 * Log and return schema-validation failures.
 	 * https://github.com/honojs/middleware/tree/main/packages/zod-openapi#a-dry-approach-to-handling-validation-errors
 	 */
-	const app = new OpenAPIHono({
+	const app = new OpenAPIHono<ApiEnv<Services>>({
 		defaultHook: (result, c) => {
 			if (!result.success) {
 				logger.log('Invalid API request', result.error.issues);
@@ -106,6 +111,10 @@ export function createSrApi<Services>(
 			}
 			return undefined;
 		},
+	});
+	app.use('*', async (c, next) => {
+		c.set('services', services);
+		await next();
 	});
 
 	/*
