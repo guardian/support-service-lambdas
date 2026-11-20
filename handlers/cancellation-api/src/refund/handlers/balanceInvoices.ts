@@ -6,9 +6,8 @@ import {
 	orderNumberSchema,
 	subscriptionNumberSchema,
 } from '@modules/zuora/identifiers';
-import { getInvoice } from '@modules/zuora/invoice';
+import { getInvoiceItems } from '@modules/zuora/invoice';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { toPence } from '../money';
 import { getRefundKey } from '../refundKey';
 import { checkInvoiceOnlyForSubscription } from '../singleSubscriptionInvoice';
 import { getSubscriptionInvoiceItems } from '../zuora/subscriptionInvoiceItems';
@@ -52,10 +51,10 @@ export async function balanceInvoices(
 	);
 	// checks both before adjusting either, so neither is left half balanced
 	for (const invoiceId of invoiceIds) {
-		const { amount } = await getInvoice(zuoraClient, invoiceId);
+		const { invoiceItems } = await getInvoiceItems(zuoraClient, invoiceId);
 		checkInvoiceOnlyForSubscription({
 			invoiceId,
-			invoiceAmountPence: toPence(amount),
+			invoiceItemIds: invoiceItems.map(({ id }) => id),
 			subscriptionInvoiceItems,
 		});
 	}
