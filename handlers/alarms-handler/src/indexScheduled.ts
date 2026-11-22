@@ -78,7 +78,11 @@ export async function getChatMessages(
 
 	const allWebhookAndBulletPoint: Array<{
 		webhookUrl: string;
-		alarm: { alarm: MetricAlarm; diagnosticLinks: string | undefined };
+		alarm: {
+			alarm: MetricAlarm;
+			diagnosticLinks: string | undefined;
+			logsFilterPattern: string | undefined;
+		};
 	}> = await Promise.all(
 		relevantAlarms.flatMap(async (alarmData) => {
 			const tags = await alarmData.tags.get();
@@ -90,6 +94,7 @@ export async function getChatMessages(
 				alarm: {
 					alarm: alarmData.alarm,
 					diagnosticLinks: tags.DiagnosticLinks,
+					logsFilterPattern: tags.LogsFilterPattern,
 				},
 			}));
 		}),

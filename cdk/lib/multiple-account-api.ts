@@ -35,6 +35,7 @@ export class MultipleAccountApi extends SrStack {
 			},
 			monitoring: {
 				errorImpact: 'The multiple account system is experiencing errors',
+				logsFilterPattern: 'statusCode: 500',
 			},
 		});
 

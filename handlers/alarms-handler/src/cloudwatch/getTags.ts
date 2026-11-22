@@ -8,6 +8,7 @@ import { objectFromEntries } from '@modules/objectFunctions';
 export type Tags = {
 	App?: string;
 	DiagnosticLinks?: string;
+	LogsFilterPattern?: string;
 };
 export const getTags = async (
 	alarmArn: string,
