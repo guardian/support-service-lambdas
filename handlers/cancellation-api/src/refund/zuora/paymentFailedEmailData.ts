@@ -33,8 +33,9 @@ async function queryOne<T>(
 const accountSchema = z.object({
 	sfContactId__c: z.string().nullable().optional(),
 	BillToId: z.string(),
-	DefaultPaymentMethodId: z.string().nullable().optional(),
 });
+
+const paymentSchema = z.object({ PaymentMethodId: z.string() });
 
 const contactSchema = z.object({
 	WorkEmail: z.string().nullable().optional(),
@@ -65,15 +66,17 @@ export async function getPaymentFailedEmailData(
 		subscriptionNumber,
 		accountNumber,
 		unpaidInvoiceId,
+		failedPaymentId,
 	}: {
 		subscriptionNumber: SubscriptionNumber;
 		accountNumber: string;
 		unpaidInvoiceId: string;
+		failedPaymentId: string;
 	},
 ): Promise<PaymentFailedEmailData> {
 	const account = await queryOne(
 		zuoraClient,
-		`select sfContactId__c, BillToId, DefaultPaymentMethodId from Account where AccountNumber = '${accountNumber}'`,
+		`select sfContactId__c, BillToId from Account where AccountNumber = '${accountNumber}'`,
 		accountSchema,
 	);
 	const contact = await queryOne(
@@ -81,13 +84,17 @@ export async function getPaymentFailedEmailData(
 		`select WorkEmail, FirstName, LastName from Contact where Id = '${account.BillToId}'`,
 		contactSchema,
 	);
-	const paymentMethod = account.DefaultPaymentMethodId
-		? await queryOne(
-				zuoraClient,
-				`select Type, CreditCardType, CreditCardExpirationMonth, CreditCardExpirationYear from PaymentMethod where Id = '${account.DefaultPaymentMethodId}'`,
-				paymentMethodSchema,
-			)
-		: undefined;
+	// the failed payment's method, as the customer may have changed their default since
+	const { PaymentMethodId } = await queryOne(
+		zuoraClient,
+		`select PaymentMethodId from Payment where Id = '${failedPaymentId}'`,
+		paymentSchema,
+	);
+	const paymentMethod = await queryOne(
+		zuoraClient,
+		`select Type, CreditCardType, CreditCardExpirationMonth, CreditCardExpirationYear from PaymentMethod where Id = '${PaymentMethodId}'`,
+		paymentMethodSchema,
+	);
 	const { records: invoiceItems } = await doQuery(
 		zuoraClient,
 		`select ProductName, ChargeAmount, ServiceStartDate, ServiceEndDate from InvoiceItem where InvoiceId = '${unpaidInvoiceId}' and SubscriptionNumber = '${subscriptionNumber}'`,
@@ -101,7 +108,7 @@ export async function getPaymentFailedEmailData(
 		emailAddress: contact.WorkEmail ?? undefined,
 		firstName: contact.FirstName,
 		lastName: contact.LastName,
-		paymentMethod: paymentMethod && {
+		paymentMethod: {
 			type: paymentMethod.Type,
 			cardType: paymentMethod.CreditCardType ?? undefined,
 			cardExpiryMonth: paymentMethod.CreditCardExpirationMonth ?? undefined,

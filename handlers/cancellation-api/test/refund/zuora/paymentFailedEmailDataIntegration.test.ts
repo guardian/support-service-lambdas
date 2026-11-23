@@ -13,6 +13,7 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { createContribution } from '../../../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import { getLatestPositiveInvoiceId } from '../../../src/refund/latestInvoice';
 import { buildPaymentFailedEmail } from '../../../src/refund/paymentFailedEmail';
+import { getLatestInvoicePayment } from '../../../src/refund/zuora/invoicePayment';
 import { getPaymentFailedEmailData } from '../../../src/refund/zuora/paymentFailedEmailData';
 import { getSubscriptionInvoiceItems } from '../../../src/refund/zuora/subscriptionInvoiceItems';
 
@@ -45,11 +46,20 @@ describe('getPaymentFailedEmailData', () => {
 				await getSubscriptionInvoiceItems(zuoraClient, subscriptionNumber),
 			);
 
+			const payment = await getLatestInvoicePayment(
+				zuoraClient,
+				unpaidInvoiceId,
+			);
+			if (payment === undefined) {
+				throw new Error(`Invoice ${unpaidInvoiceId} has no payment`);
+			}
+
 			const email = buildPaymentFailedEmail(
 				await getPaymentFailedEmailData(zuoraClient, {
 					subscriptionNumber,
 					accountNumber,
 					unpaidInvoiceId,
+					failedPaymentId: payment.id,
 				}),
 			);
 

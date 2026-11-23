@@ -18,14 +18,13 @@ export type PaymentFailedEmailData = {
 	emailAddress: string | undefined;
 	firstName: string;
 	lastName: string;
-	paymentMethod:
-		| {
-				type: string;
-				cardType: string | undefined;
-				cardExpiryMonth: number | undefined;
-				cardExpiryYear: number | undefined;
-		  }
-		| undefined;
+	// the method the failed payment was taken with
+	paymentMethod: {
+		type: string;
+		cardType: string | undefined;
+		cardExpiryMonth: number | undefined;
+		cardExpiryYear: number | undefined;
+	};
 	invoiceItems: PaymentFailedInvoiceItem[];
 };
 
@@ -58,7 +57,7 @@ export function buildPaymentFailedEmail({
 	if (charge === undefined) {
 		throw new PermanentError(`Invoice ${unpaidInvoiceId} has no charges`);
 	}
-	const { cardExpiryMonth, cardExpiryYear } = paymentMethod ?? {};
+	const { cardExpiryMonth, cardExpiryYear } = paymentMethod;
 
 	return buildEmailMessage(
 		emailAddress,
@@ -66,8 +65,8 @@ export function buildPaymentFailedEmail({
 		{
 			subscriber_id: subscriptionNumber,
 			product: charge.ProductName,
-			payment_method: paymentMethod?.type ?? '',
-			card_type: paymentMethod?.cardType ?? '',
+			payment_method: paymentMethod.type,
+			card_type: paymentMethod.cardType ?? '',
 			card_expiry_date:
 				cardExpiryMonth !== undefined && cardExpiryYear !== undefined
 					? `${String(cardExpiryMonth).padStart(2, '0')}/${cardExpiryYear}`

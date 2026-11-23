@@ -15,6 +15,8 @@ const sendPaymentFailedEmailInputSchema = z.object({
 	accountNumber: z.string().min(1),
 	// the invoice whose payment failed
 	invoiceId: z.string().min(1),
+	// the failed payment
+	paymentId: z.string().min(1),
 });
 
 /**
@@ -23,7 +25,7 @@ const sendPaymentFailedEmailInputSchema = z.object({
 export const handler = async (
 	event: unknown,
 ): Promise<Record<string, never>> => {
-	const { invoiceId, ...input } = parseStepInput(
+	const { invoiceId, paymentId, ...input } = parseStepInput(
 		sendPaymentFailedEmailInputSchema,
 		event,
 	);
@@ -34,6 +36,7 @@ export const handler = async (
 	await sendPaymentFailedEmail(zuoraClient, stage, {
 		...input,
 		unpaidInvoiceId: invoiceId,
+		failedPaymentId: paymentId,
 	});
 	return {};
 };
@@ -45,6 +48,7 @@ export async function sendPaymentFailedEmail(
 		subscriptionNumber: SubscriptionNumber;
 		accountNumber: string;
 		unpaidInvoiceId: string;
+		failedPaymentId: string;
 	},
 ): Promise<void> {
 	const emailMessage = buildPaymentFailedEmail(
