@@ -8,6 +8,7 @@ import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { PermanentError } from '../permanentError';
 
 const serviceStartDateQueryResponseSchema = z.object({
+	done: z.boolean(),
 	records: z.array(z.object({ ServiceStartDate: z.string() })).default([]),
 });
 
@@ -19,11 +20,16 @@ export async function getInvoiceServiceStartDate(
 	subscriptionNumber: SubscriptionNumber,
 	invoiceId: string,
 ): Promise<Dayjs> {
-	const { records } = await doQuery(
+	const { done, records } = await doQuery(
 		zuoraClient,
 		`select ServiceStartDate from InvoiceItem where InvoiceId = '${invoiceId}' and SubscriptionNumber = '${subscriptionNumber}'`,
 		serviceStartDateQueryResponseSchema,
 	);
+	if (!done) {
+		throw new PermanentError(
+			`Too many items on invoice ${invoiceId} for subscription ${subscriptionNumber}`,
+		);
+	}
 	const earliest = sortBy(
 		records,
 		({ ServiceStartDate }) => ServiceStartDate,
