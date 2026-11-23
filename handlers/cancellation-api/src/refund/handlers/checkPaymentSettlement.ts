@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { logger } from '@modules/logger/logger';
 import { stageFromEnvironment } from '@modules/stage';
 import { subscriptionNumberSchema } from '@modules/zuora/identifiers';
-import { getInvoice } from '@modules/zuora/invoice';
+import { disableInvoiceAutoPay, getInvoice } from '@modules/zuora/invoice';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getLatestPositiveInvoiceId } from '../latestInvoice';
 import type { PaymentSettlementStatus } from '../paymentSettlement';
@@ -47,6 +47,8 @@ export async function checkPaymentSettlement(
 		getLatestPositiveInvoiceId(
 			await getSubscriptionInvoiceItems(zuoraClient, subscriptionNumber),
 		);
+	// before reading the payment, so a payment run can't take a new payment after we've checked
+	await disableInvoiceAutoPay(zuoraClient, invoiceId);
 	const { amount, balance } = await getInvoice(zuoraClient, invoiceId);
 	const latestPayment = await getLatestInvoicePayment(zuoraClient, invoiceId);
 	const status = getPaymentSettlementStatus({

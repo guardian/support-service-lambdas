@@ -1,5 +1,5 @@
 import { subscriptionNumberSchema } from '@modules/zuora/identifiers';
-import { getInvoice } from '@modules/zuora/invoice';
+import { disableInvoiceAutoPay, getInvoice } from '@modules/zuora/invoice';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { checkPaymentSettlement } from '../../../src/refund/handlers/checkPaymentSettlement';
 import { subscriptionInvoiceItemSchema } from '../../../src/refund/subscriptionInvoiceItem';
@@ -46,6 +46,20 @@ describe('checkPaymentSettlement', () => {
 		});
 		expect(getSubscriptionInvoiceItems).not.toHaveBeenCalled();
 		expect(getLatestInvoicePayment).toHaveBeenCalledWith(zuoraClient, 'paid');
+	});
+
+	it('turns off AutoPay on the invoice before reading its payment', async () => {
+		await checkPaymentSettlement(zuoraClient, {
+			subscriptionNumber,
+			paidInvoiceId: 'paid',
+		});
+
+		expect(disableInvoiceAutoPay).toHaveBeenCalledWith(zuoraClient, 'paid');
+		expect(
+			jest.mocked(disableInvoiceAutoPay).mock.invocationCallOrder[0],
+		).toBeLessThan(
+			jest.mocked(getLatestInvoicePayment).mock.invocationCallOrder[0]!,
+		);
 	});
 
 	it('checks the latest positive invoice when no refund is due', async () => {

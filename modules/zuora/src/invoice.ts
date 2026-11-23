@@ -24,6 +24,19 @@ export const getInvoice = async (
 	return await zuoraClient.get(`/v1/invoices/${invoiceId}`, getInvoiceSchema);
 };
 
+// Stops payment runs taking a payment for the invoice
+export const disableInvoiceAutoPay = async (
+	zuoraClient: ZuoraClient,
+	invoiceId: string,
+): Promise<void> => {
+	console.log(`Turning off AutoPay for invoice ${invoiceId}`);
+	await zuoraClient.put(
+		`/v1/invoices/${invoiceId}`,
+		JSON.stringify({ autoPay: false }),
+		voidSchema,
+	);
+};
+
 export const getInvoiceItems = async (
 	zuoraClient: ZuoraClient,
 	invoiceId: string,
