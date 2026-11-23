@@ -27,10 +27,10 @@ describe('getPaymentSettlementStatus', () => {
 		);
 	});
 
-	it('is pending when the invoice is owed and there is no payment yet', () => {
+	it('is failed when the invoice is owed and there is no payment, as AutoPay is off so none will be taken', () => {
 		expect(
 			settlement(undefined, { invoiceAmount: 15, invoiceBalance: 15 }),
-		).toBe('Pending');
+		).toBe('Failed');
 	});
 
 	it('is settled when the invoice was paid without a payment, e.g. from credit balance', () => {

@@ -5,6 +5,9 @@ import { PermanentError } from './permanentError';
  *
  * Direct Debit payments stay Processed while the bank collects them: only GatewayState shows whether they have
  * settled or failed. Card payments are settled once Processed.
+ *
+ * The invoice's AutoPay is turned off before checking, so the payment run won't take a payment for an unpaid
+ * invoice: an owed invoice with no payment is failed.
  */
 
 export type PaymentSettlementStatus = 'Settled' | 'Pending' | 'Failed';
@@ -30,7 +33,7 @@ export function getPaymentSettlementStatus({
 		return 'Settled';
 	}
 	if (latestPayment === undefined) {
-		return invoiceBalance > 0 ? 'Pending' : 'Settled';
+		return invoiceBalance > 0 ? 'Failed' : 'Settled';
 	}
 	const { status, gatewayState, paymentMethodType } = latestPayment;
 	switch (status) {
