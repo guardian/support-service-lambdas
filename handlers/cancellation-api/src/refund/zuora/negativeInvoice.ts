@@ -10,6 +10,7 @@ import {
 	getInvoiceStatus,
 	postInvoice,
 } from './invoiceGeneration';
+import { checkInvoicesOnlyForSubscription } from './singleSubscriptionInvoices';
 import { getSubscriptionInvoiceItems } from './subscriptionInvoiceItems';
 
 /**
@@ -69,6 +70,13 @@ export async function generateAndPostNegativeInvoice(
 		);
 	}
 	if ((await getInvoiceStatus(zuoraClient, negativeInvoiceId)) === 'Draft') {
+		// Invoices are generated for the whole account, so this one may include another subscription's charges. Leave it
+		// unposted so those charges don't become collectible
+		await checkInvoicesOnlyForSubscription(
+			zuoraClient,
+			[negativeInvoiceId],
+			subscriptionInvoiceItems,
+		);
 		await postInvoice(zuoraClient, negativeInvoiceId);
 	}
 	return negativeInvoiceId;

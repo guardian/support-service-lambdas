@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import { subscriptionNumberSchema } from '@modules/zuora/identifiers';
+import { getInvoiceItems } from '@modules/zuora/invoice';
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { PermanentError } from '../../../src/refund/permanentError';
@@ -13,6 +14,7 @@ import { generateAndPostNegativeInvoice } from '../../../src/refund/zuora/negati
 import { getSubscriptionInvoiceItems } from '../../../src/refund/zuora/subscriptionInvoiceItems';
 
 jest.mock('@modules/zuora/subscription');
+jest.mock('@modules/zuora/invoice');
 jest.mock('../../../src/refund/zuora/invoiceGeneration');
 jest.mock('../../../src/refund/zuora/subscriptionInvoiceItems');
 
@@ -41,6 +43,9 @@ describe('generateAndPostNegativeInvoice', () => {
 	beforeEach(() => {
 		jest.resetAllMocks();
 		jest.mocked(getSubscription).mockResolvedValue({ accountId: 'account-1' });
+		jest.mocked(getInvoiceItems).mockResolvedValue({
+			invoiceItems: [{ id: 'negative-item' }],
+		} as Awaited<ReturnType<typeof getInvoiceItems>>);
 		jest
 			.mocked(getSubscriptionInvoiceItems)
 			.mockResolvedValue([
@@ -98,6 +103,23 @@ describe('generateAndPostNegativeInvoice', () => {
 			),
 		);
 		expect(error).not.toBeInstanceOf(PermanentError);
+		expect(postInvoice).not.toHaveBeenCalled();
+	});
+
+	it('fails permanently without posting a draft that includes another subscription’s charges', async () => {
+		jest.mocked(generateInvoice).mockResolvedValue('negative');
+		jest.mocked(getInvoiceStatus).mockResolvedValue('Draft');
+		jest.mocked(getInvoiceItems).mockResolvedValue({
+			invoiceItems: [
+				{ id: 'negative-item' },
+				{ id: 'other-subscription-item' },
+			],
+		} as Awaited<ReturnType<typeof getInvoiceItems>>);
+
+		await expect(
+			generateAndPostNegativeInvoice(zuoraClient, input),
+		).rejects.toBeInstanceOf(PermanentError);
+		expect(getInvoiceItems).toHaveBeenCalledWith(zuoraClient, 'negative');
 		expect(postInvoice).not.toHaveBeenCalled();
 	});
 });
