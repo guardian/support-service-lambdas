@@ -17,9 +17,21 @@ describe('getLatestInvoicePayment', () => {
 		jest.mocked(doQuery).mockResolvedValue({
 			done: true,
 			records: [
-				{ PaymentId: 'failed', CreatedDate: '2026-11-01T10:00:00.000+00:00' },
-				{ PaymentId: 'retry', CreatedDate: '2026-11-05T10:00:00.000+00:00' },
-				{ PaymentId: 'older', CreatedDate: '2026-10-01T10:00:00.000+00:00' },
+				{
+					PaymentId: 'failed',
+					Amount: 12,
+					CreatedDate: '2026-11-01T10:00:00.000+00:00',
+				},
+				{
+					PaymentId: 'retry',
+					Amount: 12,
+					CreatedDate: '2026-11-05T10:00:00.000+00:00',
+				},
+				{
+					PaymentId: 'older',
+					Amount: 12,
+					CreatedDate: '2026-10-01T10:00:00.000+00:00',
+				},
 			],
 		});
 		get.mockImplementation((path: string) =>
@@ -27,7 +39,6 @@ describe('getLatestInvoicePayment', () => {
 				path === '/v1/object/payment/retry'
 					? {
 							Id: 'retry',
-							Amount: 12,
 							Status: 'Processed',
 							GatewayState: 'Submitted',
 							PaymentMethodId: 'pm-1',
@@ -49,6 +60,36 @@ describe('getLatestInvoicePayment', () => {
 		);
 	});
 
+	it('returns the amount applied to the invoice, not the whole payment', async () => {
+		jest.mocked(doQuery).mockResolvedValue({
+			done: true,
+			records: [
+				{
+					PaymentId: 'split',
+					Amount: 10,
+					CreatedDate: '2026-11-05T10:00:00.000+00:00',
+				},
+			],
+		});
+		get.mockImplementation((path: string) =>
+			Promise.resolve(
+				path === '/v1/object/payment/split'
+					? {
+							Id: 'split',
+							Amount: 20,
+							Status: 'Processed',
+							GatewayState: 'Settled',
+							PaymentMethodId: 'pm-1',
+						}
+					: { Type: 'BankTransfer' },
+			),
+		);
+
+		expect(await getLatestInvoicePayment(zuoraClient, 'invoice-1')).toEqual(
+			expect.objectContaining({ id: 'split', amount: 10 }),
+		);
+	});
+
 	it('returns undefined if the invoice has no payments', async () => {
 		jest.mocked(doQuery).mockResolvedValue({ done: true, records: [] });
 
@@ -62,7 +103,11 @@ describe('getLatestInvoicePayment', () => {
 		jest.mocked(doQuery).mockResolvedValue({
 			done: false,
 			records: [
-				{ PaymentId: 'older', CreatedDate: '2026-10-01T10:00:00.000+00:00' },
+				{
+					PaymentId: 'older',
+					Amount: 12,
+					CreatedDate: '2026-10-01T10:00:00.000+00:00',
+				},
 			],
 		});
 

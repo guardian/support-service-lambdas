@@ -7,19 +7,25 @@ import { PermanentError } from '../permanentError';
 
 export type InvoicePayment = SettlementPayment & {
 	id: string;
+	// the amount applied to this invoice, as a payment can be split across invoices
 	amount: number;
 };
 
 const invoicePaymentQueryResponseSchema = z.object({
 	done: z.boolean(),
 	records: z
-		.array(z.object({ PaymentId: z.string(), CreatedDate: z.string() }))
+		.array(
+			z.object({
+				PaymentId: z.string(),
+				Amount: z.number(),
+				CreatedDate: z.string(),
+			}),
+		)
 		.default([]),
 });
 
 const paymentSchema = z.object({
 	Id: z.string(),
-	Amount: z.number(),
 	Status: z.string(),
 	GatewayState: z.string(),
 	PaymentMethodId: z.string(),
@@ -37,7 +43,7 @@ export async function getLatestInvoicePayment(
 ): Promise<InvoicePayment | undefined> {
 	const { done, records } = await doQuery(
 		zuoraClient,
-		`select PaymentId, CreatedDate from InvoicePayment where InvoiceId = '${invoiceId}'`,
+		`select PaymentId, Amount, CreatedDate from InvoicePayment where InvoiceId = '${invoiceId}'`,
 		invoicePaymentQueryResponseSchema,
 	);
 	if (!done) {
@@ -57,7 +63,7 @@ export async function getLatestInvoicePayment(
 	);
 	return {
 		id: payment.Id,
-		amount: payment.Amount,
+		amount: latest.Amount,
 		status: payment.Status,
 		gatewayState: payment.GatewayState,
 		paymentMethodType: paymentMethod.Type,
