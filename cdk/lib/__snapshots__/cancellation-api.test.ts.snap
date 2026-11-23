@@ -2903,7 +2903,7 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              ""},"Backdated?":{"Type":"Choice","Choices":[{"Condition":"{% $states.input.backdated = true %}","Next":"SendPaymentFailedEmail","Comment":"Yes"}],"Default":"Succeed"},"BalanceInvoices":{"Next":"Backdated?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              ""},"Backdated after a failed payment?":{"Type":"Choice","Choices":[{"Condition":"{% $states.input.backdated = true and $exists($states.input.paymentId) %}","Next":"SendPaymentFailedEmail","Comment":"Yes"}],"Default":"Succeed"},"BalanceInvoices":{"Next":"Backdated after a failed payment?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
               {
                 "Fn::GetAtt": [
                   "BalanceInvoicesLambdaB82C6F3B",
@@ -6720,7 +6720,7 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              ""},"Backdated?":{"Type":"Choice","Choices":[{"Condition":"{% $states.input.backdated = true %}","Next":"SendPaymentFailedEmail","Comment":"Yes"}],"Default":"Succeed"},"BalanceInvoices":{"Next":"Backdated?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              ""},"Backdated after a failed payment?":{"Type":"Choice","Choices":[{"Condition":"{% $states.input.backdated = true and $exists($states.input.paymentId) %}","Next":"SendPaymentFailedEmail","Comment":"Yes"}],"Default":"Succeed"},"BalanceInvoices":{"Next":"Backdated after a failed payment?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
               {
                 "Fn::GetAtt": [
                   "BalanceInvoicesLambdaB82C6F3B",

@@ -156,9 +156,12 @@ export class CancellationApi extends SrStack {
 		const succeed = Succeed.jsonata(this, 'Succeed');
 
 		const balanceInvoices = step('BalanceInvoices', balanceInvoicesLambda).next(
-			Choice.jsonata(this, 'Backdated?')
+			Choice.jsonata(this, 'Backdated after a failed payment?')
 				.when(
-					when('$states.input.backdated = true'),
+					// an owed invoice with no payment is also backdated, but there was no payment to fail
+					when(
+						'$states.input.backdated = true and $exists($states.input.paymentId)',
+					),
 					step('SendPaymentFailedEmail', sendPaymentFailedEmailLambda).next(
 						succeed,
 					),
