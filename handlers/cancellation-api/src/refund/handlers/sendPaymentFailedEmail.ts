@@ -18,7 +18,7 @@ const sendPaymentFailedEmailInputSchema = z.object({
 });
 
 /**
- * Sent only when the cancellation was backdated.
+ * Sent only when the cancellation was backdated because a payment failed.
  */
 export const handler = async (
 	event: unknown,
