@@ -55,7 +55,7 @@ describe('buildPaymentFailedEmail', () => {
 		});
 	});
 
-	it('includes the card details when the default payment method is a card', () => {
+	it('includes the card details when the failed payment was by card', () => {
 		const email = buildPaymentFailedEmail({
 			...directDebit,
 			paymentMethod: {
@@ -77,6 +77,12 @@ describe('buildPaymentFailedEmail', () => {
 		expect(() =>
 			buildPaymentFailedEmail({ ...directDebit, emailAddress: undefined }),
 		).toThrow('The account has no email address');
+	});
+
+	it('throws if the account has no Salesforce contact', () => {
+		expect(() =>
+			buildPaymentFailedEmail({ ...directDebit, sfContactId: undefined }),
+		).toThrow('The account has no Salesforce contact');
 	});
 
 	it('throws if the invoice has no charges', () => {
