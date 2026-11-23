@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import { subscriptionNumberSchema } from '@modules/zuora/identifiers';
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { PermanentError } from '../../../src/refund/permanentError';
 import { subscriptionInvoiceItemSchema } from '../../../src/refund/subscriptionInvoiceItem';
 import {
 	generateInvoice,
@@ -81,6 +82,22 @@ describe('generateAndPostNegativeInvoice', () => {
 		).rejects.toThrow(
 			'Generated invoice paid is not the latest invoice negative',
 		);
+		expect(postInvoice).not.toHaveBeenCalled();
+	});
+
+	it('fails with a retryable error if the generated invoice is not visible yet', async () => {
+		jest.mocked(generateInvoice).mockResolvedValue('new');
+
+		const error = await generateAndPostNegativeInvoice(
+			zuoraClient,
+			input,
+		).catch((e: unknown) => e);
+		expect(error).toEqual(
+			new Error(
+				"Generated invoice new isn't in the subscription's invoice items yet",
+			),
+		);
+		expect(error).not.toBeInstanceOf(PermanentError);
 		expect(postInvoice).not.toHaveBeenCalled();
 	});
 });

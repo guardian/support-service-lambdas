@@ -39,9 +39,22 @@ export async function generateAndPostNegativeInvoice(
 		invoiceDate: today,
 		targetDate,
 	});
-	const negativeInvoiceId = getCancellationInvoiceId(
-		await getSubscriptionInvoiceItems(zuoraClient, subscriptionNumber),
+	const subscriptionInvoiceItems = await getSubscriptionInvoiceItems(
+		zuoraClient,
+		subscriptionNumber,
 	);
+	if (
+		generatedInvoiceId !== undefined &&
+		!subscriptionInvoiceItems.some(
+			({ InvoiceId }) => InvoiceId === generatedInvoiceId,
+		)
+	) {
+		// This can be retried, a re-run finds nothing to bill and picks up the invoice once it's visible
+		throw new Error(
+			`Generated invoice ${generatedInvoiceId} isn't in the subscription's invoice items yet`,
+		);
+	}
+	const negativeInvoiceId = getCancellationInvoiceId(subscriptionInvoiceItems);
 	logger.log(
 		generatedInvoiceId === undefined
 			? `Nothing to bill, using the latest invoice ${negativeInvoiceId}`

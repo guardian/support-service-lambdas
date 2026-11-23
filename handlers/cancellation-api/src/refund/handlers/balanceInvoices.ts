@@ -6,10 +6,9 @@ import {
 	orderNumberSchema,
 	subscriptionNumberSchema,
 } from '@modules/zuora/identifiers';
-import { getInvoiceItems } from '@modules/zuora/invoice';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getRefundKey } from '../refundKey';
-import { checkInvoiceOnlyForSubscription } from '../singleSubscriptionInvoice';
+import { checkInvoicesOnlyForSubscription } from '../zuora/singleSubscriptionInvoices';
 import { getSubscriptionInvoiceItems } from '../zuora/subscriptionInvoiceItems';
 import { zeroInvoice } from '../zuora/zeroInvoice';
 import { parseStepInput } from './stepInput';
@@ -50,14 +49,11 @@ export async function balanceInvoices(
 		input.subscriptionNumber,
 	);
 	// checks both before adjusting either, so neither is left half balanced
-	for (const invoiceId of invoiceIds) {
-		const { invoiceItems } = await getInvoiceItems(zuoraClient, invoiceId);
-		checkInvoiceOnlyForSubscription({
-			invoiceId,
-			invoiceItemIds: invoiceItems.map(({ id }) => id),
-			subscriptionInvoiceItems,
-		});
-	}
+	await checkInvoicesOnlyForSubscription(
+		zuoraClient,
+		invoiceIds,
+		subscriptionInvoiceItems,
+	);
 	for (const invoiceId of invoiceIds) {
 		await zeroInvoice({
 			zuoraClient,
