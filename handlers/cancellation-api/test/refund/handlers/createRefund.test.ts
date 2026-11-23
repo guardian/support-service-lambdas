@@ -4,6 +4,7 @@ import {
 	getRefundablePaymentId,
 } from '../../../src/refund/handlers/createRefund';
 import { PermanentError } from '../../../src/refund/permanentError';
+import { getPaymentInvoiceIds } from '../../../src/refund/zuora/invoicePayment';
 import {
 	createRefund as createZuoraRefund,
 	getRefund,
@@ -11,10 +12,12 @@ import {
 } from '../../../src/refund/zuora/refund';
 
 jest.mock('../../../src/refund/zuora/refund');
+jest.mock('../../../src/refund/zuora/invoicePayment');
 
 const zuoraClient = {} as ZuoraClient;
 const input = {
 	refundKey: 'A-S00123456-O-00123456',
+	invoiceId: 'invoice-1',
 	paymentId: 'payment-1',
 	refundAmount: 12,
 };
@@ -22,6 +25,7 @@ const input = {
 describe('createRefund', () => {
 	beforeEach(() => {
 		jest.resetAllMocks();
+		jest.mocked(getPaymentInvoiceIds).mockResolvedValue(['invoice-1']);
 	});
 
 	it('refunds the payment with the refund key as its comment', async () => {
@@ -88,6 +92,19 @@ describe('createRefund', () => {
 		await expect(createRefund(zuoraClient, input)).rejects.toThrow(
 			'Refund refund-1 is for 5, expected 12',
 		);
+	});
+
+	it('fails permanently without refunding if the payment was also applied to another invoice', async () => {
+		jest.mocked(getRefundsByComment).mockResolvedValue([]);
+		jest
+			.mocked(getPaymentInvoiceIds)
+			.mockResolvedValue(['invoice-1', 'other-invoice']);
+
+		await expect(createRefund(zuoraClient, input)).rejects.toBeInstanceOf(
+			PermanentError,
+		);
+		expect(getPaymentInvoiceIds).toHaveBeenCalledWith(zuoraClient, 'payment-1');
+		expect(createZuoraRefund).not.toHaveBeenCalled();
 	});
 });
 

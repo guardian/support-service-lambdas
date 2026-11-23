@@ -9,6 +9,7 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { toPence } from '../money';
 import { PermanentError } from '../permanentError';
 import { getRefundKey } from '../refundKey';
+import { getPaymentInvoiceIds } from '../zuora/invoicePayment';
 import {
 	createRefund as createZuoraRefund,
 	getRefund,
@@ -37,6 +38,7 @@ export const handler = async (event: unknown): Promise<CreateRefundOutput> => {
 	const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 	return createRefund(zuoraClient, {
 		refundKey: getRefundKey(input),
+		invoiceId: input.invoiceId,
 		paymentId: getRefundablePaymentId(input),
 		refundAmount: input.refundAmount,
 	});
@@ -78,9 +80,15 @@ export async function createRefund(
 	zuoraClient: ZuoraClient,
 	{
 		refundKey,
+		invoiceId,
 		paymentId,
 		refundAmount,
-	}: { refundKey: string; paymentId: string; refundAmount: number },
+	}: {
+		refundKey: string;
+		invoiceId: string;
+		paymentId: string;
+		refundAmount: number;
+	},
 ): Promise<CreateRefundOutput> {
 	const existingRefunds = await getRefundsByComment(zuoraClient, refundKey);
 	if (existingRefunds.length > 1) {
@@ -94,6 +102,9 @@ export async function createRefund(
 			`Refund ${existingRefund.id} with comment ${refundKey} already exists, so not refunding again`,
 			existingRefund,
 		);
+	}
+	if (existingRefund === undefined) {
+		await checkPaymentOnlyForInvoice(zuoraClient, paymentId, invoiceId);
 	}
 	const refundId =
 		existingRefund?.id ??
@@ -119,4 +130,22 @@ export async function createRefund(
 		);
 	}
 	return { refundId };
+}
+
+/**
+ * A refund is taken from the payment without saying which invoice it is for, so Zuora chooses. If the payment was
+ * also applied to another invoice, for example one for another subscription collected in the same payment run, the
+ * refund could reopen that invoice instead.
+ */
+async function checkPaymentOnlyForInvoice(
+	zuoraClient: ZuoraClient,
+	paymentId: string,
+	invoiceId: string,
+): Promise<void> {
+	const invoiceIds = await getPaymentInvoiceIds(zuoraClient, paymentId);
+	if (invoiceIds.some((id) => id !== invoiceId)) {
+		throw new PermanentError(
+			`Payment ${paymentId} was applied to invoices ${invoiceIds.join(', ')}, not just invoice ${invoiceId}`,
+		);
+	}
 }
