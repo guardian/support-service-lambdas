@@ -7,7 +7,7 @@ import type { SubscriptionInvoiceItem } from '../subscriptionInvoiceItem';
 import { subscriptionInvoiceItemSchema } from '../subscriptionInvoiceItem';
 
 // The toPence function in subscriptionInvoiceItemSchema throws a PermanentError on a fraction of a penny.
-// However if this occurs withing the zuoraClient it will be wrapped in a standard retryable error
+// However if this occurs within the zuoraClient it will be wrapped in a standard retryable error
 // which we don't want, so parse it with a looser schema initially and then the stricter schema afterwards.
 const invoiceItemQueryResponseSchema = z.object({
 	done: z.boolean(),
