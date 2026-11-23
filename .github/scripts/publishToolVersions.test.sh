@@ -65,6 +65,7 @@ runPublisher() {
 }
 
 printf '| Tool | Current | Update |\n| --- | --- | --- |\n| Node.js | 22.22.0 | [22.23.4](https://nodejs.org/en/blog/release/v22.23.4) |\n' > "$tempDir/toolchainVersions.md"
+printf '\nChecked but unchanged:\n\n- pnpm: 10.34.9\n' >> "$tempDir/toolchainVersions.md"
 
 runPublisher unchanged '' ''
 grep -Fx 'update_available=false' "$tempDir/unchanged.outputs"
@@ -92,6 +93,7 @@ if grep -Fq 'Test run:' "$tempDir/toolchainUpdate.md"; then
 fi
 grep -Fx '| Node.js | 22.22.0 | [22.23.4](https://nodejs.org/en/blog/release/v22.23.4) |' "$tempDir/toolchainUpdate.md"
 grep -F 'Previous toolchain update: https://github.com/example/repo/pull/1' "$tempDir/toolchainUpdate.md"
+[[ "$(tail -n 1 "$tempDir/toolchainUpdate.md")" == '- pnpm: 10.34.9' ]]
 branchSha="$(git --git-dir="$tempDir/origin.git" rev-parse automation/tool-versions)"
 [[ "$(git --git-dir="$tempDir/origin.git" show -s --format=%an automation/tool-versions)" == 'update-tool-versions automation' ]]
 
