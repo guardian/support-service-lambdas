@@ -1,6 +1,6 @@
 import { z } from '@hono/zod-openapi';
 import { identityIdSchema } from '@modules/identity/identityId';
-import { apiErrorResponses } from '@modules/routing/srApi';
+import { apiErrorResponses } from '@modules/routing/apiGatewayHandler';
 import { subscriptionNumberSchema } from '@modules/zuora/identifiers';
 
 export const subscriptionPathSchema = z.object({
@@ -11,9 +11,9 @@ export const subscriptionPathSchema = z.object({
 });
 
 export const identityHeadersSchema = z.object({
-	'x-identity-id': identityIdSchema.openapi({
+	'x-identity-id': identityIdSchema.optional().openapi({
 		description:
-			'Identity ID supplied by the authenticated manage-frontend service layer.',
+			'Identity ID supplied by the authenticated manage-frontend service layer. Omitted for trusted CSR/admin callers.',
 		example: '123456789',
 	}),
 });

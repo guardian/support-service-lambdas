@@ -32,6 +32,9 @@
       "@modules/identity/*": [
         "../../modules/identity/src/*"
       ],
+      "@modules/guardian-subscription/*": [
+        "../../modules/guardian-subscription/src/*"
+      ],
       "@modules/cancellation-api/*": [
         "../../modules/cancellation-api/src/*"
       ]

@@ -1,22 +1,45 @@
 import { createRoute, defineOpenAPIRoute, z } from '@hono/zod-openapi';
-import { logger } from '@modules/logger/logger';
+import { ValidationError } from '@modules/errors';
+import { getSinglePlanFlattenedSubscriptionOrThrow } from '@modules/guardian-subscription/getSinglePlanFlattenedSubscriptionOrThrow';
+import { SubscriptionFilter } from '@modules/guardian-subscription/subscriptionFilter';
 import {
 	type JsonRequest,
 	withJsonHandler,
 } from '@modules/routing/withJsonHandler';
 import {
+	type SubscriptionAndAccount,
+	withSubscription,
+} from '@modules/routing/withMMAIdentityCheck';
+import type { CancellationServices } from '..';
+import {
 	type CancellationResponse,
 	cancellationResponses,
-	exampleResponse,
 	identityHeadersSchema,
 	subscriptionPathSchema,
 } from './cancellationContract';
 
 export function previewHandler(
-	request: JsonRequest<typeof route>,
+	services: CancellationServices,
+	_request: JsonRequest<typeof route>,
+	{ subscription }: SubscriptionAndAccount,
 ): Promise<CancellationResponse> {
-	logger.log('Preview endpoint', request.body);
-	return Promise.resolve(exampleResponse);
+	if (subscription.status === 'Cancelled') {
+		throw new ValidationError('Subscription is already cancelled');
+	}
+	const guardianSubscription =
+		services.subscriptionParser.toGuardianSubscription(subscription);
+	const currentSubscription =
+		SubscriptionFilter.activeNonEndedSubscriptionFilter(
+			services.now(),
+		).filterSubscription(guardianSubscription);
+	const { ratePlan } =
+		getSinglePlanFlattenedSubscriptionOrThrow(currentSubscription);
+	if (ratePlan.productKey !== 'Contribution') {
+		throw new ValidationError(
+			'Cancellation preview is currently only supported for recurring contributions',
+		);
+	}
+	return Promise.resolve({ type: 'immediate', willRefund: false });
 }
 
 const route = createRoute({
@@ -40,5 +63,5 @@ const route = createRoute({
 
 export const previewEndpoint = defineOpenAPIRoute({
 	route,
-	handler: withJsonHandler(previewHandler),
+	handler: withJsonHandler(withSubscription(previewHandler)),
 });

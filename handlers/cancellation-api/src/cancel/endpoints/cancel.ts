@@ -4,6 +4,7 @@ import {
 	type JsonRequest,
 	withJsonHandler,
 } from '@modules/routing/withJsonHandler';
+import type { CancellationServices } from '..';
 import {
 	type CancellationResponse,
 	cancellationResponses,
@@ -13,6 +14,7 @@ import {
 } from './cancellationContract';
 
 export function cancelHandler(
+	_services: CancellationServices,
 	request: JsonRequest<typeof route>,
 ): Promise<CancellationResponse> {
 	logger.log('cancel endpoint', request.body);

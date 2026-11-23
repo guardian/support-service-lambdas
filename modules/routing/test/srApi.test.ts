@@ -1,9 +1,15 @@
 import { createRoute, defineOpenAPIRoute, z } from '@hono/zod-openapi';
 import { ValidationError } from '@modules/errors';
 import { logger } from '@modules/logger/logger';
-import { createSrApi } from '../src/srApi';
+import { type ApiDefinition, createSrApi } from '../src/apiGatewayHandler';
+
+jest.mock('@hono/aws-lambda', () => ({ handle: jest.fn() }));
 
 const info = { title: 'Test API', description: 'Test API', version: '1.0.0' };
+function createTestApi(routes: ApiDefinition<undefined>['routes']) {
+	return createSrApi({ info, routes }, undefined);
+}
+
 const successResponses = {
 	200: {
 		description: 'Success',
@@ -33,12 +39,13 @@ describe('SR API conventions', () => {
 	});
 
 	afterEach(() => {
+		logger.resetContext();
 		jest.restoreAllMocks();
 	});
 
 	it('includes the failing field and Zod validation message in request errors', async () => {
 		const output = captureOutput();
-		const app = createSrApi(info, [
+		const app = createTestApi([
 			defineOpenAPIRoute({
 				route: createRoute({
 					method: 'post',
@@ -88,7 +95,7 @@ describe('SR API conventions', () => {
 		'defaults to STAGE and persists explorer authentication only in CODE ($stage)',
 		async ({ stage, persistAuth }) => {
 			jest.replaceProperty(process, 'env', { ...process.env, STAGE: stage });
-			const app = createSrApi(info, []);
+			const app = createTestApi([]);
 			const response = await app.request('/explorer');
 
 			expect(response.status).toBe(200);
@@ -96,9 +103,9 @@ describe('SR API conventions', () => {
 		},
 	);
 
-	it('logs request/response details with credential fingerprints and clears context afterwards', async () => {
+	it('logs credential-safe request/response details without resetting invocation context', async () => {
 		const output = captureOutput();
-		const app = createSrApi(info, [
+		const app = createTestApi([
 			defineOpenAPIRoute({
 				route: createRoute({
 					method: 'post',
@@ -124,6 +131,7 @@ describe('SR API conventions', () => {
 				},
 			}),
 		]);
+		logger.mutableAddContext('invocation-reference');
 		const response = await app.request('/items', {
 			method: 'POST',
 			headers: {
@@ -138,7 +146,9 @@ describe('SR API conventions', () => {
 		expect(response.headers.get('x-session-token')).toBe('response-token');
 		expect(await response.json()).toEqual({ ok: true });
 		const logs = output();
-		expect(logs).toMatch(/request-reference \[.*TRACE httpRequest EXIT/);
+		expect(logs).toMatch(
+			/invocation-reference request-reference \[.*TRACE httpRequest EXIT/,
+		);
 		expect(logs).toContain('"x-api-key": "[len:15,sha256:6bb57354ef5a]"');
 		expect(logs).toContain('password: "[len:16,sha256:dca6861589d6]"');
 		expect(logs).toContain('"x-session-token": "[len:14,sha256:96129e6e97f5]"');
@@ -150,13 +160,13 @@ describe('SR API conventions', () => {
 			expect(logs).not.toContain(secret);
 		}
 		expect(logger.getMessage('test', 'after request')).toBe(
-			'[test] after request',
+			'invocation-reference request-reference [test] after request',
 		);
 	});
 
 	it('fingerprints malformed JSON rather than leaking credentials from it', async () => {
 		const output = captureOutput();
-		const app = createSrApi(info, [
+		const app = createTestApi([
 			defineOpenAPIRoute({
 				route: createRoute({
 					method: 'post',
@@ -197,7 +207,7 @@ describe('SR API conventions', () => {
 		jest.spyOn(Request.prototype, 'clone').mockImplementationOnce(() => {
 			throw error;
 		});
-		const app = createSrApi(info, [
+		const app = createTestApi([
 			defineOpenAPIRoute({
 				route: createRoute({
 					method: 'get',
@@ -220,7 +230,7 @@ describe('SR API conventions', () => {
 	});
 
 	it.each(['invalid output', 'validation exception'])(
-		'returns a generic 500 for %s and clears context',
+		'returns a generic 500 for %s',
 		async (failure) => {
 			const result = { ok: true };
 			if (failure === 'invalid output') {
@@ -244,7 +254,7 @@ describe('SR API conventions', () => {
 					},
 				},
 			});
-			const app = createSrApi(info, [
+			const app = createTestApi([
 				defineOpenAPIRoute({
 					route,
 					handler: async (c) => {
@@ -259,9 +269,6 @@ describe('SR API conventions', () => {
 				message: 'Internal server error',
 			});
 			expect(errorLog).toHaveBeenCalledTimes(1);
-			expect(logger.getMessage('test', 'after request')).toBe(
-				'[test] after request',
-			);
 		},
 	);
 
@@ -276,7 +283,7 @@ describe('SR API conventions', () => {
 				path: '/failure',
 				responses: successResponses,
 			});
-			const app = createSrApi(info, [
+			const app = createTestApi([
 				defineOpenAPIRoute({
 					route,
 					handler: async () => {
@@ -289,9 +296,6 @@ describe('SR API conventions', () => {
 			const response = await app.request('/failure');
 			expect(response.status).toBe(status);
 			expect(await response.json()).toEqual({ message });
-			expect(logger.getMessage('test', 'after request')).toBe(
-				'[test] after request',
-			);
 			if (status === 500) {
 				expect(errorLog).toHaveBeenCalledWith('API request failed', error);
 				expect(errorLog).toHaveBeenCalledTimes(1);

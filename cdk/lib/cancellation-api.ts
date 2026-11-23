@@ -1,5 +1,9 @@
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
+import {
+	AllowS3CatalogReadPolicy,
+	AllowZuoraOAuthSecretsPolicy,
+} from './cdk/policies';
 import { SrApiLambda } from './cdk/SrApiLambda';
 import { SrLambda } from './cdk/SrLambda';
 import type { SrStageNames } from './cdk/SrStack';
@@ -23,6 +27,10 @@ export class CancellationApi extends SrStack {
 				burstLimit: 10,
 			},
 		});
+		lambda.addPolicies(
+			new AllowZuoraOAuthSecretsPolicy(this),
+			new AllowS3CatalogReadPolicy(this),
+		);
 		lambda.addPublicPath('explorer');
 		lambda.addPublicPath('openapi.json');
 

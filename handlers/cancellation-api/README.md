@@ -9,11 +9,12 @@ This handler contains
 
 ### 1. Cancellation API
 
-**WIP:** routing, request validation, documentation and local serving are
-implemented. Both POST endpoints currently return the fixed
-`{ "type": "immediate", "willRefund": false }` example. Zuora/ownership checks,
-cancellation, emails and events are not implemented; do not connect real
-customer journeys yet.
+**WIP:** preview loads the subscription/account from Zuora, checks ownership
+when an identity ID is supplied, and accepts active recurring contributions.
+It returns `{ "type": "immediate", "willRefund": false }` without making changes.
+Unsupported products and already-cancelled subscriptions return 400.
+Execute still returns a fixed example: cancellation, emails and events are not
+implemented; do not connect real customer journeys yet.
 
 `immediate` means access ends today (entitlement updates usually propagate within
 a day); `scheduled` includes the future `accessEndDate`.
@@ -26,8 +27,10 @@ a day); `scheduled` includes the future `accessEndDate`.
 | Interactive API explorer | `/explorer`                                                |
 
 The explorer and OpenAPI contract are public. API Gateway validates API keys for
-operations; the app validates the identity header and request shape.
-Local operation requests need `x-identity-id` but no API Gateway key.
+operations; the app validates the request shape. When `x-identity-id` is supplied,
+preview verifies ownership; omission is reserved for trusted CSR/admin callers.
+This relies on upstream authentication and header handling, not on header
+absence as authentication. Local requests do not need an API Gateway key.
 
 The CODE explorer remembers authentication in browser local storage. Persistence
 is disabled in PROD and when the stage is unspecified. Stored credentials are
@@ -36,6 +39,7 @@ not encrypted; this does not persist request parameter values.
 ### Local development and testing
 
 ```sh
+# Requires Janus credentials for shared Zuora secrets and the Zuora catalogue.
 pnpm --filter cancellation-api local
 # Open http://localhost:8787/explorer
 
