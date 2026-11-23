@@ -2889,63 +2889,63 @@ exports[`The Cancellation api stack matches the snapshot 1`] = `
           "Fn::Join": [
             "",
             [
-              "{"StartAt":"Refund due?","States":{"Refund due?":{"Type":"Choice","Choices":[{"Condition":"{% $states.input.refundDue = true %}","Next":"GenerateCancellationInvoice","Comment":"Yes"}],"Default":"CheckPaymentSettlement"},"CheckPaymentSettlement":{"Next":"Payment?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              "{"StartAt":"Refund due?","States":{"Refund due?":{"Type":"Choice","Choices":[{"Condition":"{% $states.input.refundDue = true %}","Next":"GenerateCancellationInvoice","Comment":"Yes"}],"Default":"CheckPaymentSettlement"},"CheckPaymentSettlement":{"Next":"Payment?","Retry":[{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
               {
                 "Fn::GetAtt": [
                   "CheckPaymentSettlementLambda20602FE6",
                   "Arn",
                 ],
               },
-              ""},"Wait 24h":{"Type":"Wait","Seconds":86400,"Next":"CheckPaymentSettlement"},"Payment?":{"Type":"Choice","Choices":[{"Condition":"{% $states.input.status = \\"Pending\\" %}","Next":"Wait 24h","Comment":"Pending"},{"Condition":"{% $states.input.status = \\"Failed\\" %}","Next":"GetCancellationReason","Comment":"Failed"},{"Condition":"{% $states.input.status = \\"Settled\\" and $states.input.refundDue = true %}","Next":"CreateRefund","Comment":"Settled, refund due"}],"Default":"Succeed"},"Succeed":{"Type":"Succeed"},"SendPaymentFailedEmail":{"Next":"Succeed","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              ""},"Wait 24h":{"Type":"Wait","Seconds":86400,"Next":"CheckPaymentSettlement"},"Payment?":{"Type":"Choice","Choices":[{"Condition":"{% $states.input.status = \\"Pending\\" %}","Next":"Wait 24h","Comment":"Pending"},{"Condition":"{% $states.input.status = \\"Failed\\" %}","Next":"GetCancellationReason","Comment":"Failed"},{"Condition":"{% $states.input.status = \\"Settled\\" and $states.input.refundDue = true %}","Next":"CreateRefund","Comment":"Settled, refund due"}],"Default":"Succeed"},"Succeed":{"Type":"Succeed"},"SendPaymentFailedEmail":{"Next":"Succeed","Retry":[{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
               {
                 "Fn::GetAtt": [
                   "SendPaymentFailedEmailLambdaA7794EF0",
                   "Arn",
                 ],
               },
-              ""},"Backdated after a failed payment?":{"Type":"Choice","Choices":[{"Condition":"{% $states.input.backdated = true and $exists($states.input.paymentId) %}","Next":"SendPaymentFailedEmail","Comment":"Yes"}],"Default":"Succeed"},"BalanceInvoices":{"Next":"Backdated after a failed payment?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              ""},"Backdated after a failed payment?":{"Type":"Choice","Choices":[{"Condition":"{% $states.input.backdated = true and $exists($states.input.paymentId) %}","Next":"SendPaymentFailedEmail","Comment":"Yes"}],"Default":"Succeed"},"BalanceInvoices":{"Next":"Backdated after a failed payment?","Retry":[{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
               {
                 "Fn::GetAtt": [
                   "BalanceInvoicesLambdaB82C6F3B",
                   "Arn",
                 ],
               },
-              ""},"CalculateCredit":{"Next":"BalanceInvoices","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              ""},"CalculateCredit":{"Next":"BalanceInvoices","Retry":[{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
               {
                 "Fn::GetAtt": [
                   "CalculateRefundLambda0081A960",
                   "Arn",
                 ],
               },
-              ""},"BackdateCancellation":{"Next":"CalculateCredit","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              ""},"BackdateCancellation":{"Next":"CalculateCredit","Retry":[{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
               {
                 "Fn::GetAtt": [
                   "BackdateCancellationLambdaF9568FC2",
                   "Arn",
                 ],
               },
-              ""},"GetCancellationReason":{"Next":"BackdateCancellation","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              ""},"GetCancellationReason":{"Next":"BackdateCancellation","Retry":[{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
               {
                 "Fn::GetAtt": [
                   "GetCancellationReasonLambdaBF5402CB",
                   "Arn",
                 ],
               },
-              ""},"CreateRefund":{"Next":"BalanceInvoices","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              ""},"CreateRefund":{"Next":"BalanceInvoices","Retry":[{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
               {
                 "Fn::GetAtt": [
                   "CreateRefundLambda8E81CB7F",
                   "Arn",
                 ],
               },
-              ""},"Zero amount?":{"Type":"Choice","Choices":[{"Condition":"{% $states.input.refundAmount = 0 %}","Next":"BalanceInvoices","Comment":"Yes"}],"Default":"CheckPaymentSettlement"},"CalculateRefund":{"Next":"Zero amount?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              ""},"Zero amount?":{"Type":"Choice","Choices":[{"Condition":"{% $states.input.refundAmount = 0 %}","Next":"BalanceInvoices","Comment":"Yes"}],"Default":"CheckPaymentSettlement"},"CalculateRefund":{"Next":"Zero amount?","Retry":[{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
               {
                 "Fn::GetAtt": [
                   "CalculateRefundLambda0081A960",
                   "Arn",
                 ],
               },
-              ""},"GenerateCancellationInvoice":{"Next":"CalculateRefund","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              ""},"GenerateCancellationInvoice":{"Next":"CalculateRefund","Retry":[{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
               {
                 "Fn::GetAtt": [
                   "GenerateCancellationInvoiceLambdaF69943C4",
@@ -6706,63 +6706,63 @@ exports[`The Cancellation api stack matches the snapshot 2`] = `
           "Fn::Join": [
             "",
             [
-              "{"StartAt":"Refund due?","States":{"Refund due?":{"Type":"Choice","Choices":[{"Condition":"{% $states.input.refundDue = true %}","Next":"GenerateCancellationInvoice","Comment":"Yes"}],"Default":"CheckPaymentSettlement"},"CheckPaymentSettlement":{"Next":"Payment?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              "{"StartAt":"Refund due?","States":{"Refund due?":{"Type":"Choice","Choices":[{"Condition":"{% $states.input.refundDue = true %}","Next":"GenerateCancellationInvoice","Comment":"Yes"}],"Default":"CheckPaymentSettlement"},"CheckPaymentSettlement":{"Next":"Payment?","Retry":[{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
               {
                 "Fn::GetAtt": [
                   "CheckPaymentSettlementLambda20602FE6",
                   "Arn",
                 ],
               },
-              ""},"Wait 24h":{"Type":"Wait","Seconds":86400,"Next":"CheckPaymentSettlement"},"Payment?":{"Type":"Choice","Choices":[{"Condition":"{% $states.input.status = \\"Pending\\" %}","Next":"Wait 24h","Comment":"Pending"},{"Condition":"{% $states.input.status = \\"Failed\\" %}","Next":"GetCancellationReason","Comment":"Failed"},{"Condition":"{% $states.input.status = \\"Settled\\" and $states.input.refundDue = true %}","Next":"CreateRefund","Comment":"Settled, refund due"}],"Default":"Succeed"},"Succeed":{"Type":"Succeed"},"SendPaymentFailedEmail":{"Next":"Succeed","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              ""},"Wait 24h":{"Type":"Wait","Seconds":86400,"Next":"CheckPaymentSettlement"},"Payment?":{"Type":"Choice","Choices":[{"Condition":"{% $states.input.status = \\"Pending\\" %}","Next":"Wait 24h","Comment":"Pending"},{"Condition":"{% $states.input.status = \\"Failed\\" %}","Next":"GetCancellationReason","Comment":"Failed"},{"Condition":"{% $states.input.status = \\"Settled\\" and $states.input.refundDue = true %}","Next":"CreateRefund","Comment":"Settled, refund due"}],"Default":"Succeed"},"Succeed":{"Type":"Succeed"},"SendPaymentFailedEmail":{"Next":"Succeed","Retry":[{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
               {
                 "Fn::GetAtt": [
                   "SendPaymentFailedEmailLambdaA7794EF0",
                   "Arn",
                 ],
               },
-              ""},"Backdated after a failed payment?":{"Type":"Choice","Choices":[{"Condition":"{% $states.input.backdated = true and $exists($states.input.paymentId) %}","Next":"SendPaymentFailedEmail","Comment":"Yes"}],"Default":"Succeed"},"BalanceInvoices":{"Next":"Backdated after a failed payment?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              ""},"Backdated after a failed payment?":{"Type":"Choice","Choices":[{"Condition":"{% $states.input.backdated = true and $exists($states.input.paymentId) %}","Next":"SendPaymentFailedEmail","Comment":"Yes"}],"Default":"Succeed"},"BalanceInvoices":{"Next":"Backdated after a failed payment?","Retry":[{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
               {
                 "Fn::GetAtt": [
                   "BalanceInvoicesLambdaB82C6F3B",
                   "Arn",
                 ],
               },
-              ""},"CalculateCredit":{"Next":"BalanceInvoices","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              ""},"CalculateCredit":{"Next":"BalanceInvoices","Retry":[{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
               {
                 "Fn::GetAtt": [
                   "CalculateRefundLambda0081A960",
                   "Arn",
                 ],
               },
-              ""},"BackdateCancellation":{"Next":"CalculateCredit","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              ""},"BackdateCancellation":{"Next":"CalculateCredit","Retry":[{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
               {
                 "Fn::GetAtt": [
                   "BackdateCancellationLambdaF9568FC2",
                   "Arn",
                 ],
               },
-              ""},"GetCancellationReason":{"Next":"BackdateCancellation","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              ""},"GetCancellationReason":{"Next":"BackdateCancellation","Retry":[{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
               {
                 "Fn::GetAtt": [
                   "GetCancellationReasonLambdaBF5402CB",
                   "Arn",
                 ],
               },
-              ""},"CreateRefund":{"Next":"BalanceInvoices","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              ""},"CreateRefund":{"Next":"BalanceInvoices","Retry":[{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
               {
                 "Fn::GetAtt": [
                   "CreateRefundLambda8E81CB7F",
                   "Arn",
                 ],
               },
-              ""},"Zero amount?":{"Type":"Choice","Choices":[{"Condition":"{% $states.input.refundAmount = 0 %}","Next":"BalanceInvoices","Comment":"Yes"}],"Default":"CheckPaymentSettlement"},"CalculateRefund":{"Next":"Zero amount?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              ""},"Zero amount?":{"Type":"Choice","Choices":[{"Condition":"{% $states.input.refundAmount = 0 %}","Next":"BalanceInvoices","Comment":"Yes"}],"Default":"CheckPaymentSettlement"},"CalculateRefund":{"Next":"Zero amount?","Retry":[{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
               {
                 "Fn::GetAtt": [
                   "CalculateRefundLambda0081A960",
                   "Arn",
                 ],
               },
-              ""},"GenerateCancellationInvoice":{"Next":"CalculateRefund","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
+              ""},"GenerateCancellationInvoice":{"Next":"CalculateRefund","Retry":[{"ErrorEquals":["PermanentError"],"MaxAttempts":0},{"ErrorEquals":["States.ALL"],"IntervalSeconds":60,"MaxAttempts":30,"BackoffRate":2,"MaxDelaySeconds":3600}],"Type":"Task","Output":"{% $merge([$states.input, $states.result]) %}","Resource":"",
               {
                 "Fn::GetAtt": [
                   "GenerateCancellationInvoiceLambdaF69943C4",

@@ -140,6 +140,8 @@ export class CancellationApi extends SrStack {
 			LambdaInvoke.jsonata(this, id, {
 				lambdaFunction,
 				payloadResponseOnly: true,
+				// otherwise CDK's retrier comes first and gives up after about two minutes, before the retry below can catch the error
+				retryOnServiceExceptions: false,
 				outputs: '{% $merge([$states.input, $states.result]) %}',
 			})
 				.addRetry({ errors: ['PermanentError'], maxAttempts: 0 })
