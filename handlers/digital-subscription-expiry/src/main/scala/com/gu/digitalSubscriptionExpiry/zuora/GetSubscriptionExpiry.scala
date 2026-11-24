@@ -19,7 +19,7 @@ object GetSubscriptionExpiry {
       Some(accountSummary.billToLastName),
       Some(accountSummary.soldToLastName),
       accountSummary.soldToPostcode,
-    ).flatten.map(format)
+    ).flatten.map(format).filter(_.nonEmpty)
 
     val formattedPassword = format(password)
 
