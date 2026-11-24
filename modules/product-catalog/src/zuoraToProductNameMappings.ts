@@ -241,6 +241,18 @@ export const getZuoraProductKey = (product: string): ProductKey => {
 		`Unexpected product type ${product}`,
 	);
 };
+
+// TODO: remove once all consumers use 'Patron' - 'PatronMembership' is the deprecated name
+const deprecatedProductKeyAliases: Partial<Record<ProductKey, ProductKey[]>> = {
+	PatronMembership: ['Patron'],
+};
+
+// Returns the product key followed by any additional keys the same Zuora product is also published under
+export const getZuoraProductKeys = (product: string): ProductKey[] => {
+	const key = getZuoraProductKey(product);
+	return [key, ...(deprecatedProductKeyAliases[key] ?? [])];
+};
+
 export const getProductRatePlanKey = (productRatePlan: string): string => {
 	return getIfDefined(
 		zuoraCatalogToProductRatePlanKey[productRatePlan],

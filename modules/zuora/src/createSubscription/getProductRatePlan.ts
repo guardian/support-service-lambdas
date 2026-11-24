@@ -88,6 +88,7 @@ export function getProductRatePlan(
 				productPurchase.ratePlan,
 			);
 		case 'PatronMembership':
+		case 'Patron':
 			return productCatalogHelper.getProductRatePlan(
 				productPurchase.product,
 				productPurchase.ratePlan,
