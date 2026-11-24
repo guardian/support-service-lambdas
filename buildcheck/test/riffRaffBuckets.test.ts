@@ -40,7 +40,7 @@ const lambdaDeployments = fs
 	});
 
 test.each(lambdaDeployments)(
-	'$handlerName/$deploymentName looks up its artifact bucket from SSM',
+	'ROOT $handlerName/$deploymentName looks up its artifact bucket from SSM',
 	({ deployment }) => {
 		expect(deployment.parameters).not.toHaveProperty('bucket');
 		expect(deployment.parameters?.bucketSsmLookup).toBe(true);
