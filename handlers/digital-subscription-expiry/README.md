@@ -34,4 +34,10 @@ Sample response:
 }
 ```
 
-The cloudformation in this project doesn't define an api gateway, instead the lambda is just exported to be included in the '/subs' endpoint of the [digital subscription authorisation](https://github.com/guardian/digital-subscription-authorisation/blob/main/cloudformation.yaml) api gateway
+The cloudformation in this project defines a public API Gateway exposing the lambda as `POST /subs` on `digital-subscription-authorisation-<stage>.subscriptions.guardianapis.com`.
+
+The endpoint is unauthenticated at the gateway (callers authenticate with their subscriber id and postcode or surname), so it is protected by a WAF. The Web ACL is defined in [guardian/waf](https://github.com/guardian/waf) (`lib/membership/digital-subscription-expiry-waf.ts`), which rate limits each IP to slow guessing of subscriber ids, passwords and emergency tokens. This project publishes the API stage ARN to the SSM parameter `/infosec/waf/services/<stage>/digital-subscription-expiry-api-gateway-arn` for that stack to use.
+
+References:
+- [guardian/waf README](https://github.com/guardian/waf#readme)
+- [AWS WAF rate-based rules](https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-rate-based.html)

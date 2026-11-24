@@ -167,3 +167,11 @@ Resources:
         ResourceRecords:
           - !FindInMap [StageVariables, !Ref 'Stage', ApiGatewayTargetDomainName]
 
+    # Picked up by guardian/waf, which attaches this API to a Web ACL
+    WafApiGatewayArnParameter:
+      Type: AWS::SSM::Parameter
+      Properties:
+        Name: !Sub /infosec/waf/services/${Stage}/digital-subscription-expiry-api-gateway-arn
+        Type: String
+        Value: !Sub arn:aws:apigateway:${AWS::Region}::/restapis/${RestApi}/stages/${Stage}
+      DependsOn: RestApiStage
