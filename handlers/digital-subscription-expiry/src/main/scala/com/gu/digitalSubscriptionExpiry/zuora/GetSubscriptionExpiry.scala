@@ -10,7 +10,7 @@ import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 
 object GetSubscriptionExpiry {
-  private def validPassword(accountSummary: AccountSummaryResult, password: String): Boolean = {
+  def validPassword(accountSummary: AccountSummaryResult, password: String): Boolean = {
 
     def format(str: String): String = str.filter(_.isLetterOrDigit).toLowerCase
 

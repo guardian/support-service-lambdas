@@ -34,6 +34,7 @@ object DigitalSubscriptionExpirySteps extends Logging {
       getEmergencyTokenExpiry: String => ApiGatewayOp[Unit],
       getSubscription: SubscriptionId => ApiGatewayOp[SubscriptionResult],
       getAccountSummary: AccountId => ApiGatewayOp[AccountSummaryResult],
+      isValidPassword: (AccountSummaryResult, String) => Boolean,
       getSubscriptionExpiry: (String, SubscriptionResult, AccountSummaryResult) => ApiResponse,
       skipActivationDateUpdate: (UrlParams, SubscriptionResult) => Boolean,
       setActivationDate: SubscriptionId => ApiGatewayOp[Unit],
@@ -55,11 +56,6 @@ object DigitalSubscriptionExpirySteps extends Logging {
 
         subscriptionResult <- getSubscription(subscriptionId)
         queryStringParameters <- apiGatewayRequest.queryParamsAsCaseClass[UrlParams]()
-        _ <-
-          if (skipActivationDateUpdate(queryStringParameters, subscriptionResult))
-            ContinueProcessing(())
-          else
-            setActivationDate(subscriptionResult.id)
         accountSummary <- getAccountSummary(subscriptionResult.accountId)
         _ = {
           if (accountSummary.identityId.isDefined) {
@@ -71,6 +67,17 @@ object DigitalSubscriptionExpirySteps extends Logging {
         password <- expiryRequest.password.toApiGatewayContinueProcessing(
           DigitalSubscriptionApiResponses.notFoundResponse,
         )
+        _ <-
+          if (isValidPassword(accountSummary, password))
+            ContinueProcessing(())
+          else
+            ReturnWithResponse(DigitalSubscriptionApiResponses.notFoundResponse)
+        // the caller must be authenticated before we write anything to Zuora
+        _ <-
+          if (skipActivationDateUpdate(queryStringParameters, subscriptionResult))
+            ContinueProcessing(())
+          else
+            setActivationDate(subscriptionResult.id)
         subscriptionEndDate = getSubscriptionExpiry(password, subscriptionResult, accountSummary)
       } yield subscriptionEndDate).apiResponse
 
