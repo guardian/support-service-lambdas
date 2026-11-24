@@ -67,6 +67,7 @@ object Processor {
           sttpBackend,
           maximumOrderDuration,
           maximumOrderAttemptDuration,
+          creditIdempotencyKey(subscription.subscriptionNumber, update),
         )(order)
         .map(_ => ())
     }
@@ -234,6 +235,15 @@ object Processor {
       if (timeAvailableForOrder < maximumOrderDuration) timeAvailableForOrder
       else maximumOrderDuration
     }
+  }
+
+  private[creditprocessor] def creditIdempotencyKey(
+      subscriptionNumber: String,
+      update: SubscriptionUpdate,
+  ): String = {
+    val productAddition = update.productAddition
+    val creditDate = productAddition.chargeOverride.HolidayStart__c
+    s"credit-processor:$subscriptionNumber:${productAddition.productRatePlanId}:$creditDate"
   }
 
   // FIXME: Temporary test in production to validate migration to https://github.com/guardian/invoicing-api/pull/20

@@ -2,7 +2,6 @@ package com.gu.salesforce
 
 import com.gu.salesforce.SalesforceClient.SalesforceErrorResponseBody
 import com.gu.util.Logging
-import com.gu.util.reader.Types._
 import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker.toClientFailableOp
 import com.gu.util.resthttp.HttpOp
@@ -40,7 +39,6 @@ object SalesforceAuthenticate extends Logging {
         Json.parse(response.value)
       }
       .parse[SalesforceAuth]
-      .map(_.withLogging(s"salesforce auth"))
       .runRequest(config)
       .toDisjunction
       .left

@@ -202,7 +202,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
   }
 
   "orderDuration" should "cap an order at the full retry budget" in {
-    Processor.orderDuration(15.minutes.toMillis.toInt) shouldBe Some(11.minutes)
+    Processor.orderDuration(15.minutes.toMillis.toInt) shouldBe Some(13.minutes + 50.seconds)
   }
 
   it should "leave time to prepare the order and finish the credit" in {
