@@ -87,9 +87,6 @@ test('All Zuora product rate plan ids are unique', () => {
 		.concat(prodCatalogHelper.getAllProductDetailsForBillingSystem('zuora'));
 	const productRatePlanIds = allProducts
 		.filter((product) => product.productRatePlan != 'Discount')
-		// Patron and PatronMembership are duplicated while we rename, so skip
-		// one of them otherwise this uniqueness test fails.
-		.filter((product) => product.zuoraProduct != 'PatronMembership')
 		.map((product) => {
 			return product.id;
 		})

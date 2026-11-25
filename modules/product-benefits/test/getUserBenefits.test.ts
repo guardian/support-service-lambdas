@@ -137,7 +137,6 @@ describe('Premium Puzzles eligibility', () => {
 		'GuardianWeeklyZoneC',
 		'SupporterMembership',
 		'PartnerMembership',
-		'PatronMembership',
 		'Patron',
 		'GuardianPatron',
 	] as const)('grants puzzlePremium to %s', (product) => {

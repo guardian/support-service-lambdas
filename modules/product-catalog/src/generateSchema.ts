@@ -10,7 +10,6 @@ import {
 	getProductRatePlanChargeKey,
 	getProductRatePlanKey,
 	getZuoraProductKey,
-	getZuoraProductKeys,
 	isSupportedProduct,
 	isSupportedProductRatePlan,
 } from '@modules/product-catalog/zuoraToProductNameMappings';
@@ -37,16 +36,11 @@ export const generateSchema = (catalog: ZuoraCatalog): string => {
 	const discountRatePlan: ZuoraProductRatePlan = findDiscountRatePlan(catalog);
 
 	const productKeys = supportedZuoraProducts
-		// getZuoraProductKeys (plural) is temporary and facilitates a single
-		// Zuora product (Patrons) being mapped to multiple in the product
-		// catalog: PatronMembership and Patron.
-		.flatMap((product) => getZuoraProductKeys(product.name))
+		.map((product) => getZuoraProductKey(product.name))
 		.sort();
 
 	const zuoraProductsSchema = supportedZuoraProducts
-		.flatMap((product) =>
-			generateZuoraProductSchemas(product, discountRatePlan),
-		)
+		.map((product) => generateZuoraProductSchema(product, discountRatePlan))
 		.join(',\n');
 
 	return `${header}
@@ -89,14 +83,14 @@ function getRatePlanSchema(
 		.join(',\n');
 }
 
-const generateZuoraProductSchemas = (
+const generateZuoraProductSchema = (
 	product: CatalogProduct,
 	discountRatePlan: ZuoraProductRatePlan,
 ) => {
+	const productKey = getZuoraProductKey(product.name);
 	const ratePlanSchema = getRatePlanSchema(product, discountRatePlan);
 
-	return getZuoraProductKeys(product.name).map(
-		(productKey) => `${productKey}: z.object({
+	return `${productKey}: z.object({
 		billingSystem: z.literal('zuora'),
 		active: z.boolean(),
 		customerFacingName: z.string(),
@@ -104,8 +98,7 @@ const generateZuoraProductSchemas = (
 		ratePlans: z.object({
 			${ratePlanSchema},
 		}),
-	})`,
-	);
+	})`;
 };
 
 const generateProductRatePlanSchema = (
