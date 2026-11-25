@@ -1063,6 +1063,19 @@ const cancellationApi: HandlerDefinition = {
 	},
 };
 
+const emailReminders: HandlerDefinition = {
+	name: 'email-reminders',
+	dependencies: {
+		...dep.zod,
+		...dep.hono,
+		...dep['@hono/zod-openapi'],
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
+	moduleDependencies: [moduleLogger, moduleRouting, moduleZuora],
+};
+
 // MARKER new-lambda: buildcheck-const
 
 export const build: BuildDefinition = {
@@ -1105,6 +1118,7 @@ export const build: BuildDefinition = {
 		paymentFailureCommsExitApi,
 		sendTestDataToMparticle,
 		cancellationApi,
+		emailReminders,
 		// MARKER new-lambda: buildcheck-reference
 	],
 

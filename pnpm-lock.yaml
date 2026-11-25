@@ -315,6 +315,31 @@ importers:
         specifier: ^2.7.4
         version: 2.7.4
 
+  handlers/email-reminders:
+    dependencies:
+      '@hono/zod-openapi':
+        specifier: ^1.6.3
+        version: 1.6.3(hono@4.13.18)(zod@4.4.3)
+      hono:
+        specifier: ^4.13.18
+        version: 4.13.18
+      logger:
+        specifier: workspace:*
+        version: link:../../modules/logger
+      routing:
+        specifier: workspace:*
+        version: link:../../modules/routing
+      zod:
+        specifier: 'catalog:'
+        version: 4.4.3
+      zuora:
+        specifier: workspace:*
+        version: link:../../modules/zuora
+    devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.147
+        version: 8.10.161
+
   handlers/generate-product-catalog:
     dependencies:
       aws:
