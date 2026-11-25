@@ -26,5 +26,8 @@ async function handleRequest(
 		event,
 	);
 
-	return Promise.resolve(ok({ contributionsOnlyCountries }));
+	return Promise.resolve({
+		...ok({ contributionsOnlyCountries }),
+		headers: { 'Cache-Control': 'public, max-age=3600' },
+	});
 }

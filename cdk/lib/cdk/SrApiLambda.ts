@@ -38,6 +38,7 @@ type SrApiLambdaProps = SrLambdaProps & {
 	readonly quota?: QuotaSettings;
 	/**
 	 * Overall throttle settings for the API.
+	 * Applied to the usage plan, or to the stage if the API is public (public APIs have no usage plan).
 	 * @default none
 	 */
 	readonly throttle?: ThrottleSettings;
@@ -77,6 +78,12 @@ export class SrApiLambda extends SrLambda {
 				proxy: false, // add proxy method later, to allow public paths
 				deployOptions: {
 					stageName: scope.stage,
+					...(props.isPublic && props.throttle
+						? {
+								throttlingRateLimit: props.throttle.rateLimit,
+								throttlingBurstLimit: props.throttle.burstLimit,
+							}
+						: {}),
 				},
 				...(props.isPublic
 					? {}

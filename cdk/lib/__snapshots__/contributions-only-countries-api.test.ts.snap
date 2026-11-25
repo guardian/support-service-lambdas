@@ -426,6 +426,15 @@ exports[`The contributions-only countries list api stack matches the snapshot 1`
         "DeploymentId": {
           "Ref": "LambdaRestApiDeployment95319089496bfa4870eed110fe9abbf1d3ecb754",
         },
+        "MethodSettings": [
+          {
+            "DataTraceEnabled": false,
+            "HttpMethod": "*",
+            "ResourcePath": "/*",
+            "ThrottlingBurstLimit": 20,
+            "ThrottlingRateLimit": 10,
+          },
+        ],
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",
         },
@@ -1247,6 +1256,15 @@ exports[`The contributions-only countries list api stack matches the snapshot 2`
         "DeploymentId": {
           "Ref": "LambdaRestApiDeployment953190896de5e097b894c10e3d6208e4675efd2c",
         },
+        "MethodSettings": [
+          {
+            "DataTraceEnabled": false,
+            "HttpMethod": "*",
+            "ResourcePath": "/*",
+            "ThrottlingBurstLimit": 20,
+            "ThrottlingRateLimit": 10,
+          },
+        ],
         "RestApiId": {
           "Ref": "LambdaRestApi687C4D83",
         },

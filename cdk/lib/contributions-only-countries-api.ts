@@ -18,6 +18,7 @@ export class ContributionsOnlyCountriesApi extends SrStack {
 			},
 
 			isPublic: true, // Don't create an API Key for this lambda
+			throttle: { rateLimit: 10, burstLimit: 20 },
 		});
 	}
 }
