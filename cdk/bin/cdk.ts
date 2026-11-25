@@ -52,6 +52,7 @@ import {
 	APP_NAME as SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME,
 	SingleContributionSalesforceWrites,
 } from '../lib/single-contribution-salesforce-writes';
+import { SlotSpend } from '../lib/slot-spend';
 import { SoftOptInConsentSetter } from '../lib/soft-opt-in-consent-setter';
 import { StripeDisputes } from '../lib/stripe-disputes';
 import type { StripeWebhookEndpointsProps } from '../lib/stripe-webhook-endpoints';
@@ -148,7 +149,14 @@ new SingleContributionSalesforceWrites(
 	`${SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME}-PROD`,
 	{ stack: 'membership', stage: 'PROD' },
 );
-
+new SlotSpend(app, 'slot-spend-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+});
+new SlotSpend(app, 'slot-spend-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+});
 new PromotionsLambdas(app, 'CODE', {
 	newPromoStreamLabel: '2026-01-05T11:33:36.603',
 });

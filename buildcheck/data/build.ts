@@ -661,6 +661,14 @@ const salesforceDisasterRecoveryHealthCheck: HandlerDefinition = {
 	moduleDependencies: [],
 };
 
+const slotSpend: HandlerDefinition = {
+	name: 'slot-spend',
+	functionNames: ['slot-spend-query-', 'slot-spend-update-'],
+	entryPoints: ['src/handlers/*.ts'],
+	outbase: 'src/handlers',
+	moduleDependencies: [],
+};
+
 const stripeDisputes: HandlerDefinition = {
 	name: 'stripe-disputes',
 	functionNames: ['stripe-disputes-producer-', 'stripe-disputes-consumer-'],
@@ -1105,6 +1113,7 @@ export const build: BuildDefinition = {
 		paymentFailureCommsExitApi,
 		sendTestDataToMparticle,
 		cancellationApi,
+		slotSpend,
 		// MARKER new-lambda: buildcheck-reference
 	],
 

@@ -1,0 +1,21 @@
+{
+  "name": "slot-spend",
+  "scripts": {
+    "test": "jest --group=-integration",
+    "it-test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --group=integration",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
+    "check-formatting": "prettier --check \"**/*.ts\"",
+    "fix-formatting": "prettier --write \"**/*.ts\"",
+    "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ --outbase=src/handlers src/handlers/*.ts --sourcemap --source-root=/support-service-lambdas/handlers/slot-spend/target/",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm packageQuick",
+    "packageQuick": "pnpm build && cd target && zip -qr slot-spend.zip . -i '*.js' '*.js.map'",
+    "cdk:test": "pnpm --filter cdk test slot-spend",
+    "cdk:test-update": "pnpm --filter cdk test-update slot-spend",
+    "update-lambda": "../../update-lambda.sh \"slot-spend\" slot-spend-query- slot-spend-update-",
+    "update-stack": "../../update-stack.sh \"slot-spend\""
+  },
+  "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
+  "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
+  "dependencies": {}
+}
