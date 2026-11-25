@@ -29,6 +29,7 @@ describe('contributions-only-countries-api handler', () => {
 		});
 
 		expect(response.statusCode).toBe(200);
+		expect(response.headers?.['Cache-Control']).toBe('public, max-age=3600');
 		expect(JSON.parse(response.body)).toEqual({
 			contributionsOnlyCountries,
 		});
