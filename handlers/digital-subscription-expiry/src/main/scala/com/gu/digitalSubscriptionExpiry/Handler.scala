@@ -60,6 +60,7 @@ object Handler extends Logging {
           (SetActivationDate(zuoraRequests, now) _).andThen(_.toApiGatewayOp(s"zuora SetActivationDate fail")),
         getAccountSummary =
           (GetAccountSummary(zuoraRequests) _).andThen(_.toApiGatewayOp(s"zuora GetAccountSummary fail")),
+        isValidPassword = GetSubscriptionExpiry.validPassword,
         getSubscriptionExpiry = GetSubscriptionExpiry(today),
         skipActivationDateUpdate = SkipActivationDateUpdate.apply,
       )

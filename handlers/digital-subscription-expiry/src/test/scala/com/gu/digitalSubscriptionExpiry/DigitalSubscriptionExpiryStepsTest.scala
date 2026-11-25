@@ -73,6 +73,8 @@ class DigitalSubscriptionExpiryStepsTest extends AnyFlatSpec with Matchers {
   ): ApiResponse =
     successfulResponseFromZuora
 
+  def isValidPassword(accountSummary: AccountSummaryResult, password: String): Boolean = password == "somePassword"
+
   def getTokenExpiry(token: String): ApiGatewayOp[Unit] = {
     if (token == "validToken") ReturnWithResponse(validTokenResponse) else ContinueProcessing(())
   }
@@ -87,6 +89,7 @@ class DigitalSubscriptionExpiryStepsTest extends AnyFlatSpec with Matchers {
       getSubscription = getSubId,
       setActivationDate = setActivationDate,
       getAccountSummary = getAccount,
+      isValidPassword = isValidPassword,
       getSubscriptionExpiry = getSubExpiry,
       skipActivationDateUpdate = skipActivationDateUpdate,
     )
@@ -222,6 +225,7 @@ class DigitalSubscriptionExpiryStepsTest extends AnyFlatSpec with Matchers {
       },
       setActivationDate = setActivationDate,
       getAccountSummary = getAccount,
+      isValidPassword = isValidPassword,
       getSubscriptionExpiry = getSubExpiry,
       skipActivationDateUpdate = skipActivationDateUpdate,
     )
@@ -241,6 +245,52 @@ class DigitalSubscriptionExpiryStepsTest extends AnyFlatSpec with Matchers {
       expectedBody = expectedNotFoundResponseBody,
       expectedStatus = "404",
     )
+  }
+
+  def stepsRecordingActivation(onSetActivationDate: () => Unit) =
+    DigitalSubscriptionExpirySteps(
+      getEmergencyTokenExpiry = getTokenExpiry,
+      getSubscription = getSubId,
+      setActivationDate = id => {
+        onSetActivationDate()
+        setActivationDate(id)
+      },
+      getAccountSummary = getAccount,
+      isValidPassword = isValidPassword,
+      getSubscriptionExpiry = getSubExpiry,
+      skipActivationDateUpdate = skipActivationDateUpdate,
+    )
+
+  it should "not set the activation date when the password is wrong" in {
+    var setActivationDateCalled = false
+    val request = """{"subscriberId" : "A-VALIDZUORASUBID", "password" : "wrongPassword"}"""
+
+    val actual = stepsRecordingActivation(() => setActivationDateCalled = true)
+      .steps(ApiGatewayRequest(None, None, Some(request), None, None, None))
+
+    setActivationDateCalled shouldBe false
+    verifyResponse(actualResponse = actual, expectedBody = expectedNotFoundResponseBody, expectedStatus = "404")
+  }
+
+  it should "not set the activation date when no password is provided" in {
+    var setActivationDateCalled = false
+    val request = """{"subscriberId" : "A-VALIDZUORASUBID"}"""
+
+    stepsRecordingActivation(() => setActivationDateCalled = true)
+      .steps(ApiGatewayRequest(None, None, Some(request), None, None, None))
+
+    setActivationDateCalled shouldBe false
+  }
+
+  it should "set the activation date when the password is correct" in {
+    var setActivationDateCalled = false
+    val request = """{"subscriberId" : "A-VALIDZUORASUBID", "password" : "somePassword"}"""
+
+    val actual = stepsRecordingActivation(() => setActivationDateCalled = true)
+      .steps(ApiGatewayRequest(None, None, Some(request), None, None, None))
+
+    setActivationDateCalled shouldBe true
+    actual.shouldBe(successfulResponseFromZuora)
   }
 
   def verifyResponse(actualResponse: ApiResponse, expectedStatus: String, expectedBody: String) = {
@@ -294,13 +344,18 @@ class SubscriptionIdValidationTest extends AnyFlatSpec with Matchers {
   it should "perform correct subscription validation, accepting" in {
     DigitalSubscriptionExpirySteps.isValidSubscriptionId("A-S00044160") should be(true)
     DigitalSubscriptionExpirySteps.isValidSubscriptionId("A3F4DACDD") should be(true)
-    DigitalSubscriptionExpirySteps.isValidSubscriptionId("00044160") should be(true) // the leading `0` will be trimmed out
+    DigitalSubscriptionExpirySteps.isValidSubscriptionId("00044160") should be(
+      true,
+    ) // the leading `0` will be trimmed out
   }
   it should "perform correct subscription validation, rejecting" in {
     DigitalSubscriptionExpirySteps.isValidSubscriptionId("AB-S00044160") should be(false)
     DigitalSubscriptionExpirySteps.isValidSubscriptionId("a3f4dAccd") should be(false) // we do not allow lowercases
-    DigitalSubscriptionExpirySteps.isValidSubscriptionId("Luke@TheResistance") should be(false) // we do not allow non alpha numerical
-    DigitalSubscriptionExpirySteps.isValidSubscriptionId("feedback for the Guardian") should be(false) // we do not allow non alpha numerical, here the spaces
+    DigitalSubscriptionExpirySteps.isValidSubscriptionId("Luke@TheResistance") should be(
+      false,
+    ) // we do not allow non alpha numerical
+    DigitalSubscriptionExpirySteps.isValidSubscriptionId("feedback for the Guardian") should be(
+      false,
+    ) // we do not allow non alpha numerical, here the spaces
   }
 }
-

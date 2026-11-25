@@ -165,6 +165,18 @@ class GetSubscriptionExpiryTest extends AnyFlatSpec {
     actualResponse shouldEqual notFoundResponse
   }
 
+  it should "reject empty or punctuation-only passwords when the account has empty postcodes" in {
+    val emptyPostcodes = accountSummary.copy(billToPostcode = Some(""), soldToPostcode = Some(" - "))
+    GetSubscriptionExpiry.validPassword(emptyPostcodes, "") shouldBe false
+    GetSubscriptionExpiry.validPassword(emptyPostcodes, "!!") shouldBe false
+    GetSubscriptionExpiry(today)("", digitalPack, emptyPostcodes) shouldEqual notFoundResponse
+  }
+
+  it should "still accept the last name when the account has empty postcodes" in {
+    val emptyPostcodes = accountSummary.copy(billToPostcode = Some(""), soldToPostcode = Some(""))
+    GetSubscriptionExpiry(today)("billingLastName", digitalPack, emptyPostcodes) shouldEqual expectedResponse
+  }
+
   it should "return not found for non digipack subscription" in {
     val actualResponse = GetSubscriptionExpiry(today)("billingLastName", monthlyContribution, accountSummary)
     actualResponse shouldEqual notFoundResponse
