@@ -171,21 +171,6 @@ export const productPurchaseSchema = z.discriminatedUnion('product', [
 		]),
 	}),
 	z.object({
-		product: z.literal('PatronMembership'),
-		ratePlan: z.union([
-			z.literal('Annual'),
-			z.literal('Monthly'),
-			z.literal('V1DeprecatedAnnual'),
-			z.literal('V1DeprecatedMonthly'),
-			z.literal('BylineAnnual'),
-			z.literal('BylineMonthly'),
-			z.literal('HeadlineAnnual'),
-			z.literal('HeadlineMonthly'),
-			z.literal('MastheadAnnual'),
-			z.literal('MastheadMonthly'),
-		]),
-	}),
-	z.object({
 		deliveryContact: deliveryContactSchema,
 		firstDeliveryDate: dateOrDateStringSchema,
 		product: z.literal('SubscriptionCard'),

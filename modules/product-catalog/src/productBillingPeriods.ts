@@ -31,7 +31,6 @@ const productBillingPeriods = {
 	OneTimeContribution: ['OneTime'],
 	PartnerMembership: ['Annual', 'Month'],
 	Patron: ['Annual', 'Month'],
-	PatronMembership: ['Annual', 'Month'],
 	SubscriptionCard: ['Month'],
 	SupporterMembership: ['Annual', 'Month'],
 	SupporterPlus: ['Annual', 'Month'],

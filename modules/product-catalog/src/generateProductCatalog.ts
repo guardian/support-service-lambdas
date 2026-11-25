@@ -21,7 +21,7 @@ import {
 	getProductRatePlanKey,
 	getTermLength,
 	getTermTypeName,
-	getZuoraProductKeys,
+	getZuoraProductKey,
 	isSupportedProduct,
 	isSupportedProductRatePlan,
 } from '@modules/product-catalog/zuoraToProductNameMappings';
@@ -158,15 +158,16 @@ export const generateProductCatalog = (
 	const discountRatePlan = findDiscountRatePlan(catalog);
 
 	const result = arrayToObject(
-		supportedProducts.flatMap((product) =>
-			getZuoraProductKeys(product.name).map((productName) => ({
+		supportedProducts.map((product) => {
+			const productName = getZuoraProductKey(product.name);
+			return {
 				[productName]: getZuoraProduct(
 					productName,
 					product.productRatePlans,
 					discountRatePlan,
 				),
-			})),
-		),
+			};
+		}),
 	);
 	const productCatalog = {
 		...stripeProducts,
