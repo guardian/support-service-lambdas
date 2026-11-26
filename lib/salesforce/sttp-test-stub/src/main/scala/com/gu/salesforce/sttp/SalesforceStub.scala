@@ -1,7 +1,7 @@
 package com.gu.salesforce.sttp
 
 import cats.syntax.all._
-import com.gu.salesforce.{SFAuthConfig, SalesforceAuth, SalesforceConstants}
+import com.gu.salesforce.{SFAuthConfig, SalesforceAuth, SalesforceClientCredentials, SalesforceConstants}
 import io.circe.parser.decode
 import io.circe.syntax._
 import io.circe.{Decoder, Encoder}
@@ -14,6 +14,13 @@ import java.net.URLEncoder
 object SalesforceStub {
   class SalesforceStubSttpBackendStubOps[F[_], S](sttpStub: SttpBackendStub[F, S]) {
     def stubAuth(config: SFAuthConfig, auth: SalesforceAuth) = {
+      sttpStub.whenRequestMatchesPartial {
+        case request: Request[_, _] if matchesAuthRequest(config, request) =>
+          Response.ok(Right(auth))
+      }
+    }
+
+    def stubAuth(config: SalesforceClientCredentials, auth: SalesforceAuth) = {
       sttpStub.whenRequestMatchesPartial {
         case request: Request[_, _] if matchesAuthRequest(config, request) =>
           Response.ok(Right(auth))
@@ -78,6 +85,17 @@ object SalesforceStub {
         s"username=${URLEncoder.encode(config.username, "UTF-8")}&" +
         s"password=${URLEncoder.encode(config.password + config.token, "UTF-8")}&" +
         s"grant_type=password",
+      "utf-8",
+    )
+    urlMatches && bodyMatches
+  }
+
+  private def matchesAuthRequest[S, F[_]](config: SalesforceClientCredentials, request: Request[_, _]) = {
+    val urlMatches = request.uri.toString() == config.authUrl
+    val bodyMatches = request.body == StringBody(
+      s"grant_type=client_credentials&" +
+        s"client_id=${URLEncoder.encode(config.clientId, "UTF-8")}&" +
+        s"client_secret=${URLEncoder.encode(config.clientSecret, "UTF-8")}",
       "utf-8",
     )
     urlMatches && bodyMatches

@@ -713,6 +713,7 @@ lazy val `delivery-records-api` = lambdaProject(
   "delivery-records-api",
   "API for accessing delivery records in Salesforce",
   Seq(
+    awsSecretsManager,
     http4sDsl,
     http4sCirce,
     http4sServer,
@@ -722,7 +723,6 @@ lazy val `delivery-records-api` = lambdaProject(
     diffx,
   ),
   Seq(
-    `effects-s3`,
     `config-core`,
     `salesforce-sttp-client`,
     `salesforce-sttp-test-stub` % Test,

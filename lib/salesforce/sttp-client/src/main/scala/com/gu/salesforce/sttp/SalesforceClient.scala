@@ -4,7 +4,7 @@ import cats.data.EitherT
 import cats.effect.Sync
 import cats.syntax.all._
 import com.gu.salesforce.SalesforceConstants.{compositeBaseUrl, sfObjectsBaseUrl, soqlQueryBaseUrl}
-import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig, SalesforceAuth}
+import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig, SalesforceAuth, SalesforceClientCredentials}
 import com.typesafe.scalalogging.LazyLogging
 import io.circe
 import io.circe.generic.auto._
@@ -44,21 +44,46 @@ object SalesforceClient extends LazyLogging {
   def apply[F[_]: Sync, S](
       backend: SttpBackend[F, S],
       config: SFAuthConfig,
+  ): EitherT[F, SalesforceClientError, SalesforceClient[F]] =
+    create(
+      backend,
+      config.url + "/services/oauth2/token",
+      Seq(
+        "client_id" -> config.client_id,
+        "client_secret" -> config.client_secret,
+        "username" -> config.username,
+        "password" -> (config.password + config.token),
+        "grant_type" -> "password",
+      ),
+    )
+
+  def apply[F[_]: Sync, S](
+      backend: SttpBackend[F, S],
+      config: SalesforceClientCredentials,
+  ): EitherT[F, SalesforceClientError, SalesforceClient[F]] =
+    create(
+      backend,
+      config.authUrl,
+      Seq(
+        "grant_type" -> "client_credentials",
+        "client_id" -> config.clientId,
+        "client_secret" -> config.clientSecret,
+      ),
+    )
+
+  private def create[F[_]: Sync, S](
+      backend: SttpBackend[F, S],
+      authUrl: String,
+      authBody: Seq[(String, String)],
   ): EitherT[F, SalesforceClientError, SalesforceClient[F]] = {
 
-    def auth(config: SFAuthConfig): EitherT[F, SalesforceClientError, SalesforceAuth] = {
+    def authenticate(): EitherT[F, SalesforceClientError, SalesforceAuth] = {
       sendRequest[SalesforceAuth](
         basicRequest
           .post(
-            Uri(new URI(config.url + "/services/oauth2/token")),
+            Uri(new URI(authUrl)),
           )
-          .body(
-            "client_id" -> config.client_id,
-            "client_secret" -> config.client_secret,
-            "username" -> config.username,
-            "password" -> (config.password + config.token),
-            "grant_type" -> "password",
-          )
+          .body(authBody: _*)
           .response(asJson[SalesforceAuth])
           .mapResponse(_.left.map(e => DeserializationException(e.getMessage, DecodingFailure(e.getMessage, Nil)))),
       )
@@ -173,7 +198,7 @@ object SalesforceClient extends LazyLogging {
         .toEitherT[F]
 
     for {
-      auth <- auth(config)
+      auth <- authenticate()
       client = new SalesforceClient[F]() {
 
         override def query[A: Decoder](
