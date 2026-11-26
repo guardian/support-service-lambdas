@@ -5,7 +5,7 @@ import { zuoraCatalogToProductKey } from '@modules/product-catalog/zuoraToProduc
 import { zuoraSubscriptionSchema } from '@modules/zuora/types';
 import type { BillingDateMessage } from '../billingDateMessage';
 import { classifyNotice } from './classifyNotice';
-import { selectLeader } from './selectLeader';
+import { checkFirstCharge } from './firstCharge';
 
 export const reminderSubscriptionSchema = zuoraSubscriptionSchema.extend({
 	autoRenew: z.boolean(),
@@ -31,8 +31,8 @@ export const inScopeProducts: ProductKey[] = [
 	'NewspaperVoucher',
 ];
 
-// Logged when a callout can't be matched to a leader; an alarm is based on this text
-export const leaderNotFoundMessage = 'EMAIL_REMINDER_LEADER_NOT_FOUND';
+// Logged when the callout's charge no longer bills on the date; an alarm is based on this text
+export const chargeNotBillingMessage = 'EMAIL_REMINDER_CHARGE_NOT_BILLING';
 export const outcomeMessage = 'EMAIL_REMINDER_OUTCOME';
 
 export async function processBillingDate(
@@ -43,17 +43,17 @@ export async function processBillingDate(
 		message.subscriptionNumber,
 	);
 
-	const leader = selectLeader(
+	const firstCharge = checkFirstCharge(
 		subscription.ratePlans.flatMap((ratePlan) => ratePlan.ratePlanCharges),
 		message.chargeNumber,
 		message.billingDate,
 	);
-	if (leader === 'leaderNotFound') {
-		logger.error(leaderNotFoundMessage, message);
+	if (firstCharge === 'chargeNotBilling') {
+		logger.error(chargeNotBillingMessage, message);
 		return;
 	}
-	if (leader === 'notLeader') {
-		logger.log('not the leader charge, ignoring', message);
+	if (firstCharge === 'notFirstCharge') {
+		logger.log('not the first charge billing on this date, ignoring', message);
 		return;
 	}
 

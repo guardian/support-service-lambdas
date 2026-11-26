@@ -24,7 +24,7 @@ export class EmailReminders extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
 		super(scope, { stage, app: 'email-reminders' });
 
-		// created explicitly so the leader-not-found metric filter can be attached to it
+		// created explicitly so the charge-not-billing metric filter can be attached to it
 		const processorLogGroup = new LogGroup(this, 'ProcessorLogGroup', {
 			logGroupName: `/aws/lambda/email-reminders-processor-${this.stage}`,
 			retention: RetentionDays.ONE_MONTH,
@@ -59,26 +59,26 @@ export class EmailReminders extends SrStack {
 		});
 		processor.inputQueue.grantSendMessages(api);
 
-		const leaderNotFoundFilter = new MetricFilter(
+		const chargeNotBillingFilter = new MetricFilter(
 			this,
-			'LeaderNotFoundMetricFilter',
+			'ChargeNotBillingMetricFilter',
 			{
 				logGroup: processorLogGroup,
 				filterPattern: FilterPattern.literal(
-					'"EMAIL_REMINDER_LEADER_NOT_FOUND"',
+					'"EMAIL_REMINDER_CHARGE_NOT_BILLING"',
 				),
 				metricNamespace: `support-service-lambdas-${this.stage}`,
-				metricName: 'email-reminders-leader-not-found',
+				metricName: 'email-reminders-charge-not-billing',
 				metricValue: '1',
 			},
 		);
 
-		new SrLambdaAlarm(this, 'LeaderNotFoundAlarm', {
+		new SrLambdaAlarm(this, 'ChargeNotBillingAlarm', {
 			app: this.app,
 			lambdaFunctionNames: processor.functionName,
-			alarmName: `${this.app}-${this.stage} could not find the leader charge for a billing date callout`,
-			alarmDescription: `A subscription changed between Zuora sending a billing date callout and it being processed, so it may not have been evaluated. Search the processor logs for EMAIL_REMINDER_LEADER_NOT_FOUND. Impact: ${errorImpact}`,
-			metric: leaderNotFoundFilter.metric({
+			alarmName: `${this.app}-${this.stage} billing date callout for a charge that no longer bills on that date`,
+			alarmDescription: `A subscription changed between Zuora sending a billing date callout and it being processed, so it may not have been evaluated. Search the processor logs for EMAIL_REMINDER_CHARGE_NOT_BILLING. Impact: ${errorImpact}`,
+			metric: chargeNotBillingFilter.metric({
 				statistic: 'Sum',
 				period: Duration.hours(1),
 			}),

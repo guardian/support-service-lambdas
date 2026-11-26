@@ -1,7 +1,7 @@
 import { logger } from '@modules/logger/logger';
 import type { ReminderSubscription } from '../src/processor/processBillingDate';
 import {
-	leaderNotFoundMessage,
+	chargeNotBillingMessage,
 	outcomeMessage,
 	processBillingDate,
 } from '../src/processor/processBillingDate';
@@ -62,7 +62,7 @@ describe('processBillingDate', () => {
 
 	afterEach(() => jest.restoreAllMocks());
 
-	it('logs the notice that would be sent for the leader charge', async () => {
+	it('logs the notice that would be sent for the first charge', async () => {
 		await processBillingDate(services, message('C-00000001'));
 
 		expect(logSpy).toHaveBeenCalledWith(
@@ -82,11 +82,11 @@ describe('processBillingDate', () => {
 		expect(errorSpy).not.toHaveBeenCalled();
 	});
 
-	it('reports when no leader can be found', async () => {
+	it('reports when the callout charge no longer bills on the date', async () => {
 		await processBillingDate(services, message('C-00000003'));
 
 		expect(errorSpy).toHaveBeenCalledWith(
-			leaderNotFoundMessage,
+			chargeNotBillingMessage,
 			expect.anything(),
 		);
 	});
