@@ -8,6 +8,7 @@ import { RuleTargetInput, Schedule } from 'aws-cdk-lib/aws-events';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Architecture, CfnPermission, Runtime } from 'aws-cdk-lib/aws-lambda';
 import type { IConstruct } from 'constructs';
+import { AllowGetSecretValuePolicy } from './cdk/policies';
 import { SrLambdaErrorAlarm } from './cdk/SrLambdaErrorAlarm';
 import { SrScheduledLambda } from './cdk/SrScheduledLambda';
 import type { SrStageNames } from './cdk/SrStack';
@@ -63,16 +64,14 @@ export class DeliveryProblemCreditProcessor extends SrStack {
 				`arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${stage}/zuoraRest-${stage}*.json`,
 			],
 		});
-		const sfAuthS3Statement = new PolicyStatement({
-			effect: Effect.ALLOW,
-			actions: ['s3:GetObject'],
-			resources: [
-				`arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${stage}/sfAuth-${stage}*.json`,
-			],
-		});
-
 		lambda.addToRolePolicy(zuoraRestS3Statement);
-		lambda.addToRolePolicy(sfAuthS3Statement);
+		lambda.addPolicies(
+			new AllowGetSecretValuePolicy(
+				this,
+				'Get Salesforce connected app secret',
+				'Salesforce/ConnectedApp/PrintFulfilment-*',
+			),
+		);
 
 		let failureAlarm: SrLambdaErrorAlarm | undefined;
 		if (isProd) {

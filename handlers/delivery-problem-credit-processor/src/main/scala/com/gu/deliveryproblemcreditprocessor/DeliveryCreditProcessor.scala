@@ -8,7 +8,7 @@ import com.gu.creditprocessor.{ProcessResult, Processor}
 import com.gu.effects.GetFromS3
 import com.gu.fulfilmentdates.{FulfilmentDates, FulfilmentDatesFetcher}
 import com.gu.salesforce.sttp.SalesforceClient
-import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig}
+import com.gu.salesforce.{RecordsWrapperCaseClass, SalesforceClientCredentials}
 import com.gu.util.Logging
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.{ConfigLocation, LoadConfigModule, Stage}
@@ -17,6 +17,8 @@ import com.gu.zuora.subscription._
 import com.gu.zuora.{AccessToken, HolidayStopProcessorZuoraConfig, Zuora}
 import io.circe.generic.auto._
 import org.asynchttpclient.DefaultAsyncHttpClient
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient
+import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest
 import sttp.client3.HttpURLConnectionBackend
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import zio.Schedule.{exponential, recurs}
@@ -27,6 +29,7 @@ import zio.{RIO, Task, ZIO}
 import java.time.{DayOfWeek, LocalDate, LocalDateTime}
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.{FiniteDuration, MINUTES, SECONDS}
+import scala.util.Try
 
 object DeliveryCreditProcessor extends Logging {
 
@@ -40,11 +43,10 @@ object DeliveryCreditProcessor extends Logging {
 
   private lazy val stage = Stage()
 
-  private lazy val sfConfig: Task[SFAuthConfig] =
-    config(
-      LoadConfigModule(stage, GetFromS3.fetchString)
-        .load[SFAuthConfig](ConfigLocation("sfAuth", 1), SFAuthConfig.reads),
-    )
+  private lazy val sfConfig: Task[SalesforceClientCredentials] =
+    ZIO
+      .fromEither(SalesforceCredentials.load(stage, fetchSecret))
+      .mapError(error => new RuntimeException(error.message))
 
   private lazy val zuoraConfig: Task[HolidayStopProcessorZuoraConfig] =
     config(
@@ -58,6 +60,14 @@ object DeliveryCreditProcessor extends Logging {
       case e: Throwable => e
     }
   }
+
+  private def fetchSecret(secretId: String): Try[String] = Try {
+    val request = GetSecretValueRequest.builder().secretId(secretId).build()
+    Option(secretsClient.getSecretValue(request).secretString())
+      .getOrElse(throw new IllegalStateException(s"Secret $secretId does not contain a SecretString"))
+  }
+
+  private lazy val secretsClient = SecretsManagerClient.create()
 
   private def zuoraAccessToken(config: HolidayStopProcessorZuoraConfig): RIO[Clock, AccessToken] =
     ZIO
@@ -99,7 +109,7 @@ object DeliveryCreditProcessor extends Logging {
     } yield results
 
   def processProduct(
-      sfAuthConfig: SFAuthConfig,
+      sfAuthConfig: SalesforceClientCredentials,
       zuoraConfig: HolidayStopProcessorZuoraConfig,
       zuoraAccessToken: AccessToken,
       getRemainingTimeInMillis: () => Int,
@@ -170,7 +180,7 @@ object DeliveryCreditProcessor extends Logging {
     invoiceDate = InvoiceDate(addedCharge.effectiveStartDate),
   )
 
-  def getCreditRequestsFromSalesforce(sfAuthConfig: SFAuthConfig)(
+  def getCreditRequestsFromSalesforce(sfAuthConfig: SalesforceClientCredentials)(
       productType: ZuoraProductType,
       unused: List[LocalDate],
   ): SalesforceApiResponse[List[DeliveryCreditRequest]] = {
@@ -223,7 +233,7 @@ object DeliveryCreditProcessor extends Logging {
       Invoice_Date__c: LocalDate,
   )
 
-  def writeCreditResultsToSalesforce(sfAuthConfig: SFAuthConfig)(
+  def writeCreditResultsToSalesforce(sfAuthConfig: SalesforceClientCredentials)(
       results: List[DeliveryCreditResult],
   ): SalesforceApiResponse[_] = {
 

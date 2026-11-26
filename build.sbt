@@ -603,7 +603,9 @@ lazy val `delivery-problem-credit-processor` = lambdaProject(
   "Add a delivery-problem credit to a subscription with the Zuora Orders API.",
   Seq(
     scalaLambda,
+    awsSecretsManager,
     circe,
+    circeParser,
     zio,
     sttpAsyncHttpClientBackendCats,
     scalatest,

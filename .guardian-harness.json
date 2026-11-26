@@ -1,15 +1,21 @@
 {
-  "name": "delivery-records-api",
+  "name": "delivery-problem-credit-processor",
   "checks": [
     {
-      "id": "delivery-records-api-test-and-assembly",
-      "command": ["sbt", "project delivery-records-api", "test", "assembly"],
+      "id": "install-node-dependencies",
+      "command": ["pnpm", "install", "--frozen-lockfile"],
+      "timeout_seconds": 600,
+      "required": true
+    },
+    {
+      "id": "delivery-problem-credit-processor-test-and-assembly",
+      "command": ["sbt", "project delivery-problem-credit-processor", "test", "assembly"],
       "timeout_seconds": 1800,
       "required": true
     },
     {
-      "id": "salesforce-sttp-client-test",
-      "command": ["sbt", "project salesforce-sttp-client", "test"],
+      "id": "cdk-package",
+      "command": ["pnpm", "--filter", "cdk", "package"],
       "timeout_seconds": 1800,
       "required": true
     },
