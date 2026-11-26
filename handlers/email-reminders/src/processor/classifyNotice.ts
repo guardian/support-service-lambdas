@@ -1,5 +1,6 @@
 export type ClassifiableCharge = {
 	type: string;
+	model: string;
 	billingPeriod: string | null;
 	effectiveStartDate: Date;
 	upToPeriods: number | null;
@@ -30,7 +31,14 @@ export type Classification =
 			renewalReminderAnchoredToOfferEnd: boolean;
 	  };
 
-const discountProductName = 'Discounts';
+// Discounts live under more than one product (e.g. Discounts, and the legacy Promotions), so go by charge model
+const isDiscountRatePlan = (ratePlan: {
+	ratePlanCharges: ClassifiableCharge[];
+}) =>
+	ratePlan.ratePlanCharges.length > 0 &&
+	ratePlan.ratePlanCharges.every((charge) =>
+		charge.model.startsWith('Discount'),
+	);
 
 const billingPeriodMonths: Record<string, number> = {
 	Month: 1,
@@ -105,7 +113,7 @@ export function classifyNotice(
 		(ratePlan) => ratePlan.lastChangeType !== 'Remove',
 	);
 	const productRatePlans = currentRatePlans.filter(
-		(ratePlan) => ratePlan.productName !== discountProductName,
+		(ratePlan) => !isDiscountRatePlan(ratePlan),
 	);
 	const [productRatePlan, ...otherRatePlans] = productRatePlans;
 	if (productRatePlan === undefined || otherRatePlans.length > 0) {
@@ -132,7 +140,7 @@ export function classifyNotice(
 	const intervalMonths = reminderIntervalMonths(periodMonths);
 
 	const discountEnds = currentRatePlans
-		.filter((ratePlan) => ratePlan.productName === discountProductName)
+		.filter(isDiscountRatePlan)
 		.flatMap((ratePlan) => ratePlan.ratePlanCharges)
 		.map((charge) => discountEndDate(charge, periodMonths))
 		.filter((date): date is Date => date !== undefined)

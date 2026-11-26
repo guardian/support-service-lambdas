@@ -11,6 +11,7 @@ const recurring = (
 	startDate: string,
 ): ClassifiableCharge => ({
 	type: 'Recurring',
+	model: 'FlatFee',
 	billingPeriod,
 	effectiveStartDate: date(startDate),
 	upToPeriods: null,
@@ -24,6 +25,7 @@ const discount = (
 	upToPeriodsType: string,
 ): ClassifiableCharge => ({
 	type: 'Recurring',
+	model: 'DiscountPercentage',
 	billingPeriod,
 	effectiveStartDate: date(startDate),
 	upToPeriods,
@@ -56,6 +58,27 @@ const noticeFor = (sub: ClassifiableSubscription, billingDate: string) => {
 };
 
 describe('classifyNotice', () => {
+	it('treats discounts under the legacy Promotions product as discounts', () => {
+		const sub: ClassifiableSubscription = {
+			contractEffectiveDate: date('2026-06-10'),
+			ratePlans: [
+				{
+					productName: 'Promotions',
+					ratePlanCharges: [discount('Month', '2026-06-10', 3, 'Months')],
+				},
+				{
+					productName: 'Digital Pack',
+					ratePlanCharges: [recurring('Month', '2026-06-10')],
+				},
+			],
+		};
+
+		const result = noticeFor(sub, '2026-09-10');
+
+		expect(result.productName).toBe('Digital Pack');
+		expect(result.notice).toBe('endOfOffer');
+	});
+
 	it('sends a renewal reminder six months after a monthly subscription starts', () => {
 		const sub = subscription('Month', '2026-06-01');
 
