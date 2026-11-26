@@ -55,6 +55,8 @@ export const zuoraSubscriptionSchema = z.object({
 					billingPeriodAlignment: z
 						.enum(billingPeriodAlignmentValues)
 						.nullable(),
+					triggerEvent: z.string().optional(),
+					triggerDate: z.coerce.date().nullish(),
 				}),
 			),
 		}),

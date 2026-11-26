@@ -10,10 +10,14 @@ export type ClassifiableCharge = {
 	effectiveStartDate: Date;
 	upToPeriods: number | null;
 	upToPeriodsType: string | null;
+	triggerEvent?: string;
+	triggerDate?: Date | null;
 };
 
 export type ClassifiableSubscription = {
 	contractEffectiveDate: Date;
+	serviceActivationDate: Date;
+	customerAcceptanceDate: Date;
 	ratePlans: Array<{
 		productName: string;
 		lastChangeType?: string;
@@ -30,6 +34,7 @@ export type Classification =
 			notice: Notice;
 			productName: string;
 			billingPeriod: string;
+			billingStartDate: string;
 			monthsSinceStart: number;
 			discountEndDates: string[];
 			// Reminders could instead be anchored to the end of the last offer; logged for comparison
@@ -62,12 +67,17 @@ const utc = (date: Date) => dayjs.utc(date);
 const monthsBetween = (from: Date, to: Date) =>
 	Math.round(utc(to).diff(utc(from), 'month', true));
 
-// Zuora caps a discount's effectiveEndDate at the term end, so work out the real end from its periods
+// Zuora caps a discount's effectiveEndDate at the term end, so work out the real end from its periods.
+// A discount's billing periods are its own, which can differ from the product's (e.g. 12 months off an annual plan).
 export function discountEndDate(
 	charge: ClassifiableCharge,
-	periodMonths: number,
+	productPeriodMonths: number,
 ): Date | undefined {
 	const { upToPeriods, upToPeriodsType, effectiveStartDate } = charge;
+	const periodMonths =
+		(charge.billingPeriod === null
+			? undefined
+			: billingPeriodMonths[charge.billingPeriod]) ?? productPeriodMonths;
 	if (upToPeriods === null) {
 		return undefined;
 	}
@@ -91,6 +101,25 @@ export function discountEndDate(
 	}
 }
 
+// Billing starts on the date matching the charge's trigger, which can be weeks after the contract date,
+// e.g. after a trial or when delivery starts. These dates are fixed, so amendments don't move the anchor.
+function billingStartDate(
+	subscription: ClassifiableSubscription,
+	charge: ClassifiableCharge | undefined,
+): Date {
+	switch (charge?.triggerEvent) {
+		case 'ServiceActivation':
+			return subscription.serviceActivationDate;
+		case 'CustomerAcceptance':
+			return subscription.customerAcceptanceDate;
+		case 'SpecificDate':
+			return charge.triggerDate ?? subscription.contractEffectiveDate;
+		case undefined:
+		default:
+			return subscription.contractEffectiveDate;
+	}
+}
+
 const isReminderMonth = (months: number, intervalMonths: number) =>
 	months > 0 && months % intervalMonths === 0;
 
@@ -109,9 +138,10 @@ export function classifyNotice(
 			reason: `expected one product rate plan, found ${productRatePlans.length}`,
 		};
 	}
-	const billingPeriod = productRatePlan.ratePlanCharges.find(
+	const productCharge = productRatePlan.ratePlanCharges.find(
 		(charge) => charge.type === 'Recurring',
-	)?.billingPeriod;
+	);
+	const billingPeriod = productCharge?.billingPeriod;
 	const periodMonths =
 		billingPeriod === undefined || billingPeriod === null
 			? undefined
@@ -138,10 +168,8 @@ export function classifyNotice(
 
 	const isEndOfOffer = discountEndDates.includes(billingDate);
 
-	const monthsSinceStart = monthsBetween(
-		subscription.contractEffectiveDate,
-		billing,
-	);
+	const billingStart = billingStartDate(subscription, productCharge);
+	const monthsSinceStart = monthsBetween(billingStart, billing);
 	const isRenewalReminder = isReminderMonth(monthsSinceStart, intervalMonths);
 
 	const lastOfferEnd = discountEnds
@@ -162,6 +190,7 @@ export function classifyNotice(
 				: 'none',
 		productName: productRatePlan.productName,
 		billingPeriod,
+		billingStartDate: utc(billingStart).format('YYYY-MM-DD'),
 		monthsSinceStart,
 		discountEndDates,
 		renewalReminderAnchoredToOfferEnd,

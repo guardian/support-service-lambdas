@@ -38,6 +38,8 @@ const subscription = (
 	discountCharge?: ClassifiableCharge,
 ): ClassifiableSubscription => ({
 	contractEffectiveDate: date(startDate),
+	serviceActivationDate: date(startDate),
+	customerAcceptanceDate: date(startDate),
 	ratePlans: [
 		{
 			productName: 'Supporter Plus',
@@ -58,6 +60,37 @@ const noticeFor = (sub: ClassifiableSubscription, billingDate: string) => {
 };
 
 describe('classifyNotice', () => {
+	it('counts discount billing periods in the discount period, not the product period', () => {
+		const sub = subscription(
+			'Annual',
+			'2026-05-30',
+			discount('Month', '2026-05-30', 12, 'Billing_Periods'),
+		);
+
+		expect(noticeFor(sub, '2027-05-30').notice).toBe('endOfOffer');
+	});
+
+	it('anchors renewals to when billing starts, not the contract date', () => {
+		const sub: ClassifiableSubscription = {
+			contractEffectiveDate: date('2022-05-14'),
+			serviceActivationDate: date('2022-05-14'),
+			customerAcceptanceDate: date('2022-05-30'),
+			ratePlans: [
+				{
+					productName: 'Digital Pack',
+					ratePlanCharges: [
+						{
+							...recurring('Annual', '2022-05-30'),
+							triggerEvent: 'CustomerAcceptance',
+						},
+					],
+				},
+			],
+		};
+
+		expect(noticeFor(sub, '2024-05-30').notice).toBe('renewalReminder');
+	});
+
 	it('ignores credits under the Discounts product', () => {
 		const sub = subscription('Month', '2026-06-01');
 		sub.ratePlans.push({
@@ -81,6 +114,8 @@ describe('classifyNotice', () => {
 	it('treats discounts under the legacy Promotions product as discounts', () => {
 		const sub: ClassifiableSubscription = {
 			contractEffectiveDate: date('2026-06-10'),
+			serviceActivationDate: date('2026-06-10'),
+			customerAcceptanceDate: date('2026-06-10'),
 			ratePlans: [
 				{
 					productName: 'Promotions',
