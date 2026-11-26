@@ -67,6 +67,20 @@ const redact = (body: object) =>
 		key === 'x-api-key' ? '<redacted>' : value,
 	);
 
+// ZuoraClient logs full request bodies, which include the key in the callout template headers
+function redactFromConsole(secret: string) {
+	const wrap =
+		(write: (...args: unknown[]) => void) =>
+		(...args: unknown[]) =>
+			write(
+				...args.map((arg) =>
+					typeof arg === 'string' ? arg.replaceAll(secret, '<redacted>') : arg,
+				),
+			);
+	console.log = wrap(console.log.bind(console));
+	console.error = wrap(console.error.bind(console));
+}
+
 async function createOrUpdate(
 	zuoraClient: ZuoraClient,
 	apply: boolean,
@@ -107,6 +121,7 @@ async function main() {
 	if (!apiKey) {
 		throw new Error('set CALLOUT_API_KEY to the email-reminders API key');
 	}
+	redactFromConsole(apiKey);
 
 	const runAt = /^(\d{1,2}):(\d{2})$/.exec(process.env.RUN_AT ?? defaultRunAt);
 	if (!runAt) {

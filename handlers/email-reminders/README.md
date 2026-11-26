@@ -6,6 +6,33 @@ Current status: work in progress. No emails are sent; the processor only logs wh
 
 ## How it works
 
+```mermaid
+flowchart LR
+    subgraph Zuora
+        event["Scheduled event<br/>RatePlanCharge.ChargedThroughDate<br/>daily 03:00, 14 days before"]
+        definition["Notification definition<br/>filter: active, auto-renew, UK"]
+        template["Callout template<br/>x-api-key header"]
+        event --> definition --> template
+    end
+
+    subgraph AWS
+        api["API Gateway + lambda<br/>email-reminders-STAGE"]
+        queue[("SQS<br/>email-reminders-processor-queue-STAGE")]
+        dlq[("Dead letter queue")]
+        processor["Processor lambda<br/>email-reminders-processor-STAGE"]
+        logs["CloudWatch logs<br/>EMAIL_REMINDER_OUTCOME"]
+        alarm["Alarm<br/>EMAIL_REMINDER_LEADER_NOT_FOUND"]
+    end
+
+    template -- "POST /zuora-callouts/billing-date<br/>one per charge" --> api
+    api --> queue
+    queue --> processor
+    queue -. "after 3 failures" .-> dlq
+    processor -- "GET subscription" --> zuoraApi["Zuora REST API"]
+    processor --> logs
+    processor -. "leader not found" .-> alarm
+```
+
 1. A Zuora scheduled event on `RatePlanCharge.ChargedThroughDate` runs daily at 03:00 (London) and sends a callout for each charge billing in 14 days, filtered to active, auto-renewing UK subscriptions.
 2. The API (`email-reminders-STAGE`) validates the callout and puts it on the `email-reminders-processor-queue-STAGE` queue.
 3. The processor (`email-reminders-processor-STAGE`) fetches the subscription. A subscription gets one callout per charge, so only the callout for the lowest numbered charge billing on that date is processed.
