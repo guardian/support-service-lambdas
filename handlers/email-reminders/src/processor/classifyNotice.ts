@@ -1,3 +1,8 @@
+import dayjs from 'dayjs';
+import utcPlugin from 'dayjs/plugin/utc';
+
+dayjs.extend(utcPlugin);
+
 export type ClassifiableCharge = {
 	type: string;
 	model: string;
@@ -31,14 +36,16 @@ export type Classification =
 			renewalReminderAnchoredToOfferEnd: boolean;
 	  };
 
-// Discounts live under more than one product (e.g. Discounts, and the legacy Promotions), so go by charge model
-const isDiscountRatePlan = (ratePlan: {
+const isDiscountCharge = (charge: ClassifiableCharge) =>
+	charge.model.startsWith('Discount');
+
+// The Discounts product also holds credits such as holiday stops, and legacy discounts sit under a Promotions product
+const isProductRatePlan = (ratePlan: {
+	productName: string;
 	ratePlanCharges: ClassifiableCharge[];
 }) =>
-	ratePlan.ratePlanCharges.length > 0 &&
-	ratePlan.ratePlanCharges.every((charge) =>
-		charge.model.startsWith('Discount'),
-	);
+	ratePlan.productName !== 'Discounts' &&
+	!ratePlan.ratePlanCharges.every(isDiscountCharge);
 
 const billingPeriodMonths: Record<string, number> = {
 	Month: 1,
@@ -49,31 +56,11 @@ const billingPeriodMonths: Record<string, number> = {
 const reminderIntervalMonths = (periodMonths: number) =>
 	periodMonths === 12 ? 12 : 6;
 
-const toIsoDate = (date: Date) => date.toISOString().slice(0, 10);
+const utc = (date: Date) => dayjs.utc(date);
 
-const daysInMonthUtc = (year: number, month: number) =>
-	new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
-
-// Adds months the same way Zuora does, keeping the day of month where possible
-export function addMonthsUtc(date: Date, months: number): Date {
-	const totalMonths = date.getUTCMonth() + months;
-	const year = date.getUTCFullYear() + Math.floor(totalMonths / 12);
-	const month = ((totalMonths % 12) + 12) % 12;
-	const day = Math.min(date.getUTCDate(), daysInMonthUtc(year, month));
-	return new Date(Date.UTC(year, month, day));
-}
-
-const addDaysUtc = (date: Date, days: number) =>
-	new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
-
-// Whole months between two dates, rounded to absorb bill cycle day alignment
-export function monthsBetween(from: Date, to: Date): number {
-	return Math.round(
-		(to.getUTCFullYear() - from.getUTCFullYear()) * 12 +
-			(to.getUTCMonth() - from.getUTCMonth()) +
-			(to.getUTCDate() - from.getUTCDate()) / 31,
-	);
-}
+// Rounded to absorb bill cycle day alignment
+const monthsBetween = (from: Date, to: Date) =>
+	Math.round(utc(to).diff(utc(from), 'month', true));
 
 // Zuora caps a discount's effectiveEndDate at the term end, so work out the real end from its periods
 export function discountEndDate(
@@ -86,16 +73,18 @@ export function discountEndDate(
 	}
 	switch (upToPeriodsType) {
 		case 'Days':
-			return addDaysUtc(effectiveStartDate, upToPeriods);
+			return utc(effectiveStartDate).add(upToPeriods, 'day').toDate();
 		case 'Weeks':
-			return addDaysUtc(effectiveStartDate, upToPeriods * 7);
+			return utc(effectiveStartDate).add(upToPeriods, 'week').toDate();
 		case 'Months':
-			return addMonthsUtc(effectiveStartDate, upToPeriods);
+			return utc(effectiveStartDate).add(upToPeriods, 'month').toDate();
 		case 'Years':
-			return addMonthsUtc(effectiveStartDate, upToPeriods * 12);
+			return utc(effectiveStartDate).add(upToPeriods, 'year').toDate();
 		case 'Billing_Periods':
 		case 'Billing Periods':
-			return addMonthsUtc(effectiveStartDate, upToPeriods * periodMonths);
+			return utc(effectiveStartDate)
+				.add(upToPeriods * periodMonths, 'month')
+				.toDate();
 		case null:
 		default:
 			return undefined;
@@ -112,9 +101,7 @@ export function classifyNotice(
 	const currentRatePlans = subscription.ratePlans.filter(
 		(ratePlan) => ratePlan.lastChangeType !== 'Remove',
 	);
-	const productRatePlans = currentRatePlans.filter(
-		(ratePlan) => !isDiscountRatePlan(ratePlan),
-	);
+	const productRatePlans = currentRatePlans.filter(isProductRatePlan);
 	const [productRatePlan, ...otherRatePlans] = productRatePlans;
 	if (productRatePlan === undefined || otherRatePlans.length > 0) {
 		return {
@@ -136,16 +123,18 @@ export function classifyNotice(
 		};
 	}
 
-	const billing = new Date(`${billingDate}T00:00:00Z`);
+	const billing = dayjs.utc(billingDate).toDate();
 	const intervalMonths = reminderIntervalMonths(periodMonths);
 
 	const discountEnds = currentRatePlans
-		.filter(isDiscountRatePlan)
 		.flatMap((ratePlan) => ratePlan.ratePlanCharges)
+		.filter(isDiscountCharge)
 		.map((charge) => discountEndDate(charge, periodMonths))
 		.filter((date): date is Date => date !== undefined)
 		.sort((a, b) => a.getTime() - b.getTime());
-	const discountEndDates = discountEnds.map(toIsoDate);
+	const discountEndDates = discountEnds.map((date) =>
+		utc(date).format('YYYY-MM-DD'),
+	);
 
 	const isEndOfOffer = discountEndDates.includes(billingDate);
 

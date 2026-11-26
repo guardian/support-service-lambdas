@@ -2,7 +2,7 @@ import type {
 	ClassifiableCharge,
 	ClassifiableSubscription,
 } from '../src/processor/classifyNotice';
-import { addMonthsUtc, classifyNotice } from '../src/processor/classifyNotice';
+import { classifyNotice } from '../src/processor/classifyNotice';
 
 const date = (iso: string) => new Date(`${iso}T00:00:00Z`);
 
@@ -58,6 +58,26 @@ const noticeFor = (sub: ClassifiableSubscription, billingDate: string) => {
 };
 
 describe('classifyNotice', () => {
+	it('ignores credits under the Discounts product', () => {
+		const sub = subscription('Month', '2026-06-01');
+		sub.ratePlans.push({
+			productName: 'Discounts',
+			ratePlanCharges: [recurring('Month', '2026-08-01')],
+		});
+
+		expect(noticeFor(sub, '2026-12-01').notice).toBe('renewalReminder');
+	});
+
+	it('ends a discount on the last day of a shorter month, as Zuora does', () => {
+		const sub = subscription(
+			'Month',
+			'2026-01-31',
+			discount('Month', '2026-01-31', 1, 'Months'),
+		);
+
+		expect(noticeFor(sub, '2026-02-28').notice).toBe('endOfOffer');
+	});
+
 	it('treats discounts under the legacy Promotions product as discounts', () => {
 		const sub: ClassifiableSubscription = {
 			contractEffectiveDate: date('2026-06-10'),
@@ -178,12 +198,5 @@ describe('classifyNotice', () => {
 			classifyNotice(subscription('Semi_Annual', '2026-06-01'), '2026-12-01')
 				.status,
 		).toBe('unsupported');
-	});
-});
-
-describe('addMonthsUtc', () => {
-	it('keeps the day of month where possible, like Zuora', () => {
-		expect(addMonthsUtc(date('2026-01-31'), 1)).toEqual(date('2026-02-28'));
-		expect(addMonthsUtc(date('2026-11-15'), 3)).toEqual(date('2027-02-15'));
 	});
 });

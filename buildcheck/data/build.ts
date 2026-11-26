@@ -1068,6 +1068,7 @@ const emailReminders: HandlerDefinition = {
 	functionNames: ['email-reminders-', 'email-reminders-processor-'],
 	entryPoints: ['src/index.ts', 'src/indexProcessor.ts'],
 	dependencies: {
+		...dep.dayjs,
 		...dep.zod,
 		...dep.hono,
 		...dep['@hono/zod-openapi'],
