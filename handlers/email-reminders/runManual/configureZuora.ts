@@ -4,12 +4,16 @@
  *
  * Usage: STAGE=CODE CALLOUT_API_KEY=... [RUN_AT=HH:MM] pnpm configure-zuora [--apply] [--active]
  *   RUN_AT    run time in the Zuora tenant time zone, e.g. for a one-off test (default 03:00)
+ *   ZUORA_CLIENT_ID, ZUORA_CLIENT_SECRET
+ *             a Zuora OAuth client with Events & Notifications permissions. If unset, the shared
+ *             support-service-lambdas credentials are used, which only have them in CODE.
  *   --apply   make the changes (otherwise only prints them)
  *   --active  switch the callouts on (otherwise they are created or left inactive)
  */
 import { z } from 'zod';
 import { logger } from '@modules/logger/logger';
 import { stageFromEnvironment } from '@modules/stage';
+import { ZuoraBearerTokenProvider } from '@modules/zuora/auth';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 const eventName = 'EmailRemindersBillingDate';
@@ -68,13 +72,18 @@ const redact = (body: object) =>
 	);
 
 // ZuoraClient logs full request bodies, which include the key in the callout template headers
-function redactFromConsole(secret: string) {
+function redactFromConsole(secrets: string[]) {
 	const wrap =
 		(write: (...args: unknown[]) => void) =>
 		(...args: unknown[]) =>
 			write(
 				...args.map((arg) =>
-					typeof arg === 'string' ? arg.replaceAll(secret, '<redacted>') : arg,
+					typeof arg === 'string'
+						? secrets.reduce(
+								(text, secret) => text.replaceAll(secret, '<redacted>'),
+								arg,
+							)
+						: arg,
 				),
 			);
 	console.log = wrap(console.log.bind(console));
@@ -121,14 +130,21 @@ async function main() {
 	if (!apiKey) {
 		throw new Error('set CALLOUT_API_KEY to the email-reminders API key');
 	}
-	redactFromConsole(apiKey);
+	const clientId = process.env.ZUORA_CLIENT_ID;
+	const clientSecret = process.env.ZUORA_CLIENT_SECRET;
+	redactFromConsole([apiKey, ...(clientSecret ? [clientSecret] : [])]);
 
 	const runAt = /^(\d{1,2}):(\d{2})$/.exec(process.env.RUN_AT ?? defaultRunAt);
 	if (!runAt) {
 		throw new Error('RUN_AT must be HH:MM');
 	}
 
-	const zuoraClient = await ZuoraClient.create(stage);
+	const zuoraClient =
+		clientId && clientSecret
+			? new ZuoraClient(
+					new ZuoraBearerTokenProvider(stage, { clientId, clientSecret }),
+				)
+			: await ZuoraClient.create(stage);
 
 	const schedule = {
 		displayName: 'email-reminders: charge billing date',
