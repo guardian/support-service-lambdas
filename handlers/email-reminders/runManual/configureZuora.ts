@@ -2,8 +2,7 @@
  * Creates or updates the Zuora scheduled event, callout template and notification definition that
  * send billing date callouts to this API. Safe to re-run: existing objects are found by name and updated.
  *
- * Usage: STAGE=CODE CALLOUT_API_KEY=... [RUN_AT=HH:MM] pnpm configure-zuora [--apply] [--active]
- *   RUN_AT    run time in the Zuora tenant time zone, e.g. for a one-off test (default 03:00)
+ * Usage: STAGE=CODE CALLOUT_API_KEY=... pnpm configure-zuora [--apply] [--active]
  *   ZUORA_CLIENT_ID, ZUORA_CLIENT_SECRET
  *             a Zuora OAuth client with Events & Notifications permissions. If unset, the shared
  *             support-service-lambdas credentials are used, which only have them in CODE.
@@ -23,7 +22,8 @@ const description =
 	'Managed by handlers/email-reminders/runManual/configureZuora.ts';
 
 const daysBeforeBillingDate = 14;
-const defaultRunAt = '03:00';
+// daily run time in the Zuora tenant time zone
+const runAt = { hours: 3, minutes: 0 };
 
 // Only subscription and account fields: filtering on charge fields would drop some of a subscription's charges
 const filterCondition =
@@ -134,11 +134,6 @@ async function main() {
 	const clientSecret = process.env.ZUORA_CLIENT_SECRET;
 	redactFromConsole([apiKey, ...(clientSecret ? [clientSecret] : [])]);
 
-	const runAt = /^(\d{1,2}):(\d{2})$/.exec(process.env.RUN_AT ?? defaultRunAt);
-	if (!runAt) {
-		throw new Error('RUN_AT must be HH:MM');
-	}
-
 	const zuoraClient =
 		clientId && clientSecret
 			? new ZuoraClient(
@@ -149,8 +144,7 @@ async function main() {
 	const schedule = {
 		displayName: 'email-reminders: charge billing date',
 		description,
-		hours: Number(runAt[1]),
-		minutes: Number(runAt[2]),
+		...runAt,
 		active,
 	};
 	await createOrUpdate(zuoraClient, apply, {
