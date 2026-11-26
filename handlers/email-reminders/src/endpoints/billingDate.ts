@@ -10,15 +10,16 @@ import {
 	subscriptionNumberSchema,
 } from '@modules/zuora/identifiers';
 import type { EmailRemindersServices } from '..';
+import type { BillingDateMessage } from '../billingDateMessage';
+import { isoDateSchema } from '../billingDateMessage';
 
-// Body of the Zuora callout template, populated from Zuora merge fields.
-// Zuora localises dates using the communication profile, so the date is not parsed as ISO until its format is confirmed.
+// Body of the Zuora callout template, populated from Zuora merge fields
 export const billingDateCalloutSchema = z
 	.object({
 		subscriptionNumber: subscriptionNumberSchema,
 		accountNumber: accountNumberSchema,
-		ratePlanChargeId: z.string().min(1),
-		chargedThroughDate: z.string().min(1),
+		chargeNumber: z.string().min(1),
+		chargedThroughDate: isoDateSchema,
 	})
 	.openapi('BillingDateCallout');
 
@@ -34,16 +35,21 @@ const acceptedResponseSchema = z
 	.strictObject({ status: z.literal('accepted') })
 	.openapi('CalloutAccepted');
 
-export function billingDateHandler(
-	_services: EmailRemindersServices,
+export async function billingDateHandler(
+	services: EmailRemindersServices,
 	{ body, headers }: JsonRequest<typeof route>,
 ): Promise<z.input<typeof acceptedResponseSchema>> {
 	logger.mutableAddContext(body.subscriptionNumber);
-	logger.log('received billing date callout', {
+	const message: BillingDateMessage = {
 		notificationId: headers['zuora-notification-id'],
-		...body,
-	});
-	return Promise.resolve({ status: 'accepted' });
+		subscriptionNumber: body.subscriptionNumber,
+		accountNumber: body.accountNumber,
+		chargeNumber: body.chargeNumber,
+		billingDate: body.chargedThroughDate,
+	};
+	logger.log('received billing date callout', message);
+	await services.sendToProcessor(JSON.stringify(message));
+	return { status: 'accepted' };
 }
 
 const route = createRoute({

@@ -1065,6 +1065,8 @@ const cancellationApi: HandlerDefinition = {
 
 const emailReminders: HandlerDefinition = {
 	name: 'email-reminders',
+	functionNames: ['email-reminders-', 'email-reminders-processor-'],
+	entryPoints: ['src/index.ts', 'src/indexProcessor.ts'],
 	dependencies: {
 		...dep.zod,
 		...dep.hono,
@@ -1072,8 +1074,18 @@ const emailReminders: HandlerDefinition = {
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
+		...devDeps['tsx'],
 	},
-	moduleDependencies: [moduleLogger, moduleRouting, moduleZuora],
+	extraScripts: {
+		'configure-zuora': 'tsx runManual/configureZuora.ts',
+	},
+	moduleDependencies: [
+		moduleAws,
+		moduleLogger,
+		moduleProductCatalog,
+		moduleRouting,
+		moduleZuora,
+	],
 };
 
 // MARKER new-lambda: buildcheck-const

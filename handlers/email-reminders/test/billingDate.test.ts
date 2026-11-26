@@ -4,12 +4,13 @@ import { api } from '../src';
 
 jest.mock('@hono/aws-lambda', () => ({ handle: jest.fn() }));
 
-const app = createSrApi(api, {}, 'CODE');
+const sendToProcessor = jest.fn(() => Promise.resolve());
+const app = createSrApi(api, { sendToProcessor }, 'CODE');
 
 const validCallout = {
 	subscriptionNumber: 'A-S00123456',
 	accountNumber: 'A00123456',
-	ratePlanChargeId: '8a12345678901234567890123456789a',
+	chargeNumber: 'C-01954845',
 	chargedThroughDate: '2026-12-09',
 };
 
@@ -25,11 +26,10 @@ function postCallout(body: unknown) {
 }
 
 describe('billing date callout', () => {
-	let logSpy: jest.SpyInstance;
-
 	beforeEach(() => {
-		logSpy = jest.spyOn(logger, 'log').mockImplementation(() => undefined);
+		jest.spyOn(logger, 'log').mockImplementation(() => undefined);
 		jest.spyOn(logger, 'error').mockImplementation(() => undefined);
+		sendToProcessor.mockClear();
 	});
 
 	afterEach(() => {
@@ -37,16 +37,18 @@ describe('billing date callout', () => {
 		jest.restoreAllMocks();
 	});
 
-	it('accepts a valid callout and logs it with the notification id', async () => {
+	it('accepts a valid callout and passes it to the processor', async () => {
 		const response = await postCallout(validCallout);
 
 		expect(response.status).toBe(200);
 		expect(await response.json()).toEqual({ status: 'accepted' });
-		expect(logSpy).toHaveBeenCalledWith(
-			'received billing date callout',
-			expect.objectContaining({
+		expect(sendToProcessor).toHaveBeenCalledWith(
+			JSON.stringify({
 				notificationId: 'notification-1',
 				subscriptionNumber: 'A-S00123456',
+				accountNumber: 'A00123456',
+				chargeNumber: 'C-01954845',
+				billingDate: '2026-12-09',
 			}),
 		);
 	});
@@ -55,6 +57,16 @@ describe('billing date callout', () => {
 		const { subscriptionNumber: _, ...withoutSubscription } = validCallout;
 
 		const response = await postCallout(withoutSubscription);
+
+		expect(response.status).toBe(400);
+		expect(sendToProcessor).not.toHaveBeenCalled();
+	});
+
+	it('rejects a callout with a non-ISO date', async () => {
+		const response = await postCallout({
+			...validCallout,
+			chargedThroughDate: '09/12/2026',
+		});
 
 		expect(response.status).toBe(400);
 	});

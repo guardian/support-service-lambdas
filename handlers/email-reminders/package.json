@@ -7,13 +7,14 @@
     "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
-    "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ --outbase=src src/index.ts --sourcemap --source-root=/support-service-lambdas/handlers/email-reminders/target/",
+    "build": "esbuild --bundle --platform=node --target=node22 --outdir=target/ --outbase=src src/index.ts src/indexProcessor.ts --sourcemap --source-root=/support-service-lambdas/handlers/email-reminders/target/",
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm packageQuick",
     "packageQuick": "pnpm build && cd target && zip -qr email-reminders.zip . -i '*.js' '*.js.map'",
     "cdk:test": "pnpm --filter cdk test email-reminders",
     "cdk:test-update": "pnpm --filter cdk test-update email-reminders",
-    "update-lambda": "../../update-lambda.sh \"email-reminders\"",
-    "update-stack": "../../update-stack.sh \"email-reminders\""
+    "update-lambda": "../../update-lambda.sh \"email-reminders\" email-reminders- email-reminders-processor-",
+    "update-stack": "../../update-stack.sh \"email-reminders\"",
+    "configure-zuora": "tsx runManual/configureZuora.ts"
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
@@ -21,11 +22,14 @@
     "zod": "catalog:",
     "hono": "^4.13.18",
     "@hono/zod-openapi": "^1.6.3",
+    "aws": "workspace:*",
     "logger": "workspace:*",
+    "product-catalog": "workspace:*",
     "routing": "workspace:*",
     "zuora": "workspace:*"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.147"
+    "@types/aws-lambda": "^8.10.147",
+    "tsx": "^4.21.0"
   }
 }
