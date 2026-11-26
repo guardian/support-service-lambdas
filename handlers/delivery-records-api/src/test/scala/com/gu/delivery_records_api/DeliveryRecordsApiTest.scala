@@ -32,8 +32,11 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
 
   private implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
-  val config: SFAuthConfig =
-    SFAuthConfig("https://salesforceAuthUrl", "sfClientId", "sfClientSecret", "sfUsername", "sfPassword", "sfToken")
+  val config: SalesforceClientCredentials = SalesforceClientCredentials(
+    authUrl = "https://salesforceAuthUrl/services/oauth2/token",
+    clientId = "sfClientId",
+    clientSecret = "sfClientSecret",
+  )
   val auth: SalesforceAuth = SalesforceAuth("salesforce-access-token", "https://salesforceInstanceUrl")
   val subscriptionNumber = "A-213123"
   val identityId = "identity id"

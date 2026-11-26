@@ -4,17 +4,19 @@ import cats.data.EitherT
 import cats.effect.{ContextShift, IO}
 import com.gu.delivery_records_api.service.createproblem.CreateDeliveryProblemServiceImpl
 import com.gu.delivery_records_api.service.getrecords.GetDeliveryRecordsServiceImpl
-import com.gu.salesforce.SFAuthConfig
+import com.gu.salesforce.SalesforceClientCredentials
 import com.gu.salesforce.sttp.SalesforceClient
 import com.gu.util.config.Stage
 import com.typesafe.scalalogging.LazyLogging
-import io.circe.generic.auto._
 import org.http4s.HttpRoutes
 import org.http4s.server.middleware.Logger
 import org.typelevel.ci.CIString
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient
+import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest
 import sttp.client3.SttpBackend
 
 import scala.concurrent.ExecutionContext
+import scala.util.Try
 
 final case class DeliveryRecordsApiError(message: String)
 
@@ -29,7 +31,7 @@ object DeliveryRecordsApiApp extends LazyLogging {
     } yield app
 
   def httpRoutesFromConfig[S](
-      config: SFAuthConfig,
+      config: SalesforceClientCredentials,
       sttpBackend: SttpBackend[IO, S],
   ): EitherT[IO, DeliveryRecordsApiError, HttpRoutes[IO]] =
     for {
@@ -50,14 +52,17 @@ object DeliveryRecordsApiApp extends LazyLogging {
       logAction = Some({ message: String => IO.delay(logger.info(message)) }),
     )(routes)
 
-  private def loadSalesforceConfig(): EitherT[IO, DeliveryRecordsApiError, SFAuthConfig] = {
-    ConfigLoader
-      .loadFileFromS3[IO, SFAuthConfig](bucket, stage, SFAuthConfig.location)
-      .leftMap(error => DeliveryRecordsApiError(error.toString))
+  private def loadSalesforceConfig(): EitherT[IO, DeliveryRecordsApiError, SalesforceClientCredentials] =
+    SalesforceCredentials.load[IO](stage, fetchSecret)
+
+  private def fetchSecret(secretId: String): Try[String] = Try {
+    val request = GetSecretValueRequest.builder().secretId(secretId).build()
+    Option(secretsClient.getSecretValue(request).secretString())
+      .getOrElse(throw new IllegalStateException(s"Secret $secretId does not contain a SecretString"))
   }
 
   private lazy val stage: Stage =
     Stage(Option(System.getenv("Stage")).filter(_ != "").getOrElse("CODE"))
 
-  private val bucket = "gu-reader-revenue-private"
+  private lazy val secretsClient = SecretsManagerClient.create()
 }

@@ -2,7 +2,7 @@ package com.gu.salesforce.sttp
 
 import cats.effect.IO
 import com.gu.salesforce.sttp.SalesforceStub.implicitSalesforceStub
-import com.gu.salesforce.{SFAuthConfig, SalesforceAuth}
+import com.gu.salesforce.{SFAuthConfig, SalesforceAuth, SalesforceClientCredentials}
 import io.circe.generic.auto._
 import org.scalatest.Inside.inside
 import org.scalatest.flatspec
@@ -97,6 +97,26 @@ class SalesforceClientTest extends flatspec.FixtureAnyFlatSpec with Matchers {
             "{}",
           ),
         )
+        .value
+        .unsafeRunSync()
+    } { case Right(response) =>
+      response should equal(())
+    }
+  }
+
+  it should "authenticate with client credentials before making an API request" in { fixture =>
+    val config = SalesforceClientCredentials(
+      authUrl = "https://salesforceAuthUrl/services/oauth2/token",
+      clientId = "sfClientId",
+      clientSecret = "sfClientSecret",
+    )
+    val backendStub = SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO])
+      .stubAuth(config, fixture.auth)
+      .stubPatch(fixture.auth)
+
+    inside {
+      SalesforceClient(backendStub, config)
+        .flatMap(_.patch("objectName", "objectId", "{}"))
         .value
         .unsafeRunSync()
     } { case Right(response) =>
