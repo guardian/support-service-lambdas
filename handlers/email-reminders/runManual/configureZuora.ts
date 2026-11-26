@@ -2,7 +2,8 @@
  * Creates or updates the Zuora scheduled event, callout template and notification definition that
  * send billing date callouts to this API. Safe to re-run: existing objects are found by name and updated.
  *
- * Usage: STAGE=CODE CALLOUT_API_KEY=... pnpm configure-zuora [--apply] [--active]
+ * Usage: STAGE=CODE CALLOUT_API_KEY=... [RUN_AT=HH:MM] pnpm configure-zuora [--apply] [--active]
+ *   RUN_AT    run time in the Zuora tenant time zone, e.g. for a one-off test (default 03:00)
  *   --apply   make the changes (otherwise only prints them)
  *   --active  switch the callouts on (otherwise they are created or left inactive)
  */
@@ -18,7 +19,7 @@ const description =
 	'Managed by handlers/email-reminders/runManual/configureZuora.ts';
 
 const daysBeforeBillingDate = 14;
-const runAtHour = 3;
+const defaultRunAt = '03:00';
 
 // Only subscription and account fields: filtering on charge fields would drop some of a subscription's charges
 const filterCondition =
@@ -107,13 +108,18 @@ async function main() {
 		throw new Error('set CALLOUT_API_KEY to the email-reminders API key');
 	}
 
+	const runAt = /^(\d{1,2}):(\d{2})$/.exec(process.env.RUN_AT ?? defaultRunAt);
+	if (!runAt) {
+		throw new Error('RUN_AT must be HH:MM');
+	}
+
 	const zuoraClient = await ZuoraClient.create(stage);
 
 	const schedule = {
 		displayName: 'email-reminders: charge billing date',
 		description,
-		hours: runAtHour,
-		minutes: 0,
+		hours: Number(runAt[1]),
+		minutes: Number(runAt[2]),
 		active,
 	};
 	await createOrUpdate(zuoraClient, apply, {

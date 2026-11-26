@@ -29,7 +29,7 @@ STAGE=CODE AWS_PROFILE=membership CALLOUT_API_KEY=... pnpm configure-zuora      
 STAGE=CODE AWS_PROFILE=membership CALLOUT_API_KEY=... pnpm configure-zuora --apply --active
 ```
 
-Without `--active` the event and notification definition are left inactive.
+Without `--active` the event and notification definition are left inactive. The event runs daily at 03:00 in the Zuora tenant time zone; set `RUN_AT=HH:MM` to override it, e.g. for a test run, and re-run without it afterwards.
 
 ## Testing
 
