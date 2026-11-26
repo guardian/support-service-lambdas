@@ -1,3 +1,4 @@
-export function handler() {
-	console.log('spend query handler running...');
-}
+export const handler = () => {
+	console.log('Running slotSpendQuery');
+	return Promise.resolve({ spend: 0 });
+};

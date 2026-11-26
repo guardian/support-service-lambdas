@@ -40,7 +40,6 @@ export class SlotSpend extends GuStack {
 
 		const updateLambdaTask = new LambdaInvoke(this, 'Update Spend', {
 			lambdaFunction: updateLambda,
-			inputPath: '$.Payload',
 		});
 
 		new StateMachine(this, `slot-spend-state-machine-${this.stage}`, {

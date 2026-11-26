@@ -666,6 +666,9 @@ const slotSpend: HandlerDefinition = {
 	functionNames: ['slot-spend-query-', 'slot-spend-update-'],
 	entryPoints: ['src/handlers/*.ts'],
 	outbase: 'src/handlers',
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
 	moduleDependencies: [],
 };
 
