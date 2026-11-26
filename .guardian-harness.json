@@ -1,0 +1,33 @@
+{
+  "name": "delivery-records-api",
+  "checks": [
+    {
+      "id": "delivery-records-api-test-and-assembly",
+      "command": ["sbt", "project delivery-records-api", "test", "assembly"],
+      "timeout_seconds": 1800,
+      "required": true
+    },
+    {
+      "id": "salesforce-sttp-client-test",
+      "command": ["sbt", "project salesforce-sttp-client", "test"],
+      "timeout_seconds": 1800,
+      "required": true
+    },
+    {
+      "id": "diff-check",
+      "command": ["git", "diff", "--check"],
+      "timeout_seconds": 60,
+      "required": true
+    }
+  ],
+  "required_observations": [
+    "local-validation",
+    "configuration",
+    "code-deployment",
+    "functional-test",
+    "review-readiness",
+    "review",
+    "monitoring",
+    "rollback"
+  ]
+}
