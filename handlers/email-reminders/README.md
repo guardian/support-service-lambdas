@@ -33,7 +33,7 @@ Alarms (PROD only):
 - The step function failed or timed out.
 - `EMAIL_REMINDER_CHARGE_NOT_BILLING`: a subscription changed between the query and being processed, so it may not have been evaluated.
 
-Files in the bucket expire after 30 days.
+Files in the bucket, the processor logs and the step function logs contain subscription and account numbers, so they are kept for 14 days.
 
 ## Re-running a day
 

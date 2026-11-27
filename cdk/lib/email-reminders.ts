@@ -22,6 +22,7 @@ import {
 	DistributedMap,
 	Fail,
 	JsonPath,
+	LogLevel,
 	ProcessorMode,
 	ProcessorType,
 	ResultWriterV2,
@@ -56,7 +57,7 @@ export class EmailReminders extends SrStack {
 		const bucket = new Bucket(this, 'Bucket', {
 			blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
 			enforceSSL: true,
-			lifecycleRules: [{ expiration: Duration.days(30) }],
+			lifecycleRules: [{ expiration: Duration.days(14) }],
 		});
 
 		const zuoraOAuthPolicy = new AllowZuoraOAuthSecretsPolicy(this);
@@ -85,7 +86,7 @@ export class EmailReminders extends SrStack {
 		// created explicitly so the charge-not-billing metric filter can be attached to it
 		const processorLogGroup = new LogGroup(this, 'ProcessorLogGroup', {
 			logGroupName: `/aws/lambda/email-reminders-processor-${this.stage}`,
-			retention: RetentionDays.ONE_MONTH,
+			retention: RetentionDays.TWO_WEEKS,
 		});
 
 		const processorLambda = new SrLambda(this, 'ProcessorLambda', {
@@ -198,6 +199,14 @@ export class EmailReminders extends SrStack {
 		const stateMachine = new StateMachine(this, 'StateMachine', {
 			stateMachineName: `${this.app}-${this.stage}`,
 			timeout: Duration.hours(3),
+			// the map's express child executions only have history in the console if this is enabled
+			logs: {
+				destination: new LogGroup(this, 'StateMachineLogGroup', {
+					retention: RetentionDays.TWO_WEEKS,
+				}),
+				level: LogLevel.ALL,
+				includeExecutionData: true,
+			},
 			definitionBody: DefinitionBody.fromChainable(
 				query
 					.next(

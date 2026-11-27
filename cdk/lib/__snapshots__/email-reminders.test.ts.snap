@@ -22,7 +22,7 @@ exports[`The Email reminders stack matches the snapshot 1`] = `
         "LifecycleConfiguration": {
           "Rules": [
             {
-              "ExpirationInDays": 30,
+              "ExpirationInDays": 14,
               "Status": "Enabled",
             },
           ],
@@ -696,7 +696,7 @@ exports[`The Email reminders stack matches the snapshot 1`] = `
       "DeletionPolicy": "Retain",
       "Properties": {
         "LogGroupName": "/aws/lambda/email-reminders-processor-CODE",
-        "RetentionInDays": 30,
+        "RetentionInDays": 14,
         "Tags": [
           {
             "Key": "App",
@@ -987,6 +987,22 @@ exports[`The Email reminders stack matches the snapshot 1`] = `
               "","Prefix.$":"States.Format('{}/results', $.billingDate)"}}},"GetMapResult":{"Next":"CheckForFailures","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.map.ResultWriterDetails.Bucket","Key.$":"$.map.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"CheckForFailures":{"Type":"Choice","Choices":[{"Variable":"$.ResultFiles.FAILED[0]","IsPresent":true,"Next":"SomeSubscriptionsFailed"}],"Default":"AllSubscriptionsProcessed"},"AllSubscriptionsProcessed":{"Type":"Succeed"},"SomeSubscriptionsFailed":{"Type":"Fail","Cause":"Some subscriptions could not be processed, see the FAILED results file in S3"},"NoSubscriptionsFound":{"Type":"Fail","Cause":"The Zuora query found no subscriptions billing on the date"}},"TimeoutSeconds":10800}",
             ],
           ],
+        },
+        "LoggingConfiguration": {
+          "Destinations": [
+            {
+              "CloudWatchLogsLogGroup": {
+                "LogGroupArn": {
+                  "Fn::GetAtt": [
+                    "StateMachineLogGroup15B91BCB",
+                    "Arn",
+                  ],
+                },
+              },
+            },
+          ],
+          "IncludeExecutionData": true,
+          "Level": "ALL",
         },
         "RoleArn": {
           "Fn::GetAtt": [
@@ -1306,6 +1322,36 @@ exports[`The Email reminders stack matches the snapshot 1`] = `
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
+    "StateMachineLogGroup15B91BCB": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "RetentionInDays": 14,
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "email-reminders",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Retain",
+    },
     "StateMachineRoleB840431D": {
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -1472,6 +1518,20 @@ exports[`The Email reminders stack matches the snapshot 1`] = `
                 },
               ],
             },
+            {
+              "Action": [
+                "logs:CreateLogDelivery",
+                "logs:GetLogDelivery",
+                "logs:UpdateLogDelivery",
+                "logs:DeleteLogDelivery",
+                "logs:ListLogDeliveries",
+                "logs:PutResourcePolicy",
+                "logs:DescribeResourcePolicies",
+                "logs:DescribeLogGroups",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
           ],
           "Version": "2012-10-17",
         },
@@ -1552,7 +1612,7 @@ exports[`The Email reminders stack matches the snapshot 2`] = `
         "LifecycleConfiguration": {
           "Rules": [
             {
-              "ExpirationInDays": 30,
+              "ExpirationInDays": 14,
               "Status": "Enabled",
             },
           ],
@@ -2226,7 +2286,7 @@ exports[`The Email reminders stack matches the snapshot 2`] = `
       "DeletionPolicy": "Retain",
       "Properties": {
         "LogGroupName": "/aws/lambda/email-reminders-processor-PROD",
-        "RetentionInDays": 30,
+        "RetentionInDays": 14,
         "Tags": [
           {
             "Key": "App",
@@ -2517,6 +2577,22 @@ exports[`The Email reminders stack matches the snapshot 2`] = `
               "","Prefix.$":"States.Format('{}/results', $.billingDate)"}}},"GetMapResult":{"Next":"CheckForFailures","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.map.ResultWriterDetails.Bucket","Key.$":"$.map.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"CheckForFailures":{"Type":"Choice","Choices":[{"Variable":"$.ResultFiles.FAILED[0]","IsPresent":true,"Next":"SomeSubscriptionsFailed"}],"Default":"AllSubscriptionsProcessed"},"AllSubscriptionsProcessed":{"Type":"Succeed"},"SomeSubscriptionsFailed":{"Type":"Fail","Cause":"Some subscriptions could not be processed, see the FAILED results file in S3"},"NoSubscriptionsFound":{"Type":"Fail","Cause":"The Zuora query found no subscriptions billing on the date"}},"TimeoutSeconds":10800}",
             ],
           ],
+        },
+        "LoggingConfiguration": {
+          "Destinations": [
+            {
+              "CloudWatchLogsLogGroup": {
+                "LogGroupArn": {
+                  "Fn::GetAtt": [
+                    "StateMachineLogGroup15B91BCB",
+                    "Arn",
+                  ],
+                },
+              },
+            },
+          ],
+          "IncludeExecutionData": true,
+          "Level": "ALL",
         },
         "RoleArn": {
           "Fn::GetAtt": [
@@ -2836,6 +2912,36 @@ exports[`The Email reminders stack matches the snapshot 2`] = `
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
+    "StateMachineLogGroup15B91BCB": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "RetentionInDays": 14,
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "email-reminders",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Retain",
+    },
     "StateMachineRoleB840431D": {
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -3001,6 +3107,20 @@ exports[`The Email reminders stack matches the snapshot 2`] = `
                   ],
                 },
               ],
+            },
+            {
+              "Action": [
+                "logs:CreateLogDelivery",
+                "logs:GetLogDelivery",
+                "logs:UpdateLogDelivery",
+                "logs:DeleteLogDelivery",
+                "logs:ListLogDeliveries",
+                "logs:PutResourcePolicy",
+                "logs:DescribeResourcePolicies",
+                "logs:DescribeLogGroups",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
             },
           ],
           "Version": "2012-10-17",
