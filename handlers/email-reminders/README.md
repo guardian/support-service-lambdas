@@ -56,7 +56,7 @@ STAGE=CODE CALLOUT_API_KEY=... pnpm configure-zuora           # dry run
 STAGE=CODE CALLOUT_API_KEY=... pnpm configure-zuora --apply --active
 ```
 
-The lambdas only need to read subscriptions, but the script needs Zuora Events & Notifications permissions. The shared support-service-lambdas OAuth client only has them in CODE, so for PROD ask an admin to create a temporary OAuth client under your Zuora user (Settings > Administration > Manage Users), pass it as `ZUORA_CLIENT_ID` and `ZUORA_CLIENT_SECRET`, and delete it afterwards. With these set, the script needs no AWS credentials; otherwise it uses the `membership` AWS profile unless `AWS_PROFILE` is set.
+The lambdas only need to read subscriptions, but the script needs Zuora Events & Notifications permissions. The shared support-service-lambdas OAuth client only has them in CODE, so for PROD ask an admin to create a temporary OAuth client under your Zuora user (Settings > Administration > Manage Users), pass it as `ZUORA_CLIENT_ID` and `ZUORA_CLIENT_SECRET`, and delete it afterwards. With these set, the script needs no AWS credentials; otherwise it uses the `membership` AWS profile.
 
 Without `--active` the event and notification definition are left inactive. The event runs daily at 03:00 in the Zuora tenant time zone (`runAt` in the script). It can only be set via the API, so for a test run change `runAt`, re-run the script, then revert it.
 

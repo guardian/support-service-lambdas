@@ -6,7 +6,6 @@
  *   ZUORA_CLIENT_ID, ZUORA_CLIENT_SECRET
  *             a Zuora OAuth client with Events & Notifications permissions. If unset, the shared
  *             support-service-lambdas credentials are used, which only have them in CODE.
- *   AWS_PROFILE  defaults to membership
  *   --apply   make the changes (otherwise only prints them)
  *   --active  switch the callouts on (otherwise they are created or left inactive)
  */
@@ -109,7 +108,6 @@ function upsertNotification(
 }
 
 async function main() {
-	process.env.AWS_PROFILE ??= 'membership';
 	const stage = stageFromEnvironment();
 	const apply = process.argv.includes('--apply');
 	const active = process.argv.includes('--active');
