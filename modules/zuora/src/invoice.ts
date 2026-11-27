@@ -1,5 +1,6 @@
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
+import { logger } from '@modules/logger/logger';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type {
 	GetInvoiceItemsResponse,
@@ -22,6 +23,19 @@ export const getInvoice = async (
 ): Promise<GetInvoiceResponse> => {
 	console.log(`Getting invoice with id ${invoiceId}`);
 	return await zuoraClient.get(`/v1/invoices/${invoiceId}`, getInvoiceSchema);
+};
+
+// Stops payment runs taking a payment for the invoice
+export const disableInvoiceAutoPay = async (
+	zuoraClient: ZuoraClient,
+	invoiceId: string,
+): Promise<void> => {
+	logger.log(`Turning off AutoPay for invoice ${invoiceId}`);
+	await zuoraClient.put(
+		`/v1/invoices/${invoiceId}`,
+		JSON.stringify({ autoPay: false }),
+		voidSchema,
+	);
 };
 
 export const getInvoiceItems = async (

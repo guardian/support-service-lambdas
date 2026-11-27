@@ -12,7 +12,7 @@ export type RefundAmount = {
 	paidInvoiceId: string;
 };
 
-type InvoiceGroup = {
+export type InvoiceGroup = {
 	invoiceId: string;
 	// an invoice is dated by its first item's ChargeDate
 	chargeDate: number;
@@ -49,18 +49,16 @@ export function calculateRefundAmount({
 		);
 	}
 
-	const refundPence = sum(
-		paidInvoice.items,
-		(item) => item.ChargeAmount + item.TaxAmount,
-	);
-
 	return {
-		refundAmount: fromPence(refundPence),
+		refundAmount: fromPence(invoiceTotalPence(paidInvoice)),
 		paidInvoiceId: paidInvoice.invoiceId,
 	};
 }
 
-function groupByInvoice(
+export const invoiceTotalPence = ({ items }: InvoiceGroup): number =>
+	sum(items, (item) => item.ChargeAmount + item.TaxAmount);
+
+export function groupByInvoice(
 	invoiceItems: SubscriptionInvoiceItem[],
 ): InvoiceGroup[] {
 	return [...groupByToMap(invoiceItems, (item) => item.InvoiceId)].map(

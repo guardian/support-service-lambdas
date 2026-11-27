@@ -69,3 +69,26 @@ export async function getLatestInvoicePayment(
 		paymentMethodType: paymentMethod.Type,
 	};
 }
+
+const paymentInvoicesQueryResponseSchema = z.object({
+	done: z.boolean(),
+	records: z.array(z.object({ InvoiceId: z.string() })).default([]),
+});
+
+/**
+ * Gets the invoices a payment was applied to.
+ */
+export async function getPaymentInvoiceIds(
+	zuoraClient: ZuoraClient,
+	paymentId: string,
+): Promise<string[]> {
+	const { done, records } = await doQuery(
+		zuoraClient,
+		`select InvoiceId from InvoicePayment where PaymentId = '${paymentId}'`,
+		paymentInvoicesQueryResponseSchema,
+	);
+	if (!done) {
+		throw new PermanentError(`Too many invoices for payment ${paymentId}`);
+	}
+	return [...new Set(records.map(({ InvoiceId }) => InvoiceId))];
+}
