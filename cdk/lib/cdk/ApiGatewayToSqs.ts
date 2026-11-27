@@ -1,4 +1,9 @@
-import { AwsIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
+import type { ThrottleSettings } from 'aws-cdk-lib/aws-apigateway';
+import {
+	ApiKeySourceType,
+	AwsIntegration,
+	RestApi,
+} from 'aws-cdk-lib/aws-apigateway';
 import { Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import type { Queue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
@@ -19,6 +24,11 @@ type ApiGatewayToSqsProps = {
 	 * of it here or add a public facing fastly enabled domain.
 	 */
 	srRestDomainProps?: SrRestDomainProps;
+	/**
+	 * Require an x-api-key header, with a key named $app-key-$stage.
+	 * Note that all headers, including the key, are copied into the message.
+	 */
+	apiKey?: { throttle?: ThrottleSettings };
 };
 
 function iterateParam(targetName: string, sourceName: string) {
@@ -98,6 +108,7 @@ export class ApiGatewayToSqs extends Construct {
 
 		const apiGateway = new RestApi(scope, 'RestApi', {
 			restApiName: `${scope.stack}-${scope.stage}-${scope.app}`,
+			...(props.apiKey ? { apiKeySourceType: ApiKeySourceType.HEADER } : {}),
 		});
 
 		if (scope.stage === 'PROD' && !props.monitoring.noMonitoring) {
@@ -111,6 +122,7 @@ export class ApiGatewayToSqs extends Construct {
 		apiGateway.root
 			.resourceForPath('/')
 			.addMethod('POST', sendMessageIntegration, {
+				...(props.apiKey ? { apiKeyRequired: true } : {}),
 				methodResponses: [
 					{
 						statusCode: '200',
@@ -120,6 +132,20 @@ export class ApiGatewayToSqs extends Construct {
 					},
 				],
 			});
+
+		if (props.apiKey) {
+			const usagePlan = apiGateway.addUsagePlan('UsagePlan', {
+				name: `${scope.app}-${scope.stage}`,
+				description: 'REST endpoints for ' + scope.app,
+				throttle: props.apiKey.throttle,
+				apiStages: [{ stage: apiGateway.deploymentStage, api: apiGateway }],
+			});
+			usagePlan.addApiKey(
+				apiGateway.addApiKey('ApiKey', {
+					apiKeyName: `${scope.app}-key-${scope.stage}`,
+				}),
+			);
+		}
 
 		this.domain = new SrRestDomain(scope, apiGateway, props.srRestDomainProps);
 	}

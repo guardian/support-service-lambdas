@@ -30,6 +30,10 @@
       "hasTsSource": true
     },
     {
+      "subproject": "email-reminders",
+      "hasTsSource": true
+    },
+    {
       "subproject": "generate-product-catalog",
       "hasTsSource": true
     },

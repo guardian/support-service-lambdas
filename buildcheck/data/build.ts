@@ -1063,6 +1063,29 @@ const cancellationApi: HandlerDefinition = {
 	},
 };
 
+const emailReminders: HandlerDefinition = {
+	name: 'email-reminders',
+	functionNames: ['email-reminders-processor-'],
+	entryPoints: ['src/indexProcessor.ts'],
+	dependencies: {
+		...dep.dayjs,
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+		...devDeps['tsx'],
+	},
+	extraScripts: {
+		'configure-zuora': 'tsx runManual/configureZuora.ts',
+	},
+	moduleDependencies: [
+		moduleLogger,
+		moduleProductCatalog,
+		moduleRouting,
+		moduleZuora,
+	],
+};
+
 // MARKER new-lambda: buildcheck-const
 
 export const build: BuildDefinition = {
@@ -1105,6 +1128,7 @@ export const build: BuildDefinition = {
 		paymentFailureCommsExitApi,
 		sendTestDataToMparticle,
 		cancellationApi,
+		emailReminders,
 		// MARKER new-lambda: buildcheck-reference
 	],
 
