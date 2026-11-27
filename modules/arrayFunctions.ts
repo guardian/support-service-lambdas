@@ -87,7 +87,10 @@ export const groupCollect = <T, R, K extends string>(
 	);
 };
 
-export const chunkArray = <T>(array: readonly T[], chunkSize: number): T[][] => {
+export const chunkArray = <T>(
+	array: readonly T[],
+	chunkSize: number,
+): T[][] => {
 	if (chunkSize <= 0) {
 		throw new Error('Chunk size must be greater than 0');
 	}
@@ -153,6 +156,15 @@ export const sortBy = <T>(array: T[], fn: (item: T) => string): T[] => {
 		}
 	});
 };
+
+export const maxBy = <T>(
+	array: readonly T[],
+	fn: (item: T) => number,
+): T | undefined =>
+	array.reduce<T | undefined>(
+		(max, item) => (max === undefined || fn(item) > fn(max) ? item : max),
+		undefined,
+	);
 
 export const getSingleOrThrow = <T>(
 	array: T[],

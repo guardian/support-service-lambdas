@@ -1,0 +1,62 @@
+{
+	"size": 4,
+	"records": [
+		{
+			"ChargeDate": "2023-07-28T12:26:04.000+01:00",
+			"TaxAmount": -0.24,
+			"UnitPrice": 10,
+			"SubscriptionNumber": "A-S01918489",
+			"ProductName": "Supporter Plus",
+			"ServiceEndDate": "2023-08-24",
+			"ServiceStartDate": "2023-07-25",
+			"ChargeName": "Supporter Plus Monthly Charge",
+			"Id": "8a1289288995cad501899c3fa6be501d",
+			"InvoiceId": "8a1289288995cad501899c3fa6b0501c",
+			"ChargeAmount": -9.76,
+			"ChargeNumber": "C-04460599"
+		},
+		{
+			"ChargeDate": "2023-07-28T12:26:04.000+01:00",
+			"TaxAmount": 0,
+			"UnitPrice": 2,
+			"SubscriptionNumber": "A-S01918489",
+			"ProductName": "Supporter Plus",
+			"ServiceEndDate": "2023-08-24",
+			"ServiceStartDate": "2023-07-25",
+			"ChargeName": "Contribution",
+			"Id": "8a1289288995cad501899c3fa6be501e",
+			"InvoiceId": "8a1289288995cad501899c3fa6b0501c",
+			"ChargeAmount": -2,
+			"ChargeNumber": "C-04460598"
+		},
+		{
+			"ChargeDate": "2023-07-25T22:15:52.000+01:00",
+			"TaxAmount": 0.24,
+			"UnitPrice": 10,
+			"SubscriptionNumber": "A-S01918489",
+			"ProductName": "Supporter Plus",
+			"ServiceEndDate": "2023-08-24",
+			"ServiceStartDate": "2023-07-25",
+			"ChargeName": "Supporter Plus Monthly Charge",
+			"Id": "8a129f89898cbdf301898ee88c260860",
+			"InvoiceId": "8a129f89898cbdf301898ee88c0f085f",
+			"ChargeAmount": 9.76,
+			"ChargeNumber": "C-04460599"
+		},
+		{
+			"ChargeDate": "2023-07-25T22:15:52.000+01:00",
+			"TaxAmount": 0,
+			"UnitPrice": 2,
+			"SubscriptionNumber": "A-S01918489",
+			"ProductName": "Supporter Plus",
+			"ServiceEndDate": "2023-08-24",
+			"ServiceStartDate": "2023-07-25",
+			"ChargeName": "Contribution",
+			"Id": "8a129f89898cbdf301898ee88c260861",
+			"InvoiceId": "8a129f89898cbdf301898ee88c0f085f",
+			"ChargeAmount": 2,
+			"ChargeNumber": "C-04460598"
+		}
+	],
+	"done": true
+}
