@@ -21,17 +21,27 @@ export type ExistingAccountOrderRequest = {
 	existingAccountNumber: string;
 };
 type AccountOrderRequest = NewAccountOrderRequest | ExistingAccountOrderRequest;
+type PlanAddedCustomFields = {
+	LastPlanAddedDate__c: string;
+	DeliveryAgent__c?: string;
+	ReaderType__c?: string;
+};
+export type CancellationReasonCustomFields = {
+	UserCancellationReason__c?: string;
+	CancellationReason__c?: string;
+};
+type SubscriptionCustomFields =
+	| PlanAddedCustomFields
+	| (CancellationReasonCustomFields & {
+			[K in keyof PlanAddedCustomFields]?: never;
+	  });
 export type OrderRequest = AccountOrderRequest & {
 	orderDate: string;
 	description?: string;
 	subscriptions: Array<{
 		subscriptionNumber?: string;
 		orderActions: OrderAction[];
-		customFields?: {
-			LastPlanAddedDate__c: string;
-			DeliveryAgent__c?: string;
-			ReaderType__c?: string;
-		};
+		customFields?: SubscriptionCustomFields;
 	}>;
 };
 export type PreviewOrderRequest = OrderRequest & {

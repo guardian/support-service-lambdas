@@ -4,13 +4,20 @@ import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { createOrderAsynchronously } from './asyncOrderRequests';
 import type { CancelSubscriptionOrderAction } from './orderActions';
-import type { CreateOrderRequest } from './orderRequests';
+import type {
+	CancellationReasonCustomFields,
+	CreateOrderRequest,
+} from './orderRequests';
 
 export type CancellationOrderInput = {
 	accountNumber: string;
 	subscriptionNumber: string;
 	orderDate: Dayjs;
 	cancellationEffectiveDate: Dayjs;
+	// set on the cancelled subscription version by the same order
+	cancellationReasons?: CancellationReasonCustomFields;
+	// defaults to true
+	runBilling?: boolean;
 };
 
 const cancellationAction = (
@@ -41,10 +48,13 @@ export const buildCancellationOrderRequest = (
 		{
 			subscriptionNumber: input.subscriptionNumber,
 			orderActions: [cancellationAction(input.cancellationEffectiveDate)],
+			...(input.cancellationReasons && {
+				customFields: input.cancellationReasons,
+			}),
 		},
 	],
 	processingOptions: {
-		runBilling: true,
+		runBilling: input.runBilling ?? true,
 		collectPayment: false,
 	},
 });
