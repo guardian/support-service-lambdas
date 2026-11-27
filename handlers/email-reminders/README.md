@@ -35,7 +35,7 @@ flowchart LR
 
 1. A Zuora scheduled event on `RatePlanCharge.ChargedThroughDate` runs daily at 03:00 (London) and sends a callout for each charge billing in 14 days, filtered to active, auto-renewing UK subscriptions.
 2. The API (`email-reminders-STAGE`) validates the callout and puts it on the `email-reminders-processor-queue-STAGE` queue.
-3. The processor (`email-reminders-processor-STAGE`) fetches the subscription. A subscription gets one callout per charge, so only the callout for the first charge billing on that date (the lowest charge number) is processed.
+3. The processor (`email-reminders-processor-STAGE`) reads the queue in batches of up to 100 and fetches each subscription in the batch once. A subscription gets one callout per charge, so only the callout for the first charge billing on that date (the lowest charge number) is processed.
 4. It classifies the billing date and logs an `EMAIL_REMINDER_OUTCOME` line.
 
 If a callout's charge no longer bills on the date (the subscription changed in between), it logs `EMAIL_REMINDER_CHARGE_NOT_BILLING`, which triggers an alarm.

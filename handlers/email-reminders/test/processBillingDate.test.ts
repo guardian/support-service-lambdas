@@ -1,4 +1,5 @@
 import { logger } from '@modules/logger/logger';
+import { processBatch } from '../src/processor/processBatch';
 import type { ReminderSubscription } from '../src/processor/processBillingDate';
 import {
 	chargeNotBillingMessage,
@@ -53,7 +54,6 @@ const message = (chargeNumber: string) => ({
 describe('processBillingDate', () => {
 	let logSpy: jest.SpyInstance;
 	let errorSpy: jest.SpyInstance;
-	const services = { getSubscription: () => Promise.resolve(subscription) };
 
 	beforeEach(() => {
 		logSpy = jest.spyOn(logger, 'log').mockImplementation(() => undefined);
@@ -62,8 +62,8 @@ describe('processBillingDate', () => {
 
 	afterEach(() => jest.restoreAllMocks());
 
-	it('logs the notice that would be sent for the first charge', async () => {
-		await processBillingDate(services, message('C-00000001'));
+	it('logs the notice that would be sent for the first charge', () => {
+		processBillingDate(subscription, message('C-00000001'));
 
 		expect(logSpy).toHaveBeenCalledWith(
 			outcomeMessage,
@@ -75,19 +75,54 @@ describe('processBillingDate', () => {
 		);
 	});
 
-	it('ignores callouts for other charges', async () => {
-		await processBillingDate(services, message('C-00000002'));
+	it('ignores callouts for other charges', () => {
+		processBillingDate(subscription, message('C-00000002'));
 
 		expect(logSpy).not.toHaveBeenCalledWith(outcomeMessage, expect.anything());
 		expect(errorSpy).not.toHaveBeenCalled();
 	});
 
-	it('reports when the callout charge no longer bills on the date', async () => {
-		await processBillingDate(services, message('C-00000003'));
+	it('reports when the callout charge no longer bills on the date', () => {
+		processBillingDate(subscription, message('C-00000003'));
 
 		expect(errorSpy).toHaveBeenCalledWith(
 			chargeNotBillingMessage,
 			expect.anything(),
 		);
+	});
+});
+
+describe('processBatch', () => {
+	beforeEach(() => {
+		jest.spyOn(logger, 'log').mockImplementation(() => undefined);
+		jest.spyOn(logger, 'error').mockImplementation(() => undefined);
+	});
+
+	afterEach(() => jest.restoreAllMocks());
+
+	const batchMessage = (messageId: string, subscriptionNumber: string) => ({
+		messageId,
+		message: { ...message('C-00000001'), subscriptionNumber },
+	});
+
+	it('fetches each subscription once and only fails the messages for a failed fetch', async () => {
+		const getSubscription = jest.fn((subscriptionNumber: string) =>
+			subscriptionNumber === 'A-S00000002'
+				? Promise.reject(new Error('zuora error'))
+				: Promise.resolve(subscription),
+		);
+
+		const failed = await processBatch({ getSubscription }, [
+			batchMessage('m1', 'A-S00000001'),
+			batchMessage('m2', 'A-S00000002'),
+			batchMessage('m3', 'A-S00000001'),
+			batchMessage('m4', 'A-S00000002'),
+		]);
+
+		expect(getSubscription.mock.calls).toEqual([
+			['A-S00000001'],
+			['A-S00000002'],
+		]);
+		expect(failed).toEqual(['m2', 'm4']);
 	});
 });

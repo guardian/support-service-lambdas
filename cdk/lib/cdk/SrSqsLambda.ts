@@ -43,6 +43,13 @@ export type SrSqsLambdaProps = SrLambdaProps & {
 	 */
 	readonly maxConcurrency?: number;
 	/**
+	 * Maximum number of messages passed to the lambda in one invocation. The handler must report
+	 * failures per message (batchItemFailures) so only the failed messages are retried.
+	 *
+	 * @default 1
+	 */
+	readonly batch?: { size: number; maxBatchingWindow: Duration };
+	/**
 	 * legacy IDs, to avoid having to drop and recreate an existing stack
 	 */
 	legacyQueueIds?: { queue: string; dlq: string; dlqNameOverride?: string };
@@ -93,7 +100,9 @@ export class SrSqsLambda extends SrLambda implements Construct {
 
 		super.addEventSource(
 			new SqsEventSource(this.inputQueue, {
-				batchSize: 1,
+				batchSize: props.batch?.size ?? 1,
+				maxBatchingWindow: props.batch?.maxBatchingWindow,
+				reportBatchItemFailures: props.batch !== undefined,
 				maxConcurrency: props.maxConcurrency,
 			}),
 		);

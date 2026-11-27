@@ -1029,7 +1029,7 @@ exports[`The Email reminders stack matches the snapshot 1`] = `
             "Value": "CODE",
           },
         ],
-        "Timeout": 30,
+        "Timeout": 600,
       },
       "Type": "AWS::Lambda::Function",
     },
@@ -1204,7 +1204,7 @@ exports[`The Email reminders stack matches the snapshot 1`] = `
     },
     "ProcessorLambdaSqsEventSourceemailremindersCODEQueue43F6465B88346B4A": {
       "Properties": {
-        "BatchSize": 1,
+        "BatchSize": 100,
         "EventSourceArn": {
           "Fn::GetAtt": [
             "Queue4A7E3555",
@@ -1214,6 +1214,10 @@ exports[`The Email reminders stack matches the snapshot 1`] = `
         "FunctionName": {
           "Ref": "ProcessorLambda71A929CE",
         },
+        "FunctionResponseTypes": [
+          "ReportBatchItemFailures",
+        ],
+        "MaximumBatchingWindowInSeconds": 5,
         "ScalingConfig": {
           "MaximumConcurrency": 5,
         },
@@ -1308,7 +1312,7 @@ exports[`The Email reminders stack matches the snapshot 1`] = `
             "Value": "CODE",
           },
         ],
-        "VisibilityTimeout": 60,
+        "VisibilityTimeout": 900,
       },
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
@@ -2581,7 +2585,7 @@ DLQ: https://",
             "Value": "PROD",
           },
         ],
-        "Timeout": 30,
+        "Timeout": 600,
       },
       "Type": "AWS::Lambda::Function",
     },
@@ -2756,7 +2760,7 @@ DLQ: https://",
     },
     "ProcessorLambdaSqsEventSourceemailremindersPRODQueue4681D2DBC9C371AF": {
       "Properties": {
-        "BatchSize": 1,
+        "BatchSize": 100,
         "EventSourceArn": {
           "Fn::GetAtt": [
             "Queue4A7E3555",
@@ -2766,6 +2770,10 @@ DLQ: https://",
         "FunctionName": {
           "Ref": "ProcessorLambda71A929CE",
         },
+        "FunctionResponseTypes": [
+          "ReportBatchItemFailures",
+        ],
+        "MaximumBatchingWindowInSeconds": 5,
         "ScalingConfig": {
           "MaximumConcurrency": 5,
         },
@@ -2860,7 +2868,7 @@ DLQ: https://",
             "Value": "PROD",
           },
         ],
-        "VisibilityTimeout": 60,
+        "VisibilityTimeout": 900,
       },
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",

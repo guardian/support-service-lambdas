@@ -35,14 +35,10 @@ export const inScopeProducts: ProductKey[] = [
 export const chargeNotBillingMessage = 'EMAIL_REMINDER_CHARGE_NOT_BILLING';
 export const outcomeMessage = 'EMAIL_REMINDER_OUTCOME';
 
-export async function processBillingDate(
-	services: ProcessorServices,
+export function processBillingDate(
+	subscription: ReminderSubscription,
 	message: BillingDateMessage,
-): Promise<void> {
-	const subscription = await services.getSubscription(
-		message.subscriptionNumber,
-	);
-
+): void {
 	const firstCharge = checkFirstCharge(
 		subscription.ratePlans.flatMap((ratePlan) => ratePlan.ratePlanCharges),
 		message.chargeNumber,

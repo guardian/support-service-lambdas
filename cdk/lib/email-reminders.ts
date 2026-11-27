@@ -35,13 +35,15 @@ export class EmailReminders extends SrStack {
 			lambdaOverrides: {
 				description:
 					'Decides which reminder or notice email, if any, a subscriber is due',
-				timeout: Duration.seconds(30),
+				timeout: Duration.minutes(10), // a batch can hold up to 100 subscriptions, fetched in turn
 				logGroup: processorLogGroup,
 			},
 			monitoring: { errorImpact },
 			maxReceiveCount: 3,
-			visibilityTimeout: Duration.seconds(60),
+			visibilityTimeout: Duration.minutes(15),
 			maxConcurrency: 5, // limit concurrent Zuora API calls
+			// a subscription gets a callout per charge, batching lets each subscription be fetched once
+			batch: { size: 100, maxBatchingWindow: Duration.seconds(5) },
 		});
 		processor.addPolicies(new AllowZuoraOAuthSecretsPolicy(this));
 
