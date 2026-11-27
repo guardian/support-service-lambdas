@@ -15,7 +15,7 @@ deployments:
     type: aws-lambda
     parameters:
       fileName: fulfilment-date-calculator.jar
-      bucket: support-service-lambdas-dist
+      bucketSsmLookup: true
       prefixStack: false
       functionNames:
       - fulfilment-date-calculator-

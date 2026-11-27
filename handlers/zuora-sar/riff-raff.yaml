@@ -16,7 +16,7 @@ deployments:
     type: aws-lambda
     parameters:
       fileName: zuora-sar.jar
-      bucket: support-service-lambdas-dist
+      bucketSsmLookup: true
       prefixStack: false
       functionNames: [zuora-baton-sar-lambda-, zuora-baton-perform-sar-lambda-]
     dependencies: [cfn]
