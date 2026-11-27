@@ -6,7 +6,7 @@ import type { HandlerEnv } from '@modules/routing/lambdaHandler';
 import { LambdaHandlerWithServices } from '@modules/routing/lambdaHandler';
 import { getSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { billingDateMessageSchema } from './billingDateMessage';
+import { parseBillingDateMessage } from './billingDateMessage';
 import type { BatchMessage } from './processor/processBatch';
 import { processBatch } from './processor/processBatch';
 import type { ProcessorServices } from './processor/processBillingDate';
@@ -23,9 +23,10 @@ export const handler = LambdaHandlerWithServices(
 		const parseFailures: string[] = [];
 		const messages: BatchMessage[] = event.Records.flatMap((record) => {
 			try {
-				const message = billingDateMessageSchema.parse(JSON.parse(record.body));
+				const message = parseBillingDateMessage(record.body);
 				return [{ messageId: record.messageId, message }];
 			} catch (error) {
+				// reported as failed so it ends up on the DLQ, which alarms
 				logger.error(`invalid message ${record.messageId}`, error);
 				parseFailures.push(record.messageId);
 				return [];

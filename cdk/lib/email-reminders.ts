@@ -10,8 +10,8 @@ import {
 	MetricFilter,
 	RetentionDays,
 } from 'aws-cdk-lib/aws-logs';
+import { ApiGatewayToSqs } from './cdk/ApiGatewayToSqs';
 import { AllowZuoraOAuthSecretsPolicy } from './cdk/policies';
-import { SrApiLambda } from './cdk/SrApiLambda';
 import { SrLambdaAlarm } from './cdk/SrLambdaAlarm';
 import { SrSqsLambda } from './cdk/SrSqsLambda';
 import type { SrStageNames } from './cdk/SrStack';
@@ -34,7 +34,7 @@ export class EmailReminders extends SrStack {
 			nameSuffix: 'processor',
 			lambdaOverrides: {
 				description:
-					'Decides which reminder or notice email, if any, a subscriber is due',
+					'Receives Zuora billing date callouts and decides which reminder or notice email, if any, a subscriber is due',
 				timeout: Duration.minutes(10), // a batch can hold up to 100 subscriptions, fetched in turn
 				logGroup: processorLogGroup,
 			},
@@ -47,19 +47,15 @@ export class EmailReminders extends SrStack {
 		});
 		processor.addPolicies(new AllowZuoraOAuthSecretsPolicy(this));
 
-		const api = new SrApiLambda(this, 'Lambda', {
-			lambdaOverrides: {
-				description:
-					'Receives Zuora callouts used to send reminder and notice emails to subscribers',
-			},
+		// Zuora callouts go straight onto the processor queue
+		new ApiGatewayToSqs(this, 'ApiGatewayToSqs', {
+			queue: processor.inputQueue,
 			monitoring: { errorImpact },
-			// Zuora sends each scheduled event's callouts in a burst; rejected callouts are retried by Zuora
-			throttle: {
-				rateLimit: 500,
-				burstLimit: 1000,
+			apiKey: {
+				// Zuora sends each scheduled event's callouts in a burst; rejected callouts are retried by Zuora
+				throttle: { rateLimit: 500, burstLimit: 1000 },
 			},
 		});
-		processor.inputQueue.grantSendMessages(api);
 
 		const chargeNotBillingFilter = new MetricFilter(
 			this,

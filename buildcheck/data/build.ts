@@ -1065,13 +1065,11 @@ const cancellationApi: HandlerDefinition = {
 
 const emailReminders: HandlerDefinition = {
 	name: 'email-reminders',
-	functionNames: ['email-reminders-', 'email-reminders-processor-'],
-	entryPoints: ['src/index.ts', 'src/indexProcessor.ts'],
+	functionNames: ['email-reminders-processor-'],
+	entryPoints: ['src/indexProcessor.ts'],
 	dependencies: {
 		...dep.dayjs,
 		...dep.zod,
-		...dep.hono,
-		...dep['@hono/zod-openapi'],
 	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
@@ -1081,7 +1079,6 @@ const emailReminders: HandlerDefinition = {
 		'configure-zuora': 'tsx runManual/configureZuora.ts',
 	},
 	moduleDependencies: [
-		moduleAws,
 		moduleLogger,
 		moduleProductCatalog,
 		moduleRouting,

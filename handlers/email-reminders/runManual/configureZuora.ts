@@ -6,11 +6,13 @@
  *   ZUORA_CLIENT_ID, ZUORA_CLIENT_SECRET
  *             a Zuora OAuth client with Events & Notifications permissions. If unset, the shared
  *             support-service-lambdas credentials are used, which only have them in CODE.
+ *   AWS_PROFILE  defaults to membership
  *   --apply   make the changes (otherwise only prints them)
  *   --active  switch the callouts on (otherwise they are created or left inactive)
  */
 import { z } from 'zod';
 import { logger } from '@modules/logger/logger';
+import type { Stage } from '@modules/stage';
 import { stageFromEnvironment } from '@modules/stage';
 import { ZuoraBearerTokenProvider } from '@modules/zuora/auth';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
@@ -36,8 +38,111 @@ const calloutBody = {
 	chargedThroughDate: '{{DataSource.RatePlanCharge.ChargedThroughDate}}',
 };
 
-const calloutUrl = (stage: string) =>
-	`https://email-reminders${stage === 'PROD' ? '' : '-' + stage.toLowerCase()}.support.guardianapis.com/zuora-callouts/billing-date`;
+const calloutUrl = (stage: Stage) =>
+	`https://email-reminders${stage === 'PROD' ? '' : '-' + stage.toLowerCase()}.support.guardianapis.com/`;
+
+type Upsert = (
+	name: string,
+	body: object,
+	createOnly: object,
+) => Promise<string | undefined>;
+
+// Fires daily for each charge whose ChargedThroughDate (the next billing date) is in the notification's window
+function upsertEvent(upsert: Upsert, active: boolean) {
+	return upsert(
+		eventName,
+		{
+			displayName: 'email-reminders: charge billing date',
+			description,
+			...runAt,
+			active,
+		},
+		{
+			name: eventName,
+			apiObject: 'RatePlanCharge',
+			apiField: 'ChargedThroughDate',
+		},
+	);
+}
+
+function upsertTemplate(upsert: Upsert, stage: Stage, apiKey: string) {
+	return upsert(
+		calloutTemplateName,
+		{
+			name: calloutTemplateName,
+			description,
+			active: true,
+			calloutBaseurl: calloutUrl(stage),
+			httpMethod: 'POST',
+			calloutHeaders: { 'x-api-key': apiKey },
+			calloutRetry: true,
+			contentType: 'APPLICATION_JSON',
+			useCustomRequestBody: true,
+			customRequestBody: JSON.stringify(calloutBody),
+		},
+		{ eventTypeName: eventName, eventTypeNamespace: 'user.notification' },
+	);
+}
+
+function upsertNotification(
+	upsert: Upsert,
+	active: boolean,
+	calloutTemplateId: string | undefined,
+) {
+	return upsert(
+		notificationDefinitionName,
+		{
+			name: notificationDefinitionName,
+			description,
+			active,
+			emailActive: false,
+			calloutActive: true,
+			calloutTemplateIds: [calloutTemplateId ?? '<new callout template id>'],
+			filterRule: { condition: filterCondition },
+			filterRuleParams: {
+				_DAYS: String(daysBeforeBillingDate),
+				_CONDITION: 'Before',
+			},
+		},
+		{ eventTypeName: eventName, eventTypeNamespace: 'user.notification' },
+	);
+}
+
+async function main() {
+	process.env.AWS_PROFILE ??= 'membership';
+	const stage = stageFromEnvironment();
+	const apply = process.argv.includes('--apply');
+	const active = process.argv.includes('--active');
+	const apiKey = process.env.CALLOUT_API_KEY;
+	if (!apiKey) {
+		throw new Error('set CALLOUT_API_KEY to the email-reminders API key');
+	}
+	const clientId = process.env.ZUORA_CLIENT_ID;
+	const clientSecret = process.env.ZUORA_CLIENT_SECRET;
+	const zuoraClient =
+		clientId && clientSecret
+			? new ZuoraClient(
+					new ZuoraBearerTokenProvider(stage, { clientId, clientSecret }),
+				)
+			: await ZuoraClient.create(stage);
+
+	const upsertAt =
+		(path: string): Upsert =>
+		(name, body, createOnly) =>
+			createOrUpdate(zuoraClient, apply, path, name, body, createOnly);
+
+	await upsertEvent(upsertAt('/events/scheduled-events'), active);
+	const calloutTemplateId = await upsertTemplate(
+		upsertAt('/notifications/callout-templates'),
+		stage,
+		apiKey,
+	);
+	await upsertNotification(
+		upsertAt('/notifications/notification-definitions'),
+		active,
+		calloutTemplateId,
+	);
+}
 
 const namedObjectSchema = z.object({ id: z.string(), name: z.string() });
 const pageSchema = z.object({
@@ -66,147 +171,33 @@ async function findByName(
 	return undefined;
 }
 
-const redact = (body: object) =>
-	JSON.stringify(body, (key, value: unknown) =>
-		key === 'x-api-key' ? '<redacted>' : value,
-	);
-
-// ZuoraClient logs full request bodies, which include the key in the callout template headers
-function redactFromConsole(secrets: string[]) {
-	const wrap =
-		(write: (...args: unknown[]) => void) =>
-		(...args: unknown[]) =>
-			write(
-				...args.map((arg) =>
-					typeof arg === 'string'
-						? secrets.reduce(
-								(text, secret) => text.replaceAll(secret, '<redacted>'),
-								arg,
-							)
-						: arg,
-				),
-			);
-	console.log = wrap(console.log.bind(console));
-	console.error = wrap(console.error.bind(console));
-}
-
+// Updates the object with this name if it exists, otherwise creates it with createOnly fields added
 async function createOrUpdate(
 	zuoraClient: ZuoraClient,
 	apply: boolean,
-	{
-		path,
-		name,
-		createBody,
-		updateBody,
-	}: {
-		path: string;
-		name: string;
-		createBody: object;
-		updateBody: object;
-	},
+	path: string,
+	name: string,
+	body: object,
+	createOnly: object,
 ): Promise<string | undefined> {
 	const existingId = await findByName(zuoraClient, path, name);
-	const action = existingId ? `PUT ${path}/${existingId}` : `POST ${path}`;
-	const body = existingId ? updateBody : createBody;
-	logger.log(`${apply ? '' : '[dry run] '}${action} ${redact(body)}`);
+	const [action, requestBody] = existingId
+		? [`PUT ${path}/${existingId}`, body]
+		: [`POST ${path}`, { ...body, ...createOnly }];
+	logger.log(
+		`${apply ? '' : '[dry run] '}${action} ${JSON.stringify(requestBody)}`,
+	);
 	if (!apply) {
 		return existingId;
 	}
 	const result = existingId
 		? await zuoraClient.put(
 				`${path}/${existingId}`,
-				JSON.stringify(body),
+				JSON.stringify(requestBody),
 				idSchema,
 			)
-		: await zuoraClient.post(path, JSON.stringify(body), idSchema);
+		: await zuoraClient.post(path, JSON.stringify(requestBody), idSchema);
 	return result.id;
-}
-
-async function main() {
-	const stage = stageFromEnvironment();
-	const apply = process.argv.includes('--apply');
-	const active = process.argv.includes('--active');
-	const apiKey = process.env.CALLOUT_API_KEY;
-	if (!apiKey) {
-		throw new Error('set CALLOUT_API_KEY to the email-reminders API key');
-	}
-	const clientId = process.env.ZUORA_CLIENT_ID;
-	const clientSecret = process.env.ZUORA_CLIENT_SECRET;
-	redactFromConsole([apiKey, ...(clientSecret ? [clientSecret] : [])]);
-
-	const zuoraClient =
-		clientId && clientSecret
-			? new ZuoraClient(
-					new ZuoraBearerTokenProvider(stage, { clientId, clientSecret }),
-				)
-			: await ZuoraClient.create(stage);
-
-	const schedule = {
-		displayName: 'email-reminders: charge billing date',
-		description,
-		...runAt,
-		active,
-	};
-	await createOrUpdate(zuoraClient, apply, {
-		path: '/events/scheduled-events',
-		name: eventName,
-		createBody: {
-			name: eventName,
-			apiObject: 'RatePlanCharge',
-			apiField: 'ChargedThroughDate',
-			...schedule,
-		},
-		updateBody: schedule,
-	});
-
-	const calloutTemplate = {
-		name: calloutTemplateName,
-		description,
-		active: true,
-		calloutBaseurl: calloutUrl(stage),
-		httpMethod: 'POST',
-		calloutHeaders: { 'x-api-key': apiKey },
-		calloutRetry: true,
-		contentType: 'APPLICATION_JSON',
-		useCustomRequestBody: true,
-		customRequestBody: JSON.stringify(calloutBody),
-	};
-	const calloutTemplateId = await createOrUpdate(zuoraClient, apply, {
-		path: '/notifications/callout-templates',
-		name: calloutTemplateName,
-		createBody: {
-			...calloutTemplate,
-			eventTypeName: eventName,
-			eventTypeNamespace: 'user.notification',
-		},
-		updateBody: calloutTemplate,
-	});
-
-	const notificationDefinition = {
-		name: notificationDefinitionName,
-		description,
-		active,
-		emailActive: false,
-		calloutActive: true,
-		calloutTemplateIds: [calloutTemplateId ?? '<new callout template id>'],
-		filterRule: {
-			condition: filterCondition,
-		},
-		filterRuleParams: {
-			_DAYS: String(daysBeforeBillingDate),
-			_CONDITION: 'Before',
-		},
-	};
-	await createOrUpdate(zuoraClient, apply, {
-		path: '/notifications/notification-definitions',
-		name: notificationDefinitionName,
-		createBody: {
-			...notificationDefinition,
-			eventTypeName: eventName,
-			eventTypeNamespace: 'user.notification',
-		},
-		updateBody: notificationDefinition,
-	});
 }
 
 main().catch((error: unknown) => {
