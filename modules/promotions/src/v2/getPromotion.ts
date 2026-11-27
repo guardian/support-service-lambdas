@@ -8,7 +8,7 @@ import type {
 } from '@modules/product-catalog/productCatalog';
 import { supportsPromotions } from '@modules/product-catalog/productCatalog';
 import type { Promo } from '@modules/promotions/v2/schema';
-import { promoSchema } from '@modules/promotions/v2/schema';
+import { promoItemSchema } from '@modules/promotions/v2/schema';
 import type { Stage } from '@modules/stage';
 
 const dynamoClient = new DynamoDBClient(awsConfig);
@@ -33,7 +33,7 @@ export const getPromotion = async (
 	}
 
 	const unmarshalledItem = unmarshall(result.Item);
-	const parseResult = promoSchema.safeParse(unmarshalledItem);
+	const parseResult = promoItemSchema.safeParse(unmarshalledItem);
 
 	if (!parseResult.success) {
 		console.error(

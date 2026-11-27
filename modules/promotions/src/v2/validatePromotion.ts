@@ -1,6 +1,5 @@
 import { intersection } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
-import type { SupportRegionId } from '@modules/internationalisation/countryGroup';
 import { countryGroupBySupportRegionId } from '@modules/internationalisation/countryGroup';
 import { logger } from '@modules/logger/logger';
 import type { AppliedPromotion, Promo } from './schema';
@@ -32,7 +31,7 @@ export const validatePromotion = (
 		`${promotion.promoCode} has a duration of ${promotion.discount.durationMonths}`,
 	);
 
-	validateForCountryGroup(promotion, appliedPromotion.supportRegionId);
+	validateCountry(promotion, appliedPromotion);
 	logger.log(
 		`Promotion ${promotion.promoCode} is valid for country group ${appliedPromotion.supportRegionId}`,
 	);
@@ -78,10 +77,19 @@ function checkHasDiscount(
 	}
 }
 
-const validateForCountryGroup = (
+const validateCountry = (
 	promotion: Promo,
-	supportRegionId: SupportRegionId,
+	{ countryCode, supportRegionId }: AppliedPromotion,
 ) => {
+	if (countryCode !== undefined) {
+		if (!promotion.appliesTo.countries.includes(countryCode)) {
+			throw new ValidationError(
+				`Promotion ${promotion.name} is not valid for country ${countryCode}`,
+			);
+		}
+		return;
+	}
+
 	const countryGroup = countryGroupBySupportRegionId(supportRegionId);
 
 	if (

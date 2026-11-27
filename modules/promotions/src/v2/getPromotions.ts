@@ -10,7 +10,7 @@ import { ValidationError } from '@modules/errors';
 import { logger } from '@modules/logger/logger';
 import type { Stage } from '@modules/stage';
 import type { Promo } from './schema';
-import { promoSchema } from './schema';
+import { promoItemSchema } from './schema';
 
 const dynamoClient = new DynamoDBClient(awsConfig);
 
@@ -23,7 +23,7 @@ const getTableName = (stage: Stage) => `support-admin-console-promos-${stage}`;
 
 const parsePromoItem = (item: Record<string, AttributeValue>): Promo => {
 	const unmarshalledItem = unmarshall(item);
-	const parseResult = promoSchema.safeParse(unmarshalledItem);
+	const parseResult = promoItemSchema.safeParse(unmarshalledItem);
 	if (!parseResult.success) {
 		console.error(
 			`Failed to parse promotion: ${JSON.stringify(item, null, 2)} because of error:`,
