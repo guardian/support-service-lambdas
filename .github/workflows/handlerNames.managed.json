@@ -134,6 +134,10 @@
       "hasTsSource": true
     },
     {
+      "subproject": "slot-spend",
+      "hasTsSource": true
+    },
+    {
       "subproject": "stripe-disputes",
       "hasTsSource": true
     },

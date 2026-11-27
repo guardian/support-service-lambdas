@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@modules/*": [
+        "../../modules/*"
+      ],
+      "@modules/slot-spend/*": [
+        "../../modules/slot-spend/src/*"
+      ]
+    }
+  }
+}

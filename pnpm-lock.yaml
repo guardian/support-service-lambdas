@@ -926,6 +926,12 @@ importers:
         specifier: ^8.10.147
         version: 8.10.161
 
+  handlers/slot-spend:
+    devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.147
+        version: 8.10.161
+
   handlers/stripe-disputes:
     dependencies:
       aws-sdk:
