@@ -17,6 +17,7 @@ import { ContributionsOnlyCountriesApi } from '../lib/contributions-only-countri
 import { DeliveryProblemCreditProcessor } from '../lib/delivery-problem-credit-processor';
 import { DiscountApi } from '../lib/discount-api';
 import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
+import { EmailReminders } from '../lib/email-reminders';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
 import { HolidayStopProcessor } from '../lib/holiday-stop-processor';
 import { IamPolicies } from '../lib/iam-policies';
@@ -194,6 +195,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	CancellationsBus,
 	SecurityGroupsUpdater,
 	CancellationApi,
+	EmailReminders,
 	// MARKER new-lambda: cdk-bin
 ];
 

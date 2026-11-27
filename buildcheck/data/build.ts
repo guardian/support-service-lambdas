@@ -1063,6 +1063,31 @@ const cancellationApi: HandlerDefinition = {
 	},
 };
 
+const emailReminders: HandlerDefinition = {
+	name: 'email-reminders',
+	functionNames: [
+		'email-reminders-query-',
+		'email-reminders-fetch-',
+		'email-reminders-processor-',
+	],
+	entryPoints: [
+		'src/indexQuery.ts',
+		'src/indexFetch.ts',
+		'src/indexProcessor.ts',
+	],
+	dependencies: {
+		...dep.dayjs,
+		...dep.zod,
+	},
+	moduleDependencies: [
+		moduleAws,
+		moduleLogger,
+		moduleProductCatalog,
+		moduleRouting,
+		moduleZuora,
+	],
+};
+
 // MARKER new-lambda: buildcheck-const
 
 export const build: BuildDefinition = {
@@ -1105,6 +1130,7 @@ export const build: BuildDefinition = {
 		paymentFailureCommsExitApi,
 		sendTestDataToMparticle,
 		cancellationApi,
+		emailReminders,
 		// MARKER new-lambda: buildcheck-reference
 	],
 

@@ -315,6 +315,30 @@ importers:
         specifier: ^2.7.4
         version: 2.7.4
 
+  handlers/email-reminders:
+    dependencies:
+      aws:
+        specifier: workspace:*
+        version: link:../../modules/aws
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.21
+      logger:
+        specifier: workspace:*
+        version: link:../../modules/logger
+      product-catalog:
+        specifier: workspace:*
+        version: link:../../modules/product-catalog
+      routing:
+        specifier: workspace:*
+        version: link:../../modules/routing
+      zod:
+        specifier: 'catalog:'
+        version: 4.4.3
+      zuora:
+        specifier: workspace:*
+        version: link:../../modules/zuora
+
   handlers/generate-product-catalog:
     dependencies:
       aws:
