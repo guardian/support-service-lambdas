@@ -18,6 +18,56 @@ exports[`The slot-spend stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
+    "SlotSpendTable36FB2949": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "channel",
+            "AttributeType": "S",
+          },
+          {
+            "AttributeName": "testName",
+            "AttributeType": "S",
+          },
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "KeySchema": [
+          {
+            "AttributeName": "channel",
+            "KeyType": "HASH",
+          },
+          {
+            "AttributeName": "testName",
+            "KeyType": "RANGE",
+          },
+        ],
+        "SSESpecification": {
+          "SSEEnabled": true,
+        },
+        "TableName": "slot-spend-CODE",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::DynamoDB::Table",
+      "UpdateReplacePolicy": "Delete",
+    },
     "querylambda0C45C633": {
       "DependsOn": [
         "querylambdaServiceRoleDefaultPolicy28BED9DF",
@@ -636,6 +686,56 @@ exports[`The slot-spend stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
+    "SlotSpendTable36FB2949": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "channel",
+            "AttributeType": "S",
+          },
+          {
+            "AttributeName": "testName",
+            "AttributeType": "S",
+          },
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "KeySchema": [
+          {
+            "AttributeName": "channel",
+            "KeyType": "HASH",
+          },
+          {
+            "AttributeName": "testName",
+            "KeyType": "RANGE",
+          },
+        ],
+        "SSESpecification": {
+          "SSEEnabled": true,
+        },
+        "TableName": "slot-spend-PROD",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::DynamoDB::Table",
+      "UpdateReplacePolicy": "Retain",
+    },
     "querylambda0C45C633": {
       "DependsOn": [
         "querylambdaServiceRoleDefaultPolicy28BED9DF",
